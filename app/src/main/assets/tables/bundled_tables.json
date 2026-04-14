@@ -1,0 +1,179 @@
+{
+  "tables": [
+    {
+      "name": "Encuentro Aleatorio Bosque",
+      "description": "Tirar al entrar en el bosque o cada hora de viaje.",
+      "category": "Encuentros",
+      "rollFormula": "1d12",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 2,  "text": "Sin encuentro. El bosque está en calma." },
+        { "minRoll": 3,  "maxRoll": 4,  "text": "[1d4+1] ciervos pastando." },
+        { "minRoll": 5,  "maxRoll": 6,  "text": "Una manada de [1d4+1] lobos observa desde las sombras." },
+        { "minRoll": 7,  "maxRoll": 8,  "text": "[1d3] bandidos emboscadores (@Nombre Humano Masculino les lidera)." },
+        { "minRoll": 9,  "maxRoll": 10, "text": "Una dríada emerge de un roble centenario. Parece hostil." },
+        { "minRoll": 11, "maxRoll": 11, "text": "[1d3] trolls de bosque hambrientos." },
+        { "minRoll": 12, "maxRoll": 12, "text": "Un dragón verde juvenil aterriza bloqueando el camino." }
+      ]
+    },
+    {
+      "name": "Encuentro Aleatorio Mazmorra",
+      "description": "Tirar cada turno de exploración o al abrir una puerta.",
+      "category": "Encuentros",
+      "rollFormula": "1d20",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 3,  "text": "Sin encuentro. Silencio sepulcral." },
+        { "minRoll": 4,  "maxRoll": 5,  "text": "[1d6+2] ratas gigantes." },
+        { "minRoll": 6,  "maxRoll": 7,  "text": "[1d4] esqueletos patrullando." },
+        { "minRoll": 8,  "maxRoll": 9,  "text": "[1d3] zombis. Huele fatal." },
+        { "minRoll": 10, "maxRoll": 11, "text": "[2d4] goblins merodeadores." },
+        { "minRoll": 12, "maxRoll": 13, "text": "Un hombre araña acecha el techo." },
+        { "minRoll": 14, "maxRoll": 15, "text": "[1d3] ogros. Están comiendo." },
+        { "minRoll": 16, "maxRoll": 17, "text": "Un gelatinoso cubo llena el pasillo." },
+        { "minRoll": 18, "maxRoll": 19, "text": "Un vampiro menor busca sangre fresca." },
+        { "minRoll": 20, "maxRoll": 20, "text": "Un lich. Muy furioso por la intrusión." }
+      ]
+    },
+    {
+      "name": "Nombre Humano Masculino",
+      "description": "Nombres masculinos para personajes humanos.",
+      "category": "Nombres",
+      "rollFormula": "1d20",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Aldric" },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Bram" },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Calder" },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Dorn" },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Edric" },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Faolan" },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Garrett" },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Hadren" },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Idris" },
+        { "minRoll": 10, "maxRoll": 10, "text": "Jorvald" },
+        { "minRoll": 11, "maxRoll": 11, "text": "Keldar" },
+        { "minRoll": 12, "maxRoll": 12, "text": "Lorcan" },
+        { "minRoll": 13, "maxRoll": 13, "text": "Maddox" },
+        { "minRoll": 14, "maxRoll": 14, "text": "Naevin" },
+        { "minRoll": 15, "maxRoll": 15, "text": "Oswin" },
+        { "minRoll": 16, "maxRoll": 16, "text": "Perrin" },
+        { "minRoll": 17, "maxRoll": 17, "text": "Quinlan" },
+        { "minRoll": 18, "maxRoll": 18, "text": "Rodrik" },
+        { "minRoll": 19, "maxRoll": 19, "text": "Seren" },
+        { "minRoll": 20, "maxRoll": 20, "text": "Theron" }
+      ]
+    },
+    {
+      "name": "Nombre Humano Femenino",
+      "description": "Nombres femeninos para personajes humanos.",
+      "category": "Nombres",
+      "rollFormula": "1d20",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Aelindra" },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Brynn" },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Caoimhe" },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Dessa" },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Elara" },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Fiona" },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Gwynna" },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Hessa" },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Ilara" },
+        { "minRoll": 10, "maxRoll": 10, "text": "Jora" },
+        { "minRoll": 11, "maxRoll": 11, "text": "Kira" },
+        { "minRoll": 12, "maxRoll": 12, "text": "Lyra" },
+        { "minRoll": 13, "maxRoll": 13, "text": "Mira" },
+        { "minRoll": 14, "maxRoll": 14, "text": "Nessa" },
+        { "minRoll": 15, "maxRoll": 15, "text": "Orla" },
+        { "minRoll": 16, "maxRoll": 16, "text": "Petra" },
+        { "minRoll": 17, "maxRoll": 17, "text": "Regan" },
+        { "minRoll": 18, "maxRoll": 18, "text": "Sienna" },
+        { "minRoll": 19, "maxRoll": 19, "text": "Tara" },
+        { "minRoll": 20, "maxRoll": 20, "text": "Vesna" }
+      ]
+    },
+    {
+      "name": "Nombre Élfico",
+      "description": "Nombres élvicos de alta fantasía.",
+      "category": "Nombres",
+      "rollFormula": "1d12",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Aerindel" },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Caladwen" },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Elenmir" },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Faerindë" },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Galathil" },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Ithilwen" },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Lúthien" },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Míriel" },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Nienor" },
+        { "minRoll": 10, "maxRoll": 10, "text": "Silindë" },
+        { "minRoll": 11, "maxRoll": 11, "text": "Taurevorn" },
+        { "minRoll": 12, "maxRoll": 12, "text": "Vorothiel" }
+      ]
+    },
+    {
+      "name": "Clima",
+      "description": "Condiciones meteorológicas durante el viaje.",
+      "category": "Clima",
+      "rollFormula": "1d6",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1, "maxRoll": 1, "text": "Despejado y soleado. Temperatura agradable." },
+        { "minRoll": 2, "maxRoll": 2, "text": "Nublado. Luz difusa sin sombras." },
+        { "minRoll": 3, "maxRoll": 3, "text": "Llovizna persistente. El camino se vuelve barro." },
+        { "minRoll": 4, "maxRoll": 4, "text": "Tormenta con truenos. Visibilidad reducida." },
+        { "minRoll": 5, "maxRoll": 5, "text": "Niebla espesa. Visibilidad [1d4+1] metros." },
+        { "minRoll": 6, "maxRoll": 6, "text": "Tormenta eléctrica severa. Peligro de rayo." }
+      ]
+    },
+    {
+      "name": "Botín de Goblin",
+      "description": "Lo que llevan los goblins encima al morir.",
+      "category": "Botín",
+      "rollFormula": "1d8",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1, "maxRoll": 2, "text": "[2d6] monedas de cobre y pelusa." },
+        { "minRoll": 3, "maxRoll": 3, "text": "Una daga oxidada (daño normal) y [1d4] cp." },
+        { "minRoll": 4, "maxRoll": 4, "text": "Una bolsa con [1d6] gp. Robado de alguien." },
+        { "minRoll": 5, "maxRoll": 5, "text": "Un amuleto barato de hueso tallado." },
+        { "minRoll": 6, "maxRoll": 6, "text": "Una poción de curación (2d4+2 PV) mal etiquetada." },
+        { "minRoll": 7, "maxRoll": 7, "text": "Un mapa garabateado. Parece indicar un tesoro." },
+        { "minRoll": 8, "maxRoll": 8, "text": "Nada. Solo pulgas." }
+      ]
+    },
+    {
+      "name": "Resultado de Crítico",
+      "description": "Efectos adicionales en un golpe crítico.",
+      "category": "Combate",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 2,  "text": "Daño doble. El enemigo sangra ([1d4] daño al inicio de su turno)." },
+        { "minRoll": 3,  "maxRoll": 4,  "text": "Golpe ensordecedor. El enemigo tiene desventaja en percepción 1 turno." },
+        { "minRoll": 5,  "maxRoll": 6,  "text": "Arma volando. El enemigo pierde su arma a [1d4] metros." },
+        { "minRoll": 7,  "maxRoll": 8,  "text": "Rodilla rota. Velocidad del enemigo reducida a la mitad 2 turnos." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Golpe en la cabeza. El enemigo queda aturdido hasta su próximo turno." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Herida espectacular. +[1d6] daño adicional. El enemigo pierde moral." }
+      ]
+    },
+    {
+      "name": "Resultado de Pifia",
+      "description": "Efectos al sacar un 1 natural en un ataque.",
+      "category": "Combate",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 2,  "text": "Resbalón. Caes prono. Levantarse cuesta movimiento." },
+        { "minRoll": 3,  "maxRoll": 4,  "text": "Golpeas a un aliado adyacente. Daño normal." },
+        { "minRoll": 5,  "maxRoll": 6,  "text": "El arma se atasca. Acción para librarla." },
+        { "minRoll": 7,  "maxRoll": 8,  "text": "Sobre-extensión. Desventaja en el siguiente ataque." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "El arma se rompe. Pierde [1d4] puntos de daño permanentemente." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Crítico fallido total. Pierdes tu turno y quedas aturdido." }
+      ]
+    }
+  ]
+}

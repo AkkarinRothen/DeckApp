@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Acceso a almacenamiento para importar imágenes y PDFs.
+         SAF (ACTION_OPEN_DOCUMENT_TREE) no requiere permisos en tiempo de ejecución.
+         READ_EXTERNAL_STORAGE cubre acceso directo (no-SAF) hasta API 32. -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
+    <!-- Wake lock para mantener pantalla activa durante sesiones de juego -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- Haptic feedback con VibrationEffect: pulso fuerte al robar carta (CLAUDE.md mandate) -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <application
+        android:name=".DeckApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.DeckApp">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustPan">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+    </application>
+
+</manifest>

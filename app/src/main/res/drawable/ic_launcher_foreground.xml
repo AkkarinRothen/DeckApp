@@ -1,0 +1,13 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Silueta simple de carta de juego -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M38,20 L70,20 Q74,20 74,24 L74,84 Q74,88 70,88 L38,88 Q34,88 34,84 L34,24 Q34,20 38,20 Z" />
+    <path
+        android:fillColor="#BB86FC"
+        android:pathData="M42,30 L66,30 L66,78 L42,78 Z" />
+</vector>

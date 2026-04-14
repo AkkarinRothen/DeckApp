@@ -1,0 +1,6 @@
+<resources>
+    <!-- Tema base sin ActionBar — Compose maneja toda la UI -->
+    <style name="Theme.DeckApp" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
+</resources>
