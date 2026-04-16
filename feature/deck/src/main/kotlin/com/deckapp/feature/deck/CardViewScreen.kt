@@ -17,11 +17,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.StickyNote2
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.StickyNote2
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.ViewStream
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
@@ -125,7 +126,7 @@ fun CardViewScreen(
                         IconButton(onClick = { showNotesSheet = true }) {
                             val hasNotes = !card.dmNotes.isNullOrBlank()
                             Icon(
-                                imageVector = if (hasNotes) Icons.Default.StickyNote2 else Icons.Default.Edit,
+                                imageVector = if (hasNotes) Icons.AutoMirrored.Filled.StickyNote2 else Icons.Default.Edit,
                                 contentDescription = "Notas del DM",
                                 tint = if (hasNotes) MaterialTheme.colorScheme.tertiary else LocalContentColor.current
                             )
@@ -289,7 +290,7 @@ private fun CardNotesBottomSheet(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    Icons.Default.StickyNote2,
+                    Icons.AutoMirrored.Filled.StickyNote2,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.tertiary
                 )

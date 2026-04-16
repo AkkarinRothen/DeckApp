@@ -21,8 +21,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
@@ -32,13 +34,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.deckapp.core.model.CardContentMode
 import com.deckapp.core.ui.components.ErrorCard
+import com.deckapp.core.ui.components.PdfThumbnailBrowser
+import android.graphics.Bitmap
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ImportScreen(
     onBack: () -> Unit,
     onImportSuccess: (deckId: Long) -> Unit,
-    viewModel: ImportViewModel = hiltViewModel()
+    viewModel: DeckImportViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -79,22 +83,31 @@ fun ImportScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             when (uiState.phase) {
-                ImportPhase.SELECT_SOURCE -> SourceSelectionPhase(
+                DeckImportPhase.SELECT_SOURCE -> SourceSelectionPhase(
+                    recentPdfs = uiState.recentPdfs,
+                    browsedPdfs = uiState.browsedPdfs,
+                    onRenderThumbnail = { viewModel.renderThumbnail(it) },
                     onSelectFolder = {
-                        viewModel.selectSource(ImportSource.FOLDER)
+                        viewModel.selectSource(DeckImportSource.FOLDER)
                         folderPickerLauncher.launch(null)
                     },
                     onSelectPdf = {
-                        viewModel.selectSource(ImportSource.PDF)
+                        viewModel.selectSource(DeckImportSource.PDF)
                         pdfPickerLauncher.launch(arrayOf("application/pdf"))
                     },
                     onSelectZip = {
-                        viewModel.selectSource(ImportSource.ZIP)
+                        viewModel.selectSource(DeckImportSource.ZIP)
                         zipPickerLauncher.launch(arrayOf("application/zip"))
+                    },
+                    onOpenFolder = {
+                        folderPickerLauncher.launch(null)
+                    },
+                    onPdfSelectedFromBrowser = { uri ->
+                        viewModel.onPdfSelected(uri)
                     }
                 )
 
-                ImportPhase.CONFIGURE -> ConfigurePhase(
+                DeckImportPhase.CONFIGURE -> ConfigurePhase(
                     uiState = uiState,
                     onDeckNameChange = { viewModel.updateDeckName(it) },
                     onContentModeChange = { viewModel.updateDefaultContentMode(it) },
@@ -108,7 +121,7 @@ fun ImportScreen(
                     onStartImport = { viewModel.startImport() }
                 )
 
-                ImportPhase.PREVIEW -> PreviewPhase(
+                DeckImportPhase.PREVIEW -> PreviewPhase(
                     bitmaps = uiState.previewCardBitmaps,
                     isLoading = uiState.isGeneratingPreview,
                     pageCount = uiState.pdfPageCount,
@@ -119,12 +132,12 @@ fun ImportScreen(
                     onBack = { viewModel.backToConfigure() }
                 )
 
-                ImportPhase.IMPORTING -> ImportingPhase(
+                DeckImportPhase.IMPORTING -> ImportingPhase(
                     progress = uiState.importProgress,
                     cardCount = uiState.importedCardCount
                 )
 
-                ImportPhase.SUCCESS -> SuccessPhase(
+                DeckImportPhase.SUCCESS -> SuccessPhase(
                     cardCount = uiState.importedCardCount,
                     deckName = uiState.deckName,
                     failedFiles = uiState.failedFiles
@@ -144,95 +157,75 @@ fun ImportScreen(
 
 @Composable
 private fun SourceSelectionPhase(
+    recentPdfs: List<Pair<Uri, String>>,
+    browsedPdfs: List<Pair<Uri, String>>,
+    onRenderThumbnail: suspend (Uri) -> Bitmap?,
     onSelectFolder: () -> Unit,
     onSelectPdf: () -> Unit,
-    onSelectZip: () -> Unit
+    onSelectZip: () -> Unit,
+    onOpenFolder: () -> Unit,
+    onPdfSelectedFromBrowser: (Uri) -> Unit
 ) {
-    Text("¿Desde dónde importás el mazo?", style = MaterialTheme.typography.titleMedium)
-    Spacer(Modifier.height(8.dp))
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Text("¿Desde dónde importás el mazo?", style = MaterialTheme.typography.titleMedium)
+        
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedCard(
+                onClick = onSelectFolder,
+                modifier = Modifier.weight(1f)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(Icons.Default.FolderOpen, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
+                    Text("Carpeta", style = MaterialTheme.typography.labelMedium)
+                }
+            }
+            
+            OutlinedCard(
+                onClick = onSelectPdf,
+                modifier = Modifier.weight(1f)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(Icons.Default.PictureAsPdf, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(32.dp))
+                    Text("PDF", style = MaterialTheme.typography.labelMedium)
+                }
+            }
 
-    OutlinedCard(
-        onClick = onSelectFolder,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier.padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Icon(
-                Icons.Default.FolderOpen,
-                contentDescription = null,
-                modifier = Modifier.size(40.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-            Column {
-                Text("Carpeta de imágenes", style = MaterialTheme.typography.titleSmall)
-                Text(
-                    "JPG, PNG, WEBP — cada imagen es una carta",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            OutlinedCard(
+                onClick = onSelectZip,
+                modifier = Modifier.weight(1f)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(Icons.Default.Inventory2, null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(32.dp))
+                    Text("ZIP", style = MaterialTheme.typography.labelMedium)
+                }
             }
         }
-    }
 
-    OutlinedCard(
-        onClick = onSelectPdf,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier.padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Icon(
-                Icons.Default.PictureAsPdf,
-                contentDescription = null,
-                modifier = Modifier.size(40.dp),
-                tint = MaterialTheme.colorScheme.secondary
-            )
-            Column {
-                Text("PDF de mazo", style = MaterialTheme.typography.titleSmall)
-                Text(
-                    "Print-and-play, Nord Games, etc.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
-
-    OutlinedCard(
-        onClick = onSelectZip,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier.padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Icon(
-                Icons.Default.Inventory2, // Icono de ZIP/Archivo
-                contentDescription = null,
-                modifier = Modifier.size(40.dp),
-                tint = MaterialTheme.colorScheme.tertiary
-            )
-            Column {
-                Text("Archivo ZIP", style = MaterialTheme.typography.titleSmall)
-                Text(
-                    "Pack de imágenes comprimido (.zip)",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
+        PdfThumbnailBrowser(
+            recentPdfs = recentPdfs,
+            browsedPdfs = browsedPdfs,
+            onRenderPage = onRenderThumbnail,
+            onPdfSelected = onPdfSelectedFromBrowser,
+            onOpenFolder = onOpenFolder
+        )
     }
 }
 
 @Composable
 private fun ConfigurePhase(
-    uiState: ImportUiState,
+    uiState: DeckImportUiState,
     onDeckNameChange: (String) -> Unit,
     onContentModeChange: (CardContentMode) -> Unit,
     onPdfLayoutModeChange: (PdfLayoutMode) -> Unit,
@@ -242,18 +235,34 @@ private fun ConfigurePhase(
     onPreview: () -> Unit,
     onStartImport: () -> Unit
 ) {
-    Text("Configurar importación", style = MaterialTheme.typography.titleMedium)
-
-    OutlinedTextField(
-        value = uiState.deckName,
-        onValueChange = onDeckNameChange,
-        label = { Text("Nombre del mazo") },
-        modifier = Modifier.fillMaxWidth(),
-        singleLine = true
-    )
+    Surface(
+        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                "Paso final: Nombre del mazo",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = uiState.deckName,
+                onValueChange = onDeckNameChange,
+                label = { Text("Nombre del mazo") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                )
+            )
+        }
+    }
 
     // PDF layout config
-    if (uiState.source == ImportSource.PDF) {
+    if (uiState.source == DeckImportSource.PDF) {
         HorizontalDivider()
         Text("Layout del PDF", style = MaterialTheme.typography.labelLarge)
 
@@ -384,7 +393,7 @@ private fun ConfigurePhase(
     Text("Tipo de contenido", style = MaterialTheme.typography.labelLarge)
 
     // Para layouts de 2 caras, ofrecer opciones de cara doble; para grilla, solo de 1 cara.
-    val isTwoFaceLayout = uiState.source == ImportSource.PDF &&
+    val isTwoFaceLayout = uiState.source == DeckImportSource.PDF &&
             uiState.pdfLayoutMode != PdfLayoutMode.GRID
 
     val contentModes = if (isTwoFaceLayout) {
@@ -427,7 +436,7 @@ private fun ConfigurePhase(
         }
     }
 
-    if (uiState.source == ImportSource.PDF) {
+    if (uiState.source == DeckImportSource.PDF) {
         // PDF: primero previsualizar, luego confirmar
         Button(
             onClick = onPreview,

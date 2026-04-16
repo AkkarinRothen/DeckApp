@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.deckapp.feature.tables.TableDetailSheet
+import com.deckapp.feature.tables.TablesViewModel
 import com.deckapp.core.ui.components.SelectionActionBar
 import com.deckapp.feature.tables.library.components.TableGridItem
 
@@ -28,7 +29,7 @@ fun TableLibraryScreen(
     onTableClick: (Long) -> Unit,
     onImportClick: () -> Unit,
     onCreateTable: () -> Unit,
-    viewModel: TableLibraryViewModel = hiltViewModel()
+    viewModel: TablesViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -46,12 +47,12 @@ fun TableLibraryScreen(
     if (uiState.activeTable != null) {
         TableDetailSheet(
             table = uiState.activeTable!!,
-            lastResult = uiState.activeRollResult,
+            lastResult = uiState.lastResult,
             recentResults = emptyList(), 
             isRolling = uiState.isRolling,
-            onRoll = { viewModel.quickRoll(uiState.activeTable!!.id) },
+            onRoll = { viewModel.rollTable(uiState.activeTable!!.id, sessionId = null) },
             onExport = { /* Opcional: Compartir JSON */ },
-            onDismiss = { viewModel.clearRollResult() }
+            onDismiss = { viewModel.closeTable() }
         )
     }
 
@@ -120,7 +121,7 @@ fun TableLibraryScreen(
                         count = uiState.selectedTableIds.size,
                         onClear = { viewModel.clearSelection() },
                         onDelete = { showBulkDeleteConfirmation = true },
-                        onTogglePin = { viewModel.bulkUpdatePinned(it) },
+                        onTogglePin = { viewModel.bulkTogglePin(it) },
                         onAddTag = { showBulkTagMenu = true }
                     )
                     
@@ -196,7 +197,7 @@ fun TableLibraryScreen(
                     hasFilters = uiState.searchQuery.isNotEmpty() || uiState.selectedTagIds.isNotEmpty(),
                     onClearFilters = {
                         viewModel.setSearchQuery("")
-                        viewModel.clearTagFilters()
+                        viewModel.clearFilters()
                     }
                 )
             } else {
@@ -220,8 +221,8 @@ fun TableLibraryScreen(
                                     onTableClick(table.id)
                                 }
                             },
-                            onQuickRoll = { viewModel.quickRoll(table.id) },
-                            onTogglePin = { viewModel.togglePin(table.id, table.isPinned) },
+                            onQuickRoll = { viewModel.rollTable(table.id, sessionId = null) },
+                            onTogglePin = { viewModel.togglePin(table) },
                             onDuplicate = if (uiState.selectedTableIds.isEmpty()) ({ viewModel.duplicateTable(table.id) }) else null,
                             onDelete = { viewModel.deleteTable(table.id) }
                         )

@@ -15,7 +15,8 @@ coroutines = "1.8.1"
 serialization = "1.7.3"
 markwon = "4.6.2"
 work-runtime = "2.9.1"
-mlkit-text-recognition = "16.0.0"
+mlkit-text-recognition = "16.0.1"
+androidx-camera-core = "1.4.2"
 pdfium-android = "1.9.0"
 junit = "4.13.2"
 mockk = "1.13.12"
@@ -79,6 +80,7 @@ markwon-core = { group = "io.noties.markwon", name = "core", version.ref = "mark
 
 # ML Kit OCR
 mlkit-text-recognition = { group = "com.google.mlkit", name = "text-recognition", version.ref = "mlkit-text-recognition" }
+androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "androidx-camera-core" }
 
 # PdfiumAndroid (Migración A-1)
 pdfium-android = { group = "com.github.barteksc", name = "pdfium-android", version.ref = "pdfium-android" }

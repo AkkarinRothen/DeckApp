@@ -33,28 +33,43 @@ class AnalyzeTableImageUseCase @Inject constructor() {
     }
 
     operator fun invoke(blocks: List<OcrBlock>, expectedTableCount: Int = 0): List<AnalysisResult> {
+        val layout = analyzeLayout(blocks, expectedTableCount)
+        return layout.mapNotNull { (cluster, anchors) -> 
+            processWithAnchors(cluster, anchors)
+        }
+    }
+
+    /**
+     * Paso 1: Fragmentar los bloques en tablas candidatas y detectar sus columnas (anchors).
+     */
+    fun analyzeLayout(blocks: List<OcrBlock>, expectedTableCount: Int = 0): List<Pair<List<OcrBlock>, List<Float>>> {
         if (blocks.isEmpty()) return emptyList()
 
-        // 0a. Filtrar ruido visual: líneas separadoras que ML Kit convierte en texto
         val cleanBlocks = blocks.filter { !isSeparatorNoise(it.text) }
-
-        // 0b. Pre-segmentación: dividir bloques multilínea residuales (safety net)
         val segmentedBlocks = splitMultiLineBlocks(cleanBlocks)
 
-        // Si el usuario declaró exactamente 1 tabla, saltear el clustering espacial:
-        // cualquier separación que haga clusterBlocks llevaría a devolver 2+ resultados
-        // ignorando la intención del usuario.
-        if (expectedTableCount == 1) {
-            return analyzeCluster(segmentedBlocks, expectedTableCount)
+        val clusters = if (expectedTableCount == 1) {
+            listOf(segmentedBlocks)
+        } else {
+            clusterBlocks(segmentedBlocks)
         }
 
-        // 1. Agrupar bloques en clusters espaciales (tablas candidatas)
-        val clusters = clusterBlocks(segmentedBlocks)
-
-        // 2. Procesar cada cluster de forma independiente
-        return clusters.flatMap { cluster ->
-            analyzeCluster(cluster, expectedTableCount)
+        return clusters.map { cluster ->
+            val sortedBlocks = cluster.sortedBy { it.boundingBox.centerY }
+            val lines = groupIntoLines(sortedBlocks)
+            // Aquí simplificamos: el pre-mapeo visual se suele hacer sobre la tabla principal
+            // Si hay múltiples clusters, tomamos sus gutters.
+            cluster to detectColumns(lines)
         }
+    }
+
+    /**
+     * Paso 2: Procesar un cluster usando columnas (anchors) específicas (manuales o detectadas).
+     */
+    fun processWithAnchors(cluster: List<OcrBlock>, anchors: List<Float>): AnalysisResult? {
+        val sortedBlocks = cluster.sortedBy { it.boundingBox.centerY }
+        val lines = groupIntoLines(sortedBlocks)
+        return processTableGroup(lines, anchors)
     }
 
     /**
@@ -153,8 +168,9 @@ class AnalyzeTableImageUseCase @Inject constructor() {
         val tableGroups = splitLinesIntoTables(lines, expectedTableCount)
 
         // 3. Procesar cada grupo como una tabla independiente
-        return tableGroups.mapNotNull { group ->
-            processTableGroup(group)
+        return tableGroups.mapNotNull { linesInGroup ->
+            val gutters = detectColumns(linesInGroup)
+            processTableGroup(linesInGroup, gutters)
         }
     }
 
@@ -230,14 +246,11 @@ class AnalyzeTableImageUseCase @Inject constructor() {
         return groups
     }
 
-    private fun processTableGroup(lines: List<List<OcrBlock>>): AnalysisResult? {
+    private fun processTableGroup(lines: List<List<OcrBlock>>, columnGutters: List<Float>): AnalysisResult? {
         if (lines.isEmpty()) return null
         
         // 1. Intentar encontrar un posible título
         val titleCandidate = detectTitle(lines)
-
-        // 2. Detectar estructura de columnas (Gutters) específicas para este grupo
-        val columnGutters = detectColumns(lines)
 
         // 3. Procesar cada línea clasificando bloques por columna
         val rawRows = lines.map { line ->
@@ -361,7 +374,11 @@ class AnalyzeTableImageUseCase @Inject constructor() {
         if (parseResult != null) {
             val consumed = parseResult.consumedLength
             if (consumed < firstBlock.text.length) {
-                val textAfter = firstBlock.text.substring(consumed).trim()
+                var textAfter = firstBlock.text.substring(consumed).trimStart()
+                
+                // Limpiar separadores comunes que quedan tras el rango (ej: "1. Texto" -> "Texto")
+                textAfter = textAfter.trimStart('.', ':', ')', '-', ' ', '–', '—').trimStart()
+
                 if (textAfter.isNotBlank()) {
                     remainingBlocks.add(firstBlock.copy(text = textAfter))
                 }
@@ -387,11 +404,6 @@ class AnalyzeTableImageUseCase @Inject constructor() {
 
         return RawRow(structuredText, range, columnContents.mapValues { it.value.joinToString(" ") }, minConfidence)
     }
-
-    private data class EntriesWithConfidence(
-        val entries: List<TableEntry>,
-        val lowConfidenceIndices: Set<Int>
-    )
 
     private fun buildEntries(rawRows: List<RawRow>): EntriesWithConfidence {
         val entries = mutableListOf<TableEntry>()
@@ -441,7 +453,12 @@ class AnalyzeTableImageUseCase @Inject constructor() {
         return resultCols.joinToString(" | ")
     }
 
-    private data class RawRow(
+    data class EntriesWithConfidence(
+        val entries: List<TableEntry>,
+        val lowConfidenceIndices: Set<Int>
+    )
+
+    data class RawRow(
         val text: String,
         val range: RangeParser.ParsedRange?,
         val columns: Map<Int, String> = emptyMap(),

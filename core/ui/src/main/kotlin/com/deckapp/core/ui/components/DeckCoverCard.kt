@@ -12,7 +12,7 @@ import java.io.File
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Archive
-import androidx.compose.material.icons.filled.CallMerge
+import androidx.compose.material.icons.automirrored.filled.CallMerge
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
@@ -117,7 +117,7 @@ fun DeckCoverCard(
                     Box(modifier = Modifier.fillMaxSize()) {
                         if (deck.coverImagePath != null) {
                             AsyncImage(
-                                model = File(deck.coverImagePath),
+                                model = File(deck.coverImagePath ?: ""),
                                 contentDescription = deck.name,
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop,
@@ -236,7 +236,7 @@ fun DeckCoverCard(
                                     DropdownMenuItem(
                                         text = { Text("Fusionar en…") },
                                         leadingIcon = {
-                                            Icon(Icons.Default.CallMerge, contentDescription = null)
+                                            Icon(Icons.AutoMirrored.Filled.CallMerge, contentDescription = null)
                                         },
                                         onClick = {
                                             menuExpanded = false

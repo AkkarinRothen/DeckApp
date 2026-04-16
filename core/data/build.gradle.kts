@@ -39,6 +39,7 @@ dependencies {
 
     // ML Kit OCR
     implementation(libs.mlkit.text.recognition)
+    implementation(libs.androidx.camera.core) // Workaround for 16KB alignment
     implementation(libs.kotlinx.coroutines.play.services)
 
 }

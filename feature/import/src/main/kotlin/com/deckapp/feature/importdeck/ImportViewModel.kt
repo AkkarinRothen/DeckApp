@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-enum class ImportSource { FOLDER, PDF, ZIP }
+enum class DeckImportSource { FOLDER, PDF, ZIP }
 
 enum class PdfLayoutMode {
     ALTERNATING_PAGES,   // Página 1=frente, página 2=dorso, página 3=frente...
@@ -24,9 +24,9 @@ enum class PdfLayoutMode {
     FIRST_HALF_FRONTS    // Primera mitad = frentes, segunda mitad = dorsos
 }
 
-data class ImportUiState(
-    val phase: ImportPhase = ImportPhase.SELECT_SOURCE,
-    val source: ImportSource? = null,
+data class DeckImportUiState(
+    val phase: DeckImportPhase = DeckImportPhase.SELECT_SOURCE,
+    val source: DeckImportSource? = null,
     val selectedUri: Uri? = null,
     val deckName: String = "",
     val defaultContentMode: CardContentMode = CardContentMode.IMAGE_ONLY,
@@ -40,6 +40,8 @@ data class ImportUiState(
     val previewCardBitmaps: List<android.graphics.Bitmap> = emptyList(),
     val isGeneratingPreview: Boolean = false,
     val pdfAutoTrimCells: Boolean = true,
+    val recentPdfs: List<Pair<Uri, String>> = emptyList(),
+    val browsedPdfs: List<Pair<Uri, String>> = emptyList(),
     // Progress
     val importProgress: Float = 0f,
     val importedCardCount: Int = 0,
@@ -49,7 +51,7 @@ data class ImportUiState(
     val failedFiles: List<String> = emptyList()
 )
 
-enum class ImportPhase {
+enum class DeckImportPhase {
     SELECT_SOURCE,
     CONFIGURE,
     PREVIEW,
@@ -58,55 +60,102 @@ enum class ImportPhase {
 }
 
 @HiltViewModel
-class ImportViewModel @Inject constructor(
+class DeckImportViewModel @Inject constructor(
     private val importDeckUseCase: ImportDeckUseCase,
     private val fileRepository: FileRepository,
+    private val recentFileRepository: com.deckapp.core.domain.repository.RecentFileRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(ImportUiState())
-    val uiState: StateFlow<ImportUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(DeckImportUiState())
+    val uiState: StateFlow<DeckImportUiState> = _uiState.asStateFlow()
 
-    fun selectSource(source: ImportSource) {
+    init {
+        loadRecents()
+    }
+
+    private fun loadRecents() {
+        viewModelScope.launch {
+            recentFileRepository.getRecentFiles(10).collect { files ->
+                _uiState.update { it.copy(recentPdfs = files.map { f -> f.uri to f.name }) }
+            }
+        }
+    }
+
+    fun selectSource(source: DeckImportSource) {
         _uiState.update { it.copy(source = source) }
     }
 
     fun onFolderSelected(uri: Uri) {
-        // Persist the URI permission so we can read it later
         context.contentResolver.takePersistableUriPermission(
             uri,
             android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
         )
+        viewModelScope.launch {
+            _uiState.update { it.copy(isImporting = true) } // Usar isImporting o similar para overlay de carga
+            try {
+                val pdfs = fileRepository.listPdfsInFolder(uri)
+                _uiState.update { it.copy(browsedPdfs = pdfs, isImporting = false) }
+                // Opcional: Si no hay PDFs, podríamos intentar tratar el resto normalmente 
+                // pero el usuario pidió ver miniaturas de PDFs.
+            } catch (e: Exception) {
+                _uiState.update { it.copy(errorMessage = "Error al listar PDFs: ${e.message}", isImporting = false) }
+            }
+        }
+        
+        // Comportamiento original si se decide seguir con la carpeta directamente:
+        // val folderName = uri.lastPathSegment?.substringAfterLast(':') ?: "Nuevo mazo"
+        // _uiState.update { it.copy(selectedUri = uri, deckName = folderName, phase = ImportPhase.CONFIGURE) }
+    }
+
+    fun onFolderConfirmed(uri: Uri) {
         val folderName = uri.lastPathSegment?.substringAfterLast(':') ?: "Nuevo mazo"
         _uiState.update {
             it.copy(
                 selectedUri = uri,
                 deckName = folderName,
-                phase = ImportPhase.CONFIGURE
+                phase = DeckImportPhase.CONFIGURE,
+                source = DeckImportSource.FOLDER
             )
         }
     }
 
     fun onPdfSelected(uri: Uri) {
-        context.contentResolver.takePersistableUriPermission(
-            uri,
-            android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
-        )
+        try {
+            context.contentResolver.takePersistableUriPermission(
+                uri,
+                android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+        } catch (e: SecurityException) {
+            // Si el URI proviene de un listado de carpeta (tree URI), no se puede tomar persistencia individual
+            // pero ya tenemos la persistencia sobre la carpeta madre.
+        }
         val fileName = uri.lastPathSegment?.substringAfterLast('/') ?: "Nuevo mazo"
         val deckName = fileName.removeSuffix(".pdf")
         _uiState.update {
             it.copy(
                 selectedUri = uri,
                 deckName = deckName,
-                phase = ImportPhase.CONFIGURE
+                phase = DeckImportPhase.CONFIGURE,
+                source = DeckImportSource.PDF
             )
         }
+
+        // Guardar en recientes
+        viewModelScope.launch {
+            recentFileRepository.addRecentFile(uri, fileName, com.deckapp.core.domain.repository.RecentFileType.PDF)
+        }
+
         renderPdfFirstPagePreview(uri)
         // Obtener conteo de páginas en background
         viewModelScope.launch(Dispatchers.IO) {
             val count = fileRepository.getPdfPageCount(uri)
             _uiState.update { it.copy(pdfPageCount = count) }
         }
+    }
+
+    suspend fun renderThumbnail(uri: Uri): android.graphics.Bitmap? {
+        return fileRepository.renderPdfPageToBitmap(uri, pageIndex = 0, targetWidth = 300)
     }
 
     fun onZipSelected(uri: Uri) {
@@ -124,7 +173,7 @@ class ImportViewModel @Inject constructor(
             it.copy(
                 selectedUri = uri,
                 deckName = deckName,
-                phase = ImportPhase.CONFIGURE
+                phase = DeckImportPhase.CONFIGURE
             )
         }
     }
@@ -229,7 +278,7 @@ class ImportViewModel @Inject constructor(
                     it.copy(
                         previewCardBitmaps = bitmaps,
                         isGeneratingPreview = false,
-                        phase = ImportPhase.PREVIEW
+                        phase = DeckImportPhase.PREVIEW
                     )
                 }
             } catch (e: Throwable) {
@@ -245,7 +294,7 @@ class ImportViewModel @Inject constructor(
 
     /** Vuelve a la fase de configuración para ajustar el layout. */
     fun backToConfigure() {
-        _uiState.update { it.copy(phase = ImportPhase.CONFIGURE) }
+        _uiState.update { it.copy(phase = DeckImportPhase.CONFIGURE) }
     }
 
     fun updateDeckName(name: String) = _uiState.update { it.copy(deckName = name) }
@@ -283,14 +332,14 @@ class ImportViewModel @Inject constructor(
         val uri = state.selectedUri ?: return
         if (state.deckName.isBlank()) return
 
-        _uiState.update { it.copy(phase = ImportPhase.IMPORTING, isImporting = true) }
+        _uiState.update { it.copy(phase = DeckImportPhase.IMPORTING, isImporting = true) }
 
         val failedFiles = mutableListOf<String>()
         viewModelScope.launch {
             importDeckUseCase(
                 uri = uri,
                 deckName = state.deckName,
-                source = state.source ?: ImportSource.FOLDER,
+                source = state.source ?: DeckImportSource.FOLDER,
                 defaultContentMode = state.defaultContentMode,
                 pdfLayoutMode = state.pdfLayoutMode,
                 pdfGridCols = state.pdfGridCols,
@@ -306,7 +355,7 @@ class ImportViewModel @Inject constructor(
                 onSuccess = { deckId ->
                     _uiState.update {
                         it.copy(
-                            phase = ImportPhase.SUCCESS,
+                            phase = DeckImportPhase.SUCCESS,
                             isImporting = false,
                             importedDeckId = deckId,
                             failedFiles = failedFiles.toList()
@@ -316,7 +365,7 @@ class ImportViewModel @Inject constructor(
                 onFailure = { error ->
                     _uiState.update {
                         it.copy(
-                            phase = ImportPhase.CONFIGURE,
+                            phase = DeckImportPhase.CONFIGURE,
                             isImporting = false,
                             errorMessage = error.message,
                             failedFiles = failedFiles.toList()

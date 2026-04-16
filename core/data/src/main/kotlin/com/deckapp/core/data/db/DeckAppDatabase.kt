@@ -21,9 +21,10 @@ import androidx.room.RoomDatabase
         RandomTableTagCrossRef::class,
         EncounterEntity::class,
         EncounterCreatureEntity::class,
-        CombatLogEntryEntity::class
+        CombatLogEntryEntity::class,
+        RecentFileRecord::class
     ],
-    version = 18,
+    version = 19,
     exportSchema = true
 )
 abstract class DeckAppDatabase : RoomDatabase() {
@@ -37,6 +38,7 @@ abstract class DeckAppDatabase : RoomDatabase() {
     abstract fun tableRollResultDao(): TableRollResultDao
     abstract fun encounterDao(): EncounterDao
     abstract fun combatLogDao(): CombatLogDao
+    abstract fun recentFileDao(): RecentFileDao
 
     companion object {
         const val DATABASE_NAME = "deckapp.db"
@@ -49,5 +51,6 @@ abstract class DeckAppDatabase : RoomDatabase() {
         val MIGRATION_15_16 = com.deckapp.core.data.db.MIGRATION_15_16
         val MIGRATION_16_17 = com.deckapp.core.data.db.MIGRATION_16_17
         val MIGRATION_17_18 = com.deckapp.core.data.db.MIGRATION_17_18
+        val MIGRATION_18_19 = com.deckapp.core.data.db.MIGRATION_18_19
     }
 }

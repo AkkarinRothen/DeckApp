@@ -10,6 +10,7 @@ import android.net.Uri
 interface FileRepository {
 
     suspend fun listImagesInFolder(folderUri: Uri): List<Pair<Uri, String>>
+    suspend fun listPdfsInFolder(folderUri: Uri): List<Pair<Uri, String>>
 
     suspend fun copyImageToInternal(sourceUri: Uri, deckId: Long, fileName: String): String
 

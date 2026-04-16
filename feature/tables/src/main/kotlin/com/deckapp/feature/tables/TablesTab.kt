@@ -19,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
@@ -57,6 +58,10 @@ fun TablesTab(
         if (uiState.activeTable != null && sessionId != null) {
             viewModel.loadRecentResults(sessionId)
         }
+    }
+
+    LaunchedEffect(sessionId) {
+        viewModel.setSession(sessionId)
     }
 
     if (uiState.activeTable != null) {
@@ -127,6 +132,27 @@ fun TablesTab(
                     }
                 }
                 Spacer(Modifier.height(4.dp))
+            }
+
+            if (sessionId != null) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        if (uiState.showAllTables) "Mostrando todas las tablas" else "Tablas de la sesión",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Switch(
+                        checked = uiState.showAllTables,
+                        onCheckedChange = { viewModel.setShowAllTables(it) },
+                        modifier = Modifier.scale(0.7f)
+                    )
+                }
             }
 
             when {

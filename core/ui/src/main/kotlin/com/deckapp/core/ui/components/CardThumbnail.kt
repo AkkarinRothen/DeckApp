@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Notes
+import androidx.compose.material.icons.automirrored.filled.StickyNote2
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -91,7 +92,7 @@ fun CardThumbnail(
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
-                            imageVector = Icons.Default.StickyNote2,
+                            imageVector = Icons.AutoMirrored.Filled.StickyNote2,
                             contentDescription = "Tiene notas DM",
                             modifier = Modifier.size(12.dp),
                             tint = MaterialTheme.colorScheme.onTertiary

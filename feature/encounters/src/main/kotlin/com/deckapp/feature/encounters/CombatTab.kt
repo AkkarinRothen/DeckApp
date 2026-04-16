@@ -24,6 +24,7 @@ import com.deckapp.core.model.CombatLogEntry
 import com.deckapp.core.model.Condition
 import com.deckapp.core.model.Encounter
 import com.deckapp.core.model.EncounterCreature
+import java.util.Locale
 
 @Composable
 fun CombatTab(
@@ -238,7 +239,7 @@ private fun CombatCreatureItem(
                     creature.conditions.forEach { condition ->
                         AssistChip(
                             onClick = { onToggleCondition(condition) },
-                            label = { Text(condition.name.lowercase().capitalize(), style = MaterialTheme.typography.labelSmall) },
+                            label = { Text(condition.name.lowercase().replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }, style = MaterialTheme.typography.labelSmall) },
                             colors = AssistChipDefaults.assistChipColors(
                                 containerColor = MaterialTheme.colorScheme.secondaryContainer
                             )

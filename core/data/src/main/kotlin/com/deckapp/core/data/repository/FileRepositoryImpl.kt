@@ -71,6 +71,41 @@ class FileRepositoryImpl @Inject constructor(
         return result
     }
 
+    override suspend fun listPdfsInFolder(folderUri: Uri): List<Pair<Uri, String>> {
+        val result = mutableListOf<Pair<Uri, String>>()
+
+        val treeDocId = DocumentsContract.getTreeDocumentId(folderUri)
+        val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(folderUri, treeDocId)
+
+        val projection = arrayOf(
+            DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+            DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+            DocumentsContract.Document.COLUMN_MIME_TYPE
+        )
+
+        context.contentResolver.query(
+            childrenUri, projection, null, null,
+            "${DocumentsContract.Document.COLUMN_DISPLAY_NAME} ASC"
+        )?.use { cursor ->
+            val idCol   = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
+            val nameCol = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
+            val mimeCol = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_MIME_TYPE)
+
+            while (cursor.moveToNext()) {
+                val mimeType = cursor.getString(mimeCol) ?: continue
+                if (mimeType != "application/pdf") continue
+
+                val docId = cursor.getString(idCol) ?: continue
+                val displayName = cursor.getString(nameCol) ?: continue
+
+                val documentUri = DocumentsContract.buildDocumentUriUsingTree(folderUri, docId)
+                result.add(documentUri to displayName)
+            }
+        }
+
+        return result
+    }
+
     override suspend fun copyImageToInternal(
         sourceUri: Uri,
         deckId: Long,

@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material.icons.filled.Style
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -57,6 +58,7 @@ import com.deckapp.core.model.CardAspectRatio
 import com.deckapp.core.model.SessionDeckRef
 import com.deckapp.core.ui.components.CardThumbnail
 import com.deckapp.core.ui.components.MarkdownText
+import com.deckapp.feature.draw.components.ResourceManagerDialog
 import com.deckapp.feature.encounters.CombatTab
 import com.deckapp.feature.tables.TablesTab
 import com.deckapp.feature.tables.TablesViewModel
@@ -178,6 +180,20 @@ fun SessionScreen(
         )
     }
 
+    // Resource Manager Dialog
+    if (uiState.showResourceManager) {
+        ResourceManagerDialog(
+            allDecks = uiState.allDecks,
+            allTables = uiState.allTables,
+            deckCardCounts = uiState.deckCardCounts,
+            selectedDeckIds = uiState.deckRefs.map { it.stackId }.toSet(),
+            selectedTableIds = uiState.tablesInSession.map { it.id }.toSet(),
+            onToggleDeck = { viewModel.toggleDeckInSession(it) },
+            onToggleTable = { viewModel.toggleTableInSession(it) },
+            onDismiss = { viewModel.dismissResourceManager() }
+        )
+    }
+
     val selectedDeckName = uiState.deckNames[uiState.selectedDeckId]
         ?: uiState.session?.name ?: "Sesión"
 
@@ -253,6 +269,10 @@ fun SessionScreen(
                             DropdownMenuItem(
                                 text = { Text("Repartir cartas…") },
                                 onClick = { menuExpanded = false; showDealDialog = true }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Gestionar recursos…") },
+                                onClick = { menuExpanded = false; viewModel.openResourceManager() }
                             )
                             HorizontalDivider()
                             DropdownMenuItem(
@@ -383,7 +403,8 @@ fun SessionScreen(
                             onInteractWithDeck = { viewModel.setLastInteractedDeck(it) },
                             onResetDeck = { viewModel.resetSingleDeck(it) },
                             onShuffle = { viewModel.shufflePileBack(it) },
-                            onRollTable = { tablesViewModel.rollTable(it, uiState.session?.id) }
+                            onRollTable = { tablesViewModel.rollTable(it, uiState.session?.id) },
+                            onManageResources = { viewModel.openResourceManager() }
                         )
                         1 -> PilasTab(
                             uiState = uiState,
@@ -500,7 +521,8 @@ private fun DeckWorkspace(
     onInteractWithDeck: (stackId: Long) -> Unit,
     onResetDeck: (stackId: Long) -> Unit,
     onShuffle: (Long?) -> Unit,
-    onRollTable: (Long) -> Unit
+    onRollTable: (Long) -> Unit,
+    onManageResources: () -> Unit
 ) {
     var pileExpanded by remember { mutableStateOf(false) }
 
@@ -508,6 +530,22 @@ private fun DeckWorkspace(
         if (uiState.isLoading) {
             Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
+            }
+        } else if (uiState.deckRefs.isEmpty()) {
+            Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        "No hay mazos en esta sesión",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    Button(onClick = onManageResources) {
+                        Icon(Icons.Default.Style, null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Gestionar recursos")
+                    }
+                }
             }
         } else {
             // ── Clusters de mazos ─────────────────────────────────────────────
@@ -753,7 +791,7 @@ private fun CompactCardItem(
     ) {
         if (faceDown && backImagePath != null) {
             AsyncImage(
-                model = File(backImagePath),
+                model = File(backImagePath ?: ""),
                 contentDescription = "Dorso",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
@@ -762,7 +800,7 @@ private fun CompactCardItem(
             val activeFace = card.activeFace
             if (activeFace.imagePath != null) {
                 AsyncImage(
-                    model = File(activeFace.imagePath),
+                    model = File(activeFace.imagePath ?: ""),
                     contentDescription = card.title,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()

@@ -14,13 +14,16 @@ import com.deckapp.core.data.db.MIGRATION_14_15
 import com.deckapp.core.data.db.MIGRATION_15_16
 import com.deckapp.core.data.db.MIGRATION_16_17
 import com.deckapp.core.data.db.MIGRATION_17_18
+import com.deckapp.core.data.db.MIGRATION_18_19
 import com.deckapp.core.data.repository.CardRepositoryImpl
+import com.deckapp.core.data.repository.RecentFileRepositoryImpl
 import com.deckapp.core.data.repository.EncounterRepositoryImpl
 import com.deckapp.core.data.repository.FileRepositoryImpl
 import com.deckapp.core.data.repository.OcrRepositoryImpl
 import com.deckapp.core.data.repository.SessionRepositoryImpl
 import com.deckapp.core.data.repository.TableRepositoryImpl
 import com.deckapp.core.domain.repository.CardRepository
+import com.deckapp.core.domain.repository.RecentFileRepository
 import com.deckapp.core.domain.repository.EncounterRepository
 import com.deckapp.core.domain.repository.FileRepository
 import com.deckapp.core.domain.repository.OcrRepository
@@ -55,7 +58,8 @@ object DatabaseModule {
                 MIGRATION_14_15,
                 MIGRATION_15_16,
                 MIGRATION_16_17,
-                MIGRATION_17_18
+                MIGRATION_17_18,
+                MIGRATION_18_19
             )
             .fallbackToDestructiveMigrationFrom(1, 2, 3, 4, 5)
             .build()
@@ -70,6 +74,7 @@ object DatabaseModule {
     @Provides fun provideTableRollResultDao(db: DeckAppDatabase) = db.tableRollResultDao()
     @Provides fun provideEncounterDao(db: DeckAppDatabase) = db.encounterDao()
     @Provides fun provideCombatLogDao(db: DeckAppDatabase) = db.combatLogDao()
+    @Provides fun provideRecentFileDao(db: DeckAppDatabase) = db.recentFileDao()
 }
 
 @Module
@@ -95,6 +100,10 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindEncounterRepository(impl: EncounterRepositoryImpl): EncounterRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindRecentFileRepository(impl: RecentFileRepositoryImpl): RecentFileRepository
 }
 
 /**

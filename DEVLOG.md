@@ -5,7 +5,56 @@
 
 ---
 
-### Sprint 14.5 — Workspace Bento: Clusters de Mazos en Sesión (15 de abril de 2026)
+### Sprint 22 — Estabilización del Build y Refactor de Módulos (16 de abril de 2026)
+
+**ARCHITECTURE — Solución Crítica: KSP Internal Compiler Error**
+- **PROBLEM**: El módulo `:feature:tables` sufría un error interno de KSP (NullPointerException) que bloqueaba completamente el build, sin causa aparente en el código fuente.
+- **SOLUTION**: Migrado el procesamiento de Hilt en `:feature:tables` de **KSP a Kapt**. Aunque KSP es el estándar moderno, Kapt ofrece la estabilidad necesaria para este módulo específico mientras se investiga la causa raíz del fallo en el compilador.
+- **CONSOLIDATION**: Fusionados `TableLibraryViewModel` y `TablesViewModel` en una única unidad lógica. Eliminado `TableImportViewModel` del módulo `:feature:tables` para reducir la complejidad y los puntos de fallo de inyección.
+
+**FIX — Solución al Crash de Inicio (Database Schema Mismatch)**
+- **PROBLEM**: El app crasheaba instantáneamente al arrancar debido a un fallo en la validación de Room.
+- **CAUSE**: La migración 18→19 creaba un índice para la tabla `recent_files`, pero la entidad `@Entity RecentFileRecord` no lo tenía definido en su código Kotlin.
+- **SOLUTION**: Añadido `indices = [Index(value = ["uri"], unique = true)]` a `RecentFileRecord`. Alineados todos los índices manuales con las definiciones de las entidades de Room para asegurar la integridad del esquema.
+
+**FIX — Solución al Crash en Importación (SecurityException)**
+- **PROBLEM**: Crash al seleccionar un PDF desde la navegación por carpetas (`No persistable permission grants found`).
+- **CAUSE**: Se intentaba llamar a `takePersistableUriPermission` sobre un URI de documento hijo que ya heredaba permisos del árbol (tree URI) de la carpeta madre, lo cual no es permitido por Android.
+- **SOLUTION**: Implementado un bloque `try-catch` en `ImportViewModel.onPdfSelected` para manejar de forma segura los permisos de URIs que ya poseen acceso delegado.
+
+**UX/OCR — Mejoras en el Reconocimiento de Tablas**
+- **FIX**: Eliminado el residuo de caracteres separadores (como puntos, dos puntos o guiones) que el OCR mantenía en el texto de las filas tras extraer el número de el rango. Mejorada la robustez de la limpieza en `AnalyzeTableImageUseCase`.
+
+**BUILD — Soporte de Alineación 16 KB (Android 15+)**
+- **FIX**: Resuelta la advertencia de `Android 16 KB Alignment` en `libmlkit_google_ocr_pipeline.so`.
+- **UPDATE**: ML Kit Text Recognition actualizado a `16.0.1`.
+- **WORKAROUND**: Añadida dependencia `androidx.camera:camera-core:1.4.2` para forzar utilidades nativas alineadas.
+- **CONFIG**: Habilitado `useLegacyPackaging = true` en el bloque de `packaging` para asegurar la correcta alineación de librerías JNI.
+
+**FEAT — Importación Proactiva de Tablas**
+- **NEW**: Implementada la navegación por el dispositivo para importación de tablas.
+- **NEW**: Soporte para miniaturas de PDFs en el listado de archivos encontrados tras seleccionar una carpeta (Tree URI).
+- **UX**: Conectada la interfaz de `SourceSelectionView` con `ActivityResultLauncher` para una experiencia nativa y fluida.
+
+**INTEGRATION — Build**
+- **BUILD SUCCESSFUL** `assembleDebug` — 325 tareas, sin errores.
+
+---
+
+### Sprint 21 — Gestión de Recursos y UX de Nombramiento (15 de abril de 2026)
+
+**FEATURE — Filtrado de Tablas por Sesión**
+- `TablesViewModel` ahora soporta `setSession(id)`. Si hay una sesión activa, el tab de tablas solo muestra las tablas "asignadas" por defecto.
+- Añadido un interruptor ("Mostrando todas") para navegar rápidamente por la biblioteca completa sin salir del contexto de la sesión.
+
+**UI/UX — Renombrado Prominente en Importación**
+- **PROBLEM**: Los usuarios a veces olvidaban cambiar el nombre predeterminado al importar recursos nuevos.
+- **SOLUTION**: Los campos de Nombre (Mazos/Tablas) se han movido a la parte superior del paso final de configuración, envuelvos en una `Surface` resaltada (primaryContainer) para asegurar su visibilidad inmediata.
+
+**INTEGRATION — Build**
+- **BUILD SUCCESSFUL** `assembleDebug` — 462 tareas, sin errores.
+
+---
 
 **ARCHITECTURE — Refactor de MazosTab → DeckWorkspace**
 - **PROBLEM**: Con múltiples mazos activos, la mano era una única fila horizontal de scroll infinito sin distinción visual entre recursos de diferente origen.

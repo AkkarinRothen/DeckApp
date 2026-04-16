@@ -334,3 +334,17 @@ data class CombatLogEntryEntity(
     val type: String,               // CombatLogType.name
     val timestamp: Long
 )
+
+// ── Recent Files ───────────────────────────────────────────────────────────
+
+@Entity(
+    tableName = "recent_files",
+    indices = [Index(value = ["uri"], unique = true)]
+)
+data class RecentFileRecord(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val uri: String,                // URI del archivo o carpeta
+    val name: String,               // Nombre a mostrar
+    val type: String,               // "PDF" o "FOLDER"
+    val lastAccessed: Long = System.currentTimeMillis()
+)

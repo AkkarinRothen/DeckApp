@@ -32,3 +32,10 @@ data class DrawEvent(
     val metadata: String = "",  // JSON opcional (ej: nombre del jugador al hacer PASS)
     val timestamp: Long = System.currentTimeMillis()
 )
+
+/** Referencia de una tabla asignada a una sesión */
+data class SessionTableRef(
+    val sessionId: Long,
+    val tableId: Long,
+    val sortOrder: Int = 0
+)

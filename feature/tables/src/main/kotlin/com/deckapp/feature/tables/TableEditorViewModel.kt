@@ -4,8 +4,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.deckapp.core.domain.repository.TableRepository
+import com.deckapp.core.domain.repository.CardRepository
 import com.deckapp.core.domain.usecase.RollTableUseCase
 import com.deckapp.core.model.RandomTable
+import com.deckapp.core.model.Tag
 import com.deckapp.core.model.TableEntry
 import com.deckapp.core.model.TableRollMode
 import com.deckapp.core.model.TableRollResult
@@ -20,8 +22,8 @@ import javax.inject.Inject
 data class TableEditorUiState(
     val name: String = "",
     val description: String = "",
-    val tags: List<com.deckapp.core.model.Tag> = emptyList(),
-    val allTags: List<com.deckapp.core.model.Tag> = emptyList(),
+    val tags: List<Tag> = emptyList(),
+    val allTags: List<Tag> = emptyList(),
     val rollFormula: String = "1d6",
     val rollMode: TableRollMode = TableRollMode.RANGE,
     val entries: List<TableEntry> = emptyList(),
@@ -41,7 +43,7 @@ data class TableEditorUiState(
 @HiltViewModel
 class TableEditorViewModel @Inject constructor(
     private val tableRepository: TableRepository,
-    private val cardRepository: com.deckapp.core.domain.repository.CardRepository,
+    private val cardRepository: CardRepository,
     private val rollTableUseCase: RollTableUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -103,7 +105,7 @@ class TableEditorViewModel @Inject constructor(
     fun setName(name: String) = _uiState.update { it.copy(name = name, isDirty = true) }
     fun setDescription(desc: String) = _uiState.update { it.copy(description = desc, isDirty = true) }
     
-    fun toggleTag(tag: com.deckapp.core.model.Tag) {
+    fun toggleTag(tag: Tag) {
         _uiState.update { state ->
             val updatedTags = if (tag in state.tags) state.tags - tag else state.tags + tag
             state.copy(tags = updatedTags, isDirty = true)

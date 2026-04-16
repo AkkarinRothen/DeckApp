@@ -298,3 +298,29 @@ interface DrawEventDao {
     @Query("DELETE FROM draw_events WHERE id = (SELECT id FROM draw_events WHERE sessionId = :sessionId ORDER BY timestamp DESC LIMIT 1)")
     suspend fun deleteLastEvent(sessionId: Long)
 }
+
+@Dao
+interface RecentFileDao {
+    @Query("SELECT * FROM recent_files ORDER BY lastAccessed DESC LIMIT :limit")
+    fun getRecentFiles(limit: Int): Flow<List<RecentFileRecord>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertRecord(record: RecentFileRecord)
+
+    @Query("UPDATE recent_files SET lastAccessed = :timestamp WHERE uri = :uri")
+    suspend fun updateLastAccessed(uri: String, timestamp: Long)
+
+    @Query("SELECT * FROM recent_files WHERE uri = :uri LIMIT 1")
+    suspend fun getRecordByUri(uri: String): RecentFileRecord?
+
+    @Query("DELETE FROM recent_files WHERE uri = :uri")
+    suspend fun deleteRecord(uri: String)
+
+    /** Mantiene limpia la tabla eliminando los registros más antiguos que excedan el límite. */
+    @Query("""
+        DELETE FROM recent_files WHERE id NOT IN (
+            SELECT id FROM recent_files ORDER BY lastAccessed DESC LIMIT :limit
+        )
+    """)
+    suspend fun pruneOldRecords(limit: Int)
+}

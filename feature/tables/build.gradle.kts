@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
-    alias(libs.plugins.ksp)
+    kotlin("kapt")
     alias(libs.plugins.kotlin.serialization)
 }
 
@@ -28,6 +28,6 @@ dependencies {
     implementation(libs.bundles.lifecycle)
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
-    ksp(libs.hilt.android.compiler)
+    kapt(libs.hilt.android.compiler)
     implementation(libs.kotlinx.serialization.json)
 }

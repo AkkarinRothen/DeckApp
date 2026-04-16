@@ -42,7 +42,12 @@ data class SessionUiState(
     val collapsedDeckIds: Set<Long> = emptySet(),   // clusters colapsados manualmente por el DM
     val handByDeck: Map<Long, List<Card>> = emptyMap(), // hand agrupada por stackId (derivada)
     // Combat Log
-    val combatLog: List<CombatLogEntry> = emptyList()
+    val combatLog: List<CombatLogEntry> = emptyList(),
+    // Sprint 17 — Resource Management
+    val allDecks: List<CardStack> = emptyList(),
+    val allTables: List<RandomTable> = emptyList(),
+    val tablesInSession: List<RandomTable> = emptyList(),
+    val showResourceManager: Boolean = false
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -50,6 +55,7 @@ data class SessionUiState(
 class SessionViewModel @Inject constructor(
     private val sessionRepository: SessionRepository,
     private val cardRepository: CardRepository,
+    private val tableRepository: com.deckapp.core.domain.repository.TableRepository,
     private val encounterRepository: EncounterRepository,
     private val drawCardUseCase: DrawCardUseCase,
     private val undoLastActionUseCase: UndoLastActionUseCase,
@@ -174,6 +180,26 @@ class SessionViewModel @Inject constructor(
                     ) }
                 }
         }
+
+        // Tablas asignadas a la sesión
+        viewModelScope.launch {
+            sessionRepository.getTablesForSession(sessionId)
+                .collect { tables ->
+                    _uiState.update { it.copy(tablesInSession = tables) }
+                }
+        }
+
+        // Todos los recursos disponibles (para el diálogo de gestión)
+        viewModelScope.launch {
+            combine(
+                cardRepository.getAllDecks(),
+                tableRepository.getAllTables()
+            ) { decks, tables ->
+                decks to tables
+            }.collect { (decks, tables) ->
+                _uiState.update { it.copy(allDecks = decks, allTables = tables) }
+            }
+        }
     }
 
     /** Selecciona el mazo activo para la siguiente acción ROBAR. */
@@ -184,6 +210,31 @@ class SessionViewModel @Inject constructor(
     /** Actualiza el tab activo del workspace de sesión. */
     fun setActiveTab(tab: Int) {
         _uiState.update { it.copy(activeTab = tab) }
+    }
+
+    fun openResourceManager() = _uiState.update { it.copy(showResourceManager = true) }
+    fun dismissResourceManager() = _uiState.update { it.copy(showResourceManager = false) }
+
+    fun toggleDeckInSession(deckId: Long) {
+        viewModelScope.launch {
+            val isPresent = _uiState.value.deckRefs.any { it.stackId == deckId }
+            if (isPresent) {
+                sessionRepository.removeDeckFromSession(sessionId, deckId)
+            } else {
+                sessionRepository.addDeckToSession(SessionDeckRef(sessionId, deckId))
+            }
+        }
+    }
+
+    fun toggleTableInSession(tableId: Long) {
+        viewModelScope.launch {
+            val isPresent = _uiState.value.tablesInSession.any { it.id == tableId }
+            if (isPresent) {
+                sessionRepository.removeTableFromSession(sessionId, tableId)
+            } else {
+                sessionRepository.addTableToSession(sessionId, tableId)
+            }
+        }
     }
 
     /**

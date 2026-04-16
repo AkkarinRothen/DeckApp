@@ -6,6 +6,10 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+ksp {
+    arg("incremental", "false")
+}
+
 android {
     namespace = "com.deckapp.feature.importdeck"
     compileSdk = 35

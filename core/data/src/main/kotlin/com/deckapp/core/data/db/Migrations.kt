@@ -674,3 +674,18 @@ val MIGRATION_17_18 = object : Migration(17, 18) {
         database.execSQL("PRAGMA foreign_keys=ON")
     }
 }
+
+val MIGRATION_18_19 = object : Migration(18, 19) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `recent_files` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+                `uri` TEXT NOT NULL, 
+                `name` TEXT NOT NULL, 
+                `type` TEXT NOT NULL, 
+                `lastAccessed` INTEGER NOT NULL
+            )
+        """.trimIndent())
+        database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_recent_files_uri` ON `recent_files` (`uri`)")
+    }
+}

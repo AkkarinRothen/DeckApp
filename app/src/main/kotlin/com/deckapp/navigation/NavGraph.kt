@@ -38,7 +38,7 @@ import com.deckapp.feature.session.SessionListScreen
 import com.deckapp.feature.session.SessionSetupScreen
 import com.deckapp.feature.settings.SettingsScreen
 import com.deckapp.feature.tables.TableEditorScreen
-import com.deckapp.feature.tables.tableimport.TableImportScreen
+import com.deckapp.feature.importdeck.table.TableImportScreen
 
 @Composable
 fun DeckAppNavHost() {
@@ -214,9 +214,10 @@ fun DeckAppNavHost() {
             composable<TableImportRoute> {
                 TableImportScreen(
                     onBack = { navController.popBackStack() },
-                    onImportFinished = { _ ->
-                        // Por ahora solo volvemos, pero se podría navegar al detalle
-                        navController.popBackStack()
+                    onNavigateToTable = { tableId ->
+                        navController.navigate(TableEditorRoute(tableId)) {
+                            popUpTo(TableImportRoute) { inclusive = true }
+                        }
                     }
                 )
             }

@@ -1,0 +1,84 @@
+﻿Reusing configuration cache.
+> Task :feature:tables:preBuild UP-TO-DATE
+> Task :core:ui:preBuild UP-TO-DATE
+> Task :core:domain:preBuild UP-TO-DATE
+> Task :core:domain:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core:domain:preDebugBuild UP-TO-DATE
+> Task :core:domain:javaPreCompileDebug UP-TO-DATE
+> Task :feature:tables:preDebugBuild UP-TO-DATE
+> Task :core:domain:processDebugNavigationResources UP-TO-DATE
+> Task :feature:tables:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :feature:tables:generateDebugResValues UP-TO-DATE
+> Task :core:domain:generateDebugResValues UP-TO-DATE
+> Task :feature:tables:processDebugNavigationResources UP-TO-DATE
+> Task :core:domain:generateDebugResources UP-TO-DATE
+> Task :core:ui:preDebugBuild UP-TO-DATE
+> Task :core:ui:generateDebugResValues UP-TO-DATE
+> Task :feature:tables:generateDebugResources UP-TO-DATE
+> Task :core:model:preBuild UP-TO-DATE
+> Task :core:ui:generateDebugResources UP-TO-DATE
+> Task :core:model:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core:domain:packageDebugResources UP-TO-DATE
+> Task :core:ui:packageDebugResources UP-TO-DATE
+> Task :core:ui:javaPreCompileDebug UP-TO-DATE
+> Task :core:domain:parseDebugLocalResources UP-TO-DATE
+> Task :core:domain:generateDebugRFile UP-TO-DATE
+> Task :feature:tables:packageDebugResources UP-TO-DATE
+> Task :feature:tables:parseDebugLocalResources UP-TO-DATE
+> Task :feature:tables:generateDebugRFile UP-TO-DATE
+> Task :core:model:preDebugBuild UP-TO-DATE
+> Task :core:ui:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core:model:generateDebugResValues UP-TO-DATE
+> Task :core:model:processDebugNavigationResources UP-TO-DATE
+> Task :core:model:javaPreCompileDebug UP-TO-DATE
+> Task :core:model:generateDebugResources UP-TO-DATE
+> Task :core:ui:processDebugNavigationResources UP-TO-DATE
+> Task :core:ui:parseDebugLocalResources UP-TO-DATE
+> Task :core:ui:generateDebugRFile UP-TO-DATE
+> Task :core:model:packageDebugResources UP-TO-DATE
+> Task :core:model:parseDebugLocalResources UP-TO-DATE
+> Task :core:model:generateDebugRFile UP-TO-DATE
+> Task :core:model:compileDebugKotlin UP-TO-DATE
+> Task :core:model:compileDebugJavaWithJavac NO-SOURCE
+> Task :core:model:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :core:ui:compileDebugKotlin UP-TO-DATE
+> Task :core:ui:compileDebugJavaWithJavac NO-SOURCE
+> Task :core:ui:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :core:domain:kspDebugKotlin UP-TO-DATE
+> Task :core:domain:compileDebugKotlin UP-TO-DATE
+> Task :core:domain:compileDebugJavaWithJavac UP-TO-DATE
+> Task :core:domain:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :feature:tables:kaptGenerateStubsDebugKotlin UP-TO-DATE
+> Task :feature:tables:kaptDebugKotlin UP-TO-DATE
+
+> Task :feature:tables:compileDebugKotlin FAILED
+./gradlew : e: file:///I:/TTRPG/Visuales/Decks/Deckapp/feature/tables/src/main/kotlin/com/deckapp/feature/tables/Tables
+ViewModel.kt:68:11 Argument type mismatch: actual type is 
+'kotlin.Function6<kotlin.collections.List<com.deckapp.core.model.RandomTable>, 
+kotlin.collections.List<com.deckapp.core.model.Tag>, kotlin.String, kotlin.collections.Set<kotlin.Long>, 
+kotlin.Boolean, kotlin.collections.Set<kotlin.Long>, com.deckapp.feature.tables.TablesUiState>', but 
+'kotlin.coroutines.SuspendFunction1<kotlin.Array<T>, R>' was expected.
+En línea: 1 Carácter: 1
++ ./gradlew :feature:tables:compileDebugKotlin > build_log_final.txt 2> ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (e: file:///I:/T...' was expected.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':feature:tables:compileDebugKotlin'.
+> A failure occurred while executing 
+org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 8s
+38 actionable tasks: 1 executed, 37 up-to-date
+Configuration cache entry reused.
