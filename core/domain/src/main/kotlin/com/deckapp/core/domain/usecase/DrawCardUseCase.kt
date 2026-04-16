@@ -36,7 +36,15 @@ class DrawCardUseCase @Inject constructor(
         }
 
         // Persistir estado antes de animar
-        cardRepository.updateCardDrawnState(card.id, isDrawn = true)
+        val now = System.currentTimeMillis()
+        cardRepository.updateCardDrawnState(card.id, isDrawn = true, lastDrawnAt = now)
+
+        val deck = cardRepository.getDeckById(deckId).first()
+        val faceDown = deck?.drawFaceDown == true
+        if (faceDown) {
+            cardRepository.updateCardRevealed(card.id, isRevealed = false)
+        }
+
         sessionRepository.logEvent(
             DrawEvent(
                 sessionId = sessionId,
@@ -45,6 +53,6 @@ class DrawCardUseCase @Inject constructor(
             )
         )
 
-        return card.copy(isDrawn = true)
+        return card.copy(isDrawn = true, isRevealed = !faceDown)
     }
 }

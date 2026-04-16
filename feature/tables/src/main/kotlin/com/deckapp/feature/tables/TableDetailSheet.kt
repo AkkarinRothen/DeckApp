@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Casino
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -39,6 +40,7 @@ fun TableDetailSheet(
     recentResults: List<TableRollResult>,
     isRolling: Boolean,
     onRoll: () -> Unit,
+    onExport: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -54,15 +56,30 @@ fun TableDetailSheet(
                 .padding(bottom = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Cabecera
-            Text(
-                text = table.name,
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = 4.dp)
-            )
+            // Cabecera con botón de exportar
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = table.name,
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = onExport) {
+                    Icon(
+                        Icons.Default.Share,
+                        contentDescription = "Exportar tabla",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
             Text(
                 text = buildString {
-                    if (table.category.isNotBlank()) append("${table.category}  ·  ")
+                    if (table.tags.isNotEmpty()) {
+                        append(table.tags.joinToString("  ·  ") { it.name })
+                        append("  ·  ")
+                    }
                     append(table.rollFormula)
                     append("  ·  ${table.entries.size} entradas")
                 },

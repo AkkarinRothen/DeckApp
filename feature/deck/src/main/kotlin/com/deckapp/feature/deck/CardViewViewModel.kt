@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.deckapp.core.domain.repository.CardRepository
+import com.deckapp.core.domain.usecase.UpdateCardNotesUseCase
 import com.deckapp.core.model.Card
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -20,6 +21,7 @@ data class CardViewUiState(
 @HiltViewModel
 class CardViewViewModel @Inject constructor(
     private val cardRepository: CardRepository,
+    private val updateCardNotesUseCase: UpdateCardNotesUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -41,6 +43,12 @@ class CardViewViewModel @Inject constructor(
         }
     }
 
+    fun jumpToFace(index: Int) {
+        viewModelScope.launch {
+            cardRepository.updateCardFaceIndex(cardId, index)
+        }
+    }
+
     fun rotate90() {
         val card = uiState.value.card ?: return
         val nextRotation = (card.currentRotation + 90) % 360
@@ -49,10 +57,22 @@ class CardViewViewModel @Inject constructor(
         }
     }
 
+    fun setRotation(degrees: Int) {
+        viewModelScope.launch {
+            cardRepository.updateCardRotation(cardId, degrees)
+        }
+    }
+
     fun toggleReversed() {
         val card = uiState.value.card ?: return
         viewModelScope.launch {
             cardRepository.updateCardReversed(cardId, !card.isReversed)
+        }
+    }
+
+    fun updateNotes(notes: String) {
+        viewModelScope.launch {
+            updateCardNotesUseCase(cardId, notes)
         }
     }
 }

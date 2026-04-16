@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.deckapp.core.domain.repository.CardRepository
 import com.deckapp.core.domain.repository.FileRepository
+import com.deckapp.core.domain.repository.TableRepository
 import com.deckapp.core.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -20,13 +21,16 @@ data class CardEditorUiState(
     val selectedFaceIndex: Int = 0,
     val isSaving: Boolean = false,
     val isSaved: Boolean = false,
-    val isPickingImage: Boolean = false   // true mientras se copia la imagen
+    val isPickingImage: Boolean = false,
+    val availableTables: List<RandomTable> = emptyList(),
+    val linkedTableId: Long? = null
 )
 
 @HiltViewModel
 class CardEditorViewModel @Inject constructor(
     private val cardRepository: CardRepository,
     private val fileRepository: FileRepository,
+    private val tableRepository: TableRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -37,6 +41,7 @@ class CardEditorViewModel @Inject constructor(
     val uiState: StateFlow<CardEditorUiState> = _uiState.asStateFlow()
 
     init {
+        loadTables()
         if (cardId != null) {
             viewModelScope.launch {
                 cardRepository.getCardById(cardId).firstOrNull()?.let { card ->
@@ -45,13 +50,22 @@ class CardEditorViewModel @Inject constructor(
                             title = card.title,
                             suit = card.suit ?: "",
                             value = card.value?.toString() ?: "",
-                            faces = card.faces
+                            faces = card.faces,
+                            linkedTableId = card.linkedTableId
                         )
                     }
                 }
             }
         }
     }
+
+    private fun loadTables() {
+        tableRepository.getAllTables()
+            .onEach { tables -> _uiState.update { it.copy(availableTables = tables) } }
+            .launchIn(viewModelScope)
+    }
+
+    fun updateLinkedTable(tableId: Long?) = _uiState.update { it.copy(linkedTableId = tableId) }
 
     fun updateTitle(title: String) = _uiState.update { it.copy(title = title) }
     fun updateSuit(suit: String) = _uiState.update { it.copy(suit = suit) }
@@ -146,6 +160,7 @@ class CardEditorViewModel @Inject constructor(
                 suit = state.suit.takeIf { it.isNotBlank() },
                 value = state.value.toIntOrNull(),
                 faces = state.faces,
+                linkedTableId = state.linkedTableId,
                 sortOrder = 0
             )
             cardRepository.saveCard(card)

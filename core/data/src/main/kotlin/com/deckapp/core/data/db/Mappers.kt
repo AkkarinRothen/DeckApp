@@ -18,8 +18,11 @@ fun CardStackEntity.toDomain(tags: List<Tag> = emptyList()) = CardStack(
     sourceFolderPath = sourceFolderPath,
     defaultContentMode = CardContentMode.valueOf(defaultContentMode),
     drawMode = DrawMode.valueOf(drawMode),
+    drawFaceDown = drawFaceDown,
+    backImagePath = backImagePath,
     displayCount = displayCount,
     aspectRatio = runCatching { CardAspectRatio.valueOf(aspectRatio) }.getOrDefault(CardAspectRatio.STANDARD),
+    isArchived = isArchived,
     tags = tags,
     createdAt = createdAt
 )
@@ -33,8 +36,11 @@ fun CardStack.toEntity() = CardStackEntity(
     sourceFolderPath = sourceFolderPath,
     defaultContentMode = defaultContentMode.name,
     drawMode = drawMode.name,
+    drawFaceDown = drawFaceDown,
+    backImagePath = backImagePath,
     displayCount = displayCount,
     aspectRatio = aspectRatio.name,
+    isArchived = isArchived,
     createdAt = createdAt
 )
 
@@ -52,8 +58,12 @@ fun CardEntity.toDomain(faces: List<CardFace> = emptyList(), tags: List<Tag> = e
     currentRotation = currentRotation,
     isReversed = isReversed,
     isDrawn = isDrawn,
+    isRevealed = isRevealed,
     sortOrder = sortOrder,
-    tags = tags
+    tags = tags,
+    linkedTableId = linkedTableId,
+    dmNotes = dmNotes,
+    lastDrawnAt = lastDrawnAt
 )
 
 fun Card.toEntity() = CardEntity(
@@ -67,7 +77,11 @@ fun Card.toEntity() = CardEntity(
     currentRotation = currentRotation,
     isReversed = isReversed,
     isDrawn = isDrawn,
-    sortOrder = sortOrder
+    isRevealed = isRevealed,
+    sortOrder = sortOrder,
+    linkedTableId = linkedTableId,
+    dmNotes = dmNotes,
+    lastDrawnAt = lastDrawnAt
 )
 
 // --- CardFace ---
@@ -141,16 +155,19 @@ fun SessionDeckRef.toEntity() = SessionDeckRefEntity(
 
 // --- RandomTable ---
 
-fun RandomTableEntity.toDomain(entries: List<TableEntryEntity> = emptyList()) =
-    com.deckapp.core.model.RandomTable(
+fun RandomTableEntity.toDomain(
+    entries: List<TableEntryEntity> = emptyList(),
+    tags: List<Tag> = emptyList()
+) = com.deckapp.core.model.RandomTable(
         id = id,
         name = name,
         description = description,
-        category = category,
+        tags = tags,
         rollFormula = rollFormula,
         rollMode = runCatching { com.deckapp.core.model.TableRollMode.valueOf(rollMode) }
             .getOrDefault(com.deckapp.core.model.TableRollMode.RANGE),
         entries = entries.map { it.toDomain() },
+        isPinned = isPinned,
         isBuiltIn = isBuiltIn,
         createdAt = createdAt
     )
@@ -159,9 +176,9 @@ fun com.deckapp.core.model.RandomTable.toEntity() = RandomTableEntity(
     id = id,
     name = name,
     description = description,
-    category = category,
     rollFormula = rollFormula,
     rollMode = rollMode.name,
+    isPinned = isPinned,
     isBuiltIn = isBuiltIn,
     createdAt = createdAt
 )
@@ -210,7 +227,10 @@ fun com.deckapp.core.model.TableRollResult.toEntity() = TableRollResultEntity(
     timestamp = timestamp
 )
 
-fun TableWithEntries.toDomain() = table.toDomain(entries)
+fun TableWithEntries.toDomain(tags: List<Tag> = emptyList()) = table.toDomain(
+    entries = entries,
+    tags = tags
+)
 
 // --- DrawEvent ---
 
@@ -222,4 +242,63 @@ fun DrawEventEntity.toDomain() = DrawEvent(
 fun DrawEvent.toEntity() = DrawEventEntity(
     id = id, sessionId = sessionId, cardId = cardId,
     action = action.name, metadata = metadata, timestamp = timestamp
+)
+
+// --- Encounters ---
+
+fun EncounterEntity.toDomain(creatures: List<EncounterCreature> = emptyList()) = Encounter(
+    id = id,
+    name = name,
+    description = description,
+    creatures = creatures,
+    linkedSessionId = linkedSessionId,
+    isActive = isActive,
+    currentRound = currentRound,
+    currentTurnIndex = currentTurnIndex,
+    createdAt = createdAt
+)
+
+fun Encounter.toEntity() = EncounterEntity(
+    id = id,
+    name = name,
+    description = description,
+    linkedSessionId = linkedSessionId,
+    isActive = isActive,
+    currentRound = currentRound,
+    currentTurnIndex = currentTurnIndex,
+    createdAt = createdAt
+)
+
+fun EncounterCreatureEntity.toDomain(): EncounterCreature {
+    val conditions: Set<Condition> = try {
+        json.decodeFromString(conditionsJson)
+    } catch (e: Exception) { emptySet() }
+    
+    return EncounterCreature(
+        id = id,
+        encounterId = encounterId,
+        name = name,
+        maxHp = maxHp,
+        currentHp = currentHp,
+        armorClass = armorClass,
+        initiativeBonus = initiativeBonus,
+        initiativeRoll = initiativeRoll,
+        conditions = conditions,
+        notes = notes,
+        sortOrder = sortOrder
+    )
+}
+
+fun EncounterCreature.toEntity() = EncounterCreatureEntity(
+    id = id,
+    encounterId = encounterId,
+    name = name,
+    maxHp = maxHp,
+    currentHp = currentHp,
+    armorClass = armorClass,
+    initiativeBonus = initiativeBonus,
+    initiativeRoll = initiativeRoll,
+    conditionsJson = json.encodeToString(conditions),
+    notes = notes,
+    sortOrder = sortOrder
 )

@@ -126,7 +126,8 @@ fun ImportScreen(
 
                 ImportPhase.SUCCESS -> SuccessPhase(
                     cardCount = uiState.importedCardCount,
-                    deckName = uiState.deckName
+                    deckName = uiState.deckName,
+                    failedFiles = uiState.failedFiles
                 )
             }
 
@@ -603,15 +604,40 @@ private fun ImportingPhase(progress: Float, cardCount: Int) {
 }
 
 @Composable
-private fun SuccessPhase(cardCount: Int, deckName: String) {
-    Box(Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Mazo importado", style = MaterialTheme.typography.headlineSmall)
-            Text(
-                "\"$deckName\" — $cardCount cartas",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.primary
-            )
+private fun SuccessPhase(cardCount: Int, deckName: String, failedFiles: List<String> = emptyList()) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text("Mazo importado", style = MaterialTheme.typography.headlineSmall)
+        Text(
+            "\"$deckName\" — $cardCount cartas",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.primary
+        )
+        if (failedFiles.isNotEmpty()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer
+                )
+            ) {
+                Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        "${failedFiles.size} archivo${if (failedFiles.size != 1) "s" else ""} no se pudo importar:",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                    failedFiles.forEach { name ->
+                        Text(
+                            "• $name",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
+                }
+            }
         }
     }
 }

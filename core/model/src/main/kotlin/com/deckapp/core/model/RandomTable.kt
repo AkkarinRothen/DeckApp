@@ -4,10 +4,11 @@ data class RandomTable(
     val id: Long = 0,
     val name: String,
     val description: String = "",
-    val category: String = "",
+    val tags: List<Tag> = emptyList(),
     val rollFormula: String = "1d6",
     val rollMode: TableRollMode = TableRollMode.RANGE,
     val entries: List<TableEntry> = emptyList(),
+    val isPinned: Boolean = false,
     val isBuiltIn: Boolean = false,
     val createdAt: Long = System.currentTimeMillis()
 )

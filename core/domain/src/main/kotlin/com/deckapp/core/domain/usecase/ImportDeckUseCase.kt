@@ -38,7 +38,8 @@ class ImportDeckUseCase @Inject constructor(
         pdfGridCols: Int = 3,
         pdfGridRows: Int = 3,
         pdfAutoTrimCells: Boolean = true,
-        onProgress: (progress: Float, cardCount: Int) -> Unit = { _, _ -> }
+        onProgress: (progress: Float, cardCount: Int) -> Unit = { _, _ -> },
+        onFileError: (fileName: String) -> Unit = {}
     ): Result<Long> {
         return try {
             // Crear el stack inicial sin portada para obtener el deckId asignado por Room
@@ -56,14 +57,14 @@ class ImportDeckUseCase @Inject constructor(
             when (source.toString()) {
                 "FOLDER" -> {
                     val images = fileRepository.listImagesInFolder(uri)
-                    val coverPath = importFromImageList(images, deckId, defaultContentMode, onProgress)
+                    val coverPath = importFromImageList(images, deckId, defaultContentMode, onProgress, onFileError)
                     if (coverPath != null) {
                         cardRepository.updateStack(stack.copy(id = deckId, coverImagePath = coverPath))
                     }
                 }
                 "ZIP" -> {
                     val images = fileRepository.unzipToTemp(uri)
-                    val coverPath = importFromImageList(images, deckId, defaultContentMode, onProgress)
+                    val coverPath = importFromImageList(images, deckId, defaultContentMode, onProgress, onFileError)
                     if (coverPath != null) {
                         cardRepository.updateStack(stack.copy(id = deckId, coverImagePath = coverPath))
                     }
@@ -264,38 +265,45 @@ class ImportDeckUseCase @Inject constructor(
         images: List<Pair<Uri, String>>,
         deckId: Long,
         contentMode: CardContentMode,
-        onProgress: (Float, Int) -> Unit
+        onProgress: (Float, Int) -> Unit,
+        onFileError: (String) -> Unit = {}
     ): String? {
         val total = images.size
         if (total == 0) return null
 
         var coverPath: String? = null
+        var savedCount = 0
 
         images.forEachIndexed { index, (imageUri, displayName) ->
-            val internalPath = fileRepository.copyImageToInternal(imageUri, deckId, displayName)
-            if (index == 0) coverPath = internalPath
+            try {
+                val internalPath = fileRepository.copyImageToInternal(imageUri, deckId, displayName)
+                if (savedCount == 0) coverPath = internalPath
 
-            val metadata = FilenameParser.parse(displayName)
+                val metadata = FilenameParser.parse(displayName)
 
-            val card = Card(
-                stackId = deckId,
-                originDeckId = deckId,
-                title = metadata.title,
-                suit = metadata.suit,
-                value = metadata.value,
-                faces = listOf(
-                    CardFace(
-                        name = "Frente",
-                        imagePath = internalPath,
-                        contentMode = contentMode,
-                        zones = emptyList()
-                    )
-                ),
-                sortOrder = index,
-                tags = emptyList()
-            )
-            cardRepository.saveCard(card)
-            onProgress((index + 1).toFloat() / total, index + 1)
+                val card = Card(
+                    stackId = deckId,
+                    originDeckId = deckId,
+                    title = metadata.title,
+                    suit = metadata.suit,
+                    value = metadata.value,
+                    faces = listOf(
+                        CardFace(
+                            name = "Frente",
+                            imagePath = internalPath,
+                            contentMode = contentMode,
+                            zones = emptyList()
+                        )
+                    ),
+                    sortOrder = savedCount,
+                    tags = emptyList()
+                )
+                cardRepository.saveCard(card)
+                savedCount++
+            } catch (e: Exception) {
+                onFileError(displayName)
+            }
+            onProgress((index + 1).toFloat() / total, savedCount)
         }
 
         return coverPath

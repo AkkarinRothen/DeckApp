@@ -22,6 +22,16 @@ class CardRepositoryImpl @Inject constructor(
             }
         }
 
+    override fun getArchivedDecks(): Flow<List<CardStack>> =
+        stackDao.getArchivedDecks().map { entities ->
+            entities.map { entity ->
+                entity.toDomain(tags = tagDao.getTagsForStack(entity.id).map { it.toDomain() })
+            }
+        }
+
+    override suspend fun setDeckArchived(deckId: Long, archived: Boolean) =
+        stackDao.setArchived(deckId, archived)
+
     override fun getDeckById(id: Long): Flow<CardStack?> =
         stackDao.getStackById(id).map { entity ->
             entity?.toDomain(tags = tagDao.getTagsForStack(entity.id).map { it.toDomain() })
@@ -89,8 +99,8 @@ class CardRepositoryImpl @Inject constructor(
 
     override suspend fun deleteCard(id: Long) = cardDao.deleteCard(id)
 
-    override suspend fun updateCardDrawnState(cardId: Long, isDrawn: Boolean) =
-        cardDao.updateDrawnState(cardId, isDrawn)
+    override suspend fun updateCardDrawnState(cardId: Long, isDrawn: Boolean, lastDrawnAt: Long?) =
+        cardDao.updateDrawnState(cardId, isDrawn, lastDrawnAt)
 
     override suspend fun updateCardRotation(cardId: Long, rotation: Int) =
         cardDao.updateRotation(cardId, rotation)
@@ -100,6 +110,12 @@ class CardRepositoryImpl @Inject constructor(
 
     override suspend fun updateCardFaceIndex(cardId: Long, faceIndex: Int) =
         cardDao.updateFaceIndex(cardId, faceIndex)
+
+    override suspend fun updateCardRevealed(cardId: Long, isRevealed: Boolean) =
+        cardDao.updateRevealed(cardId, isRevealed)
+
+    override suspend fun updateCardNotes(cardId: Long, notes: String?) =
+        cardDao.updateDmNotes(cardId, notes)
 
     override suspend fun resetDeck(deckId: Long) = cardDao.resetDeck(deckId)
 
@@ -140,4 +156,28 @@ class CardRepositoryImpl @Inject constructor(
     override suspend fun saveTag(tag: Tag): Long = tagDao.insertTag(tag.toEntity())
 
     override suspend fun deleteTag(id: Long) = tagDao.deleteTag(id)
+
+    override suspend fun updateTag(tag: Tag) {
+        tagDao.insertTag(tag.toEntity()) // insertTag usa REPLACE on conflict, sirve para update
+    }
+
+    override suspend fun bulkArchiveDecks(ids: List<Long>, archive: Boolean) {
+        stackDao.bulkSetArchived(ids, archive)
+    }
+
+    override suspend fun bulkDeleteDecks(ids: List<Long>) {
+        stackDao.bulkDeleteStacks(ids)
+    }
+
+    override suspend fun bulkAddTagToStacks(stackIds: List<Long>, tagId: Long) {
+        stackIds.forEach { stackId ->
+            tagDao.insertStackTagRef(CardStackTagCrossRef(stackId, tagId))
+        }
+    }
+
+    override suspend fun bulkRemoveTagFromStacks(stackIds: List<Long>, tagId: Long) {
+        stackIds.forEach { stackId ->
+            tagDao.removeStackTagRef(stackId, tagId)
+        }
+    }
 }

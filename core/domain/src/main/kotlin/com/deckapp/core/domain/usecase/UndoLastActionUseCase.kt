@@ -17,29 +17,34 @@ class UndoLastActionUseCase @Inject constructor(
     suspend operator fun invoke(sessionId: Long): Boolean {
         val lastEvent = sessionRepository.getLastEventForSession(sessionId) ?: return false
 
+        val cardId = lastEvent.cardId
         when (lastEvent.action) {
-            DrawAction.DRAW -> cardRepository.updateCardDrawnState(lastEvent.cardId, isDrawn = false)
+            DrawAction.DRAW -> if (cardId != null) cardRepository.updateCardDrawnState(cardId, isDrawn = false)
             DrawAction.FLIP -> {
-                val card = cardRepository.getCardById(lastEvent.cardId).first()
-                if (card != null) {
-                    val prevIndex = if (card.currentFaceIndex == 0) card.faces.size - 1
-                                   else card.currentFaceIndex - 1
-                    cardRepository.updateCardFaceIndex(card.id, prevIndex)
+                if (cardId != null) {
+                    val card = cardRepository.getCardById(cardId).first()
+                    if (card != null) {
+                        val prevIndex = if (card.currentFaceIndex == 0) card.faces.size - 1
+                                       else card.currentFaceIndex - 1
+                        cardRepository.updateCardFaceIndex(card.id, prevIndex)
+                    }
                 }
             }
             DrawAction.REVERSE ->
-                cardRepository.updateCardReversed(lastEvent.cardId, isReversed = false)
+                if (cardId != null) cardRepository.updateCardReversed(cardId, isReversed = false)
             DrawAction.ROTATE -> {
-                val card = cardRepository.getCardById(lastEvent.cardId).first()
-                if (card != null) {
-                    val prevRotation = (card.currentRotation + 270) % 360
-                    cardRepository.updateCardRotation(card.id, prevRotation)
+                if (cardId != null) {
+                    val card = cardRepository.getCardById(cardId).first()
+                    if (card != null) {
+                        val prevRotation = (card.currentRotation + 270) % 360
+                        cardRepository.updateCardRotation(card.id, prevRotation)
+                    }
                 }
             }
             DrawAction.DISCARD ->
                 // Devuelve la carta a la mano (isDrawn = true)
-                cardRepository.updateCardDrawnState(lastEvent.cardId, isDrawn = true)
-            DrawAction.PASS, DrawAction.RESET, DrawAction.PEEK -> { /* no revertibles or no state change */ }
+                if (cardId != null) cardRepository.updateCardDrawnState(cardId, isDrawn = true)
+            DrawAction.PASS, DrawAction.RESET, DrawAction.PEEK, DrawAction.SHUFFLE_BACK -> { /* no revertibles or no state change */ }
         }
 
         sessionRepository.deleteLastEvent(sessionId)

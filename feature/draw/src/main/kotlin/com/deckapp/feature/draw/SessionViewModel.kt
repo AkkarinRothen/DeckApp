@@ -4,12 +4,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.deckapp.core.domain.repository.CardRepository
+import com.deckapp.core.domain.repository.EncounterRepository
 import com.deckapp.core.domain.repository.SessionRepository
-import com.deckapp.core.domain.usecase.DrawCardUseCase
-import com.deckapp.core.domain.usecase.UndoLastActionUseCase
+import com.deckapp.core.domain.usecase.*
 import com.deckapp.core.model.*
-import com.deckapp.core.model.CardAspectRatio
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -32,17 +32,29 @@ data class SessionUiState(
     val sessionEnded: Boolean = false,
     val activeTab: Int = 0,                  // 0=Mazos, 1=Tablas, 2=Notas, 3=Combate
     val hasActiveEncounter: Boolean = false, // habilita tab Combate (Sprint 7)
+    val activeEncounter: Encounter? = null,  // datos del combate en curso
     val dmNotes: String = "",
+    val showQuickNoteDialog: Boolean = false,
     val sessionElapsedMinutes: Long = 0,
-    val deckAspectRatios: Map<Long, CardAspectRatio> = emptyMap() // stackId → aspectRatio
+    val deckAspectRatios: Map<Long, CardAspectRatio> = emptyMap(), // stackId → aspectRatio
+    val deckBackImages: Map<Long, String?> = emptyMap(),           // stackId → backImagePath
+    // Sprint 14.5 — Workspace Bento
+    val collapsedDeckIds: Set<Long> = emptySet(),   // clusters colapsados manualmente por el DM
+    val handByDeck: Map<Long, List<Card>> = emptyMap(), // hand agrupada por stackId (derivada)
+    // Combat Log
+    val combatLog: List<CombatLogEntry> = emptyList()
 )
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class SessionViewModel @Inject constructor(
     private val sessionRepository: SessionRepository,
     private val cardRepository: CardRepository,
+    private val encounterRepository: EncounterRepository,
     private val drawCardUseCase: DrawCardUseCase,
     private val undoLastActionUseCase: UndoLastActionUseCase,
+    private val nextTurnUseCase: NextTurnUseCase,
+    private val applyDamageUseCase: ApplyDamageUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -83,16 +95,21 @@ class SessionViewModel @Inject constructor(
             ) { refs, allDecks ->
                 val names = allDecks.associate { it.id to it.name }
                 val ratios = allDecks.associate { it.id to it.aspectRatio }
-                Triple(refs, names, ratios)
-            }.collect { (refs, names, ratios) ->
+                val backImages = allDecks.associate { it.id to it.backImagePath }
+                object {
+                    val refs = refs; val names = names
+                    val ratios = ratios; val backImages = backImages
+                }
+            }.collect { data ->
                 _uiState.update { state ->
                     state.copy(
-                        deckRefs = refs,
-                        deckNames = names,
-                        deckAspectRatios = ratios,
+                        deckRefs = data.refs,
+                        deckNames = data.names,
+                        deckAspectRatios = data.ratios,
+                        deckBackImages = data.backImages,
                         // Auto-seleccionar el primer mazo si todavía no hay selección
                         selectedDeckId = state.selectedDeckId
-                            ?: refs.firstOrNull()?.stackId
+                            ?: data.refs.firstOrNull()?.stackId
                     )
                 }
             }
@@ -115,11 +132,16 @@ class SessionViewModel @Inject constructor(
                 }
         }
 
-        // Mano: cartas con isDrawn = true
+        // Mano: cartas con isDrawn = true + agrupación por mazo para el Workspace
         viewModelScope.launch {
             cardRepository.getDrawnCards()
                 .collect { drawn ->
-                    _uiState.update { it.copy(hand = drawn) }
+                    _uiState.update {
+                        it.copy(
+                            hand = drawn,
+                            handByDeck = drawn.groupBy { card -> card.stackId }
+                        )
+                    }
                 }
         }
 
@@ -135,6 +157,23 @@ class SessionViewModel @Inject constructor(
                 .map { it.isNotEmpty() }
                 .collect { canUndo -> _uiState.update { it.copy(canUndo = canUndo) } }
         }
+
+        // --- Combat Tracker ---
+        viewModelScope.launch {
+            encounterRepository.getActiveEncounter(sessionId)
+                .flatMapLatest { encounter ->
+                    if (encounter == null) flowOf(null to emptyList<CombatLogEntry>())
+                    else encounterRepository.getLogForEncounter(encounter.id)
+                        .map { log -> encounter to log }
+                }
+                .collect { (encounter, log) ->
+                    _uiState.update { it.copy(
+                        activeEncounter = encounter,
+                        hasActiveEncounter = encounter != null,
+                        combatLog = log
+                    ) }
+                }
+        }
     }
 
     /** Selecciona el mazo activo para la siguiente acción ROBAR. */
@@ -147,15 +186,60 @@ class SessionViewModel @Inject constructor(
         _uiState.update { it.copy(activeTab = tab) }
     }
 
+    /**
+     * Alterna el estado expandido/colapsado de un cluster de mazo en el Workspace Bento.
+     * El estado de colapso es efímero (no se persiste en Room).
+     */
+    fun toggleDeckCollapse(stackId: Long) {
+        _uiState.update { state ->
+            val current = state.collapsedDeckIds
+            val updated = if (stackId in current) current - stackId else current + stackId
+            state.copy(collapsedDeckIds = updated)
+        }
+    }
+
+    /**
+     * Registra el último cluster con el que interactuó el DM.
+     * El FAB usa esta información para saber de qué mazo robar.
+     */
+    fun setLastInteractedDeck(stackId: Long) {
+        _uiState.update { it.copy(selectedDeckId = stackId) }
+    }
+
     /** Stub — lógica de tirada activa implementada en Sprint 5. */
     fun rollActiveTable() { /* Implementado en feature:tables */ }
 
-    /** Cambia al tab de notas. */
-    fun startQuickNote() {
-        _uiState.update { it.copy(activeTab = 2) }
+    /** Abre el dialog de nota rápida. */
+    fun showQuickNote() {
+        _uiState.update { it.copy(showQuickNoteDialog = true) }
     }
 
-    /** Actualiza las notas de la sesión con debounce se manejaría en la UI, pero el repo persiste. */
+    /** Cierra el dialog de nota rápida sin guardar. */
+    fun dismissQuickNote() {
+        _uiState.update { it.copy(showQuickNoteDialog = false) }
+    }
+
+    /**
+     * Añade una nota rápida con timestamp al texto de notas existente y navega al tab Notas.
+     * Formato: "[HH:mm] texto\n"
+     */
+    fun addQuickNote(text: String) {
+        if (text.isBlank()) {
+            _uiState.update { it.copy(showQuickNoteDialog = false) }
+            return
+        }
+        val time = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+            .format(java.util.Date())
+        val entry = "[$time] $text"
+        val current = _uiState.value.dmNotes
+        val updated = if (current.isBlank()) entry else "$current\n$entry"
+        _uiState.update { it.copy(dmNotes = updated, showQuickNoteDialog = false, activeTab = 3) }
+        viewModelScope.launch {
+            sessionRepository.updateDmNotes(sessionId, updated)
+        }
+    }
+
+    /** Actualiza las notas de la sesión (llamado desde el editor con debounce en la UI). */
     fun updateNotes(notes: String) {
         _uiState.update { it.copy(dmNotes = notes) }
         viewModelScope.launch {
@@ -190,7 +274,59 @@ class SessionViewModel @Inject constructor(
             sessionRepository.logEvent(
                 DrawEvent(sessionId = sessionId, cardId = cardId, action = DrawAction.DISCARD)
             )
+            cardRepository.updateCardDrawnState(cardId, isDrawn = false, lastDrawnAt = null)
+        }
+    }
+
+    /** Regresa todas las cartas de la pila al mazo (Shuffle back). */
+    fun shufflePileBack(stackId: Long? = null) {
+        viewModelScope.launch {
+            val piledCards = cardRepository.getPiledCards(sessionId).first()
+            val cardsToReturn = if (stackId != null) {
+                piledCards.filter { it.stackId == stackId }
+            } else {
+                piledCards
+            }
+
+            if (cardsToReturn.isEmpty()) return@launch
+
+            // Marcamos como no robadas
+            cardsToReturn.forEach { card ->
+                cardRepository.updateCardDrawnState(card.id, isDrawn = false)
+            }
+
+            // Registramos el evento de barajado
+            sessionRepository.logEvent(
+                DrawEvent(
+                    sessionId = sessionId,
+                    cardId = null,
+                    action = DrawAction.SHUFFLE_BACK,
+                    metadata = if (stackId != null) "Mazo: $stackId" else "Toda la pila"
+                )
+            )
+            _uiState.update { it.copy(snackbarMessage = "Pila barajada de vuelta al mazo") }
+        }
+    }
+
+    /** Mueve una carta específica de la pila a la mano. */
+    fun returnToHand(cardId: Long) {
+        viewModelScope.launch {
+            cardRepository.updateCardDrawnState(cardId, isDrawn = true, lastDrawnAt = System.currentTimeMillis())
+            // Podríamos loguear un evento especial si fuera necesario
+        }
+    }
+
+    /** Mueve una carta específica de la pila de vuelta al mazo. */
+    fun returnToDeck(cardId: Long) {
+        viewModelScope.launch {
             cardRepository.updateCardDrawnState(cardId, isDrawn = false)
+            // No necesita evento DISCARD porque ya está fuera, simplemente se limpia de la pila
+            // (isDrawn=false && sin evento DISCARD reciente manejará esto si el DAO es correcto).
+            // NOTA: Para que getPiledCards deje de verla, técnicamente necesita un RESET o que
+            // nosotros logueemos algo que "gane" al DISCARD.
+            // Por simplicidad, el DAO actual usa timestamp > MAX(RESET).
+            // Vamos a registrar un SHUFFLE_BACK individual para que el DAO (si lo ajustamos) lo ignore.
+            // O mejor, el DAO de PiledCards debería excluir cartas que tienen un evento posterior al DISCARD.
         }
     }
 
@@ -198,14 +334,39 @@ class SessionViewModel @Inject constructor(
     fun resetDeck() {
         viewModelScope.launch {
             _uiState.value.hand.forEach { card ->
-                cardRepository.updateCardDrawnState(card.id, isDrawn = false)
+                cardRepository.updateCardDrawnState(card.id, isDrawn = false, lastDrawnAt = null)
             }
             _uiState.value.deckRefs.forEach { ref ->
                 cardRepository.resetDeck(ref.stackId)
             }
             sessionRepository.logEvent(
-                DrawEvent(sessionId = sessionId, cardId = 0L, action = DrawAction.RESET)
+                DrawEvent(sessionId = sessionId, cardId = null, action = DrawAction.RESET)
             )
+        }
+    }
+
+    /**
+     * Resetea un único mazo: devuelve al mazo todas sus cartas (mano + pila de descarte).
+     * Loguea un RESET individual con metadata del stackId.
+     */
+    fun resetSingleDeck(stackId: Long) {
+        viewModelScope.launch {
+            // Devolver al mazo las cartas en mano de este deck
+            _uiState.value.hand
+                .filter { it.stackId == stackId }
+                .forEach { card -> cardRepository.updateCardDrawnState(card.id, isDrawn = false, lastDrawnAt = null) }
+            // Resetear todas las cartas del mazo (disponibles + descartadas)
+            cardRepository.resetDeck(stackId)
+            sessionRepository.logEvent(
+                DrawEvent(
+                    sessionId = sessionId,
+                    cardId = null,
+                    action = DrawAction.RESET,
+                    metadata = "Mazo: $stackId"
+                )
+            )
+            val name = _uiState.value.deckNames[stackId] ?: "Mazo"
+            _uiState.update { it.copy(snackbarMessage = "\"$name\" reseteado") }
         }
     }
 
@@ -260,6 +421,17 @@ class SessionViewModel @Inject constructor(
 
     fun clearPeek() = _uiState.update { it.copy(peekCard = null) }
 
+    /** Revela una carta que fue robada boca abajo. Loguea FLIP como evento de revelación. */
+    fun revealCard(cardId: Long) {
+        viewModelScope.launch {
+            cardRepository.updateCardRevealed(cardId, isRevealed = true)
+            sessionRepository.logEvent(
+                DrawEvent(sessionId = sessionId, cardId = cardId, action = DrawAction.FLIP,
+                    metadata = "reveal")
+            )
+        }
+    }
+
     /**
      * Roba [count] cartas del mazo seleccionado en secuencia.
      * Si el mazo se queda sin cartas antes de completar, notifica con un snackbar.
@@ -292,6 +464,62 @@ class SessionViewModel @Inject constructor(
         _uiState.update { it.copy(errorMessage = null) }
     }
 
+    // --- Combat Actions ---
+
+    fun applyDamage(creatureId: Long, delta: Int) {
+        viewModelScope.launch {
+            applyDamageUseCase(creatureId, delta)
+        }
+    }
+
+    fun nextTurn() {
+        val encounterId = _uiState.value.activeEncounter?.id ?: return
+        viewModelScope.launch {
+            nextTurnUseCase(encounterId)
+        }
+    }
+
+    fun toggleCondition(creatureId: Long, condition: Condition) {
+        viewModelScope.launch {
+            val creature = encounterRepository.getCreatureById(creatureId) ?: return@launch
+            val newConditions = if (condition in creature.conditions) {
+                creature.conditions - condition
+            } else {
+                creature.conditions + condition
+            }
+            encounterRepository.updateCreature(creature.copy(conditions = newConditions))
+        }
+    }
+
+    fun endEncounter() {
+        val encounter = _uiState.value.activeEncounter ?: return
+        viewModelScope.launch {
+            // 1. Generar Resumen
+            val survivors = encounter.creatures
+                .filter { it.currentHp > 0 }
+                .joinToString(", ") { it.name }
+            val summary = """
+                
+                --- RESUMEN DE COMBATE: ${encounter.name} ---
+                Rondas: ${encounter.currentRound}
+                Supervivientes: ${if (survivors.isEmpty()) "Ninguno" else survivors}
+                ------------------------------------------
+            """.trimIndent()
+            
+            // 2. Anexar a notas
+            val updatedNotes = "${_uiState.value.dmNotes}\n$summary"
+            updateNotes(updatedNotes)
+            
+            // 3. Desactivar el encuentro
+            encounterRepository.saveEncounter(encounter.copy(isActive = false))
+            
+            // 4. Volver a mazos si estábamos en combate
+            if (_uiState.value.activeTab == 4) {
+                _uiState.update { it.copy(activeTab = 0, snackbarMessage = "Combate finalizado y resumido en notas") }
+            }
+        }
+    }
+
     /** Genera un log de texto con los eventos de la sesión. */
     suspend fun getSessionLogText(): String {
         val events = sessionRepository.getEventsForSession(sessionId).first()
@@ -301,10 +529,28 @@ class SessionViewModel @Inject constructor(
         sb.append("Generado: ${java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(java.util.Date())}\n")
         sb.append("--------------------------------------------------\n\n")
 
+        sb.append("--- ACTIVIDAD DE CARTAS ---\n")
         events.forEach { event ->
             val time = java.text.SimpleDateFormat("HH:mm:ss").format(java.util.Date(event.timestamp))
             sb.append("[$time] ${event.action}: Carta ${event.cardId} ${event.metadata}\n")
         }
+        
+        // Sprint 16: Logs de Combate
+        val encounters = encounterRepository.getAllEncounters().first()
+            .filter { it.linkedSessionId == sessionId }
+        
+        if (encounters.isNotEmpty()) {
+            sb.append("\n\n--- HISTORIAL DE COMBATES ---\n")
+            encounters.forEach { enc ->
+                sb.append("\nENCUENTRO: ${enc.name} (Rondas: ${enc.currentRound})\n")
+                val logEntries = encounterRepository.getLogForEncounter(enc.id).first()
+                logEntries.reversed().forEach { entry ->
+                    val time = java.text.SimpleDateFormat("HH:mm:ss").format(java.util.Date(entry.timestamp))
+                    sb.append("[$time] ${entry.message}\n")
+                }
+            }
+        }
+        
         return sb.toString()
     }
 

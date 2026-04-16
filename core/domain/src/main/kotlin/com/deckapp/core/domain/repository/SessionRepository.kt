@@ -1,6 +1,7 @@
 package com.deckapp.core.domain.repository
 
 import com.deckapp.core.model.DrawEvent
+import com.deckapp.core.model.RandomTable
 import com.deckapp.core.model.Session
 import com.deckapp.core.model.SessionDeckRef
 import kotlinx.coroutines.flow.Flow
@@ -21,6 +22,10 @@ interface SessionRepository {
     fun getDecksForSession(sessionId: Long): Flow<List<SessionDeckRef>>
     suspend fun addDeckToSession(ref: SessionDeckRef)
     suspend fun removeDeckFromSession(sessionId: Long, stackId: Long)
+
+    fun getTablesForSession(sessionId: Long): Flow<List<RandomTable>>
+    suspend fun addTableToSession(sessionId: Long, tableId: Long)
+    suspend fun removeTableFromSession(sessionId: Long, tableId: Long)
 
     // Event log — append only
     suspend fun logEvent(event: DrawEvent)

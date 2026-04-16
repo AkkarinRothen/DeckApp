@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.pdf.PdfRenderer
 import android.net.Uri
+import android.os.ParcelFileDescriptor
 import android.provider.DocumentsContract
 import com.deckapp.core.domain.repository.FileRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -26,6 +27,7 @@ import javax.inject.Inject
 class FileRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : FileRepository {
+
 
     // Extensiones de imagen soportadas
     private val imageMimeTypes = setOf(
@@ -217,7 +219,7 @@ class FileRepositoryImpl @Inject constructor(
 
     // ── Helpers privados ──────────────────────────────────────────────────────
 
-    /** Renderiza una página completa a Bitmap. Abre y cierra el PdfRenderer internamente. */
+    /** Renderiza una página completa a Bitmap usando PdfRenderer nativo. */
     private fun renderPage(uri: Uri, pageIndex: Int, targetWidth: Int): Bitmap? {
         val fd = context.contentResolver.openFileDescriptor(uri, "r") ?: return null
         return try {
@@ -226,15 +228,24 @@ class FileRepositoryImpl @Inject constructor(
                 renderer.close()
                 return null
             }
+            
             val page = renderer.openPage(pageIndex)
-            val scale = targetWidth.toFloat() / page.width.coerceAtLeast(1)
-            val bH = (page.height * scale).toInt().coerceAtLeast(1)
+            val originalW = page.width
+            val originalH = page.height
+            
+            val scale = targetWidth.toFloat() / originalW.coerceAtLeast(1)
+            val bH = (originalH * scale).toInt().coerceAtLeast(1)
+            
             val bitmap = Bitmap.createBitmap(targetWidth, bH, Bitmap.Config.ARGB_8888)
             bitmap.eraseColor(Color.WHITE)
+            
             page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+            
             page.close()
             renderer.close()
             bitmap
+        } catch (e: Exception) {
+            null
         } finally {
             fd.close()
         }
@@ -313,13 +324,18 @@ class FileRepositoryImpl @Inject constructor(
             this
     }
 
+    /** Lee la calidad JPEG configurada por el usuario (default 90). */
+    private fun getJpegQuality(): Int =
+        context.getSharedPreferences("deckapp_settings", android.content.Context.MODE_PRIVATE)
+            .getInt("jpeg_quality", 90)
+
     /** Guarda un Bitmap como JPEG en {filesDir}/decks/{deckId}/{fileName}. Recicla el bitmap. */
     private fun saveBitmapToInternal(bitmap: Bitmap, deckId: Long, fileName: String): String {
         val deckDir = File(context.filesDir, "decks/$deckId")
         deckDir.mkdirs()
         val file = File(deckDir, sanitizeFileName(fileName))
         FileOutputStream(file).use { out ->
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, getJpegQuality(), out)
         }
         bitmap.recycle()
         return file.absolutePath
@@ -327,4 +343,7 @@ class FileRepositoryImpl @Inject constructor(
 
     private fun sanitizeFileName(name: String): String =
         name.replace(Regex("[\\\\/:*?\"<>|]"), "_")
+
+    override suspend fun readTextFromUri(uri: Uri): String =
+        context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() } ?: ""
 }

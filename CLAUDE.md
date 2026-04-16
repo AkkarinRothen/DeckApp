@@ -21,6 +21,12 @@ Al realizar cambios sustanciales de arquitectura o feature, el desarrollador (o 
 actualizar `DEVLOG.md` con fecha, tipo (DECISION / ARCHITECTURE / INTEGRATION / PROBLEM / SOLUTION)
 y descripción. Mantener el registro histórico vivo del desarrollo.
 
+## Planning and History Mandate
+Cualquier desarrollador (o agente) DEBE realizar las siguientes acciones ANTES de generar código o proponer cambios:
+1. **Verificar `DEVLOG.md`:** Entender las últimas decisiones técnicas y el estado actual.
+2. **Revisar `docs/planning/`:** Consultar el `PLAN_GENERAL.md` y cualquier plan específico (ej. `ADVANCED_TABLES.md`) para asegurar consistencia con la visión del proyecto.
+3. **Respetar el Roadmap:** Consultar `docs/planning/ROADMAP.md` para entender las dependencias entre features.
+
 ## Modular-First Mandate
 - **Sin sobrecarga de archivos:** Features nuevas en archivos/módulos separados.
 - **Extracción de componentes:** Cualquier componente UI con más de 50 líneas de lógica o

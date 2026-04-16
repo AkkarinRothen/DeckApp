@@ -27,7 +27,7 @@ data class SessionDeckRef(
 data class DrawEvent(
     val id: Long = 0,
     val sessionId: Long,
-    val cardId: Long,
+    val cardId: Long?,
     val action: DrawAction,
     val metadata: String = "",  // JSON opcional (ej: nombre del jugador al hacer PASS)
     val timestamp: Long = System.currentTimeMillis()

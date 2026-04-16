@@ -3,26 +3,35 @@ package com.deckapp.feature.deck
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Casino
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.deckapp.core.model.CardContentMode
 import com.deckapp.core.model.CardFace
+import com.deckapp.core.model.RandomTable
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -113,6 +122,13 @@ fun CardEditorScreen(
                     singleLine = true
                 )
             }
+
+            // ── Vínculo con Tabla ─────────────────────────────────────
+            TableLinkSection(
+                selectedTableId = uiState.linkedTableId,
+                availableTables = uiState.availableTables,
+                onTableSelect = { viewModel.updateLinkedTable(it) }
+            )
 
             HorizontalDivider()
 
@@ -350,4 +366,99 @@ private fun zoneLabelsFor(mode: CardContentMode): List<String> = when (mode) {
     CardContentMode.FOUR_EDGE_CUES    -> listOf("Norte", "Este", "Sur", "Oeste")
     CardContentMode.FOUR_QUADRANT     -> listOf("Noroeste", "Noreste", "Suroeste", "Sureste")
     CardContentMode.DOUBLE_SIDED_FULL -> listOf("Contenido")
+}
+
+/** Sección para vincular una tabla aleatoria a la carta. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TableLinkSection(
+    selectedTableId: Long?,
+    availableTables: List<RandomTable>,
+    onTableSelect: (Long?) -> Unit
+) {
+    val selectedTable = availableTables.find { it.id == selectedTableId }
+    var showDialog by remember { mutableStateOf(false) }
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("Acción vinculada", style = MaterialTheme.typography.titleMedium)
+        Card(
+            onClick = { showDialog = true },
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = if (selectedTableId != null) 
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f) 
+                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            ),
+            border = if (selectedTableId != null)
+                null else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        ) {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Casino,
+                    contentDescription = null,
+                    tint = if (selectedTableId != null) 
+                        MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = selectedTable?.name ?: "Vincular tabla aleatoria",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = if (selectedTableId != null) FontWeight.Bold else FontWeight.Normal
+                    )
+                    Text(
+                        text = if (selectedTableId != null) 
+                            "Se podrá tirar esta tabla al robar la carta" else "Activa una acción automática al usar esta carta",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                if (selectedTableId != null) {
+                    IconButton(onClick = { onTableSelect(null) }) {
+                        Icon(Icons.Default.Close, contentDescription = "Eliminar vínculo")
+                    }
+                }
+            }
+        }
+    }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Vincular tabla") },
+            text = {
+                if (availableTables.isEmpty()) {
+                    Text("No hay tablas creadas todavía en la biblioteca.")
+                } else {
+                    LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
+                        items(availableTables) { table ->
+                            ListItem(
+                                headlineContent = { Text(table.name) },
+                                supportingContent = { 
+                                    Text(
+                                        if (table.tags.isNotEmpty()) table.tags.joinToString(", ") { it.name }
+                                        else "Sin etiquetas"
+                                    ) 
+                                },
+                                leadingContent = { 
+                                    RadioButton(
+                                        selected = table.id == selectedTableId,
+                                        onClick = { onTableSelect(table.id); showDialog = false }
+                                    ) 
+                                },
+                                modifier = Modifier.clickable { onTableSelect(table.id); showDialog = false }
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) { Text("Cancelar") }
+            }
+        )
+    }
 }

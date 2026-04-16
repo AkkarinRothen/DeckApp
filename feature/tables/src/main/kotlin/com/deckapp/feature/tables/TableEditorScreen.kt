@@ -1,5 +1,6 @@
 package com.deckapp.feature.tables
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -9,7 +10,14 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Casino
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.LinkOff
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.material3.*
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,6 +26,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.deckapp.core.model.RandomTable
 import com.deckapp.core.model.TableEntry
 import com.deckapp.core.model.TableRollMode
 
@@ -28,7 +37,7 @@ import com.deckapp.core.model.TableRollMode
  * - FAB en [TablesTab] → nueva tabla (tableId = -1)
  * - Long-press en item de lista → editar tabla existente (tableId = id)
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun TableEditorScreen(
     onBack: () -> Unit,
@@ -68,6 +77,15 @@ fun TableEditorScreen(
                     Text("Tirar de nuevo")
                 }
             }
+        )
+    }
+    
+    // Selector de Sub-tabla
+    if (uiState.pickingEntryIndex != null) {
+        TablePickerDialog(
+            tables = uiState.availableTables,
+            onDismiss = { viewModel.cancelPicking() },
+            onTableSelected = { viewModel.linkSubTable(it) }
         )
     }
 
@@ -120,14 +138,60 @@ fun TableEditorScreen(
                     )
                 }
                 item {
-                    OutlinedTextField(
-                        value = uiState.category,
-                        onValueChange = { viewModel.setCategory(it) },
-                        label = { Text("Categoría") },
-                        placeholder = { Text("Encuentros, Nombres, Clima…") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
+                    Text(
+                        "Etiquetas",
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.padding(bottom = 4.dp)
                     )
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        uiState.tags.forEach { tag ->
+                            InputChip(
+                                selected = true,
+                                onClick = { viewModel.toggleTag(tag) },
+                                label = { Text(tag.name) },
+                                trailingIcon = { Icon(Icons.Default.Close, null, modifier = Modifier.size(16.dp)) },
+                                colors = InputChipDefaults.inputChipColors(
+                                    selectedContainerColor = Color(tag.color).copy(alpha = 0.2f),
+                                    selectedLabelColor = Color(tag.color)
+                                )
+                            )
+                        }
+                        
+                        var showTagMenu by remember { mutableStateOf(false) }
+                        IconButton(onClick = { showTagMenu = true }) {
+                            Icon(Icons.Default.Add, contentDescription = "Añadir etiqueta")
+                        }
+                        
+                        DropdownMenu(
+                            expanded = showTagMenu,
+                            onDismissRequest = { showTagMenu = false }
+                        ) {
+                            if (uiState.allTags.isEmpty()) {
+                                DropdownMenuItem(
+                                    text = { Text("No hay etiquetas creadas") },
+                                    onClick = { },
+                                    enabled = false
+                                )
+                            }
+                            uiState.allTags.forEach { tag ->
+                                val isSelected = tag in uiState.tags
+                                DropdownMenuItem(
+                                    text = { Text(tag.name) },
+                                    onClick = { 
+                                        viewModel.toggleTag(tag)
+                                        showTagMenu = false 
+                                    },
+                                    trailingIcon = {
+                                        if (isSelected) Icon(Icons.Default.Check, null)
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
                 item {
                     OutlinedTextField(
@@ -140,13 +204,18 @@ fun TableEditorScreen(
                     )
                 }
                 item {
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // La fórmula solo importa en modo RANGE; en WEIGHTED se ignora
                         OutlinedTextField(
                             value = uiState.rollFormula,
                             onValueChange = { viewModel.setRollFormula(it) },
                             label = { Text("Fórmula") },
                             placeholder = { Text("1d6") },
                             singleLine = true,
+                            enabled = uiState.rollMode == TableRollMode.RANGE,
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                             modifier = Modifier.weight(1f)
                         )
@@ -171,6 +240,14 @@ fun TableEditorScreen(
                             }
                         }
                     }
+                    if (uiState.rollMode == TableRollMode.WEIGHTED) {
+                        Text(
+                            "Modo Peso: la fórmula se ignora. El resultado se elige por probabilidad relativa.",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
                 }
 
                 // ── Sección de entradas ──────────────────────────────────────
@@ -193,7 +270,9 @@ fun TableEditorScreen(
                         index = index,
                         rollMode = uiState.rollMode,
                         onUpdate = { viewModel.updateEntry(index, it) },
-                        onRemove = { viewModel.removeEntry(index) }
+                        onRemove = { viewModel.removeEntry(index) },
+                        onLinkSubTable = { viewModel.startPickingSubTable(index) },
+                        onUnlinkSubTable = { viewModel.unlinkSubTable(index) }
                     )
                 }
 
@@ -207,9 +286,9 @@ fun TableEditorScreen(
                         Text("Añadir entrada")
                     }
                 }
-            }
         }
     }
+}
 }
 
 @Composable
@@ -218,14 +297,16 @@ private fun EntryRow(
     index: Int,
     rollMode: TableRollMode,
     onUpdate: (TableEntry) -> Unit,
-    onRemove: () -> Unit
+    onRemove: () -> Unit,
+    onLinkSubTable: () -> Unit,
+    onUnlinkSubTable: () -> Unit
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
             // Rango o peso
             if (rollMode == TableRollMode.RANGE) {
                 OutlinedTextField(
@@ -265,6 +346,15 @@ private fun EntryRow(
                 modifier = Modifier.weight(1f)
             )
 
+            // Enlazar Sub-tabla
+            IconButton(onClick = if (entry.subTableId == null) onLinkSubTable else onUnlinkSubTable) {
+                Icon(
+                    if (entry.subTableId == null) Icons.Default.Link else Icons.Default.LinkOff,
+                    contentDescription = "Enlazar tabla",
+                    tint = if (entry.subTableId == null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                )
+            }
+
             // Eliminar
             IconButton(onClick = onRemove) {
                 Icon(
@@ -274,5 +364,84 @@ private fun EntryRow(
                 )
             }
         }
+
+        // Indicador de sub-tabla
+        if (entry.subTableId != null) {
+            Surface(
+                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+                shape = MaterialTheme.shapes.small
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Default.Link, null, modifier = Modifier.size(14.dp), 
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer)
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        "Llamada a: ${entry.subTableRef ?: "Tabla"}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+        }
     }
+}
+}
+
+@Composable
+fun TablePickerDialog(
+    tables: List<RandomTable>,
+    onDismiss: () -> Unit,
+    onTableSelected: (RandomTable) -> Unit
+) {
+    var searchQuery by remember { mutableStateOf("") }
+    val filteredTables = remember(searchQuery, tables) {
+        tables.filter { table ->
+            table.name.contains(searchQuery, ignoreCase = true) || 
+            table.tags.any { it.name.contains(searchQuery, ignoreCase = true) }
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Seleccionar sub-tabla") },
+        text = {
+            Column(modifier = Modifier.fillMaxWidth().heightIn(max = 400.dp)) {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    label = { Text("Buscar tabla…") },
+                    leadingIcon = { Icon(Icons.Default.Search, null) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                Spacer(Modifier.height(12.dp))
+                if (filteredTables.isEmpty()) {
+                    Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+                        Text("No se encontraron tablas", style = MaterialTheme.typography.bodyMedium)
+                    }
+                } else {
+                    LazyColumn(modifier = Modifier.weight(1f)) {
+                        items(filteredTables.size) { index ->
+                            val table = filteredTables[index]
+                            ListItem(
+                                headlineContent = { Text(table.name) },
+                                supportingContent = { 
+                                    Text(table.tags.joinToString(", ") { it.name }.ifBlank { "Sin etiquetas" }) 
+                                },
+                                modifier = Modifier.clickable { onTableSelected(table) }
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("Cancelar") }
+        }
+    )
 }

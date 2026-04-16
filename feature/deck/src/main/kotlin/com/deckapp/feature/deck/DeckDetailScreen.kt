@@ -14,6 +14,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Collections
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.LaunchedEffect
 import android.net.Uri
@@ -52,6 +54,16 @@ fun DeckDetailScreen(
     val createZipLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/zip")
     ) { uri -> uri?.let { viewModel.exportToZip(it) } }
+
+    // Launcher para elegir imagen de dorso
+    val backImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        // En una app real, copiaríamos el archivo a la carpeta interna
+        // Por ahora usamos la URI directamente (requiere permisos persistentes o FileProvider)
+        // Simplificamos asumiendo que el ViewModel manejará la persistencia o usaremos el path
+        uri?.let { viewModel.setBackImage(it.toString()) }
+    }
 
     // Mostrar mensajes de éxito/error
     LaunchedEffect(uiState.errorMessage, uiState.exportSuccessMessage) {
@@ -129,6 +141,12 @@ fun DeckDetailScreen(
                     }
                 },
                 actions = {
+                    IconButton(
+                        onClick = { viewModel.showConfigSheet(true) },
+                        enabled = uiState.deck?.isArchived != true
+                    ) {
+                        Icon(Icons.Default.Settings, contentDescription = "Configuración")
+                    }
                     Box {
                         IconButton(onClick = { showOverflow = true }) {
                             Icon(Icons.Default.MoreVert, contentDescription = "Más opciones")
@@ -158,7 +176,7 @@ fun DeckDetailScreen(
                                     showOverflow = false
                                     viewModel.duplicateDeck()
                                 },
-                                enabled = !uiState.isDuplicating
+                                enabled = !uiState.isDuplicating && uiState.deck?.isArchived != true
                             )
 
                             DropdownMenuItem(
@@ -182,7 +200,7 @@ fun DeckDetailScreen(
                                     showOverflow = false
                                     viewModel.showMergeDialog(true)
                                 },
-                                enabled = !uiState.isMerging
+                                enabled = !uiState.isMerging && uiState.deck?.isArchived != true
                             )
 
                             DropdownMenuItem(
@@ -218,8 +236,10 @@ fun DeckDetailScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             uiState.deck?.let { deck ->
-                FloatingActionButton(onClick = { onAddCard(deck.id) }) {
-                    Icon(Icons.Default.Add, contentDescription = "Nueva carta")
+                if (!deck.isArchived) {
+                    FloatingActionButton(onClick = { onAddCard(deck.id) }) {
+                        Icon(Icons.Default.Add, contentDescription = "Nueva carta")
+                    }
                 }
             }
         }
@@ -286,21 +306,49 @@ fun DeckDetailScreen(
                                 selected = false,
                                 onClick = {},
                                 label = { Text(tag.name) },
-                                trailingIcon = {
-                                    Icon(
-                                        Icons.Default.Close,
-                                        contentDescription = "Quitar tag",
-                                        modifier = Modifier
-                                            .size(16.dp)
-                                            .combinedClickable(onClick = { viewModel.removeTag(tag.id) })
-                                    )
+                                trailingIcon = if (deck.isArchived) null else {
+                                    {
+                                        Icon(
+                                            Icons.Default.Close,
+                                            contentDescription = "Quitar tag",
+                                            modifier = Modifier
+                                                .size(16.dp)
+                                                .combinedClickable(onClick = { viewModel.removeTag(tag.id) })
+                                        )
+                                    }
                                 }
                             )
                         }
-                        AssistChip(
-                            onClick = { showAddTagDialog = true },
-                            label = { Text("+ Tag") }
-                        )
+                        if (!deck.isArchived) {
+                            AssistChip(
+                                onClick = { showAddTagDialog = true },
+                                label = { Text("+ Tag") }
+                            )
+                        }
+                    }
+
+                    // Chips de filtro por palo (C-3) — solo si hay palos definidos
+                    if (uiState.availableSuits.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState())
+                                .padding(horizontal = 16.dp, vertical = 4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            FilterChip(
+                                selected = uiState.suitFilter == null,
+                                onClick = { viewModel.setSuitFilter(null) },
+                                label = { Text("Todos") }
+                            )
+                            uiState.availableSuits.forEach { suit ->
+                                FilterChip(
+                                    selected = uiState.suitFilter == suit,
+                                    onClick = { viewModel.setSuitFilter(suit) },
+                                    label = { Text(suit) }
+                                )
+                            }
+                        }
                     }
 
                     Text(
@@ -331,7 +379,7 @@ fun DeckDetailScreen(
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier.fillMaxSize()
                         ) {
-                            items(uiState.cards, key = { it.id }) { card ->
+                            items(uiState.filteredCards, key = { it.id }) { card ->
                                 CardThumbnail(
                                     card = card,
                                     modifier = Modifier.combinedClickable(
@@ -341,13 +389,130 @@ fun DeckDetailScreen(
                                     height = 120.dp,
                                     showTitle = true,
                                     aspectRatio = uiState.deck?.aspectRatio
-                                        ?: com.deckapp.core.model.CardAspectRatio.STANDARD
+                                        ?: com.deckapp.core.model.CardAspectRatio.STANDARD,
+                                    showModeBadge = true
                                 )
                             }
                         }
                     }
                 }
             }
+        }
+    }
+
+    if (uiState.showConfigSheet) {
+        DeckConfigSheet(
+            deck = uiState.deck,
+            onDismiss = { viewModel.showConfigSheet(false) },
+            onUpdateDrawMode = viewModel::updateDrawMode,
+            onUpdateAspectRatio = viewModel::updateAspectRatio,
+            onToggleFaceDown = viewModel::toggleDrawFaceDown,
+            onPickBackImage = { backImageLauncher.launch("image/*") }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DeckConfigSheet(
+    deck: com.deckapp.core.model.CardStack?,
+    onDismiss: () -> Unit,
+    onUpdateDrawMode: (com.deckapp.core.model.DrawMode) -> Unit,
+    onUpdateAspectRatio: (com.deckapp.core.model.CardAspectRatio) -> Unit,
+    onToggleFaceDown: (Boolean) -> Unit,
+    onPickBackImage: () -> Unit
+) {
+    if (deck == null) return
+    val sheetState = rememberModalBottomSheetState()
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 32.dp, start = 16.dp, end = 16.dp)
+        ) {
+            Text(
+                "Configuración del mazo",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            // --- Draw Mode ---
+            Text("Modo de robo", style = MaterialTheme.typography.labelMedium)
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                com.deckapp.core.model.DrawMode.entries.forEachIndexed { index, mode ->
+                    SegmentedButton(
+                        selected = deck.drawMode == mode,
+                        onClick = { onUpdateDrawMode(mode) },
+                        shape = SegmentedButtonDefaults.itemShape(index = index, count = com.deckapp.core.model.DrawMode.entries.size)
+                    ) {
+                        Text(
+                            text = when(mode) {
+                                com.deckapp.core.model.DrawMode.TOP -> "Tope"
+                                com.deckapp.core.model.DrawMode.BOTTOM -> "Fondo"
+                                com.deckapp.core.model.DrawMode.RANDOM -> "Azar"
+                            }
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            // --- Face Down ---
+            ListItem(
+                headlineContent = { Text("Robar boca abajo") },
+                supportingContent = { Text("Las cartas se roban mostrando su dorso por defecto") },
+                trailingContent = {
+                    Switch(
+                        checked = deck.drawFaceDown,
+                        onCheckedChange = { onToggleFaceDown(it) }
+                    )
+                }
+            )
+
+            HorizontalDivider(Modifier.padding(vertical = 8.dp))
+
+            // --- Aspect Ratio ---
+            Text("Proporción de cartas", style = MaterialTheme.typography.labelMedium)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                com.deckapp.core.model.CardAspectRatio.entries.forEach { ratio ->
+                    FilterChip(
+                        selected = deck.aspectRatio == ratio,
+                        onClick = { onUpdateAspectRatio(ratio) },
+                        label = { Text(ratio.name.lowercase().replaceFirstChar { it.uppercase() }) }
+                    )
+                }
+            }
+
+            // --- Back Image ---
+            ListItem(
+                headlineContent = { Text("Imagen de dorso") },
+                supportingContent = { 
+                    Text(if (deck.backImagePath != null) "Imagen personalizada activa" else "Sin imagen de dorso")
+                },
+                leadingContent = {
+                    Icon(Icons.Default.Collections, contentDescription = null)
+                },
+                trailingContent = {
+                    TextButton(onClick = onPickBackImage) {
+                        Text(if (deck.backImagePath != null) "Cambiar" else "Elegir")
+                    }
+                }
+            )
         }
     }
 }
@@ -384,7 +549,7 @@ private fun MergeDeckDialog(
                                 ) {
                                     if (deck.coverImagePath != null) {
                                         AsyncImage(
-                                            model = File(deck.coverImagePath),
+                                            model = File(deck.coverImagePath!!),
                                             contentDescription = null,
                                             modifier = Modifier.size(40.dp),
                                             contentScale = ContentScale.Crop

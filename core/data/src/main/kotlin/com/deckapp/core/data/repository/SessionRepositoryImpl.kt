@@ -9,7 +9,8 @@ import javax.inject.Inject
 
 class SessionRepositoryImpl @Inject constructor(
     private val sessionDao: SessionDao,
-    private val drawEventDao: DrawEventDao
+    private val drawEventDao: DrawEventDao,
+    private val randomTableDao: RandomTableDao
 ) : SessionRepository {
 
     override fun getAllSessions(): Flow<List<Session>> =
@@ -47,6 +48,19 @@ class SessionRepositoryImpl @Inject constructor(
 
     override suspend fun removeDeckFromSession(sessionId: Long, stackId: Long) =
         sessionDao.removeSessionDeckRef(sessionId, stackId)
+
+    override fun getTablesForSession(sessionId: Long): Flow<List<RandomTable>> =
+        sessionDao.getTablesForSession(sessionId).map { refs ->
+            refs.mapNotNull { ref ->
+                randomTableDao.getTableWithEntries(ref.tableId)?.toDomain()
+            }
+        }
+
+    override suspend fun addTableToSession(sessionId: Long, tableId: Long) =
+        sessionDao.insertSessionTableRef(SessionTableRefEntity(sessionId, tableId))
+
+    override suspend fun removeTableFromSession(sessionId: Long, tableId: Long) =
+        sessionDao.removeSessionTableRef(sessionId, tableId)
 
     override suspend fun logEvent(event: DrawEvent) {
         drawEventDao.insertEvent(event.toEntity())

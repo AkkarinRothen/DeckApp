@@ -20,7 +20,8 @@ import javax.inject.Inject
 data class TableEditorUiState(
     val name: String = "",
     val description: String = "",
-    val category: String = "",
+    val tags: List<com.deckapp.core.model.Tag> = emptyList(),
+    val allTags: List<com.deckapp.core.model.Tag> = emptyList(),
     val rollFormula: String = "1d6",
     val rollMode: TableRollMode = TableRollMode.RANGE,
     val entries: List<TableEntry> = emptyList(),
@@ -31,12 +32,16 @@ data class TableEditorUiState(
     val errorMessage: String? = null,
     val successMessage: String? = null,
     val previewResult: TableRollResult? = null,
-    val isNewTable: Boolean = true
+    val isNewTable: Boolean = true,
+    // Sub-tablas
+    val availableTables: List<RandomTable> = emptyList(),
+    val pickingEntryIndex: Int? = null
 )
 
 @HiltViewModel
 class TableEditorViewModel @Inject constructor(
     private val tableRepository: TableRepository,
+    private val cardRepository: com.deckapp.core.domain.repository.CardRepository,
     private val rollTableUseCase: RollTableUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -47,8 +52,27 @@ class TableEditorViewModel @Inject constructor(
     val uiState: StateFlow<TableEditorUiState> = _uiState.asStateFlow()
 
     init {
+        loadAvailableTables()
+        loadAllTags()
         if (tableId != -1L) {
             loadTable(tableId)
+        }
+    }
+
+    private fun loadAllTags() {
+        viewModelScope.launch {
+            cardRepository.getAllTags().collect { tags ->
+                _uiState.update { it.copy(allTags = tags) }
+            }
+        }
+    }
+
+    private fun loadAvailableTables() {
+        viewModelScope.launch {
+            tableRepository.getAllTables().collect { tables ->
+                // Filtramos la tabla actual para no referenciarse a sí misma directamente en el selector
+                _uiState.update { it.copy(availableTables = tables.filter { t -> t.id != tableId }) }
+            }
         }
     }
 
@@ -61,7 +85,7 @@ class TableEditorViewModel @Inject constructor(
                     TableEditorUiState(
                         name = table.name,
                         description = table.description,
-                        category = table.category,
+                        tags = table.tags,
                         rollFormula = table.rollFormula,
                         rollMode = table.rollMode,
                         entries = table.entries,
@@ -78,7 +102,13 @@ class TableEditorViewModel @Inject constructor(
 
     fun setName(name: String) = _uiState.update { it.copy(name = name, isDirty = true) }
     fun setDescription(desc: String) = _uiState.update { it.copy(description = desc, isDirty = true) }
-    fun setCategory(cat: String) = _uiState.update { it.copy(category = cat, isDirty = true) }
+    
+    fun toggleTag(tag: com.deckapp.core.model.Tag) {
+        _uiState.update { state ->
+            val updatedTags = if (tag in state.tags) state.tags - tag else state.tags + tag
+            state.copy(tags = updatedTags, isDirty = true)
+        }
+    }
     fun setRollFormula(formula: String) = _uiState.update { it.copy(rollFormula = formula, isDirty = true) }
     fun setRollMode(mode: TableRollMode) = _uiState.update { it.copy(rollMode = mode, isDirty = true) }
 
@@ -108,6 +138,39 @@ class TableEditorViewModel @Inject constructor(
         val entries = _uiState.value.entries.toMutableList()
         if (index in entries.indices) {
             entries.removeAt(index)
+            _uiState.update { it.copy(entries = entries, isDirty = true) }
+        }
+    }
+
+    // ── Gestión de Sub-tablas ─────────────────────────────────────────────────
+
+    fun startPickingSubTable(index: Int) {
+        _uiState.update { it.copy(pickingEntryIndex = index) }
+    }
+
+    fun cancelPicking() {
+        _uiState.update { it.copy(pickingEntryIndex = null) }
+    }
+
+    fun linkSubTable(table: RandomTable) {
+        val index = _uiState.value.pickingEntryIndex ?: return
+        val entries = _uiState.value.entries.toMutableList()
+        if (index in entries.indices) {
+            entries[index] = entries[index].copy(
+                subTableId = table.id,
+                subTableRef = table.name
+            )
+            _uiState.update { it.copy(entries = entries, isDirty = true, pickingEntryIndex = null) }
+        }
+    }
+
+    fun unlinkSubTable(index: Int) {
+        val entries = _uiState.value.entries.toMutableList()
+        if (index in entries.indices) {
+            entries[index] = entries[index].copy(
+                subTableId = null,
+                subTableRef = null
+            )
             _uiState.update { it.copy(entries = entries, isDirty = true) }
         }
     }
@@ -145,7 +208,7 @@ class TableEditorViewModel @Inject constructor(
         id = id,
         name = _uiState.value.name.trim(),
         description = _uiState.value.description.trim(),
-        category = _uiState.value.category.trim(),
+        tags = _uiState.value.tags,
         rollFormula = _uiState.value.rollFormula.trim(),
         rollMode = _uiState.value.rollMode,
         entries = _uiState.value.entries,

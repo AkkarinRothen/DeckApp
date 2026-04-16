@@ -3,18 +3,29 @@ package com.deckapp.feature.deck
 import android.app.Activity
 import android.view.WindowManager
 import androidx.compose.animation.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.StickyNote2
+import androidx.compose.material.icons.filled.ViewStream
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.*
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +55,13 @@ fun CardViewScreen(
 
     // Estado local: cuadrante seleccionado en modo FOUR_QUADRANT
     var selectedQuadrant by remember { mutableIntStateOf(-1) }
+    // V-6: modo "ver todas las caras"
+    var showAllFaces by remember { mutableStateOf(false) }
+    // V-7: modo brújula para FOUR_EDGE_CUES
+    var showCompass by remember { mutableStateOf(false) }
+    // Sprint 15: Sheet de notas
+    var showNotesSheet by remember { mutableStateOf(false) }
+    
     // Resetear al cambiar de carta o de cara
     LaunchedEffect(uiState.card?.id, uiState.card?.currentFaceIndex) {
         selectedQuadrant = -1
@@ -71,14 +89,46 @@ fun CardViewScreen(
                 },
                 actions = {
                     uiState.card?.let { card ->
-                        // Botón "Mostrar a jugador" — siempre visible cuando hay carta
+                        // V-6: toggle "ver todas las caras"
+                        if (card.faces.size > 1) {
+                            IconButton(onClick = { showAllFaces = !showAllFaces; showCompass = false }) {
+                                Icon(
+                                    Icons.Default.ViewStream,
+                                    contentDescription = "Ver todas las caras",
+                                    tint = if (showAllFaces) MaterialTheme.colorScheme.primary
+                                           else LocalContentColor.current
+                                )
+                            }
+                        }
+                        // V-7: toggle brújula FOUR_EDGE_CUES
+                        if (card.activeFace.contentMode == CardContentMode.FOUR_EDGE_CUES) {
+                            IconButton(onClick = { showCompass = !showCompass; showAllFaces = false }) {
+                                Icon(
+                                    Icons.Default.Explore,
+                                    contentDescription = "Vista brújula",
+                                    tint = if (showCompass) MaterialTheme.colorScheme.primary
+                                           else LocalContentColor.current
+                                )
+                            }
+                            if (!showCompass) {
+                                IconButton(onClick = { viewModel.rotate90() }) {
+                                    Icon(Icons.Default.Refresh, contentDescription = "Rotar orientación")
+                                }
+                            }
+                        }
+                        // Botón "Mostrar a jugador"
                         IconButton(onClick = { showPlayerView = true }) {
                             Icon(Icons.Default.Visibility, contentDescription = "Mostrar a jugador")
                         }
-                        if (card.activeFace.contentMode == CardContentMode.FOUR_EDGE_CUES) {
-                            IconButton(onClick = { viewModel.rotate90() }) {
-                                Icon(Icons.Default.Refresh, contentDescription = "Rotar orientación")
-                            }
+                        
+                        // Botón de Notas (Sprint 15)
+                        IconButton(onClick = { showNotesSheet = true }) {
+                            val hasNotes = !card.dmNotes.isNullOrBlank()
+                            Icon(
+                                imageVector = if (hasNotes) Icons.Default.StickyNote2 else Icons.Default.Edit,
+                                contentDescription = "Notas del DM",
+                                tint = if (hasNotes) MaterialTheme.colorScheme.tertiary else LocalContentColor.current
+                            )
                         }
                     }
                 }
@@ -100,95 +150,184 @@ fun CardViewScreen(
                 val isFlippable = face.contentMode == CardContentMode.DOUBLE_SIDED_FULL
                         && card.faces.size > 1
 
-                Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+                when {
+                    // V-6: modo referencia — todas las caras en columna
+                    showAllFaces -> AllFacesView(
+                        card = card,
+                        modifier = Modifier.fillMaxSize().padding(padding)
+                    )
 
-                    // ── Área de imagen ────────────────────────────────────────────
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                            .padding(16.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                    ) {
-                        if (isFlippable) {
-                            // DOUBLE_SIDED_FULL: animación de deslizamiento al voltear cara
-                            AnimatedContent(
-                                targetState = card.currentFaceIndex,
-                                transitionSpec = {
-                                    if (targetState > initialState)
-                                        (slideInHorizontally { it } + fadeIn()) togetherWith
-                                        (slideOutHorizontally { -it } + fadeOut())
-                                    else
-                                        (slideInHorizontally { -it } + fadeIn()) togetherWith
-                                        (slideOutHorizontally { it } + fadeOut())
-                                },
-                                modifier = Modifier.fillMaxSize(),
-                                label = "card-face-flip"
-                            ) { faceIndex ->
-                                CardFaceImage(
-                                    face = card.faces.getOrElse(faceIndex) { card.faces.first() },
-                                    title = card.title
-                                )
-                            }
-                        } else {
-                            CardFaceImage(face = face, title = card.title)
-
-                            // TOP_BOTTOM_SPLIT: línea divisoria central
-                            if (face.contentMode == CardContentMode.TOP_BOTTOM_SPLIT) {
-                                HorizontalDivider(
-                                    modifier = Modifier.align(Alignment.Center),
-                                    thickness = 2.dp,
-                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                                )
-                            }
-
-                            // FOUR_QUADRANT: overlay 2×2 semitransparente
-                            if (face.contentMode == CardContentMode.FOUR_QUADRANT) {
-                                FourQuadrantOverlay(
-                                    selectedQuadrant = selectedQuadrant,
-                                    onQuadrantSelected = { q ->
-                                        selectedQuadrant = if (selectedQuadrant == q) -1 else q
-                                    }
-                                )
-                            }
-                        }
+                    // V-7: brújula FOUR_EDGE_CUES
+                    showCompass && face.contentMode == CardContentMode.FOUR_EDGE_CUES -> {
+                        FourEdgeCompassView(
+                            face = face,
+                            activeRotation = card.currentRotation,
+                            onZoneTap = { viewModel.setRotation(it) },
+                            modifier = Modifier.fillMaxSize().padding(padding)
+                        )
                     }
 
-                    // ── Panel de zonas de contenido ───────────────────────────────
-                    when (face.contentMode) {
-                        CardContentMode.TOP_BOTTOM_SPLIT -> {
-                            TopBottomZonePanel(zones = face.zones)
-                        }
-                        CardContentMode.FOUR_QUADRANT -> {
-                            FourQuadrantZonePanel(
-                                zones = face.zones,
-                                selectedQuadrant = selectedQuadrant
-                            )
-                        }
-                        else -> {
-                            val activeZone = card.activeZone
-                            if (activeZone != null && activeZone.text.isNotBlank()) {
-                                GenericZonePanel(
-                                    zone = activeZone,
-                                    contentMode = face.contentMode,
-                                    isReversed = card.isReversed,
-                                    currentRotation = card.currentRotation,
-                                    onToggleReversed = { viewModel.toggleReversed() }
-                                )
-                            }
-                        }
-                    }
+                    // Vista normal
+                    else -> Column(modifier = Modifier.fillMaxSize().padding(padding)) {
 
-                    // ── Botón de voltear cara (DOUBLE_SIDED_FULL) ─────────────────
-                    if (card.faces.size > 1) {
-                        OutlinedButton(
-                            onClick = { viewModel.flipFace() },
+                        // ── Área de imagen ────────────────────────────────────────────
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                .weight(1f)
+                                .padding(16.dp)
+                                .clip(RoundedCornerShape(12.dp))
                         ) {
-                            Text("Voltear carta  (cara ${card.currentFaceIndex + 1}/${card.faces.size})")
+                            if (isFlippable) {
+                                AnimatedContent(
+                                    targetState = card.currentFaceIndex,
+                                    transitionSpec = {
+                                        if (targetState > initialState)
+                                            (slideInHorizontally { it } + fadeIn()) togetherWith
+                                            (slideOutHorizontally { -it } + fadeOut())
+                                        else
+                                            (slideInHorizontally { -it } + fadeIn()) togetherWith
+                                            (slideOutHorizontally { it } + fadeOut())
+                                    },
+                                    modifier = Modifier.fillMaxSize(),
+                                    label = "card-face-flip"
+                                ) { faceIndex ->
+                                    CardFaceImage(
+                                        face = card.faces.getOrElse(faceIndex) { card.faces.first() },
+                                        title = card.title
+                                    )
+                                }
+                            } else {
+                                CardFaceImage(face = face, title = card.title)
+
+                                if (face.contentMode == CardContentMode.TOP_BOTTOM_SPLIT) {
+                                    HorizontalDivider(
+                                        modifier = Modifier.align(Alignment.Center),
+                                        thickness = 2.dp,
+                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                                    )
+                                }
+                                if (face.contentMode == CardContentMode.FOUR_QUADRANT) {
+                                    FourQuadrantOverlay(
+                                        selectedQuadrant = selectedQuadrant,
+                                        onQuadrantSelected = { q ->
+                                            selectedQuadrant = if (selectedQuadrant == q) -1 else q
+                                        }
+                                    )
+                                }
+                            }
                         }
+
+                        // ── Panel de zonas ────────────────────────────────────────────
+                        when (face.contentMode) {
+                            CardContentMode.TOP_BOTTOM_SPLIT -> TopBottomZonePanel(zones = face.zones)
+                            CardContentMode.FOUR_QUADRANT -> FourQuadrantZonePanel(
+                                zones = face.zones, selectedQuadrant = selectedQuadrant
+                            )
+                            else -> {
+                                val activeZone = card.activeZone
+                                if (activeZone != null && activeZone.text.isNotBlank()) {
+                                    GenericZonePanel(
+                                        zone = activeZone,
+                                        contentMode = face.contentMode,
+                                        isReversed = card.isReversed,
+                                        currentRotation = card.currentRotation,
+                                        onToggleReversed = { viewModel.toggleReversed() }
+                                    )
+                                }
+                            }
+                        }
+
+                        // ── V-5: Tira de miniaturas de caras ──────────────────────────
+                        if (card.faces.size > 1) {
+                            FaceStrip(
+                                card = card,
+                                onFaceSelected = { viewModel.jumpToFace(it) },
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (showNotesSheet && uiState.card != null) {
+        CardNotesBottomSheet(
+            notes = uiState.card?.dmNotes ?: "",
+            onNotesChange = { viewModel.updateNotes(it) },
+            onDismiss = { showNotesSheet = false }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CardNotesBottomSheet(
+    notes: String,
+    onNotesChange: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState()
+    var text by remember { mutableStateOf(notes) }
+    
+    // Auto-guardado al cerrar o cambiar texto (debounce real se haría en el VM, aqui es simple)
+    LaunchedEffect(text) {
+        onNotesChange(text)
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 48.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Default.StickyNote2,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.tertiary
+                )
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    "Notas Privadas del DM",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            
+            Spacer(Modifier.height(16.dp))
+            
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 120.dp),
+                placeholder = { Text("Escribe anotaciones para esta carta... (Markdown soportado)") },
+                shape = RoundedCornerShape(12.dp)
+            )
+            
+            Spacer(Modifier.height(16.dp))
+            
+            if (text.isNotBlank()) {
+                Text(
+                    "Vista previa",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+                Surface(
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Box(Modifier.padding(12.dp)) {
+                        MarkdownText(markdown = text)
                     }
                 }
             }
@@ -259,6 +398,208 @@ private fun PlayerViewOverlay(face: CardFace, cardTitle: String, onDismiss: () -
                 style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
             )
+        }
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// V-5 — Tira de miniaturas de caras
+// ──────────────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun FaceStrip(
+    card: com.deckapp.core.model.Card,
+    onFaceSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyRow(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        itemsIndexed(card.faces) { index, face ->
+            val isActive = index == card.currentFaceIndex
+            Box(
+                modifier = Modifier
+                    .width(40.dp)
+                    .height(56.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .then(
+                        if (isActive) Modifier.border(
+                            2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(6.dp)
+                        ) else Modifier
+                    )
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .clickable { onFaceSelected(index) },
+                contentAlignment = Alignment.Center
+            ) {
+                if (face.imagePath != null) {
+                    coil.compose.AsyncImage(
+                        model = java.io.File(face.imagePath!!),
+                        contentDescription = face.name,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Text(
+                        text = (index + 1).toString(),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = if (isActive) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// V-6 — Modo referencia: todas las caras en columna
+// ──────────────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun AllFacesView(
+    card: com.deckapp.core.model.Card,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        itemsIndexed(card.faces) { index, face ->
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "Cara ${index + 1}: ${face.name}",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(220.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                ) {
+                    CardFaceImage(face = face, title = card.title)
+                }
+                if (index < card.faces.size - 1) {
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                }
+            }
+        }
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// V-7 — Vista brújula para FOUR_EDGE_CUES
+// ──────────────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun FourEdgeCompassView(
+    face: com.deckapp.core.model.CardFace,
+    activeRotation: Int,
+    onZoneTap: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    // zones[0]=Norte (rot 0), zones[1]=Este (rot 90), zones[2]=Sur (rot 180), zones[3]=Oeste (rot 270)
+    val labels = listOf("N", "E", "S", "O")
+    val rotations = listOf(0, 90, 180, 270)
+
+    Column(
+        modifier = modifier.padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Norte
+        CompassZoneChip(
+            text = face.zones.getOrNull(0)?.text ?: "",
+            label = "Norte",
+            isActive = activeRotation == 0,
+            onClick = { onZoneTap(0) },
+            modifier = Modifier.fillMaxWidth(0.7f)
+        )
+
+        Row(
+            modifier = Modifier.weight(1f).fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Oeste
+            CompassZoneChip(
+                text = face.zones.getOrNull(3)?.text ?: "",
+                label = "Oeste",
+                isActive = activeRotation == 270,
+                onClick = { onZoneTap(270) },
+                modifier = Modifier.weight(1f).fillMaxHeight()
+            )
+
+            // Imagen central
+            Box(
+                modifier = Modifier
+                    .weight(2f)
+                    .fillMaxHeight()
+                    .clip(RoundedCornerShape(12.dp))
+            ) {
+                CardFaceImage(face = face, title = "")
+            }
+
+            // Este
+            CompassZoneChip(
+                text = face.zones.getOrNull(1)?.text ?: "",
+                label = "Este",
+                isActive = activeRotation == 90,
+                onClick = { onZoneTap(90) },
+                modifier = Modifier.weight(1f).fillMaxHeight()
+            )
+        }
+
+        // Sur
+        CompassZoneChip(
+            text = face.zones.getOrNull(2)?.text ?: "",
+            label = "Sur",
+            isActive = activeRotation == 180,
+            onClick = { onZoneTap(180) },
+            modifier = Modifier.fillMaxWidth(0.7f)
+        )
+    }
+}
+
+@Composable
+private fun CompassZoneChip(
+    text: String,
+    label: String,
+    isActive: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(8.dp),
+        color = if (isActive) MaterialTheme.colorScheme.primaryContainer
+                else MaterialTheme.colorScheme.surfaceContainerHigh,
+        tonalElevation = if (isActive) 4.dp else 0.dp
+    ) {
+        Column(
+            modifier = Modifier.padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = if (isActive) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            if (text.isNotBlank()) {
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isActive) MaterialTheme.colorScheme.onPrimaryContainer
+                            else MaterialTheme.colorScheme.onSurface,
+                    maxLines = 4,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }

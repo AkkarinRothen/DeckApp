@@ -53,5 +53,6 @@ enum class DrawAction {
     ROTATE,    // Cambio de orientación (para FOUR_EDGE_CUES)
     REVERSE,   // Toggle upright/reversed (para REVERSIBLE)
     RESET,     // Todas las cartas vuelven al mazo de origen
-    PEEK       // Vió el tope del mazo sin robar
+    PEEK,      // Vió el tope del mazo sin robar
+    SHUFFLE_BACK // La pila de descarte vuelve al mazo
 }

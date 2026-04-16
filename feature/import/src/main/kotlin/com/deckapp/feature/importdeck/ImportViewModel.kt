@@ -45,7 +45,8 @@ data class ImportUiState(
     val importedCardCount: Int = 0,
     val isImporting: Boolean = false,
     val importedDeckId: Long? = null,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val failedFiles: List<String> = emptyList()
 )
 
 enum class ImportPhase {
@@ -129,32 +130,12 @@ class ImportViewModel @Inject constructor(
     }
 
     private fun renderPdfFirstPagePreview(uri: Uri) {
-        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-            try {
-                val fd = context.contentResolver.openFileDescriptor(uri, "r") ?: return@launch
-                val renderer = android.graphics.pdf.PdfRenderer(fd)
-                if (renderer.pageCount == 0) {
-                    renderer.close()
-                    return@launch
-                }
-                val page = renderer.openPage(0)
-                // Escalar a ~600px de ancho manteniendo proporción
-                val targetWidth = 600
-                val scale = targetWidth.toFloat() / page.width.coerceAtLeast(1)
-                val bitmapWidth = targetWidth
-                val bitmapHeight = (page.height * scale).toInt().coerceAtLeast(1)
-                val bitmap = android.graphics.Bitmap.createBitmap(
-                    bitmapWidth, bitmapHeight,
-                    android.graphics.Bitmap.Config.ARGB_8888
-                )
-                // Rellenar fondo blanco (PdfRenderer usa fondo transparente por defecto)
-                bitmap.eraseColor(android.graphics.Color.WHITE)
-                page.render(bitmap, null, null, android.graphics.pdf.PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-                page.close()
-                renderer.close()
+        viewModelScope.launch(Dispatchers.IO) {
+            val bitmap = fileRepository.renderPdfPageToBitmap(uri, pageIndex = 0, targetWidth = 600)
+            if (bitmap != null) {
                 _uiState.update { it.copy(pdfPreviewBitmap = bitmap) }
-            } catch (e: Throwable) {
-                _uiState.update { it.copy(errorMessage = "No se pudo previsualizar el PDF: ${e.message}") }
+            } else {
+                _uiState.update { it.copy(errorMessage = "No se pudo previsualizar el PDF") }
             }
         }
     }
@@ -304,6 +285,7 @@ class ImportViewModel @Inject constructor(
 
         _uiState.update { it.copy(phase = ImportPhase.IMPORTING, isImporting = true) }
 
+        val failedFiles = mutableListOf<String>()
         viewModelScope.launch {
             importDeckUseCase(
                 uri = uri,
@@ -316,6 +298,9 @@ class ImportViewModel @Inject constructor(
                 pdfAutoTrimCells = state.pdfAutoTrimCells,
                 onProgress = { progress, count ->
                     _uiState.update { it.copy(importProgress = progress, importedCardCount = count) }
+                },
+                onFileError = { fileName ->
+                    failedFiles += fileName
                 }
             ).fold(
                 onSuccess = { deckId ->
@@ -323,7 +308,8 @@ class ImportViewModel @Inject constructor(
                         it.copy(
                             phase = ImportPhase.SUCCESS,
                             isImporting = false,
-                            importedDeckId = deckId
+                            importedDeckId = deckId,
+                            failedFiles = failedFiles.toList()
                         )
                     }
                 },
@@ -332,7 +318,8 @@ class ImportViewModel @Inject constructor(
                         it.copy(
                             phase = ImportPhase.CONFIGURE,
                             isImporting = false,
-                            errorMessage = error.message
+                            errorMessage = error.message,
+                            failedFiles = failedFiles.toList()
                         )
                     }
                 }

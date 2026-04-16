@@ -84,4 +84,10 @@ interface FileRepository {
      * Limpia los archivos temporales de la app (caché de PDFs, ZIPs descomprimidos, etc.)
      */
     suspend fun clearCache()
+
+    /**
+     * Lee el contenido de texto de un URI (archivo CSV, JSON, TXT) como String.
+     * Usa el ContentResolver del sistema para acceder a archivos SAF.
+     */
+    suspend fun readTextFromUri(uri: Uri): String
 }

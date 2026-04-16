@@ -52,7 +52,15 @@ class RollTableUseCase @Inject constructor(
 
         val rollValue = evaluateDiceFormula(table.rollFormula)
         val entry = pickEntry(table, rollValue)
-        val resolvedText = resolveText(entry?.text ?: "[sin entrada]", sessionId, depth)
+        
+        // 1. Resolver texto base (dados inline y referencias por @Nombre)
+        var resolvedText = resolveText(entry?.text ?: "[sin entrada]", sessionId, depth)
+
+        // 2. Resolver sub-tabla vinculada por ID (Referencia directa potente)
+        entry?.subTableId?.let { id ->
+            val subResult = invoke(id, sessionId, depth + 1)
+            resolvedText = "$resolvedText → ${subResult.resolvedText}"
+        }
 
         val result = TableRollResult(
             tableId = tableId,

@@ -11,8 +11,14 @@ interface CardStackDao {
     @Query("SELECT * FROM card_stacks WHERE id = :id")
     fun getStackById(id: Long): Flow<CardStackEntity?>
 
-    @Query("SELECT * FROM card_stacks WHERE type = 'DECK' ORDER BY createdAt DESC")
+    @Query("SELECT * FROM card_stacks WHERE type = 'DECK' AND isArchived = 0 ORDER BY createdAt DESC")
     fun getAllDecks(): Flow<List<CardStackEntity>>
+
+    @Query("SELECT * FROM card_stacks WHERE type = 'DECK' AND isArchived = 1 ORDER BY createdAt DESC")
+    fun getArchivedDecks(): Flow<List<CardStackEntity>>
+
+    @Query("UPDATE card_stacks SET isArchived = :archived WHERE id = :deckId")
+    suspend fun setArchived(deckId: Long, archived: Boolean)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertStack(stack: CardStackEntity): Long
@@ -22,6 +28,12 @@ interface CardStackDao {
 
     @Query("DELETE FROM card_stacks WHERE id = :id")
     suspend fun deleteStack(id: Long)
+
+    @Query("UPDATE card_stacks SET isArchived = :archived WHERE id IN (:deckIds)")
+    suspend fun bulkSetArchived(deckIds: List<Long>, archived: Boolean)
+
+    @Query("DELETE FROM card_stacks WHERE id IN (:deckIds)")
+    suspend fun bulkDeleteStacks(deckIds: List<Long>)
 }
 
 @Dao
@@ -44,8 +56,8 @@ interface CardDao {
     @Query("DELETE FROM cards WHERE id = :id")
     suspend fun deleteCard(id: Long)
 
-    @Query("UPDATE cards SET isDrawn = :isDrawn WHERE id = :cardId")
-    suspend fun updateDrawnState(cardId: Long, isDrawn: Boolean)
+    @Query("UPDATE cards SET isDrawn = :isDrawn, last_drawn_at = :lastDrawnAt WHERE id = :cardId")
+    suspend fun updateDrawnState(cardId: Long, isDrawn: Boolean, lastDrawnAt: Long?)
 
     @Query("UPDATE cards SET currentRotation = :rotation WHERE id = :cardId")
     suspend fun updateRotation(cardId: Long, rotation: Int)
@@ -56,7 +68,13 @@ interface CardDao {
     @Query("UPDATE cards SET currentFaceIndex = :faceIndex WHERE id = :cardId")
     suspend fun updateFaceIndex(cardId: Long, faceIndex: Int)
 
-    @Query("UPDATE cards SET isDrawn = 0 WHERE stackId = :deckId")
+    @Query("UPDATE cards SET isRevealed = :isRevealed WHERE id = :cardId")
+    suspend fun updateRevealed(cardId: Long, isRevealed: Boolean)
+
+    @Query("UPDATE cards SET dm_notes = :notes WHERE id = :cardId")
+    suspend fun updateDmNotes(cardId: Long, notes: String?)
+
+    @Query("UPDATE cards SET isDrawn = 0, last_drawn_at = NULL WHERE stackId = :deckId")
     suspend fun resetDeck(deckId: Long)
 
     @Query("SELECT COUNT(*) FROM cards WHERE stackId = :stackId AND isDrawn = 0")
@@ -69,7 +87,7 @@ interface CardDao {
     @Query("SELECT * FROM cards WHERE stackId = :stackId AND isDrawn = 0 ORDER BY sortOrder ASC LIMIT 1")
     suspend fun getTopCard(stackId: Long): CardEntity?
 
-    @Query("SELECT * FROM cards WHERE isDrawn = 1 ORDER BY id ASC")
+    @Query("SELECT * FROM cards WHERE isDrawn = 1 ORDER BY last_drawn_at ASC")
     fun getDrawnCards(): Flow<List<CardEntity>>
 
     /**
@@ -85,7 +103,8 @@ interface CardDao {
               AND de.action = 'DISCARD'
               AND de.timestamp > COALESCE(
                   (SELECT MAX(de2.timestamp) FROM draw_events de2
-                   WHERE de2.sessionId = :sessionId AND de2.action = 'RESET'),
+                   WHERE de2.sessionId = :sessionId 
+                     AND de2.action IN ('RESET', 'SHUFFLE_BACK')),
                   0
               )
         )
@@ -136,11 +155,26 @@ interface TagDao {
     @Query("DELETE FROM card_stack_tags WHERE stackId = :stackId")
     suspend fun deleteTagsForStack(stackId: Long)
 
+    @Query("DELETE FROM card_stack_tags WHERE stackId = :stackId AND tagId = :tagId")
+    suspend fun removeStackTagRef(stackId: Long, tagId: Long)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCardTagRef(ref: CardTagCrossRef)
 
     @Query("DELETE FROM card_tags WHERE cardId = :cardId")
     suspend fun deleteTagsForCard(cardId: Long)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTableTagRef(ref: RandomTableTagCrossRef)
+
+    @Query("DELETE FROM random_table_tags WHERE tableId = :tableId")
+    suspend fun deleteTagsForTable(tableId: Long)
+
+    @Query("DELETE FROM random_table_tags WHERE tableId = :tableId AND tagId = :tagId")
+    suspend fun removeTableTagRef(tableId: Long, tagId: Long)
+
+    @Query("SELECT t.* FROM tags t INNER JOIN random_table_tags rt ON t.id = rt.tagId WHERE rt.tableId = :tableId")
+    suspend fun getTagsForTable(tableId: Long): List<TagEntity>
 }
 
 @Dao
@@ -169,6 +203,15 @@ interface SessionDao {
     @Query("DELETE FROM session_deck_refs WHERE sessionId = :sessionId AND stackId = :stackId")
     suspend fun removeSessionDeckRef(sessionId: Long, stackId: Long)
 
+    @Query("SELECT * FROM session_table_refs WHERE sessionId = :sessionId ORDER BY sortOrder ASC")
+    fun getTablesForSession(sessionId: Long): Flow<List<SessionTableRefEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSessionTableRef(ref: SessionTableRefEntity)
+
+    @Query("DELETE FROM session_table_refs WHERE sessionId = :sessionId AND tableId = :tableId")
+    suspend fun removeSessionTableRef(sessionId: Long, tableId: Long)
+
     @Query("DELETE FROM sessions WHERE id = :sessionId")
     suspend fun deleteSession(sessionId: Long)
 
@@ -178,7 +221,7 @@ interface SessionDao {
     @Query("UPDATE sessions SET showCardTitles = :show WHERE id = :sessionId")
     suspend fun updateCardTitlesVisibility(sessionId: Long, show: Boolean)
 
-    @Query("UPDATE sessions SET dmNotes = :notes WHERE id = :sessionId")
+    @Query("UPDATE sessions SET dm_notes = :notes WHERE id = :sessionId")
     suspend fun updateDmNotes(sessionId: Long, notes: String)
 }
 
@@ -186,12 +229,6 @@ interface SessionDao {
 interface RandomTableDao {
     @Query("SELECT * FROM random_tables ORDER BY name ASC")
     fun getAllTables(): Flow<List<RandomTableEntity>>
-
-    @Query("SELECT * FROM random_tables WHERE category = :category ORDER BY name ASC")
-    fun getTablesByCategory(category: String): Flow<List<RandomTableEntity>>
-
-    @Query("SELECT DISTINCT category FROM random_tables WHERE category != '' ORDER BY category ASC")
-    fun getCategories(): Flow<List<String>>
 
     @Transaction
     @Query("SELECT * FROM random_tables WHERE id = :id")
@@ -212,6 +249,15 @@ interface RandomTableDao {
 
     @Query("DELETE FROM random_tables WHERE id = :id")
     suspend fun deleteTable(id: Long)
+
+    @Query("UPDATE random_tables SET isPinned = :isPinned WHERE id = :id")
+    suspend fun updatePinnedState(id: Long, isPinned: Boolean)
+
+    @Query("UPDATE random_tables SET isPinned = :isPinned WHERE id IN (:ids)")
+    suspend fun bulkUpdatePinnedState(ids: List<Long>, isPinned: Boolean)
+
+    @Query("DELETE FROM random_tables WHERE id IN (:ids)")
+    suspend fun bulkDeleteTables(ids: List<Long>)
 
     @Query("DELETE FROM table_entries WHERE tableId = :tableId")
     suspend fun deleteEntriesForTable(tableId: Long)

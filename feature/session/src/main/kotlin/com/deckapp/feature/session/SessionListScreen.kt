@@ -103,6 +103,7 @@ fun SessionListScreen(
                             isActive = true,
                             onClick = { onSessionClick(session.id) },
                             onRename = { sessionToRename = session },
+                            onClone = { viewModel.cloneSession(session.id) },
                             onDelete = { sessionToDelete = session }
                         )
                     }
@@ -124,6 +125,7 @@ fun SessionListScreen(
                             isActive = false,
                             onClick = { onHistoryClick(session.id) },
                             onRename = { sessionToRename = session },
+                            onClone = { viewModel.cloneSession(session.id) },
                             onDelete = { sessionToDelete = session }
                         )
                     }
@@ -139,6 +141,7 @@ private fun SessionCard(
     isActive: Boolean,
     onClick: () -> Unit,
     onRename: () -> Unit,
+    onClone: () -> Unit,
     onDelete: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -185,13 +188,13 @@ private fun SessionCard(
                             onRename()
                         }
                     )
-                    /*DropdownMenuItem(
+                    DropdownMenuItem(
                         text = { Text("Duplicar") },
                         onClick = {
                             showMenu = false
-                            // onClone()
+                            onClone()
                         }
-                    )*/
+                    )
                     DropdownMenuItem(
                         text = { Text("Eliminar", color = MaterialTheme.colorScheme.error) },
                         onClick = {

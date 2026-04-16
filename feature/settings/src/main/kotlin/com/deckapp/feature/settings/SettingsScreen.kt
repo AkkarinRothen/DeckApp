@@ -10,6 +10,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -79,8 +81,29 @@ fun SettingsScreen(
 
             if (uiState.decksStorage.isNotEmpty()) {
                 items(uiState.decksStorage, key = { it.id }) { info ->
-                    DeckStorageRow(info = info)
+                    DeckStorageRow(
+                        info = info,
+                        totalSizeBytes = uiState.totalSizeBytes
+                    )
                 }
+            }
+
+            // ── Calidad de imagen ───────────────────────────────────────
+            item { HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp)) }
+
+            item {
+                Text(
+                    "Importación",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            item {
+                JpegQualitySelector(
+                    currentQuality = uiState.jpegQuality,
+                    onQualitySelected = { viewModel.setJpegQuality(it) }
+                )
             }
 
             // ── Librerías ───────────────────────────────────────────────
@@ -191,24 +214,41 @@ private fun StorageSummaryCard(
 
 
 @Composable
-private fun DeckStorageRow(info: DeckStorageInfo) {
-    Row(
+private fun DeckStorageRow(info: DeckStorageInfo, totalSizeBytes: Long) {
+    val percentage = if (totalSizeBytes > 0) info.sizeBytes.toFloat() / totalSizeBytes else 0f
+
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 4.dp, vertical = 2.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+            .padding(vertical = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Text(
-            text = info.name,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.weight(1f),
-            maxLines = 1
-        )
-        Text(
-            text = formatBytes(info.sizeBytes),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = info.name,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f),
+                maxLines = 1
+            )
+            Text(
+                text = formatBytes(info.sizeBytes),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        
+        LinearProgressIndicator(
+            progress = { percentage },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(4.dp)
+                .clip(RoundedCornerShape(2.dp)),
+            color = MaterialTheme.colorScheme.primary,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant
         )
     }
 }
@@ -225,6 +265,33 @@ private fun InfoRow(label: String, value: String) {
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Text(value, style = MaterialTheme.typography.bodyMedium)
+    }
+}
+
+@Composable
+private fun JpegQualitySelector(currentQuality: Int, onQualitySelected: (Int) -> Unit) {
+    val options = listOf("Alta" to 95, "Media" to 85, "Baja" to 70)
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                "Calidad de imagen al importar",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                "Afecta el tamaño de las imágenes guardadas.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                options.forEach { (label, quality) ->
+                    FilterChip(
+                        selected = currentQuality == quality,
+                        onClick = { onQualitySelected(quality) },
+                        label = { Text(label) }
+                    )
+                }
+            }
+        }
     }
 }
 

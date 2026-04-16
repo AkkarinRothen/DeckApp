@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Casino
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Style
 import androidx.compose.material3.FloatingActionButton
@@ -27,13 +28,17 @@ import com.deckapp.feature.deck.CardEditorScreen
 import com.deckapp.feature.deck.CardViewScreen
 import com.deckapp.feature.deck.DeckDetailScreen
 import com.deckapp.feature.draw.SessionScreen
+import com.deckapp.feature.encounters.EncounterEditorScreen
+import com.deckapp.feature.encounters.EncounterListScreen
 import com.deckapp.feature.importdeck.ImportScreen
 import com.deckapp.feature.library.LibraryScreen
+import com.deckapp.feature.library.TagManagerScreen
 import com.deckapp.feature.session.SessionHistoryScreen
 import com.deckapp.feature.session.SessionListScreen
 import com.deckapp.feature.session.SessionSetupScreen
 import com.deckapp.feature.settings.SettingsScreen
 import com.deckapp.feature.tables.TableEditorScreen
+import com.deckapp.feature.tables.tableimport.TableImportScreen
 
 @Composable
 fun DeckAppNavHost() {
@@ -45,6 +50,7 @@ fun DeckAppNavHost() {
     val showBottomNav = currentDestination?.let {
         it.hasRoute(LibraryRoute::class) ||
         it.hasRoute(SessionListRoute::class) ||
+        it.hasRoute(TablesListRoute::class) ||
         it.hasRoute(SettingsRoute::class)
     } ?: true
 
@@ -80,6 +86,18 @@ fun DeckAppNavHost() {
                         label = { Text("Sesión") }
                     )
                     NavigationBarItem(
+                        selected = currentDestination?.hasRoute(TablesListRoute::class) == true,
+                        onClick = {
+                            navController.navigate(TablesListRoute) {
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        icon = { Icon(Icons.Default.Casino, contentDescription = null) },
+                        label = { Text("Tablas") }
+                    )
+                    NavigationBarItem(
                         selected = currentDestination?.hasRoute(SettingsRoute::class) == true,
                         onClick = {
                             navController.navigate(SettingsRoute) {
@@ -113,7 +131,9 @@ fun DeckAppNavHost() {
                 LibraryScreen(
                     onDeckClick = { deckId -> navController.navigate(DeckDetailRoute(deckId)) },
                     onImportClick = { navController.navigate(ImportRoute) },
-                    onAddToSession = { deckId -> navController.navigate(SessionSetupRoute(deckId)) }
+                    onManageTags = { navController.navigate(TagManagerRoute) },
+                    onAddToSession = { deckId -> navController.navigate(SessionSetupRoute(deckId)) },
+                    onEncounterLibrary = { navController.navigate(EncounterListRoute) }
                 )
             }
             composable<SessionListRoute> {
@@ -174,19 +194,48 @@ fun DeckAppNavHost() {
                         }
                     },
                     onBrowseDeck = { deckId -> navController.navigate(DeckDetailRoute(deckId)) },
-                    onCreateTable = { navController.navigate(TableEditorRoute()) }
+                    onCreateTable = { navController.navigate(TableEditorRoute()) },
+                    onImportTable = { navController.navigate(TableImportRoute) }
                 )
             }
             composable<TablesListRoute> {
-                // Pantalla completa de gestión de tablas (accedida desde Ajustes o menú futuro)
-                // Por ahora redirige al editor de nueva tabla
-                TableEditorScreen(onBack = { navController.popBackStack() })
+                com.deckapp.feature.tables.library.TableLibraryScreen(
+                    onTableClick = { id -> navController.navigate(TableEditorRoute(id)) },
+                    onImportClick = { navController.navigate(TableImportRoute) },
+                    onCreateTable = { navController.navigate(TableEditorRoute()) }
+                )
             }
             composable<TableEditorRoute> {
                 TableEditorScreen(onBack = { navController.popBackStack() })
             }
             composable<SessionHistoryRoute> {
                 SessionHistoryScreen(onBack = { navController.popBackStack() })
+            }
+            composable<TableImportRoute> {
+                TableImportScreen(
+                    onBack = { navController.popBackStack() },
+                    onImportFinished = { _ ->
+                        // Por ahora solo volvemos, pero se podría navegar al detalle
+                        navController.popBackStack()
+                    }
+                )
+            }
+            composable<TagManagerRoute> {
+                TagManagerScreen(onBack = { navController.popBackStack() })
+            }
+            composable<EncounterListRoute> {
+                EncounterListScreen(
+                    onEncounterClick = { id -> navController.navigate(EncounterEditorRoute(id)) },
+                    onStartEncounter = { 
+                        navController.navigate(SessionListRoute) {
+                            popUpTo(EncounterListRoute) { inclusive = true }
+                        }
+                    },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable<EncounterEditorRoute> {
+                EncounterEditorScreen(onBack = { navController.popBackStack() })
             }
         }
     }

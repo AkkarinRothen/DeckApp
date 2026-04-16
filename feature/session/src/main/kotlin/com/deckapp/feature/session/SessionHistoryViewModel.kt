@@ -42,8 +42,8 @@ class SessionHistoryViewModel @Inject constructor(
     ) { session, events ->
         if (session == null) return@combine SessionHistoryUiState(isLoading = false)
 
-        // Obtener cards únicas para el log
-        val cardIds = events.map { it.cardId }.distinct()
+        // Obtener cards únicas para el log (ignorando eventos de sistema sin carta)
+        val cardIds = events.mapNotNull { it.cardId }.distinct()
         // Cargamos las cartas de forma simplificada (podría optimizarse con un getCardsByIds)
         val cardsMap = mutableMapOf<Long, Card>()
         cardIds.forEach { id ->

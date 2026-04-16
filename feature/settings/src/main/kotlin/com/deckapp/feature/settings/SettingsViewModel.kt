@@ -29,7 +29,8 @@ data class SettingsUiState(
     val totalSizeBytes: Long = 0L,
     val isLoading: Boolean = true,
     val isClearingCache: Boolean = false,
-    val cacheClearedMessage: String? = null
+    val cacheClearedMessage: String? = null,
+    val jpegQuality: Int = 90
 )
 
 @HiltViewModel
@@ -42,11 +43,14 @@ class SettingsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
+    private val prefs = context.getSharedPreferences("deckapp_settings", Context.MODE_PRIVATE)
+
     init {
         val version = runCatching {
             context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "—"
         }.getOrDefault("—")
-        _uiState.update { it.copy(appVersion = version) }
+        val quality = prefs.getInt("jpeg_quality", 90)
+        _uiState.update { it.copy(appVersion = version, jpegQuality = quality) }
         loadStorageInfo()
     }
 
@@ -81,6 +85,11 @@ class SettingsViewModel @Inject constructor(
             _uiState.update { it.copy(isClearingCache = false, cacheClearedMessage = "Caché limpiada") }
             loadStorageInfo()
         }
+    }
+
+    fun setJpegQuality(quality: Int) {
+        prefs.edit().putInt("jpeg_quality", quality).apply()
+        _uiState.update { it.copy(jpegQuality = quality) }
     }
 
     fun clearMessage() = _uiState.update { it.copy(cacheClearedMessage = null) }

@@ -45,8 +45,12 @@ data class Card(
     val currentRotation: Int = 0,   // 0/90/180/270 — activo en FOUR_EDGE_CUES y REVERSIBLE
     val isReversed: Boolean = false,
     val isDrawn: Boolean = false,
+    val isRevealed: Boolean = true,   // false = boca abajo (Face Down Draw)
     val sortOrder: Int = 0,
-    val tags: List<Tag> = emptyList()
+    val tags: List<Tag> = emptyList(),
+    val linkedTableId: Long? = null,
+    val dmNotes: String? = null,      // notas privadas del DM para esta carta
+    val lastDrawnAt: Long? = null     // marca de tiempo del último robo para orden predictivo
 ) {
     val activeFace: CardFace get() = faces.getOrElse(currentFaceIndex) { faces.first() }
 
@@ -72,7 +76,10 @@ data class CardStack(
     val defaultContentMode: CardContentMode = CardContentMode.IMAGE_ONLY,
     val displayCount: Boolean = true,
     val drawMode: DrawMode = DrawMode.RANDOM,
+    val drawFaceDown: Boolean = false,
+    val backImagePath: String? = null,
     val aspectRatio: CardAspectRatio = CardAspectRatio.STANDARD,
+    val isArchived: Boolean = false,
     val tags: List<Tag> = emptyList(),
     val createdAt: Long = System.currentTimeMillis()
 )

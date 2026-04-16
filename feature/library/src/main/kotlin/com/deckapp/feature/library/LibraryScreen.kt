@@ -1,17 +1,21 @@
 package com.deckapp.feature.library
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,19 +27,33 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.deckapp.core.model.CardStack
 import com.deckapp.core.ui.components.DeckCoverCard
+import com.deckapp.core.ui.components.SelectionActionBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LibraryScreen(
     onDeckClick: (Long) -> Unit,
     onImportClick: () -> Unit,
+    onManageTags: () -> Unit,
     onAddToSession: (Long) -> Unit,
+    onEncounterLibrary: () -> Unit,
     viewModel: LibraryViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
     var confirmDeleteDeck by remember { mutableStateOf<CardStack?>(null) }
 
+    // Snackbar
+    LaunchedEffect(uiState.snackbarMessage) {
+        uiState.snackbarMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearSnackbar()
+        }
+    }
+
+    // Diálogo confirmación de borrado
     confirmDeleteDeck?.let { deck ->
         AlertDialog(
             onDismissRequest = { confirmDeleteDeck = null },
@@ -59,16 +77,124 @@ fun LibraryScreen(
         )
     }
 
+    // Diálogo de fusión — selector de mazo destino
+    if (uiState.mergeSourceDeckId != null) {
+        val sourceName = uiState.allDecks.find { it.id == uiState.mergeSourceDeckId }?.name ?: ""
+        MergeTargetDialog(
+            sourceName = sourceName,
+            candidates = uiState.mergeCandidates,
+            onSelect = { targetId -> viewModel.confirmMerge(targetId) },
+            onDismiss = { viewModel.cancelMerge() }
+        )
+    }
+
+
+    var showBulkDeleteConfirmation by remember { mutableStateOf(false) }
+    var showBulkTagMenu by remember { mutableStateOf(false) }
+
+    if (showBulkDeleteConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showBulkDeleteConfirmation = false },
+            title = { Text("¿Borrar seleccionados?") },
+            text = { Text("Se eliminarán permanentemente ${uiState.selectedDeckIds.size} mazos y todas sus cartas. Esta acción no se puede deshacer.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.bulkDelete()
+                        showBulkDeleteConfirmation = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Borrar todo")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showBulkDeleteConfirmation = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Biblioteca de Mazos") },
+                title = { Text(if (uiState.selectedDeckIds.isNotEmpty()) "${uiState.selectedDeckIds.size} seleccionados" else "Biblioteca") },
                 actions = {
-                    IconButton(onClick = onImportClick) {
-                        Icon(Icons.Default.Add, contentDescription = "Importar mazo")
+                    if (uiState.selectedDeckIds.isEmpty()) {
+                        IconButton(onClick = onImportClick) {
+                            Icon(Icons.Default.Add, contentDescription = "Importar mazo")
+                        }
+                        
+                        var showMenu by remember { mutableStateOf(false) }
+                        IconButton(onClick = { showMenu = true }) {
+                            Icon(Icons.Default.MoreVert, contentDescription = "Más opciones")
+                        }
+                        
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Gestionar Etiquetas") },
+                                onClick = {
+                                    showMenu = false
+                                    onManageTags()
+                                },
+                                leadingIcon = { Icon(Icons.Default.Tag, null) }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Encuentros Preparados") },
+                                onClick = {
+                                    showMenu = false
+                                    onEncounterLibrary()
+                                },
+                                leadingIcon = { Icon(Icons.Default.PlayArrow, null) }
+                            )
+                        }
+                    } else {
+                        IconButton(onClick = { viewModel.clearSelection() }) {
+                            Icon(Icons.Default.Clear, contentDescription = "Limpiar selección")
+                        }
                     }
                 }
             )
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = {
+            if (uiState.selectedDeckIds.isNotEmpty()) {
+                Box(modifier = Modifier.padding(16.dp)) {
+                    SelectionActionBar(
+                        count = uiState.selectedDeckIds.size,
+                        onClear = { viewModel.clearSelection() },
+                        onDelete = { showBulkDeleteConfirmation = true },
+                        onArchive = { viewModel.bulkArchive(it) },
+                        onAddTag = { showBulkTagMenu = true }
+                    )
+                    
+                    DropdownMenu(
+                        expanded = showBulkTagMenu,
+                        onDismissRequest = { showBulkTagMenu = false }
+                    ) {
+                        uiState.allTags.forEach { tag ->
+                            DropdownMenuItem(
+                                text = { Text(tag.name) },
+                                onClick = {
+                                    viewModel.bulkAddTag(tag.id)
+                                    showBulkTagMenu = false
+                                }
+                            )
+                        }
+                        if (uiState.allTags.isEmpty()) {
+                            DropdownMenuItem(
+                                text = { Text("No hay etiquetas") },
+                                onClick = {},
+                                enabled = false
+                            )
+                        }
+                    }
+                }
+            }
         }
     ) { padding ->
         Column(
@@ -97,14 +223,28 @@ fun LibraryScreen(
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             )
 
-            // ── Chips de filtro por tag ────────────────────────────────
-            if (uiState.allTags.isNotEmpty()) {
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    items(uiState.allTags, key = { it.id }) { tag ->
+            // ── Chips: filtro por tag + toggle Archivados ─────────────
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                item {
+                    FilterChip(
+                        selected = uiState.showArchived,
+                        onClick = { viewModel.toggleShowArchived() },
+                        label = { Text("Archivados") },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.Archive,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    )
+                }
+                uiState.allTags.forEach { tag ->
+                    item(key = tag.id) {
                         FilterChip(
                             selected = tag.id in uiState.selectedTagIds,
                             onClick = { viewModel.toggleTagFilter(tag.id) },
@@ -112,8 +252,8 @@ fun LibraryScreen(
                         )
                     }
                 }
-                Spacer(Modifier.height(8.dp))
             }
+            Spacer(Modifier.height(8.dp))
 
             // ── Grid de mazos ─────────────────────────────────────────
             when {
@@ -122,8 +262,17 @@ fun LibraryScreen(
                         CircularProgressIndicator()
                     }
                 }
-                uiState.allDecks.isEmpty() -> {
+                uiState.allDecks.isEmpty() && !uiState.showArchived -> {
                     EmptyLibraryState(onImportClick = onImportClick)
+                }
+                uiState.displayedDecks.isEmpty() && uiState.showArchived -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            "No hay mazos archivados",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
                 uiState.filteredDecks.isEmpty() -> {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -150,11 +299,23 @@ fun LibraryScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        items(uiState.filteredDecks, key = { it.id }) { deck ->
+                        gridItems(uiState.filteredDecks, key = { it.id }) { deck ->
+                            val isSelected = deck.id in uiState.selectedDeckIds
                             DeckCoverCard(
                                 deck = deck,
-                                onClick = { onDeckClick(deck.id) },
+                                isSelected = isSelected,
+                                onLongClick = { viewModel.toggleDeckSelection(deck.id) },
+                                onClick = {
+                                    if (uiState.selectedDeckIds.isNotEmpty()) {
+                                        viewModel.toggleDeckSelection(deck.id)
+                                    } else {
+                                        onDeckClick(deck.id)
+                                    }
+                                },
                                 onAddToSession = { onAddToSession(deck.id) },
+                                onDuplicate = if (!uiState.showArchived && uiState.selectedDeckIds.isEmpty()) ({ viewModel.duplicateDeck(deck.id) }) else null,
+                                onMergeWith = if (!uiState.showArchived && uiState.selectedDeckIds.isEmpty()) ({ viewModel.startMerge(deck.id) }) else null,
+                                onArchive = { viewModel.archiveDeck(deck.id, !deck.isArchived) },
                                 onDelete = { confirmDeleteDeck = deck },
                                 cardCount = uiState.deckCardCounts[deck.id] ?: 0
                             )
@@ -164,6 +325,52 @@ fun LibraryScreen(
             }
         }
     }
+}
+
+@Composable
+private fun MergeTargetDialog(
+    sourceName: String,
+    candidates: List<CardStack>,
+    onSelect: (Long) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Fusionar \"$sourceName\" en…") },
+        text = {
+            if (candidates.isEmpty()) {
+                Text(
+                    "No hay otros mazos disponibles como destino.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.heightIn(max = 320.dp)
+                ) {
+                    candidates.forEach { deck ->
+                        item(key = deck.id) {
+                            TextButton(
+                                onClick = { onSelect(deck.id) },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = deck.name,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancelar") }
+        }
+    )
 }
 
 @Composable

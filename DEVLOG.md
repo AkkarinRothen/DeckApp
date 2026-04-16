@@ -5,6 +5,312 @@
 
 ---
 
+### Sprint 14.5 — Workspace Bento: Clusters de Mazos en Sesión (15 de abril de 2026)
+
+**ARCHITECTURE — Refactor de MazosTab → DeckWorkspace**
+- **PROBLEM**: Con múltiples mazos activos, la mano era una única fila horizontal de scroll infinito sin distinción visual entre recursos de diferente origen.
+- **SOLUTION**: Reemplazado `MazosTab` (scroll horizontal) por `DeckWorkspace` (lista vertical de clusters), donde cada mazo de la sesión tiene su propia caja Bento colapsable.
+- **IMPACT**: Eliminado el scroll horizontal; las cartas se organizan en `FlowRow` que envuelve automáticamente a múltiples filas.
+
+**FEATURE — DeckClusterItem**
+- Nuevo componente `DeckClusterItem`: header colapsable (nombre del mazo + "N en mano · M disponibles" + icono ExpandMore/Less), body animado con `AnimatedVisibility`.
+- Cuando el cluster no tiene cartas: slot vacío con call-to-action "Selecciona y pulsa ROBAR" que activa el mazo al tocarlo, eliminando la necesidad de la `DeckBar` separada.
+
+**FEATURE — CompactCardItem**
+- Nueva variante de carta de 120dp (vs 160dp en SwipeToDiscardCard) para acomodar más cartas por pantalla sin scroll.
+- Mantiene swipe-to-discard, tap para detalle, alpha de feedback de arrastre, e indicador de tabla enlazada.
+
+**ARCHITECTURE — SessionViewModel / SessionUiState**
+- Nuevos campos: `collapsedDeckIds: Set<Long>` (efímero, no persistido), `handByDeck: Map<Long, List<Card>>` (derivado reactivamente de `hand`).
+- Nuevas funciones: `toggleDeckCollapse(stackId)`, `setLastInteractedDeck(stackId)`.
+
+**INTEGRATION — Build**
+- `@file:OptIn(ExperimentalLayoutApi::class)` para `FlowRow` (API experimental de Compose).
+- **BUILD SUCCESSFUL** `assembleDebug` — 409 tareas, sin errores.
+
+---
+
+### Sprint 20 — Reconocimiento de Tablas: Parsers y Pulido (15 de abril de 2026)
+
+**FEATURE — Multi-columna configurable en `CsvTableParser`**
+- Nuevo campo `additionalColumns: List<Int>` en `ParseConfig`. Las columnas adicionales se concatenan al texto principal con ` — `.
+- `ParsePreview` expone `columnCount` para que la UI pueda renderizar un selector de columnas.
+
+**FIX — `inferRollFormula` detecta 2d6, 3d6 y otras combinaciones multi-dado**
+- Nueva sobrecarga `inferRollFormula(minValue, maxValue)` que reconoce 2d4 (2–8), 2d6 (2–12), 2d10 (2–20) y 3d6 (3–18).
+- `ImportTableUseCase.inferFormula()` ahora pasa tanto min como max.
+- La sobrecarga de 1 argumento se mantiene por compatibilidad (asume min=1).
+
+**FEATURE — Soporte formato Roll20 en `JsonTableParser`**
+- Detecta objetos con campo `"items"` (formato `RollableTable` de Roll20).
+- Convierte `weight` en rangos acumulativos: item de weight=3 ocupa 3 resultados consecutivos.
+
+**ARCHITECTURE — `TableParseException` sellada**
+- Nuevo archivo `TableParseException.kt` en `:core:domain` con casos: `InvalidJson`, `UnknownFormat`, `EmptyResult`.
+- `JsonTableParser` relanza `InvalidJson` y `UnknownFormat` en lugar de `IllegalArgumentException`.
+- `ImportTableUseCase` lanza `EmptyResult` cuando JSON o texto plano no producen entradas.
+
+**FIX — Gutters con umbral de votos adaptativo**
+- Tablas con menos de 10 líneas usan `minVotes = 1` en `detectColumns`. Las tablas grandes mantienen el 15%.
+- Evita descartar columnas opcionales en tablas pequeñas con datos dispersos.
+
+**INTEGRATION — Build**
+- **BUILD SUCCESSFUL** `assembleDebug` — 443 tareas, sin errores.
+
+---
+
+### Sprint 19 — Reconocimiento de Tablas: Robustez del Pipeline (15 de abril de 2026)
+
+**FIX — `groupIntoLines` por centro de línea acumulado**
+- **PROBLEM**: La tolerancia usaba la altura del bloque *anterior*, no de la línea en construcción. Un bloque con altura atípica (ej. un dígito grande) desplazaba el threshold para todos los siguientes.
+- **SOLUTION**: Se mantienen `lineCenterY` y `lineAvgHeight` como medias incrementales. Cada bloque nuevo se compara contra el centro actual de la línea, no contra el último bloque visto.
+
+**FIX — Modo percentil en `splitLinesIntoTables`**
+- Pre-escaneo de todas las líneas para detectar si `maxRoll >= 90` (tabla 01–100).
+- En modo percentil, `resetThreshold = 10` en lugar de 2 para evitar partir en la transición "91-00" → "1".
+
+**FEATURE — DPI adaptativo en `loadPdfPage`**
+- `renderPageAdaptiveDpi()`: primer render a 800px, mide altura promedio de bloques OCR, luego elige resolución final: 1800px (texto denso), 1200px (normal), 900px (texto grande).
+- Evita cargar bitmaps de alta resolución innecesarios en tablas con tipografía grande.
+
+**ARCHITECTURE — `OcrRepositoryImpl` a `@ActivityRetainedScoped`**
+- Cambiado de `@Singleton` a `@ActivityRetainedScoped` para liberar el reconocedor ML Kit al salir del flujo de importación.
+- **FIX de build**: Extraído a `OcrModule` propio con `@InstallIn(ActivityRetainedComponent::class)`, ya que el scope no es compatible con `SingletonComponent`.
+
+**FEATURE — Stitching con dos modos (`StitchingMode`)**
+- Nuevo enum `StitchingMode`: `CONTINUE_RANGES` (desplaza rolls para continuar la secuencia) y `APPEND` (respeta rolls del OCR, solo ajusta `sortOrder`).
+- `updateStitchingMode()` expuesto en el ViewModel para que la UI ofrezca el toggle al activar stitching.
+
+**INTEGRATION — Build**
+- **BUILD SUCCESSFUL** `assembleDebug` — 443 tareas, sin errores.
+
+---
+
+### Sprint 18 — Reconocimiento de Tablas: Heurísticas, Confianza y Parsers (15 de abril de 2026)
+
+**FEATURE — Confianza OCR propagada hasta el UiState**
+- `buildEntries` calcula `minConfidence` por fila (mínimo de los bloques que la componen).
+- `AnalysisResult.lowConfidenceIndices` → `ImportResult.lowConfidenceIndices` → `TableImportUiState.lowConfidenceIndices`.
+- Umbral: `CONFIDENCE_THRESHOLD = 0.6f` en `AnalyzeTableImageUseCase`. La UI de revisión puede resaltar estas entradas (implementación visual pendiente).
+
+**FIX — Clustering con promedios globales**
+- `clusterBlocks` ahora calcula `avgWidth` y `avgHeight` sobre todos los bloques antes del BFS. Elimina el problema donde un bloque pequeño (ej. "1") generaba un threshold mínimo, impidiendo conectar bloques cercanos.
+
+**FIX — `suggestTablePoints` excluye encabezados y pies de página**
+- Filtro: bloques en el 5% superior/inferior de la imagen y textos de ≤3 caracteres se ignoran al calcular el bounding box sugerido.
+
+**FIX — Bug crítico: `expectedTableCount=1` partía la tabla en múltiples**
+- **PROBLEM**: `splitLinesIntoTables` aplicaba la heurística de reinicio incluso cuando el usuario declaraba explícitamente 1 tabla.
+- **SOLUTION**: Si `expectedCount == 1`, la función devuelve todas las líneas como un único grupo sin evaluar reinicios.
+
+**FEATURE — Detección de formato CSV/JSON por contenido**
+- `onFileSelected` asigna `ImportMode.NONE` cuando la extensión no es `.csv`/`.json`.
+- `loadFileText` resuelve el modo tras leer el contenido: detecta JSON por prefijo `{`/`[`, CSV por presencia de delimitadores.
+
+**FIX — ENUM_PATTERN ampliado en PlainTextTableParser**
+- Cubre ahora `[1-5] texto`, tabulador como separador, y espacio simple sin símbolo de puntuación.
+
+**FIX — Header detection mejorada en CsvTableParser**
+- Reconoce keywords TTRPG ("roll", "result", "rango", "encounter", etc.) como señal positiva de cabecera.
+- Valida con `RangeParser` antes de aplicar la heurística de dígitos, evitando clasificar `"1d6"` como dato.
+
+**INTEGRATION — Build**
+- **BUILD SUCCESSFUL** `assembleDebug` — 443 tareas, 28 ejecutadas, sin errores.
+
+---
+
+### Sprint 17 — Reconocimiento de Tablas: Fundamentos del Pipeline OCR (15 de abril de 2026)
+
+**ARCHITECTURE — Jerarquía OCR: TextLine como unidad base**
+- **PROBLEM**: `OcrRepositoryImpl` iteraba `TextBlock` y concatenaba líneas con `\n`, forzando a `AnalyzeTableImageUseCase` a re-separar lo que ML Kit ya tenía separado con `splitMultiLineBlocks`.
+- **SOLUTION**: Refactorizado `OcrRepositoryImpl` para iterar `block.lines` (nivel `TextLine`). Cada línea produce un `OcrBlock` independiente con bounding box propio.
+- **IMPACT**: `splitMultiLineBlocks` pasa a ser safety net en lugar de paso crítico. Bounding boxes más precisos mejoran `groupIntoLines` y `detectColumns`.
+
+**ARCHITECTURE — `OcrBlock.confidence` real + `RectModel` Float**
+- `confidence` ahora es el promedio de `TextElement.confidence` por línea en vez de `1.0f` hardcodeado. Habilita filtrado de entradas inciertas en sprints futuros.
+- `RectModel` migrado de `Int` a `Float` para preservar precisión al escalar bitmaps. Eliminadas conversiones `.toFloat()` redundantes en `detectColumns`.
+
+**ARCHITECTURE — `OcrRepository` devuelve `Result<List<OcrBlock>>`**
+- **PROBLEM**: Fallo silencioso: `catch (e: Exception) { emptyList() }` hacía indistinguible un error de ML Kit de una imagen sin texto.
+- **SOLUTION**: Firma cambiada a `Result<List<OcrBlock>>`. Nuevo `OcrException` en `:core:domain`. `ImportTableUseCase.getRawBlocks` usa `getOrThrow()` — el ViewModel ya tenía `try-catch` y distingue el tipo de error.
+
+**FEATURE — Filtro de ruido de separadores**
+- `AnalyzeTableImageUseCase` descarta bloques cuyo texto es solo guiones, barras o subrayados (`"———"`, `"_____"`, `"| | |"`). Estos son líneas de tabla que ML Kit convierte en texto y rompían el clustering.
+
+**FIX — Rangos percentiles `00 = 100`**
+- `RangeParser` ahora normaliza `"00"` → `100`. `"96-00"` se parsea como `ParsedRange(96, 100)`. Convención estándar en tablas OSR y D&D Basic.
+
+**FIX — BOM UTF-8 en CSV de Excel**
+- `CsvTableParser.preview()` y `parse()` aplican `trimStart('\uFEFF')`. El primer campo ya no aparece como `"﻿Roll"` en archivos exportados desde Excel.
+
+---
+
+### Sprint 11 — OCR Avanzado: Segmentación Multilínea y Control por Tabla (15 de abril de 2026)
+
+**FEATURE — Motor OCR Mejorado (`AnalyzeTableImageUseCase`)**
+- Implementada `splitMultiLineBlocks`: divide bloques OCR que fusionan filas múltiples (común en layouts con zebra-striping), recuperando números de Roll ocultos.
+- Parámetro `expectedTableCount` para que el usuario indique cuántas tablas esperar, ajustando la agresividad del clustering espacial.
+
+**UI/UX — Edición Manual en ReviewStep**
+- `BasicTextField` editable para `minRoll` / `maxRoll` directamente en la lista de entradas.
+- Botones `ExpandLess`/`ExpandMore` en `EntryRow` para reordenar filas manualmente tras la detección.
+
+**INTEGRATION — Build y Estabilidad**
+- **BUILD SUCCESSFUL** — Sin regresión en flujos existentes de CSV, JSON y Texto.
+
+---
+
+### Sprint 16 — Estabilización Crítica: Persistencia y Motor de PDF (15 de abril de 2026)
+
+
+**ARCHITECTURE — Migración a PdfRenderer Nativo**
+- **PROBLEM**: El uso de `pdfium-android` causaba `NoClassDefFoundError: ArrayMap` en dispositivos modernos debido a dependencias obsoletas de Android Support superpuestas con AndroidX.
+- **SOLUTION**: Refactorizado `FileRepositoryImpl` para utilizar la API nativa `android.graphics.pdf.PdfRenderer`.
+- **IMPACT**: Eliminación de dependencias externas pesadas (`pdfium`, `legacy-support`) y mejora de la estabilidad en los flujos de importación de PDF.
+
+**ARCHITECTURE — Consolidación de Integridad Referencial (MIGRATION 11→12→13)**
+- **PROBLEM**: Crone de `SQLiteConstraintException` y fallo de arranque `IllegalStateException` indicando que faltaba una ruta de migración de la versión 11 a la 13.
+- **SOLUTION**: Actualizado el esquema Room (versión 13) para incluir `@ForeignKey` con `onDelete = CASCADE` en todas las tablas dependientes.
+- **FIX**: Corregida la omisión de `MIGRATION_11_12` y `MIGRATION_12_13` en el `Room.databaseBuilder` dentro de `DataModule.kt`.
+- **FIX**: Corregida discrepancia de esquema en `session_deck_refs` (índice faltante) y typo `AUTOINT` en scripts de migración previos.
+
+**INTEGRATION — Build y Calidad**
+- **PENDING**: Verificación de flujos de importación de PDF con el nuevo motor nativo y validación de borrado masivo de recursos.
+
+---
+
+### Sprint 11 — Detección de Múltiples Tablas e Importación por Lotes (15 de abril de 2026)
+
+**FEATURE — Clustering Espacial en OCR**
+- Implementada la lógica de **clustering espacial** en `AnalyzeTableImageUseCase` para separar múltiples tablas en una misma imagen/página.
+- El sistema utiliza un algoritmo de componentes conectados para agrupar bloques de texto próximos, permitiendo detectar tablas independientes.
+- Añadida heurística para la **detección automática de títulos** de tablas basada en el contexto del cluster.
+
+**UI/UX — Review Multi-tabla**
+- Rediseñada la pantalla `TableImportScreen` para incluir un **selector de pestañas** (`ScrollableTabRow`) cuando se detectan múltiples tablas.
+- Permite al usuario revisar, editar y guardar cada tabla de forma independiente dentro del mismo flujo de importación.
+
+**INTEGRATION — Build y Estabilidad**
+- **BUILD SUCCESSFUL** — Verificada la compatibilidad de la nueva lógica de OCR con los flujos existentes de CSV y Texto.
+
+---
+
+### Sprint 10 — Estabilización y Gestión de Deuda Técnica (15 de abril de 2026)
+
+**PROBLEM/SOLUTION — Bloqueos de Base de Datos y PDF**
+- **DB (MIGRATION 10→11)**: Corregid el fallo de arranque por índices faltantes en `session_deck_refs` y `session_table_refs`. Implementada migración manual para preservar datos.
+- **PDFium (AndroidX)**: Solucionado el error `NoClassDefFoundError: ArrayMap` mediante la inclusión de `androidx.legacy:legacy-support-v4` como puente de compatibilidad.
+
+**INTEGRATION — Build**
+- **BUILD SUCCESSFUL** — El proyecto vuelve a ser completamente estable.
+
+---
+
+### Sprint 9 — Integración de Cartas y Tablas (15 de abril de 2026)
+
+**ARCHITECTURE — Vínculo de Dominio y Persistencia (MIGRATION 8→9)**
+- Implementada la migración de base de datos **8 a 9** para añadir la columna `linkedTableId` a la tabla `cards`.
+- Actualizado el modelo de dominio `Card` y los `Mappers` para soportar la asociación opcional con tablas aleatorias.
+- Incrementada la versión de la DB a **9** y registrada la migración en `DataModule`.
+
+**FEATURE — Selector de Tablas en Editor de Cartas**
+- Añadida la sección **"Acción Vinculada"** en `CardEditorScreen`.
+- Implementado un selector modal que carga dinámicamente todas las tablas disponibles de la biblioteca.
+- Permite vincular, cambiar o eliminar la asociación de una tabla con la carta de forma persistente.
+
+**FEATURE — Acción Rápida en Sesión (Direct Roll)**
+- Las cartas en la `SessionScreen` ahora detectan si tienen una tabla vinculada.
+- Añadido un **trigger visual** (icono de dado) en la esquina superior de la carta (cuando está revelada).
+- Al pulsar el icono, se dispara `tablesViewModel.rollTable(tableId)`, mostrando el resultado instantáneamente en el panel de detalles.
+- Solucionado el problema de *Smart Cast* en propiedades multi-módulo mediante captura en variables locales.
+
+**INTEGRATION — Build y Estabilidad**
+- **BUILD SUCCESSFUL** — Verificada la compatibilidad de las migraciones y la integridad de los nuevos componentes UI.
+- Actualizada la documentación funcional en `walkthrough.md`.
+
+---
+
+### Sprint 8 — Sistema de Tablas Aleatorias (Fase Avanzada) (15 de abril de 2026)
+
+**ARCHITECTURE — Corrección de Perspectiva (4 Puntos)**
+- Implementada la lógica de **Homografía** usando `android.graphics.Matrix.setPolyToPoly`.
+- Permite transformar cuadriláteros irregulares (fotos de manuales físicos) en bitmaps rectulares planos para un OCR óptimo.
+- UI: Reemplazado `cropRect` por lista de 4 puntos (`Offset`) arrastrables de forma independiente con líneas conectoras y área de recorte visual.
+
+**FEATURE — Soporte Multipage (Stitching) y Flujo Continuo**
+- Añadido `isStitchingMode` a `TableImportViewModel`.
+- Botón "Añadir página" permite concatenar resultados de diferentes recortes o páginas en una sola tabla lógica antes de guardar.
+- El sistema ajusta automáticamente el `sortOrder` y la integridad de los dados al añadir nuevas filas.
+
+**FEATURE — Detección Automática de Columnas y Heurística de Datos**
+- El motor de análisis detecta la estructura horizontal de la tabla buscando alineaciones de bloques (gutters) en el eje X.
+- Separación automática de múltiples columnas usando el delimitador `|` (ej: `1-10 | Poción | 50 gp`).
+- Merge multilínea inteligente: las descripciones largas se unen solo a su columna correspondiente basándose en su posición horizontal.
+
+**FEATURE — Auto-detección de Bordes (Sugerencia OCR)**
+- Escaneo silencioso al abrir una página: utiliza los resultados de OCR iniciales para calcular el *bounding box* del contenido textual.
+- La UI posiciona automáticamente las 4 esquinas rodeando la tabla detectada para minimizar el ajuste manual.
+
+**INTEGRATION — Estabilidad y Verificación**
+- **BUILD SUCCESSFUL** — verificado post-implementación de todas las heurísticas avanzadas.
+- Actualizada documentación técnica en `walkthrough.md`.
+
+---
+
+### Sprint 7 — Completar Sistema de Tablas (15 de abril de 2026)
+
+**FEATURE — FAB "TIRAR" real en SessionScreen (tab Tablas)**
+- `TablesViewModel` inyectado en `SessionScreen` via `hiltViewModel()` — mismo NavBackStackEntry, misma instancia compartida con `TablesTab`.
+- FAB página 2 (Tablas): si `activeTable != null` → tira esa tabla y el resultado aparece en `TableDetailSheet` ya abierto. Si no hay tabla activa → Snackbar "Abre una tabla para usar TIRAR".
+- `SessionFab` actualizado: acepta `hasActiveTable`, muestra FAB atenuado (α 0.5) y sublabel "tabla activa" para feedback visual.
+
+**FEATURE — Export de tablas a JSON**
+- `ExportTableUseCase` (object en `:core:domain`): serializa `RandomTable` → formato DeckApp JSON v1 (compatible con `JsonTableParser`). Escapa correctamente `\`, `"`, `\n`.
+- `TablesViewModel.getExportJson()`: construye JSON desde `activeTable` (ya en memoria con entries completos).
+- `TableDetailSheet`: nuevo parámetro `onExport`, nuevo botón de Share en la cabecera.
+- `TablesTab`: `rememberLauncherForActivityResult(CreateDocument)` → el usuario elige destino → se escribe el JSON via `ContentResolver`.
+
+**FEATURE — WEIGHTED mode en TableEditorScreen**
+- Campo "Fórmula" deshabilitado cuando `rollMode == WEIGHTED` (la fórmula se ignora en ese modo).
+- Nota informativa: "Modo Peso: la fórmula se ignora. El resultado se elige por probabilidad relativa."
+- `RollTableUseCase.pickEntry` ya manejaba WEIGHTED correctamente — solo faltaba el feedback visual en el editor.
+
+---
+
+### Sprint 6 — Sistema de Importación de Tablas (14 de abril de 2026)
+
+**ARCHITECTURE — Motor de importación multi-fuente**
+- `ImportTableUseCase` en `:core:domain` — orquestador universal: OCR, CSV, JSON, texto plano.
+- `AnalyzeTableImageUseCase` — heurística de parsing OCR: agrupación por Y, detección de rango/texto, manejo de entradas multilínea.
+- `RenderPdfPageUseCase` — envuelve `FileRepository.renderPdfPageToBitmap` para previsualización en el flujo de importación.
+- `CsvTableParser` — auto-detección de delimitador, preview de columnas, `ParseConfig` para mapeo manual.
+- `JsonTableParser` — compatibilidad con Foundry VTT `RollTable` y formato DeckApp JSON.
+- `PlainTextTableParser` — detección de patrones `N. texto`, `- [rango] texto` y listas simples.
+- `RangeParser` — motor centralizado: parseo, validación de integridad (huecos/solapamientos), inferencia de fórmula de dado.
+- `ReadTextFromUriUseCase` — lectura de texto desde URI SAF vía `FileRepository.readTextFromUri`.
+
+**FEATURE — TableImportScreen (flujo de 5 pasos)**
+- Paso 1 (`SOURCE_SELECTION`): 4 cards de origen — Imagen, PDF, Archivo, Pegar texto.
+- Paso 2 (`CROP`): canvas interactivo con rectángulo de recorte arrastrable sobre el PDF/imagen; navegación de páginas PDF.
+- Paso 3 (`FILE_PREVIEW`): texto raw editable — continuar para CSV configura columnas, para texto plano analiza directamente.
+- Paso 4 (`MAPPING`): selección de columna Rango / Texto para CSV con muestra visual de filas.
+- Paso 5 (`REVIEW`): entradas editables inline, advertencias de huecos/solapamientos, nombre y categoría de tabla; checkmark en TopBar guarda en Room.
+
+**FEATURE — TableImportViewModel**
+- Flujo completo: selección → carga → análisis → revisión → guardado.
+- `loadFileText` usa `ReadTextFromUriUseCase` para leer archivos CSV/JSON/TXT desde URI SAF.
+- `saveTable()` construye `RandomTable` desde el estado de revisión y persiste via `TableRepository`.
+- `savedSuccessfully: Boolean` en `TableImportUiState` — señal para que la pantalla navegue de vuelta.
+
+**INTEGRATION — FileRepository**
+- `readTextFromUri(uri: Uri): String` añadido a interfaz e implementado en `FileRepositoryImpl` via `ContentResolver`.
+
+**INTEGRATION — NavGraph**
+- `TableImportRoute` ya estaba registrado; `onImportFinished` ahora observado via `LaunchedEffect(savedSuccessfully)`.
+- `BUILD SUCCESSFUL` — pendiente de verificación post-refactor.
+
+---
+
 ### Sprint 5 — Tablas Aleatorias (14 de abril de 2026)
 
 **ARCHITECTURE — Sistema de tablas aleatorias completo**
@@ -455,6 +761,12 @@
     - [x] Añadido timer de sesión en el TopBar de la sesión activa.
     - [x] Migración Room v4 → v5 con campo `dmNotes` en `SessionEntity`.
     - [x] Añadido `DrawAction.PEEK` para registrar revisiones del tope del mazo.
+- [x] **Sprint 7: Configuración de Mazos (2026-04-14)**
+    - [x] Implementado `DeckConfigSheet` (ModalBottomSheet) para configurar mazos.
+    - [x] Añadido soporte para **Robo Boca Abajo** (B-2): Las cartas se inicializan en la cara de dorso al ser robadas.
+    - [x] Añadido soporte para **Imagen de Dorso Global** (B-3).
+    - [x] Añadida configuración de **Aspect Ratio** y **Draw Mode** desde la UI del mazo.
+    - [x] Migración Room v5 → v6 con campos `backImagePath` y `drawFaceDown` en `CardStackEntity`.
 
 ---
 
@@ -477,3 +789,58 @@ El recorte de cartas en los 4 modos de PDF import es matemático: se divide la p
 rectángulos iguales usando las dimensiones conocidas. No requiere detección de bordes.
 Esto mantiene el APK ~40MB más liviano. OpenCV se agrega en Fase 2 solo para el feature
 opcional de auto-detección cuando el usuario no conoce el layout del PDF.
+
+## Sprint 12: Gestión Avanzada de Mazos y Mejoras de OCR (2026-04-15)
+
+### Objetivos Completados
+- [x] **Duplicar Mazo:** Implementada la clonación completa de mazos, incluyendo la copia física de las imágenes en el almacenamiento interno para evitar dependencias entre copias.
+- [x] **Fusionar Mazos:** Capacidad de migrar cartas de un mazo origen a uno destino, remapeando automáticamente las rutas de archivos de imagen.
+- [x] **Mejora de Heurística OCR:** Corregido el error de "fusión de filas". El sistema ahora detecta rangos incluso si están concatenados con el texto descriptivo y separa los bloques automáticamente.
+- [x] **Estabilidad:** Verificado con build completo (`BUILD SUCCESSFUL`).
+
+### Cambios Técnicos
+- **DuplicateDeckUseCase:** Ahora retorna el ID del nuevo mazo para permitir navegación inmediata después de la copia.
+- **RangeParser:** Refactorizado para devolver la longitud consumida del string, permitiendo a `AnalyzeTableImageUseCase` dividir bloques de OCR que contienen múltiples datos (rango + descripción).
+- **Tolerancia Vertical:** Se aumentó un 15% (de 0.6 a 0.7) en la agrupación de líneas para manejar mejor escaneos de manuales con tipografía variable.
+
+## Sprint 13: Archivado y Restauración de Mazos (2026-04-15)
+
+### Objetivos Completados
+- [x] **Visualización de Archivo:** Los mazos archivados ahora muestran un filtro de escala de grises y un icono de "Caja" en el centro de la portada para una distinción inmediata.
+- [x] **Modo Solo Lectura:** Al entrar en el detalle de un mazo archivado, se deshabilitan las funciones de edición (Añadir cartas, Tags, Configuración, Duplicación y Fusión) para preservar su estado.
+- [x] **Gestión de Sesión:** Deshabilitado el botón de "Añadir a sesión" para mazos archivados desde la biblioteca.
+- [x] **Estabilidad:** Build verificado y sin errores.
+
+### Cambios Técnicos
+- **DeckCoverCard:** Integración de `ColorFilter.colorMatrix` para el efecto de desactivación visual sin perder la miniatura.
+- **DeckDetailScreen:** Implementación de lógica condicional sobre `uiState.deck.isArchived` para restringir el acceso a componentes mutables.
+- **LibraryViewModel:** Centralización del estado de visibilidad (Activos vs Archivados) desacoplado de la lógica de persistencia.
+
+---
+
+### Sprint 14: OCR Pro - Revisión Dual y Sensibilidad (15 de abril de 2026)
+
+**FEATURE — Interfaz de Revisión Dual (OCR)**
+- Implementado el componente `ZoomableImage` con soporte para gestos (Zoom/Pan/Reset) para previsualización interactiva.
+- Rediseño de `ReviewStep` en `TableImportScreen` con layout vertical dividido para validación directa visual vs datos.
+- Persistencia de `croppedBitmap` en el `TableImportUiState` para asegurar que la referencia visual se mantenga durante todo el flujo.
+
+**INTEGRATION — Build y Estabilidad**
+- **BUILD SUCCESSFUL** — Verificada la integración del nuevo visor interactivo.
+
+---
+
+### Sprint 15: Tablas Recursivas (Sub-tablas) (15 de abril de 2026)
+
+**ARCHITECTURE — Motor de Tirada Recursivo**
+- Actualizado `RollTableUseCase` para soportar `subTableId` con recursividad real (hasta 5 niveles).
+- Implementada lógica de concatenación de resultados (`Resultado A → Resultado B`) preservando el flujo de sesión.
+- Corrección de *Smart Casts* multi-módulo mediante captura en variables locales.
+
+**FEATURE — Table Picker & Editor UX**
+- Implementado `TablePickerDialog` en el editor para vincular entradas a cualquier tabla de la biblioteca.
+- Nuevo diseño de `EntryRow` con botones de Enlace/Desenlace e indicadores visuales de recursividad.
+- Cargada toda la biblioteca de tablas en `TableEditorViewModel` permitiendo búsquedas rápidas durante la vinculación.
+
+**INTEGRATION — Build y Estabilidad**
+- **BUILD SUCCESSFUL** — Todas las referencias circulares y de sintaxis resueltas.

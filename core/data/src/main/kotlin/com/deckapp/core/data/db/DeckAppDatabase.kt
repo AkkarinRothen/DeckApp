@@ -16,9 +16,14 @@ import androidx.room.RoomDatabase
         DrawEventEntity::class,
         RandomTableEntity::class,
         TableEntryEntity::class,
-        TableRollResultEntity::class
+        TableRollResultEntity::class,
+        SessionTableRefEntity::class,
+        RandomTableTagCrossRef::class,
+        EncounterEntity::class,
+        EncounterCreatureEntity::class,
+        CombatLogEntryEntity::class
     ],
-    version = 5,
+    version = 18,
     exportSchema = true
 )
 abstract class DeckAppDatabase : RoomDatabase() {
@@ -30,8 +35,19 @@ abstract class DeckAppDatabase : RoomDatabase() {
     abstract fun drawEventDao(): DrawEventDao
     abstract fun randomTableDao(): RandomTableDao
     abstract fun tableRollResultDao(): TableRollResultDao
+    abstract fun encounterDao(): EncounterDao
+    abstract fun combatLogDao(): CombatLogDao
 
     companion object {
         const val DATABASE_NAME = "deckapp.db"
+
+        val MIGRATION_10_11 = com.deckapp.core.data.db.MIGRATION_10_11
+        val MIGRATION_11_12 = com.deckapp.core.data.db.MIGRATION_11_12
+        val MIGRATION_12_13 = com.deckapp.core.data.db.MIGRATION_12_13
+        val MIGRATION_13_14 = com.deckapp.core.data.db.MIGRATION_13_14
+        val MIGRATION_14_15 = com.deckapp.core.data.db.MIGRATION_14_15
+        val MIGRATION_15_16 = com.deckapp.core.data.db.MIGRATION_15_16
+        val MIGRATION_16_17 = com.deckapp.core.data.db.MIGRATION_16_17
+        val MIGRATION_17_18 = com.deckapp.core.data.db.MIGRATION_17_18
     }
 }

@@ -8,38 +8,52 @@
 
 ---
 
-## Estado actual del proyecto (14 de abril de 2026)
+## Estado actual del proyecto (15 de abril de 2026)
 
 ### ✅ Implementado y funcional
 - Import desde carpeta SAF (imágenes → cartas, auto-detect de metadata de filename)
 - Import desde ZIP y Export a ZIP
-- PDF import con native PdfRenderer (4 modos de layout, grilla configurable, auto-trim de bordes)
+- PDF import con **PdfiumAndroid** (migrado en Sprint 11 — 4 modos de layout, grilla configurable, auto-trim)
 - 8 modos de contenido de carta completos (renderizado + edición)
 - CardEditorScreen multi-cara con picker de imagen y zonas editables
-- SessionScreen: robo, descarte, undo, night mode, haptic, wake lock, multi-mazo
-- Peek (ver tope sin robar), Deal (repartir N cartas), Mostrar a jugador (full-screen, brillo máximo)
+- SessionScreen: workspace multi-tab (`HorizontalPager`) — Mazos / Tablas / Notas / Combate (dinámico)
+- Robo, descarte, undo, night mode, haptic, wake lock, multi-mazo
+- Peek (ver tope sin robar), Browse mode desde sesión
 - Tags en mazos + búsqueda y filtro en Biblioteca
-- Duplicar mazo, Browse mode desde sesión
+- **Duplicar mazo** (Sprint 12 — `DuplicateDeckUseCase`)
+- **Fusionar mazos** (Sprint 12 — `MergeDecksUseCase` + dialog de selección de destino)
+- **Archivar/restaurar mazos** (Sprint 13 — toggle en Biblioteca con chip "Archivados")
 - Borrar y renombrar sesiones
-- `:feature:settings` con uso de almacenamiento por mazo
+- `:feature:settings` con uso de almacenamiento por mazo + **calidad JPEG configurable** (Sprint 11)
+- Room: **migraciones escritas** v1→v8 — sin `fallbackToDestructiveMigration` en prod (Sprint 11)
+- Tags cross-ref: **índices en `card_tags` y `card_stack_tags`** (Sprint 11)
+- **Sistema de Tablas Aleatorias completo** — `:feature:tables`, 9 tablas bundled, modos RANGE/WEIGHTED
+- **Import de tablas** — OCR (ML Kit), CSV, JSON (Foundry VTT), texto plano; flujo de 5 pasos
+- **Homografía + auto-detección de bordes** en import OCR; stitching multi-página (Sprint 8)
+- **Export de tablas** a JSON compatible con formato DeckApp / Foundry VTT
+- `RangeParser`, `CsvTableParser`, `JsonTableParser`, `PlainTextTableParser` — motor de parsing robusto
 
 ### ⚠️ Incompleto o con deuda técnica
-- PDF import usa `android.graphics.pdf.PdfRenderer` nativo en lugar de `PdfiumAndroid`
-  (este último soporta más variantes de PDF y está ya en el plan)
-- Room usa `fallbackToDestructiveMigration()` — correcto solo para dev, hay que migrar correctamente antes de release
-- Tags cross-ref sin índice → full scan en updates (acceptables ahora, hay que resolverlo antes de mazos grandes)
+- `SessionHistoryScreen` — implementada la navegación, pendiente el contenido real (timeline de DrawEvents)
+- Notas de DM — `Session.dmNotes` existe en el modelo, la UI está pendiente (ver `DM_NOTES.md`)
+- Tab "Notas" en SessionScreen — stub vacío (sprint pendiente)
+- Tab "Combate" en SessionScreen — stub vacío, aparece cuando `hasActiveEncounter = true` (sprint pendiente)
+- `Card.dmNotes` — no existe todavía en el modelo
+- Exportar resumen de sesión (notas + tiradas + cartas) — Fase 2
 
 ---
 
 ## A — Deuda Técnica
 
-| # | Ítem | Impacto | Esfuerzo | Notas |
-|---|------|---------|----------|-------|
-| A-1 | Migrar PDF rendering de `PdfRenderer` nativo a **PdfiumAndroid** | 🔴 | ★★ | El nativo falla con PDFs complejos (font embedding, transparencias). PdfiumAndroid ya está en el plan y en el `settings.gradle.kts` como jitpack dependency |
-| A-2 | Room: strategy de migración real (quitar `fallbackToDestructiveMigration`) | 🔴 | ★★ | Antes del primer release a producción. Definir migraciones escritas o `AutoMigration`. Requiere configurar `room.schemaLocation` |
-| A-3 | Índices en tablas cross-ref de tags (`card_tags`, `card_stack_tags`) | 🟡 | ★ | Actualmente full scan. Añadir `@Index` en las entities para `tagId` |
-| A-4 | Compresión de imagen configurable en import | 🟡 | ★ | Actualmente JPEG quality=90 fijo. Exponer en Settings: Alta (95) / Media (85) / Baja (70) |
-| A-5 | Manejo de errores visible en Import (fallo de archivo individual) | 🟡 | ★ | Si falla copiar una imagen concreta, hoy se silencia. Mostrar lista de archivos fallidos al final del import |
+| # | Ítem | Impacto | Esfuerzo | Estado |
+|---|------|---------|----------|--------|
+| A-1 | Migrar PDF rendering de `PdfRenderer` nativo a **PdfiumAndroid** | 🔴 | ★★ | ✅ Hecho (Sprint 11) |
+| A-2 | Room: strategy de migración real (quitar `fallbackToDestructiveMigration`) | 🔴 | ★★ | ✅ Hecho (Sprint 11) — migraciones v1→v8 escritas |
+| A-3 | Índices en tablas cross-ref de tags (`card_tags`, `card_stack_tags`) | 🟡 | ★ | ✅ Hecho (Sprint 11) |
+| A-4 | Compresión de imagen configurable en import | 🟡 | ★ | ✅ Hecho (Sprint 11) — Settings: Alta/Media/Baja |
+| A-5 | Manejo de errores visible en Import (fallo de archivo individual) | 🟡 | ★ | ✅ Hecho (Sprint 11) — `failedFiles` en `ImportUiState` |
+| A-6 | Export ZIP de mazo desde `DeckDetailScreen` overflow | 🟡 | ★ | ⏳ UseCase existe, falta el botón en la UI |
+| A-7 | Progress bar de almacenamiento por mazo en `SettingsScreen` | 🟢 | ★ | ⏳ Pendiente |
 
 ---
 
@@ -90,18 +104,8 @@ Es esencial para el modo Face Down y para la presentación visual general.
 
 ---
 
-### B-4 — Archivar mazos 🟡 ★
-Ocultar mazos de la Biblioteca sin borrarlos. Útil para mazos de campañas anteriores.
-
-**Comportamiento esperado:**
-- Opción "Archivar" en el menú contextual del mazo (⋮)
-- Biblioteca muestra solo mazos activos por defecto
-- Toggle en filtros para mostrar archivados también
-- El mazo archivado conserva todas sus cartas
-
-**Detalles técnicos:**
-- `CardStack.isArchived: Boolean` (nuevo campo, Room migration)
-- `CardStackDao.getActiveDecks()` con `WHERE isArchived = 0`
+### B-4 — Archivar mazos ✅ Hecho (Sprint 13)
+`CardStack.isArchived`, migración v7→v8, chip "Archivados" en Biblioteca, `getArchivedDecks()` en DAO/repo.
 
 ---
 
@@ -218,14 +222,9 @@ Desde `CardViewScreen`, opción de compartir la imagen de la cara activa como JP
 
 ## D — Features Nuevas (no estaban en el plan original)
 
-### D-1 — Notas de DM por sesión 🔴 ★
-Un campo de texto libre (Markdown) por sesión donde el DM puede tomar apuntes rápidos.
-
-**Comportamiento esperado:**
-- Ítem "Notas de sesión" en el overflow de `SessionScreen`
-- BottomSheet con `TextField` Markdown + botón Guardar
-- Las notas se muestran en el historial de sesión (ver B-1)
-- `Session.dmNotes: String?` (nuevo campo)
+### D-1 — Notas de DM 🔴 ★★★
+`Session.dmNotes: String?` existe en el modelo. Plan completo en `DM_NOTES.md`.
+Roadmap en 3 fases: notas por sesión → notas por carta + Quick Notes → diario de campaña completo.
 
 ---
 
@@ -286,41 +285,77 @@ Glance widget (API de widgets de Compose para Android) en la pantalla de inicio.
 
 ---
 
-## Sprints Sugeridos (ordenados por impacto)
+## Sprints Realizados
+
+| Sprint | Contenido principal | Estado |
+|--------|---------------------|--------|
+| 1–3 | Setup multi-módulo, Room schema, LibraryScreen, DeckDetail, SessionScreen base | ✅ |
+| 4 | CardAspectRatio, ContentScale.Fit, dots de caras, badge de conteo | ✅ |
+| — | Refactor SessionScreen → HorizontalPager (Mazos/Tablas/Notas/Combate) | ✅ |
+| 5 | Sistema de Tablas Aleatorias completo + 9 tablas bundled | ✅ |
+| 6 | Import de tablas — OCR, CSV, JSON, PlainText; flujo de 5 pasos | ✅ |
+| 7 | FAB TIRAR real, export tablas JSON, WEIGHTED mode UI | ✅ |
+| 8 | Homografía, stitching multi-página, detección automática de bordes | ✅ |
+| 9 | RangeParser robusto, CsvTableParser, JsonTableParser, PlainTextTableParser | ✅ |
+| 10 | Tags para tablas, `isPinned`, TableLibraryScreen, gestión en caliente | ✅ |
+| 11 | OCR avanzado: `splitMultiLineBlocks`, `expectedTableCount`, edición manual de rangos | ✅ |
+| 12 | Duplicar mazo, fusionar mazos (UseCase + dialog UI) | ✅ |
+| 13 | Archivar/restaurar mazos, Room v8, chip Archivados en Biblioteca | ✅ |
+| 14 | Deuda técnica: PdfRenderer nativo, migraciones Room v13, índices tags | ✅ |
+| 14.5 | Workspace Bento: DeckClusterItem, DeckWorkspace, CompactCardItem, FlowRow | ✅ |
+
+---
+
+## Próximos Sprints
 
 ```
-Sprint 4 — Configuración y pulido de mazos
-  · C-2  Panel de config del mazo (DrawMode, defaultContentMode, imagen de dorso)
-  · B-3  Imagen de dorso por mazo (exponer en UI)
+Sprint 15 — Notas de DM por sesión
+  · Tab Notas en SessionScreen: editor Markdown con autoguardado
+  · SessionViewModel.updateDmNotes() ya existe — conectar con la UI
+  · Quick Notes con timestamp automático desde el FAB
+  · SessionHistoryScreen: mostrar dmNotes en sesiones finalizadas
+  · Plan detallado: DM_NOTES.md
+
+Sprint 16 — Notas por carta + Gestión de Almacenamiento
+  · Room migration: cards.dmNotes
+  · CardViewScreen: panel de nota por carta
+  · DeckDetailScreen: badge en cartas con nota
+  · A-6: Export ZIP desde DeckDetailScreen overflow
+  · A-7: Progress bars en SettingsScreen
+
+Sprint 17 — Encuentros y Combat Tracker
+  · Modelo Encounter + EncounterCreature en :core:model
+  · :feature:encounters: lista + editor + tracker de HP
+  · Tab Combate en SessionScreen (dinámico)
+  · Ver ENCOUNTERS.md para plan detallado
+
+Sprint 18 — NPCs
+  · Modelo Npc + :feature:npcs
+  · Lista + ficha + editor
+  · Link bidireccional NPC ↔ Encuentro
+
+Sprint 19 — Planificador de sesiones + Wiki
+  · SessionPlan, Scene, WikiEntry en :core:model
+  · :feature:planner + :feature:wiki
+  · Editor Markdown con resolución de [[links]]
+
+Sprint 20 — Backup & Restauración
+  · Export ZIP de toda la biblioteca + schema JSON (D-4)
+  · Restore: importar ZIP y recrear la biblioteca
+
+Sprint 21 — UX avanzada
+  · C-1  Drag & drop para reordenar cartas en DeckDetail
+  · C-2  Panel de config del mazo (DrawMode, dorso, contentMode)
   · B-2  Modo boca abajo al robar (Face Down Draw)
-  · C-3  Filtrar cartas por palo en DeckDetail
-  · A-3  Índices en cross-ref de tags
-
-Sprint 5 — Historial y notas
-  · B-1  SessionHistoryScreen (timeline de DrawEvents)
-  · D-1  Notas de DM por sesión
-  · B-6  Clonar sesión
-  · D-3  Timer de sesión
-
-Sprint 6 — PDF real + deuda técnica
-  · A-1  Migrar a PdfiumAndroid
-  · A-2  Room: migraciones escritas (quitar fallbackToDestructiveMigration)
-  · A-4  Compresión de imagen configurable
-  · A-5  Errores visibles en import
-
-Sprint 7 — UX avanzada
-  · C-1  Drag & drop para reordenar cartas
-  · B-4  Archivar mazos
   · C-4  Snackbar con "Deshacer borrado"
-  · D-4  Backup y restauración
 
-Sprint 8 — Features de mesa (Fase 3)
-  · B-5  Spread layout Tarokka
-  · D-2  Robar al azar por palo
+Sprint 22+ — Fase 3
+  · B-5  Spread layout Tarokka (posiciones nombradas) → Mesa Central del Workspace
   · B-7  Auto-detección de grilla PDF (OpenCV)
-  · D-5  Widget de Android
+  · D-5  Widget de Android (Glance)
+  · Búsqueda global con Room FTS
 ```
 
 ---
 
-*Última actualización: 14 de abril de 2026*
+*Última actualización: 15 de abril de 2026*

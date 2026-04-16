@@ -1,31 +1,30 @@
 package com.deckapp.feature.tables
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.deckapp.core.domain.repository.TableRepository
+import com.deckapp.core.domain.usecase.ExportTableUseCase
 import com.deckapp.core.domain.usecase.RollTableUseCase
 import com.deckapp.core.model.RandomTable
-import com.deckapp.core.model.TableEntry
-import com.deckapp.core.model.TableRollMode
 import com.deckapp.core.model.TableRollResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 data class TablesUiState(
     val tables: List<RandomTable> = emptyList(),
-    val categories: List<String> = emptyList(),
-    val selectedCategory: String? = null,
+    val allTags: List<com.deckapp.core.model.Tag> = emptyList(),
+    val selectedTagIds: Set<Long> = emptySet(),
+    val selectedTableIds: Set<Long> = emptySet(),
     val searchQuery: String = "",
-    val isLoading: Boolean = true,
-    val activeTable: RandomTable? = null,          // tabla con BottomSheet abierto
+    val activeTable: RandomTable? = null,
     val lastResult: TableRollResult? = null,
     val recentResults: List<TableRollResult> = emptyList(),
+    val isLoading: Boolean = true,
     val isRolling: Boolean = false,
     val snackbarMessage: String? = null
 )
@@ -33,152 +32,116 @@ data class TablesUiState(
 @HiltViewModel
 class TablesViewModel @Inject constructor(
     private val tableRepository: TableRepository,
-    private val rollTableUseCase: RollTableUseCase,
-    @ApplicationContext private val context: Context
+    private val cardRepository: com.deckapp.core.domain.repository.CardRepository,
+    private val rollTableUseCase: RollTableUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TablesUiState())
     val uiState: StateFlow<TablesUiState> = _uiState.asStateFlow()
 
     init {
-        viewModelScope.launch { loadBundledTablesIfNeeded() }
-
-        viewModelScope.launch {
-            combine(
-                tableRepository.getAllTables(),
-                tableRepository.getCategories()
-            ) { tables, categories -> tables to categories }
-                .collect { (tables, categories) ->
-                    _uiState.update { it.copy(tables = tables, categories = categories, isLoading = false) }
-                }
-        }
+        loadTables()
     }
 
-    // ── Filtros ───────────────────────────────────────────────────────────────
-
-    fun setSearchQuery(query: String) = _uiState.update { it.copy(searchQuery = query) }
-
-    fun selectCategory(category: String?) = _uiState.update { it.copy(selectedCategory = category) }
+    private fun loadTables() {
+        viewModelScope.launch {
+            tableRepository.getAllTables().collect { tables ->
+                _uiState.update { it.copy(tables = tables, isLoading = false) }
+            }
+        }
+        viewModelScope.launch {
+            cardRepository.getAllTags().collect { tags ->
+                _uiState.update { it.copy(allTags = tags) }
+            }
+        }
+    }
 
     fun filteredTables(): List<RandomTable> {
         val state = _uiState.value
         return state.tables.filter { table ->
-            val matchesCategory = state.selectedCategory == null || table.category == state.selectedCategory
-            val matchesSearch = state.searchQuery.isBlank() ||
-                table.name.contains(state.searchQuery, ignoreCase = true) ||
-                table.category.contains(state.searchQuery, ignoreCase = true)
-            matchesCategory && matchesSearch
+            (state.selectedTagIds.isEmpty() || table.tags.any { it.id in state.selectedTagIds }) &&
+            (state.searchQuery.isBlank() || table.name.contains(state.searchQuery, ignoreCase = true))
+        }.sortedWith(compareByDescending<RandomTable> { it.isPinned }.thenBy { it.name })
+    }
+
+    fun setSearchQuery(query: String) = _uiState.update { it.copy(searchQuery = query) }
+    
+    fun toggleTagFilter(tagId: Long) {
+        _uiState.update { state ->
+            val current = state.selectedTagIds
+            val updated = if (tagId in current) current - tagId else current + tagId
+            state.copy(selectedTagIds = updated)
         }
     }
 
-    // ── BottomSheet de detalle ─────────────────────────────────────────────────
-
-    fun openTable(table: RandomTable) {
-        _uiState.update { it.copy(activeTable = table, lastResult = null, recentResults = emptyList()) }
+    fun clearFilters() {
+        _uiState.update { it.copy(selectedTagIds = emptySet(), searchQuery = "") }
     }
 
-    fun closeTable() = _uiState.update { it.copy(activeTable = null, lastResult = null, recentResults = emptyList()) }
-
-    fun loadRecentResults(sessionId: Long?) {
-        val tableId = _uiState.value.activeTable?.id ?: return
-        if (sessionId == null) return
-        viewModelScope.launch {
-            tableRepository.getRecentResultsForTable(sessionId, tableId)
-                .collect { results -> _uiState.update { it.copy(recentResults = results) } }
+    fun toggleTableSelection(tableId: Long) {
+        _uiState.update { state ->
+            val current = state.selectedTableIds
+            val updated = if (tableId in current) current - tableId else current + tableId
+            state.copy(selectedTableIds = updated)
         }
     }
 
-    // ── Tirada ────────────────────────────────────────────────────────────────
+    fun clearSelection() = _uiState.update { it.copy(selectedTableIds = emptySet()) }
+    fun openTable(table: RandomTable) = _uiState.update { it.copy(activeTable = table) }
+    fun closeTable() = _uiState.update { it.copy(activeTable = null) }
 
-    fun rollTable(tableId: Long, sessionId: Long?) {
-        _uiState.update { it.copy(isRolling = true) }
+    fun togglePin(table: RandomTable) {
         viewModelScope.launch {
-            val result = rollTableUseCase(tableId, sessionId)
-            _uiState.update { it.copy(lastResult = result, isRolling = false) }
+            tableRepository.updatePinnedState(table.id, !table.isPinned)
         }
     }
 
-    // ── Editor ────────────────────────────────────────────────────────────────
+    // --- Bulk Operations ---
 
-    suspend fun getTableForEdit(tableId: Long): RandomTable? =
-        tableRepository.getTableWithEntries(tableId)
-
-    fun saveTable(table: RandomTable) {
+    fun bulkDelete() {
+        val ids = _uiState.value.selectedTableIds.toList()
+        if (ids.isEmpty()) return
         viewModelScope.launch {
-            tableRepository.saveTable(table)
-            _uiState.update { it.copy(snackbarMessage = "Tabla guardada") }
+            tableRepository.bulkDeleteTables(ids)
+            _uiState.update { it.copy(selectedTableIds = emptySet(), snackbarMessage = "Eliminadas ${ids.size} tablas") }
         }
     }
 
-    fun deleteTable(tableId: Long) {
+    fun bulkTogglePin(pin: Boolean) {
+        val ids = _uiState.value.selectedTableIds.toList()
+        if (ids.isEmpty()) return
         viewModelScope.launch {
-            tableRepository.deleteTable(tableId)
-            _uiState.update { it.copy(snackbarMessage = "Tabla eliminada") }
+            tableRepository.bulkUpdatePinnedState(ids, pin)
+            _uiState.update { it.copy(selectedTableIds = emptySet()) }
         }
     }
 
     fun clearSnackbar() = _uiState.update { it.copy(snackbarMessage = null) }
 
-    // ── Bundled tables ────────────────────────────────────────────────────────
-
-    private suspend fun loadBundledTablesIfNeeded() {
-        if (tableRepository.countBuiltInTables() > 0) return
-        try {
-            val json = context.assets.open("tables/bundled_tables.json")
-                .bufferedReader().readText()
-            val pack = bundledJson.decodeFromString(BundledTablePack.serializer(), json)
-            pack.tables.forEach { bundled ->
-                val table = RandomTable(
-                    name = bundled.name,
-                    description = bundled.description,
-                    category = bundled.category,
-                    rollFormula = bundled.rollFormula,
-                    rollMode = runCatching { TableRollMode.valueOf(bundled.rollMode) }
-                        .getOrDefault(TableRollMode.RANGE),
-                    entries = bundled.entries.mapIndexed { idx, e ->
-                        TableEntry(
-                            minRoll = e.minRoll,
-                            maxRoll = e.maxRoll,
-                            weight = e.weight,
-                            text = e.text,
-                            subTableRef = e.subTableRef,
-                            sortOrder = idx
-                        )
-                    },
-                    isBuiltIn = true
-                )
-                tableRepository.saveTable(table)
+    fun rollTable(tableId: Long, sessionId: Long?) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isRolling = true) }
+            try {
+                val result = rollTableUseCase(tableId, sessionId)
+                _uiState.update { it.copy(lastResult = result, isRolling = false) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isRolling = false) }
             }
-        } catch (e: Exception) {
-            // Si no hay assets o hay error de parseo, seguimos sin tablas predefinidas
         }
     }
 
-    companion object {
-        private val bundledJson = Json { ignoreUnknownKeys = true }
+    /** Devuelve el JSON de exportación de la tabla activa, o cadena vacía si no hay ninguna. */
+    fun getExportJson(): String {
+        val table = _uiState.value.activeTable ?: return ""
+        return ExportTableUseCase.buildJson(table)
+    }
+
+    fun loadRecentResults(sessionId: Long) {
+        val tableId = _uiState.value.activeTable?.id ?: return
+        viewModelScope.launch {
+            tableRepository.getRecentResultsForTable(sessionId, tableId).collect { results ->
+                _uiState.update { it.copy(recentResults = results) }
+            }
+        }
     }
 }
-
-// ── Modelos de deserialización del bundle ─────────────────────────────────────
-
-@Serializable
-data class BundledTablePack(val tables: List<BundledTable>)
-
-@Serializable
-data class BundledTable(
-    val name: String,
-    val description: String = "",
-    val category: String = "",
-    val rollFormula: String = "1d6",
-    val rollMode: String = "RANGE",
-    val entries: List<BundledEntry>
-)
-
-@Serializable
-data class BundledEntry(
-    val minRoll: Int = 1,
-    val maxRoll: Int = 1,
-    val weight: Int = 1,
-    val text: String,
-    val subTableRef: String? = null
-)

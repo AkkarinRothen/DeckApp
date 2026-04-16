@@ -22,6 +22,9 @@ import javax.inject.Inject
 data class DeckDetailUiState(
     val deck: CardStack? = null,
     val cards: List<Card> = emptyList(),
+    val filteredCards: List<Card> = emptyList(),
+    val availableSuits: List<String> = emptyList(),
+    val suitFilter: String? = null,
     val isLoading: Boolean = true,
     val duplicatedDeckId: Long? = null,   // non-null tras duplicar → navegación
     val isDuplicating: Boolean = false,
@@ -30,7 +33,8 @@ data class DeckDetailUiState(
     val showMergeDialog: Boolean = false,
     val availableDecks: List<CardStack> = emptyList(),
     val errorMessage: String? = null,
-    val exportSuccessMessage: String? = null
+    val exportSuccessMessage: String? = null,
+    val showConfigSheet: Boolean = false
 )
 
 @HiltViewModel
@@ -52,7 +56,9 @@ class DeckDetailViewModel @Inject constructor(
         val isMerging: Boolean = false,
         val showMergeDialog: Boolean = false,
         val errorMessage: String? = null,
-        val exportSuccessMessage: String? = null
+        val exportSuccessMessage: String? = null,
+        val showConfigSheet: Boolean = false,
+        val suitFilter: String? = null
     )
 
     val uiState = combine(
@@ -61,9 +67,15 @@ class DeckDetailViewModel @Inject constructor(
         cardRepository.getAllDecks(),
         _extras
     ) { deck, cards, allDecks, extras ->
+        val suits = cards.mapNotNull { it.suit }.distinct().sorted()
+        val filtered = if (extras.suitFilter == null) cards
+                       else cards.filter { it.suit == extras.suitFilter }
         DeckDetailUiState(
             deck = deck,
             cards = cards,
+            filteredCards = filtered,
+            availableSuits = suits,
+            suitFilter = extras.suitFilter,
             isLoading = false,
             duplicatedDeckId = extras.duplicatedDeckId,
             isDuplicating = extras.isDuplicating,
@@ -72,7 +84,8 @@ class DeckDetailViewModel @Inject constructor(
             showMergeDialog = extras.showMergeDialog,
             availableDecks = allDecks.filter { it.id != deckId },
             errorMessage = extras.errorMessage,
-            exportSuccessMessage = extras.exportSuccessMessage
+            exportSuccessMessage = extras.exportSuccessMessage,
+            showConfigSheet = extras.showConfigSheet
         )
     }.stateIn(
         scope = viewModelScope,
@@ -136,6 +149,42 @@ class DeckDetailViewModel @Inject constructor(
     /** Llamar desde la UI después de consumir la navegación. */
     fun onDuplicatedNavHandled() {
         _extras.update { it.copy(duplicatedDeckId = null) }
+    }
+
+    fun showConfigSheet(show: Boolean) {
+        _extras.update { it.copy(showConfigSheet = show) }
+    }
+
+    fun updateDrawMode(mode: com.deckapp.core.model.DrawMode) {
+        val deck = uiState.value.deck ?: return
+        viewModelScope.launch {
+            cardRepository.updateStack(deck.copy(drawMode = mode))
+        }
+    }
+
+    fun updateAspectRatio(ratio: com.deckapp.core.model.CardAspectRatio) {
+        val deck = uiState.value.deck ?: return
+        viewModelScope.launch {
+            cardRepository.updateStack(deck.copy(aspectRatio = ratio))
+        }
+    }
+
+    fun toggleDrawFaceDown(enabled: Boolean) {
+        val deck = uiState.value.deck ?: return
+        viewModelScope.launch {
+            cardRepository.updateStack(deck.copy(drawFaceDown = enabled))
+        }
+    }
+
+    fun setBackImage(path: String?) {
+        val deck = uiState.value.deck ?: return
+        viewModelScope.launch {
+            cardRepository.updateStack(deck.copy(backImagePath = path))
+        }
+    }
+
+    fun setSuitFilter(suit: String?) {
+        _extras.update { it.copy(suitFilter = suit) }
     }
 
     fun deleteCard(cardId: Long) {

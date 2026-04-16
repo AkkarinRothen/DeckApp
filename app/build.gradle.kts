@@ -48,6 +48,7 @@ dependencies {
     implementation(project(":feature:session"))
     implementation(project(":feature:settings"))
     implementation(project(":feature:tables"))
+    implementation(project(":feature:encounters"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
