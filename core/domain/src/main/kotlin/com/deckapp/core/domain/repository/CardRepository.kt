@@ -28,6 +28,8 @@ interface CardRepository {
     suspend fun updateCardFaceIndex(cardId: Long, faceIndex: Int)
     suspend fun updateCardRevealed(cardId: Long, isRevealed: Boolean)
     suspend fun updateCardNotes(cardId: Long, notes: String?)
+    /** Persiste el nuevo orden de las cartas actualizando el campo sortOrder de cada ID. */
+    suspend fun updateCardsSortOrder(orderedIds: List<Long>)
     suspend fun resetDeck(deckId: Long)  // isDrawn=false para todas las cartas del mazo
     fun getDrawnCards(): Flow<List<Card>>  // cartas con isDrawn=true (mano activa)
     fun getPiledCards(sessionId: Long): Flow<List<Card>>  // cartas descartadas en esta sesión
@@ -46,4 +48,7 @@ interface CardRepository {
     suspend fun bulkDeleteDecks(ids: List<Long>)
     suspend fun bulkAddTagToStacks(stackIds: List<Long>, tagId: Long)
     suspend fun bulkRemoveTagFromStacks(stackIds: List<Long>, tagId: Long)
+
+    // --- Search ---
+    fun searchCards(query: String): Flow<List<Card>>
 }

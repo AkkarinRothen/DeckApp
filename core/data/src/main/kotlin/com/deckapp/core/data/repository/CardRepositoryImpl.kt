@@ -12,7 +12,8 @@ class CardRepositoryImpl @Inject constructor(
     private val stackDao: CardStackDao,
     private val cardDao: CardDao,
     private val faceDao: CardFaceDao,
-    private val tagDao: TagDao
+    private val tagDao: TagDao,
+    private val searchDao: SearchDao
 ) : CardRepository {
 
     override fun getAllDecks(): Flow<List<CardStack>> =
@@ -117,6 +118,12 @@ class CardRepositoryImpl @Inject constructor(
     override suspend fun updateCardNotes(cardId: Long, notes: String?) =
         cardDao.updateDmNotes(cardId, notes)
 
+    override suspend fun updateCardsSortOrder(orderedIds: List<Long>) {
+        orderedIds.forEachIndexed { index, id ->
+            cardDao.updateSortOrder(id, index)
+        }
+    }
+
     override suspend fun resetDeck(deckId: Long) = cardDao.resetDeck(deckId)
 
     override suspend fun getTopCard(stackId: Long): Card? {
@@ -178,6 +185,24 @@ class CardRepositoryImpl @Inject constructor(
     override suspend fun bulkRemoveTagFromStacks(stackIds: List<Long>, tagId: Long) {
         stackIds.forEach { stackId ->
             tagDao.removeStackTagRef(stackId, tagId)
+        }
+    }
+
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    override fun searchCards(query: String): Flow<List<Card>> {
+        if (query.isBlank()) return kotlinx.coroutines.flow.flowOf(emptyList())
+        val ftsQuery = "$query*"
+        
+        return combine(
+            searchDao.searchCardIds(ftsQuery),
+            searchDao.searchCardFaceIds(ftsQuery)
+        ) { cardIds, faceIds ->
+            (cardIds.map { it.rowid } + faceIds.map { it.rowid }).distinct()
+        }.flatMapLatest { ids ->
+            if (ids.isEmpty()) kotlinx.coroutines.flow.flowOf(emptyList())
+            else combine(
+                ids.map { id -> getCardById(id) }
+            ) { cards -> cards.filterNotNull() }
         }
     }
 }

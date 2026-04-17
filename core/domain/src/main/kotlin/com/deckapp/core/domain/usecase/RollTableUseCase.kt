@@ -15,7 +15,8 @@ import kotlin.random.Random
  * - Fórmulas de dado: "1d6", "2d8+3", "1d100"
  * - Dados inline en el texto de la entrada: "[1d4+1] bandidos"
  * - Sub-tabla de 1 nivel: "@NombreDeTabla" reemplazado por el resultado de esa tabla
- * - Modos: RANGE (por rango minRoll..maxRoll) y WEIGHTED (peso relativo)
+ * - Modos: RANGE (rango), WEIGHTED (peso), SEQUENTIAL (siguiente entrada)
+ * - isNoRepeat: evita repetir el último resultado en la sesión
  */
 class RollTableUseCase @Inject constructor(
     private val tableRepository: TableRepository
@@ -50,8 +51,13 @@ class RollTableUseCase @Inject constructor(
                 resolvedText = "[tabla no encontrada]"
             )
 
-        val rollValue = evaluateDiceFormula(table.rollFormula)
-        val entry = pickEntry(table, rollValue)
+        val entry = pickEntry(table, sessionId)
+        val rollValue = if (table.rollMode == TableRollMode.RANGE) {
+            // Si es RANGE, intentamos que el dado coincida con la entrada elegida
+            entry?.minRoll ?: 1
+        } else {
+            evaluateDiceFormula(table.rollFormula)
+        }
         
         // 1. Resolver texto base (dados inline y referencias por @Nombre)
         var resolvedText = resolveText(entry?.text ?: "[sin entrada]", sessionId, depth)
@@ -75,19 +81,56 @@ class RollTableUseCase @Inject constructor(
 
     // ── Selección de entrada ──────────────────────────────────────────────────
 
-    private fun pickEntry(table: RandomTable, rollValue: Int): TableEntry? {
+    private suspend fun pickEntry(table: RandomTable, sessionId: Long?): TableEntry? {
+        if (table.entries.isEmpty()) return null
+
+        val lastResults = if (table.isNoRepeat && sessionId != null) {
+            tableRepository.getRecentResultsForTable(sessionId, table.id, 5)
+        } else emptyList()
+        val lastTexts = lastResults.map { it.resolvedText }.toSet()
+
         return when (table.rollMode) {
             TableRollMode.RANGE -> {
-                table.entries.firstOrNull { rollValue in it.minRoll..it.maxRoll }
-                    ?: table.entries.randomOrNull()
+                var entry: TableEntry? = null
+                var attempts = 0
+                do {
+                    val roll = evaluateDiceFormula(table.rollFormula)
+                    entry = table.entries.firstOrNull { roll in it.minRoll..it.maxRoll }
+                    attempts++
+                } while (table.isNoRepeat && lastTexts.contains(entry?.text) && attempts < 10)
+                entry ?: table.entries.randomOrNull()
             }
             TableRollMode.WEIGHTED -> {
-                val totalWeight = table.entries.sumOf { it.weight }.coerceAtLeast(1)
-                var pick = Random.nextInt(totalWeight)
-                table.entries.firstOrNull { entry ->
-                    pick -= entry.weight
-                    pick < 0
-                } ?: table.entries.randomOrNull()
+                var entry: TableEntry? = null
+                var attempts = 0
+                do {
+                    val totalWeight = table.entries.sumOf { it.weight }.coerceAtLeast(1)
+                    var pick = Random.nextInt(totalWeight)
+                    entry = table.entries.firstOrNull { e ->
+                        pick -= e.weight
+                        pick < 0
+                    }
+                    attempts++
+                } while (table.isNoRepeat && lastTexts.contains(entry?.text) && attempts < 10)
+                entry ?: table.entries.randomOrNull()
+            }
+            TableRollMode.SEQUENTIAL -> {
+                val lastResult = if (sessionId != null) {
+                    tableRepository.getRecentResultsForTable(sessionId, table.id, 1).firstOrNull()
+                } else null
+                
+                if (lastResult == null) {
+                    table.entries.minByOrNull { it.sortOrder }
+                } else {
+                    // Buscar la siguiente entrada después de la última obtenida
+                    val sorted = table.entries.sortedBy { it.sortOrder }
+                    val lastIndex = sorted.indexOfFirst { it.text == lastResult.resolvedText }
+                    if (lastIndex == -1 || lastIndex >= sorted.size - 1) {
+                        sorted.firstOrNull() // Volver a empezar o primera
+                    } else {
+                        sorted[lastIndex + 1]
+                    }
+                }
             }
         }
     }

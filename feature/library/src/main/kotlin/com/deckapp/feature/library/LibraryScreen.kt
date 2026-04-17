@@ -16,6 +16,9 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tag
+import androidx.compose.material.icons.filled.Casino
+import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,8 +29,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.deckapp.core.model.CardStack
-import com.deckapp.core.ui.components.DeckCoverCard
-import com.deckapp.core.ui.components.SelectionActionBar
+import com.deckapp.core.model.CollectionIcon
+import com.deckapp.core.model.SearchResultType
+import com.deckapp.core.ui.components.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,9 +47,7 @@ fun LibraryScreen(
     val focusManager = LocalFocusManager.current
     val snackbarHostState = remember { SnackbarHostState() }
 
-    var confirmDeleteDeck by remember { mutableStateOf<CardStack?>(null) }
-
-    // Snackbar
+    // Snackbar para mensajes generales
     LaunchedEffect(uiState.snackbarMessage) {
         uiState.snackbarMessage?.let {
             snackbarHostState.showSnackbar(it)
@@ -53,28 +55,17 @@ fun LibraryScreen(
         }
     }
 
-    // Diálogo confirmación de borrado
-    confirmDeleteDeck?.let { deck ->
-        AlertDialog(
-            onDismissRequest = { confirmDeleteDeck = null },
-            title = { Text("Eliminar mazo") },
-            text = {
-                Text("¿Eliminar \"${deck.name}\"? Se borrarán todas sus cartas e imágenes. Esta acción no se puede deshacer.")
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        viewModel.deleteDeck(deck.id)
-                        confirmDeleteDeck = null
-                    }
-                ) {
-                    Text("Eliminar", color = MaterialTheme.colorScheme.error)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { confirmDeleteDeck = null }) { Text("Cancelar") }
-            }
+    // Snackbar de borrado con opción Deshacer (C-4)
+    LaunchedEffect(uiState.pendingDeleteName) {
+        val name = uiState.pendingDeleteName ?: return@LaunchedEffect
+        val result = snackbarHostState.showSnackbar(
+            message = "\"$name\" eliminado",
+            actionLabel = "Deshacer",
+            duration = SnackbarDuration.Long
         )
+        if (result == SnackbarResult.ActionPerformed) {
+            viewModel.undoDeletion()
+        }
     }
 
     // Diálogo de fusión — selector de mazo destino
@@ -91,6 +82,10 @@ fun LibraryScreen(
 
     var showBulkDeleteConfirmation by remember { mutableStateOf(false) }
     var showBulkTagMenu by remember { mutableStateOf(false) }
+    var selectedTab by remember { mutableIntStateOf(0) } // 0: Mazos, 1: Tablas, 2: Colecciones
+    
+    var showCreateCollectionDialog by remember { mutableStateOf(false) }
+    var resourceToAddToCollection by remember { mutableStateOf<Pair<Long, SearchResultType>?>(null) }
 
     if (showBulkDeleteConfirmation) {
         AlertDialog(
@@ -112,6 +107,31 @@ fun LibraryScreen(
                 TextButton(onClick = { showBulkDeleteConfirmation = false }) {
                     Text("Cancelar")
                 }
+            }
+        )
+    }
+
+    if (showCreateCollectionDialog) {
+        CreateCollectionDialog(
+            onDismiss = { showCreateCollectionDialog = false },
+            onConfirm = { name, color, icon ->
+                viewModel.createCollection(name, color, icon)
+                showCreateCollectionDialog = false
+            }
+        )
+    }
+
+    resourceToAddToCollection?.let { (resourceId, type) ->
+        AddToCollectionDialog(
+            collections = uiState.allCollections,
+            onDismiss = { resourceToAddToCollection = null },
+            onSelect = { colId ->
+                viewModel.addResourceToCollection(colId, resourceId, type)
+                resourceToAddToCollection = null
+            },
+            onCreateNewCollection = {
+                resourceToAddToCollection = null
+                showCreateCollectionDialog = true
             }
         )
     }
@@ -223,72 +243,124 @@ fun LibraryScreen(
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             )
 
-            // ── Chips: filtro por tag + toggle Archivados ─────────────
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                item {
-                    FilterChip(
-                        selected = uiState.showArchived,
-                        onClick = { viewModel.toggleShowArchived() },
-                        label = { Text("Archivados") },
-                        leadingIcon = {
-                            Icon(
-                                Icons.Default.Archive,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp)
+            if (uiState.searchQuery.length >= 2 && uiState.searchResults.isNotEmpty()) {
+                Text(
+                    text = "Resultados globales (${uiState.searchResults.size})",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+                
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxWidth().heightIn(max = 100.dp)
+                ) {
+                    items(uiState.searchResults.size) { index ->
+                        val result = uiState.searchResults[index]
+                        Card(
+                            onClick = {
+                                if (result.type == SearchResultType.CARD) {
+                                    result.parentId?.let { onDeckClick(it) }
+                                }
+                            },
+                            modifier = Modifier.width(200.dp).fillMaxHeight(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                             )
-                        }
-                    )
-                }
-                uiState.allTags.forEach { tag ->
-                    item(key = tag.id) {
-                        FilterChip(
-                            selected = tag.id in uiState.selectedTagIds,
-                            onClick = { viewModel.toggleTagFilter(tag.id) },
-                            label = { Text(tag.name) }
-                        )
-                    }
-                }
-            }
-            Spacer(Modifier.height(8.dp))
-
-            // ── Grid de mazos ─────────────────────────────────────────
-            when {
-                uiState.isLoading -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
-                }
-                uiState.allDecks.isEmpty() && !uiState.showArchived -> {
-                    EmptyLibraryState(onImportClick = onImportClick)
-                }
-                uiState.displayedDecks.isEmpty() && uiState.showArchived -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            "No hay mazos archivados",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-                uiState.filteredDecks.isEmpty() -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(
-                                "Sin resultados",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            TextButton(onClick = { viewModel.clearFilters() }) {
-                                Text("Limpiar filtros")
+                            Row(
+                                modifier = Modifier.padding(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = when (result.type) {
+                                        SearchResultType.CARD -> Icons.Default.Layers
+                                        SearchResultType.TABLE -> Icons.Default.Casino
+                                        else -> Icons.Default.Description
+                                    },
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Column {
+                                    Text(
+                                        text = result.title,
+                                        style = MaterialTheme.typography.titleSmall,
+                                        maxLines = 1,
+                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        text = result.subtitle ?: "",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         }
+                    }
+                }
+                HorizontalDivider(Modifier.padding(top = 12.dp))
+            }
+            // ── Pestañas de Navegación ────────────────────────────────
+            TabRow(
+                selectedTabIndex = selectedTab,
+                containerColor = Color.Transparent,
+                divider = {}
+            ) {
+                Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }) {
+                    Text("Mazos", modifier = Modifier.padding(12.dp))
+                }
+                Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }) {
+                    Text("Tablas", modifier = Modifier.padding(12.dp))
+                }
+                Tab(selected = selectedTab == 2, onClick = { selectedTab = 2 }) {
+                    Text("Baúl", modifier = Modifier.padding(12.dp))
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            // ── Chips: filtro por tag + toggle Archivados (Solo para Mazos) ──
+            if (selectedTab == 0) {
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    item {
+                        FilterChip(
+                            selected = uiState.showArchived,
+                            onClick = { viewModel.toggleShowArchived() },
+                            label = { Text("Archivados") },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Archive,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        )
+                    }
+                    uiState.allTags.forEach { tag ->
+                        item(key = tag.id) {
+                            FilterChip(
+                                selected = tag.id in uiState.selectedTagIds,
+                                onClick = { viewModel.toggleTagFilter(tag.id) },
+                                label = { Text(tag.name) }
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+            }
+
+            // ── Grid de Contenido ─────────────────────────────────────
+            when {
+                uiState.isLoading || (selectedTab == 2 && uiState.isLoadingCollections) -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
                     }
                 }
                 else -> {
@@ -299,32 +371,160 @@ fun LibraryScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        gridItems(uiState.filteredDecks, key = { it.id }) { deck ->
-                            val isSelected = deck.id in uiState.selectedDeckIds
-                            DeckCoverCard(
-                                deck = deck,
-                                isSelected = isSelected,
-                                onLongClick = { viewModel.toggleDeckSelection(deck.id) },
-                                onClick = {
-                                    if (uiState.selectedDeckIds.isNotEmpty()) {
-                                        viewModel.toggleDeckSelection(deck.id)
-                                    } else {
-                                        onDeckClick(deck.id)
+                        when (selectedTab) {
+                            0 -> { // Mazos
+                                gridItems(uiState.filteredDecks, key = { "deck_${it.id}" }) { deck ->
+                                    val isSelected = deck.id in uiState.selectedDeckIds
+                                    DeckCoverCard(
+                                        deck = deck,
+                                        isSelected = isSelected,
+                                        onLongClick = { viewModel.toggleDeckSelection(deck.id) },
+                                        onClick = {
+                                            if (uiState.selectedDeckIds.isNotEmpty()) {
+                                                viewModel.toggleDeckSelection(deck.id)
+                                            } else {
+                                                onDeckClick(deck.id)
+                                            }
+                                        },
+                                        onAddToSession = { onAddToSession(deck.id) },
+                                        onDuplicate = if (!uiState.showArchived && uiState.selectedDeckIds.isEmpty()) ({ viewModel.duplicateDeck(deck.id) }) else null,
+                                        onMergeWith = if (!uiState.showArchived && uiState.selectedDeckIds.isEmpty()) ({ viewModel.startMerge(deck.id) }) else null,
+                                        onArchive = { viewModel.archiveDeck(deck.id, !deck.isArchived) },
+                                        onDelete = { viewModel.scheduleDeletion(deck.id) },
+                                        onAddToCollection = { resourceToAddToCollection = deck.id to SearchResultType.DECK },
+                                        cardCount = uiState.deckCardCounts[deck.id] ?: 0
+                                    )
+                                }
+                            }
+                            1 -> { // Tablas
+                                gridItems(uiState.allTables, key = { "table_${it.id}" }) { table ->
+                                    Card(
+                                        onClick = { /* Navegar a tabla */ },
+                                        onLongClick = { resourceToAddToCollection = table.id to SearchResultType.TABLE },
+                                        modifier = Modifier.fillMaxWidth().height(100.dp)
+                                    ) {
+                                        Column(Modifier.padding(12.dp)) {
+                                            Text(table.name, style = MaterialTheme.typography.titleSmall)
+                                            Text(table.rollFormula, style = MaterialTheme.typography.labelSmall)
+                                        }
                                     }
-                                },
-                                onAddToSession = { onAddToSession(deck.id) },
-                                onDuplicate = if (!uiState.showArchived && uiState.selectedDeckIds.isEmpty()) ({ viewModel.duplicateDeck(deck.id) }) else null,
-                                onMergeWith = if (!uiState.showArchived && uiState.selectedDeckIds.isEmpty()) ({ viewModel.startMerge(deck.id) }) else null,
-                                onArchive = { viewModel.archiveDeck(deck.id, !deck.isArchived) },
-                                onDelete = { confirmDeleteDeck = deck },
-                                cardCount = uiState.deckCardCounts[deck.id] ?: 0
-                            )
+                                }
+                            }
+                            2 -> { // Colecciones (Baúl)
+                                gridItems(uiState.allCollections, key = { "col_${it.id}" }) { collection ->
+                                    CollectionGridItem(
+                                        collection = collection,
+                                        onClick = { viewModel.setActiveCollection(collection.id) },
+                                        onLongClick = { /* Opciones de colección */ }
+                                    )
+                                }
+                                
+                                // Botón para añadir nueva colección
+                                item {
+                                    OutlinedCard(
+                                        onClick = { showCreateCollectionDialog = true },
+                                        modifier = Modifier.fillMaxWidth().height(180.dp),
+                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                                    ) {
+                                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                                Icon(Icons.Default.Add, null)
+                                                Text("Nueva Colección", style = MaterialTheme.typography.labelMedium)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+fun CreateCollectionDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (String, Int, CollectionIcon) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    var selectedIcon by remember { mutableStateOf(CollectionIcon.CHEST) }
+    var selectedColor by remember { mutableStateOf(0xFF6200EE.toInt()) } // Violeta por defecto
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Nueva Colección") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Nombre") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                Text("Icono", style = MaterialTheme.typography.labelLarge)
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    CollectionIcon.values().forEach { icon ->
+                        item {
+                            FilterChip(
+                                selected = selectedIcon == icon,
+                                onClick = { selectedIcon = icon },
+                                label = { Icon(icon.toIcon(), null, modifier = Modifier.size(20.dp)) }
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { if (name.isNotBlank()) onConfirm(name, selectedColor, selectedIcon) },
+                enabled = name.isNotBlank()
+            ) { Text("Crear") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancelar") }
+        }
+    )
+}
+
+@Composable
+fun AddToCollectionDialog(
+    collections: List<com.deckapp.core.model.Collection>,
+    onDismiss: () -> Unit,
+    onSelect: (Long) -> Unit,
+    onCreateNewCollection: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Añadir al Baúl") },
+        text = {
+            if (collections.isEmpty()) {
+                Text("No tienes colecciones creadas todavía.")
+            } else {
+                LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
+                    collections.forEach { col ->
+                        item {
+                            ListItem(
+                                headlineContent = { Text(col.name) },
+                                leadingContent = { Icon(col.icon.toIcon(), null, tint = Color(col.color)) },
+                                modifier = Modifier.combinedClickable(onClick = { onSelect(col.id) })
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onCreateNewCollection) { Text("Nueva Colección") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cerrar") }
+        }
+    )
 }
 
 @Composable

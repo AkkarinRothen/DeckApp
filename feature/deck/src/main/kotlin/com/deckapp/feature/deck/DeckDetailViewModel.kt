@@ -34,7 +34,8 @@ data class DeckDetailUiState(
     val availableDecks: List<CardStack> = emptyList(),
     val errorMessage: String? = null,
     val exportSuccessMessage: String? = null,
-    val showConfigSheet: Boolean = false
+    val showConfigSheet: Boolean = false,
+    val isReorderMode: Boolean = false
 )
 
 @HiltViewModel
@@ -58,7 +59,8 @@ class DeckDetailViewModel @Inject constructor(
         val errorMessage: String? = null,
         val exportSuccessMessage: String? = null,
         val showConfigSheet: Boolean = false,
-        val suitFilter: String? = null
+        val suitFilter: String? = null,
+        val isReorderMode: Boolean = false
     )
 
     val uiState = combine(
@@ -85,7 +87,8 @@ class DeckDetailViewModel @Inject constructor(
             availableDecks = allDecks.filter { it.id != deckId },
             errorMessage = extras.errorMessage,
             exportSuccessMessage = extras.exportSuccessMessage,
-            showConfigSheet = extras.showConfigSheet
+            showConfigSheet = extras.showConfigSheet,
+            isReorderMode = extras.isReorderMode
         )
     }.stateIn(
         scope = viewModelScope,
@@ -185,6 +188,17 @@ class DeckDetailViewModel @Inject constructor(
 
     fun setSuitFilter(suit: String?) {
         _extras.update { it.copy(suitFilter = suit) }
+    }
+
+    fun toggleReorderMode() {
+        _extras.update { it.copy(isReorderMode = !it.isReorderMode) }
+    }
+
+    fun saveReorder(orderedIds: List<Long>) {
+        viewModelScope.launch {
+            cardRepository.updateCardsSortOrder(orderedIds)
+            _extras.update { it.copy(isReorderMode = false) }
+        }
     }
 
     fun deleteCard(cardId: Long) {

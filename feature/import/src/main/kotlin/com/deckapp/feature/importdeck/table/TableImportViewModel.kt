@@ -8,10 +8,12 @@ import androidx.lifecycle.viewModelScope
 import com.deckapp.core.domain.repository.TableRepository
 import com.deckapp.core.domain.repository.RecentFileRepository
 import com.deckapp.core.domain.repository.FileRepository
+import com.deckapp.core.domain.repository.RecentFileType
 import com.deckapp.core.domain.usecase.RenderPdfPageUseCase
 import com.deckapp.core.domain.usecase.ImportTableUseCase
-import com.deckapp.core.domain.usecase.ImportTableUseCase.ImportResult
+import com.deckapp.core.domain.usecase.ImportResult
 import com.deckapp.core.domain.usecase.ImportSource
+import com.deckapp.core.domain.usecase.TextImportParams
 import com.deckapp.core.domain.usecase.ReadTextFromUriUseCase
 import com.deckapp.core.domain.usecase.AnalyzeTableImageUseCase
 import com.deckapp.core.domain.usecase.CsvTableParser
@@ -52,8 +54,8 @@ class TableImportViewModel(
         viewModelScope.launch {
             recentFileRepository.getRecentFiles().collect { recents ->
                 val mapped = recents
-                    .filter { it.type == "pdf" }
-                    .map { Uri.parse(it.uri) to it.name }
+                    .filter { it.type == RecentFileType.PDF }
+                    .map { it.uri to it.name }
                 _uiState.update { it.copy(recentPdfs = mapped) }
             }
         }
@@ -73,11 +75,39 @@ class TableImportViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isProcessing = true, selectedUri = uri) }
             try {
-                recentFileRepository.addRecentFile(uri, uri.lastPathSegment ?: "Archivo", com.deckapp.core.domain.repository.RecentFileType.PDF)
+                recentFileRepository.addRecentFile(uri, uri.lastPathSegment ?: "Archivo", RecentFileType.PDF)
                 
                 loadPage(0)
             } catch (e: Exception) {
                 _uiState.update { it.copy(errorMessage = e.message, isProcessing = false) }
+            }
+        }
+    }
+
+    fun importTextFile(uri: Uri) {
+        val mode = _uiState.value.mode
+        val source = when (mode) {
+            ImportMode.CSV -> ImportSource.CSV_TEXT
+            ImportMode.JSON -> ImportSource.JSON_TEXT
+            ImportMode.PLAIN_TEXT -> ImportSource.PLAIN_TEXT
+            else -> return
+        }
+        
+        viewModelScope.launch {
+            _uiState.update { it.copy(isProcessing = true, selectedUri = uri) }
+            try {
+                val text = readTextFromUriUseCase(uri)
+                val result = importTableUseCase.fromText(TextImportParams(source, text))
+                
+                _uiState.update { it.copy(
+                    detectedTables = listOf(result),
+                    currentTableIndex = 0,
+                    step = ImportStep.MAPPING,
+                    isProcessing = false
+                ) }
+                loadResultToDraft(result)
+            } catch (e: Exception) {
+                _uiState.update { it.copy(errorMessage = "Error al importar texto: ${e.message}", isProcessing = false) }
             }
         }
     }
@@ -87,11 +117,12 @@ class TableImportViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isProcessing = true) }
             try {
-                val result = renderPdfPageUseCase(uri, index)
-                if (result != null) {
+                val bitmap = renderPdfPageUseCase.renderPage(uri, index)
+                val count = renderPdfPageUseCase.getPageCount(uri)
+                if (bitmap != null) {
                     _uiState.update { it.copy(
-                        pageBitmap = result.bitmap,
-                        pdfPageCount = result.totalPageCount,
+                        pageBitmap = bitmap,
+                        pdfPageCount = count,
                         currentPageIndex = index,
                         step = ImportStep.FILE_PREVIEW,
                         isProcessing = false
@@ -117,7 +148,8 @@ class TableImportViewModel(
                 _uiState.update { it.copy(browsedPdfs = files, isProcessing = false) }
                 
                 files.forEach { (uri, _) ->
-                    val thumb = renderPdfPageUseCase(uri, 0)?.bitmap
+                    // 400px es suficiente para thumbnails — 1200px era innecesariamente lento.
+                    val thumb = renderPdfPageUseCase.renderPage(uri, 0, targetWidth = 400)
                     _uiState.update { s -> s.copy(browsedThumbnails = s.browsedThumbnails + (uri to thumb)) }
                 }
             } catch (e: Exception) {
@@ -138,12 +170,22 @@ class TableImportViewModel(
                     return@launch
                 }
 
-                val (cluster, anchors) = layout[0]
+                val initialTables = layout.map { (cluster, anchors) ->
+                    val analysis = analyzeTableImageUseCase.processWithAnchors(cluster, anchors)
+                    ImportResult(
+                        sourceType = "OCR",
+                        entries = analysis?.entries ?: emptyList(),
+                        suggestedName = analysis?.suggestedName ?: "",
+                        lowConfidenceIndices = analysis?.lowConfidenceIndices ?: emptySet()
+                    )
+                }
 
                 _uiState.update { it.copy(
                     ocrBlocks = blocks,
-                    currentCluster = cluster,
-                    detectedAnchors = anchors,
+                    detectedTables = initialTables,
+                    currentTableIndex = 0,
+                    currentCluster = layout[0].first,
+                    detectedAnchors = layout[0].second,
                     step = ImportStep.RECOGNITION,
                     isProcessing = false
                 ) }
@@ -170,38 +212,38 @@ class TableImportViewModel(
             try {
                 _uiState.update { it.copy(isProcessing = true) }
                 
-                val result = analyzeTableImageUseCase.processWithAnchors(
+                val analysis = analyzeTableImageUseCase.processWithAnchors(
                     _uiState.value.currentCluster,
                     _uiState.value.detectedAnchors
                 )
 
-                if (result == null) {
+                if (analysis == null) {
                     _uiState.update { it.copy(errorMessage = "Error al procesar con las columnas seleccionadas", isProcessing = false) }
                     return@launch
                 }
 
-                if (_uiState.value.isStitchingMode && _uiState.value.detectedTables.isNotEmpty()) {
-                    val currentTables = _uiState.value.detectedTables.toMutableList()
-                    val lastTable = currentTables.last()
-                    val mergedEntries = lastTable.entries + result.entries
-                    currentTables[currentTables.size - 1] = lastTable.copy(entries = mergedEntries)
-                    
-                    _uiState.update { it.copy(
-                        detectedTables = currentTables,
-                        currentTableIndex = currentTables.size - 1,
-                        step = ImportStep.MAPPING,
-                        isProcessing = false
-                    ) }
-                    loadResultToDraft(currentTables.last())
+                val result = ImportResult(
+                    sourceType = "OCR",
+                    entries = analysis.entries,
+                    suggestedName = analysis.suggestedName,
+                    lowConfidenceIndices = analysis.lowConfidenceIndices
+                )
+
+                val updatedTables = _uiState.value.detectedTables.toMutableList()
+                val currentIndex = _uiState.value.currentTableIndex
+                
+                if (currentIndex in updatedTables.indices) {
+                    updatedTables[currentIndex] = result
                 } else {
-                    _uiState.update { it.copy(
-                        detectedTables = listOf(result),
-                        currentTableIndex = 0,
-                        step = ImportStep.MAPPING,
-                        isProcessing = false
-                    ) }
-                    loadResultToDraft(result)
+                    updatedTables.add(result)
                 }
+
+                _uiState.update { it.copy(
+                    detectedTables = updatedTables,
+                    step = ImportStep.MAPPING,
+                    isProcessing = false
+                ) }
+                loadResultToDraft(result)
             } catch (e: Exception) {
                 _uiState.update { it.copy(errorMessage = "Error al confirmar mapeo: ${e.message}", isProcessing = false) }
             }
@@ -217,11 +259,29 @@ class TableImportViewModel(
     }
 
     private fun loadResultToDraft(result: ImportResult) {
+        val threshold = _uiState.value.confidenceThreshold
+        val entries = result.entries
+        val lowConf = entries.mapIndexedNotNull { idx, entry ->
+            if (entry.confidence < threshold) idx else null
+        }.toSet()
+
         _uiState.update { it.copy(
-            editableEntries = result.entries,
+            editableEntries = entries,
             tableNameDraft = result.suggestedName,
-            validationResult = RangeParser.validate(result.entries),
-            lowConfidenceIndices = result.lowConfidenceIndices
+            validationResult = RangeParser.validateIntegrity(entries.map { it.minRoll to it.maxRoll }),
+            lowConfidenceIndices = lowConf
+        ) }
+    }
+
+    fun setConfidenceThreshold(threshold: Float) {
+        val currentEntries = _uiState.value.editableEntries
+        val lowConf = currentEntries.mapIndexedNotNull { idx, entry ->
+            if (entry.confidence < threshold) idx else null
+        }.toSet()
+        
+        _uiState.update { it.copy(
+            confidenceThreshold = threshold,
+            lowConfidenceIndices = lowConf
         ) }
     }
 
@@ -231,7 +291,7 @@ class TableImportViewModel(
             newList[index] = entry
             _uiState.update { it.copy(
                 editableEntries = newList,
-                validationResult = RangeParser.validate(newList)
+                validationResult = RangeParser.validateIntegrity(newList.map { it.minRoll to it.maxRoll })
             ) }
         }
     }

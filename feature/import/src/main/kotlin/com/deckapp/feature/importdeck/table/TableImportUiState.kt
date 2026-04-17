@@ -41,6 +41,7 @@ data class TableImportUiState(
     val tableTagDraft: String = "",
     val savedSuccessfully: Boolean = false,
     val validationResult: RangeParser.ValidationResult? = null,
+    val confidenceThreshold: Float = 0.6f,
     val lowConfidenceIndices: Set<Int> = emptySet(),
     
     // OCR Advanced

@@ -8,13 +8,11 @@ import com.deckapp.core.model.RectModel
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
-import dagger.hilt.android.scopes.ActivityRetainedScoped
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import javax.inject.Singleton
 
-// ActivityRetainedScoped en lugar de Singleton: el reconocedor se libera cuando el usuario
-// sale del flujo de importación, en vez de vivir toda la vida de la app.
-@ActivityRetainedScoped
+@Singleton
 class OcrRepositoryImpl @Inject constructor() : OcrRepository {
 
     private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
@@ -27,7 +25,10 @@ class OcrRepositoryImpl @Inject constructor() : OcrRepository {
      */
     override suspend fun recognizeText(bitmap: Bitmap): Result<List<OcrBlock>> {
         return try {
-            val image = InputImage.fromBitmap(bitmap, 0)
+            // Aplicar pre-procesamiento para mejorar la calidad del OCR
+            val processedBitmap = ImagePreprocessor.prepare(bitmap)
+            
+            val image = InputImage.fromBitmap(processedBitmap, 0)
             val result = recognizer.process(image).await()
             val blocks = result.textBlocks.flatMap { block ->
                 block.lines.mapNotNull { line ->

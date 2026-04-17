@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Unarchive
+import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -41,6 +42,7 @@ fun DeckCoverCard(
     onArchive: (() -> Unit)? = null,
     isSelected: Boolean = false,
     onLongClick: (() -> Unit)? = null,
+    onAddToCollection: (() -> Unit)? = null,
     cardCount: Int = 0,
     modifier: Modifier = Modifier
 ) {
@@ -220,6 +222,16 @@ fun DeckCoverCard(
                                 expanded = menuExpanded,
                                 onDismissRequest = { menuExpanded = false }
                             ) {
+                                DropdownMenuItem(
+                                    text = { Text("Añadir al Baúl") },
+                                    leadingIcon = {
+                                        Icon(Icons.Default.Inventory2, contentDescription = null)
+                                    },
+                                    onClick = {
+                                        menuExpanded = false
+                                        onAddToCollection?.invoke()
+                                    }
+                                )
                                 onDuplicate?.let { action ->
                                     DropdownMenuItem(
                                         text = { Text("Duplicar mazo") },

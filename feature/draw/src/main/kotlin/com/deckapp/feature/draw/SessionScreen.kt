@@ -8,6 +8,7 @@ import android.os.Vibrator
 import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -251,6 +252,11 @@ fun SessionScreen(
                                 onClick = { menuExpanded = false; viewModel.peekTopCard() }
                             )
                             DropdownMenuItem(
+                                text = { Text("Robar por palo…") },
+                                onClick = { menuExpanded = false; viewModel.openDrawBySuit() },
+                                enabled = uiState.selectedDeckId != null
+                            )
+                            DropdownMenuItem(
                                 text = { Text("Ver mazo completo") },
                                 onClick = {
                                     menuExpanded = false
@@ -445,7 +451,26 @@ fun SessionScreen(
                         .clickable { viewModel.toggleNightMode() }
                 )
             }
+
+            // ── C-5: Animación de barajar ─────────────────────────────────
+            AnimatedVisibility(
+                visible = uiState.isShuffling,
+                enter = fadeIn() + scaleIn(initialScale = 0.85f),
+                exit = fadeOut() + scaleOut(targetScale = 0.85f),
+                modifier = Modifier.align(Alignment.Center)
+            ) {
+                ShuffleAnimationOverlay()
+            }
         }
+    }
+
+    // ── D-2: Sheet "Robar por palo" ───────────────────────────────────────────
+    if (uiState.showDrawBySuitSheet) {
+        DrawBySuitSheet(
+            suits = uiState.availableSuitsForDraw,
+            onSuitSelected = { viewModel.drawCardBySuit(it) },
+            onDismiss = { viewModel.closeDrawBySuitSheet() }
+        )
     }
 }
 
@@ -1419,6 +1444,121 @@ private fun PilasTab(
                                 Icon(Icons.Default.KeyboardArrowUp, contentDescription = "A la mano")
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// C-5 — Animación de barajar
+// ──────────────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun ShuffleAnimationOverlay() {
+    val infiniteTransition = rememberInfiniteTransition(label = "shuffle")
+    val fan by infiniteTransition.animateFloat(
+        initialValue = -6f,
+        targetValue = 6f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 250, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "fan"
+    )
+
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+        shadowElevation = 12.dp,
+        modifier = Modifier.padding(32.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 32.dp, vertical = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Tres cartas con rotaciones escalonadas que oscilan
+            Box(
+                modifier = Modifier.size(width = 110.dp, height = 80.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                val cardShape = RoundedCornerShape(6.dp)
+                val cardMod = Modifier.size(width = 56.dp, height = 76.dp)
+                // Carta izquierda
+                Surface(
+                    modifier = cardMod.graphicsLayer {
+                        rotationZ = -12f + fan
+                        translationX = -22f
+                    },
+                    shape = cardShape,
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
+                ) {}
+                // Carta derecha
+                Surface(
+                    modifier = cardMod.graphicsLayer {
+                        rotationZ = 12f - fan
+                        translationX = 22f
+                    },
+                    shape = cardShape,
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f))
+                ) {}
+                // Carta central (encima)
+                Surface(
+                    modifier = cardMod.graphicsLayer { rotationZ = fan * 0.3f },
+                    shape = cardShape,
+                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f))
+                ) {}
+            }
+            Text(
+                text = "Barajando…",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// D-2 — Sheet "Robar por palo"
+// ──────────────────────────────────────────────────────────────────────────────
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DrawBySuitSheet(
+    suits: List<String>,
+    onSuitSelected: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 32.dp, start = 16.dp, end = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                "Robar por palo",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = 4.dp)
+            )
+            if (suits.isEmpty()) {
+                Text(
+                    "No hay cartas disponibles con palo definido.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                suits.forEach { suit ->
+                    OutlinedButton(
+                        onClick = { onSuitSelected(suit) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(suit, style = MaterialTheme.typography.titleMedium)
                     }
                 }
             }

@@ -3,6 +3,7 @@ package com.deckapp.core.domain.usecase
 import com.deckapp.core.model.OcrBlock
 import com.deckapp.core.model.TableEntry
 import javax.inject.Inject
+import kotlin.math.abs
 
 /**
  * Lógica heurística para convertir bloques de texto detectados por OCR en entradas de tabla.
@@ -118,8 +119,8 @@ class AnalyzeTableImageUseCase @Inject constructor() {
         // que un bloque grande (ej. título) agrupe en exceso.
         val avgWidth = blocks.map { it.boundingBox.width }.average().toFloat().coerceIn(20f, 200f)
         val avgHeight = blocks.map { it.boundingBox.height }.average().toFloat().coerceIn(8f, 80f)
-        val thresholdX = avgWidth * 3.0f
-        val thresholdY = avgHeight * 2.5f
+        val thresholdX = avgWidth * 3.5f
+        val thresholdY = avgHeight * 3.5f
 
         // Ordenamos por Y para facilitar el agrupamiento inicial
         val sortedBlocks = blocks.sortedBy { it.boundingBox.centerY }
@@ -287,31 +288,53 @@ class AnalyzeTableImageUseCase @Inject constructor() {
         val lines = mutableListOf<MutableList<OcrBlock>>()
         if (sortedBlocks.isEmpty()) return lines
 
-        var currentLine = mutableListOf(sortedBlocks[0])
-        // Usar el centerY promedio de la línea en construcción como referencia,
-        // en lugar del centerY del bloque anterior. Esto evita que un bloque con
-        // altura atípica (ej. un número grande) desplace la tolerancia del resto.
-        var lineCenterY = sortedBlocks[0].boundingBox.centerY
-        var lineAvgHeight = sortedBlocks[0].boundingBox.height
-        lines.add(currentLine)
+        // Usar una estrategia de cubos verticales (bins).
+        // Dos bloques pertenecen a la misma línea si su solapamiento vertical es > 30%
+        // de la altura del más pequeño.
+        val processed = mutableSetOf<Int>()
+        val blocks = sortedBlocks.sortedBy { it.boundingBox.top }
 
-        for (i in 1 until sortedBlocks.size) {
-            val block = sortedBlocks[i]
-            val tolerance = lineAvgHeight * 0.7f
-            if (kotlin.math.abs(block.boundingBox.centerY - lineCenterY) < tolerance) {
-                currentLine.add(block)
-                // Actualizar el centro y la altura promedio de la línea de forma incremental
-                val n = currentLine.size.toFloat()
-                lineCenterY = ((lineCenterY * (n - 1)) + block.boundingBox.centerY) / n
-                lineAvgHeight = ((lineAvgHeight * (n - 1)) + block.boundingBox.height) / n
-            } else {
-                currentLine = mutableListOf(block)
-                lineCenterY = block.boundingBox.centerY
-                lineAvgHeight = block.boundingBox.height
-                lines.add(currentLine)
+        for (i in blocks.indices) {
+            if (i in processed) continue
+            
+            val currentLine = mutableListOf(blocks[i])
+            processed.add(i)
+            
+            var lineTop = blocks[i].boundingBox.top
+            var lineBottom = blocks[i].boundingBox.bottom
+
+            // Buscar otros bloques que traslapen significativamente con este "carril" vertical
+            for (j in i + 1 until blocks.size) {
+                if (j in processed) continue
+                val target = blocks[j]
+                
+                val overlap = calculateOverlap(lineTop, lineBottom, target.boundingBox.top, target.boundingBox.bottom)
+                val targetHeight = target.boundingBox.height
+                val lineHeight = lineBottom - lineTop
+                
+                // Si el solapamiento es mayor al 40% de cualquiera de las dos alturas,
+                // consideramos que están en la misma línea visual.
+                if (overlap > minOf(targetHeight, lineHeight) * 0.4f) {
+                    currentLine.add(target)
+                    processed.add(j)
+                    // Expandir ligeramente el carril de la línea si el bloque es más alto
+                    lineTop = minOf(lineTop, target.boundingBox.top)
+                    lineBottom = maxOf(lineBottom, target.boundingBox.bottom)
+                }
             }
+            lines.add(currentLine)
         }
-        return lines
+        
+        // Re-ordenar las líneas por su posición Y media (por si el sorting inicial falló)
+        // y ordenar bloques dentro de cada línea por X.
+        return lines.sortedBy { it.map { b -> b.boundingBox.centerY }.average() }
+            .map { it.sortedBy { b -> b.boundingBox.left }.toMutableList() }
+    }
+
+    private fun calculateOverlap(s1: Float, e1: Float, s2: Float, e2: Float): Float {
+        val start = maxOf(s1, s2)
+        val end = minOf(e1, e2)
+        return if (end > start) end - start else 0f
     }
 
     /** Analiza todos los bloques para encontrar los límites X de las columnas. */
@@ -336,10 +359,10 @@ class AnalyzeTableImageUseCase @Inject constructor() {
         val sortedCandidates = candidates.sorted()
         
         if (sortedCandidates.isNotEmpty()) {
-            // Mínimo siempre 2 votos para evitar que un bloque desalineado cree un gutter falso.
-            // El porcentaje se reduce al 10% (era 15%) para capturar mejor columnas en tablas
-            // de tamaño medio donde no todas las filas usan la columna adicional.
-            val minVotes = (lines.size * 0.10).toInt().coerceAtLeast(2)
+            // Reducimos el umbral de "votos" para detectar columnas
+            // En tablas con muchas filas vacías, 10% puede ser mucho si la columna es opcional.
+            // Bajamos a un mínimo de 1 voto si la tabla es pequeña, o 8% para tablas largas.
+            val minVotes = (lines.size * 0.08).toInt().coerceAtLeast(1)
 
             var currentGroup = mutableListOf(sortedCandidates[0])
             for (i in 1 until sortedCandidates.size) {
@@ -391,7 +414,9 @@ class AnalyzeTableImageUseCase @Inject constructor() {
         // Agrupar el resto por columnas basadas en gutters
         val columnContents = mutableMapOf<Int, MutableList<String>>()
         remainingBlocks.forEach { block ->
-            val colIndex = gutters.indexOfLast { block.boundingBox.left >= it - 10f } + 1
+            // Usamos un offset de seguridad para que bloques ligeramente a la izquierda
+            // de un gutter caigan en la columna correcta.
+            val colIndex = gutters.indexOfLast { block.boundingBox.left >= it - 8f } + 1
             columnContents.getOrPut(colIndex) { mutableListOf() }.add(block.text)
         }
 

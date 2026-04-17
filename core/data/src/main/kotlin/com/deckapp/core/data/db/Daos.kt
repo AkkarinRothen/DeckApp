@@ -74,6 +74,9 @@ interface CardDao {
     @Query("UPDATE cards SET dm_notes = :notes WHERE id = :cardId")
     suspend fun updateDmNotes(cardId: Long, notes: String?)
 
+    @Query("UPDATE cards SET sortOrder = :sortOrder WHERE id = :cardId")
+    suspend fun updateSortOrder(cardId: Long, sortOrder: Int)
+
     @Query("UPDATE cards SET isDrawn = 0, last_drawn_at = NULL WHERE stackId = :deckId")
     suspend fun resetDeck(deckId: Long)
 
@@ -270,12 +273,36 @@ interface RandomTableDao {
 }
 
 @Dao
+interface TableBundleDao {
+    @Query("SELECT * FROM table_bundles ORDER BY createdAt DESC")
+    fun getAllBundles(): Flow<List<TableBundleEntity>>
+
+    @Query("SELECT * FROM table_bundles WHERE id = :id")
+    fun getBundleById(id: Long): Flow<TableBundleEntity?>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertBundle(bundle: TableBundleEntity): Long
+
+    @Update
+    suspend fun updateBundle(bundle: TableBundleEntity)
+
+    @Query("DELETE FROM table_bundles WHERE id = :id")
+    suspend fun deleteBundle(id: Long)
+
+    @Query("SELECT * FROM random_tables WHERE bundleId = :bundleId ORDER BY name ASC")
+    fun getTablesForBundle(bundleId: Long): Flow<List<RandomTableEntity>>
+}
+
+@Dao
 interface TableRollResultDao {
     @Query("SELECT * FROM table_roll_results WHERE sessionId = :sessionId ORDER BY timestamp DESC")
     fun getResultsForSession(sessionId: Long): Flow<List<TableRollResultEntity>>
 
     @Query("SELECT * FROM table_roll_results WHERE sessionId = :sessionId AND tableId = :tableId ORDER BY timestamp DESC LIMIT 5")
     fun getRecentResultsForTable(sessionId: Long, tableId: Long): Flow<List<TableRollResultEntity>>
+
+    @Query("SELECT * FROM table_roll_results WHERE sessionId = :sessionId AND tableId = :tableId ORDER BY timestamp DESC LIMIT :limit")
+    suspend fun getRecentResultsForTableSync(sessionId: Long, tableId: Long, limit: Int): List<TableRollResultEntity>
 
     @Insert
     suspend fun insertResult(result: TableRollResultEntity): Long

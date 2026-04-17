@@ -30,6 +30,10 @@ object RangeParser {
 
     private val SINGLE_NUMBER = Regex("""^(\d{1,3})""")
 
+    // Símbolos basura que suelen aparecer antes de un número en OCR (puntos, asteriscos, ceros mal leídos, etc.)
+    // Incluye paréntesis de apertura '(' para soportar formatos como "(1-5)" y "(01–10)" habituales en manuales impresos.
+    private val NOISE_PREFIX = Regex("""^[\s\.*_\-)\]~(]*""")
+
     /**
      * Intenta parsear el texto que empieza por un rango de dados.
      * Devuelve el rango y la longitud consumida si tiene éxito.
@@ -38,8 +42,10 @@ object RangeParser {
      * Ejemplo: "96-00" → ParsedRange(96, 100), convención habitual en tablas OSR.
      */
     fun parse(raw: String): ParsedRangeResult? {
-        val trimmedStart = raw.takeWhile { it.isWhitespace() }.length
-        val cleaned = raw.trimStart()
+        val noiseMatch = NOISE_PREFIX.find(raw)
+        val noiseLength = noiseMatch?.value?.length ?: 0
+        val cleaned = raw.substring(noiseLength)
+        
         if (cleaned.isEmpty()) return null
 
         // Rango con dos extremos
@@ -48,13 +54,13 @@ object RangeParser {
             val min = normalizePercentile(match.groupValues[1]) ?: continue
             val max = normalizePercentile(match.groupValues[2]) ?: continue
             val range = if (min <= max) ParsedRange(min, max) else ParsedRange(max, min)
-            return ParsedRangeResult(range, trimmedStart + match.value.length)
+            return ParsedRangeResult(range, noiseLength + match.value.length)
         }
 
         // Número suelto
         SINGLE_NUMBER.find(cleaned)?.let {
             val value = normalizePercentile(it.groupValues[1]) ?: return null
-            return ParsedRangeResult(ParsedRange(value, value), trimmedStart + it.value.length)
+            return ParsedRangeResult(ParsedRange(value, value), noiseLength + it.value.length)
         }
 
         return null

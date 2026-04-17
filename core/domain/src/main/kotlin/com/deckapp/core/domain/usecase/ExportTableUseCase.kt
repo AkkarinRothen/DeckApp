@@ -1,39 +1,65 @@
 package com.deckapp.core.domain.usecase
 
 import com.deckapp.core.model.RandomTable
+import com.deckapp.core.model.TableRollMode
+import javax.inject.Inject
 
 /**
- * Convierte una [RandomTable] al formato JSON de exportación de DeckApp.
- *
- * Formato resultante compatible con el import de [JsonTableParser]:
- * ```json
- * { "version": 1, "tables": [ { "name": "...", "entries": [...] } ] }
- * ```
+ * UseCase para exportar tablas a formatos externos.
  */
-object ExportTableUseCase {
+class ExportTableUseCase @Inject constructor() {
 
-    fun buildJson(table: RandomTable): String = buildString {
-        appendLine("{")
-        appendLine("  \"version\": 1,")
-        appendLine("  \"tables\": [")
-        appendLine("    {")
-        appendLine("      \"name\": ${table.name.json()},")
-        appendLine("      \"description\": ${table.description.json()},")
-        appendLine("      \"category\": ${table.tags.joinToString(", ") { it.name }.json()},")
-        appendLine("      \"rollFormula\": ${table.rollFormula.json()},")
-        appendLine("      \"rollMode\": \"${table.rollMode.name}\",")
-        appendLine("      \"entries\": [")
-        table.entries.forEachIndexed { idx, entry ->
-            val comma = if (idx < table.entries.lastIndex) "," else ""
-            appendLine("        { \"minRoll\": ${entry.minRoll}, \"maxRoll\": ${entry.maxRoll}, \"weight\": ${entry.weight}, \"text\": ${entry.text.json()} }$comma")
+    /**
+     * Genera un string en formato CSV.
+     * Compatible con Excel y la mayoría de VTTs.
+     */
+    fun toCsv(table: RandomTable): String {
+        return buildString {
+            // Header
+            if (table.rollMode == TableRollMode.RANGE) {
+                append("Min,Max,Text\n")
+            } else {
+                append("Weight,Text\n")
+            }
+            
+            // Entries
+            table.entries.forEach { entry ->
+                if (table.rollMode == TableRollMode.RANGE) {
+                    append("${entry.minRoll},${entry.maxRoll},\"${entry.text.replace("\"", "\"\"")}\"\n")
+                } else {
+                    append("${entry.weight},\"${entry.text.replace("\"", "\"\"")}\"\n")
+                }
+            }
         }
-        appendLine("      ]")
-        appendLine("    }")
-        appendLine("  ]")
-        append("}")
     }
 
-    /** Envuelve la cadena en comillas dobles escapando caracteres especiales JSON. */
-    private fun String.json(): String =
-        "\"${replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "")}\""
+    /**
+     * Genera un string en formato Markdown (GFM).
+     * Ideal para notas de campaña (Notion, Obsidian, etc).
+     */
+    fun toMarkdown(table: RandomTable): String {
+        return buildString {
+            append("### ${table.name}\n\n")
+            if (table.description.isNotBlank()) {
+                append("${table.description}\n\n")
+            }
+            
+            if (table.rollMode == TableRollMode.RANGE) {
+                append("| Rango | Resultado |\n")
+                append("| :--- | :--- |\n")
+                table.entries.forEach { entry ->
+                    val range = if (entry.minRoll == entry.maxRoll) "${entry.minRoll}" else "${entry.minRoll}-${entry.maxRoll}"
+                    append("| $range | ${entry.text} |\n")
+                }
+            } else {
+                append("| Peso | Resultado |\n")
+                append("| :--- | :--- |\n")
+                table.entries.forEach { entry ->
+                    append("| ${entry.weight} | ${entry.text} |\n")
+                }
+            }
+            
+            append("\n*Fórmula: ${table.rollFormula}*")
+        }
+    }
 }

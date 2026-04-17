@@ -4,29 +4,37 @@ import android.graphics.Bitmap
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toSize
+import kotlin.math.abs
 
+/**
+ * Vista de mapeo mejorada con Zoom, Pan y feedback visual de columnas.
+ */
 @Composable
 fun TableMappingView(
     bitmap: Bitmap,
@@ -35,6 +43,14 @@ fun TableMappingView(
     onRemoveAnchor: (Float) -> Unit,
     onConfirm: () -> Unit
 ) {
+    // Estado de transformación (Zoom y Pan)
+    var scale by remember { mutableStateOf(1f) }
+    var offset by remember { mutableStateOf(Offset.Zero) }
+    val state = rememberTransformableState { zoomChange, offsetChange, _ ->
+        scale = (scale * zoomChange).coerceIn(1f, 4f)
+        offset += offsetChange
+    }
+
     var containerSize by remember { mutableStateOf(IntSize.Zero) }
     val colorScheme = MaterialTheme.colorScheme
 
@@ -44,76 +60,145 @@ fun TableMappingView(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                "Mapeo de Columnas",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
-            )
-            Text(
-                "Toca la imagen para marcar dónde terminan las columnas",
-                style = MaterialTheme.typography.bodySmall,
-                color = colorScheme.onSurfaceVariant
-            )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    "Ajustar Columnas",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    "Toca para definir dónde terminan las columnas.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colorScheme.onSurfaceVariant
+                )
+            }
+            if (scale > 1f) {
+                IconButton(onClick = { scale = 1f; offset = Offset.Zero }) {
+                    Icon(Icons.Default.ZoomIn, "Reset Zoom", tint = colorScheme.primary)
+                }
+            }
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(12.dp))
 
+        // ── Contenedor Interactivo con Zoom ────────────────────────
         Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(16.dp))
                 .background(Color.Black.copy(alpha = 0.05f))
                 .onGloballyPositioned { containerSize = it.size }
+                .transformable(state = state)
                 .pointerInput(containerSize) {
-                    detectTapGestures { offset ->
-                        val xNormalized = offset.x / containerSize.width
-                        // Si tocamos cerca de una existente, la borramos, si no, añadimos
-                        val threshold = 0.03f
-                        val existing = anchors.find { kotlin.math.abs(it - xNormalized) < threshold }
-                        if (existing != null) {
-                            onRemoveAnchor(existing)
-                        } else {
-                            onAddAnchor(xNormalized)
+                    detectTapGestures { tapOffset ->
+                        if (containerSize == IntSize.Zero) return@detectTapGestures
+                        
+                        val bitmapSize = Size(bitmap.width.toFloat(), bitmap.height.toFloat())
+                        val imageBounds = calculateImageBounds(containerSize.toSize(), bitmapSize)
+                        
+                        // 1. Revertir Zoom y Pan en el tapOffset
+                        val centerX = containerSize.width / 2f
+                        val relativeX = (tapOffset.x - centerX - offset.x) / scale + centerX
+                        
+                        // 2. Comprobar si está dentro de imageBounds
+                        if (imageBounds.contains(Offset(relativeX, tapOffset.y))) { // Solo nos importa el X para anclas
+                            val xNormalized = (relativeX - imageBounds.left) / imageBounds.width
+                            
+                            val threshold = 0.04f / scale
+                            val existing = anchors.find { abs(it - xNormalized) < threshold }
+                            if (existing != null) {
+                                onRemoveAnchor(existing)
+                            } else if (xNormalized in 0f..1f) {
+                                onAddAnchor(xNormalized)
+                            }
                         }
                     }
                 },
             contentAlignment = Alignment.Center
         ) {
-            // Fondo recortado
-            Image(
-                bitmap = bitmap.asImageBitmap(),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer(
+                        scaleX = scale,
+                        scaleY = scale,
+                        translationX = offset.x,
+                        translationY = offset.y
+                    )
+            ) {
+                // Imagen de la tabla
+                Image(
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit
+                )
 
-            // Dibujar las anclas (columnas)
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                anchors.forEach { x ->
-                    val xPos = x * size.width
-                    drawLine(
-                        color = Color.Red,
-                        start = Offset(xPos, 0f),
-                        end = Offset(xPos, size.height),
-                        strokeWidth = 3.dp.toPx()
-                    )
-                    // Pequeño indicador en la parte superior
-                    drawCircle(
-                        color = Color.Red,
-                        radius = 6.dp.toPx(),
-                        center = Offset(xPos, 12.dp.toPx())
-                    )
+                // Capa de Feedback Visual
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val bitmapSize = Size(bitmap.width.toFloat(), bitmap.height.toFloat())
+                    val imageBounds = calculateImageBounds(size, bitmapSize)
+                    
+                    val w = imageBounds.width
+                    val h = imageBounds.height
+                    val left = imageBounds.left
+                    val top = imageBounds.top
+                    
+                    // Ordenar anclas para sombrear áreas
+                    val sortedAnchors = (listOf(0f) + anchors + listOf(1f)).sorted()
+                    
+                    for (i in 0 until sortedAnchors.size - 1) {
+                        val start = left + sortedAnchors[i] * w
+                        val end = left + sortedAnchors[i+1] * w
+                        
+                        if (i % 2 != 0) {
+                            drawRect(
+                                color = colorScheme.primary.copy(alpha = 0.08f),
+                                topLeft = Offset(start, top),
+                                size = Size(end - start, h)
+                            )
+                        }
+                    }
+
+                    // Dibujar las líneas de corte (Anclas)
+                    anchors.forEach { x ->
+                        val xPos = left + x * w
+                        
+                        // Línea principal con efecto de neón sutil
+                        drawLine(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(Color.Transparent, colorScheme.primary, Color.Transparent),
+                                startY = top,
+                                endY = top + h
+                            ),
+                            start = Offset(xPos, top),
+                            end = Offset(xPos, top + h),
+                            strokeWidth = (2.dp / scale).toPx()
+                        )
+                        
+                        // Indicador superior (Mango)
+                        drawCircle(
+                            color = colorScheme.primary,
+                            radius = (4.dp / scale).toPx(),
+                            center = Offset(xPos, top + 10.dp.toPx() / scale)
+                        )
+                    }
                 }
             }
         }
 
         Spacer(Modifier.height(16.dp))
         
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = colorScheme.secondaryContainer.copy(alpha = 0.4f))
+        Surface(
+            tonalElevation = 2.dp,
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth()
         ) {
             Row(
                 modifier = Modifier.padding(12.dp),
@@ -122,9 +207,8 @@ fun TableMappingView(
                 Icon(Icons.Default.AutoFixHigh, null, tint = colorScheme.primary)
                 Spacer(Modifier.width(12.dp))
                 Text(
-                    "Las líneas indican dónde se separará el texto. Puedes tocar la imagen para corregirlas.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = colorScheme.onSecondaryContainer
+                    "Las líneas rojas separan las columnas. Si el texto está muy junto, haz zoom para separar con precisión.",
+                    style = MaterialTheme.typography.bodySmall
                 )
             }
         }
@@ -133,12 +217,29 @@ fun TableMappingView(
 
         Button(
             onClick = onConfirm,
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(16.dp)
+            modifier = Modifier.fillMaxWidth().height(60.dp),
+            shape = RoundedCornerShape(18.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
         ) {
             Icon(Icons.Default.Check, null)
             Spacer(Modifier.width(12.dp))
-            Text("Generar Tabla de Datos", style = MaterialTheme.typography.titleMedium)
+            Text("Procesar Columnas", style = MaterialTheme.typography.titleMedium)
         }
     }
+}
+
+private fun calculateImageBounds(containerSize: Size, bitmapSize: Size): Rect {
+    val containerRatio = containerSize.width / containerSize.height
+    val bitmapRatio = bitmapSize.width / bitmapSize.height
+    
+    val (drawWidth, drawHeight) = if (bitmapRatio > containerRatio) {
+        containerSize.width to (containerSize.width / bitmapRatio)
+    } else {
+        (containerSize.height * bitmapRatio) to containerSize.height
+    }
+    
+    val left = (containerSize.width - drawWidth) / 2
+    val top = (containerSize.height - drawHeight) / 2
+    
+    return Rect(left, top, left + drawWidth, top + drawHeight)
 }

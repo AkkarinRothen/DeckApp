@@ -7,17 +7,26 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Collections
+import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.filled.LowPriority
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.MoreVert
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyGridState
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.toMutableStateList
+import androidx.compose.ui.graphics.graphicsLayer
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -49,6 +58,16 @@ fun DeckDetailScreen(
     var confirmDeleteCard by remember { mutableStateOf<Card?>(null) }
     var showAddTagDialog by remember { mutableStateOf(false) }
     var showOverflow by remember { mutableStateOf(false) }
+
+    // Lista local mutable para el drag & drop — se sincroniza desde el ViewModel cuando
+    // NO estamos en modo reordenamiento (cambios externos: borrar, añadir carta).
+    val localCards: SnapshotStateList<Card> = remember { mutableStateListOf() }
+    LaunchedEffect(uiState.filteredCards, uiState.isReorderMode) {
+        if (!uiState.isReorderMode) {
+            localCards.clear()
+            localCards.addAll(uiState.filteredCards)
+        }
+    }
 
     // Launcher para guardar el ZIP
     val createZipLauncher = rememberLauncherForActivityResult(
@@ -141,6 +160,18 @@ fun DeckDetailScreen(
                     }
                 },
                 actions = {
+                    // Botón reordenar / listo — solo visible si hay ≥2 cartas y el mazo no está archivado
+                    if ((uiState.deck?.isArchived != true) && uiState.cards.size >= 2) {
+                        if (uiState.isReorderMode) {
+                            IconButton(onClick = { viewModel.saveReorder(localCards.map { it.id }) }) {
+                                Icon(Icons.Default.Check, contentDescription = "Guardar orden")
+                            }
+                        } else {
+                            IconButton(onClick = { viewModel.toggleReorderMode() }) {
+                                Icon(Icons.Default.LowPriority, contentDescription = "Reordenar cartas")
+                            }
+                        }
+                    }
                     IconButton(
                         onClick = { viewModel.showConfigSheet(true) },
                         enabled = uiState.deck?.isArchived != true
@@ -352,9 +383,15 @@ fun DeckDetailScreen(
                     }
 
                     Text(
-                        text = "Mantén presionada una carta para eliminarla",
+                        text = if (uiState.isReorderMode)
+                            "Arrastrá las cartas para reordenar · toca ✓ para guardar"
+                        else
+                            "Mantén presionada una carta para eliminarla",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (uiState.isReorderMode)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
                     )
 
@@ -372,26 +409,52 @@ fun DeckDetailScreen(
                             )
                         }
                     } else {
+                        val gridState = rememberLazyGridState()
+                        val reorderState = rememberReorderableLazyGridState(gridState) { from, to ->
+                            localCards.add(to.index, localCards.removeAt(from.index))
+                        }
+
                         LazyVerticalGrid(
+                            state = gridState,
                             columns = GridCells.Adaptive(minSize = 100.dp),
                             contentPadding = PaddingValues(16.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier.fillMaxSize()
                         ) {
-                            items(uiState.filteredCards, key = { it.id }) { card ->
-                                CardThumbnail(
-                                    card = card,
-                                    modifier = Modifier.combinedClickable(
-                                        onClick = { onCardClick(card.id) },
-                                        onLongClick = { confirmDeleteCard = card }
-                                    ),
-                                    height = 120.dp,
-                                    showTitle = true,
-                                    aspectRatio = uiState.deck?.aspectRatio
-                                        ?: com.deckapp.core.model.CardAspectRatio.STANDARD,
-                                    showModeBadge = true
-                                )
+                            items(localCards, key = { it.id }) { card ->
+                                ReorderableItem(reorderState, key = card.id) { isDragging ->
+                                    Box(
+                                        modifier = Modifier.graphicsLayer {
+                                            shadowElevation = if (isDragging) 16f else 0f
+                                        }
+                                    ) {
+                                        CardThumbnail(
+                                            card = card,
+                                            modifier = if (uiState.isReorderMode) Modifier
+                                            else Modifier.combinedClickable(
+                                                onClick = { onCardClick(card.id) },
+                                                onLongClick = { confirmDeleteCard = card }
+                                            ),
+                                            height = 120.dp,
+                                            showTitle = true,
+                                            aspectRatio = uiState.deck?.aspectRatio
+                                                ?: com.deckapp.core.model.CardAspectRatio.STANDARD,
+                                            showModeBadge = true
+                                        )
+                                        if (uiState.isReorderMode) {
+                                            Icon(
+                                                imageVector = Icons.Default.DragHandle,
+                                                contentDescription = "Arrastrar",
+                                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                                modifier = Modifier
+                                                    .align(Alignment.TopEnd)
+                                                    .padding(4.dp)
+                                                    .draggableHandle()
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

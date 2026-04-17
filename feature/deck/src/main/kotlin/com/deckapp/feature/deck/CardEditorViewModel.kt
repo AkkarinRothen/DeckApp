@@ -19,6 +19,7 @@ data class CardEditorUiState(
     val value: String = "",
     val faces: List<CardFace> = listOf(CardFace(name = "Frente")),
     val selectedFaceIndex: Int = 0,
+    val dmNotes: String = "",
     val isSaving: Boolean = false,
     val isSaved: Boolean = false,
     val isPickingImage: Boolean = false,
@@ -51,7 +52,8 @@ class CardEditorViewModel @Inject constructor(
                             suit = card.suit ?: "",
                             value = card.value?.toString() ?: "",
                             faces = card.faces,
-                            linkedTableId = card.linkedTableId
+                            linkedTableId = card.linkedTableId,
+                            dmNotes = card.dmNotes ?: ""
                         )
                     }
                 }
@@ -66,6 +68,7 @@ class CardEditorViewModel @Inject constructor(
     }
 
     fun updateLinkedTable(tableId: Long?) = _uiState.update { it.copy(linkedTableId = tableId) }
+    fun updateDmNotes(notes: String) = _uiState.update { it.copy(dmNotes = notes) }
 
     fun updateTitle(title: String) = _uiState.update { it.copy(title = title) }
     fun updateSuit(suit: String) = _uiState.update { it.copy(suit = suit) }
@@ -161,6 +164,7 @@ class CardEditorViewModel @Inject constructor(
                 value = state.value.toIntOrNull(),
                 faces = state.faces,
                 linkedTableId = state.linkedTableId,
+                dmNotes = state.dmNotes.takeIf { it.isNotBlank() },
                 sortOrder = 0
             )
             cardRepository.saveCard(card)

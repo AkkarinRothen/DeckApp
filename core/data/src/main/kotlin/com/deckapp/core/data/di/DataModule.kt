@@ -15,7 +15,9 @@ import com.deckapp.core.data.db.MIGRATION_15_16
 import com.deckapp.core.data.db.MIGRATION_16_17
 import com.deckapp.core.data.db.MIGRATION_17_18
 import com.deckapp.core.data.db.MIGRATION_18_19
+import com.deckapp.core.data.db.MIGRATION_19_20
 import com.deckapp.core.data.repository.CardRepositoryImpl
+import com.deckapp.core.data.repository.CollectionRepositoryImpl
 import com.deckapp.core.data.repository.RecentFileRepositoryImpl
 import com.deckapp.core.data.repository.EncounterRepositoryImpl
 import com.deckapp.core.data.repository.FileRepositoryImpl
@@ -23,6 +25,7 @@ import com.deckapp.core.data.repository.OcrRepositoryImpl
 import com.deckapp.core.data.repository.SessionRepositoryImpl
 import com.deckapp.core.data.repository.TableRepositoryImpl
 import com.deckapp.core.domain.repository.CardRepository
+import com.deckapp.core.domain.repository.CollectionRepository
 import com.deckapp.core.domain.repository.RecentFileRepository
 import com.deckapp.core.domain.repository.EncounterRepository
 import com.deckapp.core.domain.repository.FileRepository
@@ -59,7 +62,10 @@ object DatabaseModule {
                 MIGRATION_15_16,
                 MIGRATION_16_17,
                 MIGRATION_17_18,
-                MIGRATION_18_19
+                MIGRATION_18_19,
+                MIGRATION_19_20,
+                MIGRATION_20_21,
+                MIGRATION_21_22
             )
             .fallbackToDestructiveMigrationFrom(1, 2, 3, 4, 5)
             .build()
@@ -71,10 +77,13 @@ object DatabaseModule {
     @Provides fun provideSessionDao(db: DeckAppDatabase) = db.sessionDao()
     @Provides fun provideDrawEventDao(db: DeckAppDatabase) = db.drawEventDao()
     @Provides fun provideRandomTableDao(db: DeckAppDatabase) = db.randomTableDao()
+    @Provides fun provideTableBundleDao(db: DeckAppDatabase) = db.tableBundleDao()
     @Provides fun provideTableRollResultDao(db: DeckAppDatabase) = db.tableRollResultDao()
     @Provides fun provideEncounterDao(db: DeckAppDatabase) = db.encounterDao()
     @Provides fun provideCombatLogDao(db: DeckAppDatabase) = db.combatLogDao()
     @Provides fun provideRecentFileDao(db: DeckAppDatabase) = db.recentFileDao()
+    @Provides fun provideSearchDao(db: DeckAppDatabase) = db.searchDao()
+    @Provides fun provideCollectionDao(db: DeckAppDatabase) = db.collectionDao()
 }
 
 @Module
@@ -104,17 +113,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindRecentFileRepository(impl: RecentFileRepositoryImpl): RecentFileRepository
-}
-
-/**
- * Módulo separado para [OcrRepository] porque su implementación es
- * [ActivityRetainedScoped] — no puede vivir en [SingletonComponent].
- */
-@Module
-@InstallIn(ActivityRetainedComponent::class)
-abstract class OcrModule {
 
     @Binds
-    @dagger.hilt.android.scopes.ActivityRetainedScoped
-    abstract fun bindOcrRepository(impl: OcrRepositoryImpl): OcrRepository
+    @Singleton
+    abstract fun bindCollectionRepository(impl: CollectionRepositoryImpl): CollectionRepository
 }

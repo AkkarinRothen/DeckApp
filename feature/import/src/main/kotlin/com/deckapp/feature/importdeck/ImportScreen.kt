@@ -114,6 +114,7 @@ fun ImportScreen(
                     onPdfLayoutModeChange = { viewModel.updatePdfLayoutMode(it) },
                     onPdfGridColsChange = { viewModel.updatePdfGridCols(it) },
                     onPdfGridRowsChange = { viewModel.updatePdfGridRows(it) },
+                    onPdfSkipPagesChange = { viewModel.updatePdfSkipPages(it) },
                     onPdfAutoTrimCellsChange = { viewModel.updatePdfAutoTrimCells(it) },
                     // Para PDF → vista previa antes de importar
                     // Para carpeta → importar directo
@@ -125,6 +126,7 @@ fun ImportScreen(
                     bitmaps = uiState.previewCardBitmaps,
                     isLoading = uiState.isGeneratingPreview,
                     pageCount = uiState.pdfPageCount,
+                    skipPages = uiState.pdfSkipPages,
                     gridCols = uiState.pdfGridCols,
                     gridRows = uiState.pdfGridRows,
                     layoutMode = uiState.pdfLayoutMode,
@@ -231,6 +233,7 @@ private fun ConfigurePhase(
     onPdfLayoutModeChange: (PdfLayoutMode) -> Unit,
     onPdfGridColsChange: (Int) -> Unit,
     onPdfGridRowsChange: (Int) -> Unit,
+    onPdfSkipPagesChange: (Int) -> Unit,
     onPdfAutoTrimCellsChange: (Boolean) -> Unit,
     onPreview: () -> Unit,
     onStartImport: () -> Unit
@@ -367,6 +370,27 @@ private fun ConfigurePhase(
             color = MaterialTheme.colorScheme.primary
         )
 
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            NumberField(
+                value = uiState.pdfSkipPages,
+                onValueChange = onPdfSkipPagesChange,
+                label = "Saltar páginas",
+                modifier = Modifier.weight(0.5f),
+                min = 0
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                "Utilidad para saltear portadas o índices al inicio del PDF.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(0.5f)
+            )
+        }
+
         Spacer(Modifier.height(4.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -462,22 +486,25 @@ private fun PreviewPhase(
     bitmaps: List<android.graphics.Bitmap>,
     isLoading: Boolean,
     pageCount: Int,
+    skipPages: Int,
     gridCols: Int,
     gridRows: Int,
     layoutMode: PdfLayoutMode,
     onConfirm: () -> Unit,
     onBack: () -> Unit
 ) {
+    val effectivePageCount = (pageCount - skipPages).coerceAtLeast(0)
+
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("Vista previa de cartas", style = MaterialTheme.typography.titleMedium)
 
         // Estimado de cartas totales (todas las grillas usan gridCols×gridRows)
         val cardsPerPage = gridCols * gridRows
         val estimatedTotal = when (layoutMode) {
-            PdfLayoutMode.ALTERNATING_PAGES -> ((pageCount + 1) / 2) * cardsPerPage
-            PdfLayoutMode.SIDE_BY_SIDE      -> pageCount * cardsPerPage
-            PdfLayoutMode.GRID              -> pageCount * cardsPerPage
-            PdfLayoutMode.FIRST_HALF_FRONTS -> (pageCount / 2) * cardsPerPage
+            PdfLayoutMode.ALTERNATING_PAGES -> ((effectivePageCount + 1) / 2) * cardsPerPage
+            PdfLayoutMode.SIDE_BY_SIDE      -> effectivePageCount * cardsPerPage
+            PdfLayoutMode.GRID              -> effectivePageCount * cardsPerPage
+            PdfLayoutMode.FIRST_HALF_FRONTS -> (effectivePageCount / 2) * cardsPerPage
         }
         val previewNote = when {
             layoutMode == PdfLayoutMode.SIDE_BY_SIDE ->
@@ -563,7 +590,8 @@ private fun NumberField(
     value: Int,
     onValueChange: (Int) -> Unit,
     label: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    min: Int = 1
 ) {
     var text by remember { mutableStateOf(value.toString()) }
     var hasFocus by remember { mutableStateOf(false) }
@@ -582,14 +610,14 @@ private fun NumberField(
             val digits = raw.filter { it.isDigit() }
             text = digits
             val parsed = digits.toIntOrNull()
-            if (parsed != null && parsed >= 1) onValueChange(parsed)
+            if (parsed != null && parsed >= min) onValueChange(parsed)
         },
         label = { Text(label) },
         modifier = modifier.onFocusChanged { focusState ->
             hasFocus = focusState.isFocused
             if (!focusState.isFocused) {
-                // Al salir: normalizar a mínimo 1 y limpiar ceros iniciales
-                val parsed = text.toIntOrNull()?.coerceAtLeast(1) ?: 1
+                // Al salir: normalizar a mínimo [min] y limpiar ceros iniciales
+                val parsed = text.toIntOrNull()?.coerceAtLeast(min) ?: min
                 text = parsed.toString()
                 onValueChange(parsed)
             }

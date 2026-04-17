@@ -1,5 +1,6 @@
 package com.deckapp.feature.importdeck.table
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.animation.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,6 +22,7 @@ import com.deckapp.feature.importdeck.table.components.TableCropView
 import com.deckapp.feature.importdeck.table.components.TableMappingView
 import com.deckapp.feature.importdeck.table.components.TableReviewView
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.graphics.StrokeCap
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -86,24 +88,65 @@ fun TableImportScreen(
         uri?.let { viewModel.selectFile(it) }
     }
 
+    val textFilePickerLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let { viewModel.importTextFile(it) }
+    }
+
     var showSourceOptions by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(getStepTitle(uiState.step)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+            Column {
+                TopAppBar(
+                    title = {
+                        Column {
+                            Text(getStepTitle(uiState.step), style = MaterialTheme.typography.titleMedium)
+                            if (uiState.step != ImportStep.SOURCE_SELECTION) {
+                                Text(
+                                    "Paso ${getStepNumber(uiState.step)} de 5",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                        }
+                    },
+                    actions = {
+                        if (uiState.step == ImportStep.MAPPING) {
+                            TextButton(onClick = { viewModel.reset() }) {
+                                Text("Reiniciar")
+                            }
+                        }
                     }
+                )
+                if (uiState.step != ImportStep.SOURCE_SELECTION) {
+                    val progress by androidx.compose.animation.core.animateFloatAsState(
+                        targetValue = getStepProgress(uiState.step),
+                        label = "StepProgress"
+                    )
+                    LinearProgressIndicator(
+                        progress = { progress },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(4.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
+                        strokeCap = StrokeCap.Round
+                    )
                 }
-            )
+            }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            Crossfade(targetState = uiState.step, label = "TableImportStep") { step ->
-                when (step) {
+            Crossfade(targetState = uiState.step, label = "TableImportStep") { currentStep ->
+                when (currentStep) {
                     ImportStep.SOURCE_SELECTION -> {
                         SourceSelectionView(
                             onSelect = { source ->
@@ -111,6 +154,12 @@ fun TableImportScreen(
                                     showSourceOptions = true
                                 } else {
                                     viewModel.setSource(source)
+                                    when (source) {
+                                        ImportSource.CSV_TEXT -> textFilePickerLauncher.launch(arrayOf("text/comma-separated-values", "text/csv"))
+                                        ImportSource.JSON_TEXT -> textFilePickerLauncher.launch(arrayOf("application/json"))
+                                        ImportSource.PLAIN_TEXT -> textFilePickerLauncher.launch(arrayOf("text/plain"))
+                                        else -> {}
+                                    }
                                 }
                             },
                             onFileSelect = { viewModel.selectFile(it) },
@@ -160,12 +209,20 @@ fun TableImportScreen(
                             onConfirm = { viewModel.nextTable() },
                             validationResult = uiState.validationResult,
                             lowConfidenceIndices = uiState.lowConfidenceIndices,
-                            tableProgress = "${uiState.currentTableIndex + 1} de ${uiState.detectedTables.size}"
+                            confidenceThreshold = uiState.confidenceThreshold,
+                            onThresholdChange = { viewModel.setConfidenceThreshold(it) },
+                            tableProgress = "${uiState.currentTableIndex + 1} de ${uiState.detectedTables.size}",
+                            croppedBitmap = uiState.croppedBitmap,
+                            ocrBlocks = uiState.ocrBlocks,
+                            detectedAnchors = uiState.detectedAnchors
                         )
                     }
                     ImportStep.REVIEW -> {
                         // Resumen final opcional
                         LaunchedEffect(Unit) { viewModel.saveAll() }
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator()
+                        }
                     }
                 }
             }
@@ -228,11 +285,12 @@ fun TableImportScreen(
                 }
             }
 
-            uiState.errorMessage?.let { error ->
+            val errorMessage = uiState.errorMessage
+            if (errorMessage != null) {
                 AlertDialog(
                     onDismissRequest = { viewModel.clearError() },
                     title = { Text("Error") },
-                    text = { Text(error) },
+                    text = { Text(errorMessage) },
                     confirmButton = {
                         TextButton(onClick = { viewModel.clearError() }) {
                             Text("Aceptar")
@@ -251,4 +309,22 @@ private fun getStepTitle(step: ImportStep): String = when (step) {
     ImportStep.RECOGNITION -> "Ajustar Columnas"
     ImportStep.MAPPING -> "Revisar Datos"
     ImportStep.REVIEW -> "Guardando..."
+}
+
+private fun getStepNumber(step: ImportStep): Int = when (step) {
+    ImportStep.SOURCE_SELECTION -> 1
+    ImportStep.FILE_PREVIEW -> 2
+    ImportStep.CROP -> 3
+    ImportStep.RECOGNITION -> 4
+    ImportStep.MAPPING -> 5
+    ImportStep.REVIEW -> 5
+}
+
+private fun getStepProgress(step: ImportStep): Float = when (step) {
+    ImportStep.SOURCE_SELECTION -> 0.2f
+    ImportStep.FILE_PREVIEW -> 0.4f
+    ImportStep.CROP -> 0.6f
+    ImportStep.RECOGNITION -> 0.8f
+    ImportStep.MAPPING -> 0.95f
+    ImportStep.REVIEW -> 1f
 }

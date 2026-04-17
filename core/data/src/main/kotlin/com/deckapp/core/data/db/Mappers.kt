@@ -157,9 +157,12 @@ fun SessionDeckRef.toEntity() = SessionDeckRefEntity(
 
 fun RandomTableEntity.toDomain(
     entries: List<TableEntryEntity> = emptyList(),
-    tags: List<Tag> = emptyList()
+    tags: List<Tag> = emptyList(),
+    bundleName: String? = null
 ) = com.deckapp.core.model.RandomTable(
         id = id,
+        bundleId = bundleId,
+        bundleName = bundleName,
         name = name,
         description = description,
         tags = tags,
@@ -167,6 +170,7 @@ fun RandomTableEntity.toDomain(
         rollMode = runCatching { com.deckapp.core.model.TableRollMode.valueOf(rollMode) }
             .getOrDefault(com.deckapp.core.model.TableRollMode.RANGE),
         entries = entries.map { it.toDomain() },
+        isNoRepeat = isNoRepeat,
         isPinned = isPinned,
         isBuiltIn = isBuiltIn,
         createdAt = createdAt
@@ -174,12 +178,33 @@ fun RandomTableEntity.toDomain(
 
 fun com.deckapp.core.model.RandomTable.toEntity() = RandomTableEntity(
     id = id,
+    bundleId = bundleId,
     name = name,
     description = description,
     rollFormula = rollFormula,
     rollMode = rollMode.name,
+    isNoRepeat = isNoRepeat,
     isPinned = isPinned,
     isBuiltIn = isBuiltIn,
+    createdAt = createdAt
+)
+
+// --- TableBundle ---
+
+fun TableBundleEntity.toDomain(tables: List<RandomTable> = emptyList()) = TableBundle(
+    id = id,
+    name = name,
+    description = description,
+    sourceUri = sourceUri,
+    tables = tables,
+    createdAt = createdAt
+)
+
+fun TableBundle.toEntity() = TableBundleEntity(
+    id = id,
+    name = name,
+    description = description,
+    sourceUri = sourceUri,
     createdAt = createdAt
 )
 
@@ -227,9 +252,10 @@ fun com.deckapp.core.model.TableRollResult.toEntity() = TableRollResultEntity(
     timestamp = timestamp
 )
 
-fun TableWithEntries.toDomain(tags: List<Tag> = emptyList()) = table.toDomain(
+fun TableWithEntries.toDomain(tags: List<Tag> = emptyList(), bundleName: String? = null) = table.toDomain(
     entries = entries,
-    tags = tags
+    tags = tags,
+    bundleName = bundleName
 )
 
 // --- DrawEvent ---
@@ -302,3 +328,26 @@ fun EncounterCreature.toEntity() = EncounterCreatureEntity(
     notes = notes,
     sortOrder = sortOrder
 )
+
+// --- Collections ---
+
+fun CollectionEntity.toDomain(resourceCount: Int = 0) = Collection(
+    id = id,
+    name = name,
+    description = description,
+    color = color,
+    icon = runCatching { CollectionIcon.valueOf(iconName) }.getOrDefault(CollectionIcon.FOLDER),
+    resourceCount = resourceCount,
+    createdAt = createdAt
+)
+
+fun Collection.toEntity() = CollectionEntity(
+    id = id,
+    name = name,
+    description = description,
+    color = color,
+    iconName = icon.name,
+    createdAt = createdAt
+)
+
+fun CollectionWithCount.toDomain() = collection.toDomain(resourceCount = resourceCount)

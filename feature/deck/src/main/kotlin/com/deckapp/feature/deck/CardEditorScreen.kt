@@ -130,6 +130,17 @@ fun CardEditorScreen(
                 onTableSelect = { viewModel.updateLinkedTable(it) }
             )
 
+            // ── Notas del DM ──────────────────────────────────────────
+            OutlinedTextField(
+                value = uiState.dmNotes,
+                onValueChange = { viewModel.updateDmNotes(it) },
+                label = { Text("Notas del DM (privadas)") },
+                placeholder = { Text("Solo visibles para el DM…") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 3,
+                maxLines = 6
+            )
+
             HorizontalDivider()
 
             // ── Tabs de caras ─────────────────────────────────────────

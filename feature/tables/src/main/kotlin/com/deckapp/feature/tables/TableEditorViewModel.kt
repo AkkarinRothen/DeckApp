@@ -117,7 +117,8 @@ class TableEditorViewModel @Inject constructor(
     fun addEntry() {
         val state = _uiState.value
         val lastMax = state.entries.maxOfOrNull { it.maxRoll } ?: 0
-        val (_, maxPossible) = RollTableUseCase.getDiceRange(state.rollFormula)
+        val range = RollTableUseCase.getDiceRange(state.rollFormula)
+        val maxPossible = range.second
         val newMin = (lastMax + 1).coerceAtMost(maxPossible)
         val newEntry = TableEntry(
             minRoll = newMin,

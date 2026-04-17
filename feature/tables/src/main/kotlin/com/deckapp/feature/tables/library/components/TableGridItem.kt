@@ -28,6 +28,7 @@ fun TableGridItem(
     onQuickRoll: () -> Unit,
     onTogglePin: () -> Unit,
     onDuplicate: (() -> Unit)? = null,
+    onInvertRanges: (() -> Unit)? = null,
     onDelete: (() -> Unit)? = null,
     isSelected: Boolean = false,
     onLongClick: (() -> Unit)? = null,
@@ -146,6 +147,13 @@ fun TableGridItem(
                                 text = { Text("Duplicar") },
                                 onClick = { showMenu = false; onDuplicate() },
                                 leadingIcon = { Icon(Icons.Default.ContentCopy, null) }
+                            )
+                        }
+                        if (onInvertRanges != null) {
+                            DropdownMenuItem(
+                                text = { Text("Invertir rangos") },
+                                onClick = { showMenu = false; onInvertRanges() },
+                                leadingIcon = { Icon(Icons.Default.SwapVert, null) }
                             )
                         }
                         if (onDelete != null) {

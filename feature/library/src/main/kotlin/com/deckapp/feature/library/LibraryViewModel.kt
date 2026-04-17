@@ -3,13 +3,15 @@ package com.deckapp.feature.library
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.deckapp.core.domain.repository.CardRepository
+import com.deckapp.core.domain.repository.CollectionRepository
 import com.deckapp.core.domain.repository.FileRepository
-import com.deckapp.core.domain.usecase.DuplicateDeckUseCase
-import com.deckapp.core.domain.usecase.MergeDecksUseCase
-import com.deckapp.core.model.CardStack
-import com.deckapp.core.model.Tag
+import com.deckapp.core.domain.repository.TableRepository
+import com.deckapp.core.domain.usecase.*
+import com.deckapp.core.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -24,8 +26,14 @@ data class LibraryUiState(
     val isLoading: Boolean = true,
     val showArchived: Boolean = false,
     val snackbarMessage: String? = null,
+    val pendingDeleteName: String? = null,  // non-null = hay un borrado pendiente con undo disponible
     val mergeSourceDeckId: Long? = null,
-    val selectedDeckIds: Set<Long> = emptySet()
+    val selectedDeckIds: Set<Long> = emptySet(),
+    val searchResults: List<SearchMatch> = emptyList(),
+    val allTables: List<RandomTable> = emptyList(),
+    val allCollections: List<Collection> = emptyList(),
+    val activeCollectionId: Long? = null,
+    val isLoadingCollections: Boolean = true
 ) {
     /** Mazos que se muestran según el toggle showArchived. */
     val displayedDecks: List<CardStack>
@@ -52,12 +60,20 @@ data class LibraryUiState(
 class LibraryViewModel @Inject constructor(
     private val cardRepository: CardRepository,
     private val fileRepository: FileRepository,
+    private val tableRepository: TableRepository,
+    private val collectionRepository: CollectionRepository,
     private val duplicateDeckUseCase: DuplicateDeckUseCase,
-    private val mergeDecksUseCase: MergeDecksUseCase
+    private val mergeDecksUseCase: MergeDecksUseCase,
+    private val globalSearchUseCase: GlobalSearchUseCase,
+    private val getCollectionsUseCase: GetCollectionsUseCase,
+    private val manageCollectionResourceUseCase: ManageCollectionResourceUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LibraryUiState())
     val uiState: StateFlow<LibraryUiState> = _uiState.asStateFlow()
+
+    /** Job del borrado diferido en curso. Se cancela si el usuario toca "Deshacer". */
+    private var pendingDeleteJob: Job? = null
 
     init {
         // Decks activos + archivados + tags
@@ -73,6 +89,18 @@ class LibraryViewModel @Inject constructor(
             }
         }
 
+        // Carga de Tablas y Colecciones
+        viewModelScope.launch {
+            combine(
+                tableRepository.getAllTables(),
+                getCollectionsUseCase()
+            ) { tables, collections ->
+                tables to collections
+            }.collect { (tables, collections) ->
+                _uiState.update { it.copy(allTables = tables, allCollections = collections, isLoadingCollections = false) }
+            }
+        }
+
         // Conteo total de cartas por mazo (para badge en portada)
         viewModelScope.launch {
             cardRepository.getAllDecks()
@@ -83,6 +111,19 @@ class LibraryViewModel @Inject constructor(
                     ) { pairs -> pairs.toMap() }
                 }
                 .collect { counts -> _uiState.update { it.copy(deckCardCounts = counts) } }
+        }
+
+        // Búsqueda Global reactiva
+        viewModelScope.launch {
+            _uiState.map { it.searchQuery }
+                .distinctUntilChanged()
+                .debounce(300)
+                .flatMapLatest { query ->
+                    globalSearchUseCase(query)
+                }
+                .collect { matches ->
+                    _uiState.update { it.copy(searchResults = matches) }
+                }
         }
     }
 
@@ -133,11 +174,29 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
-    fun deleteDeck(deckId: Long) {
-        viewModelScope.launch {
+    /**
+     * Programa el borrado del mazo con una ventana de 5 segundos para deshacer.
+     * El borrado real (imágenes + Room) ocurre después del delay si no se cancela.
+     * El mazo sigue visible en la lista durante ese período.
+     */
+    fun scheduleDeletion(deckId: Long) {
+        val deck = (_uiState.value.allDecks + _uiState.value.archivedDecks).find { it.id == deckId }
+            ?: return
+        pendingDeleteJob?.cancel()
+        _uiState.update { it.copy(pendingDeleteName = deck.name) }
+        pendingDeleteJob = viewModelScope.launch {
+            delay(5_000)
             fileRepository.deleteImagesForDeck(deckId)
             cardRepository.deleteStack(deckId)
+            _uiState.update { it.copy(pendingDeleteName = null) }
         }
+    }
+
+    /** Cancela el borrado programado — el mazo se mantiene. */
+    fun undoDeletion() {
+        pendingDeleteJob?.cancel()
+        pendingDeleteJob = null
+        _uiState.update { it.copy(pendingDeleteName = null) }
     }
 
     fun duplicateDeck(deckId: Long) {
@@ -204,5 +263,33 @@ class LibraryViewModel @Inject constructor(
 
     fun clearSnackbar() {
         _uiState.update { it.copy(snackbarMessage = null) }
+    }
+
+    // --- Gestión de Colecciones ---
+
+    fun createCollection(name: String, color: Int, icon: CollectionIcon) {
+        viewModelScope.launch {
+            val newCollection = Collection(name = name, color = color, icon = icon)
+            collectionRepository.saveCollection(newCollection)
+            _uiState.update { it.copy(snackbarMessage = "Colección \"$name\" creada") }
+        }
+    }
+
+    fun deleteCollection(id: Long) {
+        viewModelScope.launch {
+            collectionRepository.deleteCollection(id)
+            _uiState.update { it.copy(snackbarMessage = "Colección eliminada") }
+        }
+    }
+
+    fun addResourceToCollection(collectionId: Long, resourceId: Long, type: SearchResultType) {
+        viewModelScope.launch {
+            manageCollectionResourceUseCase.add(collectionId, resourceId, type)
+            _uiState.update { it.copy(snackbarMessage = "Añadido al Baúl") }
+        }
+    }
+
+    fun setActiveCollection(id: Long?) {
+        _uiState.update { it.copy(activeCollectionId = id) }
     }
 }

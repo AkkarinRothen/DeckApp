@@ -30,7 +30,7 @@ data class SessionUiState(
     val errorMessage: String? = null,
     val peekCard: Card? = null,    // carta visible en modo Peek (no robada)
     val sessionEnded: Boolean = false,
-    val activeTab: Int = 0,                  // 0=Mazos, 1=Tablas, 2=Notas, 3=Combate
+    val activeTab: Int = 0,                  // 0=Mazos, 1=Pilas, 2=Tablas, 3=Notas, 4=Combate
     val hasActiveEncounter: Boolean = false, // habilita tab Combate (Sprint 7)
     val activeEncounter: Encounter? = null,  // datos del combate en curso
     val dmNotes: String = "",
@@ -47,7 +47,12 @@ data class SessionUiState(
     val allDecks: List<CardStack> = emptyList(),
     val allTables: List<RandomTable> = emptyList(),
     val tablesInSession: List<RandomTable> = emptyList(),
-    val showResourceManager: Boolean = false
+    val showResourceManager: Boolean = false,
+    // C-5 — Animación de barajar
+    val isShuffling: Boolean = false,
+    // D-2 — Robar por palo
+    val showDrawBySuitSheet: Boolean = false,
+    val availableSuitsForDraw: List<String> = emptyList()
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -329,9 +334,11 @@ class SessionViewModel @Inject constructor(
         }
     }
 
-    /** Regresa todas las cartas de la pila al mazo (Shuffle back). */
+    /** Regresa todas las cartas de la pila al mazo (Shuffle back). Activa animación C-5. */
     fun shufflePileBack(stackId: Long? = null) {
         viewModelScope.launch {
+            _uiState.update { it.copy(isShuffling = true) }
+
             val piledCards = cardRepository.getPiledCards(sessionId).first()
             val cardsToReturn = if (stackId != null) {
                 piledCards.filter { it.stackId == stackId }
@@ -339,24 +346,69 @@ class SessionViewModel @Inject constructor(
                 piledCards
             }
 
-            if (cardsToReturn.isEmpty()) return@launch
-
-            // Marcamos como no robadas
-            cardsToReturn.forEach { card ->
-                cardRepository.updateCardDrawnState(card.id, isDrawn = false)
+            if (cardsToReturn.isNotEmpty()) {
+                // Marcamos como no robadas
+                cardsToReturn.forEach { card ->
+                    cardRepository.updateCardDrawnState(card.id, isDrawn = false)
+                }
+                // Registramos el evento de barajado
+                sessionRepository.logEvent(
+                    DrawEvent(
+                        sessionId = sessionId,
+                        cardId = null,
+                        action = DrawAction.SHUFFLE_BACK,
+                        metadata = if (stackId != null) "Mazo: $stackId" else "Toda la pila"
+                    )
+                )
             }
 
-            // Registramos el evento de barajado
-            sessionRepository.logEvent(
-                DrawEvent(
-                    sessionId = sessionId,
-                    cardId = null,
-                    action = DrawAction.SHUFFLE_BACK,
-                    metadata = if (stackId != null) "Mazo: $stackId" else "Toda la pila"
-                )
-            )
-            _uiState.update { it.copy(snackbarMessage = "Pila barajada de vuelta al mazo") }
+            // Tiempo mínimo de animación: 900ms
+            delay(900)
+            _uiState.update { it.copy(isShuffling = false, snackbarMessage = if (cardsToReturn.isNotEmpty()) "Pila barajada de vuelta al mazo" else null) }
         }
+    }
+
+    // ── D-2: Robar por palo ──────────────────────────────────────────────────
+
+    /** Abre el sheet de "Robar por palo" cargando los palos disponibles del mazo activo. */
+    fun openDrawBySuit() {
+        val deckId = _uiState.value.selectedDeckId ?: return
+        viewModelScope.launch {
+            val suits = cardRepository.getCardsForStack(deckId).first()
+                .filter { !it.isDrawn }
+                .mapNotNull { it.suit }
+                .distinct()
+                .sorted()
+            _uiState.update { it.copy(showDrawBySuitSheet = true, availableSuitsForDraw = suits) }
+        }
+    }
+
+    /** Roba una carta aleatoria del palo indicado en el mazo activo. */
+    fun drawCardBySuit(suit: String) {
+        val deckId = _uiState.value.selectedDeckId ?: return
+        _uiState.update { it.copy(showDrawBySuitSheet = false) }
+        viewModelScope.launch {
+            val available = cardRepository.getCardsForStack(deckId).first()
+                .filter { !it.isDrawn && it.suit == suit }
+            if (available.isEmpty()) {
+                _uiState.update { it.copy(snackbarMessage = "No quedan cartas del palo \"$suit\"") }
+                return@launch
+            }
+            val card = available.random()
+            val now = System.currentTimeMillis()
+            cardRepository.updateCardDrawnState(card.id, isDrawn = true, lastDrawnAt = now)
+            val deck = cardRepository.getDeckById(deckId).first()
+            if (deck?.drawFaceDown == true) {
+                cardRepository.updateCardRevealed(card.id, isRevealed = false)
+            }
+            sessionRepository.logEvent(
+                DrawEvent(sessionId = sessionId, cardId = card.id, action = DrawAction.DRAW)
+            )
+        }
+    }
+
+    fun closeDrawBySuitSheet() {
+        _uiState.update { it.copy(showDrawBySuitSheet = false) }
     }
 
     /** Mueve una carta específica de la pila a la mano. */

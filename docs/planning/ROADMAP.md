@@ -354,6 +354,20 @@ Sprint 22+ — Fase 3
   · B-7  Auto-detección de grilla PDF (OpenCV)
   · D-5  Widget de Android (Glance)
   · Búsqueda global con Room FTS
+
+Sprint 23 — Refinamiento de Importación PDF 🔴 ★
+  · Rango de páginas: Selección de inicio-fin para descartar anexos
+  · Dorso Genérico: Asignar imagen de respaldo global al importar
+  · Rotación Manual: Botones de giro en la vista previa
+
+Sprint 24 — Inteligencia y Automatización 🟡 ★★
+  · Dice Parser: Detección de [XdY] y tirada con un tap
+  · Loot Weights: Sistema de probabilidades de robo por carta
+  · Traducción Visual: Capa de texto sobre imagen (OCR)
+
+Sprint 25 — Mecánicas Narrativas 🟢 ★★★
+  · Relojes de Progreso: Overlays interactivos sobre cartas
+  · Modo Oráculo: Soporte para cartas invertidas
 ```
 
 ---

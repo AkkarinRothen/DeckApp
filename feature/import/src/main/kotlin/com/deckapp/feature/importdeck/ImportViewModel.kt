@@ -34,6 +34,7 @@ data class DeckImportUiState(
     val pdfLayoutMode: PdfLayoutMode = PdfLayoutMode.ALTERNATING_PAGES,
     val pdfGridCols: Int = 3,
     val pdfGridRows: Int = 3,
+    val pdfSkipPages: Int = 0,
     val pdfPreviewBitmap: android.graphics.Bitmap? = null,
     val pdfPageCount: Int = 0,
     // Vista previa de cartas (máx 6 bitmaps en memoria)
@@ -207,12 +208,13 @@ class DeckImportViewModel @Inject constructor(
 
                 val cols = state.pdfGridCols
                 val rows = state.pdfGridRows
+                val skip = state.pdfSkipPages
                 val autoTrim = state.pdfAutoTrimCells
 
                 when (state.pdfLayoutMode) {
                     PdfLayoutMode.ALTERNATING_PAGES -> {
                         // Mostrar frentes (páginas pares) con la grilla configurada
-                        outer@ for (page in 0 until pageCount step 2) {
+                        outer@ for (page in skip until pageCount step 2) {
                             for (row in 0 until rows) {
                                 for (col in 0 until cols) {
                                     if (bitmaps.size >= maxPreview) break@outer
@@ -227,7 +229,7 @@ class DeckImportViewModel @Inject constructor(
                     PdfLayoutMode.SIDE_BY_SIDE -> {
                         // Mostrar pares frente/dorso: izq = cols 0..cols-1, der = cols cols..2*cols-1
                         val totalCols = cols * 2
-                        outer@ for (page in 0 until pageCount) {
+                        outer@ for (page in skip until pageCount) {
                             for (row in 0 until rows) {
                                 for (col in 0 until cols) {
                                     if (bitmaps.size >= maxPreview) break@outer
@@ -246,7 +248,7 @@ class DeckImportViewModel @Inject constructor(
                         }
                     }
                     PdfLayoutMode.GRID -> {
-                        outer@ for (page in 0 until pageCount) {
+                        outer@ for (page in skip until pageCount) {
                             for (row in 0 until rows) {
                                 for (col in 0 until cols) {
                                     if (bitmaps.size >= maxPreview) break@outer
@@ -259,8 +261,10 @@ class DeckImportViewModel @Inject constructor(
                         }
                     }
                     PdfLayoutMode.FIRST_HALF_FRONTS -> {
-                        val half = pageCount / 2
-                        outer@ for (page in 0 until half) {
+                        val remainingPages = pageCount - skip
+                        val half = remainingPages / 2
+                        outer@ for (pageOffset in 0 until half) {
+                            val page = skip + pageOffset
                             for (row in 0 until rows) {
                                 for (col in 0 until cols) {
                                     if (bitmaps.size >= maxPreview) break@outer
@@ -325,6 +329,7 @@ class DeckImportViewModel @Inject constructor(
 
     fun updatePdfGridCols(cols: Int) = _uiState.update { it.copy(pdfGridCols = cols.coerceAtLeast(1)) }
     fun updatePdfGridRows(rows: Int) = _uiState.update { it.copy(pdfGridRows = rows.coerceAtLeast(1)) }
+    fun updatePdfSkipPages(skip: Int) = _uiState.update { it.copy(pdfSkipPages = skip.coerceAtLeast(0)) }
     fun updatePdfAutoTrimCells(autoTrim: Boolean) = _uiState.update { it.copy(pdfAutoTrimCells = autoTrim) }
 
     fun startImport() {
@@ -344,6 +349,7 @@ class DeckImportViewModel @Inject constructor(
                 pdfLayoutMode = state.pdfLayoutMode,
                 pdfGridCols = state.pdfGridCols,
                 pdfGridRows = state.pdfGridRows,
+                pdfSkipPages = state.pdfSkipPages,
                 pdfAutoTrimCells = state.pdfAutoTrimCells,
                 onProgress = { progress, count ->
                     _uiState.update { it.copy(importProgress = progress, importedCardCount = count) }

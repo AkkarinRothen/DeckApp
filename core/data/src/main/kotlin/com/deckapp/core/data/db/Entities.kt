@@ -166,13 +166,35 @@ data class RandomTableTagCrossRef(val tableId: Long, val tagId: Long)
 
 // ── Random Tables ──────────────────────────────────────────────────────────
 
-@Entity(tableName = "random_tables")
+@Entity(tableName = "table_bundles")
+data class TableBundleEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    val description: String = "",
+    val sourceUri: String? = null,
+    val createdAt: Long = System.currentTimeMillis()
+)
+
+@Entity(
+    tableName = "random_tables",
+    foreignKeys = [
+        ForeignKey(
+            entity = TableBundleEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["bundleId"],
+            onDelete = ForeignKey.SET_NULL
+        )
+    ],
+    indices = [Index("bundleId")]
+)
 data class RandomTableEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val bundleId: Long? = null,
     val name: String,
     val description: String = "",
     val rollFormula: String = "1d6",
     val rollMode: String = "RANGE",       // TableRollMode.name
+    val isNoRepeat: Boolean = false,
     val isPinned: Boolean = false,
     val sourceType: String = "MANUAL",    // OCR, CSV, JSON, MANUAL
     val sourceName: String? = null,

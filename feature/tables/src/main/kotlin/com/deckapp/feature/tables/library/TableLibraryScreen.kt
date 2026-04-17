@@ -214,7 +214,7 @@ fun TableLibraryScreen(
                             table = table,
                             isSelected = isSelected,
                             onLongClick = { viewModel.toggleTableSelection(table.id) },
-                            onClick = { 
+                            onClick = {
                                 if (uiState.selectedTableIds.isNotEmpty()) {
                                     viewModel.toggleTableSelection(table.id)
                                 } else {
@@ -224,6 +224,7 @@ fun TableLibraryScreen(
                             onQuickRoll = { viewModel.rollTable(table.id, sessionId = null) },
                             onTogglePin = { viewModel.togglePin(table) },
                             onDuplicate = if (uiState.selectedTableIds.isEmpty()) ({ viewModel.duplicateTable(table.id) }) else null,
+                            onInvertRanges = if (uiState.selectedTableIds.isEmpty()) ({ viewModel.invertTable(table.id) }) else null,
                             onDelete = { viewModel.deleteTable(table.id) }
                         )
                     }

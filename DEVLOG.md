@@ -7,6 +7,18 @@
 
 ### Sprint 22 — Estabilización del Build y Refactor de Módulos (16 de abril de 2026)
 
+**FIX — Solución a error de inyección de Dagger Hilt (Missing Binding)**
+- **PROBLEM**: El build fallaba con un error de inyección en `TableRepositoryImpl` porque `TableBundleDao` no tenía un método `@Provides` en el módulo de Dagger.
+- **SOLUTION**: Añadido `@Provides fun provideTableBundleDao(db: DeckAppDatabase)` a `DatabaseModule` en `DataModule.kt`.
+- **FIX**: Detectada y corregida la omisión de `MIGRATION_19_20` en el `databaseBuilder` de Room, asegurando la consistencia entre la versión de la base de datos (20) y las migraciones registradas.
+
+**INTEGRATION — Build**
+- **BUILD SUCCESSFUL** `assembleDebug` — 445 tareas, 21 ejecutadas, sin errores.
+
+---
+
+### Sprint 22 — Estabilización del Build y Refactor de Módulos (16 de abril de 2026)
+
 **ARCHITECTURE — Solución Crítica: KSP Internal Compiler Error**
 - **PROBLEM**: El módulo `:feature:tables` sufría un error interno de KSP (NullPointerException) que bloqueaba completamente el build, sin causa aparente en el código fuente.
 - **SOLUTION**: Migrado el procesamiento de Hilt en `:feature:tables` de **KSP a Kapt**. Aunque KSP es el estándar moderno, Kapt ofrece la estabilidad necesaria para este módulo específico mientras se investiga la causa raíz del fallo en el compilador.

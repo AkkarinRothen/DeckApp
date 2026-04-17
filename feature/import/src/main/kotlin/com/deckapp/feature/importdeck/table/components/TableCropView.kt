@@ -10,6 +10,7 @@ import androidx.compose.foundation.magnifier
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,6 +23,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
@@ -99,6 +101,9 @@ fun TableCropView(
                 .pointerInput(containerSize) {
                     if (containerSize == IntSize.Zero) return@pointerInput
                     
+                    val bitmapSize = Size(bitmap.width.toFloat(), bitmap.height.toFloat())
+                    val imageBounds = calculateImageBounds(containerSize.toSize(), bitmapSize)
+                    
                     detectDragGestures(
                         onDragStart = { offset -> magnifierPosition = offset },
                         onDragEnd = { magnifierPosition = Offset.Unspecified },
@@ -107,15 +112,10 @@ fun TableCropView(
                             change.consume()
                             magnifierPosition = change.position
                             
-                            val width = containerSize.width.toFloat()
-                            val height = containerSize.height.toFloat()
-                            
-                            // Determinar qué estamos moviendo (aquí simplificado: el que esté más cerca oMOVE)
-                            // Para esta implementación robusta, regeneramos el rect basado en el drag
                             val currentRect = cropRect
-                            val handle = getHandleAt(change.position, currentRect, width, height)
+                            val handle = getHandleAt(change.position, currentRect, imageBounds)
                             
-                            cropRect = updateRect(currentRect, handle, dragAmount, width, height)
+                            cropRect = updateRect(currentRect, handle, dragAmount, imageBounds)
                         }
                     )
                 },
@@ -129,53 +129,63 @@ fun TableCropView(
                 contentScale = ContentScale.Fit
             )
             
-            // Canvas para el Scrim (oscurecido fuera) y el Recuadro
+            // Canvas para el Scrim y el Recuadro
             Canvas(modifier = Modifier.fillMaxSize()) {
-                val w = size.width
-                val h = size.height
+                val bitmapSize = Size(bitmap.width.toFloat(), bitmap.height.toFloat())
+                val imageBounds = calculateImageBounds(size, bitmapSize)
+                
+                // rect en pixeles relativos a la imagen
                 val rect = Rect(
-                    cropRect.left * w,
-                    cropRect.top * h,
-                    cropRect.right * w,
-                    cropRect.bottom * h
+                    imageBounds.left + cropRect.left * imageBounds.width,
+                    imageBounds.top + cropRect.top * imageBounds.height,
+                    imageBounds.left + cropRect.right * imageBounds.width,
+                    imageBounds.top + cropRect.bottom * imageBounds.height
                 )
 
-                // 1. Scrim: Oscurecer lo que está fuera del rect
+                // 1. Scrim (solo oscurecemos lo que está dentro de imageBounds pero fuera de rect)
                 val path = Path().apply {
-                    addRect(Rect(0f, 0f, w, h))
+                    addRect(imageBounds)
                     addRect(rect)
                     fillType = PathFillType.EvenOdd
                 }
-                drawPath(path, Color.Black.copy(alpha = 0.45f))
+                drawPath(path, Color.Black.copy(alpha = 0.6f))
+                
+                // Fondo oscurecido fuera de imageBounds (opcional, para limpieza visual)
+                val fullPath = Path().apply {
+                    addRect(Rect(0f, 0f, size.width, size.height))
+                    addRect(imageBounds)
+                    fillType = PathFillType.EvenOdd
+                }
+                drawPath(fullPath, Color.Black.copy(alpha = 0.2f))
 
                 // 2. Bordes del recuadro
                 drawRect(
                     color = colorScheme.primary,
                     topLeft = rect.topLeft,
                     size = rect.size,
-                    style = Stroke(width = 2.dp.toPx())
+                    style = Stroke(width = 3.dp.toPx())
                 )
 
-                // 3. Guías internas (Regla de tercios sutil)
+                // 3. Guías internas
                 val thirdW = rect.width / 3
                 val thirdH = rect.height / 3
                 for (i in 1..2) {
                     drawLine(
-                        color = colorScheme.primary.copy(alpha = 0.3f),
+                        color = Color.White.copy(alpha = 0.4f),
                         start = Offset(rect.left + thirdW * i, rect.top),
                         end = Offset(rect.left + thirdW * i, rect.bottom),
                         strokeWidth = 1.dp.toPx()
                     )
                     drawLine(
-                        color = colorScheme.primary.copy(alpha = 0.3f),
+                        color = Color.White.copy(alpha = 0.4f),
                         start = Offset(rect.left, rect.top + thirdH * i),
                         end = Offset(rect.right, rect.top + thirdH * i),
                         strokeWidth = 1.dp.toPx()
                     )
                 }
                 
-                // 4. Manejadores (Visual)
-                val handleRadius = 6.dp.toPx()
+                // 4. Manejadores
+                val handleRadius = 8.dp.toPx()
                 val handles = listOf(
                     rect.topLeft, rect.topCenter, rect.topRight,
                     rect.centerLeft, rect.centerRight,
@@ -190,63 +200,80 @@ fun TableCropView(
         
         Spacer(Modifier.height(24.dp))
         
-        // ── Acciones y Controles Avanzados ──────────────────────────
-        Card(
+        // ── Acciones y Controles Premium ──────────────────────────
+        Surface(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceVariant.copy(alpha = 0.5f))
+            shape = RoundedCornerShape(20.dp),
+            color = colorScheme.surfaceVariant.copy(alpha = 0.3f),
+            border = androidx.compose.foundation.BorderStroke(1.dp, colorScheme.outlineVariant.copy(alpha = 0.5f))
         ) {
-            Column(modifier = Modifier.padding(12.dp)) {
+            Column(modifier = Modifier.padding(20.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Text("Número de tablas", style = MaterialTheme.typography.labelLarge)
-                        Text("Detectar automáticamente vs forzar 1 tabla", style = MaterialTheme.typography.bodySmall)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Configuración de Celdas", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                        Text("Detecta tablas automáticamente o fuerza un número.", style = MaterialTheme.typography.bodySmall, color = colorScheme.onSurfaceVariant)
                     }
-                    SingleChoiceSegmentedButtonRow {
-                        SegmentedButton(
-                            selected = expectedTableCount == 0,
-                            onClick = { onSetExpectedTableCount(0) },
-                            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
-                        ) { Text("Auto") }
-                        SegmentedButton(
-                            selected = expectedTableCount == 1,
-                            onClick = { onSetExpectedTableCount(1) },
-                            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
-                        ) { Text("1 Tabla") }
+                    
+                    var expanded by remember { mutableStateOf(false) }
+                    Box {
+                        FilterChip(
+                            selected = expectedTableCount > 0,
+                            onClick = { expanded = true },
+                            label = { Text(if (expectedTableCount == 0) "Auto" else "$expectedTableCount Tablas") },
+                            trailingIcon = { Icon(Icons.Default.ArrowDropDown, null) }
+                        )
+                        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                            DropdownMenuItem(
+                                text = { Text("Automático") },
+                                onClick = { onSetExpectedTableCount(0); expanded = false }
+                            )
+                            (1..5).forEach { i ->
+                                DropdownMenuItem(
+                                    text = { Text("Forzar $i tabla${if (i > 1) "s" else ""}") },
+                                    onClick = { onSetExpectedTableCount(i); expanded = false }
+                                )
+                            }
+                        }
                     }
                 }
                 
-                Divider(Modifier.padding(vertical = 8.dp), alpha = 0.2f)
+                Spacer(Modifier.height(16.dp))
+                HorizontalDivider(color = colorScheme.outlineVariant.copy(alpha = 0.3f))
+                Spacer(Modifier.height(16.dp))
                 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Text("Modo Unión (Stitching)", style = MaterialTheme.typography.labelLarge)
-                        Text("Añadir este recorte a la tabla actual", style = MaterialTheme.typography.bodySmall)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Modo Unión (Stitching)", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                        Text("Útil para unir tablas cortadas en varias páginas.", style = MaterialTheme.typography.bodySmall, color = colorScheme.onSurfaceVariant)
                     }
                     Switch(
                         checked = isStitching,
-                        onCheckedChange = onToggleStitching
+                        onCheckedChange = onToggleStitching,
+                        thumbContent = if (isStitching) {
+                            { Icon(Icons.Default.Check, null, Modifier.size(SwitchDefaults.IconSize)) }
+                        } else null
                     )
                 }
             }
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(20.dp))
 
         Button(
             onClick = {
                 val cropped = performCrop(bitmap, cropRect)
                 onCropConfirmed(cropped)
             },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier.fillMaxWidth().height(60.dp),
+            shape = RoundedCornerShape(18.dp),
             contentPadding = PaddingValues(horizontal = 24.dp)
         ) {
             Icon(Icons.Default.Check, null)
@@ -259,9 +286,33 @@ fun TableCropView(
 
 // ── Lógica de Cálculo ────────────────────────────────────────────────────────
 
-private fun getHandleAt(pos: Offset, rect: Rect, width: Float, height: Float): HandleType {
-    val r = Rect(rect.left * width, rect.top * height, rect.right * width, rect.bottom * height)
-    val threshold = 40f // Sensibilidad del toque
+private fun calculateImageBounds(containerSize: Size, bitmapSize: Size): Rect {
+    val containerRatio = containerSize.width / containerSize.height
+    val bitmapRatio = bitmapSize.width / bitmapSize.height
+    
+    val (drawWidth, drawHeight) = if (bitmapRatio > containerRatio) {
+        // La imagen es más ancha que el contenedor (relativamente)
+        containerSize.width to (containerSize.width / bitmapRatio)
+    } else {
+        // La imagen es más alta que el contenedor
+        (containerSize.height * bitmapRatio) to containerSize.height
+    }
+    
+    val left = (containerSize.width - drawWidth) / 2
+    val top = (containerSize.height - drawHeight) / 2
+    
+    return Rect(left, top, left + drawWidth, top + drawHeight)
+}
+
+private fun getHandleAt(pos: Offset, rect: Rect, imageBounds: Rect): HandleType {
+    // rect es normalizado 0..1 relativo a imageBounds
+    val r = Rect(
+        imageBounds.left + rect.left * imageBounds.width,
+        imageBounds.top + rect.top * imageBounds.height,
+        imageBounds.left + rect.right * imageBounds.width,
+        imageBounds.top + rect.bottom * imageBounds.height
+    )
+    val threshold = 40f
     
     return when {
         (pos - r.topLeft).getDistance() < threshold -> HandleType.TOP_LEFT
@@ -273,13 +324,14 @@ private fun getHandleAt(pos: Offset, rect: Rect, width: Float, height: Float): H
         (pos - r.centerLeft).getDistance() < threshold -> HandleType.CENTER_LEFT
         (pos - r.centerRight).getDistance() < threshold -> HandleType.CENTER_RIGHT
         r.contains(pos) -> HandleType.MOVE
-        else -> HandleType.MOVE // Por defecto mover si no estamos en un handle
+        else -> HandleType.MOVE
     }
 }
 
-private fun updateRect(rect: Rect, handle: HandleType, delta: Offset, width: Float, height: Float): Rect {
-    val dx = delta.x / width
-    val dy = delta.y / height
+private fun updateRect(rect: Rect, handle: HandleType, delta: Offset, imageBounds: Rect): Rect {
+    // Normalizar delta basado en el tamaño real de la imagen
+    val dx = delta.x / imageBounds.width
+    val dy = delta.y / imageBounds.height
     val minSize = 0.05f
     
     return when (handle) {
@@ -311,7 +363,6 @@ private fun updateRect(rect: Rect, handle: HandleType, delta: Offset, width: Flo
     }
 }
 
-// Helpers para Rect que no existen en Compose por defecto
 private fun Rect.updateRight(newRight: Float) = Rect(left, top, newRight, bottom)
 
 private fun performCrop(bitmap: Bitmap, normalizedRect: Rect): Bitmap {

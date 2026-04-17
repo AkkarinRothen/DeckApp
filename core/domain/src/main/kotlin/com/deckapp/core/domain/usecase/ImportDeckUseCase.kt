@@ -37,6 +37,7 @@ class ImportDeckUseCase @Inject constructor(
         pdfLayoutMode: Any? = null,
         pdfGridCols: Int = 3,
         pdfGridRows: Int = 3,
+        pdfSkipPages: Int = 0,
         pdfAutoTrimCells: Boolean = true,
         onProgress: (progress: Float, cardCount: Int) -> Unit = { _, _ -> },
         onFileError: (fileName: String) -> Unit = {}
@@ -77,6 +78,7 @@ class ImportDeckUseCase @Inject constructor(
                         layoutMode = pdfLayoutMode.toString(),
                         gridCols = pdfGridCols,
                         gridRows = pdfGridRows,
+                        skipPages = pdfSkipPages,
                         autoTrimCells = pdfAutoTrimCells,
                         onProgress = onProgress
                     )
@@ -110,11 +112,12 @@ class ImportDeckUseCase @Inject constructor(
         layoutMode: String,
         gridCols: Int,
         gridRows: Int,
+        skipPages: Int = 0,
         autoTrimCells: Boolean = true,
         onProgress: (Float, Int) -> Unit
     ): String? {
         val pageCount = fileRepository.getPdfPageCount(pdfUri)
-        if (pageCount == 0) return null
+        if (pageCount <= skipPages) return null
 
         var coverPath: String? = null
         var cardIndex = 0
@@ -140,7 +143,7 @@ class ImportDeckUseCase @Inject constructor(
             "ALTERNATING_PAGES" -> {
                 // Páginas pares = grilla gridCols×gridRows de frentes
                 // Páginas impares = grilla gridCols×gridRows de dorsos
-                var pageIndex = 0
+                var pageIndex = skipPages
                 while (pageIndex < pageCount) {
                     for (row in 0 until gridRows) {
                         for (col in 0 until gridCols) {
@@ -175,7 +178,7 @@ class ImportDeckUseCase @Inject constructor(
                 //   columnas 0..gridCols-1      = grilla de frentes
                 //   columnas gridCols..2*gridCols-1 = grilla de dorsos
                 val totalCols = gridCols * 2
-                for (pageIndex in 0 until pageCount) {
+                for (pageIndex in skipPages until pageCount) {
                     for (row in 0 until gridRows) {
                         for (col in 0 until gridCols) {
                             val frontPath = fileRepository.renderPdfGridCellAndSave(
@@ -203,7 +206,7 @@ class ImportDeckUseCase @Inject constructor(
             }
 
             "GRID" -> {
-                for (pageIndex in 0 until pageCount) {
+                for (pageIndex in skipPages until pageCount) {
                     for (row in 0 until gridRows) {
                         for (col in 0 until gridCols) {
                             val path = fileRepository.renderPdfGridCellAndSave(
@@ -221,8 +224,11 @@ class ImportDeckUseCase @Inject constructor(
 
             "FIRST_HALF_FRONTS" -> {
                 // Primera mitad = frentes, segunda mitad = dorsos; ambas con grilla gridCols×gridRows
-                val halfCount = pageCount / 2
-                for (pageIndex in 0 until halfCount) {
+                // Si saltamos páginas, las saltamos del TOTAL, y recalculamos la mitad sobre lo que queda.
+                val remainingPages = pageCount - skipPages
+                val halfCount = remainingPages / 2
+                for (pageOffset in 0 until halfCount) {
+                    val pageIndex = skipPages + pageOffset
                     for (row in 0 until gridRows) {
                         for (col in 0 until gridCols) {
                             val frontPath = fileRepository.renderPdfGridCellAndSave(
@@ -232,7 +238,7 @@ class ImportDeckUseCase @Inject constructor(
                                 autoTrimCell = autoTrimCells
                             )
                             if (frontPath != null) {
-                                val backIndex = halfCount + pageIndex
+                                val backIndex = skipPages + halfCount + pageOffset
                                 val backPath = if (backIndex < pageCount) {
                                     fileRepository.renderPdfGridCellAndSave(
                                         pdfUri, backIndex,
@@ -248,9 +254,10 @@ class ImportDeckUseCase @Inject constructor(
                             }
                         }
                     }
-                    onProgress((pageIndex + 1).toFloat() / halfCount, cardIndex)
+                    onProgress((pageOffset + 1).toFloat() / halfCount, cardIndex)
                 }
             }
+
         }
 
         return coverPath

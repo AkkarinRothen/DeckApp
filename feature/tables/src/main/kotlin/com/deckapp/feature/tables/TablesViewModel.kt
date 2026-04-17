@@ -6,8 +6,10 @@ import com.deckapp.core.domain.repository.TableRepository
 import com.deckapp.core.domain.repository.SessionRepository
 import com.deckapp.core.domain.repository.CardRepository
 import com.deckapp.core.domain.usecase.ExportTableUseCase
+import com.deckapp.core.domain.usecase.InvertTableRangesUseCase
 import com.deckapp.core.domain.usecase.RollTableUseCase
 import com.deckapp.core.model.RandomTable
+import com.deckapp.core.model.TableBundle
 import com.deckapp.core.model.Tag
 import com.deckapp.core.model.TableRollResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,9 +25,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+enum class ExportFormat { CSV, MARKDOWN }
+
 data class TablesUiState(
     val tables: List<RandomTable> = emptyList(),
     val filteredTables: List<RandomTable> = emptyList(),
+    val bundles: List<TableBundle> = emptyList(),
+    val groupedTables: Map<String, List<RandomTable>> = emptyMap(),
     val allTags: List<Tag> = emptyList(),
     val selectedTagIds: Set<Long> = emptySet(),
     val selectedTableIds: Set<Long> = emptySet(),
@@ -33,11 +39,14 @@ data class TablesUiState(
     val activeTable: RandomTable? = null,
     val sessionTableIds: Set<Long> = emptySet(),
     val showAllTables: Boolean = true,
+    val isGridView: Boolean = false,
     val lastResult: TableRollResult? = null,
     val recentResults: List<TableRollResult> = emptyList(),
     val isLoading: Boolean = true,
     val isRolling: Boolean = false,
-    val snackbarMessage: String? = null
+    val snackbarMessage: String? = null,
+    val exportData: String? = null,
+    val exportFilename: String? = null
 )
 
 @HiltViewModel
@@ -45,7 +54,9 @@ class TablesViewModel @Inject constructor(
     private val tableRepository: TableRepository,
     private val sessionRepository: SessionRepository,
     private val cardRepository: CardRepository,
-    private val rollTableUseCase: RollTableUseCase
+    private val rollTableUseCase: RollTableUseCase,
+    private val exportTableUseCase: ExportTableUseCase,
+    private val invertTableRangesUseCase: InvertTableRangesUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TablesUiState())
@@ -59,6 +70,7 @@ class TablesViewModel @Inject constructor(
         // Combinamos todos los flujos para una reactividad pura y eficiente
         kotlinx.coroutines.flow.combine(
             tableRepository.getAllTables(),
+            tableRepository.getAllBundles(),
             cardRepository.getAllTags(),
             _uiState.map { it.searchQuery }.distinctUntilChanged(),
             _uiState.map { it.selectedTagIds }.distinctUntilChanged(),
@@ -68,13 +80,18 @@ class TablesViewModel @Inject constructor(
             @Suppress("UNCHECKED_CAST")
             val tables = args[0] as List<RandomTable>
             @Suppress("UNCHECKED_CAST")
-            val tags = args[1] as List<Tag>
-            val query = args[2] as String
+            val bundles = args[1] as List<TableBundle>
             @Suppress("UNCHECKED_CAST")
-            val selectedTagIds = args[3] as Set<Long>
-            val showAll = args[4] as Boolean
+            val tags = args[2] as List<Tag>
+            val query = args[3] as String
             @Suppress("UNCHECKED_CAST")
-            val sessionTableIds = args[5] as Set<Long>
+            val selectedTagIds = args[4] as Set<Long>
+            val showAll = args[5] as Boolean
+            @Suppress("UNCHECKED_CAST")
+            val sessionTableIds = args[6] as Set<Long>
+
+            // Mapeo rápido de bundleId -> bundleName
+            val bundleMap = bundles.associate { it.id to it.name }
 
             val filtered = tables.filter { table ->
                 val matchesSession = showAll || table.id in sessionTableIds
@@ -83,11 +100,20 @@ class TablesViewModel @Inject constructor(
                 val matchesTags = selectedTagIds.isEmpty() || 
                         table.tags.any { it.id in selectedTagIds }
                 matchesSession && matchesQuery && matchesTags
+            }.map { table ->
+                // Enriquecer con nombre de bundle si falta
+                if (table.bundleName == null && table.bundleId != null) {
+                    table.copy(bundleName = bundleMap[table.bundleId])
+                } else table
             }.sortedWith(compareByDescending<RandomTable> { it.isPinned }.thenBy { it.name })
+
+            val grouped = filtered.groupBy { it.bundleName ?: "Mis Tablas" }
 
             _uiState.value.copy(
                 tables = tables,
                 filteredTables = filtered,
+                bundles = bundles,
+                groupedTables = grouped,
                 allTags = tags,
                 isLoading = false
             )
@@ -95,6 +121,8 @@ class TablesViewModel @Inject constructor(
             _uiState.value = newState
         }.launchIn(viewModelScope)
     }
+
+    fun toggleViewMode() = _uiState.update { it.copy(isGridView = !it.isGridView) }
 
     fun setSession(sessionId: Long?) {
         if (sessionId == null) {
@@ -202,6 +230,13 @@ class TablesViewModel @Inject constructor(
         }
     }
 
+    fun invertTable(tableId: Long) {
+        viewModelScope.launch {
+            invertTableRangesUseCase(tableId)
+            _uiState.update { it.copy(snackbarMessage = "Rangos invertidos") }
+        }
+    }
+
     fun clearSnackbar() = _uiState.update { it.copy(snackbarMessage = null) }
 
     fun rollTable(tableId: Long, sessionId: Long?) {
@@ -216,10 +251,24 @@ class TablesViewModel @Inject constructor(
         }
     }
 
-    /** Devuelve el JSON de exportación de la tabla activa, o cadena vacía si no hay ninguna. */
-    fun getExportJson(): String {
-        val table = _uiState.value.activeTable ?: return ""
-        return ExportTableUseCase.buildJson(table)
+    fun exportTable(format: ExportFormat) {
+        val table = _uiState.value.activeTable ?: return
+        val data = when (format) {
+            ExportFormat.CSV -> exportTableUseCase.toCsv(table)
+            ExportFormat.MARKDOWN -> exportTableUseCase.toMarkdown(table)
+        }
+        val extension = when (format) {
+            ExportFormat.CSV -> "csv"
+            ExportFormat.MARKDOWN -> "md"
+        }
+        _uiState.update { it.copy(
+            exportData = data,
+            exportFilename = "${table.name.replace(" ", "_")}.$extension"
+        ) }
+    }
+
+    fun clearExportData() {
+        _uiState.update { it.copy(exportData = null, exportFilename = null) }
     }
 
     fun loadRecentResults(sessionId: Long) {
