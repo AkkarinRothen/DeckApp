@@ -31,9 +31,13 @@ import androidx.compose.ui.platform.LocalContext
 import com.deckapp.core.domain.repository.TableRepository
 import com.deckapp.core.domain.repository.RecentFileRepository
 import com.deckapp.core.domain.repository.FileRepository
+import com.deckapp.core.domain.repository.SettingsRepository
 import com.deckapp.core.domain.usecase.RenderPdfPageUseCase
 import com.deckapp.core.domain.usecase.ImportTableUseCase
 import com.deckapp.core.domain.usecase.ReadTextFromUriUseCase
+import com.deckapp.core.domain.usecase.TranscribeTableWithAiUseCase
+import com.deckapp.core.domain.usecase.RecognizeTableFromImageUseCase
+import com.deckapp.core.domain.usecase.RecognizeTableStreamingUseCase
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
@@ -41,9 +45,13 @@ interface TableImportEntryPoint {
     fun renderPdfPageUseCase(): RenderPdfPageUseCase
     fun importTableUseCase(): ImportTableUseCase
     fun readTextFromUriUseCase(): ReadTextFromUriUseCase
+    fun transcribeTableWithAiUseCase(): TranscribeTableWithAiUseCase
+    fun recognizeTableFromImageUseCase(): RecognizeTableFromImageUseCase
+    fun recognizeTableStreamingUseCase(): RecognizeTableStreamingUseCase
     fun tableRepository(): TableRepository
     fun recentFileRepository(): RecentFileRepository
     fun fileRepository(): FileRepository
+    fun settingsRepository(): SettingsRepository
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,8 +69,12 @@ fun TableImportScreen(
             entryPoint.importTableUseCase(),
             entryPoint.readTextFromUriUseCase(),
             entryPoint.tableRepository(),
+            entryPoint.transcribeTableWithAiUseCase(),
+            entryPoint.recognizeTableFromImageUseCase(),
+            entryPoint.recognizeTableStreamingUseCase(),
             entryPoint.recentFileRepository(),
-            entryPoint.fileRepository()
+            entryPoint.fileRepository(),
+            entryPoint.settingsRepository()
         )
     )
     
@@ -74,6 +86,12 @@ fun TableImportScreen(
             snackbarHostState.showSnackbar("Tablas guardadas con éxito")
             onBack()
         }
+    }
+
+    LaunchedEffect(uiState.autoVisionMessage) {
+        val msg = uiState.autoVisionMessage ?: return@LaunchedEffect
+        snackbarHostState.showSnackbar(msg)
+        viewModel.clearAutoVisionMessage()
     }
 
     val browsedLauncher = rememberLauncherForActivityResult(
@@ -157,7 +175,8 @@ fun TableImportScreen(
                                     when (source) {
                                         ImportSource.CSV_TEXT -> textFilePickerLauncher.launch(arrayOf("text/comma-separated-values", "text/csv"))
                                         ImportSource.JSON_TEXT -> textFilePickerLauncher.launch(arrayOf("application/json"))
-                                        ImportSource.PLAIN_TEXT -> textFilePickerLauncher.launch(arrayOf("text/plain"))
+                                        ImportSource.PLAIN_TEXT -> textFilePickerLauncher.launch(arrayOf("text/plain", "text/markdown"))
+                                        ImportSource.MARKDOWN_TABLE -> textFilePickerLauncher.launch(arrayOf("text/markdown", "text/x-markdown"))
                                         else -> {}
                                     }
                                 }
@@ -195,7 +214,9 @@ fun TableImportScreen(
                             anchors = uiState.detectedAnchors,
                             onAddAnchor = { viewModel.addAnchor(it) },
                             onRemoveAnchor = { viewModel.removeAnchor(it) },
-                            onConfirm = { viewModel.confirmRecognition() }
+                            onConfirm = { viewModel.confirmRecognition() },
+                            isVisionProcessing = uiState.isVisionProcessing,
+                            onVisionRecognize = { viewModel.recognizeWithVision() }
                         )
                     }
                     ImportStep.MAPPING -> {
@@ -203,15 +224,20 @@ fun TableImportScreen(
                             entries = uiState.editableEntries,
                             tableName = uiState.tableNameDraft,
                             tableTag = uiState.tableTagDraft,
+                            tableFormula = uiState.tableFormulaDraft,
                             onEntryChange = { idx, entry -> viewModel.updateEntry(idx, entry) },
                             onNameChange = { viewModel.setDraftName(it) },
                             onTagChange = { viewModel.setDraftTag(it) },
+                            onFormulaChange = { viewModel.setDraftFormula(it) },
                             onConfirm = { viewModel.nextTable() },
                             validationResult = uiState.validationResult,
                             lowConfidenceIndices = uiState.lowConfidenceIndices,
                             confidenceThreshold = uiState.confidenceThreshold,
                             onThresholdChange = { viewModel.setConfidenceThreshold(it) },
                             tableProgress = "${uiState.currentTableIndex + 1} de ${uiState.detectedTables.size}",
+                            isAiProcessing = uiState.isAiProcessing,
+                            isVisionProcessing = uiState.isVisionProcessing,
+                            onAiOptimize = { viewModel.optimizeWithAi() },
                             croppedBitmap = uiState.croppedBitmap,
                             ocrBlocks = uiState.ocrBlocks,
                             detectedAnchors = uiState.detectedAnchors
@@ -287,9 +313,10 @@ fun TableImportScreen(
 
             val errorMessage = uiState.errorMessage
             if (errorMessage != null) {
+                val isQuotaError = "cuota" in errorMessage.lowercase() || "quota" in errorMessage.lowercase()
                 AlertDialog(
                     onDismissRequest = { viewModel.clearError() },
-                    title = { Text("Error") },
+                    title = { Text(if (isQuotaError) "Límite de API alcanzado" else "Error de IA") },
                     text = { Text(errorMessage) },
                     confirmButton = {
                         TextButton(onClick = { viewModel.clearError() }) {

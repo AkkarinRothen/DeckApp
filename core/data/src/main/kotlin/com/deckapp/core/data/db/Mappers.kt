@@ -331,7 +331,7 @@ fun EncounterCreature.toEntity() = EncounterCreatureEntity(
 
 // --- Collections ---
 
-fun CollectionEntity.toDomain(resourceCount: Int = 0) = Collection(
+fun CollectionEntity.toDomain(resourceCount: Int = 0) = DeckCollection(
     id = id,
     name = name,
     description = description,
@@ -341,7 +341,7 @@ fun CollectionEntity.toDomain(resourceCount: Int = 0) = Collection(
     createdAt = createdAt
 )
 
-fun Collection.toEntity() = CollectionEntity(
+fun DeckCollection.toEntity() = CollectionEntity(
     id = id,
     name = name,
     description = description,

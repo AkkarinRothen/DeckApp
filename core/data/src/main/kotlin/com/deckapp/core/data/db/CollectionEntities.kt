@@ -21,6 +21,14 @@ data class CollectionEntity(
 @Entity(
     tableName = "collection_resource_refs",
     primaryKeys = ["collectionId", "resourceId", "resourceType"],
+    foreignKeys = [
+        ForeignKey(
+            entity = CollectionEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["collectionId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
     indices = [
         Index(value = ["collectionId"]),
         Index(value = ["resourceId", "resourceType"])
@@ -32,10 +40,17 @@ data class CollectionResourceCrossRef(
     val resourceType: String // "DECK" o "TABLE"
 )
 
-/**
- * Objeto para cargar una colección con el conteo de sus recursos.
- */
 data class CollectionWithCount(
     @Embedded val collection: CollectionEntity,
     @ColumnInfo(name = "resourceCount") val resourceCount: Int
+)
+
+/**
+ * Tabla FTS para búsqueda rápida de colecciones.
+ */
+@Fts4(contentEntity = CollectionEntity::class)
+@Entity(tableName = "collections_fts")
+data class CollectionFtsEntity(
+    val name: String,
+    val description: String
 )

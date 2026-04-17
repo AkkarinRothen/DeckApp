@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -32,16 +33,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import kotlin.math.abs
 
-/**
- * Vista de mapeo mejorada con Zoom, Pan y feedback visual de columnas.
- */
 @Composable
 fun TableMappingView(
     bitmap: Bitmap,
     anchors: List<Float>,
     onAddAnchor: (Float) -> Unit,
     onRemoveAnchor: (Float) -> Unit,
-    onConfirm: () -> Unit
+    onConfirm: () -> Unit,
+    isVisionProcessing: Boolean = false,
+    onVisionRecognize: (() -> Unit)? = null
 ) {
     // Estado de transformación (Zoom y Pan)
     var scale by remember { mutableStateOf(1f) }
@@ -86,7 +86,6 @@ fun TableMappingView(
 
         Spacer(Modifier.height(12.dp))
 
-        // ── Contenedor Interactivo con Zoom ────────────────────────
         Box(
             modifier = Modifier
                 .weight(1f)
@@ -132,7 +131,6 @@ fun TableMappingView(
                         translationY = offset.y
                     )
             ) {
-                // Imagen de la tabla
                 Image(
                     bitmap = bitmap.asImageBitmap(),
                     contentDescription = null,
@@ -140,7 +138,6 @@ fun TableMappingView(
                     contentScale = ContentScale.Fit
                 )
 
-                // Capa de Feedback Visual
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val bitmapSize = Size(bitmap.width.toFloat(), bitmap.height.toFloat())
                     val imageBounds = calculateImageBounds(size, bitmapSize)
@@ -150,7 +147,6 @@ fun TableMappingView(
                     val left = imageBounds.left
                     val top = imageBounds.top
                     
-                    // Ordenar anclas para sombrear áreas
                     val sortedAnchors = (listOf(0f) + anchors + listOf(1f)).sorted()
                     
                     for (i in 0 until sortedAnchors.size - 1) {
@@ -166,11 +162,8 @@ fun TableMappingView(
                         }
                     }
 
-                    // Dibujar las líneas de corte (Anclas)
                     anchors.forEach { x ->
                         val xPos = left + x * w
-                        
-                        // Línea principal con efecto de neón sutil
                         drawLine(
                             brush = Brush.verticalGradient(
                                 colors = listOf(Color.Transparent, colorScheme.primary, Color.Transparent),
@@ -181,8 +174,6 @@ fun TableMappingView(
                             end = Offset(xPos, top + h),
                             strokeWidth = (2.dp / scale).toPx()
                         )
-                        
-                        // Indicador superior (Mango)
                         drawCircle(
                             color = colorScheme.primary,
                             radius = (4.dp / scale).toPx(),
@@ -215,15 +206,52 @@ fun TableMappingView(
 
         Spacer(Modifier.height(16.dp))
 
-        Button(
-            onClick = onConfirm,
-            modifier = Modifier.fillMaxWidth().height(60.dp),
-            shape = RoundedCornerShape(18.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
-        ) {
-            Icon(Icons.Default.Check, null)
-            Spacer(Modifier.width(12.dp))
-            Text("Procesar Columnas", style = MaterialTheme.typography.titleMedium)
+        if (onVisionRecognize != null) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedButton(
+                    onClick = onConfirm,
+                    modifier = Modifier.weight(1f).height(56.dp),
+                    shape = RoundedCornerShape(18.dp),
+                    enabled = !isVisionProcessing
+                ) {
+                    Icon(Icons.Default.Check, null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("OCR")
+                }
+                Button(
+                    onClick = onVisionRecognize,
+                    modifier = Modifier.weight(1f).height(56.dp),
+                    shape = RoundedCornerShape(18.dp),
+                    enabled = !isVisionProcessing,
+                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.tertiary)
+                ) {
+                    if (isVisionProcessing) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp,
+                            color = colorScheme.onTertiary
+                        )
+                    } else {
+                        Icon(Icons.Default.RemoveRedEye, null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("IA Vision")
+                    }
+                }
+            }
+        } else {
+            Button(
+                onClick = onConfirm,
+                modifier = Modifier.fillMaxWidth().height(60.dp),
+                shape = RoundedCornerShape(18.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
+            ) {
+                Icon(Icons.Default.Check, null)
+                Spacer(Modifier.width(12.dp))
+                Text("Procesar Columnas", style = MaterialTheme.typography.titleMedium)
+            }
         }
     }
 }

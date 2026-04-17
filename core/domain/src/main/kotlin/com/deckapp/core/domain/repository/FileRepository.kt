@@ -47,7 +47,8 @@ interface FileRepository {
         col: Int, row: Int, totalCols: Int, totalRows: Int,
         deckId: Long, fileName: String,
         pageRenderWidth: Int = 1800,
-        autoTrimCell: Boolean = false
+        autoTrimCell: Boolean = false,
+        horizontalSplitRatio: Float = 0.5f
     ): String?
 
     /**
@@ -65,7 +66,8 @@ interface FileRepository {
         uri: Uri, pageIndex: Int,
         col: Int, row: Int, totalCols: Int, totalRows: Int,
         pageRenderWidth: Int = 1200,
-        autoTrimCell: Boolean = false
+        autoTrimCell: Boolean = false,
+        horizontalSplitRatio: Float = 0.5f
     ): Bitmap?
 
     // ── ZIP ──────────────────────────────────────────────────────────────────

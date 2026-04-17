@@ -6,7 +6,7 @@ import com.deckapp.core.model.TableEntry
 import com.deckapp.core.domain.usecase.ImportResult
 import com.deckapp.core.domain.usecase.RangeParser
 
-enum class ImportMode { NONE, OCR, CSV, JSON, PLAIN_TEXT }
+enum class ImportMode { NONE, OCR, CSV, JSON, PLAIN_TEXT, MARKDOWN }
 enum class ImportStep { SOURCE_SELECTION, FILE_PREVIEW, CROP, RECOGNITION, MAPPING, REVIEW }
 enum class StitchingMode { CONTINUE_RANGES, APPEND }
 
@@ -15,6 +15,8 @@ data class TableImportUiState(
     val step: ImportStep = ImportStep.SOURCE_SELECTION,
     val isProcessing: Boolean = false,
     val errorMessage: String? = null,
+    val isAiProcessing: Boolean = false,
+    val isVisionProcessing: Boolean = false,
     
     // Decks/Tables
     val availableDecks: List<com.deckapp.core.model.RandomTable> = emptyList(),
@@ -39,6 +41,8 @@ data class TableImportUiState(
     val tableTag: String = "",
     val tableNameDraft: String = "",
     val tableTagDraft: String = "",
+    val tableFormulaDraft: String = "1d6",
+    val autoVisionMessage: String? = null,
     val savedSuccessfully: Boolean = false,
     val validationResult: RangeParser.ValidationResult? = null,
     val confidenceThreshold: Float = 0.6f,

@@ -1,61 +1,91 @@
-# DeckApp TTRPG — Project Instructions
+# CLAUDE.md
 
-## Architectural Standards
-- **Multi-Module Gradle:** La app está modularizada por capas y features.
-    - `:core:model`: Modelos de dominio puros (CardStack, Card, CardFace, ContentZone, Tag, DrawEvent, enums).
-    - `:core:domain`: Interfaces de repositorio + UseCases. **Toda la lógica de negocio va aquí.**
-    - `:core:data`: Implementaciones de repositorio, Room entities, DAOs, mappers.
-    - `:core:ui`: Design system, tema `DeckAppTheme`, componentes compartidos (CardThumbnail, etc.).
-    - `:feature:library`: LibraryScreen — biblioteca de mazos.
-    - `:feature:deck`: DeckDetailScreen, CardEditorScreen, CardViewScreen.
-    - `:feature:draw`: SessionScreen, PileScreen — pantalla principal de juego.
-    - `:feature:import`: ImportScreen, PDF processor, background Worker.
-    - `:feature:session`: SessionSetupScreen, SessionHistoryScreen.
-- **Clean Architecture:** Toda la lógica de negocio DEBE residir en UseCases dentro de `:core:domain`.
-- **Navigation:** Enrutamiento centralizado en `NavGraph.kt` dentro del módulo `:app`.
-- **Dependency Injection:** Usar Hilt en todos los módulos.
-- **UI:** Usar Jetpack Compose y seguir el sistema de diseño `DeckAppTheme` (Material Design 3).
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## DEVLOG Mandate
-Al realizar cambios sustanciales de arquitectura o feature, el desarrollador (o agente) DEBE
-actualizar `DEVLOG.md` con fecha, tipo (DECISION / ARCHITECTURE / INTEGRATION / PROBLEM / SOLUTION)
-y descripción. Mantener el registro histórico vivo del desarrollo.
+## Comandos esenciales
 
-## Planning and History Mandate
-Cualquier desarrollador (o agente) DEBE realizar las siguientes acciones ANTES de generar código o proponer cambios:
-1. **Verificar `DEVLOG.md`:** Entender las últimas decisiones técnicas y el estado actual.
-2. **Revisar `docs/planning/`:** Consultar el `PLAN_GENERAL.md` y cualquier plan específico (ej. `ADVANCED_TABLES.md`) para asegurar consistencia con la visión del proyecto.
-3. **Respetar el Roadmap:** Consultar `docs/planning/ROADMAP.md` para entender las dependencias entre features.
+```bash
+# Build completo (ejecutar al final de cada sprint)
+./gradlew :app:assembleDebug
 
-## Modular-First Mandate
-- **Sin sobrecarga de archivos:** Features nuevas en archivos/módulos separados.
-- **Extracción de componentes:** Cualquier componente UI con más de 50 líneas de lógica o
-  estado complejo DEBE extraerse a un subdirectorio `components/` dentro de su módulo de feature.
-- **Pantallas como orquestadoras:** Las pantallas (`*Screen.kt`) solo coordinan componentes.
-  La lógica va en ViewModels/UseCases.
-- **Estado UI inmutable:** Estado desde ViewModel (`collectAsStateWithLifecycle`), acciones
-  hacia arriba mediante lambdas. Componentes "dumb" siempre que sea posible.
+# Compilar solo un módulo afectado
+./gradlew :core:data:compileDebugKotlin
+./gradlew :feature:import:compileDebugKotlin
 
-## Session Persistence Mandate
-- Cada acción de juego (robar, descartar, voltear, pasar) DEBE escribirse en Room como un
-  `DrawEvent` ANTES de ejecutar la animación.
-- El estado de la sesión se reconstruye desde el event log, no desde snapshots mutables.
-- Esto garantiza crash recovery, undo, e historial de sesión sin código adicional.
+# Tests unitarios (solo existen en :core:domain por ahora)
+./gradlew :core:domain:test
+./gradlew :core:domain:test --tests "com.deckapp.core.domain.usecase.MergeDecksUseCaseTest"
+```
 
-## Card Content Model
-Las cartas soportan 8 modos de contenido (`CardContentMode`):
-`IMAGE_ONLY`, `IMAGE_WITH_TEXT`, `REVERSIBLE`, `TOP_BOTTOM_SPLIT`,
-`LEFT_RIGHT_SPLIT`, `FOUR_EDGE_CUES`, `FOUR_QUADRANT`, `DOUBLE_SIDED_FULL`.
-Cada mazo tiene un `defaultContentMode`; cada carta puede sobreescribir el suyo.
+## Mandato antes de tocar código
 
-## PDF Import
-Usar `barteksc/PdfiumAndroid` para renderizar PDFs a Bitmap.
-El recorte de cartas es matemático (Kotlin puro) para los 4 modos de layout.
-OpenCV (`zynkware/Document-Scanning-Android-SDK`) reservado para auto-detección en Fase 2.
+1. **Leer `DEVLOG.md`** — entender las últimas decisiones técnicas antes de proponer cambios.
+2. **Revisar `docs/planning/`** — `PLAN_GENERAL.md`, `ROADMAP.md` y los planes activos en `planificaciones completadas/` para no contradecir decisiones ya tomadas.
+3. **Al terminar** un sprint con cambios sustanciales, actualizar `DEVLOG.md` con categoría (`FEATURE / ARCHITECTURE / FIX / INTEGRATION`) y descripción.
 
-## UX Mandates
-- **Screen Wake Lock:** `FLAG_KEEP_SCREEN_ON` activo mientras `SessionScreen` está en primer plano.
-- **Haptic feedback:** Pulso fuerte en cada acción de robo de carta (configurable, default ON).
-- **Dark theme:** Default ON — mesas de juego suelen ser con poca luz.
-- **Bottom Nav:** Exactamente 4 ítems. FAB central = acción primaria (Robar / Nueva Sesión).
-- **Touch targets:** Mínimo 48×48dp en todos los elementos interactivos.
+## Arquitectura de módulos
+
+```
+:core:model     → Modelos de dominio puros (CardStack, Card, RandomTable, TableEntry…)
+:core:domain    → Interfaces de repositorio + UseCases (TODA la lógica de negocio)
+:core:data      → Implementaciones Room, DAOs, mappers, repositorios de datos, GeminiAiRepository
+:core:ui        → DeckAppTheme (Material 3), componentes compartidos (CardThumbnail…)
+:feature:*      → Pantallas + ViewModels. Dependen de :core:domain, nunca de :core:data directamente
+:app            → NavGraph.kt, DeckApplication (@HiltAndroidApp), MainActivity
+```
+
+La dependencia fluye en una sola dirección: `feature → domain ← data`. Ningún módulo de feature importa `:core:data`.
+
+## Inyección de dependencias
+
+- **Regla general:** `@HiltViewModel` en todos los ViewModels de feature.
+- **Excepción crítica:** `TableImportViewModel` usa una **Factory manual** (no Hilt) para evitar un `NullPointerException` interno de KSP en `:feature:import`. El ViewModel se instancia en `TableImportScreen` mediante un `@EntryPoint` y `EntryPointAccessors.fromApplication(...)`. Al añadir dependencias nuevas a ese ViewModel hay que actualizar tanto el constructor como la `Factory` y el `TableImportEntryPoint`.
+- **:feature:tables** usa **kapt** (no KSP) por un error interno del compilador KSP en ese módulo específico.
+- **:core:data** usa **kapt** para Room + Hilt. El resto de módulos usan **KSP**.
+
+## Room — reglas de migración
+
+- La base de datos está en **versión 24**. No hay `fallbackToDestructiveMigration` en producción.
+- Cada cambio de esquema requiere: (1) nueva `MIGRATION_N_N+1` en `Migrations.kt`, (2) registrarla en `databaseBuilder` dentro de `DataModule.kt`, y (3) añadir el nuevo DAO con `@Provides` si aplica.
+- Las entidades FTS (`CardFtsEntity`, `RandomTableFtsEntity`, etc.) exigen que sus tablas virtuales se creen en la migración correspondiente.
+
+## Navegación
+
+Las rutas son **type-safe** con `@Serializable` (Navigation Compose 2.8+). Están definidas en `Screen.kt`:
+
+```kotlin
+@Serializable object LibraryRoute          // Sin parámetros
+@Serializable data class DeckDetailRoute(val deckId: Long)   // Con parámetros
+```
+
+Para añadir una pantalla nueva: (1) declarar su ruta en `Screen.kt`, (2) añadir el `composable<MiRuta> { ... }` en `NavGraph.kt`.
+
+## Persistencia de sesión (event log)
+
+Cada acción de juego (DRAW, DISCARD, FLIP, REVERSE, ROTATE, RESET, PEEK) se escribe en `DrawEventEntity` **antes** de ejecutar la animación. El estado actual de la sesión es una proyección del log, no un snapshot mutable. Esto da undo, historial y crash recovery gratis.
+
+## Pipeline de importación de tablas (OCR + IA)
+
+El flujo vive en `:feature:import` y pasa por 5 pasos (`ImportStep`): `SOURCE_SELECTION → FILE_PREVIEW → CROP → RECOGNITION → MAPPING → REVIEW`.
+
+- **OCR:** `OcrRepositoryImpl` (ML Kit, `@ActivityRetainedScoped`) → `AnalyzeTableImageUseCase` (clustering espacial + detección de columnas).
+- **IA texto:** `TranscribeTableWithAiUseCase` → `GeminiAiRepository.reconstructTable()` — limpieza post-OCR.
+- **IA Vision:** `RecognizeTableFromImageUseCase` → `GeminiAiRepository.recognizeTableFromImage()` — bypasa OCR, envía el bitmap directamente a Gemini.
+- `GeminiAiRepository` cachea el `GenerativeModel` por API key para evitar recrearlo en cada llamada. El bitmap se escala a ≤800 px de ancho antes del envío.
+- La API key de Gemini se gestiona en `SettingsRepository` (SharedPreferences, nunca en el código).
+
+## Modelos de contenido de carta
+
+8 modos (`CardContentMode`): `IMAGE_ONLY`, `IMAGE_WITH_TEXT`, `REVERSIBLE`, `TOP_BOTTOM_SPLIT`, `LEFT_RIGHT_SPLIT`, `FOUR_EDGE_CUES`, `FOUR_QUADRANT`, `DOUBLE_SIDED_FULL`. Cada mazo tiene `defaultContentMode`; cada carta puede sobreescribirlo. `CardViewScreen` despacha el rendering con un `when(face.contentMode)`.
+
+## Testing
+
+- Tests unitarios solo en `:core:domain`. Stack: **JUnit 4 + MockK + Turbine + kotlinx-coroutines-test**.
+- Patrón: instanciar el UseCase directamente con mocks, sin Hilt. Ver `MergeDecksUseCaseTest` como referencia.
+
+## Mandatos de componentes UI
+
+- Componentes con >50 líneas de lógica/estado → extraer a `components/` dentro del módulo de feature.
+- `*Screen.kt` solo orquesta componentes; la lógica va en ViewModel/UseCase.
+- Estado UI inmutable desde ViewModel con `collectAsStateWithLifecycle`. Acciones hacia arriba como lambdas.
+- Touch targets mínimo 48×48 dp. Dark theme default ON. Wake lock activo en `SessionScreen`.

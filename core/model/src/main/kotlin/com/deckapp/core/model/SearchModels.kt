@@ -17,5 +17,6 @@ enum class SearchResultType {
     CARD,
     DECK,
     TABLE,
-    TABLE_ENTRY
+    TABLE_ENTRY,
+    BAUL
 }

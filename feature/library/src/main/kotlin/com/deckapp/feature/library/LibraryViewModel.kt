@@ -31,7 +31,7 @@ data class LibraryUiState(
     val selectedDeckIds: Set<Long> = emptySet(),
     val searchResults: List<SearchMatch> = emptyList(),
     val allTables: List<RandomTable> = emptyList(),
-    val allCollections: List<Collection> = emptyList(),
+    val allCollections: List<DeckCollection> = emptyList(),
     val activeCollectionId: Long? = null,
     val isLoadingCollections: Boolean = true
 ) {
@@ -76,29 +76,47 @@ class LibraryViewModel @Inject constructor(
     private var pendingDeleteJob: Job? = null
 
     init {
-        // Decks activos + archivados + tags
+        // Observador central para Mazos y Tags, reaccionando a activeCollectionId
         viewModelScope.launch {
-            combine(
-                cardRepository.getAllDecks(),
-                cardRepository.getArchivedDecks(),
-                cardRepository.getAllTags()
-            ) { decks, archived, tags ->
-                Triple(decks, archived, tags)
-            }.collect { (decks, archived, tags) ->
-                _uiState.update { it.copy(allDecks = decks, archivedDecks = archived, allTags = tags, isLoading = false) }
-            }
+            _uiState.map { it.activeCollectionId }
+                .distinctUntilChanged()
+                .flatMapLatest { colId ->
+                    if (colId == null) {
+                        // Modo Global: Decks activos + archivados + todos los tags
+                        combine(
+                            cardRepository.getAllDecks(),
+                            cardRepository.getArchivedDecks(),
+                            cardRepository.getAllTags()
+                        ) { decks, archived, tags -> Triple(decks, archived, tags) }
+                    } else {
+                        // Modo Colección: Solo decks en la colección + archivados globales (o podrías filtrarlos también)
+                        combine(
+                            collectionRepository.getDecksInCollection(colId),
+                            cardRepository.getArchivedDecks(), // Mantenemos archivados globales por ahora
+                            cardRepository.getAllTags()
+                        ) { decks, archived, tags -> Triple(decks, archived, tags) }
+                    }
+                }.collect { (decks, archived, tags) ->
+                    _uiState.update { it.copy(allDecks = decks, archivedDecks = archived, allTags = tags, isLoading = false) }
+                }
         }
 
-        // Carga de Tablas y Colecciones
+        // Carga de Tablas y Colecciones, reaccionando a activeCollectionId para las tablas
         viewModelScope.launch {
+            val tablesFlow = _uiState.map { it.activeCollectionId }
+                .distinctUntilChanged()
+                .flatMapLatest { colId ->
+                    if (colId == null) tableRepository.getAllTables()
+                    else collectionRepository.getTablesInCollection(colId)
+                }
+
             combine(
-                tableRepository.getAllTables(),
+                tablesFlow,
                 getCollectionsUseCase()
-            ) { tables, collections ->
-                tables to collections
-            }.collect { (tables, collections) ->
-                _uiState.update { it.copy(allTables = tables, allCollections = collections, isLoadingCollections = false) }
-            }
+            ) { tables, collections -> tables to collections }
+                .collect { (tables, collections) ->
+                    _uiState.update { it.copy(allTables = tables, allCollections = collections, isLoadingCollections = false) }
+                }
         }
 
         // Conteo total de cartas por mazo (para badge en portada)
@@ -114,6 +132,7 @@ class LibraryViewModel @Inject constructor(
         }
 
         // Búsqueda Global reactiva
+        @OptIn(kotlinx.coroutines.FlowPreview::class)
         viewModelScope.launch {
             _uiState.map { it.searchQuery }
                 .distinctUntilChanged()
@@ -253,11 +272,33 @@ class LibraryViewModel @Inject constructor(
     }
 
     fun bulkAddTag(tagId: Long) {
-        val ids = _uiState.value.selectedDeckIds.toList()
+        addTagToDecks(_uiState.value.selectedDeckIds.toList(), tagId)
+    }
+
+    fun addTagToDecks(ids: List<Long>, tagId: Long) {
         if (ids.isEmpty()) return
         viewModelScope.launch {
             cardRepository.bulkAddTagToStacks(ids, tagId)
-            _uiState.update { it.copy(selectedDeckIds = emptySet(), snackbarMessage = "Etiqueta añadida a ${ids.size} mazos") }
+            _uiState.update { it.copy(
+                selectedDeckIds = emptySet(),
+                selectedTagIds = it.selectedTagIds + tagId,
+                snackbarMessage = "Etiqueta añadida y filtro aplicado"
+            ) }
+        }
+    }
+
+    fun createAndAddTag(ids: List<Long>, name: String) {
+        if (ids.isEmpty() || name.isBlank()) return
+        viewModelScope.launch {
+            // Color por defecto (puedes randomizarlo o usar uno fijo del tema)
+            val defaultColor = 0xFF9C27B0.toInt() // Púrpura
+            val newTagId = cardRepository.saveTag(Tag(name = name, color = defaultColor))
+            cardRepository.bulkAddTagToStacks(ids, newTagId)
+            _uiState.update { it.copy(
+                selectedDeckIds = emptySet(),
+                selectedTagIds = it.selectedTagIds + newTagId,
+                snackbarMessage = "Nueva etiqueta \"$name\" creada, añadida y filtrada"
+            ) }
         }
     }
 
@@ -269,7 +310,7 @@ class LibraryViewModel @Inject constructor(
 
     fun createCollection(name: String, color: Int, icon: CollectionIcon) {
         viewModelScope.launch {
-            val newCollection = Collection(name = name, color = color, icon = icon)
+            val newCollection = DeckCollection(name = name, color = color, icon = icon)
             collectionRepository.saveCollection(newCollection)
             _uiState.update { it.copy(snackbarMessage = "Colección \"$name\" creada") }
         }

@@ -2,27 +2,43 @@ package com.deckapp.core.domain.usecase
 
 import com.deckapp.core.domain.repository.CardRepository
 import com.deckapp.core.domain.repository.TableRepository
-import com.deckapp.core.model.SearchMatch
-import com.deckapp.core.model.SearchResultType
+import com.deckapp.core.domain.repository.CollectionRepository
+import com.deckapp.core.model.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import javax.inject.Inject
 
 class GlobalSearchUseCase @Inject constructor(
     private val cardRepository: CardRepository,
-    private val tableRepository: TableRepository
+    private val tableRepository: TableRepository,
+    private val collectionRepository: CollectionRepository
 ) {
     operator fun invoke(query: String): Flow<List<SearchMatch>> {
         if (query.length < 2) return kotlinx.coroutines.flow.flowOf(emptyList())
 
         return combine(
             cardRepository.searchCards(query),
-            tableRepository.searchTables(query)
-        ) { cards, tables ->
+            tableRepository.searchTables(query),
+            tableRepository.searchEntries(query),
+            collectionRepository.searchCollections(query)
+        ) { cards, tables, entries, collections ->
             val matches = mutableListOf<SearchMatch>()
 
-            // Mapear cartas encontradas
-            cards.forEach { card ->
+            // 1. Colecciones (Baúl) - Más prioridad
+            collections.take(10).forEach { col ->
+                matches.add(
+                    SearchMatch(
+                        id = col.id,
+                        type = SearchResultType.BAUL,
+                        title = col.name,
+                        subtitle = "Baúl · ${col.resourceCount} recursos",
+                        snippet = col.description.take(60)
+                    )
+                )
+            }
+
+            // 2. Mazos
+            cards.take(20).forEach { card ->
                 matches.add(
                     SearchMatch(
                         id = card.id,
@@ -35,8 +51,8 @@ class GlobalSearchUseCase @Inject constructor(
                 )
             }
 
-            // Mapear tablas encontradas
-            tables.forEach { table ->
+            // 3. Tablas
+            tables.take(20).forEach { table ->
                 matches.add(
                     SearchMatch(
                         id = table.id,
@@ -48,13 +64,21 @@ class GlobalSearchUseCase @Inject constructor(
                 )
             }
 
-            // Mapear entradas encontradas (agregando por tabla padre)
-            // Para simplicidad en el combine, usamos la última emisión conocida de searchEntries
-            // En una implementación real más compleja, esto se combinaría reactivamente
-            
-            matches
+            // 4. Entradas de tabla (Agregadas por tabla)
+            entries.take(50).forEach { (tableId, text) ->
+                matches.add(
+                    SearchMatch(
+                        id = tableId,
+                        type = SearchResultType.TABLE,
+                        title = "Coincidencia en tabla",
+                        subtitle = "Contenido de tabla",
+                        snippet = text.take(100),
+                        parentId = tableId
+                    )
+                )
+            }
 
-            matches
+            matches.distinctBy { "${it.type}_${it.id}" }
         }
     }
 }

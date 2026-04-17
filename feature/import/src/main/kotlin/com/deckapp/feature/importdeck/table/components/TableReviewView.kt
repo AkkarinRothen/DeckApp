@@ -5,10 +5,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,15 +26,20 @@ fun TableReviewView(
     entries: List<TableEntry>,
     tableName: String,
     tableTag: String,
+    tableFormula: String = "1d6",
     onEntryChange: (Int, TableEntry) -> Unit,
     onNameChange: (String) -> Unit,
     onTagChange: (String) -> Unit,
+    onFormulaChange: (String) -> Unit = {},
     onConfirm: () -> Unit,
     validationResult: RangeParser.ValidationResult?,
     lowConfidenceIndices: Set<Int>,
     confidenceThreshold: Float,
     onThresholdChange: (Float) -> Unit,
     tableProgress: String,
+    isAiProcessing: Boolean = false,
+    isVisionProcessing: Boolean = false,
+    onAiOptimize: () -> Unit = {},
     // Overlay params
     croppedBitmap: Bitmap? = null,
     ocrBlocks: List<OcrBlock> = emptyList(),
@@ -54,10 +60,21 @@ fun TableReviewView(
             Text("Revisando tabla: $tableProgress", style = MaterialTheme.typography.labelMedium)
             
             Row {
+                if (isAiProcessing) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp).padding(4.dp),
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    IconButton(onClick = onAiOptimize) {
+                        Icon(Icons.Default.AutoFixHigh, "Optimizar con Gemini IA", tint = MaterialTheme.colorScheme.primary)
+                    }
+                }
+
                 if (croppedBitmap != null) {
                     IconButton(onClick = { showOverlay = !showOverlay }) {
                         Icon(
-                            if (showOverlay) Icons.Default.List else Icons.Default.Image,
+                            if (showOverlay) Icons.AutoMirrored.Filled.List else Icons.Default.Image,
                             if (showOverlay) "Ver lista" else "Ver original"
                         )
                     }
@@ -107,21 +124,44 @@ fun TableReviewView(
 
             Spacer(Modifier.height(8.dp))
             
+            if (isVisionProcessing) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "Vision AI extrayendo entradas...",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(Modifier.height(8.dp))
+            }
+
             OutlinedTextField(
                 value = tableName,
                 onValueChange = onNameChange,
                 label = { Text("Nombre de la tabla") },
                 modifier = Modifier.fillMaxWidth()
             )
-            
+
             Spacer(Modifier.height(8.dp))
-            
-            OutlinedTextField(
-                value = tableTag,
-                onValueChange = onTagChange,
-                label = { Text("Categoría / Etiqueta") },
-                modifier = Modifier.fillMaxWidth()
-            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedTextField(
+                    value = tableFormula,
+                    onValueChange = onFormulaChange,
+                    label = { Text("Fórmula de dado") },
+                    placeholder = { Text("1d6") },
+                    modifier = Modifier.weight(1f)
+                )
+                OutlinedTextField(
+                    value = tableTag,
+                    onValueChange = onTagChange,
+                    label = { Text("Categoría") },
+                    modifier = Modifier.weight(2f)
+                )
+            }
             
             Spacer(Modifier.height(16.dp))
             

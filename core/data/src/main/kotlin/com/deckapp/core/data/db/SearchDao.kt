@@ -14,7 +14,8 @@ data class SearchResultId(
 
 data class EntrySearchResult(
     val rowid: Long,
-    val tableId: Long
+    val tableId: Long,
+    val text: String
 )
 
 @Dao
@@ -39,10 +40,16 @@ interface SearchDao {
     fun searchTableIds(query: String): Flow<List<SearchResultId>>
 
     @Query("""
-        SELECT f.rowid, e.tableId 
+        SELECT f.rowid, e.tableId, f.text 
         FROM table_entries_fts f
         INNER JOIN table_entries e ON f.rowid = e.id
         WHERE table_entries_fts MATCH :query
     """)
     fun searchTableEntriesWithTableId(query: String): Flow<List<EntrySearchResult>>
+    
+    @Query("""
+        SELECT rowid FROM collections_fts 
+        WHERE collections_fts MATCH :query
+    """)
+    fun searchCollectionIds(query: String): Flow<List<SearchResultId>>
 }

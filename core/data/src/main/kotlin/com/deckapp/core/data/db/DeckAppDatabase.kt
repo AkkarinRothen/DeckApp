@@ -29,9 +29,10 @@ import androidx.room.RoomDatabase
         RandomTableFtsEntity::class,
         TableEntryFtsEntity::class,
         CollectionEntity::class,
-        CollectionResourceCrossRef::class
+        CollectionResourceCrossRef::class,
+        CollectionFtsEntity::class
     ],
-    version = 23,
+    version = 24,
     exportSchema = true
 )
 abstract class DeckAppDatabase : RoomDatabase() {

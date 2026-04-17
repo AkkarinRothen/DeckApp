@@ -176,9 +176,10 @@ class FileRepositoryImpl @Inject constructor(
         uri: Uri, pageIndex: Int,
         col: Int, row: Int, totalCols: Int, totalRows: Int,
         deckId: Long, fileName: String, pageRenderWidth: Int,
-        autoTrimCell: Boolean
+        autoTrimCell: Boolean,
+        horizontalSplitRatio: Float
     ): String? = try {
-        val cell = renderGridCell(uri, pageIndex, col, row, totalCols, totalRows, pageRenderWidth, autoTrimCell)
+        val cell = renderGridCell(uri, pageIndex, col, row, totalCols, totalRows, pageRenderWidth, autoTrimCell, horizontalSplitRatio)
             ?: return null
         saveBitmapToInternal(cell, deckId, fileName)
     } catch (e: Throwable) { null }
@@ -190,9 +191,10 @@ class FileRepositoryImpl @Inject constructor(
         uri: Uri, pageIndex: Int,
         col: Int, row: Int, totalCols: Int, totalRows: Int,
         pageRenderWidth: Int,
-        autoTrimCell: Boolean
+        autoTrimCell: Boolean,
+        horizontalSplitRatio: Float
     ): Bitmap? = try {
-        renderGridCell(uri, pageIndex, col, row, totalCols, totalRows, pageRenderWidth, autoTrimCell)
+        renderGridCell(uri, pageIndex, col, row, totalCols, totalRows, pageRenderWidth, autoTrimCell, horizontalSplitRatio)
     } catch (e: Throwable) { null }
 
     // ── ZIP ──────────────────────────────────────────────────────────────────
@@ -291,12 +293,34 @@ class FileRepositoryImpl @Inject constructor(
         uri: Uri, pageIndex: Int,
         col: Int, row: Int, totalCols: Int, totalRows: Int,
         pageRenderWidth: Int,
-        autoTrim: Boolean = false
+        autoTrim: Boolean = false,
+        horizontalSplitRatio: Float = 0.5f
     ): Bitmap? {
         val fullPage = renderPage(uri, pageIndex, pageRenderWidth) ?: return null
-        val cellW = fullPage.width / totalCols
+        
+        val cellW: Int
+        val x: Int
+        
+        if (totalCols % 2 == 0) {
+            // Lógica de pares (side-by-side): tratamos cada 2 columnas como una unidad
+            val unitW = fullPage.width / (totalCols / 2)
+            if (col % 2 == 0) {
+                // Parte izquierda (Frente)
+                x = (col / 2) * unitW
+                cellW = (unitW * horizontalSplitRatio).toInt()
+            } else {
+                // Parte derecha (Dorso)
+                val splitOffset = (unitW * horizontalSplitRatio).toInt()
+                x = (col / 2) * unitW + splitOffset
+                cellW = unitW - splitOffset
+            }
+        } else {
+            // Grilla estándar equitativa
+            cellW = fullPage.width / totalCols
+            x = col * cellW
+        }
+
         val cellH = fullPage.height / totalRows
-        val x = col * cellW
         val y = row * cellH
         val safeW = cellW.coerceAtMost(fullPage.width - x).coerceAtLeast(1)
         val safeH = cellH.coerceAtMost(fullPage.height - y).coerceAtLeast(1)

@@ -327,8 +327,14 @@ val MIGRATION_22_23 = object : Migration(22, 23) {
             )
         """.trimIndent())
         
-        // 3. Crear índices para optimizar la búsqueda en colecciones
         database.execSQL("CREATE INDEX IF NOT EXISTS `index_collection_resource_refs_collectionId` ON `collection_resource_refs` (`collectionId`)")
         database.execSQL("CREATE INDEX IF NOT EXISTS `index_collection_resource_refs_resourceId_resourceType` ON `collection_resource_refs` (`resourceId`, `resourceType`)")
+    }
+}
+
+val MIGRATION_23_24 = object : Migration(23, 24) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("CREATE VIRTUAL TABLE IF NOT EXISTS `collections_fts` USING FTS4(`name`, `description`, content=`collections`)")
+        database.execSQL("INSERT INTO `collections_fts`(`collections_fts`) VALUES('rebuild')")
     }
 }

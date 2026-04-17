@@ -1,6 +1,13 @@
 package com.deckapp.feature.library
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -23,9 +30,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.deckapp.core.model.CardStack
@@ -33,7 +42,7 @@ import com.deckapp.core.model.CollectionIcon
 import com.deckapp.core.model.SearchResultType
 import com.deckapp.core.ui.components.*
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun LibraryScreen(
     onDeckClick: (Long) -> Unit,
@@ -86,6 +95,7 @@ fun LibraryScreen(
     
     var showCreateCollectionDialog by remember { mutableStateOf(false) }
     var resourceToAddToCollection by remember { mutableStateOf<Pair<Long, SearchResultType>?>(null) }
+    var tagPickerTargetIds by remember { mutableStateOf<List<Long>?>(null) }
 
     if (showBulkDeleteConfirmation) {
         AlertDialog(
@@ -132,6 +142,21 @@ fun LibraryScreen(
             onCreateNewCollection = {
                 resourceToAddToCollection = null
                 showCreateCollectionDialog = true
+            }
+        )
+    }
+
+    tagPickerTargetIds?.let { targetIds ->
+        TagSelectionDialog(
+            allTags = uiState.allTags,
+            onDismiss = { tagPickerTargetIds = null },
+            onSelect = { tagId ->
+                viewModel.addTagToDecks(targetIds, tagId)
+                tagPickerTargetIds = null
+            },
+            onCreateNew = { name ->
+                viewModel.createAndAddTag(targetIds, name)
+                tagPickerTargetIds = null
             }
         )
     }
@@ -189,30 +214,8 @@ fun LibraryScreen(
                         onClear = { viewModel.clearSelection() },
                         onDelete = { showBulkDeleteConfirmation = true },
                         onArchive = { viewModel.bulkArchive(it) },
-                        onAddTag = { showBulkTagMenu = true }
+                        onAddTag = { tagPickerTargetIds = uiState.selectedDeckIds.toList() }
                     )
-                    
-                    DropdownMenu(
-                        expanded = showBulkTagMenu,
-                        onDismissRequest = { showBulkTagMenu = false }
-                    ) {
-                        uiState.allTags.forEach { tag ->
-                            DropdownMenuItem(
-                                text = { Text(tag.name) },
-                                onClick = {
-                                    viewModel.bulkAddTag(tag.id)
-                                    showBulkTagMenu = false
-                                }
-                            )
-                        }
-                        if (uiState.allTags.isEmpty()) {
-                            DropdownMenuItem(
-                                text = { Text("No hay etiquetas") },
-                                onClick = {},
-                                enabled = false
-                            )
-                        }
-                    }
                 }
             }
         }
@@ -226,7 +229,7 @@ fun LibraryScreen(
             OutlinedTextField(
                 value = uiState.searchQuery,
                 onValueChange = { viewModel.setSearchQuery(it) },
-                placeholder = { Text("Buscar mazos…") },
+                placeholder = { Text("Buscar recursos…") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 trailingIcon = {
                     if (uiState.searchQuery.isNotBlank()) {
@@ -242,6 +245,29 @@ fun LibraryScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             )
+
+            // ── Indicador de Colección Activa ─────────────────────────
+            if (uiState.activeCollectionId != null) {
+                val activeCol = uiState.allCollections.find { it.id == uiState.activeCollectionId }
+                activeCol?.let { col ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        SuggestionChip(
+                            onClick = { viewModel.setActiveCollection(null) },
+                            label = { Text("En: ${col.name}") },
+                            icon = { Icon(col.icon.toIcon(), null, tint = Color(col.color), modifier = Modifier.size(18.dp)) }
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        TextButton(onClick = { viewModel.setActiveCollection(null) }) {
+                            Text("Limpiar", style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
+            }
 
             if (uiState.searchQuery.length >= 2 && uiState.searchResults.isNotEmpty()) {
                 Text(
@@ -260,30 +286,52 @@ fun LibraryScreen(
                         val result = uiState.searchResults[index]
                         Card(
                             onClick = {
-                                if (result.type == SearchResultType.CARD) {
-                                    result.parentId?.let { onDeckClick(it) }
+                                when (result.type) {
+                                    SearchResultType.CARD -> {
+                                        result.parentId?.let { onDeckClick(it) }
+                                    }
+                                    SearchResultType.TABLE -> {
+                                        selectedTab = 1 // Switch to Tables tab
+                                        viewModel.setSearchQuery("") // Clear search to see the table (or keep it if it filters tables too)
+                                        // TODO: Possible highlighting of the specific table
+                                    }
+                                    SearchResultType.BAUL -> {
+                                        viewModel.setActiveCollection(result.id)
+                                        viewModel.setSearchQuery("")
+                                        selectedTab = 0 // Go to Mazos tab to see the filtered collection
+                                    }
+                                    else -> {}
                                 }
                             },
-                            modifier = Modifier.width(200.dp).fillMaxHeight(),
+                            modifier = Modifier.width(220.dp).fillMaxHeight(),
                             colors = CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                             )
                         ) {
                             Row(
-                                modifier = Modifier.padding(8.dp),
+                                modifier = Modifier.padding(12.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(
-                                    imageVector = when (result.type) {
-                                        SearchResultType.CARD -> Icons.Default.Layers
-                                        SearchResultType.TABLE -> Icons.Default.Casino
-                                        else -> Icons.Default.Description
-                                    },
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Spacer(Modifier.width(8.dp))
+                                Surface(
+                                    shape = MaterialTheme.shapes.small,
+                                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f),
+                                    modifier = Modifier.size(40.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(
+                                            imageVector = when (result.type) {
+                                                SearchResultType.CARD -> Icons.Default.Layers
+                                                SearchResultType.TABLE -> Icons.Default.Casino
+                                                SearchResultType.BAUL -> Icons.Default.Archive
+                                                else -> Icons.Default.Description
+                                            },
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
+                                }
+                                Spacer(Modifier.width(12.dp))
                                 Column {
                                     Text(
                                         text = result.title,
@@ -296,6 +344,15 @@ fun LibraryScreen(
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
+                                    if (!result.snippet.isNullOrBlank()) {
+                                        Text(
+                                            text = result.snippet ?: "",
+                                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                            maxLines = 1,
+                                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -392,6 +449,7 @@ fun LibraryScreen(
                                         onArchive = { viewModel.archiveDeck(deck.id, !deck.isArchived) },
                                         onDelete = { viewModel.scheduleDeletion(deck.id) },
                                         onAddToCollection = { resourceToAddToCollection = deck.id to SearchResultType.DECK },
+                                        onTag = { tagPickerTargetIds = listOf(deck.id) },
                                         cardCount = uiState.deckCardCounts[deck.id] ?: 0
                                     )
                                 }
@@ -399,9 +457,13 @@ fun LibraryScreen(
                             1 -> { // Tablas
                                 gridItems(uiState.allTables, key = { "table_${it.id}" }) { table ->
                                     Card(
-                                        onClick = { /* Navegar a tabla */ },
-                                        onLongClick = { resourceToAddToCollection = table.id to SearchResultType.TABLE },
-                                        modifier = Modifier.fillMaxWidth().height(100.dp)
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(100.dp)
+                                            .combinedClickable(
+                                                onClick = { /* Navegar a tabla */ },
+                                                onLongClick = { resourceToAddToCollection = table.id to SearchResultType.TABLE }
+                                            )
                                     ) {
                                         Column(Modifier.padding(12.dp)) {
                                             Text(table.name, style = MaterialTheme.typography.titleSmall)
@@ -414,7 +476,10 @@ fun LibraryScreen(
                                 gridItems(uiState.allCollections, key = { "col_${it.id}" }) { collection ->
                                     CollectionGridItem(
                                         collection = collection,
-                                        onClick = { viewModel.setActiveCollection(collection.id) },
+                                        onClick = { 
+                                            viewModel.setActiveCollection(collection.id)
+                                            selectedTab = 0 // Auto-cambiar a Mazos para ver contenido
+                                        },
                                         onLongClick = { /* Opciones de colección */ }
                                     )
                                 }
@@ -491,9 +556,10 @@ fun CreateCollectionDialog(
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AddToCollectionDialog(
-    collections: List<com.deckapp.core.model.Collection>,
+    collections: List<com.deckapp.core.model.DeckCollection>,
     onDismiss: () -> Unit,
     onSelect: (Long) -> Unit,
     onCreateNewCollection: () -> Unit
@@ -523,6 +589,84 @@ fun AddToCollectionDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text("Cerrar") }
+        }
+    )
+}
+
+@Composable
+fun TagSelectionDialog(
+    allTags: List<com.deckapp.core.model.Tag>,
+    onDismiss: () -> Unit,
+    onSelect: (Long) -> Unit,
+    onCreateNew: (String) -> Unit
+) {
+    var searchQuery by remember { mutableStateOf("") }
+    val filteredTags = remember(searchQuery, allTags) {
+        if (searchQuery.isBlank()) allTags
+        else allTags.filter { it.name.contains(searchQuery, ignoreCase = true) }
+    }
+    val exactMatch = remember(searchQuery, allTags) {
+        allTags.any { it.name.equals(searchQuery, ignoreCase = true) }
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Asignar Etiqueta") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    placeholder = { Text("Buscar o crear etiqueta…") },
+                    leadingIcon = { Icon(Icons.Default.Search, null) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                if (filteredTags.isEmpty() && searchQuery.isNotBlank() && !exactMatch) {
+                    TextButton(
+                        onClick = { onCreateNew(searchQuery) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.Add, null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Crear nueva: \"$searchQuery\"")
+                    }
+                } else {
+                    LazyColumn(modifier = Modifier.heightIn(max = 240.dp)) {
+                        items(filteredTags.size) { index ->
+                            val tag = filteredTags[index]
+                            ListItem(
+                                headlineContent = { Text(tag.name) },
+                                leadingContent = { 
+                                    Box(
+                                        Modifier.size(16.dp)
+                                            .clip(CircleShape)
+                                            .background(Color(tag.color))
+                                    ) 
+                                },
+                                modifier = Modifier.clickable { onSelect(tag.id) }
+                            )
+                        }
+                    }
+                    
+                    if (searchQuery.isNotBlank() && !exactMatch) {
+                        HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                        TextButton(
+                            onClick = { onCreateNew(searchQuery) },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.Default.Add, null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Crear nueva: \"$searchQuery\"")
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancelar") }
         }
     )
 }

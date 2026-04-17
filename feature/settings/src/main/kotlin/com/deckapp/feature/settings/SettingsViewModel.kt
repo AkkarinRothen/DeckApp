@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.deckapp.core.domain.repository.CardRepository
 import com.deckapp.core.domain.repository.FileRepository
+import com.deckapp.core.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -30,27 +31,30 @@ data class SettingsUiState(
     val isLoading: Boolean = true,
     val isClearingCache: Boolean = false,
     val cacheClearedMessage: String? = null,
-    val jpegQuality: Int = 90
+    val jpegQuality: Int = 90,
+    val geminiApiKey: String = "",
+    val autoVisionEnabled: Boolean = true
 )
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val cardRepository: CardRepository,
     private val fileRepository: FileRepository,
+    private val settingsRepository: SettingsRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
-    private val prefs = context.getSharedPreferences("deckapp_settings", Context.MODE_PRIVATE)
-
     init {
         val version = runCatching {
             context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "—"
         }.getOrDefault("—")
-        val quality = prefs.getInt("jpeg_quality", 90)
-        _uiState.update { it.copy(appVersion = version, jpegQuality = quality) }
+        val quality = settingsRepository.getJpegQuality()
+        val apiKey = settingsRepository.getGeminiApiKey()
+        val autoVision = settingsRepository.getAutoVisionEnabled()
+        _uiState.update { it.copy(appVersion = version, jpegQuality = quality, geminiApiKey = apiKey, autoVisionEnabled = autoVision) }
         loadStorageInfo()
     }
 
@@ -88,8 +92,18 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun setJpegQuality(quality: Int) {
-        prefs.edit().putInt("jpeg_quality", quality).apply()
+        settingsRepository.setJpegQuality(quality)
         _uiState.update { it.copy(jpegQuality = quality) }
+    }
+    
+    fun setGeminiApiKey(key: String) {
+        settingsRepository.setGeminiApiKey(key)
+        _uiState.update { it.copy(geminiApiKey = key) }
+    }
+
+    fun setAutoVisionEnabled(enabled: Boolean) {
+        settingsRepository.setAutoVisionEnabled(enabled)
+        _uiState.update { it.copy(autoVisionEnabled = enabled) }
     }
 
     fun clearMessage() = _uiState.update { it.copy(cacheClearedMessage = null) }

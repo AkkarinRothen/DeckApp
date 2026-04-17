@@ -41,6 +41,7 @@ data class DeckImportUiState(
     val previewCardBitmaps: List<android.graphics.Bitmap> = emptyList(),
     val isGeneratingPreview: Boolean = false,
     val pdfAutoTrimCells: Boolean = true,
+    val pdfSideBySideSplitRatio: Float = 0.5f,
     val recentPdfs: List<Pair<Uri, String>> = emptyList(),
     val browsedPdfs: List<Pair<Uri, String>> = emptyList(),
     // Progress
@@ -210,6 +211,7 @@ class DeckImportViewModel @Inject constructor(
                 val rows = state.pdfGridRows
                 val skip = state.pdfSkipPages
                 val autoTrim = state.pdfAutoTrimCells
+                val splitRatio = state.pdfSideBySideSplitRatio
 
                 when (state.pdfLayoutMode) {
                     PdfLayoutMode.ALTERNATING_PAGES -> {
@@ -235,12 +237,14 @@ class DeckImportViewModel @Inject constructor(
                                     if (bitmaps.size >= maxPreview) break@outer
                                     fileRepository.renderPdfGridCellToBitmap(
                                         uri, page, col, row, totalCols, rows,
-                                        autoTrimCell = autoTrim
+                                        autoTrimCell = autoTrim,
+                                        horizontalSplitRatio = splitRatio
                                     )?.let { bitmaps += it }
                                     if (bitmaps.size < maxPreview) {
                                         fileRepository.renderPdfGridCellToBitmap(
                                             uri, page, col + cols, row, totalCols, rows,
-                                            autoTrimCell = autoTrim
+                                            autoTrimCell = autoTrim,
+                                            horizontalSplitRatio = splitRatio
                                         )?.let { bitmaps += it }
                                     }
                                 }
@@ -331,6 +335,7 @@ class DeckImportViewModel @Inject constructor(
     fun updatePdfGridRows(rows: Int) = _uiState.update { it.copy(pdfGridRows = rows.coerceAtLeast(1)) }
     fun updatePdfSkipPages(skip: Int) = _uiState.update { it.copy(pdfSkipPages = skip.coerceAtLeast(0)) }
     fun updatePdfAutoTrimCells(autoTrim: Boolean) = _uiState.update { it.copy(pdfAutoTrimCells = autoTrim) }
+    fun updatePdfSplitRatio(ratio: Float) = _uiState.update { it.copy(pdfSideBySideSplitRatio = ratio) }
 
     fun startImport() {
         val state = _uiState.value
@@ -351,6 +356,7 @@ class DeckImportViewModel @Inject constructor(
                 pdfGridRows = state.pdfGridRows,
                 pdfSkipPages = state.pdfSkipPages,
                 pdfAutoTrimCells = state.pdfAutoTrimCells,
+                pdfSplitRatio = state.pdfSideBySideSplitRatio,
                 onProgress = { progress, count ->
                     _uiState.update { it.copy(importProgress = progress, importedCardCount = count) }
                 },

@@ -12,7 +12,8 @@ enum class ImportSource {
     OCR_IMAGE,   // Imagen/PDF con análisis óptico
     CSV_TEXT,    // Texto en formato CSV / TSV / DSV
     JSON_TEXT,   // JSON (Foundry VTT, DeckApp Export, o array simple)
-    PLAIN_TEXT   // Texto plano (portapapeles, listas, Markdown)
+    PLAIN_TEXT,  // Texto plano (portapapeles, listas)
+    MARKDOWN_TABLE // Tablas estándar Markdown (|---|)
 }
 
 /**
@@ -50,6 +51,7 @@ class ImportTableUseCase @Inject constructor(
     private val csvParser = CsvTableParser()
     private val jsonParser = JsonTableParser()
     private val plainTextParser = PlainTextTableParser()
+    private val markdownParser = MarkdownTableParser()
 
     /** Importar desde imagen/PDF via OCR. Devuelve todas las tablas detectadas.
      *  Lanza [com.deckapp.core.domain.repository.OcrException] si ML Kit falla. */
@@ -102,6 +104,15 @@ class ImportTableUseCase @Inject constructor(
                 if (entries.isEmpty()) throw TableParseException.EmptyResult("el texto pegado")
                 ImportResult(
                     sourceType = "TEXT",
+                    entries = entries,
+                    suggestedFormula = inferFormula(entries)
+                )
+            }
+            ImportSource.MARKDOWN_TABLE -> {
+                val entries = markdownParser.parse(params.rawText)
+                if (entries.isEmpty()) throw TableParseException.EmptyResult("la tabla Markdown")
+                ImportResult(
+                    sourceType = "MARKDOWN",
                     entries = entries,
                     suggestedFormula = inferFormula(entries)
                 )

@@ -22,6 +22,7 @@ reorderable = "2.4.0"
 junit = "4.13.2"
 mockk = "1.13.12"
 turbine = "1.1.0"
+generativeai = "0.9.0"
 
 [libraries]
 # Core Android
@@ -88,6 +89,9 @@ pdfium-android = { group = "com.github.barteksc", name = "pdfium-android", versi
 
 # Drag & Drop para LazyVerticalGrid (C-1)
 reorderable = { group = "sh.calvin.reorderable", name = "reorderable", version.ref = "reorderable" }
+
+# Google AI (Gemini)
+google-ai-generativeai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "generativeai" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

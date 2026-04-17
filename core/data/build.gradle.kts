@@ -44,4 +44,6 @@ dependencies {
     implementation(libs.androidx.camera.core) // Workaround for 16KB alignment
     implementation(libs.kotlinx.coroutines.play.services)
 
+    // Google AI (Gemini)
+    implementation(libs.google.ai.generativeai)
 }

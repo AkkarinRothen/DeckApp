@@ -5,6 +5,7 @@ import com.deckapp.core.domain.repository.CardRepository
 import com.deckapp.core.model.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -198,11 +199,14 @@ class CardRepositoryImpl @Inject constructor(
             searchDao.searchCardFaceIds(ftsQuery)
         ) { cardIds, faceIds ->
             (cardIds.map { it.rowid } + faceIds.map { it.rowid }).distinct()
-        }.flatMapLatest { ids ->
-            if (ids.isEmpty()) kotlinx.coroutines.flow.flowOf(emptyList())
-            else combine(
-                ids.map { id -> getCardById(id) }
-            ) { cards -> cards.filterNotNull() }
+        }.flatMapLatest { ids: List<Long> ->
+            if (ids.isEmpty()) kotlinx.coroutines.flow.flowOf(emptyList<Card>())
+            else {
+                val flows = ids.map { id -> getCardById(id) }
+                combine(flows) { cards: Array<Card?> ->
+                    cards.filterNotNull()
+                }
+            }
         }
     }
 }

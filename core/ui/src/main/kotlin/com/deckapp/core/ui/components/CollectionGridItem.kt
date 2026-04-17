@@ -1,5 +1,6 @@
 package com.deckapp.core.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
@@ -17,13 +18,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.deckapp.core.model.Collection
+import com.deckapp.core.model.DeckCollection
 import com.deckapp.core.model.CollectionIcon
 
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun CollectionGridItem(
-    collection: Collection,
+    collection: DeckCollection,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     isSelected: Boolean = false,
@@ -37,58 +38,78 @@ fun CollectionGridItem(
                 onClick = onClick,
                 onLongClick = onLongClick
             ),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = if (isSelected) {
-            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-        } else CardDefaults.cardColors()
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 8.dp else 4.dp),
+        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // Fondo con el color de la colección
+            // Fondo con el color de la colección y un gradiente suave
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .matchParentSize()
                     .background(
-                        Brush.verticalGradient(
+                        Brush.linearGradient(
                             colors = listOf(
-                                Color(collection.color).copy(alpha = 0.7f),
-                                Color(collection.color)
+                                Color(collection.color).copy(alpha = 0.6f),
+                                Color(collection.color).copy(alpha = 0.9f)
                             )
                         )
                     )
             )
 
-            // Icono central grande
+            // Decoración: Círculo sutil de fondo
+            Surface(
+                modifier = Modifier
+                    .size(120.dp)
+                    .align(Alignment.Center)
+                    .offset(x = 40.dp, y = (-30).dp),
+                color = Color.White.copy(alpha = 0.1f),
+                shape = RoundedCornerShape(60.dp)
+            ) {}
+
+            // Icono central grande con sombra
             Icon(
                 imageVector = collection.icon.toIcon(),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(64.dp)
+                    .size(72.dp)
                     .align(Alignment.Center)
-                    .offset(y = (-10).dp),
-                tint = Color.White.copy(alpha = 0.8f)
+                    .offset(y = (-12).dp),
+                tint = Color.White
             )
 
-            // Info en la base
-            Column(
+            // Info en la base con efecto de "vidrio" (Glassmorphism)
+            Surface(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
-                    .fillMaxWidth()
-                    .background(Color.Black.copy(alpha = 0.4f))
-                    .padding(8.dp)
+                    .fillMaxWidth(),
+                color = Color.Black.copy(alpha = 0.3f)
             ) {
-                Text(
-                    text = collection.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color.White,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = "${collection.resourceCount} recursos",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.White.copy(alpha = 0.8f)
-                )
+                Column(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
+                ) {
+                    Text(
+                        text = collection.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.White,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Layers,
+                            contentDescription = null,
+                            modifier = Modifier.size(12.dp),
+                            tint = Color.White.copy(alpha = 0.7f)
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text = "${collection.resourceCount} recursos",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.White.copy(alpha = 0.7f)
+                        )
+                    }
+                }
             }
             
             // Indicador de selección
@@ -96,8 +117,8 @@ fun CollectionGridItem(
                 Box(
                     modifier = Modifier
                         .matchParentSize()
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                        .padding(8.dp),
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                        .padding(12.dp),
                     contentAlignment = Alignment.TopEnd
                 ) {
                     Icon(
@@ -114,7 +135,7 @@ fun CollectionGridItem(
 @Composable
 fun CollectionIcon.toIcon(): ImageVector = when (this) {
     CollectionIcon.CHEST -> Icons.Default.Inventory2
-    CollectionIcon.BOOK -> Icons.Default.MenuBook
+    CollectionIcon.BOOK -> Icons.AutoMirrored.Filled.MenuBook
     CollectionIcon.MAP -> Icons.Default.Map
     CollectionIcon.SKULL -> Icons.Default.Dangerous
     CollectionIcon.BAG -> Icons.Default.ShoppingBag

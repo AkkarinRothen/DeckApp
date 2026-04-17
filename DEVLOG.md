@@ -5,6 +5,56 @@
 
 ---
 
+### Sprint 24 — Gemini Vision Mode: Path Multimodal para Reconocimiento de Tablas (17 de abril de 2026)
+
+**INTEGRATION — Gemini Vision Mode (Multimodal)**
+- **NEW**: Añadido `recognizeTableFromImage(bitmap, apiKey)` a `AiTableRepository` y su implementación en `GeminiAiRepository`. Envía el bitmap recortado directamente a Gemini como entrada multimodal, bypassando ML Kit OCR por completo.
+- **NEW**: `RecognizeTableFromImageUseCase` en `:core:domain` — orquesta la llamada al repositorio de IA con visión.
+- **NEW**: `TableImportViewModel.recognizeWithVision()` — invoca el use case, popula las entradas y navega al paso MAPPING directamente desde RECOGNITION.
+- **UI**: Paso RECOGNITION ahora ofrece dos botones: "OCR" (flujo existente) e "IA Vision" (nuevo path). El botón Vision muestra `CircularProgressIndicator` durante el procesamiento.
+- **STATE**: Añadido `isVisionProcessing: Boolean` a `TableImportUiState`.
+
+**UPDATE — Modelo Gemini actualizado a 2.0 Flash**
+- Cambiado `gemini-1.5-flash-latest` → `gemini-2.0-flash` en `GeminiAiRepository` para ambos endpoints (texto e imagen).
+- `apiVersion` actualizado a `v1beta` (requerido por Gemini 2.0).
+- Extraídas constantes `MODEL_NAME` y `API_VERSION` en companion object.
+- Refactorizado el parsing de respuesta a función privada `parseResponse()` para eliminar duplicación.
+
+**ARCHITECTURE — Backward compatible**
+- El path OCR original no fue modificado. Usuarios sin API key configurada ven el botón Vision pero el error se gestiona mediante el diálogo de error existente.
+
+**INTEGRATION — Build**
+- Pendiente verificación con `assembleDebug`.
+
+---
+
+### Sprint 23 — Importación Inteligente: Markdown y Gemini AI (17 de abril de 2026)
+
+**FEATURE — Soporte Nativo de Tablas Markdown (`.md`)**
+- **NEW**: Implementado `MarkdownTableParser` para reconocer la sintaxis estándar de tablas `| Header |`.
+- **INTEGRATION**: El selector de archivos ahora permite elegir archivos `.md` y los procesa extrayendo las filas de datos ignorando los delimitadores de formato.
+
+**FEATURE — Transcripción Inteligente con Gemini AI**
+- **INTEGRATION**: Añadido el SDK de Google AI (`generativeai`).
+- **NEW**: Botón "Varita Mágica" en `TableReviewView` que envía el texto (especialmente tras OCR) a Gemini 1.5 Flash.
+- **AI**: La IA reconstruye y limpia los datos de la tabla, corrigiendo errores de OCR y re-estructurando columnas desordenadas en un formato JSON estructurado.
+- **CONFIG**: Implementada la gestión segura de la API Key en la pantalla de Ajustes, persistida localmente.
+
+**ARCHITECTURE — Settings & Configuration**
+- **NEW**: `SettingsRepository` centraliza la gestión de la API Key de Gemini y la calidad de imagen JPEG.
+- **FIX**: Resincronizados los ViewModels para usar el nuevo repositorio en lugar de acceso directo a SharedPreferences.
+
+**FIX — Limpieza de Warnings y Estabilización**
+- **DEPRECATION**: Reemplazados iconos `List` y `ViewList` por sus versiones `AutoMirrored` para compatibilidad futura y RTL.
+- **OPT-IN**: Añadido `@OptIn(FlowPreview::class)` en `LibraryViewModel` para silenciar avisos del operador `debounce`.
+- **KAPT**: Configurado `kapt.languageVersion = 1.9` en `gradle.properties` para resolver el aviso de fallback en Kotlin 2.0.
+- **BUILD**: Corregidos errores de referencias no resueltas e inyección de dependencias en `TableImportViewModel`.
+
+**INTEGRATION — Build**
+- **BUILD SUCCESSFUL** `assembleDebug` — 313 tareas, sin warnings de código.
+
+---
+
 ### Sprint 22 — Estabilización del Build y Refactor de Módulos (16 de abril de 2026)
 
 **FIX — Solución a error de inyección de Dagger Hilt (Missing Binding)**

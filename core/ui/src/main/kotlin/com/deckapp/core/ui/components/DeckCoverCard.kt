@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Unarchive
 import androidx.compose.material.icons.filled.Inventory2
+import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -43,12 +44,13 @@ fun DeckCoverCard(
     isSelected: Boolean = false,
     onLongClick: (() -> Unit)? = null,
     onAddToCollection: (() -> Unit)? = null,
+    onTag: (() -> Unit)? = null,
     cardCount: Int = 0,
     modifier: Modifier = Modifier
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
 
-    val showOverflow = onDelete != null || onDuplicate != null || onMergeWith != null || onArchive != null
+    val showOverflow = onDelete != null || onDuplicate != null || onMergeWith != null || onArchive != null || onTag != null
 
     // V-10: Stack visual — back surfaces peek behind the main card
     Box(modifier = modifier.fillMaxWidth()) {
@@ -232,6 +234,18 @@ fun DeckCoverCard(
                                         onAddToCollection?.invoke()
                                     }
                                 )
+                                onTag?.let { action ->
+                                    DropdownMenuItem(
+                                        text = { Text("Etiquetar") },
+                                        leadingIcon = {
+                                            Icon(Icons.Default.Tag, contentDescription = null)
+                                        },
+                                        onClick = {
+                                            menuExpanded = false
+                                            action()
+                                        }
+                                    )
+                                }
                                 onDuplicate?.let { action ->
                                     DropdownMenuItem(
                                         text = { Text("Duplicar mazo") },

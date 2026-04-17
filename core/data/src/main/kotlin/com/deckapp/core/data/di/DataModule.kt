@@ -24,6 +24,8 @@ import com.deckapp.core.data.repository.FileRepositoryImpl
 import com.deckapp.core.data.repository.OcrRepositoryImpl
 import com.deckapp.core.data.repository.SessionRepositoryImpl
 import com.deckapp.core.data.repository.TableRepositoryImpl
+import com.deckapp.core.data.repository.GeminiAiRepository
+import com.deckapp.core.data.repository.SettingsRepositoryImpl
 import com.deckapp.core.domain.repository.CardRepository
 import com.deckapp.core.domain.repository.CollectionRepository
 import com.deckapp.core.domain.repository.RecentFileRepository
@@ -32,6 +34,8 @@ import com.deckapp.core.domain.repository.FileRepository
 import com.deckapp.core.domain.repository.OcrRepository
 import com.deckapp.core.domain.repository.SessionRepository
 import com.deckapp.core.domain.repository.TableRepository
+import com.deckapp.core.domain.repository.AiTableRepository
+import com.deckapp.core.domain.repository.SettingsRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -65,7 +69,9 @@ object DatabaseModule {
                 MIGRATION_18_19,
                 MIGRATION_19_20,
                 MIGRATION_20_21,
-                MIGRATION_21_22
+                MIGRATION_21_22,
+                MIGRATION_22_23,
+                MIGRATION_23_24
             )
             .fallbackToDestructiveMigrationFrom(1, 2, 3, 4, 5)
             .build()
@@ -117,4 +123,12 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindCollectionRepository(impl: CollectionRepositoryImpl): CollectionRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAiTableRepository(impl: GeminiAiRepository): AiTableRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSettingsRepository(impl: SettingsRepositoryImpl): SettingsRepository
 }

@@ -4,18 +4,12 @@ import com.deckapp.core.data.db.RandomTableDao
 import com.deckapp.core.data.db.TableBundleDao
 import com.deckapp.core.data.db.TableRollResultDao
 import com.deckapp.core.data.db.TagDao
-import com.deckapp.core.data.db.toDomain
-import com.deckapp.core.data.db.toEntity
-import com.deckapp.core.data.db.EntrySearchResult
-import com.deckapp.core.data.db.SearchDao
+import com.deckapp.core.data.db.*
 import com.deckapp.core.domain.repository.TableRepository
 import com.deckapp.core.model.RandomTable
 import com.deckapp.core.model.TableBundle
 import com.deckapp.core.model.TableRollResult
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 class TableRepositoryImpl @Inject constructor(
@@ -46,6 +40,7 @@ class TableRepositoryImpl @Inject constructor(
             list.map { it.toDomain() }
         }
 
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     override fun getBundleWithTables(bundleId: Long): Flow<TableBundle?> =
         tableBundleDao.getBundleById(bundleId).flatMapLatest { bundleEntity ->
             if (bundleEntity == null) return@flatMapLatest flowOf(null)
@@ -142,9 +137,11 @@ class TableRepositoryImpl @Inject constructor(
         
         return searchDao.searchTableIds(ftsQuery).flatMapLatest { ids ->
             if (ids.isEmpty()) flowOf(emptyList())
-            else kotlinx.coroutines.flow.combine(
-                ids.map { id -> kotlinx.coroutines.flow.flow { emit(getTableWithEntries(id.rowid)) } }
-            ) { tables -> tables.filterNotNull() }
+            else combine(
+                ids.map { id -> flow { emit(getTableWithEntries(id.rowid)) } }
+            ) { tables: Array<RandomTable?> -> 
+                tables.filterNotNull()
+            }
         }
     }
 
@@ -154,8 +151,8 @@ class TableRepositoryImpl @Inject constructor(
         val ftsQuery = "$query*"
         
         return searchDao.searchTableEntriesWithTableId(ftsQuery).map { results: List<EntrySearchResult> ->
-            // Devolvemos el ID de la tabla y una muestra del texto de la entrada.
-            results.map { result -> result.tableId to "..." }
+            // Devolvemos el ID de la tabla y el texto coincidente como snippet.
+            results.map { result -> result.tableId to result.text }
         }
     }
 }

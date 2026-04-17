@@ -1,32 +1,29 @@
 package com.deckapp.core.data.repository
 
 import com.deckapp.core.data.db.*
-import com.deckapp.core.data.db.toDomain
-import com.deckapp.core.data.db.toEntity
 import com.deckapp.core.domain.repository.CollectionRepository
 import com.deckapp.core.model.CardStack
-import com.deckapp.core.model.Collection
+import com.deckapp.core.model.DeckCollection
 import com.deckapp.core.model.RandomTable
 import com.deckapp.core.model.Tag
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 class CollectionRepositoryImpl @Inject constructor(
     private val collectionDao: CollectionDao,
     private val tagDao: TagDao,
-    private val faceDao: CardFaceDao
+    private val searchDao: SearchDao
 ) : CollectionRepository {
 
-    override fun getAllCollections(): Flow<List<Collection>> =
+    override fun getAllCollections(): Flow<List<DeckCollection>> =
         collectionDao.getAllCollectionsWithCount().map { entities ->
             entities.map { it.toDomain() }
         }
 
-    override fun getCollectionById(id: Long): Flow<Collection?> =
+    override fun getCollectionById(id: Long): Flow<DeckCollection?> =
         collectionDao.getCollectionById(id).map { it?.toDomain() }
 
-    override suspend fun saveCollection(collection: Collection): Long {
+    override suspend fun saveCollection(collection: DeckCollection): Long {
         return collectionDao.insertCollection(collection.toEntity())
     }
 
@@ -64,4 +61,22 @@ class CollectionRepositoryImpl @Inject constructor(
                 entity.toDomain(tags = tags)
             }
         }
+
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    override fun searchCollections(query: String): Flow<List<DeckCollection>> {
+        if (query.isBlank()) return flowOf(emptyList())
+        val ftsQuery = "$query*"
+        
+        return searchDao.searchCollectionIds(ftsQuery).flatMapLatest { ids ->
+            if (ids.isEmpty()) {
+                flowOf(emptyList())
+            } else {
+                combine(
+                    ids.map { getCollectionById(it.rowid) }
+                ) { collections: Array<DeckCollection?> -> 
+                    collections.filterNotNull()
+                }
+            }
+        }
+    }
 }

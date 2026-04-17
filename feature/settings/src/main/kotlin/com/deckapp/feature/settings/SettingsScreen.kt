@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
@@ -103,6 +104,21 @@ fun SettingsScreen(
                 JpegQualitySelector(
                     currentQuality = uiState.jpegQuality,
                     onQualitySelected = { viewModel.setJpegQuality(it) }
+                )
+            }
+
+            item {
+                GeminiApiKeyEditor(
+                    currentKey = uiState.geminiApiKey,
+                    onKeyChanged = { viewModel.setGeminiApiKey(it) }
+                )
+            }
+
+            item {
+                AutoVisionToggle(
+                    enabled = uiState.autoVisionEnabled,
+                    apiKeyConfigured = uiState.geminiApiKey.isNotBlank(),
+                    onToggle = { viewModel.setAutoVisionEnabled(it) }
                 )
             }
 
@@ -291,6 +307,69 @@ private fun JpegQualitySelector(currentQuality: Int, onQualitySelected: (Int) ->
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun GeminiApiKeyEditor(currentKey: String, onKeyChanged: (String) -> Unit) {
+    var text by remember(currentKey) { mutableStateOf(currentKey) }
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                "Gemini AI (Google)",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                "API Key para procesar tablas con IA. Los datos se enviarán a Google.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                label = { Text("Google AI API Key") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                trailingIcon = {
+                    if (text != currentKey) {
+                        IconButton(onClick = { onKeyChanged(text) }) {
+                            Icon(Icons.Default.Check, "Guardar")
+                        }
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun AutoVisionToggle(
+    enabled: Boolean,
+    apiKeyConfigured: Boolean,
+    onToggle: (Boolean) -> Unit
+) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text("Vision AI automático", style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    if (apiKeyConfigured) "Usa Vision AI en cada reconocimiento de tabla"
+                    else "Requiere configurar la API Key de Gemini",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Switch(
+                checked = enabled && apiKeyConfigured,
+                onCheckedChange = onToggle,
+                enabled = apiKeyConfigured
+            )
         }
     }
 }

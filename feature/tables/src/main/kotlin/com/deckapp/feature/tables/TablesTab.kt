@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.*
@@ -137,7 +138,7 @@ fun TablesTab(
                 
                 IconButton(onClick = { viewModel.toggleViewMode() }) {
                     Icon(
-                        if (uiState.isGridView) Icons.Default.ViewList else Icons.Default.ViewModule,
+                        if (uiState.isGridView) Icons.AutoMirrored.Filled.ViewList else Icons.Default.ViewModule,
                         contentDescription = "Cambiar vista"
                     )
                 }

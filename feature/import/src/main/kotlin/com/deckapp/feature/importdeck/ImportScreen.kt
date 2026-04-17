@@ -36,6 +36,7 @@ import com.deckapp.core.model.CardContentMode
 import com.deckapp.core.ui.components.ErrorCard
 import com.deckapp.core.ui.components.PdfThumbnailBrowser
 import android.graphics.Bitmap
+import androidx.compose.foundation.Canvas
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -116,6 +117,7 @@ fun ImportScreen(
                     onPdfGridRowsChange = { viewModel.updatePdfGridRows(it) },
                     onPdfSkipPagesChange = { viewModel.updatePdfSkipPages(it) },
                     onPdfAutoTrimCellsChange = { viewModel.updatePdfAutoTrimCells(it) },
+                    onPdfSplitRatioChange = { viewModel.updatePdfSplitRatio(it) },
                     // Para PDF → vista previa antes de importar
                     // Para carpeta → importar directo
                     onPreview = { viewModel.generatePreview() },
@@ -235,6 +237,7 @@ private fun ConfigurePhase(
     onPdfGridRowsChange: (Int) -> Unit,
     onPdfSkipPagesChange: (Int) -> Unit,
     onPdfAutoTrimCellsChange: (Boolean) -> Unit,
+    onPdfSplitRatioChange: (Float) -> Unit,
     onPreview: () -> Unit,
     onStartImport: () -> Unit
 ) {
@@ -270,15 +273,34 @@ private fun ConfigurePhase(
         Text("Layout del PDF", style = MaterialTheme.typography.labelLarge)
 
         uiState.pdfPreviewBitmap?.let { bitmap ->
-            Image(
-                bitmap = bitmap.asImageBitmap(),
-                contentDescription = "Preview PDF",
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
                     .border(1.dp, MaterialTheme.colorScheme.outline),
-                contentScale = ContentScale.Fit
-            )
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = "Preview PDF",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit
+                )
+                
+                if (uiState.pdfLayoutMode == PdfLayoutMode.SIDE_BY_SIDE) {
+                    // Dibujar línea de corte vertical
+                    Canvas(modifier = Modifier.fillMaxSize()) {
+                        val lineX = size.width * uiState.pdfSideBySideSplitRatio
+                        drawLine(
+                            color = Color.Red,
+                            start = androidx.compose.ui.geometry.Offset(lineX, 0f),
+                            end = androidx.compose.ui.geometry.Offset(lineX, size.height),
+                            strokeWidth = 2.dp.toPx(),
+                            pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+                        )
+                    }
+                }
+            }
         }
 
         val pdfLayouts = listOf(
@@ -409,6 +431,36 @@ private fun ConfigurePhase(
                 checked = uiState.pdfAutoTrimCells,
                 onCheckedChange = onPdfAutoTrimCellsChange
             )
+        }
+
+        if (uiState.pdfLayoutMode == PdfLayoutMode.SIDE_BY_SIDE) {
+            Spacer(Modifier.height(8.dp))
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Calibrar punto de corte", style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        "${(uiState.pdfSideBySideSplitRatio * 100).toInt()}%",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Slider(
+                    value = uiState.pdfSideBySideSplitRatio,
+                    onValueChange = onPdfSplitRatioChange,
+                    valueRange = 0.15f..0.85f,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Text(
+                    "Ajustá esta línea si el frente y el dorso no están centrados (por márgenes o gutters).",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 

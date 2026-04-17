@@ -8,6 +8,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.TableChart
+import androidx.compose.material.icons.filled.TextFields
 import android.graphics.Bitmap
 import androidx.compose.material3.*
 import androidx.compose.ui.graphics.asImageBitmap
@@ -61,14 +63,23 @@ fun SourceSelectionView(
             )
         }
         
-        Spacer(Modifier.height(12.dp))
-        
-        SourceCard(
-            title = "Texto Plano",
-            icon = Icons.Default.Description,
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            onClick = { onSelect(ImportSource.PLAIN_TEXT) }
-        )
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            SourceCard(
+                title = "Texto Plano",
+                icon = Icons.Default.TextFields,
+                modifier = Modifier.weight(1f),
+                onClick = { onSelect(ImportSource.PLAIN_TEXT) }
+            )
+            SourceCard(
+                title = "Markdown",
+                icon = Icons.Default.TableChart,
+                modifier = Modifier.weight(1f),
+                onClick = { onSelect(ImportSource.MARKDOWN_TABLE) }
+            )
+        }
         
         Spacer(Modifier.height(32.dp))
         

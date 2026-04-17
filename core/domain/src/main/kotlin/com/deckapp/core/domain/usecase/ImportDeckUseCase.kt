@@ -39,6 +39,7 @@ class ImportDeckUseCase @Inject constructor(
         pdfGridRows: Int = 3,
         pdfSkipPages: Int = 0,
         pdfAutoTrimCells: Boolean = true,
+        pdfSplitRatio: Float = 0.5f,
         onProgress: (progress: Float, cardCount: Int) -> Unit = { _, _ -> },
         onFileError: (fileName: String) -> Unit = {}
     ): Result<Long> {
@@ -80,6 +81,7 @@ class ImportDeckUseCase @Inject constructor(
                         gridRows = pdfGridRows,
                         skipPages = pdfSkipPages,
                         autoTrimCells = pdfAutoTrimCells,
+                        splitRatio = pdfSplitRatio,
                         onProgress = onProgress
                     )
                     if (coverPath != null) {
@@ -114,6 +116,7 @@ class ImportDeckUseCase @Inject constructor(
         gridRows: Int,
         skipPages: Int = 0,
         autoTrimCells: Boolean = true,
+        splitRatio: Float = 0.5f,
         onProgress: (Float, Int) -> Unit
     ): String? {
         val pageCount = fileRepository.getPdfPageCount(pdfUri)
@@ -185,14 +188,16 @@ class ImportDeckUseCase @Inject constructor(
                                 pdfUri, pageIndex,
                                 col, row, totalCols, gridRows,
                                 deckId, "card_${cardIndex}_front.jpg",
-                                autoTrimCell = autoTrimCells
+                                autoTrimCell = autoTrimCells,
+                                horizontalSplitRatio = splitRatio
                             )
                             if (frontPath != null) {
                                 val backPath = fileRepository.renderPdfGridCellAndSave(
                                     pdfUri, pageIndex,
                                     col + gridCols, row, totalCols, gridRows,
                                     deckId, "card_${cardIndex}_back.jpg",
-                                    autoTrimCell = autoTrimCells
+                                    autoTrimCell = autoTrimCells,
+                                    horizontalSplitRatio = splitRatio
                                 )
                                 val backFaces = if (backPath != null)
                                     listOf(CardFace("Dorso", backPath, contentMode))
