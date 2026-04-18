@@ -1,5 +1,6 @@
 package com.deckapp.feature.encounters
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -12,11 +13,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.deckapp.core.model.EncounterCreature
+import com.deckapp.core.model.Npc
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,6 +36,8 @@ fun EncounterEditorScreen(
     LaunchedEffect(uiState.saved) {
         if (uiState.saved) onBack()
     }
+
+    var showNpcSelector by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState.errorMessage) {
         uiState.errorMessage?.let {
@@ -83,10 +91,17 @@ fun EncounterEditorScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text("Criaturas", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-                        TextButton(onClick = { viewModel.addCreature() }) {
-                            Icon(Icons.Default.Add, contentDescription = null)
-                            Spacer(Modifier.width(8.dp))
-                            Text("Añadir")
+                        Row {
+                            TextButton(onClick = { showNpcSelector = true }) {
+                                Icon(Icons.Default.Add, contentDescription = null)
+                                Spacer(Modifier.width(8.dp))
+                                Text("Desde NPCs")
+                            }
+                            TextButton(onClick = { viewModel.addCreature() }) {
+                                Icon(Icons.Default.Add, contentDescription = null)
+                                Spacer(Modifier.width(8.dp))
+                                Text("Añadir Vacía")
+                            }
                         }
                     }
                 }
@@ -104,7 +119,71 @@ fun EncounterEditorScreen(
                 }
             }
         }
+
+        if (showNpcSelector) {
+            NpcSelectorDialog(
+                npcs = uiState.allNpcs,
+                onSelect = { npc ->
+                    viewModel.addCreatureFromNpc(npc)
+                    showNpcSelector = false
+                },
+                onDismiss = { showNpcSelector = false }
+            )
+        }
     }
+}
+
+@Composable
+fun NpcSelectorDialog(
+    npcs: List<Npc>,
+    onSelect: (Npc) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Seleccionar NPC") },
+        text = {
+            if (npcs.isEmpty()) {
+                Text("No hay NPCs en la biblioteca.")
+            } else {
+                LazyColumn(modifier = Modifier.heightIn(max = 400.dp)) {
+                    items(npcs.size) { index ->
+                        val npc = npcs[index]
+                        ListItem(
+                            headlineContent = { Text(npc.name) },
+                            supportingContent = { Text("HP ${npc.maxHp} | AC ${npc.armorClass}") },
+                            leadingContent = {
+                                Box(modifier = Modifier.size(40.dp).clip(androidx.compose.foundation.shape.CircleShape)) {
+                                    if (npc.imagePath != null) {
+                                        AsyncImage(
+                                            model = npc.imagePath,
+                                            contentDescription = null,
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier.fillMaxSize()
+                                        )
+                                    } else {
+                                        Surface(
+                                            color = MaterialTheme.colorScheme.primaryContainer,
+                                            modifier = Modifier.fillMaxSize()
+                                        ) {
+                                            Box(contentAlignment = Alignment.Center) {
+                                                Text(npc.name.take(1))
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            modifier = Modifier.clickable { onSelect(npc) }
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancelar") }
+        }
+    )
 }
 
 @Composable

@@ -37,7 +37,6 @@
 - `SessionHistoryScreen` — implementada la navegación, pendiente el contenido real (timeline de DrawEvents)
 - Notas de DM — `Session.dmNotes` existe en el modelo, la UI está pendiente (ver `DM_NOTES.md`)
 - Tab "Notas" en SessionScreen — stub vacío (sprint pendiente)
-- Tab "Combate" en SessionScreen — stub vacío, aparece cuando `hasActiveEncounter = true` (sprint pendiente)
 - `Card.dmNotes` — no existe todavía en el modelo
 - Exportar resumen de sesión (notas + tiradas + cartas) — Fase 2
 
@@ -82,6 +81,8 @@ Muy común en mecánicas de sorpresa/misterio.
 - Tap en la carta en la mano → `FLIP` event → se revela el frente con animación
 - `CardViewScreen` desde una carta boca abajo muestra directamente el dorso
 
+✅ **Hecho (Sprint 26)** — Implementado con rotación 3D y Spring animation.
+
 **Detalles técnicos:**
 - `Card.isRevealed: Boolean` (nuevo campo, Room migration necesaria)
 - O reusar `currentFaceIndex`: si el dorso es `faces[1]`, empezar con `currentFaceIndex=1`
@@ -97,6 +98,8 @@ Es esencial para el modo Face Down y para la presentación visual general.
 - En `DeckDetailScreen` (o pantalla de config del mazo): picker de imagen para el dorso
 - El dorso se muestra en el `CardThumbnail` cuando `card.isDrawn = false` y se selecciona
 - En `SessionScreen`, cartas boca abajo muestran este dorso
+
+✅ **Hecho (Sprint 26)** — Integrado en la `DeckConfigSheet`.
 
 **Detalles técnicos:**
 - `CardStack.backImagePath: String?` ya existe en el modelo pero no está expuesto en la UI
@@ -146,18 +149,14 @@ Librería: `zynkware/Document-Scanning-Android-SDK` (Kotlin, OpenCV lightweight)
 
 ## C — Mejoras de UX
 
-### C-1 — Reordenar cartas en DeckDetail (drag & drop) 🔴 ★★
-Actualmente las cartas se muestran en orden `sortOrder` pero no se puede reordenar desde la UI.
+### C-1 — Reordenar recursos y cartas (drag & drop) 🔴 ★★
+Actualmente las cartas se muestran en orden `sortOrder`.
 
-**Comportamiento esperado:**
-- Modo edición: botón "Reordenar" en el TopAppBar activa handles de drag
-- Long-press en una carta entra en modo drag; arrastrar para reposicionar
-- Al soltar: actualiza `sortOrder` de todas las cartas afectadas en Room
+**Implementación:** `LazyVerticalGrid` con `sh.calvin.reorderable`.
 
-**Implementación:** `LazyVerticalGrid` de Compose no tiene soporte nativo de drag-and-drop.
-Opciones:
-1. `ReorderableItem` de la librería `sh.calvin.reorderable:reorderable` (Compose-first, activo)
-2. Cambiar a `LazyColumn` para DeckDetail y usar la misma librería
+**Estado:**
+- [x] **Biblioteca (Mazos y Tablas)**: Implementado reordenamiento persistente (Sprint 26).
+- [ ] **DeckDetail (Cartas individuales)**: Pendiente (Sprint 27).
 
 ---
 
@@ -174,6 +173,8 @@ de un mazo existente desde la UI.
   - `DrawMode`: selector RANDOM / TOP / BOTTOM
   - Imagen de dorso: picker de imagen (ver B-3)
   - "Mostrar contador de cartas" toggle
+
+✅ **Hecho (Sprint 26)** — Implementada la `DeckConfigSheet` premium.
 
 ---
 
@@ -289,6 +290,9 @@ Glance widget (API de widgets de Compose para Android) en la pantalla de inicio.
 
 | Sprint | Contenido principal | Estado |
 |--------|---------------------|--------|
+| 1–14.5 | Core architecture, Tables, PDF, Multi-deck, Workspace Bento | ✅ |
+| 15 | Notas de DM — Tab Notas real, Markdown toolbar, Quick Notes polish | ✅ |
+| 16 | Notas por carta + Export ZIP enriquecido (manifiesto JSON) | ✅ |
 | 1–3 | Setup multi-módulo, Room schema, LibraryScreen, DeckDetail, SessionScreen base | ✅ |
 | 4 | CardAspectRatio, ContentScale.Fit, dots de caras, badge de conteo | ✅ |
 | — | Refactor SessionScreen → HorizontalPager (Mazos/Tablas/Notas/Combate) | ✅ |
@@ -303,31 +307,18 @@ Glance widget (API de widgets de Compose para Android) en la pantalla de inicio.
 | 13 | Archivar/restaurar mazos, Room v8, chip Archivados en Biblioteca | ✅ |
 | 14 | Deuda técnica: PdfRenderer nativo, migraciones Room v13, índices tags | ✅ |
 | 14.5 | Workspace Bento: DeckClusterItem, DeckWorkspace, CompactCardItem, FlowRow | ✅ |
+| 26 | Configuración Centralizada (C-2), Boca Abajo 3D (B-2) e Importación MD | ✅ |
 
 ---
 
 ## Próximos Sprints
 
-```
-Sprint 15 — Notas de DM por sesión
-  · Tab Notas en SessionScreen: editor Markdown con autoguardado
-  · SessionViewModel.updateDmNotes() ya existe — conectar con la UI
-  · Quick Notes con timestamp automático desde el FAB
-  · SessionHistoryScreen: mostrar dmNotes en sesiones finalizadas
-  · Plan detallado: DM_NOTES.md
-
-Sprint 16 — Notas por carta + Gestión de Almacenamiento
-  · Room migration: cards.dmNotes
-  · CardViewScreen: panel de nota por carta
-  · DeckDetailScreen: badge en cartas con nota
-  · A-6: Export ZIP desde DeckDetailScreen overflow
-  · A-7: Progress bars en SettingsScreen
-
-Sprint 17 — Encuentros y Combat Tracker
+Sprint 17 — Encuentros y Combat Tracker (17 de abril de 2026) ✅
   · Modelo Encounter + EncounterCreature en :core:model
-  · :feature:encounters: lista + editor + tracker de HP
+  · :feature:encounters: lista + editor + tracker de HP / Iniciativa
+  · Integración de PJs temporales en iniciativa
   · Tab Combate en SessionScreen (dinámico)
-  · Ver ENCOUNTERS.md para plan detallado
+  · Resumen automático de combate en Notas de DM
 
 Sprint 18 — NPCs
   · Modelo Npc + :feature:npcs
@@ -372,4 +363,4 @@ Sprint 25 — Mecánicas Narrativas 🟢 ★★★
 
 ---
 
-*Última actualización: 15 de abril de 2026*
+*Última actualización: 17 de abril de 2026*

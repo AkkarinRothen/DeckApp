@@ -30,9 +30,13 @@ import androidx.room.RoomDatabase
         TableEntryFtsEntity::class,
         CollectionEntity::class,
         CollectionResourceCrossRef::class,
-        CollectionFtsEntity::class
+        CollectionFtsEntity::class,
+        NpcEntity::class,
+        NpcTagCrossRef::class,
+        WikiCategoryEntity::class,
+        WikiEntryEntity::class
     ],
-    version = 24,
+    version = 26,
     exportSchema = true
 )
 abstract class DeckAppDatabase : RoomDatabase() {
@@ -50,6 +54,9 @@ abstract class DeckAppDatabase : RoomDatabase() {
     abstract fun recentFileDao(): RecentFileDao
     abstract fun searchDao(): SearchDao
     abstract fun collectionDao(): CollectionDao
+    abstract fun npcDao(): NpcDao
+    abstract fun wikiDao(): WikiDao
+    abstract fun backupDao(): com.deckapp.core.data.db.backup.BackupDao
 
     companion object {
         const val DATABASE_NAME = "deckapp.db"
@@ -67,5 +74,8 @@ abstract class DeckAppDatabase : RoomDatabase() {
         val MIGRATION_20_21 = com.deckapp.core.data.db.MIGRATION_20_21
         val MIGRATION_21_22 = com.deckapp.core.data.db.MIGRATION_21_22
         val MIGRATION_22_23 = com.deckapp.core.data.db.MIGRATION_22_23
+        val MIGRATION_23_24 = com.deckapp.core.data.db.MIGRATION_23_24
+        val MIGRATION_24_25 = com.deckapp.core.data.db.MIGRATION_24_25
+        val MIGRATION_25_26 = com.deckapp.core.data.db.MIGRATION_25_26
     }
 }

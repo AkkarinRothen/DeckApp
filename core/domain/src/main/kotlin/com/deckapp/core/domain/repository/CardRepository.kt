@@ -15,6 +15,8 @@ interface CardRepository {
     suspend fun saveStack(stack: CardStack): Long      // INSERT — solo para stacks nuevos (id=0)
     suspend fun updateStack(stack: CardStack)          // UPDATE — para stacks existentes (no borra cartas)
     suspend fun deleteStack(id: Long)
+    /** Persiste el orden de los mazos actualizando el campo sortOrder. */
+    suspend fun updateStacksSortOrder(orderedIds: List<Long>)
 
     // --- Cards ---
     fun getCardsForStack(stackId: Long): Flow<List<Card>>

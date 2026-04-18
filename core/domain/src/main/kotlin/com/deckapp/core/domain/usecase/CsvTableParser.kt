@@ -11,7 +11,20 @@ import com.deckapp.core.model.TableEntry
  * - Auto-detección de delimitador a partir de las primeras 3 líneas
  * - Columna de rango opcional (la primera columna con formato numérico)
  */
-class CsvTableParser {
+class CsvTableParser : TableParser {
+
+    override fun canParse(rawText: String): Boolean {
+        val lines = rawText.trim().lines().take(3)
+        if (lines.isEmpty()) return false
+        val delimiters = listOf(',', ';', '|', '\t')
+        return delimiters.any { d -> lines.all { it.contains(d) } }
+    }
+
+    override fun parse(rawText: String): ParsedTableContent {
+        val preview = preview(rawText)
+        val entries = parse(rawText, preview.config)
+        return ParsedTableContent(entries = entries)
+    }
 
     data class ParseConfig(
         val delimiter: Char,

@@ -332,9 +332,145 @@ val MIGRATION_22_23 = object : Migration(22, 23) {
     }
 }
 
+
 val MIGRATION_23_24 = object : Migration(23, 24) {
     override fun migrate(database: SupportSQLiteDatabase) {
+        // 1. Crear tabla npcs
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `npcs` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `name` TEXT NOT NULL,
+                `description` TEXT NOT NULL,
+                `imagePath` TEXT,
+                `maxHp` INTEGER NOT NULL,
+                `currentHp` INTEGER NOT NULL,
+                `armorClass` INTEGER NOT NULL,
+                `initiativeBonus` INTEGER NOT NULL,
+                `notes` TEXT NOT NULL,
+                `isMonster` INTEGER NOT NULL,
+                `createdAt` INTEGER NOT NULL
+            )
+        """.trimIndent())
+
+        // 2. Crear tabla npc_tags
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `npc_tags` (
+                `npcId` INTEGER NOT NULL,
+                `tagId` INTEGER NOT NULL,
+                PRIMARY KEY(`npcId`, `tagId`),
+                FOREIGN KEY(`npcId`) REFERENCES `npcs`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE ,
+                FOREIGN KEY(`tagId`) REFERENCES `tags`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+            )
+        """.trimIndent())
+        database.execSQL("CREATE INDEX IF NOT EXISTS `index_npc_tags_tagId` ON `npc_tags` (`tagId`)")
+
+        // 3. Alterar encounter_creatures para añadir npcId e imagePath
+        database.execSQL("ALTER TABLE `encounter_creatures` ADD COLUMN `npcId` INTEGER DEFAULT NULL")
+        database.execSQL("ALTER TABLE `encounter_creatures` ADD COLUMN `imagePath` TEXT DEFAULT NULL")
+
+        // 4. FTS para Collections (faltaba en migración anterior)
         database.execSQL("CREATE VIRTUAL TABLE IF NOT EXISTS `collections_fts` USING FTS4(`name`, `description`, content=`collections`)")
         database.execSQL("INSERT INTO `collections_fts`(`collections_fts`) VALUES('rebuild')")
+    }
+}
+
+val MIGRATION_24_25 = object : Migration(24, 25) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        // 1. Recrear tabla de sesiones (para eliminar isActive y asegurar esquema exacto)
+        database.execSQL("ALTER TABLE `sessions` RENAME TO `sessions_old`")
+        
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `sessions` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+                `name` TEXT NOT NULL, 
+                `status` TEXT NOT NULL, 
+                `scheduledDate` INTEGER, 
+                `summary` TEXT, 
+                `createdAt` INTEGER NOT NULL, 
+                `endedAt` INTEGER, 
+                `showCardTitles` INTEGER NOT NULL, 
+                `dm_notes` TEXT
+            )
+        """.trimIndent())
+
+        // Migrar datos de la vieja a la nueva
+        database.execSQL("""
+            INSERT INTO `sessions` (id, name, status, createdAt, endedAt, showCardTitles, dm_notes)
+            SELECT id, name, 
+                CASE WHEN isActive = 1 THEN 'ACTIVE' ELSE 'COMPLETED' END, 
+                createdAt, endedAt, showCardTitles, dm_notes
+            FROM `sessions_old`
+        """.trimIndent())
+
+        database.execSQL("DROP TABLE `sessions_old`")
+
+        // 2. Autocuración de encounter_creatures (si se saltó la migración 23-24)
+        try {
+            database.execSQL("ALTER TABLE `encounter_creatures` ADD COLUMN `npcId` INTEGER DEFAULT NULL")
+        } catch (e: Exception) { /* Ignorar si ya existe */ }
+        
+        try {
+            database.execSQL("ALTER TABLE `encounter_creatures` ADD COLUMN `imagePath` TEXT DEFAULT NULL")
+        } catch (e: Exception) { /* Ignorar si ya existe */ }
+
+        // 3. Recreación de NPCs y npc_tags (para sanear estados corruptos columns={})
+        database.execSQL("DROP TABLE IF EXISTS `npc_tags`")
+        database.execSQL("DROP TABLE IF EXISTS `npcs`")
+        
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `npcs` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+                `name` TEXT NOT NULL, 
+                `description` TEXT NOT NULL, 
+                `imagePath` TEXT, 
+                `maxHp` INTEGER NOT NULL, 
+                `currentHp` INTEGER NOT NULL, 
+                `armorClass` INTEGER NOT NULL, 
+                `initiativeBonus` INTEGER NOT NULL, 
+                `notes` TEXT NOT NULL, 
+                `isMonster` INTEGER NOT NULL, 
+                `createdAt` INTEGER NOT NULL
+            )
+        """.trimIndent())
+
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `npc_tags` (
+                `npcId` INTEGER NOT NULL, 
+                `tagId` INTEGER NOT NULL, 
+                PRIMARY KEY(`npcId`, `tagId`), 
+                FOREIGN KEY(`npcId`) REFERENCES `npcs`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , 
+                FOREIGN KEY(`tagId`) REFERENCES `tags`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE 
+            )
+        """.trimIndent())
+        database.execSQL("CREATE INDEX IF NOT EXISTS `index_npc_tags_tagId` ON `npc_tags` (`tagId`)")
+
+        // 4. Tablas de Wiki
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `wiki_categories` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+                `name` TEXT NOT NULL, 
+                `iconName` TEXT NOT NULL
+            )
+        """.trimIndent())
+
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `wiki_entries` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+                `title` TEXT NOT NULL, 
+                `content` TEXT NOT NULL, 
+                `categoryId` INTEGER NOT NULL, 
+                `imagePath` TEXT, 
+                `lastUpdated` INTEGER NOT NULL, 
+                FOREIGN KEY(`categoryId`) REFERENCES `wiki_categories`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE 
+            )
+        """.trimIndent())
+        database.execSQL("CREATE INDEX IF NOT EXISTS `index_wiki_entries_categoryId` ON `wiki_entries` (`categoryId`)")
+    }
+}
+
+val MIGRATION_25_26 = object : Migration(25, 26) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE `card_stacks` ADD COLUMN `sortOrder` INTEGER NOT NULL DEFAULT 0")
+        database.execSQL("ALTER TABLE `random_tables` ADD COLUMN `sortOrder` INTEGER NOT NULL DEFAULT 0")
     }
 }

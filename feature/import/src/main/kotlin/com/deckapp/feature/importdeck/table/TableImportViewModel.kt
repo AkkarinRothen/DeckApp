@@ -14,22 +14,25 @@ import com.deckapp.core.domain.repository.SettingsRepository
 import com.deckapp.core.domain.usecase.RenderPdfPageUseCase
 import com.deckapp.core.domain.usecase.ImportTableUseCase
 import com.deckapp.core.domain.usecase.ImportResult
-import com.deckapp.core.domain.usecase.ImportSource
+import com.deckapp.core.model.TableImportSource
 import com.deckapp.core.domain.usecase.TextImportParams
 import com.deckapp.core.domain.usecase.ReadTextFromUriUseCase
 import com.deckapp.core.domain.usecase.AnalyzeTableImageUseCase
 import com.deckapp.core.domain.usecase.CsvTableParser
 import com.deckapp.core.domain.usecase.RangeParser
 import com.deckapp.core.domain.usecase.TranscribeTableWithAiUseCase
-import com.deckapp.core.domain.usecase.RecognizeTableFromImageUseCase
 import com.deckapp.core.domain.usecase.RecognizeTableStreamingUseCase
 import com.deckapp.core.model.OcrBlock
 import com.deckapp.core.model.TableEntry
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import java.util.zip.CRC32
 
 /**
  * ViewModel para la importación de tablas.
@@ -42,7 +45,6 @@ class TableImportViewModel(
     private val readTextFromUriUseCase: ReadTextFromUriUseCase,
     private val tableRepository: TableRepository,
     private val transcribeTableWithAiUseCase: TranscribeTableWithAiUseCase,
-    private val recognizeTableFromImageUseCase: RecognizeTableFromImageUseCase,
     private val recognizeTableStreamingUseCase: RecognizeTableStreamingUseCase,
     private val recentFileRepository: RecentFileRepository,
     private val fileRepository: FileRepository,
@@ -52,9 +54,11 @@ class TableImportViewModel(
     private val analyzeTableImageUseCase = AnalyzeTableImageUseCase()
     private val csvParser = CsvTableParser()
 
-    // Vision solo se auto-dispara cuando el OCR promedio baja de este umbral.
-    // Scans digitales limpios suelen dar 0.90+; fotos y escaneos borrosos bajan de 0.80.
     private val AUTO_VISION_THRESHOLD = 0.80f
+
+    private val visionMutex = Mutex()
+    private data class VisionCacheEntry(val nameDraft: String, val formulaDraft: String, val entries: List<TableEntry>)
+    private var visionCache: Pair<Long, VisionCacheEntry>? = null
 
     private val _uiState = MutableStateFlow(TableImportUiState())
     val uiState: StateFlow<TableImportUiState> = _uiState.asStateFlow()
@@ -74,13 +78,13 @@ class TableImportViewModel(
         }
     }
 
-    fun setSource(source: ImportSource) {
+    fun setSource(source: TableImportSource) {
         val mode = when (source) {
-            ImportSource.OCR_IMAGE -> ImportMode.OCR
-            ImportSource.CSV_TEXT -> ImportMode.CSV
-            ImportSource.JSON_TEXT -> ImportMode.JSON
-            ImportSource.PLAIN_TEXT -> ImportMode.PLAIN_TEXT
-            ImportSource.MARKDOWN_TABLE -> ImportMode.MARKDOWN
+            TableImportSource.OCR_IMAGE -> ImportMode.OCR
+            TableImportSource.CSV_TEXT -> ImportMode.CSV
+            TableImportSource.JSON_TEXT -> ImportMode.JSON
+            TableImportSource.PLAIN_TEXT -> ImportMode.PLAIN_TEXT
+            TableImportSource.MARKDOWN_TABLE -> ImportMode.MARKDOWN
         }
         _uiState.update { it.copy(mode = mode) }
     }
@@ -100,11 +104,13 @@ class TableImportViewModel(
     fun importTextFile(uri: Uri) {
         val mode = _uiState.value.mode
         val source = when (mode) {
-            ImportMode.CSV -> ImportSource.CSV_TEXT
-            ImportMode.JSON -> ImportSource.JSON_TEXT
-            ImportMode.PLAIN_TEXT -> ImportSource.PLAIN_TEXT
-            else -> return
+            ImportMode.CSV -> TableImportSource.CSV_TEXT
+            ImportMode.JSON -> TableImportSource.JSON_TEXT
+            ImportMode.PLAIN_TEXT -> TableImportSource.PLAIN_TEXT
+            ImportMode.MARKDOWN -> TableImportSource.MARKDOWN_TABLE
+            else -> TableImportSource.PLAIN_TEXT
         }
+
 
         viewModelScope.launch {
             _uiState.update { it.copy(isProcessing = true, selectedUri = uri) }
@@ -203,8 +209,7 @@ class TableImportViewModel(
                     isProcessing = false
                 ) }
 
-                // Auto-trigger Vision solo cuando la opción está activa Y la confianza OCR es baja.
-                // Scans digitales limpios (avg > AUTO_VISION_THRESHOLD) no necesitan Vision y ahorran cuota.
+                visionCache = null
                 if (settingsRepository.getAutoVisionEnabled() && settingsRepository.getGeminiApiKey().isNotBlank()) {
                     val avgConfidence = if (blocks.isNotEmpty()) blocks.map { it.confidence }.average().toFloat() else 1f
                     if (avgConfidence < AUTO_VISION_THRESHOLD) {
@@ -301,40 +306,87 @@ class TableImportViewModel(
     }
 
     fun recognizeWithVision() {
+        if (visionMutex.isLocked) return
         val bitmap = _uiState.value.croppedBitmap ?: return
         viewModelScope.launch {
-            _uiState.update { it.copy(
-                isVisionProcessing = true,
-                editableEntries = emptyList(),
-                step = ImportStep.MAPPING
-            ) }
-            var sortOrder = 0
-            try {
-                recognizeTableStreamingUseCase(bitmap).collect { event ->
-                    when (event) {
-                        is AiStreamEvent.Metadata -> _uiState.update { state -> state.copy(
-                            tableNameDraft = event.name.ifBlank { state.tableNameDraft },
-                            tableFormulaDraft = event.formula.ifBlank { state.tableFormulaDraft }
-                        ) }
-                        is AiStreamEvent.Entry -> {
-                            val entry = event.entry.copy(sortOrder = sortOrder++)
-                            val newEntries = _uiState.value.editableEntries + entry
-                            _uiState.update { it.copy(
-                                editableEntries = newEntries,
-                                validationResult = RangeParser.validateIntegrity(newEntries.map { it.minRoll to it.maxRoll })
+            visionMutex.withLock {
+                val crc = bitmapCrc32(bitmap)
+                val cached = visionCache
+                if (cached != null && cached.first == crc) {
+                    _uiState.update { it.copy(
+                        editableEntries = cached.second.entries,
+                        tableNameDraft = cached.second.nameDraft,
+                        tableFormulaDraft = cached.second.formulaDraft,
+                        step = ImportStep.MAPPING,
+                        isVisionProcessing = false,
+                        autoVisionMessage = null,
+                        validationResult = RangeParser.validateIntegrity(cached.second.entries.map { e -> e.minRoll to e.maxRoll })
+                    ) }
+                    return@withLock
+                }
+
+                _uiState.update { it.copy(
+                    isVisionProcessing = true,
+                    editableEntries = emptyList(),
+                    step = ImportStep.MAPPING
+                ) }
+                var sortOrder = 0
+                try {
+                    recognizeTableStreamingUseCase(bitmap, onRetryWait = { delayMs ->
+                        val seconds = ((delayMs + 999L) / 1000L).toInt()
+                        for (tick in seconds downTo 1) {
+                            _uiState.update { it.copy(retryCountdown = tick) }
+                            delay(1_000L)
+                        }
+                        _uiState.update { it.copy(retryCountdown = null) }
+                    }).collect { event ->
+                        when (event) {
+                            is AiStreamEvent.Metadata -> _uiState.update { state -> state.copy(
+                                tableNameDraft = event.name.ifBlank { state.tableNameDraft },
+                                tableFormulaDraft = event.formula.ifBlank { state.tableFormulaDraft }
                             ) }
+                            is AiStreamEvent.Entry -> {
+                                val entry = event.entry.copy(sortOrder = sortOrder++)
+                                val newEntries = _uiState.value.editableEntries + entry
+                                _uiState.update { it.copy(
+                                    editableEntries = newEntries,
+                                    validationResult = RangeParser.validateIntegrity(newEntries.map { it.minRoll to it.maxRoll })
+                                ) }
+                            }
                         }
                     }
+                    val finalState = _uiState.value
+                    visionCache = crc to VisionCacheEntry(
+                        nameDraft = finalState.tableNameDraft,
+                        formulaDraft = finalState.tableFormulaDraft,
+                        entries = finalState.editableEntries
+                    )
+                    _uiState.update { it.copy(isVisionProcessing = false, retryCountdown = null, autoVisionMessage = null) }
+                } catch (e: Exception) {
+                    _uiState.update { it.copy(
+                        isVisionProcessing = false,
+                        retryCountdown = null,
+                        autoVisionMessage = null,
+                        errorMessage = e.message ?: "Error desconocido con Gemini Vision"
+                    ) }
                 }
-                _uiState.update { it.copy(isVisionProcessing = false, autoVisionMessage = null) }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(
-                    isVisionProcessing = false,
-                    autoVisionMessage = null,
-                    errorMessage = e.message ?: "Error desconocido con Gemini Vision"
-                ) }
             }
         }
+    }
+
+    private fun bitmapCrc32(bitmap: Bitmap): Long {
+        val crc = CRC32()
+        val pixels = IntArray(bitmap.width * bitmap.height)
+        bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+        val buf = ByteArray(pixels.size * 4)
+        pixels.forEachIndexed { i, px ->
+            buf[i * 4] = (px shr 24).toByte()
+            buf[i * 4 + 1] = (px shr 16).toByte()
+            buf[i * 4 + 2] = (px shr 8).toByte()
+            buf[i * 4 + 3] = px.toByte()
+        }
+        crc.update(buf)
+        return crc.value
     }
 
     private fun updatedTablesWithResult(result: ImportResult): List<ImportResult> {
@@ -422,6 +474,7 @@ class TableImportViewModel(
     }
 
     fun reset() {
+        visionCache = null
         _uiState.value = TableImportUiState()
         loadRecents()
     }
@@ -435,7 +488,6 @@ class TableImportViewModel(
         private val readTextFromUriUseCase: ReadTextFromUriUseCase,
         private val tableRepository: TableRepository,
         private val transcribeTableWithAiUseCase: TranscribeTableWithAiUseCase,
-        private val recognizeTableFromImageUseCase: RecognizeTableFromImageUseCase,
         private val recognizeTableStreamingUseCase: RecognizeTableStreamingUseCase,
         private val recentFileRepository: RecentFileRepository,
         private val fileRepository: FileRepository,
@@ -449,7 +501,6 @@ class TableImportViewModel(
                 readTextFromUriUseCase,
                 tableRepository,
                 transcribeTableWithAiUseCase,
-                recognizeTableFromImageUseCase,
                 recognizeTableStreamingUseCase,
                 recentFileRepository,
                 fileRepository,

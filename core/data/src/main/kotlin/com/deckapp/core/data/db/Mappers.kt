@@ -23,6 +23,7 @@ fun CardStackEntity.toDomain(tags: List<Tag> = emptyList()) = CardStack(
     displayCount = displayCount,
     aspectRatio = runCatching { CardAspectRatio.valueOf(aspectRatio) }.getOrDefault(CardAspectRatio.STANDARD),
     isArchived = isArchived,
+    sortOrder = sortOrder,
     tags = tags,
     createdAt = createdAt
 )
@@ -41,6 +42,7 @@ fun CardStack.toEntity() = CardStackEntity(
     displayCount = displayCount,
     aspectRatio = aspectRatio.name,
     isArchived = isArchived,
+    sortOrder = sortOrder,
     createdAt = createdAt
 )
 
@@ -119,7 +121,9 @@ fun Tag.toEntity() = TagEntity(id = id, name = name, color = color)
 fun SessionEntity.toDomain() = Session(
     id = id,
     name = name,
-    isActive = isActive,
+    status = SessionStatus.valueOf(status),
+    scheduledDate = scheduledDate,
+    summary = summary,
     showCardTitles = showCardTitles,
     dmNotes = dmNotes,
     createdAt = createdAt,
@@ -129,7 +133,9 @@ fun SessionEntity.toDomain() = Session(
 fun Session.toEntity() = SessionEntity(
     id = id,
     name = name,
-    isActive = isActive,
+    status = status.name,
+    scheduledDate = scheduledDate,
+    summary = summary,
     showCardTitles = showCardTitles,
     dmNotes = dmNotes,
     createdAt = createdAt,
@@ -173,6 +179,7 @@ fun RandomTableEntity.toDomain(
         isNoRepeat = isNoRepeat,
         isPinned = isPinned,
         isBuiltIn = isBuiltIn,
+        sortOrder = sortOrder,
         createdAt = createdAt
     )
 
@@ -186,6 +193,7 @@ fun com.deckapp.core.model.RandomTable.toEntity() = RandomTableEntity(
     isNoRepeat = isNoRepeat,
     isPinned = isPinned,
     isBuiltIn = isBuiltIn,
+    sortOrder = sortOrder,
     createdAt = createdAt
 )
 
@@ -311,7 +319,9 @@ fun EncounterCreatureEntity.toDomain(): EncounterCreature {
         initiativeRoll = initiativeRoll,
         conditions = conditions,
         notes = notes,
-        sortOrder = sortOrder
+        sortOrder = sortOrder,
+        imagePath = imagePath,
+        npcId = npcId
     )
 }
 
@@ -326,7 +336,9 @@ fun EncounterCreature.toEntity() = EncounterCreatureEntity(
     initiativeRoll = initiativeRoll,
     conditionsJson = json.encodeToString(conditions),
     notes = notes,
-    sortOrder = sortOrder
+    sortOrder = sortOrder,
+    npcId = npcId,
+    imagePath = imagePath
 )
 
 // --- Collections ---
@@ -351,3 +363,67 @@ fun DeckCollection.toEntity() = CollectionEntity(
 )
 
 fun CollectionWithCount.toDomain() = collection.toDomain(resourceCount = resourceCount)
+
+// --- NPCs ---
+
+fun NpcEntity.toDomain(tags: List<Tag> = emptyList()) = Npc(
+    id = id,
+    name = name,
+    description = description,
+    imagePath = imagePath,
+    maxHp = maxHp,
+    currentHp = currentHp,
+    armorClass = armorClass,
+    initiativeBonus = initiativeBonus,
+    notes = notes,
+    isMonster = isMonster,
+    tags = tags,
+    createdAt = createdAt
+)
+
+fun Npc.toEntity() = NpcEntity(
+    id = id,
+    name = name,
+    description = description,
+    imagePath = imagePath,
+    maxHp = maxHp,
+    currentHp = currentHp,
+    armorClass = armorClass,
+    initiativeBonus = initiativeBonus,
+    notes = notes,
+    isMonster = isMonster,
+    createdAt = createdAt
+)
+
+// --- World Wiki ---
+
+fun WikiCategoryEntity.toDomain(count: Int = 0) = WikiCategory(
+    id = id,
+    name = name,
+    iconName = iconName,
+    entryCount = count
+)
+
+fun WikiCategory.toEntity() = WikiCategoryEntity(
+    id = id,
+    name = name,
+    iconName = iconName
+)
+
+fun WikiEntryEntity.toDomain() = WikiEntry(
+    id = id,
+    title = title,
+    content = content,
+    categoryId = categoryId,
+    imagePath = imagePath,
+    lastUpdated = lastUpdated
+)
+
+fun WikiEntry.toEntity() = WikiEntryEntity(
+    id = id,
+    title = title,
+    content = content,
+    categoryId = categoryId,
+    imagePath = imagePath,
+    lastUpdated = lastUpdated
+)

@@ -30,4 +30,5 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
     kapt(libs.hilt.android.compiler)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.reorderable)
 }

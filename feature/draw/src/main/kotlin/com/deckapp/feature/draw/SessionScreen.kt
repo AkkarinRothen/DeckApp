@@ -9,6 +9,7 @@ import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -37,10 +38,14 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Style
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ElectricBolt
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -49,6 +54,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -59,6 +65,7 @@ import com.deckapp.core.model.CardAspectRatio
 import com.deckapp.core.model.SessionDeckRef
 import com.deckapp.core.ui.components.CardThumbnail
 import com.deckapp.core.ui.components.MarkdownText
+import com.deckapp.core.ui.components.MarkdownToolbar
 import com.deckapp.feature.draw.components.ResourceManagerDialog
 import com.deckapp.feature.encounters.CombatTab
 import com.deckapp.feature.tables.TablesTab
@@ -425,16 +432,20 @@ fun SessionScreen(
                         )
                         3 -> NotesTab(
                             notes = uiState.dmNotes,
+                            isSaving = uiState.isSavingNotes,
                             onNotesChange = { viewModel.updateNotes(it) }
                         )
                         4 -> uiState.activeEncounter?.let { encounter ->
                             CombatTab(
                                 encounter = encounter,
+                                players = uiState.playerParticipants,
                                 log = uiState.combatLog,
                                 onApplyDamage = { id, delta -> viewModel.applyDamage(id, delta) },
                                 onNextTurn = { viewModel.nextTurn() },
                                 onToggleCondition = { id, cond -> viewModel.toggleCondition(id, cond) },
-                                onEndEncounter = { viewModel.endEncounter() }
+                                onEndEncounter = { viewModel.endEncounter() },
+                                onAddPlayer = { name, init -> viewModel.addPlayerParticipant(name, init) },
+                                onRemovePlayer = { id -> viewModel.removePlayerParticipant(id) }
                             )
                         } ?: SessionTabPlaceholder(label = "Combate")
                         else -> SessionTabPlaceholder(label = "Combate")
@@ -876,37 +887,78 @@ private fun CompactCardItem(
 @Composable
 private fun NotesTab(
     notes: String,
+    isSaving: Boolean,
     onNotesChange: (String) -> Unit
 ) {
     var isPreview by remember { mutableStateOf(false) }
-    var text by remember { mutableStateOf(notes) }
+    
+    // Usamos TextFieldValue para manejar selección y cursor (necesario para el toolbar)
+    var textValue by remember { 
+        mutableStateOf(androidx.compose.ui.text.input.TextFieldValue(notes)) 
+    }
     
     // Sync local state with domain state (when coming from VM)
     LaunchedEffect(notes) {
-        if (text != notes) text = notes
+        if (textValue.text != notes) {
+            textValue = textValue.copy(text = notes)
+        }
     }
 
     // Auto-save debounce
-    LaunchedEffect(text) {
-        if (text == notes) return@LaunchedEffect
-        delay(1000)
-        onNotesChange(text)
+    LaunchedEffect(textValue.text) {
+        if (textValue.text == notes) return@LaunchedEffect
+        delay(800)
+        onNotesChange(textValue.text)
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
+        // ── Header con controles ─────────────────────────────────────
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "Notas de la sesión",
-                style = MaterialTheme.typography.titleMedium
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "Notas de la sesión",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(Modifier.width(8.dp))
+                // Indicador de guardado
+                AnimatedVisibility(
+                    visible = isSaving,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(12.dp),
+                            strokeWidth = 1.5.dp,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            "Guardando…",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                }
+                if (!isSaving && textValue.text.isNotEmpty()) {
+                    Icon(
+                        Icons.Default.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                    )
+                }
+            }
+
             TextButton(
                 onClick = { isPreview = !isPreview },
                 contentPadding = PaddingValues(horizontal = 12.dp)
@@ -921,44 +973,61 @@ private fun NotesTab(
             }
         }
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(4.dp))
 
+        // ── Editor / Preview ─────────────────────────────────────────
         Surface(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),
             color = MaterialTheme.colorScheme.surfaceContainerLow,
-            shape = RoundedCornerShape(8.dp),
-            contentColor = MaterialTheme.colorScheme.onSurface
+            shape = RoundedCornerShape(12.dp),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            border = BorderStroke(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+            )
         ) {
-            if (isPreview) {
-                Box(Modifier.fillMaxSize().padding(12.dp)) {
-                    if (text.isBlank()) {
-                        Text(
-                            "Nada para mostrar",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    } else {
-                        MarkdownText(
-                            markdown = text,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
+            Column(Modifier.fillMaxSize()) {
+                if (isPreview) {
+                    Box(Modifier.weight(1f).fillMaxSize().padding(16.dp)) {
+                        if (textValue.text.isBlank()) {
+                            Text(
+                                "Nada para mostrar. Pulsa 'Editar' para empezar.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        } else {
+                            MarkdownText(
+                                markdown = textValue.text,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
                     }
-                }
-            } else {
-                OutlinedTextField(
-                    value = text,
-                    onValueChange = { text = it },
-                    placeholder = { Text("Escribe tus notas aquí...") },
-                    modifier = Modifier.fillMaxSize(),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
+                } else {
+                    // Toolbar solo visible en modo edición y cuando hay foco (implícito en el diseño)
+                    MarkdownToolbar(
+                        value = textValue,
+                        onValueChange = { textValue = it },
+                        modifier = Modifier.padding(bottom = 2.dp)
                     )
-                )
+                    
+                    OutlinedTextField(
+                        value = textValue,
+                        onValueChange = { textValue = it },
+                        placeholder = { Text("Utiliza Markdown para dar formato…") },
+                        modifier = Modifier.weight(1f).fillMaxSize(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color.Transparent,
+                            unfocusedBorderColor = Color.Transparent,
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent
+                        ),
+                        textStyle = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
         }
     }
@@ -974,25 +1043,52 @@ private fun QuickNoteDialog(
     onDismiss: () -> Unit
 ) {
     var text by remember { mutableStateOf("") }
+    val focusRequester = remember { androidx.compose.ui.focus.FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Nota rápida") },
+        title = { 
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.ElectricBolt, null, tint = MaterialTheme.colorScheme.primary)
+                Spacer(Modifier.width(8.dp))
+                Text("Nota rápida") 
+            }
+        },
         text = {
-            OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
-                placeholder = { Text("Escribe una nota…") },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { if (text.isNotBlank()) onConfirm(text) }),
-                modifier = Modifier.fillMaxWidth()
-            )
+            Column {
+                Text(
+                    "Se añadirá automáticamente a tus notas con un timestamp.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    placeholder = { Text("¿Qué acaba de pasar?") },
+                    singleLine = false,
+                    maxLines = 4,
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Done,
+                        capitalization = androidx.compose.ui.text.input.KeyboardCapitalization.Sentences
+                    ),
+                    keyboardActions = KeyboardActions(onDone = { if (text.isNotBlank()) onConfirm(text) }),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
+                    shape = RoundedCornerShape(12.dp)
+                )
+            }
         },
         confirmButton = {
-            TextButton(
+            Button(
                 onClick = { onConfirm(text) },
-                enabled = text.isNotBlank()
+                enabled = text.isNotBlank(),
+                shape = RoundedCornerShape(8.dp)
             ) { Text("Añadir") }
         },
         dismissButton = {

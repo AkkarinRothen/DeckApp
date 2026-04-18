@@ -43,6 +43,7 @@ interface CollectionDao {
     @Query("""
         SELECT * FROM card_stacks 
         WHERE id IN (SELECT resourceId FROM collection_resource_refs WHERE collectionId = :collectionId AND resourceType = 'DECK')
+        ORDER BY sortOrder ASC, createdAt DESC
     """)
     fun getDecksInCollection(collectionId: Long): Flow<List<CardStackEntity>>
 
@@ -50,6 +51,7 @@ interface CollectionDao {
     @Query("""
         SELECT * FROM random_tables 
         WHERE id IN (SELECT resourceId FROM collection_resource_refs WHERE collectionId = :collectionId AND resourceType = 'TABLE')
+        ORDER BY sortOrder ASC, name ASC
     """)
     fun getTablesInCollection(collectionId: Long): Flow<List<RandomTableEntity>>
 }

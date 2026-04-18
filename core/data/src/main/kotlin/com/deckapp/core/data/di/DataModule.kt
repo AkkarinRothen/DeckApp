@@ -7,6 +7,7 @@ import com.deckapp.core.data.db.MIGRATION_6_7
 import com.deckapp.core.data.db.MIGRATION_7_8
 import com.deckapp.core.data.db.MIGRATION_8_9
 import com.deckapp.core.data.db.MIGRATION_9_10
+import com.deckapp.core.data.db.MIGRATION_10_11
 import com.deckapp.core.data.db.MIGRATION_11_12
 import com.deckapp.core.data.db.MIGRATION_12_13
 import com.deckapp.core.data.db.MIGRATION_13_14
@@ -16,18 +17,16 @@ import com.deckapp.core.data.db.MIGRATION_16_17
 import com.deckapp.core.data.db.MIGRATION_17_18
 import com.deckapp.core.data.db.MIGRATION_18_19
 import com.deckapp.core.data.db.MIGRATION_19_20
-import com.deckapp.core.data.repository.CardRepositoryImpl
-import com.deckapp.core.data.repository.CollectionRepositoryImpl
-import com.deckapp.core.data.repository.RecentFileRepositoryImpl
-import com.deckapp.core.data.repository.EncounterRepositoryImpl
-import com.deckapp.core.data.repository.FileRepositoryImpl
-import com.deckapp.core.data.repository.OcrRepositoryImpl
-import com.deckapp.core.data.repository.SessionRepositoryImpl
-import com.deckapp.core.data.repository.TableRepositoryImpl
-import com.deckapp.core.data.repository.GeminiAiRepository
-import com.deckapp.core.data.repository.SettingsRepositoryImpl
+import com.deckapp.core.data.db.MIGRATION_20_21
+import com.deckapp.core.data.db.MIGRATION_21_22
+import com.deckapp.core.data.db.MIGRATION_22_23
+import com.deckapp.core.data.db.MIGRATION_23_24
+import com.deckapp.core.data.db.MIGRATION_24_25
+import com.deckapp.core.data.repository.*
+import com.deckapp.core.data.repository.WikiRepositoryImpl
 import com.deckapp.core.domain.repository.CardRepository
 import com.deckapp.core.domain.repository.CollectionRepository
+import com.deckapp.core.domain.repository.NpcRepository
 import com.deckapp.core.domain.repository.RecentFileRepository
 import com.deckapp.core.domain.repository.EncounterRepository
 import com.deckapp.core.domain.repository.FileRepository
@@ -36,6 +35,7 @@ import com.deckapp.core.domain.repository.SessionRepository
 import com.deckapp.core.domain.repository.TableRepository
 import com.deckapp.core.domain.repository.AiTableRepository
 import com.deckapp.core.domain.repository.SettingsRepository
+import com.deckapp.core.domain.repository.WikiRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -71,7 +71,8 @@ object DatabaseModule {
                 MIGRATION_20_21,
                 MIGRATION_21_22,
                 MIGRATION_22_23,
-                MIGRATION_23_24
+                MIGRATION_23_24,
+                MIGRATION_24_25
             )
             .fallbackToDestructiveMigrationFrom(1, 2, 3, 4, 5)
             .build()
@@ -90,11 +91,18 @@ object DatabaseModule {
     @Provides fun provideRecentFileDao(db: DeckAppDatabase) = db.recentFileDao()
     @Provides fun provideSearchDao(db: DeckAppDatabase) = db.searchDao()
     @Provides fun provideCollectionDao(db: DeckAppDatabase) = db.collectionDao()
+    @Provides fun provideNpcDao(db: DeckAppDatabase) = db.npcDao()
+    @Provides fun provideWikiDao(db: DeckAppDatabase) = db.wikiDao()
+    @Provides fun provideBackupDao(db: DeckAppDatabase) = db.backupDao()
 }
 
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindBackupRepository(impl: com.deckapp.core.data.repository.backup.BackupRepositoryImpl): com.deckapp.core.domain.repository.backup.BackupRepository
 
     @Binds
     @Singleton
@@ -131,4 +139,12 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindSettingsRepository(impl: SettingsRepositoryImpl): SettingsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindNpcRepository(impl: NpcRepositoryImpl): NpcRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindWikiRepository(impl: WikiRepositoryImpl): WikiRepository
 }

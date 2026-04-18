@@ -108,13 +108,6 @@ object RangeParser {
 
     /**
      * Infiere la fórmula de dado más probable a partir del rango mínimo y máximo detectado.
-     *
-     * Detecta combinaciones de dados habituales en TTRPG:
-     * - min=2, max=12  → "2d6"   (tabla de Encuentros D&D clásica)
-     * - min=3, max=18  → "3d6"   (atributos de personaje)
-     * - min=2, max=8   → "2d4"
-     * - min=2, max=20  → "2d10"
-     * Después aplica la heurística estándar de dado único (1d4, 1d6, …, 1d100).
      */
     fun inferRollFormula(minValue: Int, maxValue: Int): String {
         val multiDie = mapOf(

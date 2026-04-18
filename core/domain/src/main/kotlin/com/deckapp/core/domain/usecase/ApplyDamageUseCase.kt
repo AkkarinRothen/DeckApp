@@ -9,7 +9,7 @@ import javax.inject.Inject
 /**
  * Aplica daño o curación a una criatura.
  * Clampea el resultado entre 0 y maxHp.
- * Si HP llega a 0, añade automáticamente la condición UNCONSCIOUS.
+ * Automatiza condiciones de inconsciencia y narrativa del log.
  */
 class ApplyDamageUseCase @Inject constructor(
     private val encounterRepository: EncounterRepository
@@ -17,15 +17,20 @@ class ApplyDamageUseCase @Inject constructor(
     suspend operator fun invoke(creatureId: Long, delta: Int) {
         val creature = encounterRepository.getCreatureById(creatureId) ?: return
         
-        val newHp = (creature.currentHp + delta).coerceIn(0, creature.maxHp)
+        val oldHp = creature.currentHp
+        val newHp = (oldHp + delta).coerceIn(0, creature.maxHp)
         
-        val newConditions = if (newHp == 0) {
-            creature.conditions + Condition.UNCONSCIOUS
-        } else if (creature.currentHp == 0 && newHp > 0) {
-            // Si resucita/cura desde 0, quitamos inconsciente
-            creature.conditions - Condition.UNCONSCIOUS
-        } else {
-            creature.conditions
+        val addedConditions = mutableListOf<String>()
+        val removedConditions = mutableListOf<String>()
+        var newConditions = creature.conditions
+
+        // Lógica automática de Inconsciencia
+        if (newHp == 0 && oldHp > 0) {
+            newConditions = newConditions + Condition.UNCONSCIOUS
+            addedConditions.add("Inconsciente")
+        } else if (newHp > 0 && oldHp == 0 && newConditions.contains(Condition.UNCONSCIOUS)) {
+            newConditions = newConditions - Condition.UNCONSCIOUS
+            removedConditions.add("Inconsciente")
         }
 
         encounterRepository.updateCreature(
@@ -35,17 +40,18 @@ class ApplyDamageUseCase @Inject constructor(
             )
         )
 
-        // Registrar en el log
-        val message = if (delta < 0) {
-            "${creature.name} recibe ${-delta} de daño ($newHp/${creature.maxHp})"
-        } else {
-            "${creature.name} recupera $delta de HP ($newHp/${creature.maxHp})"
-        }
+        // Registro enriquecido en el log
+        val action = if (delta < 0) "recibe ${-delta} de daño" else "recupera $delta de vida"
+        val hpStatus = "($newHp/${creature.maxHp})"
+        
+        var logMessage = "${creature.name} $action $hpStatus."
+        if (addedConditions.isNotEmpty()) logMessage += " ¡Ha caído ${addedConditions.joinToString()}!"
+        if (removedConditions.isNotEmpty()) logMessage += " Ya no está ${removedConditions.joinToString()}."
         
         encounterRepository.recordLog(
             CombatLogEntry(
                 encounterId = creature.encounterId,
-                message = message,
+                message = logMessage,
                 type = if (delta < 0) CombatLogType.DAMAGE else CombatLogType.HEAL
             )
         )

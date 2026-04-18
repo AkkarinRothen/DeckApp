@@ -15,7 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.deckapp.core.domain.usecase.ImportSource
+import com.deckapp.core.model.TableImportSource
 import com.deckapp.feature.importdeck.table.components.SourceSelectionView
 import com.deckapp.feature.importdeck.table.components.PdfPreviewView
 import com.deckapp.feature.importdeck.table.components.TableCropView
@@ -36,7 +36,6 @@ import com.deckapp.core.domain.usecase.RenderPdfPageUseCase
 import com.deckapp.core.domain.usecase.ImportTableUseCase
 import com.deckapp.core.domain.usecase.ReadTextFromUriUseCase
 import com.deckapp.core.domain.usecase.TranscribeTableWithAiUseCase
-import com.deckapp.core.domain.usecase.RecognizeTableFromImageUseCase
 import com.deckapp.core.domain.usecase.RecognizeTableStreamingUseCase
 
 @EntryPoint
@@ -46,7 +45,6 @@ interface TableImportEntryPoint {
     fun importTableUseCase(): ImportTableUseCase
     fun readTextFromUriUseCase(): ReadTextFromUriUseCase
     fun transcribeTableWithAiUseCase(): TranscribeTableWithAiUseCase
-    fun recognizeTableFromImageUseCase(): RecognizeTableFromImageUseCase
     fun recognizeTableStreamingUseCase(): RecognizeTableStreamingUseCase
     fun tableRepository(): TableRepository
     fun recentFileRepository(): RecentFileRepository
@@ -70,7 +68,6 @@ fun TableImportScreen(
             entryPoint.readTextFromUriUseCase(),
             entryPoint.tableRepository(),
             entryPoint.transcribeTableWithAiUseCase(),
-            entryPoint.recognizeTableFromImageUseCase(),
             entryPoint.recognizeTableStreamingUseCase(),
             entryPoint.recentFileRepository(),
             entryPoint.fileRepository(),
@@ -168,15 +165,15 @@ fun TableImportScreen(
                     ImportStep.SOURCE_SELECTION -> {
                         SourceSelectionView(
                             onSelect = { source ->
-                                if (source == ImportSource.OCR_IMAGE) {
+                                if (source == TableImportSource.OCR_IMAGE) {
                                     showSourceOptions = true
                                 } else {
                                     viewModel.setSource(source)
                                     when (source) {
-                                        ImportSource.CSV_TEXT -> textFilePickerLauncher.launch(arrayOf("text/comma-separated-values", "text/csv"))
-                                        ImportSource.JSON_TEXT -> textFilePickerLauncher.launch(arrayOf("application/json"))
-                                        ImportSource.PLAIN_TEXT -> textFilePickerLauncher.launch(arrayOf("text/plain", "text/markdown"))
-                                        ImportSource.MARKDOWN_TABLE -> textFilePickerLauncher.launch(arrayOf("text/markdown", "text/x-markdown"))
+                                        TableImportSource.CSV_TEXT -> textFilePickerLauncher.launch(arrayOf("text/comma-separated-values", "text/csv"))
+                                        TableImportSource.JSON_TEXT -> textFilePickerLauncher.launch(arrayOf("application/json"))
+                                        TableImportSource.PLAIN_TEXT -> textFilePickerLauncher.launch(arrayOf("text/plain", "text/markdown"))
+                                        TableImportSource.MARKDOWN_TABLE -> textFilePickerLauncher.launch(arrayOf("text/markdown", "text/x-markdown"))
                                         else -> {}
                                     }
                                 }
@@ -306,6 +303,33 @@ fun TableImportScreen(
                                 showSourceOptions = false
                                 browsedLauncher.launch(null)
                             }
+                        )
+                    }
+                }
+            }
+
+            if (uiState.retryCountdown != null) {
+                Surface(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                    shape = MaterialTheme.shapes.medium
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Text(
+                            "Límite de cuota alcanzado. Reintentando en ${uiState.retryCountdown}s...",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
                         )
                     }
                 }

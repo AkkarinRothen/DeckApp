@@ -1,5 +1,7 @@
 package com.deckapp.feature.encounters
 
+
+
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -20,27 +22,50 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.deckapp.core.model.CombatLogEntry
 import com.deckapp.core.model.Condition
 import com.deckapp.core.model.Encounter
 import com.deckapp.core.model.EncounterCreature
+import com.deckapp.core.model.PlayerInitiativeParticipant
+import coil.compose.AsyncImage
 import java.util.Locale
 
 @Composable
 fun CombatTab(
     encounter: Encounter,
+    players: List<PlayerInitiativeParticipant> = emptyList(),
     log: List<CombatLogEntry> = emptyList(),
     onApplyDamage: (Long, Int) -> Unit,
     onNextTurn: () -> Unit,
     onToggleCondition: (Long, Condition) -> Unit,
-    onEndEncounter: () -> Unit
+    onEndEncounter: () -> Unit,
+    onAddPlayer: (String, Int) -> Unit,
+    onRemovePlayer: (String) -> Unit
 ) {
-    val sortedCreatures = remember(encounter.creatures) {
-        encounter.creatures.sortedByDescending { it.initiativeTotal ?: 0 }
+    // Unificar criaturas y jugadores en una sola lista para la iniciativa
+    val unifiedList = remember(encounter.creatures, players) {
+        val list = mutableListOf<UnifiedParticipant>()
+        encounter.creatures.forEach { creature ->
+            list.add(UnifiedParticipant.Creature(creature))
+        }
+        players.forEach { player ->
+            list.add(UnifiedParticipant.Player(player))
+        }
+
+        // Ordenamos prioritariamente por sortOrder (NPCs) e iniciativa (PJs)
+        // El objetivo es que coincida con la lógica de NextTurnUseCase.
+        list.sortedWith(
+            compareBy<UnifiedParticipant> { 
+                if (it is UnifiedParticipant.Creature) it.data.sortOrder else -1 
+            }.thenByDescending { it.initiative }
+        )
     }
+
     
     var showLog by remember { mutableStateOf(false) }
     var showSummaryDialog by remember { mutableStateOf(false) }
+    var showAddPlayerDialog by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         // --- Header de Combate ---
@@ -67,6 +92,9 @@ fun CombatTab(
                 }
                 
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = { showAddPlayerDialog = true }) {
+                        Icon(Icons.Default.PersonAdd, contentDescription = "Añadir Jugador", tint = MaterialTheme.colorScheme.primary)
+                    }
                     IconButton(onClick = { showLog = true }) {
                         Icon(Icons.Default.History, contentDescription = "Historial", tint = MaterialTheme.colorScheme.primary)
                     }
@@ -90,19 +118,43 @@ fun CombatTab(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(sortedCreatures, key = { it.id }) { creature ->
-                val isActive = sortedCreatures.indexOf(creature) == encounter.currentTurnIndex
-                CombatCreatureItem(
-                    creature = creature,
-                    isActive = isActive,
-                    onApplyDamage = { onApplyDamage(creature.id, it) },
-                    onToggleCondition = { onToggleCondition(creature.id, it) }
-                )
+            items(unifiedList, key = { it.stableId }) { participant ->
+                val isActive = unifiedList.indexOf(participant) == encounter.currentTurnIndex
+                
+                when (participant) {
+                    is UnifiedParticipant.Creature -> {
+                        CombatCreatureItem(
+                            creature = participant.data,
+                            isActive = isActive,
+                            onApplyDamage = { onApplyDamage(participant.data.id, it) },
+                            onToggleCondition = { onToggleCondition(participant.data.id, it) },
+                            modifier = Modifier.animateItem()
+                        )
+                    }
+                    is UnifiedParticipant.Player -> {
+                        CombatPlayerItem(
+                            player = participant.data,
+                            isActive = isActive,
+                            onRemove = { onRemovePlayer(participant.data.id) },
+                            modifier = Modifier.animateItem()
+                        )
+                    }
+                }
             }
             
             item {
                 Spacer(Modifier.height(80.dp))
             }
+        }
+
+        if (showAddPlayerDialog) {
+            AddPlayerDialog(
+                onConfirm = { name, init -> 
+                    onAddPlayer(name, init)
+                    showAddPlayerDialog = false
+                },
+                onDismiss = { showAddPlayerDialog = false }
+            )
         }
 
         if (showLog) {
@@ -127,7 +179,8 @@ private fun CombatCreatureItem(
     creature: EncounterCreature,
     isActive: Boolean,
     onApplyDamage: (Int) -> Unit,
-    onToggleCondition: (Condition) -> Unit
+    onToggleCondition: (Condition) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val hpPercentage = creature.currentHp.toFloat() / creature.maxHp.coerceAtLeast(1)
     val hpColor = when {
@@ -150,30 +203,59 @@ private fun CombatCreatureItem(
             androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFF44336).copy(alpha = 0.5f))
         } else null,
         color = if (isActive) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface,
-        modifier = Modifier.fillMaxWidth().graphicsLayer {
+        modifier = modifier.fillMaxWidth().graphicsLayer {
             scaleX = scale
             scaleY = scale
         }
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                // Indicador de Iniciativa
-                Surface(
-                    shape = CircleShape,
-                    color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-                    modifier = Modifier.size(32.dp)
+                // Indicador de Iniciativa / Avatar
+                Box(
+                    modifier = Modifier.size(40.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = (creature.initiativeTotal ?: "—").toString(),
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isActive) {
-                                MaterialTheme.colorScheme.onPrimary
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            }
+                    if (creature.imagePath != null) {
+                        AsyncImage(
+                            model = creature.imagePath,
+                            contentDescription = null,
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize().clip(CircleShape)
                         )
+                    } else {
+                        Surface(
+                            shape = CircleShape,
+                            color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text(
+                                    text = (creature.initiativeTotal ?: "—").toString(),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isActive) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                    
+                    // Badge de iniciativa si hay avatar
+                    if (creature.imagePath != null) {
+                        Surface(
+                            shape = CircleShape,
+                            color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(20.dp).align(Alignment.BottomEnd),
+                            shadowElevation = 2.dp
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text(
+                                    text = (creature.initiativeTotal ?: "—").toString(),
+                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                                    fontWeight = FontWeight.Black,
+                                    color = Color.White
+                                )
+                            }
+                        }
                     }
                 }
                 
@@ -183,13 +265,31 @@ private fun CombatCreatureItem(
                     Text(
                         text = creature.name,
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal
+                        fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
+                        color = if (isBloodied) Color(0xFFF44336) else Color.Unspecified
                     )
-                    Text(
-                        text = "AC ${creature.armorClass}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "AC ${creature.armorClass}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        if (isBloodied) {
+                            Spacer(Modifier.width(8.dp))
+                            Surface(
+                                color = Color(0xFFF44336),
+                                shape = RoundedCornerShape(4.dp),
+                                modifier = Modifier.height(14.dp)
+                            ) {
+                                Text(
+                                    text = "BLOODIED",
+                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                                    color = Color.White,
+                                    modifier = Modifier.padding(horizontal = 4.dp)
+                                )
+                            }
+                        }
+                    }
                 }
 
                 Column(horizontalAlignment = Alignment.End) {
@@ -376,3 +476,150 @@ private fun CombatSummaryDialog(
         }
     )
 }
+
+// --- Player Item ---
+
+@Composable
+private fun CombatPlayerItem(
+    player: PlayerInitiativeParticipant,
+    isActive: Boolean,
+    onRemove: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val scale by animateFloatAsState(if (isActive) 1.02f else 1f, label = "scale")
+
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        tonalElevation = if (isActive) 8.dp else 4.dp,
+        border = if (isActive) {
+            androidx.compose.foundation.BorderStroke(2.dp, MaterialTheme.colorScheme.tertiary)
+        } else null,
+        color = if (isActive) MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f) else MaterialTheme.colorScheme.surface,
+        modifier = modifier.fillMaxWidth().graphicsLayer {
+            scaleX = scale
+            scaleY = scale
+        }
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Iniciativa
+            Surface(
+                shape = CircleShape,
+                color = if (isActive) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier.size(32.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = player.initiativeTotal.toString(),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isActive) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            
+            Spacer(Modifier.width(12.dp))
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.Person, 
+                        contentDescription = null, 
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.tertiary
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = player.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Text(
+                    text = "Jugador",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            IconButton(onClick = onRemove) {
+                Icon(Icons.Default.Close, contentDescription = "Quitar", tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+            }
+        }
+    }
+}
+
+// --- Add Player Dialog ---
+
+@Composable
+private fun AddPlayerDialog(
+    onConfirm: (String, Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    var initiative by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Añadir Jugador a Iniciativa") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Nombre del Jugador") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = initiative,
+                    onValueChange = { if (it.all { char -> char.isDigit() }) initiative = it },
+                    label = { Text("Iniciativa Total") },
+                    singleLine = true,
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                        keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { 
+                    if (name.isNotBlank() && initiative.isNotBlank()) {
+                        onConfirm(name, initiative.toInt())
+                    }
+                },
+                enabled = name.isNotBlank() && initiative.isNotBlank()
+            ) {
+                Text("AÑADIR")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("CANCELAR")
+            }
+        }
+    )
+}
+
+// --- Unified Participant Helper ---
+
+sealed class UnifiedParticipant {
+    abstract val initiative: Int
+    abstract val stableId: String
+
+    data class Creature(val data: EncounterCreature) : UnifiedParticipant() {
+        override val initiative: Int = data.initiativeTotal ?: 0
+        override val stableId: String = "creature_${data.id}"
+    }
+
+    data class Player(val data: PlayerInitiativeParticipant) : UnifiedParticipant() {
+        override val initiative: Int = data.initiativeTotal
+        override val stableId: String = "player_${data.id}"
+    }
+}
+
+

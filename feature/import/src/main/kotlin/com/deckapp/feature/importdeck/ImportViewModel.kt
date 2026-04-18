@@ -6,23 +6,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.deckapp.core.domain.repository.FileRepository
 import com.deckapp.core.domain.usecase.ImportDeckUseCase
-import com.deckapp.core.model.CardContentMode
-import com.deckapp.core.model.StackType
+import com.deckapp.core.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-enum class DeckImportSource { FOLDER, PDF, ZIP }
-
-enum class PdfLayoutMode {
-    ALTERNATING_PAGES,   // Página 1=frente, página 2=dorso, página 3=frente...
-    SIDE_BY_SIDE,        // Frente | Dorso en la misma página (corte vertical)
-    GRID,                // N×M cartas por página
-    FIRST_HALF_FRONTS    // Primera mitad = frentes, segunda mitad = dorsos
-}
 
 data class DeckImportUiState(
     val phase: DeckImportPhase = DeckImportPhase.SELECT_SOURCE,

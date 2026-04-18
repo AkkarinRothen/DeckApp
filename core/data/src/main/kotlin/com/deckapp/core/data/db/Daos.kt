@@ -11,11 +11,14 @@ interface CardStackDao {
     @Query("SELECT * FROM card_stacks WHERE id = :id")
     fun getStackById(id: Long): Flow<CardStackEntity?>
 
-    @Query("SELECT * FROM card_stacks WHERE type = 'DECK' AND isArchived = 0 ORDER BY createdAt DESC")
+    @Query("SELECT * FROM card_stacks WHERE type = 'DECK' AND isArchived = 0 ORDER BY sortOrder ASC, createdAt DESC")
     fun getAllDecks(): Flow<List<CardStackEntity>>
 
-    @Query("SELECT * FROM card_stacks WHERE type = 'DECK' AND isArchived = 1 ORDER BY createdAt DESC")
+    @Query("SELECT * FROM card_stacks WHERE type = 'DECK' AND isArchived = 1 ORDER BY sortOrder ASC, createdAt DESC")
     fun getArchivedDecks(): Flow<List<CardStackEntity>>
+
+    @Query("UPDATE card_stacks SET sortOrder = :sortOrder WHERE id = :stackId")
+    suspend fun updateSortOrder(stackId: Long, sortOrder: Int)
 
     @Query("UPDATE card_stacks SET isArchived = :archived WHERE id = :deckId")
     suspend fun setArchived(deckId: Long, archived: Boolean)
@@ -185,8 +188,11 @@ interface SessionDao {
     @Query("SELECT * FROM sessions ORDER BY createdAt DESC")
     fun getAllSessions(): Flow<List<SessionEntity>>
 
-    @Query("SELECT * FROM sessions WHERE isActive = 1 LIMIT 1")
+    @Query("SELECT * FROM sessions WHERE status = 'ACTIVE' LIMIT 1")
     fun getActiveSession(): Flow<SessionEntity?>
+
+    @Query("SELECT * FROM sessions WHERE status = :status ORDER BY createdAt DESC")
+    fun getSessionsByStatus(status: String): Flow<List<SessionEntity>>
 
     @Query("SELECT * FROM sessions WHERE id = :id")
     fun getSessionById(id: Long): Flow<SessionEntity?>
@@ -194,8 +200,11 @@ interface SessionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSession(session: SessionEntity): Long
 
-    @Query("UPDATE sessions SET isActive = 0, endedAt = :endedAt WHERE id = :sessionId")
+    @Query("UPDATE sessions SET status = 'COMPLETED', endedAt = :endedAt WHERE id = :sessionId")
     suspend fun endSession(sessionId: Long, endedAt: Long)
+
+    @Query("UPDATE sessions SET status = :status WHERE id = :sessionId")
+    suspend fun updateSessionStatus(sessionId: Long, status: String)
 
     @Query("SELECT * FROM session_deck_refs WHERE sessionId = :sessionId ORDER BY sortOrder ASC")
     fun getDecksForSession(sessionId: Long): Flow<List<SessionDeckRefEntity>>
@@ -230,7 +239,7 @@ interface SessionDao {
 
 @Dao
 interface RandomTableDao {
-    @Query("SELECT * FROM random_tables ORDER BY name ASC")
+    @Query("SELECT * FROM random_tables ORDER BY sortOrder ASC, name ASC")
     fun getAllTables(): Flow<List<RandomTableEntity>>
 
     @Transaction
@@ -252,6 +261,9 @@ interface RandomTableDao {
 
     @Query("DELETE FROM random_tables WHERE id = :id")
     suspend fun deleteTable(id: Long)
+
+    @Query("UPDATE random_tables SET sortOrder = :sortOrder WHERE id = :id")
+    suspend fun updateSortOrder(id: Long, sortOrder: Int)
 
     @Query("UPDATE random_tables SET isPinned = :isPinned WHERE id = :id")
     suspend fun updatePinnedState(id: Long, isPinned: Boolean)

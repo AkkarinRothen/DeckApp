@@ -12,7 +12,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+import com.deckapp.core.model.SessionStatus
+
 data class SessionListUiState(
+    val plannedSessions: List<Session> = emptyList(),
     val activeSessions: List<Session> = emptyList(),
     val pastSessions: List<Session> = emptyList(),
     val isLoading: Boolean = true
@@ -26,8 +29,9 @@ class SessionListViewModel @Inject constructor(
     val uiState = sessionRepository.getAllSessions()
         .map { sessions ->
             SessionListUiState(
-                activeSessions = sessions.filter { it.isActive },
-                pastSessions = sessions.filter { !it.isActive },
+                plannedSessions = sessions.filter { it.status == SessionStatus.PLANNED },
+                activeSessions = sessions.filter { it.status == SessionStatus.ACTIVE },
+                pastSessions = sessions.filter { it.status == SessionStatus.COMPLETED },
                 isLoading = false
             )
         }
@@ -36,6 +40,12 @@ class SessionListViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = SessionListUiState()
         )
+
+    fun startSession(sessionId: Long) {
+        viewModelScope.launch {
+            sessionRepository.updateSessionStatus(sessionId, SessionStatus.ACTIVE)
+        }
+    }
 
     fun endSession(sessionId: Long) {
         viewModelScope.launch {
@@ -66,7 +76,7 @@ class SessionListViewModel @Inject constructor(
                 original.copy(
                     id = 0L,
                     name = "${original.name} (clon)",
-                    isActive = true,
+                    status = SessionStatus.ACTIVE,
                     createdAt = System.currentTimeMillis(),
                     endedAt = null
                 )

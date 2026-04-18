@@ -20,11 +20,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.Image
-import com.deckapp.core.domain.usecase.ImportSource
+import com.deckapp.core.model.TableImportSource
 
 @Composable
 fun SourceSelectionView(
-    onSelect: (ImportSource) -> Unit,
+    onSelect: (TableImportSource) -> Unit,
     onFileSelect: (Uri) -> Unit,
     recentPdfs: List<Pair<Uri, String>>,
     browsedPdfs: List<Pair<Uri, String>>,
@@ -53,13 +53,13 @@ fun SourceSelectionView(
                 title = "Imagen / PDF",
                 icon = Icons.Default.Description,
                 modifier = Modifier.weight(1f),
-                onClick = { onSelect(ImportSource.OCR_IMAGE) }
+                onClick = { onSelect(TableImportSource.OCR_IMAGE) }
             )
             SourceCard(
                 title = "CSV / Excel",
                 icon = Icons.Default.FileUpload,
                 modifier = Modifier.weight(1f),
-                onClick = { onSelect(ImportSource.CSV_TEXT) }
+                onClick = { onSelect(TableImportSource.CSV_TEXT) }
             )
         }
         
@@ -71,13 +71,13 @@ fun SourceSelectionView(
                 title = "Texto Plano",
                 icon = Icons.Default.TextFields,
                 modifier = Modifier.weight(1f),
-                onClick = { onSelect(ImportSource.PLAIN_TEXT) }
+                onClick = { onSelect(TableImportSource.PLAIN_TEXT) }
             )
             SourceCard(
                 title = "Markdown",
                 icon = Icons.Default.TableChart,
                 modifier = Modifier.weight(1f),
-                onClick = { onSelect(ImportSource.MARKDOWN_TABLE) }
+                onClick = { onSelect(TableImportSource.MARKDOWN_TABLE) }
             )
         }
         

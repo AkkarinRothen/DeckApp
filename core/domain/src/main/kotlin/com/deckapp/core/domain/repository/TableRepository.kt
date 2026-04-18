@@ -12,6 +12,8 @@ interface TableRepository {
     suspend fun getTableByName(name: String): RandomTable?
     suspend fun saveTable(table: RandomTable): Long
     suspend fun deleteTable(tableId: Long)
+    /** Persiste el orden de las tablas actualizando el campo sortOrder. */
+    suspend fun updateTablesSortOrder(orderedIds: List<Long>)
     suspend fun countBuiltInTables(): Int
     fun getRecentResultsForTable(sessionId: Long, tableId: Long): Flow<List<TableRollResult>>
     suspend fun getRecentResultsForTable(sessionId: Long, tableId: Long, limit: Int): List<TableRollResult>

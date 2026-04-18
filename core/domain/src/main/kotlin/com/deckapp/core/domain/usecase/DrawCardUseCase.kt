@@ -16,7 +16,8 @@ import javax.inject.Inject
  */
 class DrawCardUseCase @Inject constructor(
     private val cardRepository: CardRepository,
-    private val sessionRepository: SessionRepository
+    private val sessionRepository: SessionRepository,
+    private val updateCardStateUseCase: UpdateCardStateUseCase
 ) {
     suspend operator fun invoke(
         sessionId: Long,
@@ -35,15 +36,18 @@ class DrawCardUseCase @Inject constructor(
             DrawMode.RANDOM -> availableCards.random()
         }
 
-        // Persistir estado antes de animar
-        val now = System.currentTimeMillis()
-        cardRepository.updateCardDrawnState(card.id, isDrawn = true, lastDrawnAt = now)
-
         val deck = cardRepository.getDeckById(deckId).first()
         val faceDown = deck?.drawFaceDown == true
-        if (faceDown) {
-            cardRepository.updateCardRevealed(card.id, isRevealed = false)
-        }
+
+        // Actualizar estado de forma atómica a través del Use Case unificado
+        updateCardStateUseCase(
+            cardId = card.id,
+            update = UpdateCardStateUseCase.CardStateUpdate(
+                isDrawn = true,
+                lastDrawnAt = System.currentTimeMillis(),
+                isRevealed = !faceDown
+            )
+        )
 
         sessionRepository.logEvent(
             DrawEvent(

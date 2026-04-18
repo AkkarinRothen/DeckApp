@@ -30,18 +30,9 @@ class RollTableUseCase @Inject constructor(
     suspend operator fun invoke(
         tableId: Long,
         sessionId: Long?,
-        depth: Int = 0
+        depth: Int = 0,
+        persistResult: Boolean = true
     ): TableRollResult {
-        if (depth > 4) {
-            return TableRollResult(
-                tableId = tableId,
-                tableName = "?",
-                sessionId = sessionId,
-                rollValue = 0,
-                resolvedText = "[máx. anidado alcanzado]"
-            )
-        }
-
         val table = tableRepository.getTableWithEntries(tableId)
             ?: return TableRollResult(
                 tableId = tableId,
@@ -50,32 +41,57 @@ class RollTableUseCase @Inject constructor(
                 rollValue = 0,
                 resolvedText = "[tabla no encontrada]"
             )
+        
+        return roll(table, sessionId, depth, persistResult)
+    }
+
+    /**
+     * Tira sobre una tabla ya cargada. Útil para previsualizaciones o procesos por lotes.
+     */
+    suspend fun roll(
+        table: RandomTable,
+        sessionId: Long?,
+        depth: Int = 0,
+        persistResult: Boolean = true
+    ): TableRollResult {
+        if (depth > 4) {
+            return TableRollResult(
+                tableId = table.id,
+                tableName = table.name,
+                sessionId = sessionId,
+                rollValue = 0,
+                resolvedText = "[máx. anidado alcanzado]"
+            )
+        }
 
         val entry = pickEntry(table, sessionId)
         val rollValue = if (table.rollMode == TableRollMode.RANGE) {
-            // Si es RANGE, intentamos que el dado coincida con la entrada elegida
             entry?.minRoll ?: 1
         } else {
-            evaluateDiceFormula(table.rollFormula)
+            DiceEvaluator.evaluate(table.rollFormula)
         }
         
-        // 1. Resolver texto base (dados inline y referencias por @Nombre)
+        // 1. Resolver texto base
         var resolvedText = resolveText(entry?.text ?: "[sin entrada]", sessionId, depth)
 
-        // 2. Resolver sub-tabla vinculada por ID (Referencia directa potente)
+        // 2. Resolver sub-tabla vinculada por ID
         entry?.subTableId?.let { id ->
-            val subResult = invoke(id, sessionId, depth + 1)
+            val subResult = invoke(id, sessionId, depth + 1, persistResult = false)
             resolvedText = "$resolvedText → ${subResult.resolvedText}"
         }
 
         val result = TableRollResult(
-            tableId = tableId,
+            tableId = table.id,
             tableName = table.name,
             sessionId = sessionId,
             rollValue = rollValue,
             resolvedText = resolvedText
         )
-        tableRepository.saveRollResult(result)
+        
+        if (persistResult && table.id > 0) {
+            tableRepository.saveRollResult(result)
+        }
+        
         return result
     }
 
@@ -91,42 +107,43 @@ class RollTableUseCase @Inject constructor(
 
         return when (table.rollMode) {
             TableRollMode.RANGE -> {
+                // En modo rango, el dado manda. Si sale repetido, re-tiramos hasta un límite.
                 var entry: TableEntry? = null
-                var attempts = 0
-                do {
-                    val roll = evaluateDiceFormula(table.rollFormula)
-                    entry = table.entries.firstOrNull { roll in it.minRoll..it.maxRoll }
-                    attempts++
-                } while (table.isNoRepeat && lastTexts.contains(entry?.text) && attempts < 10)
+                repeat(10) {
+                    val roll = DiceEvaluator.evaluate(table.rollFormula)
+                    entry = table.entries.find { roll in it.minRoll..it.maxRoll }
+                    if (!table.isNoRepeat || entry == null || entry?.text !in lastTexts) {
+                        return entry
+                    }
+                }
                 entry ?: table.entries.randomOrNull()
             }
             TableRollMode.WEIGHTED -> {
-                var entry: TableEntry? = null
-                var attempts = 0
-                do {
-                    val totalWeight = table.entries.sumOf { it.weight }.coerceAtLeast(1)
-                    var pick = Random.nextInt(totalWeight)
-                    entry = table.entries.firstOrNull { e ->
-                        pick -= e.weight
-                        pick < 0
-                    }
-                    attempts++
-                } while (table.isNoRepeat && lastTexts.contains(entry?.text) && attempts < 10)
-                entry ?: table.entries.randomOrNull()
+                val availableEntries = if (table.isNoRepeat) {
+                    table.entries.filter { it.text !in lastTexts }.ifEmpty { table.entries }
+                } else {
+                    table.entries
+                }
+
+                val totalWeight = availableEntries.sumOf { it.weight }.coerceAtLeast(1)
+                var pick = Random.nextInt(totalWeight)
+                availableEntries.firstOrNull { e ->
+                    pick -= e.weight
+                    pick < 0
+                } ?: availableEntries.randomOrNull()
             }
             TableRollMode.SEQUENTIAL -> {
                 val lastResult = if (sessionId != null) {
                     tableRepository.getRecentResultsForTable(sessionId, table.id, 1).firstOrNull()
                 } else null
                 
+                val sorted = table.entries.sortedBy { it.sortOrder }
                 if (lastResult == null) {
-                    table.entries.minByOrNull { it.sortOrder }
+                    sorted.firstOrNull()
                 } else {
-                    // Buscar la siguiente entrada después de la última obtenida
-                    val sorted = table.entries.sortedBy { it.sortOrder }
                     val lastIndex = sorted.indexOfFirst { it.text == lastResult.resolvedText }
                     if (lastIndex == -1 || lastIndex >= sorted.size - 1) {
-                        sorted.firstOrNull() // Volver a empezar o primera
+                        sorted.firstOrNull()
                     } else {
                         sorted[lastIndex + 1]
                     }
@@ -171,28 +188,5 @@ class RollTableUseCase @Inject constructor(
             }
         }
         return result
-    }
-
-    // ── Evaluación de fórmula de dado ─────────────────────────────────────────
-
-    companion object {
-        private val diceFormulaRegex = Regex("""(\d+)d(\d+)([+\-]\d+)?""", RegexOption.IGNORE_CASE)
-
-        fun evaluateDiceFormula(formula: String): Int {
-            val match = diceFormulaRegex.find(formula.trim()) ?: return 1
-            val count = match.groupValues[1].toIntOrNull() ?: 1
-            val sides = match.groupValues[2].toIntOrNull() ?: 6
-            val modifier = match.groupValues[3].toIntOrNull() ?: 0
-            return (1..count.coerceAtLeast(1)).sumOf { Random.nextInt(1, sides.coerceAtLeast(2) + 1) } + modifier
-        }
-
-        /** Devuelve el rango posible de una fórmula: Pair(min, max). */
-        fun getDiceRange(formula: String): Pair<Int, Int> {
-            val match = diceFormulaRegex.find(formula.trim()) ?: return 1 to 1
-            val count = match.groupValues[1].toIntOrNull() ?: 1
-            val sides = match.groupValues[2].toIntOrNull() ?: 6
-            val modifier = match.groupValues[3].toIntOrNull() ?: 0
-            return (count + modifier) to (count * sides + modifier)
-        }
     }
 }

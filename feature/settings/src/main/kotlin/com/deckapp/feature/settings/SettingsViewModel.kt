@@ -1,19 +1,18 @@
 package com.deckapp.feature.settings
 
 import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.deckapp.core.domain.repository.CardRepository
 import com.deckapp.core.domain.repository.FileRepository
 import com.deckapp.core.domain.repository.SettingsRepository
+import com.deckapp.core.domain.usecase.backup.CreateBackupUseCase
+import com.deckapp.core.domain.usecase.backup.RestoreBackupUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
@@ -33,7 +32,10 @@ data class SettingsUiState(
     val cacheClearedMessage: String? = null,
     val jpegQuality: Int = 90,
     val geminiApiKey: String = "",
-    val autoVisionEnabled: Boolean = true
+    val autoVisionEnabled: Boolean = true,
+    val isBackingUp: Boolean = false,
+    val isRestoring: Boolean = false,
+    val backupMessage: String? = null
 )
 
 @HiltViewModel
@@ -41,6 +43,8 @@ class SettingsViewModel @Inject constructor(
     private val cardRepository: CardRepository,
     private val fileRepository: FileRepository,
     private val settingsRepository: SettingsRepository,
+    private val createBackupUseCase: CreateBackupUseCase,
+    private val restoreBackupUseCase: RestoreBackupUseCase,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -54,7 +58,14 @@ class SettingsViewModel @Inject constructor(
         val quality = settingsRepository.getJpegQuality()
         val apiKey = settingsRepository.getGeminiApiKey()
         val autoVision = settingsRepository.getAutoVisionEnabled()
-        _uiState.update { it.copy(appVersion = version, jpegQuality = quality, geminiApiKey = apiKey, autoVisionEnabled = autoVision) }
+        _uiState.update { 
+            it.copy(
+                appVersion = version, 
+                jpegQuality = quality, 
+                geminiApiKey = apiKey, 
+                autoVisionEnabled = autoVision 
+            ) 
+        }
         loadStorageInfo()
     }
 
@@ -106,5 +117,34 @@ class SettingsViewModel @Inject constructor(
         _uiState.update { it.copy(autoVisionEnabled = enabled) }
     }
 
-    fun clearMessage() = _uiState.update { it.copy(cacheClearedMessage = null) }
+    fun createBackup(outputUri: Uri) {
+        _uiState.update { it.copy(isBackingUp = true, backupMessage = "Generando archivo de backup...") }
+        viewModelScope.launch {
+            val result = createBackupUseCase(outputUri)
+            _uiState.update { 
+                it.copy(
+                    isBackingUp = false, 
+                    backupMessage = if (result.isSuccess) "Backup creado exitosamente." else "Error al crear backup: ${result.exceptionOrNull()?.message}"
+                ) 
+            }
+        }
+    }
+
+    fun restoreBackup(zipUri: Uri) {
+        _uiState.update { it.copy(isRestoring = true, backupMessage = "Restaurando biblioteca... No cierres la app.") }
+        viewModelScope.launch {
+            val result = restoreBackupUseCase(zipUri)
+            _uiState.update { 
+                it.copy(
+                    isRestoring = false, 
+                    backupMessage = if (result.isSuccess) "Biblioteca restaurada correctamente." else "Error al restaurar: ${result.exceptionOrNull()?.message}"
+                ) 
+            }
+            if (result.isSuccess) {
+                loadStorageInfo()
+            }
+        }
+    }
+
+    fun clearMessage() = _uiState.update { it.copy(cacheClearedMessage = null, backupMessage = null) }
 }

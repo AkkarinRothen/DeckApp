@@ -32,7 +32,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.deckapp.core.model.CardContentMode
+import com.deckapp.core.model.*
 import com.deckapp.core.ui.components.ErrorCard
 import com.deckapp.core.ui.components.PdfThumbnailBrowser
 import android.graphics.Bitmap

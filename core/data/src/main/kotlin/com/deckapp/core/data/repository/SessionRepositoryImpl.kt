@@ -19,11 +19,17 @@ class SessionRepositoryImpl @Inject constructor(
     override fun getActiveSession(): Flow<Session?> =
         sessionDao.getActiveSession().map { it?.toDomain() }
 
+    override fun getSessionsByStatus(status: SessionStatus): Flow<List<Session>> =
+        sessionDao.getSessionsByStatus(status.name).map { it.map { e -> e.toDomain() } }
+
     override fun getSessionById(id: Long): Flow<Session?> =
         sessionDao.getSessionById(id).map { it?.toDomain() }
 
     override suspend fun createSession(session: Session): Long =
         sessionDao.insertSession(session.toEntity())
+
+    override suspend fun updateSessionStatus(sessionId: Long, status: SessionStatus) =
+        sessionDao.updateSessionStatus(sessionId, status.name)
 
     override suspend fun endSession(sessionId: Long) =
         sessionDao.endSession(sessionId, System.currentTimeMillis())

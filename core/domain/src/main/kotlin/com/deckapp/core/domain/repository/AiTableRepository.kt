@@ -18,8 +18,11 @@ sealed class AiStreamEvent {
 
 interface AiTableRepository {
     suspend fun reconstructTable(rawText: String, apiKey: String): AiTableSuggestions
-    suspend fun recognizeTableFromImage(bitmap: Bitmap, apiKey: String): AiTableSuggestions
-    fun streamTableFromImage(bitmap: Bitmap, apiKey: String): Flow<AiStreamEvent>
+    fun streamTableFromImage(
+        bitmap: Bitmap,
+        apiKey: String,
+        onRetryWait: (suspend (Long) -> Unit)? = null
+    ): Flow<AiStreamEvent>
 }
 
 class AiApiException(message: String, val causeException: Throwable? = null) : Exception(message, causeException)

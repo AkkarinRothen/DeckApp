@@ -11,8 +11,11 @@ class RecognizeTableStreamingUseCase @Inject constructor(
     private val aiRepository: AiTableRepository,
     private val settingsRepository: SettingsRepository
 ) {
-    operator fun invoke(bitmap: Bitmap): Flow<AiStreamEvent> {
+    operator fun invoke(
+        bitmap: Bitmap,
+        onRetryWait: (suspend (Long) -> Unit)? = null
+    ): Flow<AiStreamEvent> {
         val apiKey = settingsRepository.getGeminiApiKey()
-        return aiRepository.streamTableFromImage(bitmap, apiKey)
+        return aiRepository.streamTableFromImage(bitmap, apiKey, onRetryWait)
     }
 }

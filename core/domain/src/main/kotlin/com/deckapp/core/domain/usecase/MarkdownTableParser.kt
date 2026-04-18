@@ -11,53 +11,57 @@ import com.deckapp.core.model.TableEntry
  * | 1-5   | Encuentro |
  * | 6     | Nada      |
  */
-class MarkdownTableParser {
+class MarkdownTableParser : TableParser {
+
+    override fun canParse(rawText: String): Boolean = isMarkdownTable(rawText)
 
     /**
      * Parsea un texto que contiene una o más tablas Markdown.
      * Si hay varias tablas, por ahora las une en una sola lista de entradas.
      */
-    fun parse(rawText: String): List<TableEntry> {
+    override fun parse(rawText: String): ParsedTableContent {
         val lines = rawText.lines()
             .map { it.trim() }
             .filter { it.isNotBlank() }
         
-        if (lines.size < 2) return emptyList()
+        if (lines.size < 2) return ParsedTableContent()
 
         val entries = mutableListOf<TableEntry>()
         var sortOrder = 0
         
-        // Identificar si la segunda línea es un delimitador de Markdown (|---|)
-        val hasMarkdownDelimiter = lines.getOrNull(1)?.contains(Regex("""\|?\s*:?-+:?\s*\|""")) == true
+        // Regex para detectar el delimitador de Markdown (|---| | :--- | etc)
+        // Buscamos al menos una secuencia de guiones rodeada opcionalmente de pipes o espacios.
+        val markdownDelimiterRegex = Regex("""^\|?\s*:?-+:?\s*(\|?\s*:?-+:?\s*)+\|?$""")
+        
+        val headerLine = lines.getOrNull(0) ?: ""
+        val hasMarkdownDelimiter = lines.getOrNull(1)?.let { markdownDelimiterRegex.matches(it) } ?: false
         
         val dataLines = if (hasMarkdownDelimiter) {
             // Saltamos el header (0) y el delimitador (1)
             lines.drop(2)
         } else {
-            // No parece una tabla MD estándar competa, probamos a ver si tiene delimitadores |
-            lines
+            // Si no tiene delimitador estándar, solo procesamos si las líneas parecen tener estructura de pipes
+            lines.filter { it.contains("|") }
         }
 
         dataLines.forEach { line ->
-            // Dividir por | y limpiar vacíos de los extremos
-            val parts = line.split("|")
-                .map { it.trim() }
-                .filterIndexed { index, _ -> 
-                    // Si la línea empieza/termina con |, split deja elementos vacíos al inicio/fin
-                    // Solo los ignoramos si están vacíos.
-                    true 
-                }
-                .filter { it.isNotEmpty() || line.contains("|") } // Mantener si la línea tiene estructura
+            // Dividir por |
+            val rawParts = line.split("|").map { it.trim() }
             
-            // Una línea de tabla MD suele tener al menos 2 columnas reales (si se cuenta el | inicial/final)
-            // | 1 | Texto | -> ["", "1", "Texto", ""]
-            val actualCols = if (line.startsWith("|")) parts.drop(1) else parts
-            val cleanCols = if (line.endsWith("|")) actualCols.dropLast(1) else actualCols
+            // Si la línea empieza con |, el primer elemento es vacío. Si termina con |, el último es vacío.
+            val parts = when {
+                line.startsWith("|") && line.endsWith("|") -> rawParts.drop(1).dropLast(1)
+                line.startsWith("|") -> rawParts.drop(1)
+                line.endsWith("|") -> rawParts.dropLast(1)
+                else -> rawParts
+            }
 
-            if (cleanCols.size < 2) return@forEach
+            if (parts.size < 2) return@forEach
 
-            val rangeText = cleanCols[0]
-            val entryText = cleanCols.drop(1).joinToString(" — ")
+            val rangeText = parts[0]
+            val entryText = parts.drop(1).filter { it.isNotBlank() }.joinToString(" — ")
+
+            if (entryText.isBlank()) return@forEach
 
             val range = RangeParser.parse(rangeText)
             entries.add(
@@ -70,7 +74,10 @@ class MarkdownTableParser {
             )
         }
 
-        return entries
+        return ParsedTableContent(
+            name = if (hasMarkdownDelimiter) headerLine.replace("|", "").trim() else null,
+            entries = entries
+        )
     }
 
     /**
@@ -79,7 +86,7 @@ class MarkdownTableParser {
     fun isMarkdownTable(text: String): Boolean {
         val lines = text.lines().map { it.trim() }.filter { it.isNotBlank() }
         if (lines.size < 2) return false
-        // Busca el patrón |---| en la segunda línea
-        return lines.getOrNull(1)?.contains(Regex("""\|?\s*:?-+:?\s*\|""")) == true
+        val markdownDelimiterRegex = Regex("""^\|?\s*:?-+:?\s*(\|?\s*:?-+:?\s*)+\|?$""")
+        return lines.getOrNull(1)?.let { markdownDelimiterRegex.matches(it) } ?: false
     }
 }

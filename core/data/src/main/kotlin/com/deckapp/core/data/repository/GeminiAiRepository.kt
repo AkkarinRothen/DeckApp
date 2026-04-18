@@ -9,6 +9,7 @@ import com.deckapp.core.model.TableEntry
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.RequestOptions
 import com.google.ai.client.generativeai.type.content
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.Serializable
@@ -77,37 +78,14 @@ class GeminiAiRepository @Inject constructor() : AiTableRepository {
             $rawText
         """.trimIndent()
 
-        return executeGeminiRequest("procesar la tabla") {
-            model.generateContent(content { text(prompt) }).text
-        }
+        return executeGeminiRequest { model.generateContent(content { text(prompt) }).text }
     }
 
-    override suspend fun recognizeTableFromImage(bitmap: Bitmap, apiKey: String): AiTableSuggestions {
-        requireApiKey(apiKey)
-        val model = getVisionModel(apiKey)
-        val scaledBitmap = scaleBitmapForVision(bitmap)
-
-        val prompt = """
-            Eres un experto en TTRPG. Analiza esta imagen de una tabla aleatoria de un manual de rol.
-
-            REGLAS:
-            1. Extrae todas las filas con su rango numérico y texto descriptivo.
-            2. Ignora encabezados, títulos, pies de página y líneas decorativas.
-            3. Si hay varias columnas, mézclalas de forma legible en el campo 'text'.
-            4. Sugiere un nombre descriptivo para la tabla, la fórmula de dado (ej: "1d20") y la categoría (ej: "Encuentros").
-            5. Responde ÚNICAMENTE con JSON: {"name":"...","formula":"1d6","category":"...","entries":[{"min":1,"max":1,"text":"..."}]}.
-            6. Sin texto adicional fuera del JSON.
-        """.trimIndent()
-
-        return executeGeminiRequest("analizar la imagen con Vision") {
-            model.generateContent(content {
-                image(scaledBitmap)
-                text(prompt)
-            }).text
-        }
-    }
-
-    override fun streamTableFromImage(bitmap: Bitmap, apiKey: String): Flow<AiStreamEvent> = flow {
+    override fun streamTableFromImage(
+        bitmap: Bitmap,
+        apiKey: String,
+        onRetryWait: (suspend (Long) -> Unit)?
+    ): Flow<AiStreamEvent> = flow {
         requireApiKey(apiKey)
         val model = getVisionModel(apiKey)
         val scaledBitmap = scaleBitmapForVision(bitmap)
@@ -125,34 +103,43 @@ class GeminiAiRepository @Inject constructor() : AiTableRepository {
             - Sin explicaciones ni texto fuera de las líneas JSON.
         """.trimIndent()
 
-        var buffer = ""
-        var sortOrder = 0
+        var lastEx: Exception? = null
+        repeat(MAX_RETRY_ATTEMPTS) { attempt ->
+            try {
+                var buffer = ""
+                var sortOrder = 0
 
-        try {
-            model.generateContentStream(content {
-                image(scaledBitmap)
-                text(prompt)
-            }).collect { response ->
-                buffer += response.text ?: ""
-                while (buffer.contains('\n')) {
-                    val idx = buffer.indexOf('\n')
-                    val line = buffer.substring(0, idx).trim()
-                    buffer = buffer.substring(idx + 1)
-                    parseStreamLine(line, sortOrder)?.let { event ->
-                        emit(event)
-                        if (event is AiStreamEvent.Entry) sortOrder++
+                model.generateContentStream(content {
+                    image(scaledBitmap)
+                    text(prompt)
+                }).collect { response ->
+                    buffer += response.text ?: ""
+                    while (buffer.contains('\n')) {
+                        val idx = buffer.indexOf('\n')
+                        val line = buffer.substring(0, idx).trim()
+                        buffer = buffer.substring(idx + 1)
+                        parseStreamLine(line, sortOrder)?.let { event ->
+                            emit(event)
+                            if (event is AiStreamEvent.Entry) sortOrder++
+                        }
                     }
                 }
-            }
 
-            // Línea restante al terminar el stream
-            val remaining = buffer.trim()
-            parseStreamLine(remaining, sortOrder)?.let { emit(it) }
-        } catch (e: AiApiException) {
-            throw e
-        } catch (e: Exception) {
-            throw AiApiException(friendlyGeminiError(e), e)
+                val remaining = buffer.trim()
+                parseStreamLine(remaining, sortOrder)?.let { emit(it) }
+                return@flow
+            } catch (e: AiApiException) {
+                throw e
+            } catch (e: Exception) {
+                if (!isRateLimitError(e) || attempt == MAX_RETRY_ATTEMPTS - 1) {
+                    throw AiApiException(friendlyGeminiError(e), e)
+                }
+                lastEx = e
+                val delayMs = parseRetryDelayMs(e) ?: (RETRY_BASE_DELAY_MS shl attempt)
+                if (onRetryWait != null) onRetryWait.invoke(delayMs) else delay(delayMs)
+            }
         }
+        throw AiApiException(friendlyGeminiError(lastEx!!), lastEx)
     }
 
     private fun parseStreamLine(line: String, sortOrder: Int): AiStreamEvent? {
@@ -168,36 +155,33 @@ class GeminiAiRepository @Inject constructor() : AiTableRepository {
         } catch (_: Exception) { null }
     }
 
-    private suspend fun executeGeminiRequest(
-        operationLabel: String,
-        block: suspend () -> String?
-    ): AiTableSuggestions = try {
-        parseResponse(block())
-    } catch (e: AiApiException) {
-        throw e
-    } catch (e: Exception) {
-        throw AiApiException(friendlyGeminiError(e), e)
+    private suspend fun executeGeminiRequest(block: suspend () -> String?): AiTableSuggestions {
+        var lastEx: Exception? = null
+        repeat(MAX_RETRY_ATTEMPTS) { attempt ->
+            try {
+                return parseResponse(block())
+            } catch (e: AiApiException) {
+                throw e
+            } catch (e: Exception) {
+                if (!isRateLimitError(e) || attempt == MAX_RETRY_ATTEMPTS - 1) {
+                    throw AiApiException(friendlyGeminiError(e), e)
+                }
+                lastEx = e
+                delay(parseRetryDelayMs(e) ?: (RETRY_BASE_DELAY_MS shl attempt))
+            }
+        }
+        throw AiApiException(friendlyGeminiError(lastEx!!), lastEx)
     }
 
-    private fun friendlyGeminiError(e: Exception): String {
+    private fun isRateLimitError(e: Exception): Boolean {
         val msg = e.message?.lowercase() ?: ""
-        return when {
-            "quota" in msg || "resource_exhausted" in msg || "429" in msg -> {
-                val retryMatch = Regex("""retry in ([\d.]+)s""").find(e.message ?: "")
-                val retryInfo = retryMatch?.let { " Vuelve a intentarlo en ${it.groupValues[1].toFloatOrNull()?.let { s -> "%.0f".format(s) } ?: it.groupValues[1]} segundos." } ?: ""
-                "Cuota gratuita de Gemini agotada.$retryInfo Revisa tu plan en ai.google.dev."
-            }
-            "api_key_invalid" in msg || "api key not valid" in msg || "401" in msg ->
-                "API Key de Gemini inválida. Verifica la clave en Ajustes."
-            "not_found" in msg || "404" in msg ->
-                "Modelo de Gemini no disponible. Comprueba tu versión de la API."
-            "network" in msg || "connect" in msg || "timeout" in msg || "unreachable" in msg ->
-                "Sin conexión con Gemini. Verifica tu red e inténtalo de nuevo."
-            "candidate" in msg && "safety" in msg ->
-                "Gemini bloqueó la respuesta por filtros de seguridad. Intenta con otra imagen."
-            else ->
-                "Error de Gemini: ${e.localizedMessage?.take(120) ?: "desconocido"}"
-        }
+        return "quota" in msg || "resource_exhausted" in msg || "429" in msg
+    }
+
+    private fun parseRetryDelayMs(e: Exception): Long? {
+        val seconds = Regex("""retry in ([\d.]+)s""", RegexOption.IGNORE_CASE)
+            .find(e.message ?: "")?.groupValues[1]?.toFloatOrNull() ?: return null
+        return (seconds * 1000).toLong() + 500L
     }
 
     private fun scaleBitmapForVision(bitmap: Bitmap, maxWidth: Int = VISION_MAX_WIDTH): Bitmap {
@@ -222,6 +206,29 @@ class GeminiAiRepository @Inject constructor() : AiTableRepository {
         )
     }
 
+    private fun friendlyGeminiError(e: Exception): String {
+        val msg = e.message?.lowercase() ?: ""
+        return when {
+            "quota" in msg || "resource_exhausted" in msg || "429" in msg -> {
+                val retryMatch = Regex("""retry in ([\d.]+)s""").find(e.message ?: "")
+                val retryInfo = retryMatch?.let {
+                    " Vuelve a intentarlo en ${"%.0f".format(it.groupValues[1].toFloatOrNull() ?: 0f)} segundos."
+                } ?: ""
+                "Cuota gratuita de Gemini agotada.$retryInfo Revisa tu plan en ai.google.dev."
+            }
+            "api_key_invalid" in msg || "api key not valid" in msg || "401" in msg ->
+                "API Key de Gemini inválida. Verifica la clave en Ajustes."
+            "not_found" in msg || "404" in msg ->
+                "Modelo de Gemini no disponible. Comprueba tu versión de la API."
+            "network" in msg || "connect" in msg || "timeout" in msg || "unreachable" in msg ->
+                "Sin conexión con Gemini. Verifica tu red e inténtalo de nuevo."
+            "candidate" in msg && "safety" in msg ->
+                "Gemini bloqueó la respuesta por filtros de seguridad. Intenta con otra imagen."
+            else ->
+                "Error de Gemini: ${e.localizedMessage?.take(120) ?: "desconocido"}"
+        }
+    }
+
     @Serializable
     private data class AiTableResponse(
         val entries: List<AiEntry>,
@@ -242,9 +249,11 @@ class GeminiAiRepository @Inject constructor() : AiTableRepository {
     )
 
     private companion object {
-        const val TEXT_MODEL_NAME = "gemini-2.0-flash-lite"  // texto OCR: más rápido, menor cuota
-        const val VISION_MODEL_NAME = "gemini-2.0-flash"     // visión multimodal: mayor calidad
+        const val TEXT_MODEL_NAME = "gemini-2.0-flash-lite"   // texto OCR: rápido, menor cuota
+        const val VISION_MODEL_NAME = "gemini-2.0-flash-lite" // visión: 30 RPM free vs 15 RPM de flash
         const val API_VERSION = "v1beta"
         const val VISION_MAX_WIDTH = 800
+        const val MAX_RETRY_ATTEMPTS = 3
+        const val RETRY_BASE_DELAY_MS = 2_000L
     }
 }

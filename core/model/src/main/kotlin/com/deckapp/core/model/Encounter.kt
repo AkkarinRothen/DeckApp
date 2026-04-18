@@ -31,7 +31,9 @@ data class EncounterCreature(
     val initiativeRoll: Int? = null,     // Valor del dado (1d20)
     val conditions: Set<Condition> = emptySet(),
     val notes: String = "",
-    val sortOrder: Int = 0
+    val sortOrder: Int = 0,
+    val imagePath: String? = null,
+    val npcId: Long? = null
 ) {
     /** Iniciativa total calculada (Roll + Bonus) */
     val initiativeTotal: Int? get() = initiativeRoll?.let { it + initiativeBonus }
@@ -45,3 +47,12 @@ enum class Condition {
     GRAPPLED, INCAPACITATED, INVISIBLE, PARALYZED,
     PETRIFIED, POISONED, PRONE, RESTRAINED, STUNNED, UNCONSCIOUS
 }
+
+/**
+ * Participante de iniciativa que no es una criatura (PJs).
+ */
+data class PlayerInitiativeParticipant(
+    val id: String = java.util.UUID.randomUUID().toString(),
+    val name: String,
+    val initiativeTotal: Int
+)

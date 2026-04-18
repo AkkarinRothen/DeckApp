@@ -13,6 +13,9 @@ interface FileRepository {
     suspend fun listPdfsInFolder(folderUri: Uri): List<Pair<Uri, String>>
 
     suspend fun copyImageToInternal(sourceUri: Uri, deckId: Long, fileName: String): String
+    
+    /** Copia imagen a una categorÃ­a general (ej: "npcs") en lugar de un mazo especÃ­fico. */
+    suspend fun copyImageToInternalByCategory(sourceUri: Uri, category: String, fileName: String): String
 
     suspend fun deleteImagesForDeck(deckId: Long)
 
@@ -80,13 +83,38 @@ interface FileRepository {
 
     /**
      * Comprime el directorio de imágenes del mazo [deckId] en el archivo [outputUri].
+     * @param manifestJson JSON opcional con metadatos del mazo para incluir en el ZIP.
      */
-    suspend fun zipDeckDirectory(deckId: Long, outputUri: Uri): Result<Unit>
+    suspend fun zipDeckDirectory(deckId: Long, outputUri: Uri, manifestJson: String? = null): Result<Unit>
 
     /**
      * Limpia los archivos temporales de la app (caché de PDFs, ZIPs descomprimidos, etc.)
      */
     suspend fun clearCache()
+
+    /**
+     * Crea un archivo ZIP completo con el manifiesto, la base de datos en JSON y todas las imágenes.
+     * @param outputUri URI destino (SAF)
+     * @param manifestJson Contenido del manifest.json
+     * @param databaseJson Contenido de deckapp_export.json
+     */
+    suspend fun createFullBackupZip(outputUri: Uri, manifestJson: String, databaseJson: String): Result<Unit>
+
+    /**
+     * Descomprime un archivo de backup en un directorio temporal y devuelve la ruta raíz.
+     */
+    suspend fun extractFullBackupZipToTemp(zipUri: Uri): String?
+
+    /**
+     * Mueve las imágenes restauradas desde el directorio temporal al almacenamiento interno definitivo.
+     */
+    suspend fun restoreImagesFromTemp(tempDirPath: String)
+
+
+    /**
+     * Verifica si un archivo existe en la ruta absoluta proporcionada.
+     */
+    suspend fun exists(path: String): Boolean
 
     /**
      * Lee el contenido de texto de un URI (archivo CSV, JSON, TXT) como String.

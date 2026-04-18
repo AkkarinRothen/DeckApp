@@ -56,3 +56,27 @@ enum class DrawAction {
     PEEK,      // Vió el tope del mazo sin robar
     SHUFFLE_BACK // La pila de descarte vuelve al mazo
 }
+
+/** Fuentes de importación para mazos completos */
+enum class DeckImportSource { FOLDER, PDF, ZIP }
+
+/** Fuentes de importación para tablas individuales */
+enum class TableImportSource {
+    OCR_IMAGE,      // Imagen/PDF con análisis óptico
+    CSV_TEXT,       // Texto en formato CSV / TSV / DSV
+    JSON_TEXT,      // JSON (Foundry VTT, DeckApp Export, o array simple)
+    PLAIN_TEXT,     // Texto plano (portapapeles, listas)
+    MARKDOWN_TABLE  // Tablas estándar Markdown (|---|)
+}
+
+/** Modos de distribución de cartas dentro de un PDF */
+enum class PdfLayoutMode {
+    /** Página 1=frente, página 2=dorso, página 3=frente... */
+    ALTERNATING_PAGES,
+    /** Frente | Dorso en la misma página (corte vertical) */
+    SIDE_BY_SIDE,
+    /** N×M cartas por página */
+    GRID,
+    /** Primera mitad = frentes, segunda mitad = dorsos */
+    FIRST_HALF_FRONTS
+}

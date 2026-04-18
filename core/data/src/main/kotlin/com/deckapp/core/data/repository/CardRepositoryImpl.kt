@@ -65,6 +65,12 @@ class CardRepositoryImpl @Inject constructor(
 
     override suspend fun deleteStack(id: Long) = stackDao.deleteStack(id)
 
+    override suspend fun updateStacksSortOrder(orderedIds: List<Long>) {
+        orderedIds.forEachIndexed { index, id ->
+            stackDao.updateSortOrder(id, index)
+        }
+    }
+
     override fun getCardsForStack(stackId: Long): Flow<List<Card>> =
         cardDao.getCardsForStack(stackId).map { cards ->
             cards.map { cardEntity ->

@@ -19,6 +19,8 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Implementación de [FileRepository] usando SAF (Storage Access Framework) y
@@ -124,6 +126,24 @@ class FileRepositoryImpl @Inject constructor(
         return destFile.absolutePath
     }
 
+    override suspend fun copyImageToInternalByCategory(
+        sourceUri: Uri,
+        category: String,
+        fileName: String
+    ): String {
+        val catDir = File(context.filesDir, category)
+        catDir.mkdirs()
+        val destFile = File(catDir, sanitizeFileName(fileName))
+
+        context.contentResolver.openInputStream(sourceUri)?.use { input ->
+            FileOutputStream(destFile).use { output ->
+                input.copyTo(output, bufferSize = DEFAULT_BUFFER_SIZE)
+            }
+        }
+
+        return destFile.absolutePath
+    }
+
     override suspend fun deleteImagesForDeck(deckId: Long) {
         val deckDir = File(context.filesDir, "decks/$deckId")
         if (deckDir.exists()) deckDir.deleteRecursively()
@@ -212,9 +232,9 @@ class FileRepositoryImpl @Inject constructor(
                         val fileName = File(entry.name).name // Solo el nombre, sin carpetas
                         val destFile = File(tempDir, fileName)
                         
-                        // Solo procesamos imágenes por ahora
+                        // Solo procesamos imágenes y el manifiesto (Sprint 16)
                         val ext = fileName.substringAfterLast(".", "").lowercase()
-                        if (ext in setOf("jpg", "jpeg", "png", "webp", "gif", "bmp")) {
+                        if (ext in setOf("jpg", "jpeg", "png", "webp", "gif", "bmp", "json")) {
                             BufferedOutputStream(FileOutputStream(destFile)).use { bos ->
                                 zis.copyTo(bos)
                             }
@@ -229,12 +249,20 @@ class FileRepositoryImpl @Inject constructor(
         return result
     }
 
-    override suspend fun zipDeckDirectory(deckId: Long, outputUri: Uri): Result<Unit> = runCatching {
+    override suspend fun zipDeckDirectory(deckId: Long, outputUri: Uri, manifestJson: String?): Result<Unit> = runCatching {
         val deckDir = File(context.filesDir, "decks/$deckId")
         if (!deckDir.exists()) throw Exception("Deck directory not found")
 
         context.contentResolver.openOutputStream(outputUri)?.use { output ->
             ZipOutputStream(BufferedOutputStream(output)).use { zos ->
+                // Guardar manifiesto si existe (Sprint 16)
+                manifestJson?.let { json ->
+                    val manifestEntry = ZipEntry("deck_manifest.json")
+                    zos.putNextEntry(manifestEntry)
+                    zos.write(json.toByteArray())
+                    zos.closeEntry()
+                }
+
                 deckDir.listFiles()?.forEach { file ->
                     if (file.isFile) {
                         val entry = ZipEntry(file.name)
@@ -252,6 +280,97 @@ class FileRepositoryImpl @Inject constructor(
     override suspend fun clearCache() {
         context.cacheDir.deleteRecursively()
         context.cacheDir.mkdirs() // Restaurar el directorio para uso futuro
+    }
+
+    override suspend fun createFullBackupZip(outputUri: Uri, manifestJson: String, databaseJson: String): Result<Unit> = runCatching {
+        withContext(Dispatchers.IO) {
+            context.contentResolver.openOutputStream(outputUri)?.use { output ->
+                ZipOutputStream(BufferedOutputStream(output)).use { zos ->
+                    // 1. Escribir Manifest
+                    zos.putNextEntry(ZipEntry("manifest.json"))
+                    zos.write(manifestJson.toByteArray())
+                    zos.closeEntry()
+
+                    // 2. Escribir Database
+                    val dbEntry = ZipEntry("database/deckapp_export.json")
+                    zos.putNextEntry(dbEntry)
+                    zos.write(databaseJson.toByteArray())
+                    zos.closeEntry()
+
+                    // 3. Empaquetar imágenes (decks, npcs, tables, etc.)
+                    val imagesRoot = context.filesDir
+                    // Solo tomamos directorios clave para no empaquetar basura
+                    val targetDirs = listOf("decks", "npcs", "tables")
+                    
+                    targetDirs.forEach { dirName ->
+                        val dir = File(imagesRoot, dirName)
+                        if (dir.exists()) {
+                            dir.walkTopDown().filter { it.isFile }.forEach { file ->
+                                // Construir ruta relativa ej: "images/decks/1/cover.jpg"
+                                val relativePath = "images/${file.toRelativeString(imagesRoot).replace('\\', '/')}"
+                                zos.putNextEntry(ZipEntry(relativePath))
+                                FileInputStream(file).use { fis -> fis.copyTo(zos) }
+                                zos.closeEntry()
+                            }
+                        }
+                    }
+                }
+            } ?: throw Exception("No se pudo abrir el stream de salida.")
+        }
+    }
+
+    override suspend fun extractFullBackupZipToTemp(zipUri: Uri): String? = withContext(Dispatchers.IO) {
+        val tempDir = File(context.cacheDir, "restore_${UUID.randomUUID()}")
+        tempDir.mkdirs()
+
+        try {
+            context.contentResolver.openInputStream(zipUri)?.use { input ->
+                ZipInputStream(BufferedInputStream(input)).use { zis ->
+                    var entry: ZipEntry? = zis.nextEntry
+                    while (entry != null) {
+                        if (!entry.isDirectory) {
+                            val destFile = File(tempDir, entry.name)
+                            destFile.parentFile?.mkdirs()
+                            BufferedOutputStream(FileOutputStream(destFile)).use { bos ->
+                                zis.copyTo(bos)
+                            }
+                        }
+                        zis.closeEntry()
+                        entry = zis.nextEntry
+                    }
+                }
+            }
+            tempDir.absolutePath
+        } catch (e: Exception) {
+            tempDir.deleteRecursively()
+            null
+        }
+    }
+
+    override suspend fun restoreImagesFromTemp(tempDirPath: String) = withContext(Dispatchers.IO) {
+        val tempDir = File(tempDirPath)
+        val tempImagesDir = File(tempDir, "images")
+        if (!tempImagesDir.exists()) return@withContext
+
+        // Limpiar imágenes actuales
+        val targetDirs = listOf("decks", "npcs", "tables")
+        targetDirs.forEach { dirName ->
+            val dir = File(context.filesDir, dirName)
+            dir.deleteRecursively()
+        }
+
+        // Copiar las nuevas desde temp/images a filesDir/
+        tempImagesDir.walkTopDown().filter { it.isFile }.forEach { tempFile ->
+            val relativePath = tempFile.toRelativeString(tempImagesDir)
+            val finalFile = File(context.filesDir, relativePath)
+            finalFile.parentFile?.mkdirs()
+            tempFile.copyTo(finalFile, overwrite = true)
+        }
+    }
+
+
+    override suspend fun exists(path: String): Boolean {
+        return File(path).exists()
     }
 
     // ── Helpers privados ──────────────────────────────────────────────────────

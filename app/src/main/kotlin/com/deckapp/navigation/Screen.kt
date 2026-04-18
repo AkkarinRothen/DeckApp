@@ -25,3 +25,7 @@ import kotlinx.serialization.Serializable
 // Encuentros y Combate
 @Serializable object EncounterListRoute
 @Serializable data class EncounterEditorRoute(val encounterId: Long = 0L)
+
+// NPCs
+@Serializable object NpcListRoute
+@Serializable data class NpcEditorRoute(val npcId: Long = -1L)

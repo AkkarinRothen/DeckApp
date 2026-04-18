@@ -17,6 +17,7 @@ data class CardStackEntity(
     val displayCount: Boolean,
     val aspectRatio: String = "STANDARD", // CardAspectRatio.name
     val isArchived: Boolean = false,
+    val sortOrder: Int = 0,
     val createdAt: Long
 )
 
@@ -115,7 +116,9 @@ data class CardTagCrossRef(val cardId: Long, val tagId: Long)
 data class SessionEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
-    val isActive: Boolean,
+    val status: String,             // SessionStatus.name
+    val scheduledDate: Long?,
+    val summary: String?,
     val createdAt: Long,
     val endedAt: Long?,
     val showCardTitles: Boolean = true,
@@ -199,6 +202,7 @@ data class RandomTableEntity(
     val sourceType: String = "MANUAL",    // OCR, CSV, JSON, MANUAL
     val sourceName: String? = null,
     val isBuiltIn: Boolean = false,
+    val sortOrder: Int = 0,
     val createdAt: Long = System.currentTimeMillis()
 )
 
@@ -336,7 +340,9 @@ data class EncounterCreatureEntity(
     val initiativeRoll: Int?,
     val conditionsJson: String,   // JSON de Set<Condition>
     val notes: String,
-    val sortOrder: Int
+    val sortOrder: Int,
+    val npcId: Long? = null,
+    val imagePath: String? = null
 )
 
 @Entity(
@@ -369,4 +375,59 @@ data class RecentFileRecord(
     val name: String,               // Nombre a mostrar
     val type: String,               // "PDF" o "FOLDER"
     val lastAccessed: Long = System.currentTimeMillis()
+)
+// ── NPCs ───────────────────────────────────────────────────────────────────
+
+@Entity(tableName = "npcs")
+data class NpcEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    val description: String,
+    val imagePath: String?,
+    val maxHp: Int,
+    val currentHp: Int,
+    val armorClass: Int,
+    val initiativeBonus: Int,
+    val notes: String,
+    val isMonster: Boolean,
+    val createdAt: Long
+)
+
+@Entity(
+    tableName = "npc_tags",
+    primaryKeys = ["npcId", "tagId"],
+    foreignKeys = [
+        ForeignKey(entity = NpcEntity::class, parentColumns = ["id"], childColumns = ["npcId"], onDelete = ForeignKey.CASCADE),
+        ForeignKey(entity = TagEntity::class, parentColumns = ["id"], childColumns = ["tagId"], onDelete = ForeignKey.CASCADE)
+    ],
+    indices = [Index("tagId")]
+)
+data class NpcTagCrossRef(val npcId: Long, val tagId: Long)
+
+// ── World Wiki ─────────────────────────────────────────────────────────────
+
+@Entity(tableName = "wiki_categories")
+data class WikiCategoryEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    val iconName: String
+)
+
+@Entity(
+    tableName = "wiki_entries",
+    foreignKeys = [ForeignKey(
+        entity = WikiCategoryEntity::class,
+        parentColumns = ["id"],
+        childColumns = ["categoryId"],
+        onDelete = ForeignKey.CASCADE
+    )],
+    indices = [Index("categoryId")]
+)
+data class WikiEntryEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val title: String,
+    val content: String,
+    val categoryId: Long,
+    val imagePath: String?,
+    val lastUpdated: Long
 )

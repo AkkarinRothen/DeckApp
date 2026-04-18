@@ -18,6 +18,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -26,9 +32,46 @@ fun SettingsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(uiState.cacheClearedMessage) {
+    val createBackupLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/zip")
+    ) { uri -> uri?.let { viewModel.createBackup(it) } }
+
+    val restoreBackupLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri -> uri?.let { viewModel.restoreBackup(it) } }
+
+    var showRestoreConfirm by remember { mutableStateOf(false) }
+
+    if (showRestoreConfirm) {
+        AlertDialog(
+            onDismissRequest = { showRestoreConfirm = false },
+            title = { Text("Restaurar biblioteca") },
+            text = { Text("Esta acción BORRARÁ todos tus mazos, tablas y notas actuales para reemplazarlos por los del backup. ¿Deseas continuar?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showRestoreConfirm = false
+                        restoreBackupLauncher.launch("application/zip")
+                    }
+                ) {
+                    Text("Restaurar y Reemplazar", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRestoreConfirm = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    LaunchedEffect(uiState.cacheClearedMessage, uiState.backupMessage) {
         uiState.cacheClearedMessage?.let {
             snackbarHostState.showSnackbar(it)
+            viewModel.clearMessage()
+        }
+        uiState.backupMessage?.let {
+            snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Long)
             viewModel.clearMessage()
         }
     }
@@ -53,6 +96,30 @@ fun SettingsScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // ── Copia de Seguridad ──────────────────────────────────────
+            item {
+                Text(
+                    "Copia de Seguridad",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            item {
+                BackupCard(
+                    isProcessing = uiState.isBackingUp || uiState.isRestoring,
+                    onCreateBackup = {
+                        val dateStr = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
+                        createBackupLauncher.launch("deckapp_backup_$dateStr.zip")
+                    },
+                    onRestoreBackup = {
+                        showRestoreConfirm = true
+                    }
+                )
+            }
+
+            item { HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp)) }
+
             // ── Almacenamiento ──────────────────────────────────────────
             item {
                 Row(
@@ -142,6 +209,7 @@ fun SettingsScreen(
                         Text("• Coil (Carga de imágenes)", style = MaterialTheme.typography.bodySmall)
                         Text("• Markwon (Renderizado Markdown)", style = MaterialTheme.typography.bodySmall)
                         Text("• PdfRenderer (Framework nativo)", style = MaterialTheme.typography.bodySmall)
+                        Text("• Kotlinx Serialization (Backup Engine)", style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
@@ -379,4 +447,53 @@ private fun formatBytes(bytes: Long): String = when {
     bytes < 1024L * 1024L     -> "${"%.1f".format(bytes / 1024.0)} KB"
     bytes < 1024L * 1024L * 1024L -> "${"%.1f".format(bytes / (1024.0 * 1024.0))} MB"
     else                      -> "${"%.2f".format(bytes / (1024.0 * 1024.0 * 1024.0))} GB"
+}
+
+@Composable
+private fun BackupCard(
+    isProcessing: Boolean,
+    onCreateBackup: () -> Unit,
+    onRestoreBackup: () -> Unit
+) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                "Gestión de Biblioteca",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                "Protege tu trabajo exportando un backup o restaura uno existente. Útil para mover tus datos a otro dispositivo.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            
+            if (isProcessing) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                    Spacer(Modifier.width(12.dp))
+                    Text("Procesando backup...", style = MaterialTheme.typography.bodyMedium)
+                }
+            } else {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = onCreateBackup,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Crear Backup")
+                    }
+                    OutlinedButton(
+                        onClick = onRestoreBackup,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Restaurar")
+                    }
+                }
+            }
+        }
+    }
 }

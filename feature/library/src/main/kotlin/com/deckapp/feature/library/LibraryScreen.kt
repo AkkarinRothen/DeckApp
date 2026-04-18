@@ -1,5 +1,7 @@
 package com.deckapp.feature.library
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -19,6 +21,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
@@ -26,6 +30,8 @@ import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material.icons.filled.Casino
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -41,6 +47,10 @@ import com.deckapp.core.model.CardStack
 import com.deckapp.core.model.CollectionIcon
 import com.deckapp.core.model.SearchResultType
 import com.deckapp.core.ui.components.*
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyGridState
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -50,10 +60,13 @@ fun LibraryScreen(
     onManageTags: () -> Unit,
     onAddToSession: (Long) -> Unit,
     onEncounterLibrary: () -> Unit,
+    onNpcLibrary: () -> Unit,
+    onWikiClick: () -> Unit,
     viewModel: LibraryViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
+    val haptic = LocalHapticFeedback.current
     val snackbarHostState = remember { SnackbarHostState() }
 
     // Snackbar para mensajes generales
@@ -167,6 +180,26 @@ fun LibraryScreen(
                 title = { Text(if (uiState.selectedDeckIds.isNotEmpty()) "${uiState.selectedDeckIds.size} seleccionados" else "Biblioteca") },
                 actions = {
                     if (uiState.selectedDeckIds.isEmpty()) {
+                        val canReorder = (selectedTab == 0 || selectedTab == 1) && 
+                                        uiState.searchQuery.isBlank() && 
+                                        uiState.selectedTagIds.isEmpty()
+
+                        if (canReorder) {
+                            IconButton(onClick = { 
+                                if (uiState.isReorderMode) {
+                                    if (selectedTab == 0) viewModel.saveSortOrder() else viewModel.saveTableSortOrder()
+                                } else {
+                                    viewModel.toggleReorderMode()
+                                }
+                            }) {
+                                Icon(
+                                    imageVector = if (uiState.isReorderMode) Icons.Default.Save else Icons.Default.Sort,
+                                    contentDescription = "Reordenar",
+                                    tint = if (uiState.isReorderMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+
                         IconButton(onClick = onImportClick) {
                             Icon(Icons.Default.Add, contentDescription = "Importar mazo")
                         }
@@ -196,6 +229,22 @@ fun LibraryScreen(
                                 },
                                 leadingIcon = { Icon(Icons.Default.PlayArrow, null) }
                             )
+                            DropdownMenuItem(
+                                text = { Text("NPCs y Criaturas") },
+                                onClick = {
+                                    showMenu = false
+                                    onNpcLibrary()
+                                },
+                                leadingIcon = { Icon(Icons.Default.Group, null) }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Wiki del Mundo") },
+                                onClick = {
+                                    showMenu = false
+                                    onWikiClick()
+                                },
+                                leadingIcon = { Icon(Icons.Default.MenuBook, null) }
+                            )
                         }
                     } else {
                         IconButton(onClick = { viewModel.clearSelection() }) {
@@ -204,6 +253,19 @@ fun LibraryScreen(
                     }
                 }
             )
+        },
+        floatingActionButton = {
+            if (uiState.isReorderMode) {
+                ExtendedFloatingActionButton(
+                    onClick = { 
+                        if (selectedTab == 0) viewModel.saveSortOrder() else viewModel.saveTableSortOrder()
+                    },
+                    icon = { Icon(Icons.Default.Save, null) },
+                    text = { Text(if (selectedTab == 0) "Guardar Orden Mazos" else "Guardar Orden Tablas") },
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
@@ -243,7 +305,8 @@ fun LibraryScreen(
                 keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                enabled = !uiState.isReorderMode
             )
 
             // ── Indicador de Colección Activa ─────────────────────────
@@ -421,8 +484,33 @@ fun LibraryScreen(
                     }
                 }
                 else -> {
+                    val deckGridState = rememberLazyGridState()
+                    val deckReorderState = rememberReorderableLazyGridState(
+                        lazyGridState = deckGridState,
+                        onMove = { from, to ->
+                            val newList = uiState.allDecks.toMutableList().apply {
+                                add(to.index, removeAt(from.index))
+                            }
+                            viewModel.updateDeckOrder(newList)
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        }
+                    )
+                    
+                    val tableGridState = rememberLazyGridState()
+                    val tableReorderState = rememberReorderableLazyGridState(
+                        lazyGridState = tableGridState,
+                        onMove = { from, to ->
+                            val newList = uiState.allTables.toMutableList().apply {
+                                add(to.index, removeAt(from.index))
+                            }
+                            viewModel.updateTableOrder(newList)
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        }
+                    )
+
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
+                        state = if (selectedTab == 0) deckGridState else tableGridState,
                         contentPadding = PaddingValues(16.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -430,44 +518,74 @@ fun LibraryScreen(
                     ) {
                         when (selectedTab) {
                             0 -> { // Mazos
-                                gridItems(uiState.filteredDecks, key = { "deck_${it.id}" }) { deck ->
+                                gridItems(uiState.filteredDecks, key = { it.id }) { deck ->
                                     val isSelected = deck.id in uiState.selectedDeckIds
-                                    DeckCoverCard(
-                                        deck = deck,
-                                        isSelected = isSelected,
-                                        onLongClick = { viewModel.toggleDeckSelection(deck.id) },
-                                        onClick = {
-                                            if (uiState.selectedDeckIds.isNotEmpty()) {
-                                                viewModel.toggleDeckSelection(deck.id)
-                                            } else {
-                                                onDeckClick(deck.id)
-                                            }
-                                        },
-                                        onAddToSession = { onAddToSession(deck.id) },
-                                        onDuplicate = if (!uiState.showArchived && uiState.selectedDeckIds.isEmpty()) ({ viewModel.duplicateDeck(deck.id) }) else null,
-                                        onMergeWith = if (!uiState.showArchived && uiState.selectedDeckIds.isEmpty()) ({ viewModel.startMerge(deck.id) }) else null,
-                                        onArchive = { viewModel.archiveDeck(deck.id, !deck.isArchived) },
-                                        onDelete = { viewModel.scheduleDeletion(deck.id) },
-                                        onAddToCollection = { resourceToAddToCollection = deck.id to SearchResultType.DECK },
-                                        onTag = { tagPickerTargetIds = listOf(deck.id) },
-                                        cardCount = uiState.deckCardCounts[deck.id] ?: 0
-                                    )
+                                    
+                                    ReorderableItem(deckReorderState, key = deck.id) { isDragging ->
+                                        val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp)
+                                        
+                                        Surface(
+                                            tonalElevation = elevation,
+                                            shadowElevation = elevation,
+                                            shape = MaterialTheme.shapes.medium,
+                                            modifier = Modifier.draggableHandle(
+                                                onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
+                                                enabled = uiState.isReorderMode
+                                            )
+                                        ) {
+                                            DeckCoverCard(
+                                                deck = deck,
+                                                isSelected = isSelected,
+                                                onLongClick = { if (!uiState.isReorderMode) viewModel.toggleDeckSelection(deck.id) },
+                                                onClick = {
+                                                    if (!uiState.isReorderMode) {
+                                                        if (uiState.selectedDeckIds.isNotEmpty()) {
+                                                            viewModel.toggleDeckSelection(deck.id)
+                                                        } else {
+                                                            onDeckClick(deck.id)
+                                                        }
+                                                    }
+                                                },
+                                                onAddToSession = { if (!uiState.isReorderMode) onAddToSession(deck.id) },
+                                                onDuplicate = if (!uiState.isReorderMode && !uiState.showArchived && uiState.selectedDeckIds.isEmpty()) ({ viewModel.duplicateDeck(deck.id) }) else null,
+                                                onMergeWith = if (!uiState.isReorderMode && !uiState.showArchived && uiState.selectedDeckIds.isEmpty()) ({ viewModel.startMerge(deck.id) }) else null,
+                                                onArchive = { if (!uiState.isReorderMode) viewModel.archiveDeck(deck.id, !deck.isArchived) },
+                                                onDelete = { if (!uiState.isReorderMode) viewModel.scheduleDeletion(deck.id) },
+                                                onAddToCollection = { if (!uiState.isReorderMode) resourceToAddToCollection = deck.id to SearchResultType.DECK },
+                                                onTag = { if (!uiState.isReorderMode) tagPickerTargetIds = listOf(deck.id) },
+                                                cardCount = uiState.deckCardCounts[deck.id] ?: 0
+                                            )
+                                        }
+                                    }
                                 }
                             }
                             1 -> { // Tablas
-                                gridItems(uiState.allTables, key = { "table_${it.id}" }) { table ->
-                                    Card(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(100.dp)
-                                            .combinedClickable(
-                                                onClick = { /* Navegar a tabla */ },
-                                                onLongClick = { resourceToAddToCollection = table.id to SearchResultType.TABLE }
-                                            )
-                                    ) {
-                                        Column(Modifier.padding(12.dp)) {
-                                            Text(table.name, style = MaterialTheme.typography.titleSmall)
-                                            Text(table.rollFormula, style = MaterialTheme.typography.labelSmall)
+                                gridItems(uiState.allTables, key = { it.id }) { table ->
+                                    ReorderableItem(tableReorderState, key = table.id) { isDragging ->
+                                        val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp)
+                                        
+                                        Card(
+                                            elevation = CardDefaults.cardElevation(defaultElevation = elevation),
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(100.dp)
+                                                .draggableHandle(
+                                                    onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
+                                                    enabled = uiState.isReorderMode
+                                                )
+                                                .then(
+                                                    if (!uiState.isReorderMode) {
+                                                        Modifier.combinedClickable(
+                                                            onClick = { /* Navegar a tabla */ },
+                                                            onLongClick = { resourceToAddToCollection = table.id to SearchResultType.TABLE }
+                                                        )
+                                                    } else Modifier
+                                                )
+                                        ) {
+                                            Column(Modifier.padding(12.dp)) {
+                                                Text(table.name, style = MaterialTheme.typography.titleSmall)
+                                                Text(table.rollFormula, style = MaterialTheme.typography.labelSmall)
+                                            }
                                         }
                                     }
                                 }

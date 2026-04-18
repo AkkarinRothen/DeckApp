@@ -3,6 +3,7 @@ package com.deckapp.feature.deck
 import android.app.Activity
 import android.view.WindowManager
 import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,7 +26,9 @@ import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.ViewStream
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -43,6 +46,9 @@ import com.deckapp.core.model.CardContentMode
 import com.deckapp.core.model.CardFace
 import com.deckapp.core.model.ContentZone
 import com.deckapp.core.ui.components.MarkdownText
+import com.deckapp.core.ui.components.MarkdownToolbar
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.material.icons.filled.Check
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -117,11 +123,15 @@ fun CardViewScreen(
                                 }
                             }
                         }
-                        // Botón "Mostrar a jugador"
-                        IconButton(onClick = { showPlayerView = true }) {
-                            Icon(Icons.Default.Visibility, contentDescription = "Mostrar a jugador")
+                        // Botón de Revelar/Ocultar (Sprint 26)
+                        IconButton(onClick = { viewModel.toggleRevealed() }) {
+                            Icon(
+                                imageVector = if (card.isRevealed) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                contentDescription = if (card.isRevealed) "Ocultar a jugadores" else "Revelar a jugadores",
+                                tint = if (card.isRevealed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                            )
                         }
-                        
+
                         // Botón de Notas (Sprint 15)
                         IconButton(onClick = { showNotesSheet = true }) {
                             val hasNotes = !card.dmNotes.isNullOrBlank()
@@ -151,14 +161,21 @@ fun CardViewScreen(
                 val isFlippable = face.contentMode == CardContentMode.DOUBLE_SIDED_FULL
                         && card.faces.size > 1
 
+                // Animación 3D de flip (B-2/B-3)
+                val rotation by animateFloatAsState(
+                    targetValue = if (card.isRevealed) 0f else 180f,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioLowBouncy,
+                        stiffness = Spring.StiffnessLow
+                    ),
+                    label = "card-flip-rotation"
+                )
+
                 when {
-                    // V-6: modo referencia — todas las caras en columna
                     showAllFaces -> AllFacesView(
                         card = card,
                         modifier = Modifier.fillMaxSize().padding(padding)
                     )
-
-                    // V-7: brújula FOUR_EDGE_CUES
                     showCompass && face.contentMode == CardContentMode.FOUR_EDGE_CUES -> {
                         FourEdgeCompassView(
                             face = face,
@@ -167,84 +184,124 @@ fun CardViewScreen(
                             modifier = Modifier.fillMaxSize().padding(padding)
                         )
                     }
-
-                    // Vista normal
                     else -> Column(modifier = Modifier.fillMaxSize().padding(padding)) {
 
-                        // ── Área de imagen ────────────────────────────────────────────
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f)
-                                .padding(16.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                        ) {
-                            if (isFlippable) {
-                                AnimatedContent(
-                                    targetState = card.currentFaceIndex,
-                                    transitionSpec = {
-                                        if (targetState > initialState)
-                                            (slideInHorizontally { it } + fadeIn()) togetherWith
-                                            (slideOutHorizontally { -it } + fadeOut())
-                                        else
-                                            (slideInHorizontally { -it } + fadeIn()) togetherWith
-                                            (slideOutHorizontally { it } + fadeOut())
-                                    },
-                                    modifier = Modifier.fillMaxSize(),
-                                    label = "card-face-flip"
-                                ) { faceIndex ->
-                                    CardFaceImage(
-                                        face = card.faces.getOrElse(faceIndex) { card.faces.first() },
-                                        title = card.title
-                                    )
-                                }
-                            } else {
-                                CardFaceImage(face = face, title = card.title)
+                    // ── Área de imagen ────────────────────────────────────────────
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .padding(16.dp)
+                            .graphicsLayer {
+                                rotationY = rotation
+                                cameraDistance = 12f * density
+                            }
+                    ) {
+                        // Si la rotación pasa de 90, mostramos el reverso
+                        if (rotation <= 90f) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(RoundedCornerShape(12.dp))
+                            ) {
+                                if (isFlippable) {
+                                    AnimatedContent(
+                                        targetState = card.currentFaceIndex,
+                                        transitionSpec = {
+                                            if (targetState > initialState)
+                                                (slideInHorizontally { it } + fadeIn()) togetherWith
+                                                        (slideOutHorizontally { -it } + fadeOut())
+                                            else
+                                                (slideInHorizontally { -it } + fadeIn()) togetherWith
+                                                        (slideOutHorizontally { it } + fadeOut())
+                                        },
+                                        modifier = Modifier.fillMaxSize(),
+                                        label = "card-face-flip"
+                                    ) { faceIndex ->
+                                        CardFaceImage(
+                                            face = card.faces.getOrElse(faceIndex) { card.faces.first() },
+                                            title = card.title
+                                        )
+                                    }
+                                } else {
+                                    CardFaceImage(face = face, title = card.title)
 
-                                if (face.contentMode == CardContentMode.TOP_BOTTOM_SPLIT) {
-                                    HorizontalDivider(
-                                        modifier = Modifier.align(Alignment.Center),
-                                        thickness = 2.dp,
-                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                                    )
-                                }
-                                if (face.contentMode == CardContentMode.FOUR_QUADRANT) {
-                                    FourQuadrantOverlay(
-                                        selectedQuadrant = selectedQuadrant,
-                                        onQuadrantSelected = { q ->
-                                            selectedQuadrant = if (selectedQuadrant == q) -1 else q
-                                        }
-                                    )
+                                    if (face.contentMode == CardContentMode.TOP_BOTTOM_SPLIT) {
+                                        HorizontalDivider(
+                                            modifier = Modifier.align(Alignment.Center),
+                                            thickness = 2.dp,
+                                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                                        )
+                                    }
+                                    if (face.contentMode == CardContentMode.FOUR_QUADRANT) {
+                                        FourQuadrantOverlay(
+                                            selectedQuadrant = selectedQuadrant,
+                                            onQuadrantSelected = { q ->
+                                                selectedQuadrant = if (selectedQuadrant == q) -1 else q
+                                            }
+                                        )
+                                    }
                                 }
                             }
-                        }
-
-                        // ── Panel de zonas ────────────────────────────────────────────
-                        when (face.contentMode) {
-                            CardContentMode.TOP_BOTTOM_SPLIT -> TopBottomZonePanel(zones = face.zones)
-                            CardContentMode.FOUR_QUADRANT -> FourQuadrantZonePanel(
-                                zones = face.zones, selectedQuadrant = selectedQuadrant
+                        } else {
+                            // Reverso de la carta (Face Down)
+                            CardBackView(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .graphicsLayer { this.rotationY = 180f } // Invertir para que se vea bien
+                                    .clip(RoundedCornerShape(12.dp))
                             )
-                            else -> {
-                                val activeZone = card.activeZone
-                                if (activeZone != null && activeZone.text.isNotBlank()) {
-                                    GenericZonePanel(
-                                        zone = activeZone,
-                                        contentMode = face.contentMode,
-                                        isReversed = card.isReversed,
-                                        currentRotation = card.currentRotation,
-                                        onToggleReversed = { viewModel.toggleReversed() }
-                                    )
+                        }
+                    }
+
+                    // ── Panel de zonas ────────────────────────────────────────────
+                    // Solo visible si está revelada
+                    AnimatedVisibility(
+                        visible = card.isRevealed,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut()
+                    ) {
+                        Column {
+                            when (face.contentMode) {
+                                CardContentMode.TOP_BOTTOM_SPLIT -> TopBottomZonePanel(zones = face.zones)
+                                CardContentMode.FOUR_QUADRANT -> FourQuadrantZonePanel(
+                                    zones = face.zones, selectedQuadrant = selectedQuadrant
+                                )
+                                else -> {
+                                    val activeZone = card.activeZone
+                                    if (activeZone != null && activeZone.text.isNotBlank()) {
+                                        GenericZonePanel(
+                                            zone = activeZone,
+                                            contentMode = face.contentMode,
+                                            isReversed = card.isReversed,
+                                            currentRotation = card.currentRotation,
+                                            onToggleReversed = { viewModel.toggleReversed() }
+                                        )
+                                    }
                                 }
                             }
-                        }
 
-                        // ── V-5: Tira de miniaturas de caras ──────────────────────────
-                        if (card.faces.size > 1) {
-                            FaceStrip(
-                                card = card,
-                                onFaceSelected = { viewModel.jumpToFace(it) },
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                            // ── V-5: Tira de miniaturas de caras ──────────────────────────
+                            if (card.faces.size > 1) {
+                                FaceStrip(
+                                    card = card,
+                                    onFaceSelected = { viewModel.jumpToFace(it) },
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                )
+                            }
+                        }
+                    }
+                    
+                    if (!card.isRevealed) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().padding(32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "Esta carta está oculta para los jugadores.\nPulsa el ojo para revelarla.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.outline,
+                                textAlign = TextAlign.Center
                             )
                         }
                     }
@@ -252,10 +309,12 @@ fun CardViewScreen(
             }
         }
     }
+}
 
     if (showNotesSheet && uiState.card != null) {
         CardNotesBottomSheet(
             notes = uiState.card?.dmNotes ?: "",
+            isSaving = uiState.isSavingNotes,
             onNotesChange = { viewModel.updateNotes(it) },
             onDismiss = { showNotesSheet = false }
         )
@@ -266,15 +325,22 @@ fun CardViewScreen(
 @Composable
 private fun CardNotesBottomSheet(
     notes: String,
+    isSaving: Boolean,
     onNotesChange: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState()
-    var text by remember { mutableStateOf(notes) }
     
-    // Auto-guardado al cerrar o cambiar texto (debounce real se haría en el VM, aqui es simple)
-    LaunchedEffect(text) {
-        onNotesChange(text)
+    // Usamos TextFieldValue para soportar el toolbar de Markdown con gestión de cursor
+    var textFieldValue by remember { 
+        mutableStateOf(TextFieldValue(notes)) 
+    }
+    
+    // Sincronizar cambios hacia el ViewModel con debounce
+    LaunchedEffect(textFieldValue.text) {
+        if (textFieldValue.text != notes) {
+            onNotesChange(textFieldValue.text)
+        }
     }
 
     ModalBottomSheet(
@@ -288,7 +354,11 @@ private fun CardNotesBottomSheet(
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 48.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            // Cabecera con estado de guardado
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Icon(
                     Icons.AutoMirrored.Filled.StickyNote2,
                     contentDescription = null,
@@ -296,27 +366,78 @@ private fun CardNotesBottomSheet(
                 )
                 Spacer(Modifier.width(12.dp))
                 Text(
-                    "Notas Privadas del DM",
+                    "Notas Privadas",
                     style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+
+                // Indicador de sincronización (Sprint 16)
+                AnimatedVisibility(
+                    visible = isSaving,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.tertiary
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            "Guardando...",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.tertiary
+                        )
+                    }
+                }
+                if (!isSaving && notes.isNotBlank()) {
+                    Icon(
+                        Icons.Default.Check,
+                        contentDescription = "Guardado",
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.outline
+                    )
+                }
+            }
+            
+            Spacer(Modifier.height(16.dp))
+            
+            // Toolbar de Markdown integrado (Sprint 16)
+            MarkdownToolbar(
+                value = textFieldValue,
+                onValueChange = { textFieldValue = it },
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 150.dp, max = 300.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+            ) {
+                OutlinedTextField(
+                    value = textFieldValue,
+                    onValueChange = { textFieldValue = it },
+                    modifier = Modifier.fillMaxSize(),
+                    placeholder = { Text("Anotaciones para esta carta...") },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent
+                    )
                 )
             }
             
             Spacer(Modifier.height(16.dp))
             
-            OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 120.dp),
-                placeholder = { Text("Escribe anotaciones para esta carta... (Markdown soportado)") },
-                shape = RoundedCornerShape(12.dp)
-            )
-            
-            Spacer(Modifier.height(16.dp))
-            
-            if (text.isNotBlank()) {
+            if (textFieldValue.text.isNotBlank()) {
                 Text(
                     "Vista previa",
                     style = MaterialTheme.typography.labelMedium,
@@ -324,11 +445,11 @@ private fun CardNotesBottomSheet(
                 )
                 Surface(
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    shape = RoundedCornerShape(8.dp)
+                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    shape = RoundedCornerShape(12.dp)
                 ) {
-                    Box(Modifier.padding(12.dp)) {
-                        MarkdownText(markdown = text)
+                    Box(Modifier.padding(16.dp)) {
+                        MarkdownText(markdown = textFieldValue.text)
                     }
                 }
             }
@@ -829,6 +950,39 @@ private fun GenericZonePanel(
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
                     .heightIn(max = 200.dp)
+            )
+        }
+    }
+}
+
+/** Componente para el reverso de la carta (Face Down) */
+@Composable
+private fun CardBackView(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .background(
+                androidx.compose.ui.graphics.Brush.verticalGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.primaryContainer,
+                        MaterialTheme.colorScheme.surfaceVariant
+                    )
+                )
+            )
+            .border(2.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp)),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                Icons.Default.VisibilityOff,
+                contentDescription = null,
+                modifier = Modifier.size(64.dp),
+                tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+            )
+            Spacer(Modifier.height(16.dp))
+            Text(
+                "FACE DOWN",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.outline
             )
         }
     }

@@ -13,6 +13,7 @@ data class RandomTable(
     val isNoRepeat: Boolean = false,
     val isPinned: Boolean = false,
     val isBuiltIn: Boolean = false,
+    val sortOrder: Int = 0,
     val createdAt: Long = System.currentTimeMillis()
 )
 

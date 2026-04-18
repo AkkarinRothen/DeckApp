@@ -24,6 +24,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import kotlinx.serialization.Serializable
 import com.deckapp.feature.deck.CardEditorScreen
 import com.deckapp.feature.deck.CardViewScreen
 import com.deckapp.feature.deck.DeckDetailScreen
@@ -37,8 +38,15 @@ import com.deckapp.feature.session.SessionHistoryScreen
 import com.deckapp.feature.session.SessionListScreen
 import com.deckapp.feature.session.SessionSetupScreen
 import com.deckapp.feature.settings.SettingsScreen
-import com.deckapp.feature.tables.TableEditorScreen
 import com.deckapp.feature.importdeck.table.TableImportScreen
+import com.deckapp.feature.npcs.NpcEditorScreen
+import com.deckapp.feature.npcs.NpcListScreen
+import com.deckapp.feature.wiki.WikiHomeScreen
+import com.deckapp.feature.wiki.WikiEntryEditorScreen
+import com.deckapp.feature.tables.TableEditorScreen
+
+@Serializable object WikiRoute
+@Serializable data class WikiEntryRoute(val entryId: Long? = null, val categoryId: Long? = null)
 
 @Composable
 fun DeckAppNavHost() {
@@ -133,7 +141,9 @@ fun DeckAppNavHost() {
                     onImportClick = { navController.navigate(ImportRoute) },
                     onManageTags = { navController.navigate(TagManagerRoute) },
                     onAddToSession = { deckId -> navController.navigate(SessionSetupRoute(deckId)) },
-                    onEncounterLibrary = { navController.navigate(EncounterListRoute) }
+                    onEncounterLibrary = { navController.navigate(EncounterListRoute) },
+                    onNpcLibrary = { navController.navigate(NpcListRoute) },
+                    onWikiClick = { navController.navigate(WikiRoute) }
                 )
             }
             composable<SessionListRoute> {
@@ -237,6 +247,26 @@ fun DeckAppNavHost() {
             }
             composable<EncounterEditorRoute> {
                 EncounterEditorScreen(onBack = { navController.popBackStack() })
+            }
+            composable<NpcListRoute> {
+                NpcListScreen(
+                    onBack = { navController.popBackStack() },
+                    onAddNpc = { navController.navigate(NpcEditorRoute()) },
+                    onEditNpc = { id -> navController.navigate(NpcEditorRoute(id)) }
+                )
+            }
+            composable<NpcEditorRoute> {
+                NpcEditorScreen(onBack = { navController.popBackStack() })
+            }
+            composable<WikiRoute> {
+                WikiHomeScreen(
+                    onBack = { navController.popBackStack() },
+                    onEntryClick = { id -> navController.navigate(WikiEntryRoute(entryId = id)) },
+                    onAddEntry = { catId -> navController.navigate(WikiEntryRoute(categoryId = catId)) }
+                )
+            }
+            composable<WikiEntryRoute> {
+                WikiEntryEditorScreen(onBack = { navController.popBackStack() })
             }
         }
     }

@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 /**
- * Avanza el turno del combate.
+ * Avanza el turno del combate basándose en el [EncounterCreature.sortOrder] establecido.
  * Incrementa el índice de turno; si llega al final de la lista,
  * vuelve al inicio e incrementa el contador de ronda.
  */
@@ -17,11 +17,14 @@ class NextTurnUseCase @Inject constructor(
     suspend operator fun invoke(encounterId: Long) {
         val encounter = encounterRepository.getEncounterById(encounterId).first() ?: return
         
-        // El orden de combate es descendente por iniciativa (total)
-        val sortedCreatures = encounter.creatures.sortedByDescending { it.initiativeTotal ?: 0 }
+        // El orden de combate es explícito mediante sortOrder
+        val sortedCreatures = encounter.creatures.sortedBy { it.sortOrder }
         if (sortedCreatures.isEmpty()) return
 
-        var nextIndex = encounter.currentTurnIndex + 1
+        // Asegurar que el índice actual es válido (por si hubo borrados)
+        val currentIndex = encounter.currentTurnIndex.coerceIn(0, sortedCreatures.size - 1)
+        
+        var nextIndex = currentIndex + 1
         var nextRound = encounter.currentRound
 
         if (nextIndex >= sortedCreatures.size) {

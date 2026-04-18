@@ -27,40 +27,29 @@ import com.deckapp.core.model.TableEntry
  *    Zombie
  *    Esqueleto
  */
-class PlainTextTableParser {
+class PlainTextTableParser : TableParser {
 
-    data class ParseResult(
-        val entries: List<TableEntry>,
-        /**
-         * Fórmula de dado sugerida para la tabla, inferida a partir del rango de las entradas.
-         * Null si el texto ya contenía rangos explícitos (el parser los usa directamente).
-         * Ejemplo: lista de 6 ítems sin rangos → "1d6".
-         */
-        val suggestedFormula: String?
-    )
+    override fun canParse(rawText: String): Boolean = rawText.isNotBlank()
 
     /**
      * Parsea texto plano y devuelve las entradas detectadas junto con la fórmula sugerida.
      * Usar [parse] si solo se necesitan las entradas.
      */
-    fun parseWithMeta(rawText: String): ParseResult {
+    fun parseWithMeta(rawText: String): ParsedTableContent {
         val lines = rawText.lines()
             .map { it.trim() }
             .filter { it.isNotBlank() && !isMarkdownTableSeparator(it) }
 
-        if (lines.isEmpty()) return ParseResult(emptyList(), null)
+        if (lines.isEmpty()) return ParsedTableContent()
 
         return when {
             looksLikeMarkdownTable(lines) ->
-                ParseResult(parseMarkdownTable(lines), null)
+                ParsedTableContent(entries = parseMarkdownTable(lines))
             looksLikeEnumeratedList(lines) ->
-                ParseResult(parseEnumeratedList(lines), null)
+                ParsedTableContent(entries = parseEnumeratedList(lines))
             else -> {
                 val entries = parseSimpleList(lines)
-                val formula = if (entries.isNotEmpty())
-                    RangeParser.inferRollFormula(1, entries.size)
-                else null
-                ParseResult(entries, formula)
+                ParsedTableContent(entries = entries)
             }
         }
     }
@@ -69,7 +58,7 @@ class PlainTextTableParser {
      * Parsea texto plano y devuelve las entradas detectadas.
      * Para obtener también la fórmula sugerida, usar [parseWithMeta].
      */
-    fun parse(rawText: String): List<TableEntry> = parseWithMeta(rawText).entries
+    override fun parse(rawText: String): ParsedTableContent = parseWithMeta(rawText)
 
     // ── Markdown Table ────────────────────────────────────────────────────────
 

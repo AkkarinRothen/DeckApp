@@ -11,9 +11,11 @@ import com.deckapp.core.model.Card
 import com.deckapp.core.model.CardStack
 import android.net.Uri
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -44,6 +46,7 @@ class DeckDetailViewModel @Inject constructor(
     private val duplicateDeckUseCase: DuplicateDeckUseCase,
     private val mergeDecksUseCase: MergeDecksUseCase,
     private val exportDeckToZipUseCase: ExportDeckToZipUseCase,
+    private val getOrCreateTagUseCase: com.deckapp.core.domain.usecase.GetOrCreateTagUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -69,6 +72,7 @@ class DeckDetailViewModel @Inject constructor(
         cardRepository.getAllDecks(),
         _extras
     ) { deck, cards, allDecks, extras ->
+        // Este bloque ahora se ejecutará en Dispatchers.Default gracias a flowOn
         val suits = cards.mapNotNull { it.suit }.distinct().sorted()
         val filtered = if (extras.suitFilter == null) cards
                        else cards.filter { it.suit == extras.suitFilter }
@@ -90,7 +94,8 @@ class DeckDetailViewModel @Inject constructor(
             showConfigSheet = extras.showConfigSheet,
             isReorderMode = extras.isReorderMode
         )
-    }.stateIn(
+    }.flowOn(Dispatchers.Default)
+    .stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = DeckDetailUiState()
@@ -186,6 +191,43 @@ class DeckDetailViewModel @Inject constructor(
         }
     }
 
+    fun updateName(name: String) {
+        val deck = uiState.value.deck ?: return
+        if (name == deck.name) return
+        viewModelScope.launch {
+            cardRepository.updateStack(deck.copy(name = name))
+        }
+    }
+
+    fun updateDescription(description: String) {
+        val deck = uiState.value.deck ?: return
+        if (description == deck.description) return
+        viewModelScope.launch {
+            cardRepository.updateStack(deck.copy(description = description))
+        }
+    }
+
+    fun setCoverImage(path: String?) {
+        val deck = uiState.value.deck ?: return
+        viewModelScope.launch {
+            cardRepository.updateStack(deck.copy(coverImagePath = path))
+        }
+    }
+
+    fun toggleArchived() {
+        val deck = uiState.value.deck ?: return
+        viewModelScope.launch {
+            cardRepository.setDeckArchived(deck.id, !deck.isArchived)
+        }
+    }
+
+    fun deleteDeck() {
+        val id = deckId
+        viewModelScope.launch {
+            cardRepository.deleteStack(id)
+        }
+    }
+
     fun setSuitFilter(suit: String?) {
         _extras.update { it.copy(suitFilter = suit) }
     }
@@ -214,9 +256,9 @@ class DeckDetailViewModel @Inject constructor(
         if (trimmed.isBlank()) return
         if (deck.tags.any { it.name.equals(trimmed, ignoreCase = true) }) return
         viewModelScope.launch {
-            val tagId = cardRepository.saveTag(com.deckapp.core.model.Tag(name = trimmed))
+            val tag = getOrCreateTagUseCase(trimmed)
             val updatedDeck = deck.copy(
-                tags = deck.tags + com.deckapp.core.model.Tag(id = tagId, name = trimmed)
+                tags = deck.tags + tag
             )
             // updateStack en lugar de saveStack: @Update no borra las cartas del mazo
             cardRepository.updateStack(updatedDeck)

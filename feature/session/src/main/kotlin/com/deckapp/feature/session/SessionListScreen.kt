@@ -88,6 +88,37 @@ fun SessionListScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                if (uiState.plannedSessions.isNotEmpty()) {
+                    item {
+                        Text(
+                            "Planificadas",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        )
+                    }
+                    items(uiState.plannedSessions, key = { it.id }) { session ->
+                        SessionCard(
+                            session = session,
+                            statusText = "Programada",
+                            onClick = { onSessionClick(session.id) },
+                            onRename = { sessionToRename = session },
+                            onClone = { viewModel.cloneSession(session.id) },
+                            onDelete = { sessionToDelete = session },
+                            trailingContent = {
+                                Button(
+                                    onClick = { viewModel.startSession(session.id) },
+                                    contentPadding = PaddingValues(horizontal = 12.dp),
+                                    modifier = Modifier.height(32.dp)
+                                ) {
+                                    Text("Empezar", style = MaterialTheme.typography.labelMedium)
+                                }
+                            }
+                        )
+                    }
+                    item { Spacer(Modifier.height(8.dp)) }
+                }
+
                 if (uiState.activeSessions.isNotEmpty()) {
                     item {
                         Text(
@@ -100,18 +131,25 @@ fun SessionListScreen(
                     items(uiState.activeSessions, key = { it.id }) { session ->
                         SessionCard(
                             session = session,
-                            isActive = true,
+                            statusText = "En curso",
                             onClick = { onSessionClick(session.id) },
                             onRename = { sessionToRename = session },
                             onClone = { viewModel.cloneSession(session.id) },
-                            onDelete = { sessionToDelete = session }
+                            onDelete = { sessionToDelete = session },
+                            trailingContent = {
+                                Icon(
+                                    Icons.Default.PlayArrow,
+                                    contentDescription = "Continuar sesión",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
                         )
                     }
+                    item { Spacer(Modifier.height(8.dp)) }
                 }
 
                 if (uiState.pastSessions.isNotEmpty()) {
                     item {
-                        Spacer(Modifier.height(8.dp))
                         Text(
                             "Historial",
                             style = MaterialTheme.typography.labelLarge,
@@ -122,7 +160,7 @@ fun SessionListScreen(
                     items(uiState.pastSessions, key = { it.id }) { session ->
                         SessionCard(
                             session = session,
-                            isActive = false,
+                            statusText = "Finalizada",
                             onClick = { onHistoryClick(session.id) },
                             onRename = { sessionToRename = session },
                             onClone = { viewModel.cloneSession(session.id) },
@@ -138,11 +176,12 @@ fun SessionListScreen(
 @Composable
 private fun SessionCard(
     session: Session,
-    isActive: Boolean,
+    statusText: String,
     onClick: () -> Unit,
     onRename: () -> Unit,
     onClone: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    trailingContent: @Composable () -> Unit = {}
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
@@ -157,21 +196,13 @@ private fun SessionCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = session.name, style = MaterialTheme.typography.titleSmall)
                 Text(
-                    text = if (isActive) "En curso" else "Finalizada",
+                    text = statusText,
                     style = MaterialTheme.typography.labelSmall,
-                    color = if (isActive) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
-            if (isActive) {
-                Icon(
-                    Icons.Default.PlayArrow,
-                    contentDescription = "Continuar sesión",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(end = 4.dp)
-                )
-            }
+            trailingContent()
 
             Box {
                 IconButton(onClick = { showMenu = true }) {

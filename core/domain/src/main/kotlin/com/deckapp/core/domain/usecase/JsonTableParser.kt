@@ -28,19 +28,19 @@ import kotlinx.serialization.json.jsonPrimitive
  * 3. **Formato DeckApp propio**: Si el JSON fue exportado por la propia app.
  *    { "name": "...", "entries": [ {"min": 1, "max": 5, "text": "..."} ] }
  */
-class JsonTableParser {
-
-    data class ParsedTable(
-        val name: String,
-        val description: String = "",
-        val entries: List<TableEntry>
-    )
+class JsonTableParser : TableParser {
 
     private val json = Json { ignoreUnknownKeys = true; isLenient = true }
 
-    fun parse(rawJson: String): ParsedTable {
+    override fun canParse(rawText: String): Boolean {
+        val trimmed = rawText.trim()
+        return (trimmed.startsWith("{") && trimmed.endsWith("}")) || 
+               (trimmed.startsWith("[") && trimmed.endsWith("]"))
+    }
+
+    override fun parse(rawText: String): ParsedTableContent {
         val element = try {
-            json.parseToJsonElement(rawJson)
+            json.parseToJsonElement(rawText)
         } catch (e: Exception) {
             throw TableParseException.InvalidJson(e.message ?: "error desconocido")
         }
@@ -55,14 +55,14 @@ class JsonTableParser {
     // ── Formatos ─────────────────────────────────────────────────────────────
 
     /** Foundry VTT (RollTable) o formato propio DeckApp */
-    private fun parseObject(obj: JsonObject): ParsedTable {
+    private fun parseObject(obj: JsonObject): ParsedTableContent {
         val name = obj["name"]?.jsonPrimitive?.content ?: "Tabla Importada"
         val description = obj["description"]?.jsonPrimitive?.content ?: ""
 
         // 1. Foundry VTT: "results" con "range": [min, max]
         val results = obj["results"]?.jsonArray
         if (results != null) {
-            return ParsedTable(
+            return ParsedTableContent(
                 name = name,
                 description = description,
                 entries = parseFoundryResults(results)
@@ -72,7 +72,7 @@ class JsonTableParser {
         // 2. Formato DeckApp propio: "entries" con "min", "max", "text"
         val entries = obj["entries"]?.jsonArray
         if (entries != null) {
-            return ParsedTable(
+            return ParsedTableContent(
                 name = name,
                 description = description,
                 entries = parseDeckAppEntries(entries)
@@ -82,7 +82,7 @@ class JsonTableParser {
         // 3. Formato Roll20: "items" con "weight" y "name"
         val items = obj["items"]?.jsonArray
         if (items != null) {
-            return ParsedTable(
+            return ParsedTableContent(
                 name = name,
                 description = description,
                 entries = parseRoll20Items(items)
@@ -93,7 +93,7 @@ class JsonTableParser {
     }
 
     /** Array simple de strings ["Resultado A", "Resultado B", ...] */
-    private fun parseSimpleArray(array: JsonArray): ParsedTable {
+    private fun parseSimpleArray(array: JsonArray): ParsedTableContent {
         val entries = array.mapIndexed { index, element ->
             val text = when {
                 element is JsonObject -> element["text"]?.jsonPrimitive?.content
@@ -108,7 +108,7 @@ class JsonTableParser {
                 sortOrder = index
             )
         }
-        return ParsedTable(name = "Tabla Importada", entries = entries)
+        return ParsedTableContent(name = "Tabla Importada", entries = entries)
     }
 
     /** Parsea resultados en formato Foundry VTT */

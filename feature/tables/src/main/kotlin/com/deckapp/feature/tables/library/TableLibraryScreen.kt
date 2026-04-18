@@ -6,8 +6,11 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,6 +25,11 @@ import com.deckapp.feature.tables.TableDetailSheet
 import com.deckapp.feature.tables.TablesViewModel
 import com.deckapp.core.ui.components.SelectionActionBar
 import com.deckapp.feature.tables.library.components.TableGridItem
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyGridState
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.animation.core.animateDpAsState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,6 +41,7 @@ fun TableLibraryScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val haptic = LocalHapticFeedback.current
     val snackbarHostState = remember { SnackbarHostState() }
 
     // Snackbar para mensajes
@@ -96,6 +105,15 @@ fun TableLibraryScreen(
                 scrollBehavior = scrollBehavior,
                 actions = {
                     if (uiState.selectedTableIds.isEmpty()) {
+                        if (uiState.searchQuery.isBlank() && uiState.selectedTagIds.isEmpty()) {
+                            IconButton(onClick = { viewModel.toggleReorderMode() }) {
+                                Icon(
+                                    imageVector = if (uiState.isReorderMode) Icons.Default.Save else Icons.Default.Sort,
+                                    contentDescription = "Reordenar",
+                                    tint = if (uiState.isReorderMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
                         IconButton(onClick = onImportClick) {
                             Icon(Icons.Default.UploadFile, contentDescription = "Importar")
                         }
@@ -108,7 +126,15 @@ fun TableLibraryScreen(
             )
         },
         floatingActionButton = {
-            if (uiState.selectedTableIds.isEmpty()) {
+            if (uiState.isReorderMode) {
+                ExtendedFloatingActionButton(
+                    onClick = { viewModel.saveSortOrder() },
+                    icon = { Icon(Icons.Default.Save, null) },
+                    text = { Text("Guardar Orden") },
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            } else if (uiState.selectedTableIds.isEmpty()) {
                 FloatingActionButton(onClick = onCreateTable) {
                     Icon(Icons.Default.Add, contentDescription = "Nueva tabla")
                 }
@@ -167,7 +193,8 @@ fun TableLibraryScreen(
                 },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                 shape = MaterialTheme.shapes.large,
-                singleLine = true
+                singleLine = true,
+                enabled = !uiState.isReorderMode
             )
 
             // Selector de Etiquetas (Tags)
@@ -201,8 +228,21 @@ fun TableLibraryScreen(
                     }
                 )
             } else {
+                val gridState = rememberLazyGridState()
+                val reorderableState = rememberReorderableLazyGridState(
+                    lazyGridState = gridState,
+                    onMove = { from, to ->
+                        val newList = uiState.tables.toMutableList().apply {
+                            add(to.index, removeAt(from.index))
+                        }
+                        viewModel.updateTableOrder(newList)
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    }
+                )
+
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
+                    state = gridState,
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -210,23 +250,40 @@ fun TableLibraryScreen(
                 ) {
                     items(uiState.filteredTables, key = { it.id }) { table ->
                         val isSelected = table.id in uiState.selectedTableIds
-                        TableGridItem(
-                            table = table,
-                            isSelected = isSelected,
-                            onLongClick = { viewModel.toggleTableSelection(table.id) },
-                            onClick = {
-                                if (uiState.selectedTableIds.isNotEmpty()) {
-                                    viewModel.toggleTableSelection(table.id)
-                                } else {
-                                    onTableClick(table.id)
-                                }
-                            },
-                            onQuickRoll = { viewModel.rollTable(table.id, sessionId = null) },
-                            onTogglePin = { viewModel.togglePin(table) },
-                            onDuplicate = if (uiState.selectedTableIds.isEmpty()) ({ viewModel.duplicateTable(table.id) }) else null,
-                            onInvertRanges = if (uiState.selectedTableIds.isEmpty()) ({ viewModel.invertTable(table.id) }) else null,
-                            onDelete = { viewModel.deleteTable(table.id) }
-                        )
+                        
+                        ReorderableItem(reorderableState, key = table.id) { isDragging ->
+                            val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp)
+                            
+                            Surface(
+                                tonalElevation = elevation,
+                                shadowElevation = elevation,
+                                shape = MaterialTheme.shapes.medium,
+                                modifier = Modifier.draggableHandle(
+                                    onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
+                                    enabled = uiState.isReorderMode
+                                )
+                            ) {
+                                TableGridItem(
+                                    table = table,
+                                    isSelected = isSelected,
+                                    onLongClick = { if (!uiState.isReorderMode) viewModel.toggleTableSelection(table.id) },
+                                    onClick = {
+                                        if (!uiState.isReorderMode) {
+                                            if (uiState.selectedTableIds.isNotEmpty()) {
+                                                viewModel.toggleTableSelection(table.id)
+                                            } else {
+                                                onTableClick(table.id)
+                                            }
+                                        }
+                                    },
+                                    onQuickRoll = { if (!uiState.isReorderMode) viewModel.rollTable(table.id, sessionId = null) },
+                                    onTogglePin = { if (!uiState.isReorderMode) viewModel.togglePin(table) },
+                                    onDuplicate = if (!uiState.isReorderMode && uiState.selectedTableIds.isEmpty()) ({ viewModel.duplicateTable(table.id) }) else null,
+                                    onInvertRanges = if (!uiState.isReorderMode && uiState.selectedTableIds.isEmpty()) ({ viewModel.invertTable(table.id) }) else null,
+                                    onDelete = { if (!uiState.isReorderMode) viewModel.deleteTable(table.id) }
+                                )
+                            }
+                        }
                     }
                 }
             }

@@ -3,24 +3,14 @@ package com.deckapp.core.domain.usecase
 import android.graphics.Bitmap
 import com.deckapp.core.domain.repository.OcrRepository
 import com.deckapp.core.model.TableEntry
+import com.deckapp.core.model.TableImportSource
 import javax.inject.Inject
-
-/**
- * Enumeración de fuentes de importación soportadas.
- */
-enum class ImportSource {
-    OCR_IMAGE,   // Imagen/PDF con análisis óptico
-    CSV_TEXT,    // Texto en formato CSV / TSV / DSV
-    JSON_TEXT,   // JSON (Foundry VTT, DeckApp Export, o array simple)
-    PLAIN_TEXT,  // Texto plano (portapapeles, listas)
-    MARKDOWN_TABLE // Tablas estándar Markdown (|---|)
-}
 
 /**
  * Parámetros para importaciones de archivo/texto estructurado.
  */
 data class TextImportParams(
-    val source: ImportSource,
+    val source: TableImportSource,
     val rawText: String,
     // Solo para CSV:
     val csvConfig: CsvTableParser.ParseConfig? = null
@@ -45,16 +35,10 @@ data class ImportResult(
  */
 class ImportTableUseCase @Inject constructor(
     private val ocrRepository: OcrRepository,
-    private val analyzeTableImageUseCase: AnalyzeTableImageUseCase
+    private val analyzeTableImageUseCase: AnalyzeTableImageUseCase,
+    private val importProvider: TableImportProvider
 ) {
-    // Parsers de texto sin estado — instancias compartidas
-    private val csvParser = CsvTableParser()
-    private val jsonParser = JsonTableParser()
-    private val plainTextParser = PlainTextTableParser()
-    private val markdownParser = MarkdownTableParser()
-
-    /** Importar desde imagen/PDF via OCR. Devuelve todas las tablas detectadas.
-     *  Lanza [com.deckapp.core.domain.repository.OcrException] si ML Kit falla. */
+    /** Importar desde imagen/PDF via OCR. Devuelve todas las tablas detectadas. */
     suspend fun fromBitmap(bitmap: Bitmap, expectedTableCount: Int = 0): List<ImportResult> {
         val blocks = getRawBlocks(bitmap)
         val analyses = analyzeTableImageUseCase(blocks, expectedTableCount)
@@ -70,59 +54,37 @@ class ImportTableUseCase @Inject constructor(
         }
     }
 
-    /** Devuelve los bloques de texto detectados sin procesar.
-     *  Propaga [com.deckapp.core.domain.repository.OcrException] ante fallo de ML Kit. */
+    /** Devuelve los bloques de texto detectados sin procesar. */
     suspend fun getRawBlocks(bitmap: Bitmap): List<com.deckapp.core.model.OcrBlock> {
         return ocrRepository.recognizeText(bitmap).getOrThrow()
     }
 
     /** Importar desde texto estructurado (CSV, JSON, Texto Plano). */
     fun fromText(params: TextImportParams): ImportResult {
-        return when (params.source) {
-            ImportSource.CSV_TEXT -> {
-                val config = params.csvConfig ?: csvParser.preview(params.rawText).config
-                val entries = csvParser.parse(params.rawText, config)
-                ImportResult(
-                    sourceType = "CSV",
-                    entries = entries,
-                    suggestedFormula = inferFormula(entries)
-                )
-            }
-            ImportSource.JSON_TEXT -> {
-                val parsed = jsonParser.parse(params.rawText)
-                if (parsed.entries.isEmpty()) throw TableParseException.EmptyResult("el archivo JSON")
-                ImportResult(
-                    sourceType = "JSON",
-                    suggestedName = parsed.name,
-                    suggestedDescription = parsed.description,
-                    entries = parsed.entries,
-                    suggestedFormula = inferFormula(parsed.entries)
-                )
-            }
-            ImportSource.PLAIN_TEXT -> {
-                val entries = plainTextParser.parse(params.rawText)
-                if (entries.isEmpty()) throw TableParseException.EmptyResult("el texto pegado")
-                ImportResult(
-                    sourceType = "TEXT",
-                    entries = entries,
-                    suggestedFormula = inferFormula(entries)
-                )
-            }
-            ImportSource.MARKDOWN_TABLE -> {
-                val entries = markdownParser.parse(params.rawText)
-                if (entries.isEmpty()) throw TableParseException.EmptyResult("la tabla Markdown")
-                ImportResult(
-                    sourceType = "MARKDOWN",
-                    entries = entries,
-                    suggestedFormula = inferFormula(entries)
-                )
-            }
-            ImportSource.OCR_IMAGE -> throw IllegalArgumentException("Use fromBitmap() para OCR.")
+        val parser = importProvider.getParser(params.source)
+        
+        val content = if (params.source == TableImportSource.CSV_TEXT && params.csvConfig != null) {
+            val entries = (parser as CsvTableParser).parse(params.rawText, params.csvConfig)
+            ParsedTableContent(entries = entries)
+        } else {
+            parser.parse(params.rawText)
         }
+
+        if (content.entries.isEmpty()) {
+            throw TableParseException.EmptyResult(params.source.name)
+        }
+
+        return ImportResult(
+            sourceType = params.source.name,
+            suggestedName = content.name ?: "",
+            suggestedDescription = content.description ?: "",
+            entries = content.entries,
+            suggestedFormula = inferFormula(content.entries)
+        )
     }
 
     /** Previsualización de CSV sin comprometerse a parsear completamente. */
-    fun previewCsv(rawText: String): CsvTableParser.ParsePreview = csvParser.preview(rawText)
+    fun previewCsv(rawText: String): CsvTableParser.ParsePreview = CsvTableParser().preview(rawText)
 
     private fun inferFormula(entries: List<TableEntry>): String {
         val min = entries.minOfOrNull { it.minRoll } ?: 1

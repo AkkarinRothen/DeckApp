@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.deckapp.core.model.RandomTable
 import com.deckapp.core.model.TableEntry
 import com.deckapp.core.model.TableRollMode
+import com.deckapp.core.domain.usecase.ValidateTableUseCase
 
 /**
  * Pantalla para crear o editar una tabla aleatoria.
@@ -247,6 +248,53 @@ fun TableEditorScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = 4.dp)
                         )
+                    }
+                }
+
+                // ── Avisos de Validación ─────────────────────────────────────
+                if (uiState.validationErrors.isNotEmpty()) {
+                    item {
+                        Surface(
+                            color = MaterialTheme.colorScheme.errorContainer,
+                            shape = MaterialTheme.shapes.medium,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(Modifier.padding(12.dp)) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        Icons.Default.Close, 
+                                        null, 
+                                        tint = MaterialTheme.colorScheme.error,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(
+                                        "Problemas detectados:",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = MaterialTheme.colorScheme.onErrorContainer
+                                    )
+                                }
+                                val errorColor = MaterialTheme.colorScheme.onErrorContainer
+                                uiState.validationErrors.forEach { error ->
+                                    val message = when (error) {
+                                        is ValidateTableUseCase.TableValidationError.RangeGaps -> 
+                                            "Huecos en el rango. Falta: ${error.gaps.joinToString(", ")}"
+                                        is ValidateTableUseCase.TableValidationError.RangeOverlaps -> 
+                                            "Solapamientos detectados en: ${error.overlaps.joinToString(", ")}"
+                                        is ValidateTableUseCase.TableValidationError.EmptyEntries -> 
+                                            "La tabla no tiene entradas."
+                                        is ValidateTableUseCase.TableValidationError.OutOfDiceRange ->
+                                            "Fórmula de dado (${error.diceMin}-${error.diceMax}) no cubre todo el rango."
+                                    }
+                                    Text(
+                                        "• $message",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = errorColor,
+                                        modifier = Modifier.padding(start = 24.dp, top = 2.dp)
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
 

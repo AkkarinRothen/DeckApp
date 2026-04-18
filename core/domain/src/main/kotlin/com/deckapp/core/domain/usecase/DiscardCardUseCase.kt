@@ -7,11 +7,16 @@ import com.deckapp.core.model.DrawEvent
 import javax.inject.Inject
 
 class DiscardCardUseCase @Inject constructor(
-    private val cardRepository: CardRepository,
-    private val sessionRepository: SessionRepository
+    private val sessionRepository: SessionRepository,
+    private val updateCardStateUseCase: UpdateCardStateUseCase
 ) {
     suspend operator fun invoke(sessionId: Long, cardId: Long) {
-        // El card ya tiene isDrawn=true; solo registramos el evento de descarte
+        // Marcamos como no robada (isDrawn=false) para que pase a la pila de descarte
+        updateCardStateUseCase(
+            cardId, 
+            UpdateCardStateUseCase.CardStateUpdate(isDrawn = false, lastDrawnAt = null)
+        )
+
         sessionRepository.logEvent(
             DrawEvent(sessionId = sessionId, cardId = cardId, action = DrawAction.DISCARD)
         )

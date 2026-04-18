@@ -1,5 +1,6 @@
 package com.deckapp.feature.deck
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
@@ -21,6 +22,12 @@ import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.LowPriority
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.material.icons.filled.Archive
+import androidx.compose.material.icons.filled.Unarchive
+import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.Image
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyGridState
 import androidx.compose.runtime.LaunchedEffect
@@ -43,6 +50,12 @@ import com.deckapp.core.model.Card
 import java.io.File
 import com.deckapp.core.ui.components.CardThumbnail
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.draw.shadow
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun DeckDetailScreen(
@@ -54,6 +67,7 @@ fun DeckDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val haptic = LocalHapticFeedback.current
     
     var confirmDeleteCard by remember { mutableStateOf<Card?>(null) }
     var showAddTagDialog by remember { mutableStateOf(false) }
@@ -78,10 +92,14 @@ fun DeckDetailScreen(
     val backImageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
-        // En una app real, copiaríamos el archivo a la carpeta interna
-        // Por ahora usamos la URI directamente (requiere permisos persistentes o FileProvider)
-        // Simplificamos asumiendo que el ViewModel manejará la persistencia o usaremos el path
         uri?.let { viewModel.setBackImage(it.toString()) }
+    }
+
+    // Launcher para elegir imagen de portada
+    val coverImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let { viewModel.setCoverImage(it.toString()) }
     }
 
     // Mostrar mensajes de éxito/error
@@ -323,7 +341,7 @@ fun DeckDetailScreen(
                         }
                     }
 
-                    // Tags del mazo
+                    // Tags del mazo (Solo vista, se editan en Config)
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -333,27 +351,9 @@ fun DeckDetailScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         deck.tags.forEach { tag ->
-                            InputChip(
-                                selected = false,
-                                onClick = {},
-                                label = { Text(tag.name) },
-                                trailingIcon = if (deck.isArchived) null else {
-                                    {
-                                        Icon(
-                                            Icons.Default.Close,
-                                            contentDescription = "Quitar tag",
-                                            modifier = Modifier
-                                                .size(16.dp)
-                                                .combinedClickable(onClick = { viewModel.removeTag(tag.id) })
-                                        )
-                                    }
-                                }
-                            )
-                        }
-                        if (!deck.isArchived) {
                             AssistChip(
-                                onClick = { showAddTagDialog = true },
-                                label = { Text("+ Tag") }
+                                onClick = { viewModel.showConfigSheet(true) },
+                                label = { Text(tag.name) }
                             )
                         }
                     }
@@ -412,6 +412,7 @@ fun DeckDetailScreen(
                         val gridState = rememberLazyGridState()
                         val reorderState = rememberReorderableLazyGridState(gridState) { from, to ->
                             localCards.add(to.index, localCards.removeAt(from.index))
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         }
 
                         LazyVerticalGrid(
@@ -424,18 +425,25 @@ fun DeckDetailScreen(
                         ) {
                             items(localCards, key = { it.id }) { card ->
                                 ReorderableItem(reorderState, key = card.id) { isDragging ->
+                                    val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp, label = "elevation")
+                                    
                                     Box(
-                                        modifier = Modifier.graphicsLayer {
-                                            shadowElevation = if (isDragging) 16f else 0f
-                                        }
+                                        modifier = Modifier.shadow(elevation, RoundedCornerShape(8.dp))
                                     ) {
                                         CardThumbnail(
                                             card = card,
-                                            modifier = if (uiState.isReorderMode) Modifier
-                                            else Modifier.combinedClickable(
-                                                onClick = { onCardClick(card.id) },
-                                                onLongClick = { confirmDeleteCard = card }
-                                            ),
+                                            modifier = if (uiState.isReorderMode) {
+                                                Modifier.longPressDraggableHandle(
+                                                    onDragStarted = {
+                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                    }
+                                                )
+                                            } else {
+                                                Modifier.combinedClickable(
+                                                    onClick = { onCardClick(card.id) },
+                                                    onLongClick = { confirmDeleteCard = card }
+                                                )
+                                            },
                                             height = 120.dp,
                                             showTitle = true,
                                             aspectRatio = uiState.deck?.aspectRatio
@@ -450,7 +458,6 @@ fun DeckDetailScreen(
                                                 modifier = Modifier
                                                     .align(Alignment.TopEnd)
                                                     .padding(4.dp)
-                                                    .draggableHandle()
                                             )
                                         }
                                     }
@@ -467,26 +474,52 @@ fun DeckDetailScreen(
         DeckConfigSheet(
             deck = uiState.deck,
             onDismiss = { viewModel.showConfigSheet(false) },
+            onUpdateName = viewModel::updateName,
+            onUpdateDescription = viewModel::updateDescription,
             onUpdateDrawMode = viewModel::updateDrawMode,
             onUpdateAspectRatio = viewModel::updateAspectRatio,
             onToggleFaceDown = viewModel::toggleDrawFaceDown,
-            onPickBackImage = { backImageLauncher.launch("image/*") }
+            onPickBackImage = { backImageLauncher.launch("image/*") },
+            onPickCoverImage = { coverImageLauncher.launch("image/*") },
+            onAddTag = viewModel::addTag,
+            onRemoveTag = viewModel::removeTag,
+            onToggleArchived = { 
+                viewModel.toggleArchived()
+                viewModel.showConfigSheet(false)
+                onBack() // Navegar atrás si se archiva (opcional)
+            },
+            onDeleteDeck = {
+                viewModel.deleteDeck()
+                viewModel.showConfigSheet(false)
+                onBack()
+            }
         )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 private fun DeckConfigSheet(
     deck: com.deckapp.core.model.CardStack?,
     onDismiss: () -> Unit,
+    onUpdateName: (String) -> Unit,
+    onUpdateDescription: (String) -> Unit,
     onUpdateDrawMode: (com.deckapp.core.model.DrawMode) -> Unit,
     onUpdateAspectRatio: (com.deckapp.core.model.CardAspectRatio) -> Unit,
     onToggleFaceDown: (Boolean) -> Unit,
-    onPickBackImage: () -> Unit
+    onPickBackImage: () -> Unit,
+    onPickCoverImage: () -> Unit,
+    onAddTag: (String) -> Unit,
+    onRemoveTag: (Long) -> Unit,
+    onToggleArchived: () -> Unit,
+    onDeleteDeck: () -> Unit
 ) {
     if (deck == null) return
     val sheetState = rememberModalBottomSheetState()
+    var nameText by remember { mutableStateOf(deck.name) }
+    var descText by remember { mutableStateOf(deck.description) }
+    var tagText by remember { mutableStateOf("") }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -495,61 +528,79 @@ private fun DeckConfigSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 32.dp, start = 16.dp, end = 16.dp)
+                .padding(bottom = 48.dp)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp)
         ) {
             Text(
                 "Configuración del mazo",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = 16.dp)
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 24.dp)
             )
 
-            // --- Draw Mode ---
-            Text("Modo de robo", style = MaterialTheme.typography.labelMedium)
-            SingleChoiceSegmentedButtonRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            ) {
-                com.deckapp.core.model.DrawMode.entries.forEachIndexed { index, mode ->
-                    SegmentedButton(
-                        selected = deck.drawMode == mode,
-                        onClick = { onUpdateDrawMode(mode) },
-                        shape = SegmentedButtonDefaults.itemShape(index = index, count = com.deckapp.core.model.DrawMode.entries.size)
-                    ) {
-                        Text(
-                            text = when(mode) {
-                                com.deckapp.core.model.DrawMode.TOP -> "Tope"
-                                com.deckapp.core.model.DrawMode.BOTTOM -> "Fondo"
-                                com.deckapp.core.model.DrawMode.RANDOM -> "Azar"
-                            }
-                        )
+            // --- Metadatos Básicos ---
+            Text("General", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+            Spacer(Modifier.height(12.dp))
+            
+            OutlinedTextField(
+                value = nameText,
+                onValueChange = { 
+                    nameText = it
+                    onUpdateName(it)
+                },
+                label = { Text("Nombre del mazo") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+            
+            Spacer(Modifier.height(12.dp))
+            
+            OutlinedTextField(
+                value = descText,
+                onValueChange = { 
+                    descText = it
+                    onUpdateDescription(it)
+                },
+                label = { Text("Descripción / Lore") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 2
+            )
+
+            Spacer(Modifier.height(24.dp))
+
+            // --- Visuales ---
+            Text("Aparición y Estilo", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+            
+            ListItem(
+                headlineContent = { Text("Imagen de portada") },
+                supportingContent = { Text("Se muestra en la cabecera y biblioteca") },
+                leadingContent = { Icon(Icons.Default.Image, null) },
+                trailingContent = {
+                    TextButton(onClick = onPickCoverImage) {
+                        Text(if (deck.coverImagePath != null) "Cambiar" else "Elegir")
                     }
                 }
-            }
+            )
 
-            Spacer(Modifier.height(16.dp))
-
-            // --- Face Down ---
             ListItem(
-                headlineContent = { Text("Robar boca abajo") },
-                supportingContent = { Text("Las cartas se roban mostrando su dorso por defecto") },
+                headlineContent = { Text("Imagen de reverso") },
+                supportingContent = { Text("Para cartas boca abajo y animaciones") },
+                leadingContent = { Icon(Icons.Default.Collections, null) },
                 trailingContent = {
-                    Switch(
-                        checked = deck.drawFaceDown,
-                        onCheckedChange = { onToggleFaceDown(it) }
-                    )
+                    TextButton(onClick = onPickBackImage) {
+                        Text(if (deck.backImagePath != null) "Cambiar" else "Elegir")
+                    }
                 }
             )
 
-            HorizontalDivider(Modifier.padding(vertical = 8.dp))
-
-            // --- Aspect Ratio ---
-            Text("Proporción de cartas", style = MaterialTheme.typography.labelMedium)
+            Text(
+                "Proporción de cartas", 
+                style = MaterialTheme.typography.labelMedium,
+                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+            )
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-                    .horizontalScroll(rememberScrollState()),
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 com.deckapp.core.model.CardAspectRatio.entries.forEach { ratio ->
@@ -561,22 +612,127 @@ private fun DeckConfigSheet(
                 }
             }
 
-            // --- Back Image ---
-            ListItem(
-                headlineContent = { Text("Imagen de dorso") },
-                supportingContent = { 
-                    Text(if (deck.backImagePath != null) "Imagen personalizada activa" else "Sin imagen de dorso")
-                },
-                leadingContent = {
-                    Icon(Icons.Default.Collections, contentDescription = null)
-                },
-                trailingContent = {
-                    TextButton(onClick = onPickBackImage) {
-                        Text(if (deck.backImagePath != null) "Cambiar" else "Elegir")
+            Spacer(Modifier.height(24.dp))
+
+            // --- Mecánicas de Juego ---
+            Text("Reglas de Robo", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+            
+            Text(
+                "Ubicación del robo", 
+                style = MaterialTheme.typography.labelMedium,
+                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+            )
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                com.deckapp.core.model.DrawMode.entries.forEachIndexed { index, mode ->
+                    SegmentedButton(
+                        selected = deck.drawMode == mode,
+                        onClick = { onUpdateDrawMode(mode) },
+                        shape = SegmentedButtonDefaults.itemShape(index = index, count = com.deckapp.core.model.DrawMode.entries.size)
+                    ) {
+                        Text(when(mode) {
+                            com.deckapp.core.model.DrawMode.TOP -> "Tope"
+                            com.deckapp.core.model.DrawMode.BOTTOM -> "Fondo"
+                            com.deckapp.core.model.DrawMode.RANDOM -> "Azar"
+                        })
                     }
                 }
+            }
+
+            ListItem(
+                headlineContent = { Text("Robar boca abajo") },
+                supportingContent = { Text("Las cartas se ocultan al DM al ser robadas") },
+                trailingContent = {
+                    Switch(checked = deck.drawFaceDown, onCheckedChange = onToggleFaceDown)
+                }
             )
+
+            Spacer(Modifier.height(24.dp))
+
+            // --- Tags ---
+            Text("Organización", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        deck.tags.forEach { tag ->
+                            SuggestionChip(
+                                onClick = { onRemoveTag(tag.id) },
+                                label = { Text(tag.name) },
+                                icon = { Icon(Icons.Default.Close, null, Modifier.size(16.dp)) }
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = tagText,
+                        onValueChange = { tagText = it },
+                        label = { Text("Añadir etiqueta...") },
+                        modifier = Modifier.fillMaxWidth(),
+                        trailingIcon = {
+                            IconButton(onClick = { 
+                                if (tagText.isNotBlank()) {
+                                    onAddTag(tagText)
+                                    tagText = ""
+                                }
+                            }) {
+                                Icon(Icons.Default.Add, null)
+                            }
+                        },
+                        singleLine = true
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(32.dp))
+
+            // --- Zona de Peligro ---
+            Text("Gestión Avanzada", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.error)
+            Spacer(Modifier.height(12.dp))
+            
+            OutlinedButton(
+                onClick = onToggleArchived,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
+            ) {
+                Icon(if (deck.isArchived) Icons.Default.Unarchive else Icons.Default.Archive, null)
+                Spacer(Modifier.width(8.dp))
+                Text(if (deck.isArchived) "Desarchivar Mazo" else "Archivar Mazo")
+            }
+            
+            TextButton(
+                onClick = { showDeleteConfirm = true },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+            ) {
+                Icon(Icons.Default.DeleteForever, null)
+                Spacer(Modifier.width(8.dp))
+                Text("Eliminar permanentemente")
+            }
         }
+    }
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("¿Eliminar mazo?") },
+            text = { Text("Esto borrará el mazo \"${deck.name}\" y todas sus cartas. Esta acción es irreversible.") },
+            confirmButton = {
+                TextButton(onClick = onDeleteDeck) {
+                    Text("Eliminar todo", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }
 

@@ -85,6 +85,12 @@ class TableRepositoryImpl @Inject constructor(
         randomTableDao.deleteTable(tableId)
     }
 
+    override suspend fun updateTablesSortOrder(orderedIds: List<Long>) {
+        orderedIds.forEachIndexed { index, id ->
+            randomTableDao.updateSortOrder(id, index)
+        }
+    }
+
     override suspend fun countBuiltInTables(): Int = randomTableDao.countBuiltInTables()
 
     override fun getRecentResultsForTable(sessionId: Long, tableId: Long): Flow<List<TableRollResult>> {

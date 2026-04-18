@@ -1,7 +1,148 @@
-# DeckApp TTRPG — Dev Log
+---
 
-> **Formato de entradas:** `### Descripción (DD de mes de AAAA)`
-> Categorías: DECISION | ARCHITECTURE | INTEGRATION | PROBLEM | SOLUTION | PENDING
+### Sprint 28 — Seguridad Total: Backup & Restore en la Nube (17 de abril de 2026)
+
+**BACKUP — Arquitectura de Persistencia (Portable)**
+- **NEW**: Implementado motor de serialización usando `kotlinx.serialization`. Convierte toda la base de datos (mazos, tablas, encuentros, notas) en un archivo JSON agnóstico del schema interno de Room.
+- **NEW**: Implementado `BackupRepository` con soporte para transacciones masivas (`withTransaction`), asegurando que la restauración sea atómica y segura.
+- **NEW**: `FileRepository` extendido para manejar empaquetado/desempaquetado de ZIPs de biblioteca completa, incluyendo rutas relativas para todas las imágenes.
+
+**UI — Gestión de Biblioteca (Settings)**
+- **NEW**: Añadida sección "Copia de Seguridad" en Ajustes.
+- **CLOUD**: Integración con Android SAF (Storage Access Framework). El DM ahora puede guardar su backup directamente en **Google Drive, Dropbox o Almacenamiento Local**.
+- **SAFETY**: Implementado diálogo de confirmación destructiva antes de restaurar, alertando al usuario sobre el reemplazo total de datos.
+- **PROGRESS**: Feedback visual mediante `CircularProgressIndicator` y Snackbars informativos durante todo el proceso de empaquetado y restauración.
+
+**INTEGRATION — Build**
+- **BUILD SUCCESSFUL** `assembleDebug` — Verificada la integridad de la base de datos tras la inyección del nuevo `BackupDao`.
+
+---
+
+### Sprint 27 — Refactor Core: Importación Robusta y Motor de Combate (17 de abril de 2026)
+
+**IMPORT — Arquitectura y Resiliencia (Sprint 1-3)**
+- **NEW**: Implementado `PdfLayoutProcessor` para desacoplar la lógica de extracción de PDFs del UseCase principal. Optimizado para ejecución en `Dispatchers.IO`.
+- **ARCHITECTURE**: Centralización total de enums (`DeckImportSource`, `TableImportSource`, `PdfLayoutMode`) en `core:model` para eliminar dependencias circulares y comparaciones de strings.
+- **SAFETY**: Implementado **Rollback Automático** en `ImportDeckUseCase`. En caso de fallo, se eliminan los registros parciales de la DB y las imágenes físicas para evitar "datos basura".
+- **INTELLIGENCE**: Refactorizado `FilenameParser` para ignorar ruido de escaneo ("Scan_", "IMG_", "Copia de") y soportar múltiples delimitadores (_, -, espacios) con normalización a *Title Case*.
+- **VALIDATION**: Añadida validación proactiva de manifiesto en importación de ZIPs para asegurar la integridad antes de procesar.
+
+**ENCOUNTERS — Motor de Combate Determinista (Sprint 1-2)**
+- **NEW**: Implementado `CalculateInitiativeOrderUseCase`. Establece un orden de combate inmutable basado en reglas TTRPG (Iniciativa > Bono > Nombre), eliminando saltos visuales en el tracker.
+- **LOGIC**: Refactorizado `NextTurnUseCase` para usar el `sortOrder` persistido. Añadido clamping de seguridad para el índice de turno ante borrados accidentales de criaturas.
+- **NARRATIVE**: Implementado `ToggleConditionUseCase` con registro automático en el `CombatLog` usando lenguaje natural (ej: "Orco ahora está Aturdido").
+- **AUTOMATION**: `ApplyDamageUseCase` ahora automatiza la narrativa del log, registrando caídas inconscientes y recuperaciones de consciencia de forma enriquecida.
+- **CLEANUP**: Implementado `CleanupCombatUseCase` para eliminaciones seguras de participantes con recalculo inmediato del orden de iniciativa.
+
+**INTEGRATION — Build**
+- **BUILD SUCCESSFUL** `assembleDebug` — 515 tareas. Verificada la integridad de los nuevos UseCases y su correcta inyección en `SessionViewModel`.
+
+---
+
+### Sprint 26 — Configuración Centralizada, Estabilidad Visual y Reordenamiento (17 de abril de 2026)
+
+**UX/UI — Reordenamiento Persistente (C-1 Extension)**
+- **NEW**: Implementado sistema de **Drag & Drop** para la Biblioteca de Mazos y la Biblioteca de Tablas.
+- **PERSISTENCE**: Añadido campo `sortOrder` a la base de datos (Entidades `CardStack` y `RandomTable`).
+- **MIGRATION**: Implementada la `MIGRATION_25_26` para añadir soporte de ordenamiento sin pérdida de datos.
+- **UX**: Integrado `sh.calvin.reorderable` con feedback háptico y visual (elevación 8dp) para una experiencia premium.
+- **CONTROL**: Añadido modo "Ordenar" en TopAppBar para evitar movimientos accidentales durante la navegación.
+
+### C-1 — Reordenar recursos y cartas (drag & drop) 🔴 ★★
+Actualmente las cartas se muestran en orden `sortOrder`.
+
+**Implementación:** `LazyVerticalGrid` con `sh.calvin.reorderable`.
+
+**Estado:**
+- [x] **Biblioteca (Mazos y Tablas)**: Implementado reordenamiento persistente (Sprint 26).
+- [ ] **DeckDetail (Cartas individuales)**: Pendiente (Sprint 27).
+
+**UX/UI — Centro de Mando del Mazo (C-2)**
+- **NEW**: Implementada la `DeckConfigSheet` centralizada. Consolidada toda la configuración (Metadatos, Visuales, Reglas y Tags) en un panel de control único y premium.
+- **FEATURE**: Edición en tiempo real de **Nombre** y **Descripción** del mazo con persistencia inmediata en `CardRepository`.
+- **VISUAL**: Integrado el selector de **Imagen de Portada** (Cover) para personalizar la apariencia en la biblioteca.
+- **CLEANUP**: Eliminado el diálogo `AddTagDialog` redundante; la gestión de etiquetas ahora es parte integral de la configuración centralizada mediante `FlowRow` y chips interactivos.
+- **SAFETY**: Añadida la "Zona de Peligro" con acciones claras de **Archivar** y **Eliminar Mazos** (con diálogo de confirmación).
+
+**VISUAL — Refactor 3D de Mecánica Boca Abajo (B-2/B-3)**
+- **NEW**: Implementada rotación 3D real (`graphicsLayer`) con sombreado dinámico basado en el ángulo de giro.
+- **ANIMATION**: Migrado a `Animatable` con **Spring** (fricción ajustada) para una respuesta táctil elástica y natural.
+- **UX**: Las cartas robadas boca abajo ahora muestran el reverso del mazo correspondiente, manteniendo la intriga para el DM.
+
+**FIX — Estabilización de Importación Markdown**
+- **PARSER**: Mejorado el `MarkdownTableParser` con una regex robusta para soportar delimitadores complejos, espacios variables y múltiples columnas sin pérdida de datos.
+- **BUG**: Corregido mapeo en `TableImportViewModel` que ignoraba el modo de importación MARKDOWN, permitiendo ahora el flujo completo desde archivos `.md`.
+
+**INTEGRATION — Build**
+- **BUILD SUCCESSFUL** `:feature:deck:compileDebugKotlin` — Verificada integridad de mappers, inyección de dependencias y recursos visuales.
+
+---
+
+### Sprint 18 — Biblioteca de NPCs y Criaturas (17 de abril de 2026)
+
+**ARCHITECTURE — Nuevo Módulo `:feature:npcs`**
+- **NEW**: Implementado el módulo independiente `:feature:npcs` para la gestión de la biblioteca persistente.
+- **DATA**: Migración de base de datos a la versión **24**. Añadidas tablas `npcs` y `npc_tags`.
+- **DATA**: `EncounterCreatureEntity` extendido con `npcId` e `imagePath` para permitir la vinculación con la biblioteca.
+- **LOGIC**: Implementados use cases para CRUD de NPCs y guardado local de avatares en `/npcs/`.
+
+**FEATURE — Biblioteca de NPCs Premium**
+- **UI**: `NpcListScreen` — Vista de grid visual con previsualización de stats (HP, AC, Iniciativa) y badges de avatars.
+- **UI**: `NpcEditorScreen` — Editor completo con selector de imágenes, campos numéricos y soporte **Markdown** para lore y notas.
+- **UX**: Sistema de filtrado por Tags para organizar criaturas por tipo, entorno o alineamiento.
+
+**INTEGRATION — Flujo de Trabajo del DM**
+- **NEW**: Integrado selector de NPCs en el `EncounterEditorScreen`. Permite añadir múltiples criaturas a un encuentro usando NPCs de la biblioteca como plantillas.
+- **UI**: El `CombatTab` ahora muestra los **Avatares** de las criaturas vinculadas, mejorando drásticamente el feedback visual durante el rastreo de iniciativa.
+- **INTEGRATION**: Registro en el `NavGraph` principal y acceso desde el menú de la `LibraryScreen`.
+
+**INTEGRATION — Build**
+- **BUILD SUCCESSFUL** `assembleDebug` — 337 tareas. Verificada integridad de mappers, migraciones y Hilt/Dagger.
+
+---
+
+### Sprint 17 — Combat Tracker e Integración de Encuentros (17 de abril de 2026)
+
+**FEATURE — Combat Tracker Premium**
+- **NEW**: Implementado `CombatTab` dinámico en `SessionScreen`. Solo aparece cuando hay un encuentro activo.
+- **NEW**: Soporte para **Participantes Temporales (PJs)**. El DM puede añadir jugadores a la iniciativa con un solo tap sin persistirlos en la biblioteca de encuentros.
+- **UX**: Visualización "Bloodied" (Sangriento) automática cuando una criatura cae por debajo del 50% de HP.
+- **UX**: Animaciones de reordenamiento automático en la lista de iniciativa (`animateItem`) y escala visual para el turno activo.
+- **LOGIC**: Mejorado `NextTurnUseCase` (ahora en `SessionViewModel`) para ciclar correctamente entre criaturas y jugadores temporales.
+
+**INTEGRATION — Automatización de Notas**
+- **NEW**: Al finalizar un combate, se genera un resumen detallado (Rondas, Supervivientes) que se anexa automáticamente a las Notas del DM de la sesión.
+- **LOGIC**: `ApplyDamageUseCase` gestiona automáticamente la condición `UNCONSCIOUS` al llegar a 0 HP y la retira al curar.
+
+---
+
+### Sprint 16 — Notas por carta y Portabilidad (ZIP Export v2) (17 de abril de 2026)
+
+**ARCHITECTURE — Componentes Globales**
+- **MOVE**: Refactorizado `MarkdownToolbar` y movido a `:core:ui`.
+- **FEATURE**: Notas por carta completas con autoguardado y vista previa.
+- **INTEGRATION**: Exportación e Importación enriquecida mediante `deck_manifest.json`.
+
+---
+
+### Sprint 15 — Notas de DM: Editor Markdown y UX de Guardado (17 de abril de 2026)
+
+**FEATURE — Editor de Notas Pro**
+- **NEW**: Implementada `MarkdownToolbar` con acciones rápidas: Bold, Italic, Link, Listas, Headers (H1/H2), Checkboxes y Código.
+- **INTEGRATION**: `NotesTab` refactorizado para usar `TextFieldValue`. Esto permite insertar etiquetas Markdown exactamente en la posición del cursor o envolver el texto seleccionado.
+- **UX**: Mejorada la jerarquía visual del editor con contenedores `Surface` redondeados, bordes suaves y tipografía optimizada.
+
+**FEATURE — Feedback de Autoguardado**
+- **UX**: Añadido indicador visual de "Guardando…" (CircularProgress + Texto) en la cabecera de la pestaña de notas.
+- **UX**: Añadido icono de verificación (Check) una vez persistido el cambio para dar tranquilidad al DM.
+- **STATE**: Nueva propiedad `isSavingNotes` en `SessionUiState` controlada desde el ViewModel durante la persistencia en `SessionRepository`.
+
+**FEATURE — Pulido de Notas Rápidas (Quick Notes)**
+- **UX**: Rediseñado el `QuickNoteDialog` con un look más premium y mejor feedback ("Se añadirá con un timestamp...").
+- **UX**: Foco automático en el editor al abrir el diálogo para permitir escritura inmediata sin toques extra.
+
+**INTEGRATION — Build**
+- **BUILD SUCCESSFUL** — Verificado que el autoguardado con debounce (800ms) funciona correctamente con la nueva estructura de `TextFieldValue`.
 
 ---
 

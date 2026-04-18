@@ -4,12 +4,18 @@ package com.deckapp.core.model
 data class Session(
     val id: Long = 0,
     val name: String,
-    val isActive: Boolean = true,
+    val status: SessionStatus = SessionStatus.ACTIVE,
+    val scheduledDate: Long? = null,
+    val summary: String? = null,
     val showCardTitles: Boolean = true,
     val dmNotes: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
     val endedAt: Long? = null
 )
+
+enum class SessionStatus {
+    PLANNED, ACTIVE, COMPLETED
+}
 
 /** Referencia de un mazo asignado a una sesión */
 data class SessionDeckRef(

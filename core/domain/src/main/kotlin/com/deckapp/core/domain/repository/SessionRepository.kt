@@ -4,13 +4,16 @@ import com.deckapp.core.model.DrawEvent
 import com.deckapp.core.model.RandomTable
 import com.deckapp.core.model.Session
 import com.deckapp.core.model.SessionDeckRef
+import com.deckapp.core.model.SessionStatus
 import kotlinx.coroutines.flow.Flow
 
 interface SessionRepository {
     fun getAllSessions(): Flow<List<Session>>
     fun getActiveSession(): Flow<Session?>
+    fun getSessionsByStatus(status: SessionStatus): Flow<List<Session>>
     fun getSessionById(id: Long): Flow<Session?>
     suspend fun createSession(session: Session): Long
+    suspend fun updateSessionStatus(sessionId: Long, status: SessionStatus)
     suspend fun endSession(sessionId: Long)
     suspend fun deleteSession(sessionId: Long)
     suspend fun renameSession(sessionId: Long, newName: String)

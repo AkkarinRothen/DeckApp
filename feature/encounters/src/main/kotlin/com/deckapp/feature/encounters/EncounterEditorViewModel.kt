@@ -4,9 +4,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.deckapp.core.domain.repository.EncounterRepository
+import com.deckapp.core.domain.usecase.GetNpcsUseCase
 import com.deckapp.core.model.Condition
 import com.deckapp.core.model.Encounter
 import com.deckapp.core.model.EncounterCreature
+import com.deckapp.core.model.Npc
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -20,12 +22,14 @@ data class EncounterEditorUiState(
     val isLoading: Boolean = true,
     val isSaving: Boolean = false,
     val saved: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val allNpcs: List<Npc> = emptyList()
 )
 
 @HiltViewModel
 class EncounterEditorViewModel @Inject constructor(
     private val encounterRepository: EncounterRepository,
+    private val getNpcsUseCase: GetNpcsUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -39,6 +43,13 @@ class EncounterEditorViewModel @Inject constructor(
         } else {
             _uiState.update { it.copy(isLoading = false) }
         }
+        loadNpcs()
+    }
+
+    private fun loadNpcs() {
+        getNpcsUseCase().onEach { npcs ->
+            _uiState.update { it.copy(allNpcs = npcs) }
+        }.launchIn(viewModelScope)
     }
 
     private fun loadEncounter() {
@@ -69,6 +80,23 @@ class EncounterEditorViewModel @Inject constructor(
             name = "Nueva Criatura ${count + 1}",
             maxHp = 10,
             currentHp = 10,
+            sortOrder = count
+        )
+        _uiState.update { it.copy(creatures = it.creatures + newCreature) }
+    }
+
+    fun addCreatureFromNpc(npc: Npc) {
+        val count = _uiState.value.creatures.size
+        val newCreature = EncounterCreature(
+            encounterId = encounterId,
+            npcId = npc.id,
+            name = npc.name,
+            maxHp = npc.maxHp,
+            currentHp = npc.maxHp,
+            armorClass = npc.armorClass,
+            initiativeBonus = npc.initiativeBonus,
+            imagePath = npc.imagePath,
+            notes = npc.notes,
             sortOrder = count
         )
         _uiState.update { it.copy(creatures = it.creatures + newCreature) }

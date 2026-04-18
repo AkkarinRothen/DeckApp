@@ -33,7 +33,8 @@ data class LibraryUiState(
     val allTables: List<RandomTable> = emptyList(),
     val allCollections: List<DeckCollection> = emptyList(),
     val activeCollectionId: Long? = null,
-    val isLoadingCollections: Boolean = true
+    val isLoadingCollections: Boolean = true,
+    val isReorderMode: Boolean = false
 ) {
     /** Mazos que se muestran según el toggle showArchived. */
     val displayedDecks: List<CardStack>
@@ -332,5 +333,34 @@ class LibraryViewModel @Inject constructor(
 
     fun setActiveCollection(id: Long?) {
         _uiState.update { it.copy(activeCollectionId = id) }
+    }
+
+    fun toggleReorderMode() {
+        _uiState.update { it.copy(isReorderMode = !it.isReorderMode) }
+    }
+
+    fun updateDeckOrder(newOrder: List<CardStack>) {
+        // Actualizamos el estado local inmediatamente para suavidad en la UI
+        _uiState.update { it.copy(allDecks = newOrder) }
+    }
+
+    fun saveSortOrder() {
+        viewModelScope.launch {
+            val orderedIds = _uiState.value.allDecks.map { it.id }
+            cardRepository.updateStacksSortOrder(orderedIds)
+            _uiState.update { it.copy(isReorderMode = false, snackbarMessage = "Orden de mazos guardado") }
+        }
+    }
+
+    fun updateTableOrder(newOrder: List<RandomTable>) {
+        _uiState.update { it.copy(allTables = newOrder) }
+    }
+
+    fun saveTableSortOrder() {
+        viewModelScope.launch {
+            val orderedIds = _uiState.value.allTables.map { it.id }
+            tableRepository.updateTablesSortOrder(orderedIds)
+            _uiState.update { it.copy(isReorderMode = false, snackbarMessage = "Orden de tablas guardado") }
+        }
     }
 }

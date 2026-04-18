@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.deckapp.core.domain.repository.TableRepository
 import com.deckapp.core.domain.repository.CardRepository
 import com.deckapp.core.domain.usecase.RollTableUseCase
+import com.deckapp.core.domain.usecase.DiceEvaluator
+import com.deckapp.core.domain.usecase.ValidateTableUseCase
 import com.deckapp.core.model.RandomTable
 import com.deckapp.core.model.Tag
 import com.deckapp.core.model.TableEntry
@@ -32,6 +34,7 @@ data class TableEditorUiState(
     val isSaving: Boolean = false,
     val isDirty: Boolean = false,
     val errorMessage: String? = null,
+    val validationErrors: List<ValidateTableUseCase.TableValidationError> = emptyList(),
     val successMessage: String? = null,
     val previewResult: TableRollResult? = null,
     val isNewTable: Boolean = true,
@@ -45,6 +48,7 @@ class TableEditorViewModel @Inject constructor(
     private val tableRepository: TableRepository,
     private val cardRepository: CardRepository,
     private val rollTableUseCase: RollTableUseCase,
+    private val validateTableUseCase: ValidateTableUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -58,7 +62,15 @@ class TableEditorViewModel @Inject constructor(
         loadAllTags()
         if (tableId != -1L) {
             loadTable(tableId)
+        } else {
+            validate()
         }
+    }
+
+    private fun validate() {
+        val table = buildTableFromState(tableId.coerceAtLeast(0))
+        val report = validateTableUseCase(table)
+        _uiState.update { it.copy(validationErrors = report.errors) }
     }
 
     private fun loadAllTags() {
@@ -96,28 +108,42 @@ class TableEditorViewModel @Inject constructor(
                         isNewTable = false
                     )
                 }
+                validate()
             } else {
                 _uiState.update { it.copy(isLoading = false, errorMessage = "Tabla no encontrada") }
             }
         }
     }
 
-    fun setName(name: String) = _uiState.update { it.copy(name = name, isDirty = true) }
-    fun setDescription(desc: String) = _uiState.update { it.copy(description = desc, isDirty = true) }
+    fun setName(name: String) {
+        _uiState.update { it.copy(name = name, isDirty = true) }
+        validate()
+    }
+    fun setDescription(desc: String) {
+        _uiState.update { it.copy(description = desc, isDirty = true) }
+        validate()
+    }
     
     fun toggleTag(tag: Tag) {
         _uiState.update { state ->
             val updatedTags = if (tag in state.tags) state.tags - tag else state.tags + tag
             state.copy(tags = updatedTags, isDirty = true)
         }
+        validate()
     }
-    fun setRollFormula(formula: String) = _uiState.update { it.copy(rollFormula = formula, isDirty = true) }
-    fun setRollMode(mode: TableRollMode) = _uiState.update { it.copy(rollMode = mode, isDirty = true) }
+    fun setRollFormula(formula: String) {
+        _uiState.update { it.copy(rollFormula = formula, isDirty = true) }
+        validate()
+    }
+    fun setRollMode(mode: TableRollMode) {
+        _uiState.update { it.copy(rollMode = mode, isDirty = true) }
+        validate()
+    }
 
     fun addEntry() {
         val state = _uiState.value
         val lastMax = state.entries.maxOfOrNull { it.maxRoll } ?: 0
-        val range = RollTableUseCase.getDiceRange(state.rollFormula)
+        val range = DiceEvaluator.getRange(state.rollFormula)
         val maxPossible = range.second
         val newMin = (lastMax + 1).coerceAtMost(maxPossible)
         val newEntry = TableEntry(
@@ -127,6 +153,7 @@ class TableEditorViewModel @Inject constructor(
             sortOrder = state.entries.size
         )
         _uiState.update { it.copy(entries = it.entries + newEntry, isDirty = true) }
+        validate()
     }
 
     fun updateEntry(index: Int, entry: TableEntry) {
@@ -134,6 +161,7 @@ class TableEditorViewModel @Inject constructor(
         if (index in entries.indices) {
             entries[index] = entry
             _uiState.update { it.copy(entries = entries, isDirty = true) }
+            validate()
         }
     }
 
@@ -142,6 +170,7 @@ class TableEditorViewModel @Inject constructor(
         if (index in entries.indices) {
             entries.removeAt(index)
             _uiState.update { it.copy(entries = entries, isDirty = true) }
+            validate()
         }
     }
 
@@ -164,6 +193,7 @@ class TableEditorViewModel @Inject constructor(
                 subTableRef = table.name
             )
             _uiState.update { it.copy(entries = entries, isDirty = true, pickingEntryIndex = null) }
+            validate()
         }
     }
 
@@ -175,6 +205,7 @@ class TableEditorViewModel @Inject constructor(
                 subTableRef = null
             )
             _uiState.update { it.copy(entries = entries, isDirty = true) }
+            validate()
         }
     }
 
@@ -183,10 +214,9 @@ class TableEditorViewModel @Inject constructor(
         if (state.entries.isEmpty()) return
         val table = buildTableFromState(tableId.coerceAtLeast(0))
         viewModelScope.launch {
-            tableRepository.saveTable(table).let { savedId ->
-                val result = rollTableUseCase(savedId, sessionId = null)
-                _uiState.update { it.copy(previewResult = result) }
-            }
+            // Tiramos directamente sobre el objeto en memoria, sin persistir
+            val result = rollTableUseCase.roll(table, sessionId = null, persistResult = false)
+            _uiState.update { it.copy(previewResult = result) }
         }
     }
 

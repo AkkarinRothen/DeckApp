@@ -17,6 +17,7 @@ data class TableImportUiState(
     val errorMessage: String? = null,
     val isAiProcessing: Boolean = false,
     val isVisionProcessing: Boolean = false,
+    val retryCountdown: Int? = null,
     
     // Decks/Tables
     val availableDecks: List<com.deckapp.core.model.RandomTable> = emptyList(),

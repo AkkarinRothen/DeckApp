@@ -46,7 +46,8 @@ data class TablesUiState(
     val isRolling: Boolean = false,
     val snackbarMessage: String? = null,
     val exportData: String? = null,
-    val exportFilename: String? = null
+    val exportFilename: String? = null,
+    val isReorderMode: Boolean = false
 )
 
 @HiltViewModel
@@ -67,8 +68,7 @@ class TablesViewModel @Inject constructor(
     }
 
     private fun loadData() {
-        // Combinamos todos los flujos para una reactividad pura y eficiente
-        kotlinx.coroutines.flow.combine(
+        combine(
             tableRepository.getAllTables(),
             tableRepository.getAllBundles(),
             cardRepository.getAllTags(),
@@ -76,50 +76,57 @@ class TablesViewModel @Inject constructor(
             _uiState.map { it.selectedTagIds }.distinctUntilChanged(),
             _uiState.map { it.showAllTables }.distinctUntilChanged(),
             _uiState.map { it.sessionTableIds }.distinctUntilChanged()
-        ) { args: Array<Any?> ->
+        ) { args ->
             @Suppress("UNCHECKED_CAST")
-            val tables = args[0] as List<RandomTable>
-            @Suppress("UNCHECKED_CAST")
-            val bundles = args[1] as List<TableBundle>
-            @Suppress("UNCHECKED_CAST")
-            val tags = args[2] as List<Tag>
-            val query = args[3] as String
-            @Suppress("UNCHECKED_CAST")
-            val selectedTagIds = args[4] as Set<Long>
-            val showAll = args[5] as Boolean
-            @Suppress("UNCHECKED_CAST")
-            val sessionTableIds = args[6] as Set<Long>
-
-            // Mapeo rápido de bundleId -> bundleName
-            val bundleMap = bundles.associate { it.id to it.name }
-
-            val filtered = tables.filter { table ->
-                val matchesSession = showAll || table.id in sessionTableIds
-                val matchesQuery = table.name.contains(query, ignoreCase = true) ||
-                        table.description.contains(query, ignoreCase = true)
-                val matchesTags = selectedTagIds.isEmpty() || 
-                        table.tags.any { it.id in selectedTagIds }
-                matchesSession && matchesQuery && matchesTags
-            }.map { table ->
-                // Enriquecer con nombre de bundle si falta
-                if (table.bundleName == null && table.bundleId != null) {
-                    table.copy(bundleName = bundleMap[table.bundleId])
-                } else table
-            }.sortedWith(compareByDescending<RandomTable> { it.isPinned }.thenBy { it.name })
-
-            val grouped = filtered.groupBy { it.bundleName ?: "Mis Tablas" }
-
-            _uiState.value.copy(
-                tables = tables,
-                filteredTables = filtered,
-                bundles = bundles,
-                groupedTables = grouped,
-                allTags = tags,
-                isLoading = false
+            computeNewState(
+                tables = args[0] as List<RandomTable>,
+                bundles = args[1] as List<TableBundle>,
+                tags = args[2] as List<Tag>,
+                query = args[3] as String,
+                selectedTagIds = args[4] as Set<Long>,
+                showAll = args[5] as Boolean,
+                sessionTableIds = args[6] as Set<Long>
             )
         }.onEach { newState ->
             _uiState.value = newState
         }.launchIn(viewModelScope)
+    }
+
+    private fun computeNewState(
+        tables: List<RandomTable>,
+        bundles: List<TableBundle>,
+        tags: List<Tag>,
+        query: String,
+        selectedTagIds: Set<Long>,
+        showAll: Boolean,
+        sessionTableIds: Set<Long>
+    ): TablesUiState {
+        val bundleMap = bundles.associate { it.id to it.name }
+
+        val filtered = tables.filter { table ->
+            val matchesSession = showAll || table.id in sessionTableIds
+            val matchesQuery = query.isEmpty() || 
+                    table.name.contains(query, ignoreCase = true) ||
+                    table.description.contains(query, ignoreCase = true)
+            val matchesTags = selectedTagIds.isEmpty() || 
+                    table.tags.any { it.id in selectedTagIds }
+            matchesSession && matchesQuery && matchesTags
+        }.map { table ->
+            if (table.bundleName == null && table.bundleId != null) {
+                table.copy(bundleName = bundleMap[table.bundleId])
+            } else table
+        }.sortedBy { it.sortOrder }
+
+        val grouped = filtered.groupBy { it.bundleName ?: "Mis Tablas" }
+
+        return _uiState.value.copy(
+            tables = tables,
+            filteredTables = filtered,
+            bundles = bundles,
+            groupedTables = grouped,
+            allTags = tags,
+            isLoading = false
+        )
     }
 
     fun toggleViewMode() = _uiState.update { it.copy(isGridView = !it.isGridView) }
@@ -277,6 +284,23 @@ class TablesViewModel @Inject constructor(
             tableRepository.getRecentResultsForTable(sessionId, tableId).collect { results ->
                 _uiState.update { it.copy(recentResults = results) }
             }
+        }
+    }
+
+    fun toggleReorderMode() {
+        _uiState.update { it.copy(isReorderMode = !it.isReorderMode) }
+    }
+
+    fun updateTableOrder(newOrder: List<RandomTable>) {
+        // Actualizamos el estado local inmediatamente
+        _uiState.update { it.copy(tables = newOrder) }
+    }
+
+    fun saveSortOrder() {
+        viewModelScope.launch {
+            val orderedIds = _uiState.value.tables.map { it.id }
+            tableRepository.updateTablesSortOrder(orderedIds)
+            _uiState.update { it.copy(isReorderMode = false, snackbarMessage = "Orden de tablas guardado") }
         }
     }
 }

@@ -80,6 +80,7 @@ data class CardStack(
     val backImagePath: String? = null,
     val aspectRatio: CardAspectRatio = CardAspectRatio.STANDARD,
     val isArchived: Boolean = false,
+    val sortOrder: Int = 0,
     val tags: List<Tag> = emptyList(),
     val createdAt: Long = System.currentTimeMillis()
 )
