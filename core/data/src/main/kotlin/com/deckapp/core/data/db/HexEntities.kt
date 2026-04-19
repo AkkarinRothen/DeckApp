@@ -23,6 +23,10 @@ data class HexMapEntity(
     val maxActivitiesPerDay: Int = 8,
     @ColumnInfo(defaultValue = "")
     val mapNotes: String = "",
+    val weatherTableId: Long? = null,
+    val travelEventTableId: Long? = null,
+    @ColumnInfo(defaultValue = "{}")
+    val terrainTableConfig: String = "{}",
     val createdAt: Long = System.currentTimeMillis()
 )
 

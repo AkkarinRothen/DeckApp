@@ -30,6 +30,7 @@ import com.deckapp.core.data.db.MIGRATION_29_30
 import com.deckapp.core.data.db.MIGRATION_30_31
 import com.deckapp.core.data.db.MIGRATION_31_32
 import com.deckapp.core.data.db.MIGRATION_32_33
+import com.deckapp.core.data.db.MIGRATION_33_34
 import com.deckapp.core.data.repository.*
 import com.deckapp.core.data.repository.WikiRepositoryImpl
 import com.deckapp.core.domain.repository.CardRepository
@@ -91,7 +92,8 @@ object DatabaseModule {
                 MIGRATION_29_30,
                 MIGRATION_30_31,
                 MIGRATION_31_32,
-                MIGRATION_32_33
+                MIGRATION_32_33,
+                MIGRATION_33_34
             )
             .fallbackToDestructiveMigration()
             .build()

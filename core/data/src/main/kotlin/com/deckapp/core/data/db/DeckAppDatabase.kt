@@ -47,7 +47,7 @@ import androidx.room.RoomDatabase
         HexPoiEntity::class,
         HexDayEntity::class
     ],
-    version = 33,
+    version = 34,
     exportSchema = true
 )
 abstract class DeckAppDatabase : RoomDatabase() {
@@ -98,5 +98,6 @@ abstract class DeckAppDatabase : RoomDatabase() {
         val MIGRATION_30_31 = com.deckapp.core.data.db.MIGRATION_30_31
         val MIGRATION_31_32 = com.deckapp.core.data.db.MIGRATION_31_32
         val MIGRATION_32_33 = com.deckapp.core.data.db.MIGRATION_32_33
+        val MIGRATION_33_34 = com.deckapp.core.data.db.MIGRATION_33_34
     }
 }

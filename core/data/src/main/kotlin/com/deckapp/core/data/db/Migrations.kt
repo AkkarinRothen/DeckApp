@@ -678,9 +678,38 @@ val MIGRATION_31_32 = object : Migration(31, 32) {
     }
 }
 
+val MIGRATION_33_34 = object : Migration(33, 34) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE `hex_maps` ADD COLUMN `weatherTableId` INTEGER DEFAULT NULL")
+        database.execSQL("ALTER TABLE `hex_maps` ADD COLUMN `travelEventTableId` INTEGER DEFAULT NULL")
+        database.execSQL("ALTER TABLE `hex_maps` ADD COLUMN `terrainTableConfig` TEXT NOT NULL DEFAULT '{}'")
+    }
+}
+
 val MIGRATION_32_33 = object : Migration(32, 33) {
     override fun migrate(database: SupportSQLiteDatabase) {
-        // No-op migration to resolve identity hash mismatch
+        // 1. table_entries.confidence (missing from recreate in 19-20)
+        try {
+            database.execSQL("ALTER TABLE `table_entries` ADD COLUMN `confidence` REAL NOT NULL DEFAULT 1.0")
+        } catch (e: Exception) { /* already exists */ }
+
+        // 2. hex_maps columns (missing from some v32 states)
+        try {
+            database.execSQL("ALTER TABLE `hex_maps` ADD COLUMN `isRadial` INTEGER NOT NULL DEFAULT 0")
+        } catch (e: Exception) { /* already exists */ }
+        
+        try {
+            database.execSQL("ALTER TABLE `hex_maps` ADD COLUMN `maxActivitiesPerDay` INTEGER NOT NULL DEFAULT 8")
+        } catch (e: Exception) { /* already exists */ }
+        
+        try {
+            database.execSQL("ALTER TABLE `hex_maps` ADD COLUMN `mapNotes` TEXT NOT NULL DEFAULT ''")
+        } catch (e: Exception) { /* already exists */ }
+
+        // 3. random_tables.sourcePack (missing from some v27+ states)
+        try {
+            database.execSQL("ALTER TABLE `random_tables` ADD COLUMN `sourcePack` TEXT")
+        } catch (e: Exception) { /* already exists */ }
     }
 }
 

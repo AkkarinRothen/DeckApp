@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.deckapp.core.domain.repository.CardRepository
 import com.deckapp.core.domain.repository.SessionRepository
 import com.deckapp.core.domain.repository.ReferenceRepository
+import com.deckapp.core.domain.usecase.ResetDeckUseCase
 import com.deckapp.core.model.CardStack
 import com.deckapp.core.model.DrawMode
 import com.deckapp.core.model.Session
@@ -35,6 +36,7 @@ class SessionSetupViewModel @Inject constructor(
     private val sessionRepository: SessionRepository,
     private val cardRepository: CardRepository,
     private val referenceRepository: ReferenceRepository,
+    private val resetDeckUseCase: ResetDeckUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -111,6 +113,9 @@ class SessionSetupViewModel @Inject constructor(
             )
             val sessionId = sessionRepository.createSession(session)
             selectedDecks.forEachIndexed { index, selection ->
+                // Sprint 18: Reset decks when starting a new session to ensure it starts "from scratch"
+                resetDeckUseCase(sessionId, selection.deck.id)
+                
                 sessionRepository.addDeckToSession(
                     SessionDeckRef(
                         sessionId = sessionId,

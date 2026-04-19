@@ -24,6 +24,9 @@ fun HexMapEntity.toDomain() = HexMap(
     isRadial = isRadial,
     maxActivitiesPerDay = maxActivitiesPerDay,
     mapNotes = mapNotes,
+    weatherTableId = weatherTableId,
+    travelEventTableId = travelEventTableId,
+    terrainTableConfig = terrainTableConfig,
     createdAt = createdAt
 )
 
@@ -39,6 +42,9 @@ fun HexMap.toEntity() = HexMapEntity(
     isRadial = isRadial,
     maxActivitiesPerDay = maxActivitiesPerDay,
     mapNotes = mapNotes,
+    weatherTableId = weatherTableId,
+    travelEventTableId = travelEventTableId,
+    terrainTableConfig = terrainTableConfig,
     createdAt = createdAt
 )
 

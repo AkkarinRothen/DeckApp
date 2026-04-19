@@ -12,6 +12,9 @@ data class HexMap(
     val isRadial: Boolean = false,
     val maxActivitiesPerDay: Int = 8,
     val mapNotes: String = "",
+    val weatherTableId: Long? = null,
+    val travelEventTableId: Long? = null,
+    val terrainTableConfig: String = "{}",
     val createdAt: Long = System.currentTimeMillis()
 )
 

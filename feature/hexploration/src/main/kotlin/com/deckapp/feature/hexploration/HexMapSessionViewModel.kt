@@ -3,7 +3,9 @@ package com.deckapp.feature.hexploration
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.deckapp.core.domain.repository.ReferenceRepository
 import com.deckapp.core.domain.repository.SessionRepository
+import com.deckapp.core.domain.usecase.GetAllTablesUseCase
 import com.deckapp.core.domain.usecase.RollTableUseCase
 import com.deckapp.core.domain.usecase.hex.ExploreHexUseCase
 import com.deckapp.core.domain.usecase.hex.GetHexDaysUseCase
@@ -17,6 +19,8 @@ import com.deckapp.core.domain.usecase.hex.StartNewHexDayUseCase
 import com.deckapp.core.model.HexDay
 import com.deckapp.core.model.HexPoi
 import com.deckapp.core.model.HexTile
+import com.deckapp.core.model.RandomTable
+import com.deckapp.core.model.SystemRule
 import com.deckapp.core.model.TableRollResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,7 +48,17 @@ data class HexMapSessionUiState(
     val showTileSheet: Boolean = false,
     val activeSessionId: Long? = null,
     val lastRollResult: TableRollResult? = null,
+    val rollResultContext: String = "",
     val showRollResultDialog: Boolean = false,
+    val recentRolls: List<TableRollResult> = emptyList(),
+    val showTablesSheet: Boolean = false,
+    val showRulesSheet: Boolean = false,
+    val allTables: List<RandomTable> = emptyList(),
+    val allRules: List<SystemRule> = emptyList(),
+    val rulesSearchQuery: String = "",
+    val weatherTableId: Long? = null,
+    val travelEventTableId: Long? = null,
+    val terrainTableConfig: String = "{}",
     val isLoading: Boolean = true
 )
 
@@ -61,7 +75,9 @@ class HexMapSessionViewModel @Inject constructor(
     private val sessionRepository: SessionRepository,
     private val movePartyUseCase: MovePartyUseCase,
     private val getHexDaysUseCase: GetHexDaysUseCase,
-    private val logHexActivityUseCase: LogHexActivityUseCase
+    private val logHexActivityUseCase: LogHexActivityUseCase,
+    private val getAllTablesUseCase: GetAllTablesUseCase,
+    private val referenceRepository: ReferenceRepository
 ) : ViewModel() {
 
     private val mapId: Long = savedStateHandle["mapId"] ?: 0L
@@ -88,6 +104,9 @@ class HexMapSessionViewModel @Inject constructor(
                         mapData.map.partyQ!! to mapData.map.partyR!!
                     else null,
                     activeSessionId = activeSession?.id,
+                    weatherTableId = mapData.map.weatherTableId,
+                    travelEventTableId = mapData.map.travelEventTableId,
+                    terrainTableConfig = mapData.map.terrainTableConfig,
                     isLoading = false
                 )
             }
@@ -97,12 +116,15 @@ class HexMapSessionViewModel @Inject constructor(
             }
         }.launchIn(viewModelScope)
 
-        // Observe days separately to track current day and activities
-        viewModelScope.launch {
-            // Days flow is not directly accessible from the use case here,
-            // so we use the repository through the domain layer via the hex map flow
-        }
         observeDays()
+
+        getAllTablesUseCase()
+            .onEach { tables -> _uiState.update { it.copy(allTables = tables) } }
+            .launchIn(viewModelScope)
+
+        referenceRepository.getAllSystemRules()
+            .onEach { rules -> _uiState.update { it.copy(allRules = rules) } }
+            .launchIn(viewModelScope)
     }
 
     private fun observeDays() {
@@ -133,6 +155,7 @@ class HexMapSessionViewModel @Inject constructor(
         viewModelScope.launch {
             val dayId = ensureDayExists()
             exploreHexUseCase(tile, dayId)
+            autoRollTerrainIfConfigured(tile)
         }
         dismissTileSheet()
     }
@@ -144,6 +167,7 @@ class HexMapSessionViewModel @Inject constructor(
         viewModelScope.launch {
             val dayId = ensureDayExists()
             reconnoiterHexUseCase(tile, dayId)
+            autoRollTerrainIfConfigured(tile)
         }
         dismissTileSheet()
     }
@@ -166,13 +190,14 @@ class HexMapSessionViewModel @Inject constructor(
                 currentDay = HexDay(id = newDayId, mapId = mapId, dayNumber = (it.currentDay?.dayNumber ?: 0) + 1),
                 activitiesUsedToday = 0
             ) }
+            val weatherId = _uiState.value.weatherTableId
+            if (weatherId != null) autoRoll(weatherId, "Clima del día")
         }
     }
 
     fun rollPoiTable(tableId: Long) {
         viewModelScope.launch {
-            val result = rollTableUseCase(tableId, _uiState.value.activeSessionId)
-            _uiState.update { it.copy(lastRollResult = result, showRollResultDialog = true) }
+            autoRoll(tableId, "Tabla POI")
         }
         dismissTileSheet()
     }
@@ -193,11 +218,43 @@ class HexMapSessionViewModel @Inject constructor(
                     tileR = r
                 )
             )
+            val travelId = _uiState.value.travelEventTableId
+            if (travelId != null) autoRoll(travelId, "Evento de viaje")
         }
     }
 
-    fun dismissRollResult() {
+    fun dismissRollDialog() {
         _uiState.update { it.copy(showRollResultDialog = false, lastRollResult = null) }
+    }
+
+    fun showTablesSheet() = _uiState.update { it.copy(showTablesSheet = true) }
+    fun dismissTablesSheet() = _uiState.update { it.copy(showTablesSheet = false) }
+    fun showRulesSheet() = _uiState.update { it.copy(showRulesSheet = true) }
+    fun dismissRulesSheet() = _uiState.update { it.copy(showRulesSheet = false) }
+    fun onRulesSearchChanged(q: String) = _uiState.update { it.copy(rulesSearchQuery = q) }
+
+    fun rollTableManually(tableId: Long) {
+        viewModelScope.launch {
+            val context = _uiState.value.allTables.find { it.id == tableId }?.name ?: ""
+            autoRoll(tableId, context)
+        }
+    }
+
+    private suspend fun autoRoll(tableId: Long, context: String) {
+        if (_uiState.value.showRollResultDialog) return
+        val result = rollTableUseCase(tableId, _uiState.value.activeSessionId)
+        _uiState.update { it.copy(
+            lastRollResult = result,
+            rollResultContext = context,
+            showRollResultDialog = true,
+            recentRolls = (listOf(result) + it.recentRolls).take(3)
+        ) }
+    }
+
+    private suspend fun autoRollTerrainIfConfigured(tile: HexTile) {
+        if (tile.terrainLabel.isBlank()) return
+        val tableId = parseTerrainConfig(_uiState.value.terrainTableConfig)[tile.terrainLabel] ?: return
+        autoRoll(tableId, "Encuentro: ${tile.terrainLabel}")
     }
 
     private suspend fun ensureDayExists(): Long {

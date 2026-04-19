@@ -14,6 +14,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -53,6 +55,8 @@ import com.deckapp.core.model.HexPoi
 import com.deckapp.core.model.HexTile
 import com.deckapp.feature.hexploration.components.HexCanvasMode
 import com.deckapp.feature.hexploration.components.HexGridCanvas
+import com.deckapp.feature.hexploration.components.HexRulesSheet
+import com.deckapp.feature.hexploration.components.HexSessionTablesSheet
 import com.deckapp.feature.hexploration.components.hexDistance
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,8 +72,16 @@ fun HexMapSessionScreen(
     if (uiState.showRollResultDialog && uiState.lastRollResult != null) {
         val result = uiState.lastRollResult!!
         AlertDialog(
-            onDismissRequest = viewModel::dismissRollResult,
-            title = { Text(result.tableName) },
+            onDismissRequest = viewModel::dismissRollDialog,
+            title = {
+                Column {
+                    Text(result.tableName)
+                    if (uiState.rollResultContext.isNotBlank() && uiState.rollResultContext != result.tableName) {
+                        Text(uiState.rollResultContext, style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            },
             text = {
                 Column {
                     Text("Resultado: ${result.rollValue}", style = MaterialTheme.typography.labelSmall,
@@ -79,9 +91,42 @@ fun HexMapSessionScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = viewModel::dismissRollResult) { Text("Cerrar") }
+                TextButton(onClick = viewModel::dismissRollDialog) { Text("Cerrar") }
             }
         )
+    }
+
+    val tablesSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    if (uiState.showTablesSheet) {
+        ModalBottomSheet(
+            onDismissRequest = viewModel::dismissTablesSheet,
+            sheetState = tablesSheetState,
+            dragHandle = { BottomSheetDefaults.DragHandle() }
+        ) {
+            HexSessionTablesSheet(
+                weatherTableId = uiState.weatherTableId,
+                travelEventTableId = uiState.travelEventTableId,
+                allTables = uiState.allTables,
+                recentRolls = uiState.recentRolls,
+                onRoll = viewModel::rollTableManually,
+                onDismiss = viewModel::dismissTablesSheet
+            )
+        }
+    }
+
+    val rulesSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    if (uiState.showRulesSheet) {
+        ModalBottomSheet(
+            onDismissRequest = viewModel::dismissRulesSheet,
+            sheetState = rulesSheetState,
+            dragHandle = { BottomSheetDefaults.DragHandle() }
+        ) {
+            HexRulesSheet(
+                rules = uiState.allRules,
+                searchQuery = uiState.rulesSearchQuery,
+                onSearchChanged = viewModel::onRulesSearchChanged
+            )
+        }
     }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -129,6 +174,14 @@ fun HexMapSessionScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = viewModel::showTablesSheet) {
+                        Icon(Icons.Default.TableChart, contentDescription = "Tablas")
+                    }
+                    IconButton(onClick = viewModel::showRulesSheet) {
+                        Icon(Icons.Default.MenuBook, contentDescription = "Reglas")
                     }
                 }
             )

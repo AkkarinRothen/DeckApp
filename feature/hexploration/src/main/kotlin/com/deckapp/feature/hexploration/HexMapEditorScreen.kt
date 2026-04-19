@@ -65,9 +65,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.foundation.lazy.LazyColumn
 import com.deckapp.core.model.HexPoi
 import com.deckapp.core.model.HexTile
 import com.deckapp.core.model.PoiType
+import com.deckapp.core.model.RandomTable
 import com.deckapp.feature.hexploration.components.HexCanvasMode
 import com.deckapp.feature.hexploration.components.HexGridCanvas
 
@@ -100,6 +102,24 @@ fun HexMapEditorScreen(
         )
     }
 
+    if (uiState.showWeatherTablePicker) {
+        HexTablePickerDialog(
+            tables = uiState.allTables,
+            onDismiss = viewModel::dismissWeatherTablePicker,
+            onTableSelected = { viewModel.setWeatherTable(it) },
+            onClear = { viewModel.setWeatherTable(null) }
+        )
+    }
+
+    if (uiState.showTravelTablePicker) {
+        HexTablePickerDialog(
+            tables = uiState.allTables,
+            onDismiss = viewModel::dismissTravelTablePicker,
+            onTableSelected = { viewModel.setTravelTable(it) },
+            onClear = { viewModel.setTravelTable(null) }
+        )
+    }
+
     var showMapSettingsSheet by remember { mutableStateOf(false) }
     val mapSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     if (showMapSettingsSheet) {
@@ -111,8 +131,18 @@ fun HexMapEditorScreen(
             MapSettingsSheet(
                 mapNotes = uiState.mapNotes,
                 maxActivitiesPerDay = uiState.maxActivitiesPerDay,
+                weatherTableName = uiState.allTables.find { it.id == uiState.weatherTableId }?.name,
+                travelTableName = uiState.allTables.find { it.id == uiState.travelEventTableId }?.name,
+                terrainTableConfig = uiState.terrainTableConfig,
+                allTables = uiState.allTables,
+                brushes = uiState.brushes,
                 onNotesChange = viewModel::updateMapNotes,
-                onMaxActivitiesChange = viewModel::updateMaxActivities
+                onMaxActivitiesChange = viewModel::updateMaxActivities,
+                onPickWeatherTable = viewModel::showWeatherTablePicker,
+                onClearWeatherTable = { viewModel.setWeatherTable(null) },
+                onPickTravelTable = viewModel::showTravelTablePicker,
+                onClearTravelTable = { viewModel.setTravelTable(null) },
+                onSetTerrainTable = viewModel::setTerrainTable
             )
         }
     }
@@ -357,38 +387,130 @@ private fun EditorTileDetails(
 private fun MapSettingsSheet(
     mapNotes: String,
     maxActivitiesPerDay: Int,
+    weatherTableName: String?,
+    travelTableName: String?,
+    terrainTableConfig: String,
+    allTables: List<RandomTable>,
+    brushes: List<TerrainBrush>,
     onNotesChange: (String) -> Unit,
-    onMaxActivitiesChange: (Int) -> Unit
+    onMaxActivitiesChange: (Int) -> Unit,
+    onPickWeatherTable: () -> Unit,
+    onClearWeatherTable: () -> Unit,
+    onPickTravelTable: () -> Unit,
+    onClearTravelTable: () -> Unit,
+    onSetTerrainTable: (String, Long?) -> Unit
 ) {
     var notes by remember(mapNotes) { mutableStateOf(mapNotes) }
-    Column(
+    var showTerrainSection by remember { mutableStateOf(false) }
+    val terrainConfig = remember(terrainTableConfig) { parseTerrainConfig(terrainTableConfig) }
+    val terrainLabels = remember(brushes) {
+        brushes.filter { it.cost >= 0 && it.label.isNotBlank() }.map { it.label }
+    }
+
+    LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .padding(bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("Configuración del mapa", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        HorizontalDivider()
-        Text("Actividades por día: $maxActivitiesPerDay", style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Slider(
-            value = maxActivitiesPerDay.toFloat(),
-            onValueChange = { onMaxActivitiesChange(it.toInt()) },
-            valueRange = 1f..30f,
-            steps = 28,
-            modifier = Modifier.fillMaxWidth()
-        )
-        HorizontalDivider()
-        OutlinedTextField(
-            value = notes,
-            onValueChange = { notes = it },
-            label = { Text("Notas del mapa (DM)") },
-            modifier = Modifier.fillMaxWidth(),
-            minLines = 3,
-            maxLines = 8
-        )
-        TextButton(onClick = { onNotesChange(notes) }) { Text("Guardar notas") }
+        item {
+            Text("Configuración del mapa", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            HorizontalDivider(modifier = Modifier.padding(top = 8.dp))
+        }
+        item {
+            Text("Actividades por día: $maxActivitiesPerDay", style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Slider(
+                value = maxActivitiesPerDay.toFloat(),
+                onValueChange = { onMaxActivitiesChange(it.toInt()) },
+                valueRange = 1f..30f,
+                steps = 28,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        item {
+            HorizontalDivider()
+            Spacer(Modifier.height(4.dp))
+            Text("Tablas automáticas", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+        }
+        item {
+            TableLinkRow(
+                label = "Clima (inicio de día)",
+                currentTableName = weatherTableName,
+                onPick = onPickWeatherTable,
+                onClear = onClearWeatherTable
+            )
+        }
+        item {
+            TableLinkRow(
+                label = "Eventos de viaje (movimiento)",
+                currentTableName = travelTableName,
+                onPick = onPickTravelTable,
+                onClear = onClearTravelTable
+            )
+        }
+        if (terrainLabels.isNotEmpty()) {
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showTerrainSection = !showTerrainSection },
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "Tablas de encuentro por terreno",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        if (showTerrainSection) "▲" else "▼",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            if (showTerrainSection) {
+                items(terrainLabels) { label ->
+                    val linkedId = terrainConfig[label]
+                    val linkedName = allTables.find { it.id == linkedId }?.name
+                    var showPickerForTerrain by remember { mutableStateOf(false) }
+                    if (showPickerForTerrain) {
+                        HexTablePickerDialog(
+                            tables = allTables,
+                            onDismiss = { showPickerForTerrain = false },
+                            onTableSelected = { id ->
+                                onSetTerrainTable(label, id)
+                                showPickerForTerrain = false
+                            },
+                            onClear = {
+                                onSetTerrainTable(label, null)
+                                showPickerForTerrain = false
+                            }
+                        )
+                    }
+                    TableLinkRow(
+                        label = label,
+                        currentTableName = linkedName,
+                        onPick = { showPickerForTerrain = true },
+                        onClear = { onSetTerrainTable(label, null) }
+                    )
+                }
+            }
+        }
+        item {
+            HorizontalDivider()
+            Spacer(Modifier.height(4.dp))
+            OutlinedTextField(
+                value = notes,
+                onValueChange = { notes = it },
+                label = { Text("Notas del mapa (DM)") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 3,
+                maxLines = 8
+            )
+            TextButton(onClick = { onNotesChange(notes) }) { Text("Guardar notas") }
+        }
     }
 }
 
@@ -450,6 +572,81 @@ private fun AddBrushDialog(
                 enabled = label.isNotBlank()
             ) { Text("Agregar") }
         },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
+    )
+}
+
+@Composable
+private fun TableLinkRow(
+    label: String,
+    currentTableName: String?,
+    onPick: () -> Unit,
+    onClear: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(label, style = MaterialTheme.typography.bodyMedium)
+            Text(
+                currentTableName ?: "Sin tabla",
+                style = MaterialTheme.typography.bodySmall,
+                color = if (currentTableName != null) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        TextButton(onClick = onPick) { Text("Cambiar") }
+        if (currentTableName != null) {
+            IconButton(onClick = onClear) {
+                Icon(Icons.Default.Close, contentDescription = "Quitar tabla",
+                    modifier = Modifier.size(16.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun HexTablePickerDialog(
+    tables: List<RandomTable>,
+    onDismiss: () -> Unit,
+    onTableSelected: (Long) -> Unit,
+    onClear: () -> Unit = {}
+) {
+    var search by remember { mutableStateOf("") }
+    val filtered = remember(search, tables) {
+        if (search.isBlank()) tables
+        else tables.filter { it.name.contains(search, ignoreCase = true) }
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Seleccionar tabla") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = search,
+                    onValueChange = { search = it },
+                    label = { Text("Buscar...") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                LazyColumn(modifier = Modifier.height(300.dp)) {
+                    items(filtered) { table ->
+                        Text(
+                            text = table.name,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onTableSelected(table.id) }
+                                .padding(vertical = 8.dp, horizontal = 4.dp)
+                        )
+                        HorizontalDivider()
+                    }
+                }
+            }
+        },
+        confirmButton = {},
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
     )
 }

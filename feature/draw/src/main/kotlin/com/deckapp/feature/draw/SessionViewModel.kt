@@ -237,6 +237,9 @@ class SessionViewModel @Inject constructor(
                 ) }
             }
         }
+
+        // Cargar estado de modo simplificado
+        _uiState.update { it.copy(isSimplifiedMode = settingsRepository.getSimplifiedModeEnabled()) }
     }
 
     /** Selecciona el mazo activo para la siguiente acción ROBAR. */

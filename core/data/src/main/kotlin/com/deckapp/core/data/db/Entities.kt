@@ -204,7 +204,6 @@ data class RandomTableEntity(
     val rollMode: String = "RANGE",       // TableRollMode.name
     @ColumnInfo(defaultValue = "0")
     val isNoRepeat: Boolean = false,
-    @ColumnInfo(defaultValue = "0")
     val isPinned: Boolean = false,
     val sourceType: String = "MANUAL",    // OCR, CSV, JSON, MANUAL
     val sourceName: String? = null,
@@ -214,7 +213,6 @@ data class RandomTableEntity(
     val createdAt: Long = System.currentTimeMillis(),
     val sourcePack: String? = null
 )
-
 @Entity(
     tableName = "table_entries",
     foreignKeys = [ForeignKey(
@@ -235,7 +233,6 @@ data class TableEntryEntity(
     val subTableRef: String? = null,
     val subTableId: Long? = null,
     val sortOrder: Int = 0,
-    @ColumnInfo(defaultValue = "1.0")
     val confidence: Float = 1.0f
 )
 
@@ -264,7 +261,6 @@ data class TableRollResultEntity(
     val sessionId: Long?,
     val rollValue: Int,
     val resolvedText: String,
-    @ColumnInfo(defaultValue = "0")
     val timestamp: Long = System.currentTimeMillis()
 )
 

@@ -3,6 +3,7 @@ package com.deckapp.feature.hexploration
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.deckapp.core.domain.usecase.GetAllTablesUseCase
 import com.deckapp.core.domain.usecase.hex.AddHexPoiUseCase
 import com.deckapp.core.domain.usecase.hex.AddHexTileUseCase
 import com.deckapp.core.domain.usecase.hex.DeleteHexPoiUseCase
@@ -15,6 +16,7 @@ import com.deckapp.core.model.HexMap
 import com.deckapp.core.model.HexPoi
 import com.deckapp.core.model.HexTile
 import com.deckapp.core.model.PoiType
+import com.deckapp.core.model.RandomTable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -62,7 +64,13 @@ data class HexMapEditorUiState(
     val newPoiDescription: String = "",
     val showCoordinates: Boolean = false,
     val currentMap: HexMap? = null,
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val allTables: List<RandomTable> = emptyList(),
+    val weatherTableId: Long? = null,
+    val travelEventTableId: Long? = null,
+    val terrainTableConfig: String = "{}",
+    val showWeatherTablePicker: Boolean = false,
+    val showTravelTablePicker: Boolean = false
 )
 
 @HiltViewModel
@@ -75,7 +83,8 @@ class HexMapEditorViewModel @Inject constructor(
     private val deleteHexPoiUseCase: DeleteHexPoiUseCase,
     private val expandHexMapUseCase: ExpandHexMapUseCase,
     private val addHexTileUseCase: AddHexTileUseCase,
-    private val deleteHexTileUseCase: DeleteHexTileUseCase
+    private val deleteHexTileUseCase: DeleteHexTileUseCase,
+    private val getAllTablesUseCase: GetAllTablesUseCase
 ) : ViewModel() {
 
     private val mapId: Long = savedStateHandle["mapId"] ?: 0L
@@ -92,6 +101,9 @@ class HexMapEditorViewModel @Inject constructor(
                         mapName = data.map.name,
                         mapNotes = data.map.mapNotes,
                         maxActivitiesPerDay = data.map.maxActivitiesPerDay,
+                        weatherTableId = data.map.weatherTableId,
+                        travelEventTableId = data.map.travelEventTableId,
+                        terrainTableConfig = data.map.terrainTableConfig,
                         tiles = data.tiles,
                         pois = data.pois,
                         currentMap = data.map,
@@ -99,6 +111,10 @@ class HexMapEditorViewModel @Inject constructor(
                     )
                 }
             }
+            .launchIn(viewModelScope)
+
+        getAllTablesUseCase()
+            .onEach { tables -> _uiState.update { it.copy(allTables = tables) } }
             .launchIn(viewModelScope)
     }
 
@@ -211,4 +227,43 @@ class HexMapEditorViewModel @Inject constructor(
         val brush = TerrainBrush(cost = cost.coerceIn(0, 3), label = label.trim(), color = color)
         _uiState.update { it.copy(brushes = it.brushes + brush, activeBrush = brush, showAddBrushDialog = false) }
     }
+
+    fun showWeatherTablePicker() = _uiState.update { it.copy(showWeatherTablePicker = true) }
+    fun dismissWeatherTablePicker() = _uiState.update { it.copy(showWeatherTablePicker = false) }
+    fun setWeatherTable(tableId: Long?) {
+        val map = _uiState.value.currentMap ?: return
+        viewModelScope.launch { updateHexMapUseCase(map.copy(weatherTableId = tableId)) }
+        _uiState.update { it.copy(weatherTableId = tableId, showWeatherTablePicker = false) }
+    }
+
+    fun showTravelTablePicker() = _uiState.update { it.copy(showTravelTablePicker = true) }
+    fun dismissTravelTablePicker() = _uiState.update { it.copy(showTravelTablePicker = false) }
+    fun setTravelTable(tableId: Long?) {
+        val map = _uiState.value.currentMap ?: return
+        viewModelScope.launch { updateHexMapUseCase(map.copy(travelEventTableId = tableId)) }
+        _uiState.update { it.copy(travelEventTableId = tableId, showTravelTablePicker = false) }
+    }
+
+    fun setTerrainTable(terrainLabel: String, tableId: Long?) {
+        val map = _uiState.value.currentMap ?: return
+        val current = parseTerrainConfig(_uiState.value.terrainTableConfig).toMutableMap()
+        if (tableId == null) current.remove(terrainLabel) else current[terrainLabel] = tableId
+        val encoded = encodeTerrainConfig(current)
+        viewModelScope.launch { updateHexMapUseCase(map.copy(terrainTableConfig = encoded)) }
+        _uiState.update { it.copy(terrainTableConfig = encoded) }
+    }
+}
+
+internal fun parseTerrainConfig(json: String): Map<String, Long> =
+    runCatching {
+        kotlinx.serialization.json.Json.decodeFromString<Map<String, Long>>(json)
+    }.getOrDefault(emptyMap())
+
+internal fun encodeTerrainConfig(map: Map<String, Long>): String = buildString {
+    append("{")
+    map.entries.forEachIndexed { index, (k, v) ->
+        if (index > 0) append(",")
+        append("\"${k.replace("\"", "\\\"")}\":$v")
+    }
+    append("}")
 }
