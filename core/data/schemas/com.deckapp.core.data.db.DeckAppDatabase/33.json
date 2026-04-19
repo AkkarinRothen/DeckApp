@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 33,
-    "identityHash": "34399e9c0c7056914f62fd3765266206",
+    "identityHash": "52061c921f4c05983c88cc6d53709d87",
     "entities": [
       {
         "tableName": "card_stacks",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `description` TEXT NOT NULL, `coverImagePath` TEXT, `sourceFolderPath` TEXT, `defaultContentMode` TEXT NOT NULL, `drawMode` TEXT NOT NULL, `drawFaceDown` INTEGER NOT NULL, `backImagePath` TEXT, `displayCount` INTEGER NOT NULL, `aspectRatio` TEXT NOT NULL, `isArchived` INTEGER NOT NULL, `sortOrder` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `description` TEXT NOT NULL, `coverImagePath` TEXT, `sourceFolderPath` TEXT, `defaultContentMode` TEXT NOT NULL, `drawMode` TEXT NOT NULL, `drawFaceDown` INTEGER NOT NULL, `backImagePath` TEXT, `displayCount` INTEGER NOT NULL, `aspectRatio` TEXT NOT NULL, `isArchived` INTEGER NOT NULL, `sortOrder` INTEGER NOT NULL DEFAULT 0, `createdAt` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -90,7 +90,8 @@
             "fieldPath": "sortOrder",
             "columnName": "sortOrder",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "0"
           },
           {
             "fieldPath": "createdAt",
@@ -492,7 +493,7 @@
       },
       {
         "tableName": "sessions",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `status` TEXT NOT NULL, `scheduledDate` INTEGER, `summary` TEXT, `createdAt` INTEGER NOT NULL, `endedAt` INTEGER, `showCardTitles` INTEGER NOT NULL, `dm_notes` TEXT, `gameSystemsJson` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `status` TEXT NOT NULL, `scheduledDate` INTEGER, `summary` TEXT, `createdAt` INTEGER NOT NULL, `endedAt` INTEGER, `showCardTitles` INTEGER NOT NULL, `dm_notes` TEXT, `gameSystemsJson` TEXT NOT NULL DEFAULT '[\"General\"]')",
         "fields": [
           {
             "fieldPath": "id",
@@ -552,7 +553,8 @@
             "fieldPath": "gameSystemsJson",
             "columnName": "gameSystemsJson",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "'[\"General\"]'"
           }
         ],
         "primaryKey": {
@@ -730,7 +732,7 @@
       },
       {
         "tableName": "random_tables",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bundleId` INTEGER, `name` TEXT NOT NULL, `category` TEXT NOT NULL, `description` TEXT NOT NULL, `rollFormula` TEXT NOT NULL, `rollMode` TEXT NOT NULL, `isNoRepeat` INTEGER NOT NULL, `isPinned` INTEGER NOT NULL, `sourceType` TEXT NOT NULL, `sourceName` TEXT, `isBuiltIn` INTEGER NOT NULL, `sortOrder` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, `sourcePack` TEXT, FOREIGN KEY(`bundleId`) REFERENCES `table_bundles`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bundleId` INTEGER, `name` TEXT NOT NULL, `category` TEXT NOT NULL DEFAULT 'General', `description` TEXT NOT NULL, `rollFormula` TEXT NOT NULL, `rollMode` TEXT NOT NULL, `isNoRepeat` INTEGER NOT NULL DEFAULT 0, `isPinned` INTEGER NOT NULL DEFAULT 0, `sourceType` TEXT NOT NULL, `sourceName` TEXT, `isBuiltIn` INTEGER NOT NULL, `sortOrder` INTEGER NOT NULL DEFAULT 0, `createdAt` INTEGER NOT NULL, `sourcePack` TEXT, FOREIGN KEY(`bundleId`) REFERENCES `table_bundles`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
         "fields": [
           {
             "fieldPath": "id",
@@ -754,7 +756,8 @@
             "fieldPath": "category",
             "columnName": "category",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "'General'"
           },
           {
             "fieldPath": "description",
@@ -778,13 +781,15 @@
             "fieldPath": "isNoRepeat",
             "columnName": "isNoRepeat",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "0"
           },
           {
             "fieldPath": "isPinned",
             "columnName": "isPinned",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "0"
           },
           {
             "fieldPath": "sourceType",
@@ -808,7 +813,8 @@
             "fieldPath": "sortOrder",
             "columnName": "sortOrder",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "0"
           },
           {
             "fieldPath": "createdAt",
@@ -856,7 +862,7 @@
       },
       {
         "tableName": "table_entries",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tableId` INTEGER NOT NULL, `minRoll` INTEGER NOT NULL, `maxRoll` INTEGER NOT NULL, `weight` INTEGER NOT NULL, `text` TEXT NOT NULL, `subTableRef` TEXT, `subTableId` INTEGER, `sortOrder` INTEGER NOT NULL, FOREIGN KEY(`tableId`) REFERENCES `random_tables`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tableId` INTEGER NOT NULL, `minRoll` INTEGER NOT NULL, `maxRoll` INTEGER NOT NULL, `weight` INTEGER NOT NULL, `text` TEXT NOT NULL, `subTableRef` TEXT, `subTableId` INTEGER, `sortOrder` INTEGER NOT NULL, `confidence` REAL NOT NULL DEFAULT 1.0, FOREIGN KEY(`tableId`) REFERENCES `random_tables`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -911,6 +917,13 @@
             "columnName": "sortOrder",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "confidence",
+            "columnName": "confidence",
+            "affinity": "REAL",
+            "notNull": true,
+            "defaultValue": "1.0"
           }
         ],
         "primaryKey": {
@@ -946,7 +959,7 @@
       },
       {
         "tableName": "table_roll_results",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tableId` INTEGER NOT NULL, `tableName` TEXT NOT NULL, `sessionId` INTEGER, `rollValue` INTEGER NOT NULL, `resolvedText` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, FOREIGN KEY(`tableId`) REFERENCES `random_tables`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`sessionId`) REFERENCES `sessions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tableId` INTEGER NOT NULL, `tableName` TEXT NOT NULL, `sessionId` INTEGER, `rollValue` INTEGER NOT NULL, `resolvedText` TEXT NOT NULL, `timestamp` INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(`tableId`) REFERENCES `random_tables`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`sessionId`) REFERENCES `sessions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -988,7 +1001,8 @@
             "fieldPath": "timestamp",
             "columnName": "timestamp",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "0"
           }
         ],
         "primaryKey": {
@@ -2489,7 +2503,7 @@
       },
       {
         "tableName": "hex_maps",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `rows` INTEGER NOT NULL, `cols` INTEGER NOT NULL, `sessionId` INTEGER, `hexStyle` TEXT NOT NULL, `partyQ` INTEGER, `partyR` INTEGER, `isRadial` INTEGER NOT NULL, `maxActivitiesPerDay` INTEGER NOT NULL, `mapNotes` TEXT NOT NULL, `createdAt` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `rows` INTEGER NOT NULL, `cols` INTEGER NOT NULL, `sessionId` INTEGER, `hexStyle` TEXT NOT NULL DEFAULT 'FLAT_TOP', `partyQ` INTEGER, `partyR` INTEGER, `isRadial` INTEGER NOT NULL DEFAULT 0, `maxActivitiesPerDay` INTEGER NOT NULL DEFAULT 8, `mapNotes` TEXT NOT NULL DEFAULT '', `createdAt` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -2525,7 +2539,8 @@
             "fieldPath": "hexStyle",
             "columnName": "hexStyle",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "'FLAT_TOP'"
           },
           {
             "fieldPath": "partyQ",
@@ -2543,19 +2558,22 @@
             "fieldPath": "isRadial",
             "columnName": "isRadial",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "0"
           },
           {
             "fieldPath": "maxActivitiesPerDay",
             "columnName": "maxActivitiesPerDay",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "8"
           },
           {
             "fieldPath": "mapNotes",
             "columnName": "mapNotes",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "''"
           },
           {
             "fieldPath": "createdAt",
@@ -2575,7 +2593,7 @@
       },
       {
         "tableName": "hex_tiles",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`mapId` INTEGER NOT NULL, `q` INTEGER NOT NULL, `r` INTEGER NOT NULL, `terrainCost` INTEGER NOT NULL, `terrainLabel` TEXT NOT NULL, `terrainColor` INTEGER NOT NULL, `dmNotes` TEXT NOT NULL, `playerNotes` TEXT NOT NULL, `isExplored` INTEGER NOT NULL, `isReconnoitered` INTEGER NOT NULL, `isMapped` INTEGER NOT NULL, PRIMARY KEY(`mapId`, `q`, `r`), FOREIGN KEY(`mapId`) REFERENCES `hex_maps`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`mapId` INTEGER NOT NULL, `q` INTEGER NOT NULL, `r` INTEGER NOT NULL, `terrainCost` INTEGER NOT NULL DEFAULT 1, `terrainLabel` TEXT NOT NULL DEFAULT '', `terrainColor` INTEGER NOT NULL DEFAULT -2183045, `dmNotes` TEXT NOT NULL DEFAULT '', `playerNotes` TEXT NOT NULL DEFAULT '', `isExplored` INTEGER NOT NULL DEFAULT 0, `isReconnoitered` INTEGER NOT NULL DEFAULT 0, `isMapped` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`mapId`, `q`, `r`), FOREIGN KEY(`mapId`) REFERENCES `hex_maps`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "mapId",
@@ -2599,49 +2617,57 @@
             "fieldPath": "terrainCost",
             "columnName": "terrainCost",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "1"
           },
           {
             "fieldPath": "terrainLabel",
             "columnName": "terrainLabel",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "''"
           },
           {
             "fieldPath": "terrainColor",
             "columnName": "terrainColor",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "-2183045"
           },
           {
             "fieldPath": "dmNotes",
             "columnName": "dmNotes",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "''"
           },
           {
             "fieldPath": "playerNotes",
             "columnName": "playerNotes",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "''"
           },
           {
             "fieldPath": "isExplored",
             "columnName": "isExplored",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "0"
           },
           {
             "fieldPath": "isReconnoitered",
             "columnName": "isReconnoitered",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "0"
           },
           {
             "fieldPath": "isMapped",
             "columnName": "isMapped",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "0"
           }
         ],
         "primaryKey": {
@@ -2679,7 +2705,7 @@
       },
       {
         "tableName": "hex_pois",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `mapId` INTEGER NOT NULL, `tileQ` INTEGER NOT NULL, `tileR` INTEGER NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `description` TEXT NOT NULL, `encounterId` INTEGER, `tableId` INTEGER, FOREIGN KEY(`mapId`) REFERENCES `hex_maps`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `mapId` INTEGER NOT NULL, `tileQ` INTEGER NOT NULL, `tileR` INTEGER NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `description` TEXT NOT NULL DEFAULT '', `encounterId` INTEGER, `tableId` INTEGER, FOREIGN KEY(`mapId`) REFERENCES `hex_maps`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -2721,7 +2747,8 @@
             "fieldPath": "description",
             "columnName": "description",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "''"
           },
           {
             "fieldPath": "encounterId",
@@ -2769,7 +2796,7 @@
       },
       {
         "tableName": "hex_days",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `mapId` INTEGER NOT NULL, `dayNumber` INTEGER NOT NULL, `activitiesLog` TEXT NOT NULL, `notes` TEXT NOT NULL, FOREIGN KEY(`mapId`) REFERENCES `hex_maps`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `mapId` INTEGER NOT NULL, `dayNumber` INTEGER NOT NULL, `activitiesLog` TEXT NOT NULL DEFAULT '[]', `notes` TEXT NOT NULL DEFAULT '', FOREIGN KEY(`mapId`) REFERENCES `hex_maps`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -2793,13 +2820,15 @@
             "fieldPath": "activitiesLog",
             "columnName": "activitiesLog",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "'[]'"
           },
           {
             "fieldPath": "notes",
             "columnName": "notes",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "''"
           }
         ],
         "primaryKey": {
@@ -2837,7 +2866,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '34399e9c0c7056914f62fd3765266206')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '52061c921f4c05983c88cc6d53709d87')"
     ]
   }
 }
