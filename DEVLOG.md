@@ -1,5 +1,35 @@
 ---
 
+### Sprint 45 — Estabilidad, Higiene Técnica y UX Pro (19 de abril de 2026)
+
+**ARCHITECTURE — Lógica de "Upsert" Inteligente y Estabilidad de Listas**
+- **Refactor Sistémico de DAOs**: Eliminado el uso de `OnConflictStrategy.REPLACE` en DAOs críticos (`CardStackDao`, `SessionDao`, `RandomTableDao`, `WikiDao`, `ReferenceDao`). 
+- **Preservación de Metadatos**: Implementada lógica de `IGNORE` + `@Update` en los repositorios. Esto garantiza que la fecha de creación (`createdAt`) no se sobrescriba al editar, evitando que los elementos "salten" de posición en las listas ordenadas cronológicamente.
+- **Migración de BD**: Bumpeada la base de datos a **Versión 32**. Añadidas columnas `isRadial`, `maxActivitiesPerDay` y `mapNotes` a la tabla `hex_maps`.
+
+**STABILITY — Blindaje del Mapa Hexagonal**
+- **Fix de Crash por Zoom**: Corregido error de `maxWidth/maxHeight` negativo al dibujar etiquetas de texto en escalas extremas. Implementada medición de texto manual con `TextLayoutResult` y filtros de coordenadas de seguridad.
+- **Optimización de Culling**: Incrementado el margen de renderizado a 3 hexágonos para eliminar parpadeos en los bordes durante el desplazamiento rápido.
+
+**FEATURE — Herramientas Avanzadas de Hexploración**
+- **Herramienta "Borrar"**: Añadido pincel de borrado al editor para eliminar hexágonos individuales y crear formas irregulares.
+- **Sistema de Coordenadas**: Interruptor visual en el editor para mostrar/ocultar coordenadas axiales en cada hexágono.
+- **Indicador de POIs Múltiples**: Nuevo renderizado con borde doble para hexágonos que contienen más de un punto de interés.
+- **UX de Creación**: Refactorizado el diálogo de nuevo mapa para soportar entrada de texto fluida (sin bloqueos de borrado) y previsualización de radio/rejilla en tiempo real.
+
+**UX — Editores Adaptables y Gestión de Sesión**
+- **Editores "Keyboard-Aware"**: Añadido `imePadding` y soporte de scroll en los editores de PNJs y Encuentros. El teclado ya no tapa los campos inferiores ni los botones de acción.
+- **Persistencia de Sesión**: El estado de previsualización de cartas ("Peek") ahora sobrevive a rotaciones de pantalla y reinicios de proceso vía `SavedStateHandle`.
+- **Cronómetro Eficiente**: Refactorizado el timer de sesión para ser reactivo y consumir recursos mínimos en segundo plano.
+
+**CLEANUP — Gestión de Almacenamiento "Zero Waste"**
+- **Borrado Físico de Imágenes**: Actualizados los repositorios de Mazos, PNJs y Wiki. Ahora, al eliminar un elemento, la aplicación borra automáticamente sus archivos de imagen del almacenamiento interno, evitando la acumulación de datos huérfanos.
+
+**INTEGRATION — Build**
+- **BUILD SUCCESSFUL** `assembleDebug` — Consolidación total de la infraestructura de datos y UI.
+
+---
+
 ### Sprint 44D — Modo Sesión e Integraciones (19 de abril de 2026)
 
 **FEATURE — HexMapSessionScreen: tracking de exploración en vivo**

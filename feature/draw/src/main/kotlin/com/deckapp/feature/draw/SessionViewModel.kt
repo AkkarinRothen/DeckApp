@@ -85,11 +85,13 @@ class SessionViewModel @Inject constructor(
     private val toggleConditionUseCase: ToggleConditionUseCase,
     private val cleanupCombatUseCase: CleanupCombatUseCase,
     private val settingsRepository: com.deckapp.core.domain.repository.SettingsRepository,
-    savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val sessionId: Long = checkNotNull(savedStateHandle["sessionId"])
-    private var peekCardId: Long? by savedStateHandle.delegate("peekCardId")
+    private var peekCardId: Long?
+        get() = savedStateHandle.get<Long>("peekCardId")
+        set(value) { savedStateHandle["peekCardId"] = value }
 
     private val _uiState = MutableStateFlow(SessionUiState())
     val uiState: StateFlow<SessionUiState> = _uiState.asStateFlow()
@@ -103,7 +105,6 @@ class SessionViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), System.currentTimeMillis())
 
     init {
-        // ... rest of init ...
         // Re-load peek card if exists in saved state
         peekCardId?.let { id ->
             viewModelScope.launch {
@@ -112,8 +113,8 @@ class SessionViewModel @Inject constructor(
                 }
             }
         }
-...
-        // Combine everything including the ticker for elapsed time
+
+        // Combine session data and ticker
         viewModelScope.launch {
             combine(
                 sessionRepository.getSessionById(sessionId),
@@ -123,14 +124,14 @@ class SessionViewModel @Inject constructor(
                     val elapsed = (now - session.createdAt) / (1000 * 60)
                     _uiState.update { it.copy(
                         session = session,
-                        dmNotes = session.dmNotes,
+                        dmNotes = session.dmNotes ?: "",
                         sessionElapsedMinutes = elapsed
                     ) }
                 }
             }.collect()
         }
 
-        // Mazos asignados a la sesión + nombres reactivos
+        // Combine decks and their metadata
         viewModelScope.launch {
             combine(
                 sessionRepository.getDecksForSession(sessionId),
@@ -139,23 +140,17 @@ class SessionViewModel @Inject constructor(
                 val names = allDecks.associate { it.id to it.name }
                 val ratios = allDecks.associate { it.id to it.aspectRatio }
                 val backImages = allDecks.associate { it.id to it.backImagePath }
-                object {
-                    val refs = refs; val names = names
-                    val ratios = ratios; val backImages = backImages
-                }
-            }.collect { data ->
+                
                 _uiState.update { state ->
                     state.copy(
-                        deckRefs = data.refs,
-                        deckNames = data.names,
-                        deckAspectRatios = data.ratios,
-                        deckBackImages = data.backImages,
-                        // Auto-seleccionar el primer mazo si todavía no hay selección
-                        selectedDeckId = state.selectedDeckId
-                            ?: data.refs.firstOrNull()?.stackId
+                        deckRefs = refs,
+                        deckNames = names,
+                        deckAspectRatios = ratios,
+                        deckBackImages = backImages,
+                        selectedDeckId = state.selectedDeckId ?: refs.firstOrNull()?.stackId
                     )
                 }
-            }
+            }.collect()
         }
 
         // Conteo reactivo de cartas disponibles por mazo
@@ -236,7 +231,7 @@ class SessionViewModel @Inject constructor(
                 Triple(decks, tables, systems)
             }.collect { (decks, tables, systems) ->
                 _uiState.update { it.copy(
-                    allDecks = decks, 
+                    allDecks = decks,
                     allTables = tables,
                     availableSystems = systems
                 ) }

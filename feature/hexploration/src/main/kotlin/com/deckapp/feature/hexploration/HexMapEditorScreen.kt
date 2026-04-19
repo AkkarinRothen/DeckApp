@@ -1,5 +1,10 @@
 package com.deckapp.feature.hexploration
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,6 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.GridOn
 import androidx.compose.material.icons.filled.Layers
@@ -112,21 +118,6 @@ fun HexMapEditorScreen(
     }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    if (uiState.showTileSheet && uiState.selectedTile != null) {
-        ModalBottomSheet(
-            onDismissRequest = viewModel::dismissTileSheet,
-            sheetState = sheetState,
-            dragHandle = { BottomSheetDefaults.DragHandle() }
-        ) {
-            TileDetailSheet(
-                tile = uiState.selectedTile!!,
-                pois = uiState.pois.filter { it.tileQ == uiState.selectedTile!!.q && it.tileR == uiState.selectedTile!!.r },
-                onSaveNotes = { dm, player -> viewModel.updateTileNotes(uiState.selectedTile!!, dm, player) },
-                onAddPoi = viewModel::showAddPoiDialog,
-                onDeletePoi = viewModel::deletePoi
-            )
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -292,55 +283,38 @@ private fun TerrainBrushToolbar(
 }
 
 @Composable
-private fun TileDetailSheet(
+private fun EditorTileDetails(
     tile: HexTile,
     pois: List<HexPoi>,
-    onSaveNotes: (dmNotes: String, playerNotes: String) -> Unit,
+    onDismiss: () -> Unit,
     onAddPoi: () -> Unit,
     onDeletePoi: (Long) -> Unit
 ) {
-    var dmNotes by remember(tile.q, tile.r) { mutableStateOf(tile.dmNotes) }
-    var playerNotes by remember(tile.q, tile.r) { mutableStateOf(tile.playerNotes) }
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
             .padding(horizontal = 16.dp)
-            .padding(bottom = 32.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(bottom = 16.dp, top = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Text(
-            "Hex (${tile.q}, ${tile.r}) — ${tile.terrainLabel.ifBlank { "Sin etiqueta" }}",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                "Hex (${tile.q}, ${tile.r}) — ${tile.terrainLabel.ifBlank { "Sin etiqueta" }}",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f)
+            )
+            IconButton(onClick = onDismiss) {
+                Icon(Icons.Default.Close, contentDescription = "Cerrar")
+            }
+        }
+        
         Text(
             "Coste de movimiento: ${if (tile.terrainCost == 0) "Infranqueable" else "${tile.terrainCost} actividad(es)"}",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-
-        HorizontalDivider()
-
-        OutlinedTextField(
-            value = dmNotes,
-            onValueChange = { dmNotes = it },
-            label = { Text("Notas del DM (privadas)") },
-            modifier = Modifier.fillMaxWidth(),
-            minLines = 2,
-            maxLines = 4
-        )
-        OutlinedTextField(
-            value = playerNotes,
-            onValueChange = { playerNotes = it },
-            label = { Text("Notas para jugadores") },
-            modifier = Modifier.fillMaxWidth(),
-            minLines = 2,
-            maxLines = 4
-        )
-        TextButton(onClick = { onSaveNotes(dmNotes, playerNotes) }) {
-            Text("Guardar notas")
-        }
 
         HorizontalDivider()
 

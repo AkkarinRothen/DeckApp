@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 32,
-    "identityHash": "bd6549925085f7eec640be17ff3501aa",
+    "identityHash": "34399e9c0c7056914f62fd3765266206",
     "entities": [
       {
         "tableName": "card_stacks",
@@ -2489,7 +2489,7 @@
       },
       {
         "tableName": "hex_maps",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `rows` INTEGER NOT NULL, `cols` INTEGER NOT NULL, `sessionId` INTEGER, `hexStyle` TEXT NOT NULL, `partyQ` INTEGER, `partyR` INTEGER, `maxActivitiesPerDay` INTEGER NOT NULL, `mapNotes` TEXT NOT NULL, `createdAt` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `rows` INTEGER NOT NULL, `cols` INTEGER NOT NULL, `sessionId` INTEGER, `hexStyle` TEXT NOT NULL, `partyQ` INTEGER, `partyR` INTEGER, `isRadial` INTEGER NOT NULL, `maxActivitiesPerDay` INTEGER NOT NULL, `mapNotes` TEXT NOT NULL, `createdAt` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -2538,6 +2538,12 @@
             "columnName": "partyR",
             "affinity": "INTEGER",
             "notNull": false
+          },
+          {
+            "fieldPath": "isRadial",
+            "columnName": "isRadial",
+            "affinity": "INTEGER",
+            "notNull": true
           },
           {
             "fieldPath": "maxActivitiesPerDay",
@@ -2831,7 +2837,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bd6549925085f7eec640be17ff3501aa')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '34399e9c0c7056914f62fd3765266206')"
     ]
   }
 }
