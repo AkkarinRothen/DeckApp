@@ -1,5 +1,181 @@
 ---
 
+### Sprint 44D — Modo Sesión e Integraciones (19 de abril de 2026)
+
+**FEATURE — HexMapSessionScreen: tracking de exploración en vivo**
+- **`HexMapSessionScreen`**: canvas en modo SESSION con fog of war activo. Header con día actual y actividades usadas. FAB "+" para nuevo día.
+- **`SessionTileSheet`** (`ModalBottomSheet`): chips de estado (Explorado/Reconocido/Mapeado), botones de acción con coste de actividades, notas de jugador visibles post-exploración, POIs con botones "Tirar tabla" y "Encuentro".
+- **`StatusChip`**: chip visual con ícono de check cuando el estado está activo.
+- **`HexMapSessionViewModel`**: auto-vincula el mapa a la sesión activa al abrir (`LinkHexMapToSessionUseCase`), gestiona día actual con `StartNewHexDayUseCase`, delega acciones a `ExploreHexUseCase`, `ReconnoiterHexUseCase`, `MapHexUseCase`.
+- **Integración Sessions**: `SessionRepository.getActiveSession()` inyectado, mapa se vincula automáticamente.
+- **Integración Tables**: `RollTableUseCase` invocado desde POI con `tableId`; resultado mostrado en `AlertDialog` con nombre de tabla y texto resuelto.
+- **Integración Encounters**: desde POI navega a `EncounterEditorRoute(encounterId)` o a `EncounterListRoute` si no hay encuentro vinculado.
+- **Punto de entrada**: "Mapas Hex" agregado al dropdown de `LibraryScreen` (icono `Layers`).
+- Fix: smart cast en `poi.tableId`/`poi.encounterId` resuelto con variables locales (propiedad de módulo externo).
+
+**INTEGRATION — Build**
+- **BUILD SUCCESSFUL** `assembleDebug` — sprint 44 completo, feature hexploration operativo.
+
+---
+
+### Sprint 44C — Pantallas de Lista y Editor de Hexploración (19 de abril de 2026)
+
+**FEATURE — HexMapListScreen y HexMapEditorScreen funcionales**
+- **`HexMapListScreen`**: lista de mapas con `LazyColumn`, `Card` clickable, botón borrar con `AlertDialog` de confirmación, FAB para crear nuevo mapa. Estado vacío con mensaje guía.
+- **`CreateHexMapDialog`**: campos de nombre, columnas y filas (3–40) con preview del total de hexes. Creación inmediata navega al editor.
+- **`HexMapEditorScreen`**: `HexGridCanvas` en modo DESIGN ocupa el espacio disponible, barra de terreno en la parte inferior, FAB "Iniciar sesión" con navegación a `HexMapSessionRoute`.
+- **`TerrainBrushToolbar`**: `LazyRow` con 8 pinceles predefinidos (abierto, difícil, muy difícil, infranqueable, agua, llanura, bosque, montaña). Tap aplica el terreno directamente al hex.
+- **`TileDetailSheet`** (`ModalBottomSheet`): long press abre notas DM/jugadores (editables + guardado), lista de POIs del hex con botón borrar, botón agregar POI.
+- **`AddPoiDialog`**: nombre, tipo (dropdown con todos los `PoiType`), descripción opcional.
+- **`HexMapEditorViewModel`**: `SavedStateHandle["mapId"]` (patrón del proyecto, sin dependencia circular a `:app`). Brush activo aplicado en tap, tile seleccionado en long press.
+- Rutas `HexMapListRoute`, `HexMapEditorRoute(mapId)`, `HexMapSessionRoute(mapId)` registradas en `Screen.kt` y `NavGraph.kt`.
+- Fix: eliminado `toRoute<HexMapEditorRoute>()` del ViewModel (causaría dependencia circular `:feature → :app`).
+
+**INTEGRATION — Build**
+- **BUILD SUCCESSFUL** `assembleDebug` — 407 tasks, 16 executed.
+
+---
+
+### Sprint 44B — HexGridCanvas (19 de abril de 2026)
+
+**FEATURE — Canvas de hexágonos con lazy rendering y modos Diseño/Sesión**
+- Nuevo módulo `:feature:hexploration` registrado en `settings.gradle.kts` y `app/build.gradle.kts`.
+- **`HexGridCanvas`** (`components/HexGridCanvas.kt`): Composable Canvas con coordenadas axiales flat-top.
+- **Lazy rendering / viewport culling**: en cada frame se filtran los tiles cuyo centro cae fuera del viewport expandido (+2 hex de margen). Sin cap de tamaño — mapas de cualquier dimensión son viables.
+- **Pan + pinch-zoom**: `rememberTransformableState` con zoom entre 0.3× y 4×.
+- **Tap / Long press**: `detectTapGestures` convierte coordenadas de pantalla → mundo → axial con `axialRound` para hit-testing preciso.
+- **Modo DESIGN**: muestra terreno, indica coste con puntos blancos en tiles difíciles (cost ≥2).
+- **Modo SESSION**: fog of war oscuro en tiles no explorados; tint blanco en reconocidos; shimmer dorado en mapeados.
+- **POI overlay**: círculo de color según `PoiType` (8 colores semánticos) visible en diseño o cuando el hex está explorado.
+- Hex stroke dorado + grosor 3px en tile seleccionado.
+
+**INTEGRATION — Build**
+- **BUILD SUCCESSFUL** `assembleDebug` — 406 tasks, 25 executed.
+
+---
+
+### Sprint 44A — Dominio y Base de Datos de Hexploración (19 de abril de 2026)
+
+**FEATURE — Capa de dominio completa para el feature Hexploración**
+- **Modelos** (`core:model`): `HexMap`, `HexTile`, `HexPoi`, `HexDay`, `HexActivityEntry`, `HexActivityType`, `HexStyle`, `PoiType`.
+- **Repository interface** (`core:domain`): `HexRepository` con métodos Flow + suspend para mapas, tiles, POIs y días.
+- **11 UseCases** en `core:domain/usecase/hex/`: `GetHexMapsUseCase`, `GetHexMapWithTilesUseCase`, `CreateHexMapUseCase` (genera grid de tiles automáticamente), `UpdateHexTileUseCase`, `ExploreHexUseCase`, `ReconnoiterHexUseCase` (costo según `terrainCost`), `MapHexUseCase`, `AddHexPoiUseCase`, `DeleteHexPoiUseCase`, `StartNewHexDayUseCase`, `LogHexActivityUseCase`, `LinkHexMapToSessionUseCase`, `DeleteHexMapUseCase`.
+- **Room** (`core:data`): `HexEntities.kt` (4 entidades con FK CASCADE), `HexDao.kt`, `HexMappers.kt` (toDomain/toEntity), `HexRepositoryImpl.kt`.
+- **Migración 29→30**: 4 nuevas tablas (`hex_maps`, `hex_tiles`, `hex_pois`, `hex_days`) con índices e integridad referencial.
+- **DI**: `HexDao` y `HexRepositoryImpl` registrados en `DataModule.kt`.
+- `HexActivityEntry` y `HexActivityType` anotados con `@Serializable` para persistencia JSON en `HexDayEntity.activitiesLog`.
+
+**INTEGRATION — Build**
+- **BUILD SUCCESSFUL** `assembleDebug` — 384 tasks, 71 executed.
+
+---
+
+### Sprint 43 — Resultado de Tirada Inline en Tarjetas de Tabla (18 de abril de 2026)
+
+**FEATURE — Quick Roll con resultado visible sin abrir la tabla**
+- Al presionar TIRAR en una tarjeta de tabla, el resultado aparece directamente en la propia tarjeta sin navegar a ningún detalle.
+- `TablesUiState` extendido con `quickRollResults: Map<Long, TableRollResult>` — cada tabla mantiene su último resultado independientemente.
+- `TablesViewModel.rollTable()` ahora también actualiza `quickRollResults[tableId]`.
+- `TablesViewModel.clearQuickRoll(tableId)` elimina el resultado de una tabla específica.
+- **`TableGridItem` (biblioteca standalone)**: modo dual con `AnimatedContent (fadeIn/fadeOut)`:
+  - *Vista normal*: nombre, descripción, tags y botón TIRAR.
+  - *Vista resultado*: fondo secundario, badge con el número de dado, texto resuelto y botón TIRAR DE NUEVO + × para cerrar.
+- **`TableListItem` (vista sesión)**: resultado inline expandido debajo del nombre. El dado cambia a icono `Refresh` y el pin se sustituye por `×` mientras hay resultado activo.
+- Grid en `TablesTab` refactorizado para usar `TableGridItem` compartido (eliminado el duplicado local más simple).
+
+**INTEGRATION — Build**
+- **BUILD SUCCESSFUL** `assembleDebug` — sin errores en feature:tables, feature:draw ni app.
+
+---
+
+### Sprint 42 — Fix BOM en Archivos de Packs (18 de abril de 2026)
+
+**FIX — BOM causaba fallo al instalar todos los packs de tablas**
+- Los 5 archivos de packs de tablas (`tables_adventure.json`, `tables_combat_magic.json`, `tables_names.json`, `tables_social.json`, `tables_world.json`) tenían BOM UTF-8 (`EF BB BF`) al inicio.
+- `kotlinx.serialization` no tolera BOM: lanzaba `Unexpected JSON token at offset 0: Expected '{', but had '"'` al intentar instalar cualquier pack de tablas.
+- El error era silencioso en `loadBundledTablesIfEmpty()` (atrapado por `catch`) pero visible en el nuevo diálogo de packs.
+- **Fix 1 (fuente)**: BOM eliminado de los 5 archivos JSON de assets.
+- **Fix 2 (defensivo)**: Agregado `.trimStart('\uFEFF')` al leer cualquier asset de pack en `TablesViewModel` y `ReferenceListViewModel`, para tolerar futuros archivos con BOM.
+
+**INTEGRATION — Build**
+- **BUILD SUCCESSFUL** `assembleDebug` — APK generado con archivos de assets corregidos.
+
+---
+
+### Sprint 41 — Pack Manager en Pantalla de Tablas (18 de abril de 2026)
+
+**FEATURE — Pack Manager nativo en Tablas**
+- Eliminada la dependencia de navegar a Referencias para gestionar packs de tablas.
+- `TablesViewModel` ahora inyecta `InstallStarterPackUseCase` y `RemoveStarterPackUseCase`, y expone `installTablePack()` / `removeTablePack()` / `setShowPackDialog()`.
+- `observeInstalledPacks()`: colecta `getInstalledPackNames()` en tiempo real y filtra solo los packs `tables_*.json`, construyendo la lista de `TablePackInfo` reactiva.
+- `TablesUiState` extendido con `showPackDialog` y `availableTablePacks`.
+- Nuevo composable `TablePackDialog` en `TableLibraryScreen.kt` (visibilidad `internal`) con estados Instalado / Disponible y acciones Instalar / Actualizar / Quitar.
+- `TableLibraryScreen`: botón de pack en TopBar (icono `AutoAwesome`); botón de estado vacío ahora abre el diálogo local.
+- `TablesTab` (usado en sesiones): nuevo `SmallFloatingActionButton` terciario con `AutoAwesome`; diálogo de packs también disponible en el contexto de sesión; estado vacío corregido.
+- `onExplorePacks` eliminado de `TablesTab` y `TableLibraryScreen` — era un callback de navegación a Referencias que ya no tiene sentido.
+- NavGraph y `SessionScreen` actualizados para no pasar el callback obsoleto.
+
+**INTEGRATION — Build**
+- **BUILD SUCCESSFUL** `:feature:tables` + `:feature:draw` + `:app` — sin errores.
+
+---
+
+### Sprint 40 — Corrección de Packs de Tablas Aleatorias (18 de abril de 2026)
+
+**FIX — Pack `tables_loot.json` vacío**
+- El archivo `tables_loot.json` existía pero contenía únicamente arrays vacíos — cero tablas y cero entradas.
+- Reescrito con **15 tablas completas** y **152 entradas** organizadas en 4 categorías:
+  - *Botín*: CR 0-4, CR 5-10, CR 11-16, CR 17+, Gemas, Arte/Antigüedades, Bandidos, Criatura
+  - *Magia*: Pociones, Pergaminos, Objetos Mágicos Menores/Moderados/Mayores
+  - *Equipamiento*: Armamento Especial
+  - *Comercio*: Mercancías Valiosas
+- Rango de IDs: tablas 20000–20014, entradas 20000–21409 (sin colisión con otros packs).
+
+**FIX — `subTableId` siempre nulo en `importStarterPack`**
+- Bug en `ReferenceRepositoryImpl`: al insertar entradas de tablas aleatorias desde un pack, `subTableId` se fijaba en `null` hardcodeado, ignorando el valor `dto.subTableId`.
+- Corregido: ahora se remapea correctamente usando `randomTableIdMap[dto.subTableId]`, preservando las referencias entre sub-tablas dentro del mismo pack.
+
+**INTEGRATION — Build**
+- **BUILD SUCCESSFUL** `:core:data:compileDebugKotlin` — Corrección compilada sin errores.
+
+---
+
+### Sprint 39 — Starter Packs Dinámicos y Resiliencia de Datos (18 de abril de 2026)
+
+**CONTENT — Sistema de Starter Packs**
+- **NEW**: Implementado sistema de **Ecosistema de Paquetes**. La app ahora escanea dinámicamente la carpeta `assets/starter_packs` para detectar nuevos contenidos JSON sin necesidad de actualizaciones de código.
+- **DATA**: Implementada la **Migración 27 a 28**, añadiendo la columna `sourcePack` a tablas de referencia, reglas y tablas aleatorias para rastrear el origen del contenido.
+- **INTELLIGENCE**: Lógica de "Instalación Inteligente" que evita duplicados. El sistema ahora "adopta" y actualiza registros antiguos (huérfanos) basándose en el nombre, unificando la base de datos automáticamente.
+- **UX**: Nuevo diálogo de gestión de packs con estados visuales (Instalado/Disponible) y opciones para **Actualizar** o **Quitar** paquetes específicos.
+- **EXPANSION**: Creados y expandidos packs exhaustivos para **D&D 5e (2024)** (Maestrías, Estados, Visión) y **Twilight 2000 4th Ed** (Tablas aleatorias de Clima y Encuentros, reglas de Stress).
+
+**STABILITY — Resiliencia y Parches**
+- **FIX**: Implementada lógica de **Autocuración de Esquema** en la Migración 28. Detecta y recrea automáticamente la tabla `npcs` si se encuentra en un estado inconsistente (`columns={}`), resolviendo fallos críticos de Room.
+- **BACKUP**: `BackupDto` actualizado con valores por defecto y soporte para `sourcePack`, mejorando la compatibilidad con archivos JSON externos simplificados.
+
+**INTEGRATION — Build**
+- **BUILD SUCCESSFUL** `assembleDebug` — Verificada la integridad de la migración v28 y el motor de escaneo dinámico de assets.
+
+---
+
+### Sprint 38 — Finalización Módulo de Referencias (18 de abril de 2026)
+
+**REFERENCE — Tablas de Consulta y Reglas (Sprint 29-37)**
+- **NEW**: Implementado módulo `:feature:reference` para centralizar tablas de reglas, equipo y mecánicas.
+- **NEW**: Motor de importación tri-modal: **CSV/TSV**, **Markdown** y **OCR inteligente vía Gemini Vision**.
+- **UX**: Grid de consulta interactivo con soporte para `CellExpandDialog` para lectura cómoda de celdas extensas.
+- **INTEGRATION**: Integración profunda en `SessionScreen` con un nuevo tab de Referencias pre-filtrado por los sistemas de juego de la sesión activa.
+- **CONFIG**: Implementado `GameSystemsSelector` y `SessionConfigSheet` para gestionar dinámicamente los sistemas (D&D 5e, Pathfinder 2e, etc) durante la partida.
+
+**BACKUP — Integración de Referencias**
+- **UPDATE**: `FullBackupDto` extendido para incluir todas las tablas de referencia y reglas del sistema.
+- **DATA**: Implementada la migración de base de datos **26 a 27** con soporte para FTS4 en tablas de referencia y reglas para búsquedas ultra-rápidas.
+
+**INTEGRATION — Build**
+- **BUILD SUCCESSFUL** `assembleDebug` — Verificada la integridad de los nuevos flujos de importación y la consistencia del backup.
+
+---
+
 ### Sprint 28 — Seguridad Total: Backup & Restore en la Nube (17 de abril de 2026)
 
 **BACKUP — Arquitectura de Persistencia (Portable)**

@@ -1,0 +1,2194 @@
+﻿{
+    "systemRuleTags":  [
+
+                       ],
+    "referenceTableTags":  [
+
+                           ],
+    "referenceRows":  [
+
+                      ],
+    "cardFaces":  [
+
+                  ],
+    "tableBundles":  [
+
+                     ],
+    "tableEntries":  [
+                         {
+                             "id":  25000,
+                             "text":  "Aldric",
+                             "tableId":  25000,
+                             "sortOrder":  0,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25001,
+                             "text":  "Bram",
+                             "tableId":  25000,
+                             "sortOrder":  1,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25002,
+                             "text":  "Calder",
+                             "tableId":  25000,
+                             "sortOrder":  2,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25003,
+                             "text":  "Dorn",
+                             "tableId":  25000,
+                             "sortOrder":  3,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25004,
+                             "text":  "Edric",
+                             "tableId":  25000,
+                             "sortOrder":  4,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25005,
+                             "text":  "Faolan",
+                             "tableId":  25000,
+                             "sortOrder":  5,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25006,
+                             "text":  "Garrett",
+                             "tableId":  25000,
+                             "sortOrder":  6,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25007,
+                             "text":  "Hadren",
+                             "tableId":  25000,
+                             "sortOrder":  7,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25008,
+                             "text":  "Idris",
+                             "tableId":  25000,
+                             "sortOrder":  8,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25009,
+                             "text":  "Jorvald",
+                             "tableId":  25000,
+                             "sortOrder":  9,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25010,
+                             "text":  "Keldar",
+                             "tableId":  25000,
+                             "sortOrder":  10,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25011,
+                             "text":  "Lorcan",
+                             "tableId":  25000,
+                             "sortOrder":  11,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25012,
+                             "text":  "Maddox",
+                             "tableId":  25000,
+                             "sortOrder":  12,
+                             "maxRoll":  13,
+                             "minRoll":  13,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25013,
+                             "text":  "Naevin",
+                             "tableId":  25000,
+                             "sortOrder":  13,
+                             "maxRoll":  14,
+                             "minRoll":  14,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25014,
+                             "text":  "Oswin",
+                             "tableId":  25000,
+                             "sortOrder":  14,
+                             "maxRoll":  15,
+                             "minRoll":  15,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25015,
+                             "text":  "Perrin",
+                             "tableId":  25000,
+                             "sortOrder":  15,
+                             "maxRoll":  16,
+                             "minRoll":  16,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25016,
+                             "text":  "Quinlan",
+                             "tableId":  25000,
+                             "sortOrder":  16,
+                             "maxRoll":  17,
+                             "minRoll":  17,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25017,
+                             "text":  "Rodrik",
+                             "tableId":  25000,
+                             "sortOrder":  17,
+                             "maxRoll":  18,
+                             "minRoll":  18,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25018,
+                             "text":  "Seren",
+                             "tableId":  25000,
+                             "sortOrder":  18,
+                             "maxRoll":  19,
+                             "minRoll":  19,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25019,
+                             "text":  "Theron",
+                             "tableId":  25000,
+                             "sortOrder":  19,
+                             "maxRoll":  20,
+                             "minRoll":  20,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25020,
+                             "text":  "Aelindra",
+                             "tableId":  25001,
+                             "sortOrder":  20,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25021,
+                             "text":  "Brynn",
+                             "tableId":  25001,
+                             "sortOrder":  21,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25022,
+                             "text":  "Caoimhe",
+                             "tableId":  25001,
+                             "sortOrder":  22,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25023,
+                             "text":  "Dessa",
+                             "tableId":  25001,
+                             "sortOrder":  23,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25024,
+                             "text":  "Elara",
+                             "tableId":  25001,
+                             "sortOrder":  24,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25025,
+                             "text":  "Fiona",
+                             "tableId":  25001,
+                             "sortOrder":  25,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25026,
+                             "text":  "Gwynna",
+                             "tableId":  25001,
+                             "sortOrder":  26,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25027,
+                             "text":  "Hessa",
+                             "tableId":  25001,
+                             "sortOrder":  27,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25028,
+                             "text":  "Ilara",
+                             "tableId":  25001,
+                             "sortOrder":  28,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25029,
+                             "text":  "Jora",
+                             "tableId":  25001,
+                             "sortOrder":  29,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25030,
+                             "text":  "Kira",
+                             "tableId":  25001,
+                             "sortOrder":  30,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25031,
+                             "text":  "Lyra",
+                             "tableId":  25001,
+                             "sortOrder":  31,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25032,
+                             "text":  "Mira",
+                             "tableId":  25001,
+                             "sortOrder":  32,
+                             "maxRoll":  13,
+                             "minRoll":  13,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25033,
+                             "text":  "Nessa",
+                             "tableId":  25001,
+                             "sortOrder":  33,
+                             "maxRoll":  14,
+                             "minRoll":  14,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25034,
+                             "text":  "Orla",
+                             "tableId":  25001,
+                             "sortOrder":  34,
+                             "maxRoll":  15,
+                             "minRoll":  15,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25035,
+                             "text":  "Petra",
+                             "tableId":  25001,
+                             "sortOrder":  35,
+                             "maxRoll":  16,
+                             "minRoll":  16,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25036,
+                             "text":  "Regan",
+                             "tableId":  25001,
+                             "sortOrder":  36,
+                             "maxRoll":  17,
+                             "minRoll":  17,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25037,
+                             "text":  "Sienna",
+                             "tableId":  25001,
+                             "sortOrder":  37,
+                             "maxRoll":  18,
+                             "minRoll":  18,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25038,
+                             "text":  "Tara",
+                             "tableId":  25001,
+                             "sortOrder":  38,
+                             "maxRoll":  19,
+                             "minRoll":  19,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25039,
+                             "text":  "Vesna",
+                             "tableId":  25001,
+                             "sortOrder":  39,
+                             "maxRoll":  20,
+                             "minRoll":  20,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25040,
+                             "text":  "Aerindel",
+                             "tableId":  25002,
+                             "sortOrder":  40,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25041,
+                             "text":  "Caladwen",
+                             "tableId":  25002,
+                             "sortOrder":  41,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25042,
+                             "text":  "Elenmir",
+                             "tableId":  25002,
+                             "sortOrder":  42,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25043,
+                             "text":  "Faerindë",
+                             "tableId":  25002,
+                             "sortOrder":  43,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25044,
+                             "text":  "Galathil",
+                             "tableId":  25002,
+                             "sortOrder":  44,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25045,
+                             "text":  "Ithilwen",
+                             "tableId":  25002,
+                             "sortOrder":  45,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25046,
+                             "text":  "Lúthien",
+                             "tableId":  25002,
+                             "sortOrder":  46,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25047,
+                             "text":  "Míriel",
+                             "tableId":  25002,
+                             "sortOrder":  47,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25048,
+                             "text":  "Nienor",
+                             "tableId":  25002,
+                             "sortOrder":  48,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25049,
+                             "text":  "Silindë",
+                             "tableId":  25002,
+                             "sortOrder":  49,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25050,
+                             "text":  "Taurevorn",
+                             "tableId":  25002,
+                             "sortOrder":  50,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25051,
+                             "text":  "Vorothiel",
+                             "tableId":  25002,
+                             "sortOrder":  51,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25052,
+                             "text":  "Balin",
+                             "tableId":  25003,
+                             "sortOrder":  52,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25053,
+                             "text":  "Bromdur",
+                             "tableId":  25003,
+                             "sortOrder":  53,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25054,
+                             "text":  "Dagna",
+                             "tableId":  25003,
+                             "sortOrder":  54,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25055,
+                             "text":  "Dolgrin",
+                             "tableId":  25003,
+                             "sortOrder":  55,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25056,
+                             "text":  "Embla",
+                             "tableId":  25003,
+                             "sortOrder":  56,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25057,
+                             "text":  "Fjord",
+                             "tableId":  25003,
+                             "sortOrder":  57,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25058,
+                             "text":  "Gorm",
+                             "tableId":  25003,
+                             "sortOrder":  58,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25059,
+                             "text":  "Hilda",
+                             "tableId":  25003,
+                             "sortOrder":  59,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25060,
+                             "text":  "Ingrid",
+                             "tableId":  25003,
+                             "sortOrder":  60,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25061,
+                             "text":  "Kordra",
+                             "tableId":  25003,
+                             "sortOrder":  61,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25062,
+                             "text":  "Logrim",
+                             "tableId":  25003,
+                             "sortOrder":  62,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25063,
+                             "text":  "Marta",
+                             "tableId":  25003,
+                             "sortOrder":  63,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25064,
+                             "text":  "Nori",
+                             "tableId":  25003,
+                             "sortOrder":  64,
+                             "maxRoll":  13,
+                             "minRoll":  13,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25065,
+                             "text":  "Okra",
+                             "tableId":  25003,
+                             "sortOrder":  65,
+                             "maxRoll":  14,
+                             "minRoll":  14,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25066,
+                             "text":  "Randur",
+                             "tableId":  25003,
+                             "sortOrder":  66,
+                             "maxRoll":  15,
+                             "minRoll":  15,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25067,
+                             "text":  "Sigrid",
+                             "tableId":  25003,
+                             "sortOrder":  67,
+                             "maxRoll":  16,
+                             "minRoll":  16,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25068,
+                             "text":  "Thorin",
+                             "tableId":  25003,
+                             "sortOrder":  68,
+                             "maxRoll":  17,
+                             "minRoll":  17,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25069,
+                             "text":  "Ulda",
+                             "tableId":  25003,
+                             "sortOrder":  69,
+                             "maxRoll":  18,
+                             "minRoll":  18,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25070,
+                             "text":  "Valdris",
+                             "tableId":  25003,
+                             "sortOrder":  70,
+                             "maxRoll":  19,
+                             "minRoll":  19,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25071,
+                             "text":  "Wyona",
+                             "tableId":  25003,
+                             "sortOrder":  71,
+                             "maxRoll":  20,
+                             "minRoll":  20,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25072,
+                             "text":  "Gorsha",
+                             "tableId":  25004,
+                             "sortOrder":  72,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25073,
+                             "text":  "Krusk",
+                             "tableId":  25004,
+                             "sortOrder":  73,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25074,
+                             "text":  "Mhurren",
+                             "tableId":  25004,
+                             "sortOrder":  74,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25075,
+                             "text":  "Nadar",
+                             "tableId":  25004,
+                             "sortOrder":  75,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25076,
+                             "text":  "Ovak",
+                             "tableId":  25004,
+                             "sortOrder":  76,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25077,
+                             "text":  "Ront",
+                             "tableId":  25004,
+                             "sortOrder":  77,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25078,
+                             "text":  "Shump",
+                             "tableId":  25004,
+                             "sortOrder":  78,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25079,
+                             "text":  "Tarak",
+                             "tableId":  25004,
+                             "sortOrder":  79,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25080,
+                             "text":  "Uthok",
+                             "tableId":  25004,
+                             "sortOrder":  80,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25081,
+                             "text":  "Vorg",
+                             "tableId":  25004,
+                             "sortOrder":  81,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25082,
+                             "text":  "Warka",
+                             "tableId":  25004,
+                             "sortOrder":  82,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25083,
+                             "text":  "Zarka",
+                             "tableId":  25004,
+                             "sortOrder":  83,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25084,
+                             "text":  "Andry Piesligeros",
+                             "tableId":  25005,
+                             "sortOrder":  84,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25085,
+                             "text":  "Bree Trébolgris",
+                             "tableId":  25005,
+                             "sortOrder":  85,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25086,
+                             "text":  "Cade Mantequilla",
+                             "tableId":  25005,
+                             "sortOrder":  86,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25087,
+                             "text":  "Daisy Bolson",
+                             "tableId":  25005,
+                             "sortOrder":  87,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25088,
+                             "text":  "Eldon Trépano",
+                             "tableId":  25005,
+                             "sortOrder":  88,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25089,
+                             "text":  "Finnan Zapatoancho",
+                             "tableId":  25005,
+                             "sortOrder":  89,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25090,
+                             "text":  "Garret Villapiedra",
+                             "tableId":  25005,
+                             "sortOrder":  90,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25091,
+                             "text":  "Halia Piernassuaves",
+                             "tableId":  25005,
+                             "sortOrder":  91,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25092,
+                             "text":  "Isla Cuerdarosada",
+                             "tableId":  25005,
+                             "sortOrder":  92,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25093,
+                             "text":  "Jinny Collinasverdes",
+                             "tableId":  25005,
+                             "sortOrder":  93,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25094,
+                             "text":  "Kym Barrilgordo",
+                             "tableId":  25005,
+                             "sortOrder":  94,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25095,
+                             "text":  "Lyle Agujeronegro",
+                             "tableId":  25005,
+                             "sortOrder":  95,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25096,
+                             "text":  "El Dragón Ebrio",
+                             "tableId":  25006,
+                             "sortOrder":  96,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25097,
+                             "text":  "La Daga Rota",
+                             "tableId":  25006,
+                             "sortOrder":  97,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25098,
+                             "text":  "El Cuervo Negro",
+                             "tableId":  25006,
+                             "sortOrder":  98,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25099,
+                             "text":  "La Rueda Oxidada",
+                             "tableId":  25006,
+                             "sortOrder":  99,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25100,
+                             "text":  "El Escudo del Peregrino",
+                             "tableId":  25006,
+                             "sortOrder":  100,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25101,
+                             "text":  "La Cabeza del Ogro",
+                             "tableId":  25006,
+                             "sortOrder":  101,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25102,
+                             "text":  "El Martillo y el Yunque",
+                             "tableId":  25006,
+                             "sortOrder":  102,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25103,
+                             "text":  "La Luna Roja",
+                             "tableId":  25006,
+                             "sortOrder":  103,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25104,
+                             "text":  "El Cerdo Dorado",
+                             "tableId":  25006,
+                             "sortOrder":  104,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25105,
+                             "text":  "La Herradura Afortunada",
+                             "tableId":  25006,
+                             "sortOrder":  105,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25106,
+                             "text":  "El Grifo Durmiente",
+                             "tableId":  25006,
+                             "sortOrder":  106,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25107,
+                             "text":  "La Vela Perpetua",
+                             "tableId":  25006,
+                             "sortOrder":  107,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25108,
+                             "text":  "El Lobo y la Liebre",
+                             "tableId":  25006,
+                             "sortOrder":  108,
+                             "maxRoll":  13,
+                             "minRoll":  13,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25109,
+                             "text":  "La Posada del Camino Largo",
+                             "tableId":  25006,
+                             "sortOrder":  109,
+                             "maxRoll":  14,
+                             "minRoll":  14,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25110,
+                             "text":  "El Hueso Rojo",
+                             "tableId":  25006,
+                             "sortOrder":  110,
+                             "maxRoll":  15,
+                             "minRoll":  15,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25111,
+                             "text":  "La Sirena Ahogada",
+                             "tableId":  25006,
+                             "sortOrder":  111,
+                             "maxRoll":  16,
+                             "minRoll":  16,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25112,
+                             "text":  "El Último Descanso",
+                             "tableId":  25006,
+                             "sortOrder":  112,
+                             "maxRoll":  17,
+                             "minRoll":  17,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25113,
+                             "text":  "La Horca Feliz",
+                             "tableId":  25006,
+                             "sortOrder":  113,
+                             "maxRoll":  18,
+                             "minRoll":  18,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25114,
+                             "text":  "La Antorcha y el Mosto",
+                             "tableId":  25006,
+                             "sortOrder":  114,
+                             "maxRoll":  19,
+                             "minRoll":  19,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25115,
+                             "text":  "El Troll Gentil",
+                             "tableId":  25006,
+                             "sortOrder":  115,
+                             "maxRoll":  20,
+                             "minRoll":  20,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25116,
+                             "text":  "Piedra Gris",
+                             "tableId":  25007,
+                             "sortOrder":  116,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25117,
+                             "text":  "Puente del Molino",
+                             "tableId":  25007,
+                             "sortOrder":  117,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25118,
+                             "text":  "Colina del Cuervo",
+                             "tableId":  25007,
+                             "sortOrder":  118,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25119,
+                             "text":  "Bahía Oscura",
+                             "tableId":  25007,
+                             "sortOrder":  119,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25120,
+                             "text":  "Torre del Centinela",
+                             "tableId":  25007,
+                             "sortOrder":  120,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25121,
+                             "text":  "Aldea de Aguamiel",
+                             "tableId":  25007,
+                             "sortOrder":  121,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25122,
+                             "text":  "Cascada del Amanecer",
+                             "tableId":  25007,
+                             "sortOrder":  122,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25123,
+                             "text":  "Puerto de la Madera",
+                             "tableId":  25007,
+                             "sortOrder":  123,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25124,
+                             "text":  "Encrucijada del Sur",
+                             "tableId":  25007,
+                             "sortOrder":  124,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25125,
+                             "text":  "Fortaleza de las Nieves",
+                             "tableId":  25007,
+                             "sortOrder":  125,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25126,
+                             "text":  "Valle del Roble",
+                             "tableId":  25007,
+                             "sortOrder":  126,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25127,
+                             "text":  "Refugio del Viajero",
+                             "tableId":  25007,
+                             "sortOrder":  127,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25128,
+                             "text":  "Piedranegra",
+                             "tableId":  25008,
+                             "sortOrder":  128,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25129,
+                             "text":  "del Valle",
+                             "tableId":  25008,
+                             "sortOrder":  129,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25130,
+                             "text":  "Hierroforja",
+                             "tableId":  25008,
+                             "sortOrder":  130,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25131,
+                             "text":  "Vientos del Norte",
+                             "tableId":  25008,
+                             "sortOrder":  131,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25132,
+                             "text":  "Roble Gris",
+                             "tableId":  25008,
+                             "sortOrder":  132,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25133,
+                             "text":  "Cuervo",
+                             "tableId":  25008,
+                             "sortOrder":  133,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25134,
+                             "text":  "Aguamiel",
+                             "tableId":  25008,
+                             "sortOrder":  134,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25135,
+                             "text":  "Espada Rota",
+                             "tableId":  25008,
+                             "sortOrder":  135,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25136,
+                             "text":  "de la Marca",
+                             "tableId":  25008,
+                             "sortOrder":  136,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25137,
+                             "text":  "Cenizas",
+                             "tableId":  25008,
+                             "sortOrder":  137,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25138,
+                             "text":  "Colmillo",
+                             "tableId":  25008,
+                             "sortOrder":  138,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25139,
+                             "text":  "Largoviaje",
+                             "tableId":  25008,
+                             "sortOrder":  139,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25140,
+                             "text":  "Puerta de Hierro",
+                             "tableId":  25008,
+                             "sortOrder":  140,
+                             "maxRoll":  13,
+                             "minRoll":  13,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25141,
+                             "text":  "Río Oscuro",
+                             "tableId":  25008,
+                             "sortOrder":  141,
+                             "maxRoll":  14,
+                             "minRoll":  14,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25142,
+                             "text":  "Escudo Blanco",
+                             "tableId":  25008,
+                             "sortOrder":  142,
+                             "maxRoll":  15,
+                             "minRoll":  15,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25143,
+                             "text":  "de la Torre",
+                             "tableId":  25008,
+                             "sortOrder":  143,
+                             "maxRoll":  16,
+                             "minRoll":  16,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25144,
+                             "text":  "Maldespada",
+                             "tableId":  25008,
+                             "sortOrder":  144,
+                             "maxRoll":  17,
+                             "minRoll":  17,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25145,
+                             "text":  "Torbellino",
+                             "tableId":  25008,
+                             "sortOrder":  145,
+                             "maxRoll":  18,
+                             "minRoll":  18,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25146,
+                             "text":  "Sombra Larga",
+                             "tableId":  25008,
+                             "sortOrder":  146,
+                             "maxRoll":  19,
+                             "minRoll":  19,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25147,
+                             "text":  "Filo Frío",
+                             "tableId":  25008,
+                             "sortOrder":  147,
+                             "maxRoll":  20,
+                             "minRoll":  20,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25148,
+                             "text":  "Arjhan",
+                             "tableId":  25009,
+                             "sortOrder":  148,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25149,
+                             "text":  "Balasar",
+                             "tableId":  25009,
+                             "sortOrder":  149,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25150,
+                             "text":  "Donaar",
+                             "tableId":  25009,
+                             "sortOrder":  150,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25151,
+                             "text":  "Ghesh",
+                             "tableId":  25009,
+                             "sortOrder":  151,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25152,
+                             "text":  "Heskan",
+                             "tableId":  25009,
+                             "sortOrder":  152,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25153,
+                             "text":  "Kriv",
+                             "tableId":  25009,
+                             "sortOrder":  153,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25154,
+                             "text":  "Medrash",
+                             "tableId":  25009,
+                             "sortOrder":  154,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25155,
+                             "text":  "Nadarr",
+                             "tableId":  25009,
+                             "sortOrder":  155,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25156,
+                             "text":  "Patrin",
+                             "tableId":  25009,
+                             "sortOrder":  156,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25157,
+                             "text":  "Rhogar",
+                             "tableId":  25009,
+                             "sortOrder":  157,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25158,
+                             "text":  "Shamash",
+                             "tableId":  25009,
+                             "sortOrder":  158,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25159,
+                             "text":  "Torinn",
+                             "tableId":  25009,
+                             "sortOrder":  159,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25160,
+                             "text":  "Filo de la Última Noche",
+                             "tableId":  25010,
+                             "sortOrder":  160,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25161,
+                             "text":  "Corazón de Piedra",
+                             "tableId":  25010,
+                             "sortOrder":  161,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25162,
+                             "text":  "Lengua de Ceniza",
+                             "tableId":  25010,
+                             "sortOrder":  162,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25163,
+                             "text":  "Ojo del Amanecer",
+                             "tableId":  25010,
+                             "sortOrder":  163,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25164,
+                             "text":  "Espina del Dragón Muerto",
+                             "tableId":  25010,
+                             "sortOrder":  164,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25165,
+                             "text":  "Susurro del Abismo",
+                             "tableId":  25010,
+                             "sortOrder":  165,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25166,
+                             "text":  "Cruz de la Marea Alta",
+                             "tableId":  25010,
+                             "sortOrder":  166,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25167,
+                             "text":  "Llama sin Combustible",
+                             "tableId":  25010,
+                             "sortOrder":  167,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25168,
+                             "text":  "Sello del Rey Olvidado",
+                             "tableId":  25010,
+                             "sortOrder":  168,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25169,
+                             "text":  "Voz del Invierno",
+                             "tableId":  25010,
+                             "sortOrder":  169,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25170,
+                             "text":  "Diente del Primer Lobo",
+                             "tableId":  25010,
+                             "sortOrder":  170,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25171,
+                             "text":  "Juramento Roto",
+                             "tableId":  25010,
+                             "sortOrder":  171,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25172,
+                             "text":  "Presenció la destrucción de su hogar cuando era niño.",
+                             "tableId":  25011,
+                             "sortOrder":  172,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25173,
+                             "text":  "Fue aprendiz de alguien que resultó no ser lo que parecía.",
+                             "tableId":  25011,
+                             "sortOrder":  173,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25174,
+                             "text":  "Sobrevivió a algo que mató a todos sus compañeros. No sabe por qué él.",
+                             "tableId":  25011,
+                             "sortOrder":  174,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25175,
+                             "text":  "Descubrió una verdad sobre su familia que cambió todo lo que creía.",
+                             "tableId":  25011,
+                             "sortOrder":  175,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25176,
+                             "text":  "Fue traicionado por alguien en quien confiaba ciegamente.",
+                             "tableId":  25011,
+                             "sortOrder":  176,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25177,
+                             "text":  "Pasó un año perdido en un lugar que nadie más conoce.",
+                             "tableId":  25011,
+                             "sortOrder":  177,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25178,
+                             "text":  "Fue prisionero injustamente. Alguien lo liberó sin revelar quién ni por qué.",
+                             "tableId":  25011,
+                             "sortOrder":  178,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25179,
+                             "text":  "Mató a alguien por primera vez por razones que aún intenta justificar.",
+                             "tableId":  25011,
+                             "sortOrder":  179,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25180,
+                             "text":  "Encontró algo que no debería existir y no pudo ignorarlo.",
+                             "tableId":  25011,
+                             "sortOrder":  180,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25181,
+                             "text":  "Una enfermedad lo cambió física o mentalmente de forma permanente.",
+                             "tableId":  25011,
+                             "sortOrder":  181,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25182,
+                             "text":  "Fue elegido o señalado para algo sin que nadie le explicara por qué.",
+                             "tableId":  25011,
+                             "sortOrder":  182,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25183,
+                             "text":  "Hizo una promesa que no puede cumplir fácilmente y que no puede ignorar.",
+                             "tableId":  25011,
+                             "sortOrder":  183,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25184,
+                             "text":  "Un mentor que sigue vivo pero en paradero desconocido.",
+                             "tableId":  25012,
+                             "sortOrder":  184,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25185,
+                             "text":  "Un amigo de infancia que tomó un camino completamente diferente.",
+                             "tableId":  25012,
+                             "sortOrder":  185,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25186,
+                             "text":  "Un oficial militar que le debe la vida y lo sabe.",
+                             "tableId":  25012,
+                             "sortOrder":  186,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25187,
+                             "text":  "Un curandero que lo salvó sin pedir nada a cambio.",
+                             "tableId":  25012,
+                             "sortOrder":  187,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25188,
+                             "text":  "Un ladrón que le enseñó a sobrevivir en los barrios bajos.",
+                             "tableId":  25012,
+                             "sortOrder":  188,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25189,
+                             "text":  "Un noble que lo apoyó en secreto durante años sin que el PJ lo supiera.",
+                             "tableId":  25012,
+                             "sortOrder":  189,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25190,
+                             "text":  "Una criatura no humana que lo consideró su igual.",
+                             "tableId":  25012,
+                             "sortOrder":  190,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25191,
+                             "text":  "Un rival de otro tiempo que terminó siendo más aliado que enemigo.",
+                             "tableId":  25012,
+                             "sortOrder":  191,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25192,
+                             "text":  "Un antiguo empleador que se sintió traicionado y no lo olvidó.",
+                             "tableId":  25013,
+                             "sortOrder":  192,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25193,
+                             "text":  "El asesino que mató a alguien cercano y aún vive y sigue activo.",
+                             "tableId":  25013,
+                             "sortOrder":  193,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25194,
+                             "text":  "Un oficial corrupto que culpó al PJ de su propio crimen.",
+                             "tableId":  25013,
+                             "sortOrder":  194,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25195,
+                             "text":  "Un mago que lo usó como sujeto de experimento sin consentimiento.",
+                             "tableId":  25013,
+                             "sortOrder":  195,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25196,
+                             "text":  "Un rival de gremio que arruinó su reputación con mentiras.",
+                             "tableId":  25013,
+                             "sortOrder":  196,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25197,
+                             "text":  "El líder de un culto del que el PJ logró escapar.",
+                             "tableId":  25013,
+                             "sortOrder":  197,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25198,
+                             "text":  "Un noble que cree que el PJ le debe algo que nunca podrá pagar.",
+                             "tableId":  25013,
+                             "sortOrder":  198,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25199,
+                             "text":  "Un familiar que lo traicionó por herencia, poder o miedo.",
+                             "tableId":  25013,
+                             "sortOrder":  199,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25200,
+                             "text":  "Entró a una cueva donde todo el mundo sabía que no debía entrar.",
+                             "tableId":  25014,
+                             "sortOrder":  200,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25201,
+                             "text":  "Encontró el cadáver de alguien famoso en un lugar inexplicable.",
+                             "tableId":  25014,
+                             "sortOrder":  201,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25202,
+                             "text":  "Persiguió algo que resultó ser mucho más grande de lo esperado.",
+                             "tableId":  25014,
+                             "sortOrder":  202,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25203,
+                             "text":  "Hizo un trato que tardó años en entender del todo.",
+                             "tableId":  25014,
+                             "sortOrder":  203,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25204,
+                             "text":  "Sobrevivió una noche en un lugar donde se decía que nadie sobrevivía.",
+                             "tableId":  25014,
+                             "sortOrder":  204,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25205,
+                             "text":  "Robó algo que resultó ser importante para alguien muy poderoso.",
+                             "tableId":  25014,
+                             "sortOrder":  205,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25206,
+                             "text":  "Salvó a alguien que luego no quería haber sido salvado.",
+                             "tableId":  25014,
+                             "sortOrder":  206,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25207,
+                             "text":  "Abrió una puerta que alguien claramente no quería que se abriera.",
+                             "tableId":  25014,
+                             "sortOrder":  207,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         }
+                     ],
+    "drawEvents":  [
+
+                   ],
+    "sessionDeckRefs":  [
+
+                        ],
+    "decks":  [
+
+              ],
+    "encounters":  [
+
+                   ],
+    "referenceTables":  [
+
+                        ],
+    "cardTags":  [
+
+                 ],
+    "systemRules":  [
+
+                    ],
+    "npcs":  [
+
+             ],
+    "cards":  [
+
+              ],
+    "sessionTableRefs":  [
+
+                         ],
+    "cardStackTags":  [
+
+                      ],
+    "encounterCreatures":  [
+
+                           ],
+    "tags":  [
+
+             ],
+    "wikiCategories":  [
+
+                       ],
+    "randomTables":  [
+                         {
+                             "rollFormula":  "1d20",
+                             "id":  25000,
+                             "category":  "Nombres",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_names.json",
+                             "name":  "Nombre Humano Masculino",
+                             "sortOrder":  0,
+                             "description":  "Nombres masculinos para personajes humanos.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652610538971,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_names.json"
+                         },
+                         {
+                             "rollFormula":  "1d20",
+                             "id":  25001,
+                             "category":  "Nombres",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_names.json",
+                             "name":  "Nombre Humano Femenino",
+                             "sortOrder":  1,
+                             "description":  "Nombres femeninos para personajes humanos.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652610540112,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_names.json"
+                         },
+                         {
+                             "rollFormula":  "1d12",
+                             "id":  25002,
+                             "category":  "Nombres",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_names.json",
+                             "name":  "Nombre Élfico",
+                             "sortOrder":  2,
+                             "description":  "Nombres élvicos de alta fantasía.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652610540277,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_names.json"
+                         },
+                         {
+                             "rollFormula":  "1d20",
+                             "id":  25003,
+                             "category":  "Nombres",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_names.json",
+                             "name":  "Nombre Enano",
+                             "sortOrder":  3,
+                             "description":  "Nombres para personajes enanos, masculinos y femeninos.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652610540334,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_names.json"
+                         },
+                         {
+                             "rollFormula":  "1d12",
+                             "id":  25004,
+                             "category":  "Nombres",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_names.json",
+                             "name":  "Nombre Orco",
+                             "sortOrder":  4,
+                             "description":  "Nombres para personajes orcos o semiorcos.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652610540487,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_names.json"
+                         },
+                         {
+                             "rollFormula":  "1d12",
+                             "id":  25005,
+                             "category":  "Nombres",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_names.json",
+                             "name":  "Nombre Mediano",
+                             "sortOrder":  5,
+                             "description":  "Nombres para hobbits, halflings o medianos.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652610540487,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_names.json"
+                         },
+                         {
+                             "rollFormula":  "1d20",
+                             "id":  25006,
+                             "category":  "Nombres",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_names.json",
+                             "name":  "Nombre de Taberna",
+                             "sortOrder":  6,
+                             "description":  "Nombres para tabernas, posadas y tugurios.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652610540641,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_names.json"
+                         },
+                         {
+                             "rollFormula":  "1d12",
+                             "id":  25007,
+                             "category":  "Nombres",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_names.json",
+                             "name":  "Nombre de Ciudad",
+                             "sortOrder":  7,
+                             "description":  "Nombres de ciudades, pueblos y aldeas de fantasía.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652610540641,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_names.json"
+                         },
+                         {
+                             "rollFormula":  "1d20",
+                             "id":  25008,
+                             "category":  "Nombres",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_names.json",
+                             "name":  "Apellido Humano",
+                             "sortOrder":  8,
+                             "description":  "Apellidos o nombres de familia para personajes humanos.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652610540794,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_names.json"
+                         },
+                         {
+                             "rollFormula":  "1d12",
+                             "id":  25009,
+                             "category":  "Nombres",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_names.json",
+                             "name":  "Nombre Dragonborn",
+                             "sortOrder":  9,
+                             "description":  "Nombres para razas dracónicas o tieflings marciales.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652610540925,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_names.json"
+                         },
+                         {
+                             "rollFormula":  "1d12",
+                             "id":  25010,
+                             "category":  "Nombres",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_names.json",
+                             "name":  "Nombre de Objeto Mágico",
+                             "sortOrder":  10,
+                             "description":  "Nombre épico para una espada, bastón u objeto legendario.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652610540978,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_names.json"
+                         },
+                         {
+                             "rollFormula":  "1d12",
+                             "id":  25011,
+                             "category":  "Trasfondo de PJ",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_names.json",
+                             "name":  "Evento Formativo del Personaje",
+                             "sortOrder":  11,
+                             "description":  "Algo del pasado que define quién es el PJ hoy.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  17765261054103,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_names.json"
+                         },
+                         {
+                             "rollFormula":  "1d8",
+                             "id":  25012,
+                             "category":  "Trasfondo de PJ",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_names.json",
+                             "name":  "Aliado del Pasado",
+                             "sortOrder":  12,
+                             "description":  "Alguien del pasado del PJ que podría reaparecer.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652610541084,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_names.json"
+                         },
+                         {
+                             "rollFormula":  "1d8",
+                             "id":  25013,
+                             "category":  "Trasfondo de PJ",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_names.json",
+                             "name":  "Enemigo del Pasado",
+                             "sortOrder":  13,
+                             "description":  "Alguien que tiene cuentas pendientes con el PJ.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652610541135,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_names.json"
+                         },
+                         {
+                             "rollFormula":  "1d8",
+                             "id":  25014,
+                             "category":  "Trasfondo de PJ",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_names.json",
+                             "name":  "Primer Recuerdo de Aventura",
+                             "sortOrder":  14,
+                             "description":  "La primera vez que el PJ hizo algo que no era vida normal.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652610541207,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_names.json"
+                         }
+                     ],
+    "sessions":  [
+
+                 ],
+    "wikiEntries":  [
+
+                    ],
+    "randomTableTags":  [
+
+                        ],
+    "combatLog":  [
+
+                  ],
+    "npcTags":  [
+
+                ],
+    "schemaVersion":  1
+}
+
+
+

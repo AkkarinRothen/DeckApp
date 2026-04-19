@@ -2,9 +2,11 @@ package com.deckapp.core.data.repository
 
 import android.graphics.Bitmap
 import com.deckapp.core.domain.repository.AiApiException
+import com.deckapp.core.domain.repository.AiReferenceRepository
 import com.deckapp.core.domain.repository.AiStreamEvent
 import com.deckapp.core.domain.repository.AiTableRepository
 import com.deckapp.core.domain.repository.AiTableSuggestions
+import com.deckapp.core.domain.repository.ReferenceTableAiResult
 import com.deckapp.core.model.TableEntry
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.RequestOptions
@@ -16,7 +18,59 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
-class GeminiAiRepository @Inject constructor() : AiTableRepository {
+class GeminiAiRepository @Inject constructor() : AiTableRepository, AiReferenceRepository {
+
+    // ... (rest of the class)
+
+    override suspend fun recognizeReferenceTableFromImage(bitmap: Bitmap, apiKey: String): ReferenceTableAiResult {
+        requireApiKey(apiKey)
+        val model = getVisionModel(apiKey)
+        val scaledBitmap = scaleBitmapForVision(bitmap)
+
+        val prompt = """
+            Eres un experto en TTRPG. Analiza esta imagen de una tabla de referencia (reglas, equipos, condiciones, etc).
+            Extrae los encabezados de las columnas y todas las filas de datos.
+
+            REGLAS:
+            1. Identifica claramente los encabezados de las columnas.
+            2. Extrae cada fila manteniendo el orden de las columnas.
+            3. Limpia el texto de errores de OCR comunes.
+            4. Responde ÚNICAMENTE con JSON: {"headers":["col1", "col2"], "rows":[["val1", "val2"], ["val3", "val4"]]}.
+            5. Sin explicaciones ni Markdown adicional fuera del JSON.
+        """.trimIndent()
+
+        var lastEx: Exception? = null
+        repeat(MAX_RETRY_ATTEMPTS) { attempt ->
+            try {
+                val responseText = model.generateContent(content {
+                    image(scaledBitmap)
+                    text(prompt)
+                }).text
+                
+                val text = responseText?.trim() ?: throw AiApiException("Gemini devolvió una respuesta vacía.")
+                val jsonString = text.removeSurrounding("```json", "```").trim()
+                val apiResponse = json.decodeFromString<AiReferenceResponse>(jsonString)
+                
+                return ReferenceTableAiResult(
+                    headers = apiResponse.headers,
+                    rows = apiResponse.rows
+                )
+            } catch (e: Exception) {
+                if (!isRateLimitError(e) || attempt == MAX_RETRY_ATTEMPTS - 1) {
+                    throw AiApiException(friendlyGeminiError(e), e)
+                }
+                lastEx = e
+                delay(parseRetryDelayMs(e) ?: (RETRY_BASE_DELAY_MS shl attempt))
+            }
+        }
+        throw AiApiException(friendlyGeminiError(lastEx!!), lastEx)
+    }
+
+    @Serializable
+    private data class AiReferenceResponse(
+        val headers: List<String>,
+        val rows: List<List<String>>
+    )
 
     private val json = Json {
         ignoreUnknownKeys = true

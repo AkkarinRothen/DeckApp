@@ -474,3 +474,199 @@ val MIGRATION_25_26 = object : Migration(25, 26) {
         database.execSQL("ALTER TABLE `random_tables` ADD COLUMN `sortOrder` INTEGER NOT NULL DEFAULT 0")
     }
 }
+
+val MIGRATION_26_27 = object : Migration(26, 27) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        // 1. Añadir gameSystemsJson a sessions
+        database.execSQL("""ALTER TABLE `sessions` ADD COLUMN `gameSystemsJson` TEXT NOT NULL DEFAULT '["General"]'""")
+
+        // 2. Tablas de referencia
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `reference_tables` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `name` TEXT NOT NULL,
+                `description` TEXT NOT NULL DEFAULT '',
+                `gameSystem` TEXT NOT NULL DEFAULT 'General',
+                `category` TEXT NOT NULL DEFAULT 'General',
+                `columnsJson` TEXT NOT NULL DEFAULT '[]',
+                `isPinned` INTEGER NOT NULL DEFAULT 0,
+                `sortOrder` INTEGER NOT NULL DEFAULT 0,
+                `createdAt` INTEGER NOT NULL
+            )
+        """.trimIndent())
+
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `reference_rows` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `tableId` INTEGER NOT NULL,
+                `cellsJson` TEXT NOT NULL DEFAULT '[]',
+                `sortOrder` INTEGER NOT NULL DEFAULT 0,
+                FOREIGN KEY(`tableId`) REFERENCES `reference_tables`(`id`) ON DELETE CASCADE
+            )
+        """.trimIndent())
+        database.execSQL("CREATE INDEX IF NOT EXISTS `index_reference_rows_tableId` ON `reference_rows` (`tableId`)")
+
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `reference_table_tags` (
+                `tableId` INTEGER NOT NULL,
+                `tagId` INTEGER NOT NULL,
+                PRIMARY KEY(`tableId`, `tagId`),
+                FOREIGN KEY(`tableId`) REFERENCES `reference_tables`(`id`) ON DELETE CASCADE,
+                FOREIGN KEY(`tagId`) REFERENCES `tags`(`id`) ON DELETE CASCADE
+            )
+        """.trimIndent())
+        database.execSQL("CREATE INDEX IF NOT EXISTS `index_reference_table_tags_tagId` ON `reference_table_tags` (`tagId`)")
+
+        // 3. Reglas de sistema
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `system_rules` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `title` TEXT NOT NULL,
+                `content` TEXT NOT NULL DEFAULT '',
+                `gameSystem` TEXT NOT NULL DEFAULT 'General',
+                `category` TEXT NOT NULL DEFAULT 'General',
+                `isPinned` INTEGER NOT NULL DEFAULT 0,
+                `sortOrder` INTEGER NOT NULL DEFAULT 0,
+                `lastUpdated` INTEGER NOT NULL
+            )
+        """.trimIndent())
+
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `system_rule_tags` (
+                `ruleId` INTEGER NOT NULL,
+                `tagId` INTEGER NOT NULL,
+                PRIMARY KEY(`ruleId`, `tagId`),
+                FOREIGN KEY(`ruleId`) REFERENCES `system_rules`(`id`) ON DELETE CASCADE,
+                FOREIGN KEY(`tagId`) REFERENCES `tags`(`id`) ON DELETE CASCADE
+            )
+        """.trimIndent())
+        database.execSQL("CREATE INDEX IF NOT EXISTS `index_system_rule_tags_tagId` ON `system_rule_tags` (`tagId`)")
+
+        // 4. FTS
+        database.execSQL("CREATE VIRTUAL TABLE IF NOT EXISTS `reference_tables_fts` USING FTS4(`name`, `description`, content=`reference_tables`)")
+        database.execSQL("CREATE VIRTUAL TABLE IF NOT EXISTS `system_rules_fts` USING FTS4(`title`, `content`, content=`system_rules`)")
+    }
+}
+
+val MIGRATION_27_28 = object : Migration(27, 28) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        // 1. Columnas de Starter Pack
+        database.execSQL("ALTER TABLE `reference_tables` ADD COLUMN `sourcePack` TEXT")
+        database.execSQL("ALTER TABLE `system_rules` ADD COLUMN `sourcePack` TEXT")
+        database.execSQL("ALTER TABLE `random_tables` ADD COLUMN `sourcePack` TEXT")
+
+        // 2. Autocuración de la tabla npcs (Corrige IllegalStateException columns={})
+        val cursor = database.query("PRAGMA table_info(`npcs`)")
+        val columnCount = cursor.count
+        cursor.close()
+
+        if (columnCount == 0) {
+            database.execSQL("DROP TABLE IF EXISTS `npc_tags`")
+            database.execSQL("DROP TABLE IF EXISTS `npcs`")
+            
+            database.execSQL("""
+                CREATE TABLE IF NOT EXISTS `npcs` (
+                    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+                    `name` TEXT NOT NULL, 
+                    `description` TEXT NOT NULL, 
+                    `imagePath` TEXT, 
+                    `maxHp` INTEGER NOT NULL, 
+                    `currentHp` INTEGER NOT NULL, 
+                    `armorClass` INTEGER NOT NULL, 
+                    `initiativeBonus` INTEGER NOT NULL, 
+                    `notes` TEXT NOT NULL, 
+                    `isMonster` INTEGER NOT NULL, 
+                    `createdAt` INTEGER NOT NULL
+                )
+            """.trimIndent())
+
+            database.execSQL("""
+                CREATE TABLE IF NOT EXISTS `npc_tags` (
+                    `npcId` INTEGER NOT NULL, 
+                    `tagId` INTEGER NOT NULL, 
+                    PRIMARY KEY(`npcId`, `tagId`), 
+                    FOREIGN KEY(`npcId`) REFERENCES `npcs`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , 
+                    FOREIGN KEY(`tagId`) REFERENCES `tags`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE 
+                )
+            """.trimIndent())
+            database.execSQL("CREATE INDEX IF NOT EXISTS `index_npc_tags_tagId` ON `npc_tags` (`tagId`)")
+        }
+    }
+}
+
+val MIGRATION_28_29 = object : Migration(28, 29) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE `random_tables` ADD COLUMN `category` TEXT NOT NULL DEFAULT 'General'")
+    }
+}
+
+val MIGRATION_29_30 = object : Migration(29, 30) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `hex_maps` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `name` TEXT NOT NULL,
+                `rows` INTEGER NOT NULL,
+                `cols` INTEGER NOT NULL,
+                `sessionId` INTEGER,
+                `hexStyle` TEXT NOT NULL DEFAULT 'FLAT_TOP',
+                `createdAt` INTEGER NOT NULL
+            )
+        """.trimIndent())
+
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `hex_tiles` (
+                `mapId` INTEGER NOT NULL,
+                `q` INTEGER NOT NULL,
+                `r` INTEGER NOT NULL,
+                `terrainCost` INTEGER NOT NULL DEFAULT 1,
+                `terrainLabel` TEXT NOT NULL DEFAULT '',
+                `terrainColor` INTEGER NOT NULL DEFAULT -2183045,
+                `dmNotes` TEXT NOT NULL DEFAULT '',
+                `playerNotes` TEXT NOT NULL DEFAULT '',
+                `isExplored` INTEGER NOT NULL DEFAULT 0,
+                `isReconnoitered` INTEGER NOT NULL DEFAULT 0,
+                `isMapped` INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY(`mapId`, `q`, `r`),
+                FOREIGN KEY(`mapId`) REFERENCES `hex_maps`(`id`) ON DELETE CASCADE
+            )
+        """.trimIndent())
+        database.execSQL("CREATE INDEX IF NOT EXISTS `index_hex_tiles_mapId` ON `hex_tiles` (`mapId`)")
+
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `hex_pois` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `mapId` INTEGER NOT NULL,
+                `tileQ` INTEGER NOT NULL,
+                `tileR` INTEGER NOT NULL,
+                `name` TEXT NOT NULL,
+                `type` TEXT NOT NULL,
+                `description` TEXT NOT NULL DEFAULT '',
+                `encounterId` INTEGER,
+                `tableId` INTEGER,
+                FOREIGN KEY(`mapId`) REFERENCES `hex_maps`(`id`) ON DELETE CASCADE
+            )
+        """.trimIndent())
+        database.execSQL("CREATE INDEX IF NOT EXISTS `index_hex_pois_mapId` ON `hex_pois` (`mapId`)")
+
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `hex_days` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `mapId` INTEGER NOT NULL,
+                `dayNumber` INTEGER NOT NULL,
+                `activitiesLog` TEXT NOT NULL DEFAULT '[]',
+                `notes` TEXT NOT NULL DEFAULT '',
+                FOREIGN KEY(`mapId`) REFERENCES `hex_maps`(`id`) ON DELETE CASCADE
+            )
+        """.trimIndent())
+        database.execSQL("CREATE INDEX IF NOT EXISTS `index_hex_days_mapId` ON `hex_days` (`mapId`)")
+    }
+}
+
+val MIGRATION_30_31 = object : Migration(30, 31) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE `hex_maps` ADD COLUMN `partyQ` INTEGER DEFAULT NULL")
+        database.execSQL("ALTER TABLE `hex_maps` ADD COLUMN `partyR` INTEGER DEFAULT NULL")
+    }
+}
+

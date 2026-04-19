@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.deckapp.core.model.DrawMode
+import com.deckapp.core.ui.components.GameSystemsSelector
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -22,6 +23,7 @@ fun SessionSetupScreen(
     viewModel: SessionSetupViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val availableSystems by viewModel.availableSystems.collectAsStateWithLifecycle()
 
     LaunchedEffect(uiState.createdSessionId) {
         uiState.createdSessionId?.let { onSessionCreated(it) }
@@ -72,6 +74,20 @@ fun SessionSetupScreen(
                         placeholder = { Text("ej. Sesión 1 — La Maldición de Strahd") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
+                    )
+                }
+
+                item {
+                    Text(
+                        "Sistemas de juego",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    GameSystemsSelector(
+                        selectedSystems = uiState.selectedGameSystems,
+                        onSystemsChanged = { viewModel.updateGameSystems(it) },
+                        availableSystems = availableSystems
                     )
                 }
 

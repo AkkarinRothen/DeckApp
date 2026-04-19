@@ -15,18 +15,3 @@ interface CombatLogDao {
     suspend fun clearLog(encounterId: Long)
 }
 
-fun CombatLogEntryEntity.toDomain() = com.deckapp.core.model.CombatLogEntry(
-    id = id,
-    encounterId = encounterId,
-    message = message,
-    type = com.deckapp.core.model.CombatLogType.valueOf(type),
-    timestamp = timestamp
-)
-
-fun com.deckapp.core.model.CombatLogEntry.toEntity() = CombatLogEntryEntity(
-    id = id,
-    encounterId = encounterId,
-    message = message,
-    type = type.name,
-    timestamp = timestamp
-)

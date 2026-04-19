@@ -33,6 +33,7 @@ data class SettingsUiState(
     val jpegQuality: Int = 90,
     val geminiApiKey: String = "",
     val autoVisionEnabled: Boolean = true,
+    val simplifiedModeEnabled: Boolean = false,
     val isBackingUp: Boolean = false,
     val isRestoring: Boolean = false,
     val backupMessage: String? = null
@@ -58,12 +59,14 @@ class SettingsViewModel @Inject constructor(
         val quality = settingsRepository.getJpegQuality()
         val apiKey = settingsRepository.getGeminiApiKey()
         val autoVision = settingsRepository.getAutoVisionEnabled()
+        val simplified = settingsRepository.getSimplifiedModeEnabled()
         _uiState.update { 
             it.copy(
                 appVersion = version, 
                 jpegQuality = quality, 
                 geminiApiKey = apiKey, 
-                autoVisionEnabled = autoVision 
+                autoVisionEnabled = autoVision,
+                simplifiedModeEnabled = simplified
             ) 
         }
         loadStorageInfo()
@@ -115,6 +118,11 @@ class SettingsViewModel @Inject constructor(
     fun setAutoVisionEnabled(enabled: Boolean) {
         settingsRepository.setAutoVisionEnabled(enabled)
         _uiState.update { it.copy(autoVisionEnabled = enabled) }
+    }
+
+    fun setSimplifiedModeEnabled(enabled: Boolean) {
+        settingsRepository.setSimplifiedModeEnabled(enabled)
+        _uiState.update { it.copy(simplifiedModeEnabled = enabled) }
     }
 
     fun createBackup(outputUri: Uri) {

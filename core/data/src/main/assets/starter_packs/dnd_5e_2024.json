@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "referenceTables": [
+    {
+      "id": -101,
+      "name": "Acciones en Combate",
+      "description": "Acciones estándar de 2024.",
+      "gameSystem": "D&D 5e (2024)",
+      "category": "Combate",
+      "columnsJson": "[{\"header\":\"Acción\",\"widthWeight\":1.0},{\"header\":\"Descripción\",\"widthWeight\":3.0}]",
+      "isPinned": true,
+      "sortOrder": 0,
+      "createdAt": 1713430000000
+    },
+    {
+      "id": -102,
+      "name": "Clases de Dificultad (DC)",
+      "description": "Guía rápida para asignar dificultad.",
+      "gameSystem": "D&D 5e (2024)",
+      "category": "Mecánicas",
+      "columnsJson": "[{\"header\":\"Dificultad\",\"widthWeight\":1.0},{\"header\":\"DC\",\"widthWeight\":0.5}]",
+      "isPinned": true,
+      "sortOrder": 1,
+      "createdAt": 1713430000000
+    },
+    {
+      "id": -103,
+      "name": "Maestrías de Armas (Mastery)",
+      "description": "Efectos especiales al usar armas con maestría.",
+      "gameSystem": "D&D 5e (2024)",
+      "category": "Combate",
+      "columnsJson": "[{\"header\":\"Propiedad\",\"widthWeight\":0.7},{\"header\":\"Efecto\",\"widthWeight\":2.3}]",
+      "isPinned": true,
+      "sortOrder": 2,
+      "createdAt": 1713430000000
+    },
+    {
+      "id": -104,
+      "name": "Tamaños de Criatura",
+      "description": "Espacio ocupado y dado de golpe por tamaño.",
+      "gameSystem": "D&D 5e (2024)",
+      "category": "Mecánicas",
+      "columnsJson": "[{\"header\":\"Tamaño\",\"widthWeight\":1.0},{\"header\":\"Espacio\",\"widthWeight\":1.0},{\"header\":\"Dado\",\"widthWeight\":0.5}]",
+      "isPinned": false,
+      "sortOrder": 3,
+      "createdAt": 1713430000000
+    }
+  ],
+  "referenceRows": [
+    { "id": -1011, "tableId": -101, "cellsJson": "[\"Atacar\",\"Ataque cuerpo a cuerpo o a distancia.\"]", "sortOrder": 0 },
+    { "id": -1012, "tableId": -101, "cellsJson": "[\"Lanzar Conjuro\",\"Tiempo de ejecución de 1 acción.\"]", "sortOrder": 1 },
+    { "id": -1013, "tableId": -101, "cellsJson": "[\"Destrabarse (Disengage)\",\"No provocas ataques de oportunidad este turno.\"]", "sortOrder": 2 },
+    { "id": -1014, "tableId": -101, "cellsJson": "[\"Correr (Dash)\",\"Ganas movimiento extra igual a tu velocidad.\"]", "sortOrder": 3 },
+    { "id": -1015, "tableId": -101, "cellsJson": "[\"Esquivar (Dodge)\",\"Desventaja a ataques contra ti; salvaciones DEX con ventaja.\"]", "sortOrder": 4 },
+    { "id": -1016, "tableId": -101, "cellsJson": "[\"Ayudar (Help)\",\"Aliado tiene ventaja en su próxima tirada.\"]", "sortOrder": 5 },
+    { "id": -1017, "tableId": -101, "cellsJson": "[\"Esconderse (Hide)\",\"Prueba de Sigilo vs Percepción Pasiva.\"]", "sortOrder": 6 },
+    { "id": -1031, "tableId": -103, "cellsJson": "[\"Cleave\",\"Si golpeas, puedes atacar a otra criatura a 5 pies.\"]", "sortOrder": 0 },
+    { "id": -1032, "tableId": -103, "cellsJson": "[\"Nick\",\"Ataque extra con arma ligera como parte de la acción Atacar.\"]", "sortOrder": 1 },
+    { "id": -1033, "tableId": -103, "cellsJson": "[\"Push\",\"Empujas a la criatura 10 pies lejos de ti.\"]", "sortOrder": 2 },
+    { "id": -1034, "tableId": -103, "cellsJson": "[\"Topple\",\"La criatura debe superar salvación de CON o caer Derribada.\"]", "sortOrder": 3 },
+    { "id": -1035, "tableId": -103, "cellsJson": "[\"Vex\",\"Tienes ventaja en tu próximo ataque contra esa criatura.\"]", "sortOrder": 4 },
+    { "id": -1036, "tableId": -103, "cellsJson": "[\"Sap\",\"La criatura tiene desventaja en su próximo ataque.\"]", "sortOrder": 5 },
+    { "id": -1037, "tableId": -103, "cellsJson": "[\"Slow\",\"Reduce la velocidad de la criatura en 10 pies hasta tu próximo turno.\"]", "sortOrder": 6 },
+    { "id": -1041, "tableId": -104, "cellsJson": "[\"Diminuto (Tiny)\",\"2.5 x 2.5 pies\",\"d4\"]", "sortOrder": 0 },
+    { "id": -1042, "tableId": -104, "cellsJson": "[\"Pequeño (Small)\",\"5 x 5 pies\",\"d6\"]", "sortOrder": 1 },
+    { "id": -1043, "tableId": -104, "cellsJson": "[\"Mediano (Medium)\",\"5 x 5 pies\",\"d8\"]", "sortOrder": 2 },
+    { "id": -1044, "tableId": -104, "cellsJson": "[\"Grande (Large)\",\"10 x 10 pies\",\"d10\"]", "sortOrder": 3 },
+    { "id": -1045, "tableId": -104, "cellsJson": "[\"Enorme (Huge)\",\"15 x 15 pies\",\"d12\"]", "sortOrder": 4 },
+    { "id": -1046, "tableId": -104, "cellsJson": "[\"Gargantuesco\",\"20 x 20 pies o más\",\"d20\"]", "sortOrder": 5 }
+  ],
+  "systemRules": [
+    {
+      "id": -101,
+      "title": "Agotado (Exhausted)",
+      "content": "- Penalizador de **-2 por nivel** a ataques y pruebas.\n- DC de conjuros baja en **1 por nivel**.\n- Muerte al nivel 6.",
+      "gameSystem": "D&D 5e (2024)",
+      "category": "Estados",
+      "isPinned": true,
+      "sortOrder": 0,
+      "lastUpdated": 1713430000000
+    },
+    {
+      "id": -102,
+      "title": "Agarrado y Derribado",
+      "content": "### Agarrado (Grappled)\n- **Velocidad**: 0.\n- **Ataques**: Desventaja contra otros que no sean quien te agarra.\n- **Escapar**: Prueba de Atletismo o Acrobacias vs DC de Atletismo del atacante.\n\n### Derribado (Prone)\n- **Movimiento**: Solo puedes gatear o gastar mitad de movimiento para levantarte.\n- **Ataques**: Tienes desventaja. Los ataques contra ti tienen ventaja (si son desde 5 pies).",
+      "gameSystem": "D&D 5e (2024)",
+      "category": "Estados",
+      "isPinned": false,
+      "sortOrder": 1,
+      "lastUpdated": 1713430000000
+    },
+    {
+      "id": -103,
+      "title": "Cegado y Sordo",
+      "content": "### Cegado (Blinded)\n- Fallas automáticamente cualquier prueba que requiera la vista.\n- Tienes desventaja en tiradas de ataque.\n- Ataques contra ti tienen ventaja.\n\n### Sordo (Deafened)\n- Fallas automáticamente cualquier prueba que requiera el oído.",
+      "gameSystem": "D&D 5e (2024)",
+      "category": "Estados",
+      "isPinned": false,
+      "sortOrder": 2,
+      "lastUpdated": 1713430000000
+    },
+    {
+      "id": -104,
+      "title": "Paralizado y Petrificado",
+      "content": "### Paralizado (Paralyzed)\n- **Incapacitado**: No puedes moverte ni hablar.\n- **Salvaciones**: Fallas automáticamente STR y DEX.\n- **Ataques**: Ataques contra ti tienen ventaja. Golpes desde 5 pies son críticos.\n\n### Petrificado (Petrified)\n- Te transformas en una sustancia sólida inanimada (generalmente piedra).\n- Tu peso se multiplica por 10 y dejas de envejecer.\n- Tienes resistencia a todo el daño.",
+      "gameSystem": "D&D 5e (2024)",
+      "category": "Estados",
+      "isPinned": false,
+      "sortOrder": 3,
+      "lastUpdated": 1713430000000
+    },
+    {
+      "id": -105,
+      "title": "Visión y Luz",
+      "content": "- **Luz Brillante**: Visión normal.\n- **Luz Tenue (Luz de Luna)**: Crea un área de **Visión Reducida** (desventaja en pruebas de Percepción basadas en la vista).\n- **Oscuridad**: Crea un área de **Visión Nula** (efectivamente Cegado).\n- **Visión en la Oscuridad**: Ves en oscuridad como si fuera luz tenue (dentro del radio).",
+      "gameSystem": "D&D 5e (2024)",
+      "category": "Mecánicas",
+      "isPinned": false,
+      "sortOrder": 4,
+      "lastUpdated": 1713430000000
+    },
+    {
+      "id": -106,
+      "title": "Envenenado y Asustado",
+      "content": "### Envenenado (Poisoned)\n- Tienes desventaja en tiradas de ataque y pruebas de característica.\n\n### Asustado (Frightened)\n- Tienes desventaja en pruebas de característica y tiradas de ataque mientras la fuente de tu miedo esté a la vista.\n- No puedes acercarte voluntariamente a la fuente de tu miedo.",
+      "gameSystem": "D&D 5e (2024)",
+      "category": "Estados",
+      "isPinned": false,
+      "sortOrder": 5,
+      "lastUpdated": 1713430000000
+    }
+  ]
+}

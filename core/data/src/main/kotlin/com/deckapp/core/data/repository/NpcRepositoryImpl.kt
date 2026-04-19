@@ -21,8 +21,8 @@ class NpcRepositoryImpl @Inject constructor(
 
     override fun getAllNpcs(): Flow<List<Npc>> {
         return npcDao.getAllNpcs().flatMapLatest { entities ->
-            // En una app real, podrÃ­amos querer optimizar esto con un JOIN en el DAO para evitar N Flows
-            // Pero por ahora, para mantener consistencia con el patrÃ³n de tags:
+            // En una app real, podríamos querer optimizar esto con un JOIN en el DAO para evitar N Flows
+            // Pero por ahora, para mantener consistencia con el patrón de tags:
             kotlinx.coroutines.flow.flow {
                 val results = entities.map { entity ->
                     // Por simplicidad en esta fase, no cargamos los tags en el listado masivo 

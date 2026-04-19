@@ -2,27 +2,28 @@ package com.deckapp.feature.tables.library
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.filled.Sort
-import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.deckapp.feature.tables.TableDetailSheet
 import com.deckapp.feature.tables.TablesViewModel
+import com.deckapp.feature.tables.TablePackInfo
 import com.deckapp.core.ui.components.SelectionActionBar
 import com.deckapp.feature.tables.library.components.TableGridItem
 import sh.calvin.reorderable.ReorderableItem
@@ -44,7 +45,6 @@ fun TableLibraryScreen(
     val haptic = LocalHapticFeedback.current
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Snackbar para mensajes
     LaunchedEffect(uiState.snackbarMessage) {
         uiState.snackbarMessage?.let {
             snackbarHostState.showSnackbar(it)
@@ -52,7 +52,15 @@ fun TableLibraryScreen(
         }
     }
 
-    // BottomSheet para resultados de tiradas rápidas
+    if (uiState.showPackDialog) {
+        TablePackDialog(
+            packs = uiState.availableTablePacks,
+            onDismiss = { viewModel.setShowPackDialog(false) },
+            onInstall = viewModel::installTablePack,
+            onRemove = viewModel::removeTablePack
+        )
+    }
+
     if (uiState.activeTable != null) {
         TableDetailSheet(
             table = uiState.activeTable!!,
@@ -60,7 +68,7 @@ fun TableLibraryScreen(
             recentResults = emptyList(), 
             isRolling = uiState.isRolling,
             onRoll = { viewModel.rollTable(uiState.activeTable!!.id, sessionId = null) },
-            onExport = { /* Opcional: Compartir JSON */ },
+            onExport = { /* Opcional */ },
             onDismiss = { viewModel.closeTable() }
         )
     }
@@ -72,7 +80,7 @@ fun TableLibraryScreen(
         AlertDialog(
             onDismissRequest = { showBulkDeleteConfirmation = false },
             title = { Text("¿Borrar seleccionadas?") },
-            text = { Text("Se eliminarán permanentemente ${uiState.selectedTableIds.size} tablas. Esta acción no se puede deshacer.") },
+            text = { Text("Se eliminarán permanentemente ${uiState.selectedTableIds.size} tablas.") },
             confirmButton = {
                 Button(
                     onClick = {
@@ -85,9 +93,7 @@ fun TableLibraryScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showBulkDeleteConfirmation = false }) {
-                    Text("Cancelar")
-                }
+                TextButton(onClick = { showBulkDeleteConfirmation = false }) { Text("Cancelar") }
             }
         )
     }
@@ -105,14 +111,8 @@ fun TableLibraryScreen(
                 scrollBehavior = scrollBehavior,
                 actions = {
                     if (uiState.selectedTableIds.isEmpty()) {
-                        if (uiState.searchQuery.isBlank() && uiState.selectedTagIds.isEmpty()) {
-                            IconButton(onClick = { viewModel.toggleReorderMode() }) {
-                                Icon(
-                                    imageVector = if (uiState.isReorderMode) Icons.Default.Save else Icons.Default.Sort,
-                                    contentDescription = "Reordenar",
-                                    tint = if (uiState.isReorderMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                                )
-                            }
+                        IconButton(onClick = { viewModel.setShowPackDialog(true) }) {
+                            Icon(Icons.Default.AutoAwesome, contentDescription = "Packs de tablas")
                         }
                         IconButton(onClick = onImportClick) {
                             Icon(Icons.Default.UploadFile, contentDescription = "Importar")
@@ -126,15 +126,7 @@ fun TableLibraryScreen(
             )
         },
         floatingActionButton = {
-            if (uiState.isReorderMode) {
-                ExtendedFloatingActionButton(
-                    onClick = { viewModel.saveSortOrder() },
-                    icon = { Icon(Icons.Default.Save, null) },
-                    text = { Text("Guardar Orden") },
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            } else if (uiState.selectedTableIds.isEmpty()) {
+            if (uiState.selectedTableIds.isEmpty()) {
                 FloatingActionButton(onClick = onCreateTable) {
                     Icon(Icons.Default.Add, contentDescription = "Nueva tabla")
                 }
@@ -150,96 +142,59 @@ fun TableLibraryScreen(
                         onTogglePin = { viewModel.bulkTogglePin(it) },
                         onAddTag = { showBulkTagMenu = true }
                     )
-                    
-                    DropdownMenu(
-                        expanded = showBulkTagMenu,
-                        onDismissRequest = { showBulkTagMenu = false }
-                    ) {
-                        uiState.allTags.forEach { tag ->
-                            DropdownMenuItem(
-                                text = { Text(tag.name) },
-                                onClick = {
-                                    viewModel.bulkAddTag(tag.id)
-                                    showBulkTagMenu = false
-                                }
-                            )
-                        }
-                        if (uiState.allTags.isEmpty()) {
-                            DropdownMenuItem(
-                                text = { Text("No hay etiquetas") },
-                                onClick = {},
-                                enabled = false
-                            )
-                        }
-                    }
                 }
             }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-            // Barra de búsqueda
             OutlinedTextField(
                 value = uiState.searchQuery,
                 onValueChange = { viewModel.setSearchQuery(it) },
                 placeholder = { Text("Buscar tablas…") },
                 leadingIcon = { Icon(Icons.Default.Search, null) },
-                trailingIcon = {
-                    if (uiState.searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.setSearchQuery("") }) {
-                            Icon(Icons.Default.Clear, null)
-                        }
-                    }
-                },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                 shape = MaterialTheme.shapes.large,
-                singleLine = true,
-                enabled = !uiState.isReorderMode
+                singleLine = true
             )
 
-            // Selector de Etiquetas (Tags)
+            // Selector de Categorías
             LazyRow(
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                uiState.allTags.forEach { tag ->
-                    item(key = tag.id) {
+                item {
+                    FilterChip(
+                        selected = uiState.selectedCategory == null,
+                        onClick = { viewModel.setCategoryFilter(null) },
+                        label = { Text("Todas") }
+                    )
+                }
+                uiState.availableCategories.forEach { category ->
+                    item {
                         FilterChip(
-                            selected = tag.id in uiState.selectedTagIds,
-                            onClick = { viewModel.toggleTagFilter(tag.id) },
-                            label = { Text(tag.name) }
+                            selected = uiState.selectedCategory == category,
+                            onClick = { viewModel.setCategoryFilter(category) },
+                            label = { Text(category) }
                         )
                     }
                 }
             }
 
-            // Grilla de Tablas (Bento Grid)
             if (uiState.isLoading) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             } else if (uiState.filteredTables.isEmpty()) {
                 EmptyLibraryState(
-                    hasFilters = uiState.searchQuery.isNotEmpty() || uiState.selectedTagIds.isNotEmpty(),
-                    onClearFilters = {
-                        viewModel.setSearchQuery("")
-                        viewModel.clearFilters()
-                    }
+                    hasFilters = uiState.searchQuery.isNotEmpty() || uiState.selectedCategory != null,
+                    onClearFilters = { viewModel.clearFilters() },
+                    onExplorePacks = { viewModel.setShowPackDialog(true) }
                 )
             } else {
                 val gridState = rememberLazyGridState()
-                val reorderableState = rememberReorderableLazyGridState(
-                    lazyGridState = gridState,
-                    onMove = { from, to ->
-                        val newList = uiState.tables.toMutableList().apply {
-                            add(to.index, removeAt(from.index))
-                        }
-                        viewModel.updateTableOrder(newList)
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    }
-                )
-
+                
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     state = gridState,
@@ -248,41 +203,40 @@ fun TableLibraryScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    items(uiState.filteredTables, key = { it.id }) { table ->
-                        val isSelected = table.id in uiState.selectedTableIds
-                        
-                        ReorderableItem(reorderableState, key = table.id) { isDragging ->
-                            val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp)
-                            
-                            Surface(
-                                tonalElevation = elevation,
-                                shadowElevation = elevation,
-                                shape = MaterialTheme.shapes.medium,
-                                modifier = Modifier.draggableHandle(
-                                    onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
-                                    enabled = uiState.isReorderMode
-                                )
-                            ) {
-                                TableGridItem(
-                                    table = table,
-                                    isSelected = isSelected,
-                                    onLongClick = { if (!uiState.isReorderMode) viewModel.toggleTableSelection(table.id) },
-                                    onClick = {
-                                        if (!uiState.isReorderMode) {
-                                            if (uiState.selectedTableIds.isNotEmpty()) {
-                                                viewModel.toggleTableSelection(table.id)
-                                            } else {
-                                                onTableClick(table.id)
-                                            }
-                                        }
-                                    },
-                                    onQuickRoll = { if (!uiState.isReorderMode) viewModel.rollTable(table.id, sessionId = null) },
-                                    onTogglePin = { if (!uiState.isReorderMode) viewModel.togglePin(table) },
-                                    onDuplicate = if (!uiState.isReorderMode && uiState.selectedTableIds.isEmpty()) ({ viewModel.duplicateTable(table.id) }) else null,
-                                    onInvertRanges = if (!uiState.isReorderMode && uiState.selectedTableIds.isEmpty()) ({ viewModel.invertTable(table.id) }) else null,
-                                    onDelete = { if (!uiState.isReorderMode) viewModel.deleteTable(table.id) }
+                    uiState.groupedTables.forEach { (category, tables) ->
+                        if (uiState.selectedCategory == null) {
+                            item(span = { GridItemSpan(2) }) {
+                                Text(
+                                    text = category,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+                                    color = MaterialTheme.colorScheme.primary
                                 )
                             }
+                        }
+                        
+                        items(tables, key = { it.id }) { table ->
+                            val isSelected = table.id in uiState.selectedTableIds
+                            TableGridItem(
+                                table = table,
+                                isSelected = isSelected,
+                                onLongClick = { viewModel.toggleTableSelection(table.id) },
+                                onClick = {
+                                    if (uiState.selectedTableIds.isNotEmpty()) {
+                                        viewModel.toggleTableSelection(table.id)
+                                    } else {
+                                        onTableClick(table.id)
+                                    }
+                                },
+                                onQuickRoll = { viewModel.rollTable(table.id, sessionId = null) },
+                                onTogglePin = { viewModel.togglePin(table) },
+                                onDuplicate = { viewModel.duplicateTable(table.id) },
+                                onInvertRanges = { viewModel.invertTable(table.id) },
+                                onDelete = { viewModel.deleteTable(table.id) },
+                                quickRollResult = uiState.quickRollResults[table.id],
+                                onDismissResult = { viewModel.clearQuickRoll(table.id) }
+                            )
                         }
                     }
                 }
@@ -292,7 +246,59 @@ fun TableLibraryScreen(
 }
 
 @Composable
-private fun EmptyLibraryState(hasFilters: Boolean, onClearFilters: () -> Unit) {
+internal fun TablePackDialog(
+    packs: List<TablePackInfo>,
+    onDismiss: () -> Unit,
+    onInstall: (String) -> Unit,
+    onRemove: (String) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Packs de Tablas") },
+        text = {
+            if (packs.isEmpty()) {
+                Text("No hay packs de tablas disponibles.", style = MaterialTheme.typography.bodyMedium)
+            } else {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(packs, key = { it.assetName }) { pack ->
+                        Column {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(pack.displayName, style = MaterialTheme.typography.bodyMedium)
+                                    Text(
+                                        if (pack.isInstalled) "Instalado" else "Disponible",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = if (pack.isInstalled) MaterialTheme.colorScheme.primary
+                                                else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                if (pack.isInstalled) {
+                                    TextButton(onClick = { onInstall(pack.assetName) }) { Text("Actualizar") }
+                                    TextButton(
+                                        onClick = { onRemove(pack.assetName) },
+                                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                                    ) { Text("Quitar") }
+                                } else {
+                                    TextButton(onClick = { onInstall(pack.assetName) }) { Text("Instalar") }
+                                }
+                            }
+                            HorizontalDivider()
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("Cerrar") }
+        }
+    )
+}
+
+@Composable
+private fun EmptyLibraryState(hasFilters: Boolean, onClearFilters: () -> Unit, onExplorePacks: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize().padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -309,15 +315,22 @@ private fun EmptyLibraryState(hasFilters: Boolean, onClearFilters: () -> Unit) {
             text = if (hasFilters) "Sin resultados" else "¡No hay tablas todavía!",
             style = MaterialTheme.typography.titleLarge
         )
-        Text(
-            text = if (hasFilters) "Prueba con otros términos o categorías" else "Importa manuales o crea tus propias tablas aleatorias.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 4.dp)
-        )
+        
         if (hasFilters) {
-            TextButton(onClick = onClearFilters) {
-                Text("Limpiar filtros")
+            TextButton(onClick = onClearFilters) { Text("Limpiar filtros") }
+        } else {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                "Puedes crear tus propias tablas o activar packs de inicio.",
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(24.dp))
+            OutlinedButton(onClick = onExplorePacks) {
+                Icon(Icons.Default.AutoAwesome, null)
+                Spacer(Modifier.width(8.dp))
+                Text("Explorar packs de tablas")
             }
         }
     }

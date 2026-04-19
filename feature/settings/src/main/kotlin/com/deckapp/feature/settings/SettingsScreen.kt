@@ -189,6 +189,24 @@ fun SettingsScreen(
                 )
             }
 
+            // ── Experiencia de Usuario ───────────────────────────────────
+            item { HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp)) }
+
+            item {
+                Text(
+                    "Experiencia de Usuario",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            item {
+                SimplifiedModeToggle(
+                    enabled = uiState.simplifiedModeEnabled,
+                    onToggle = { viewModel.setSimplifiedModeEnabled(it) }
+                )
+            }
+
             // ── Librerías ───────────────────────────────────────────────
             item { HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp)) }
 
@@ -437,6 +455,34 @@ private fun AutoVisionToggle(
                 checked = enabled && apiKeyConfigured,
                 onCheckedChange = onToggle,
                 enabled = apiKeyConfigured
+            )
+        }
+    }
+}
+
+@Composable
+private fun SimplifiedModeToggle(
+    enabled: Boolean,
+    onToggle: (Boolean) -> Unit
+) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text("Modo Simplificado (Roleplay Directo)", style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    "Agiliza flujos de trabajo: clic en mazo para robar directamente, menos pasos para acciones comunes.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Switch(
+                checked = enabled,
+                onCheckedChange = onToggle
             )
         }
     }

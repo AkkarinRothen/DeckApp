@@ -122,7 +122,8 @@ data class SessionEntity(
     val createdAt: Long,
     val endedAt: Long?,
     val showCardTitles: Boolean = true,
-    @ColumnInfo(name = "dm_notes") val dmNotes: String? = null
+    @ColumnInfo(name = "dm_notes") val dmNotes: String? = null,
+    val gameSystemsJson: String = "[\"General\"]"
 )
 
 @Entity(
@@ -194,6 +195,7 @@ data class RandomTableEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val bundleId: Long? = null,
     val name: String,
+    val category: String = "General",
     val description: String = "",
     val rollFormula: String = "1d6",
     val rollMode: String = "RANGE",       // TableRollMode.name
@@ -203,7 +205,8 @@ data class RandomTableEntity(
     val sourceName: String? = null,
     val isBuiltIn: Boolean = false,
     val sortOrder: Int = 0,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val sourcePack: String? = null
 )
 
 @Entity(
@@ -430,4 +433,78 @@ data class WikiEntryEntity(
     val categoryId: Long,
     val imagePath: String?,
     val lastUpdated: Long
+)
+
+// ── Reference Tables ─────────────────────────────────────────────────────────
+
+@Entity(tableName = "reference_tables")
+data class ReferenceTableEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    val description: String = "",
+    val gameSystem: String = "General",
+    val category: String = "General",
+    val columnsJson: String = "[]",
+    val isPinned: Boolean = false,
+    val sortOrder: Int = 0,
+    val createdAt: Long = System.currentTimeMillis(),
+    val sourcePack: String? = null
+)
+
+@Entity(
+    tableName = "reference_rows",
+    foreignKeys = [ForeignKey(
+        entity = ReferenceTableEntity::class,
+        parentColumns = ["id"],
+        childColumns = ["tableId"],
+        onDelete = ForeignKey.CASCADE
+    )],
+    indices = [Index("tableId")]
+)
+data class ReferenceRowEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val tableId: Long,
+    val cellsJson: String = "[]",
+    val sortOrder: Int = 0
+)
+
+@Entity(
+    tableName = "reference_table_tags",
+    primaryKeys = ["tableId", "tagId"],
+    foreignKeys = [
+        ForeignKey(entity = ReferenceTableEntity::class, parentColumns = ["id"], childColumns = ["tableId"], onDelete = ForeignKey.CASCADE),
+        ForeignKey(entity = TagEntity::class, parentColumns = ["id"], childColumns = ["tagId"], onDelete = ForeignKey.CASCADE)
+    ],
+    indices = [Index("tagId")]
+)
+data class ReferenceTableTagCrossRef(val tableId: Long, val tagId: Long)
+
+@Entity(tableName = "system_rules")
+data class SystemRuleEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val title: String,
+    val content: String = "",
+    val gameSystem: String = "General",
+    val category: String = "General",
+    val isPinned: Boolean = false,
+    val sortOrder: Int = 0,
+    val lastUpdated: Long = System.currentTimeMillis(),
+    val sourcePack: String? = null
+)
+
+@Entity(
+    tableName = "system_rule_tags",
+    primaryKeys = ["ruleId", "tagId"],
+    foreignKeys = [
+        ForeignKey(entity = SystemRuleEntity::class, parentColumns = ["id"], childColumns = ["ruleId"], onDelete = ForeignKey.CASCADE),
+        ForeignKey(entity = TagEntity::class, parentColumns = ["id"], childColumns = ["tagId"], onDelete = ForeignKey.CASCADE)
+    ],
+    indices = [Index("tagId")]
+)
+data class SystemRuleTagCrossRef(val ruleId: Long, val tagId: Long)
+
+data class ReferenceTableWithRows(
+    @Embedded val table: ReferenceTableEntity,
+    @Relation(parentColumn = "id", entityColumn = "tableId")
+    val rows: List<ReferenceRowEntity>
 )

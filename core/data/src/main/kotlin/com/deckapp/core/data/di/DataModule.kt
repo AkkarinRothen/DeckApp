@@ -22,6 +22,12 @@ import com.deckapp.core.data.db.MIGRATION_21_22
 import com.deckapp.core.data.db.MIGRATION_22_23
 import com.deckapp.core.data.db.MIGRATION_23_24
 import com.deckapp.core.data.db.MIGRATION_24_25
+import com.deckapp.core.data.db.MIGRATION_25_26
+import com.deckapp.core.data.db.MIGRATION_26_27
+import com.deckapp.core.data.db.MIGRATION_27_28
+import com.deckapp.core.data.db.MIGRATION_28_29
+import com.deckapp.core.data.db.MIGRATION_29_30
+import com.deckapp.core.data.db.MIGRATION_30_31
 import com.deckapp.core.data.repository.*
 import com.deckapp.core.data.repository.WikiRepositoryImpl
 import com.deckapp.core.domain.repository.CardRepository
@@ -34,7 +40,10 @@ import com.deckapp.core.domain.repository.OcrRepository
 import com.deckapp.core.domain.repository.SessionRepository
 import com.deckapp.core.domain.repository.TableRepository
 import com.deckapp.core.domain.repository.AiTableRepository
+import com.deckapp.core.domain.repository.AiReferenceRepository
+import com.deckapp.core.domain.repository.ReferenceRepository
 import com.deckapp.core.domain.repository.SettingsRepository
+import com.deckapp.core.domain.repository.HexRepository
 import com.deckapp.core.domain.repository.WikiRepository
 import dagger.Binds
 import dagger.Module
@@ -72,7 +81,13 @@ object DatabaseModule {
                 MIGRATION_21_22,
                 MIGRATION_22_23,
                 MIGRATION_23_24,
-                MIGRATION_24_25
+                MIGRATION_24_25,
+                MIGRATION_25_26,
+                MIGRATION_26_27,
+                MIGRATION_27_28,
+                MIGRATION_28_29,
+                MIGRATION_29_30,
+                MIGRATION_30_31
             )
             .fallbackToDestructiveMigrationFrom(1, 2, 3, 4, 5)
             .build()
@@ -93,7 +108,10 @@ object DatabaseModule {
     @Provides fun provideCollectionDao(db: DeckAppDatabase) = db.collectionDao()
     @Provides fun provideNpcDao(db: DeckAppDatabase) = db.npcDao()
     @Provides fun provideWikiDao(db: DeckAppDatabase) = db.wikiDao()
+    @Provides fun provideReferenceTableDao(db: DeckAppDatabase) = db.referenceTableDao()
+    @Provides fun provideSystemRuleDao(db: DeckAppDatabase) = db.systemRuleDao()
     @Provides fun provideBackupDao(db: DeckAppDatabase) = db.backupDao()
+    @Provides fun provideHexDao(db: DeckAppDatabase) = db.hexDao()
 }
 
 @Module
@@ -138,6 +156,14 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
+    abstract fun bindAiReferenceRepository(impl: GeminiAiRepository): AiReferenceRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindReferenceRepository(impl: ReferenceRepositoryImpl): ReferenceRepository
+
+    @Binds
+    @Singleton
     abstract fun bindSettingsRepository(impl: SettingsRepositoryImpl): SettingsRepository
 
     @Binds
@@ -147,4 +173,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindWikiRepository(impl: WikiRepositoryImpl): WikiRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindHexRepository(impl: HexRepositoryImpl): HexRepository
 }

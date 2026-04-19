@@ -1,5 +1,7 @@
 package com.deckapp.core.domain.usecase
 
+import com.deckapp.core.model.ImportPreviewData
+import com.deckapp.core.model.ReferenceImportSource
 import com.deckapp.core.model.TableEntry
 
 /**
@@ -112,6 +114,23 @@ class CsvTableParser : TableParser {
         return entries
     }
 
+    /**
+     * Devuelve todas las filas del CSV como listas de celdas, sin lógica de rangos de dados.
+     * Usado para importar tablas de referencia (lookup), no tablas aleatorias.
+     */
+    fun parseAllRows(rawText: String): ImportPreviewData {
+        val preview = preview(rawText)
+        val lines = rawText.trimStart('\uFEFF').lines().filter { it.isNotBlank() }
+        val rows = lines
+            .drop(if (preview.config.hasHeader) 1 else 0)
+            .map { splitCsvLine(it, preview.config.delimiter) }
+        return ImportPreviewData(
+            headers = preview.headers,
+            rows = rows,
+            source = ReferenceImportSource.CSV
+        )
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private fun detectDelimiter(lines: List<String>): Char {
@@ -121,7 +140,7 @@ class CsvTableParser : TableParser {
         } ?: ','
     }
 
-    private fun splitCsvLine(line: String, delimiter: Char): List<String> {
+    internal fun splitCsvLine(line: String, delimiter: Char): List<String> {
         val result = mutableListOf<String>()
         val current = StringBuilder()
         var inQuotes = false

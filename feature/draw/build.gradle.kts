@@ -24,6 +24,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":feature:tables"))
     implementation(project(":feature:encounters"))
+    implementation(project(":feature:reference"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose.ui)
     implementation(libs.bundles.lifecycle)

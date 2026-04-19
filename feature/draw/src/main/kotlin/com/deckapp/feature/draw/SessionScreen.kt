@@ -2,6 +2,7 @@
 
 package com.deckapp.feature.draw
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -67,7 +68,9 @@ import com.deckapp.core.ui.components.CardThumbnail
 import com.deckapp.core.ui.components.MarkdownText
 import com.deckapp.core.ui.components.MarkdownToolbar
 import com.deckapp.feature.draw.components.ResourceManagerDialog
+import com.deckapp.feature.draw.components.SessionConfigSheet
 import com.deckapp.feature.encounters.CombatTab
+import com.deckapp.feature.reference.ReferenceTab
 import com.deckapp.feature.tables.TablesTab
 import com.deckapp.feature.tables.TablesViewModel
 import kotlinx.coroutines.delay
@@ -82,6 +85,11 @@ fun SessionScreen(
     onBrowseDeck: (deckId: Long) -> Unit = {},
     onCreateTable: () -> Unit = {},
     onImportTable: () -> Unit = {},
+    onExplorePacks: () -> Unit = {},
+    onEditReferenceTable: (Long) -> Unit = {},
+    onEditSystemRule: (Long) -> Unit = {},
+    onNewReferenceTable: (String) -> Unit = { _ -> },
+    onNewSystemRule: (String) -> Unit = { _ -> },
     viewModel: SessionViewModel = hiltViewModel(),
     tablesViewModel: TablesViewModel = hiltViewModel()
 ) {
@@ -91,7 +99,7 @@ fun SessionScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
-    val tabCount = if (uiState.hasActiveEncounter) 5 else 4
+    val tabCount = if (uiState.hasActiveEncounter) 6 else 5
     val pagerState = rememberPagerState(pageCount = { tabCount })
 
     // Sync pager → ViewModel al cambiar de tab por gesto
@@ -126,6 +134,7 @@ fun SessionScreen(
             @Suppress("DEPRECATION")
             val vibrator = context.getSystemService(Vibrator::class.java)
             if (vibrator?.hasVibrator() == true) {
+                @SuppressLint("MissingPermission")
                 vibrator.vibrate(VibrationEffect.createOneShot(80, VibrationEffect.DEFAULT_AMPLITUDE))
             }
         }
@@ -147,6 +156,8 @@ fun SessionScreen(
     var menuExpanded by remember { mutableStateOf(false) }
     var showDealDialog by remember { mutableStateOf(false) }
     var showEndSessionDialog by remember { mutableStateOf(false) }
+    var fabExpanded by remember { mutableStateOf(false) }
+    LaunchedEffect(pagerState.currentPage) { fabExpanded = false }
 
     // Quick Note dialog
     if (uiState.showQuickNoteDialog) {
@@ -199,6 +210,16 @@ fun SessionScreen(
             onToggleDeck = { viewModel.toggleDeckInSession(it) },
             onToggleTable = { viewModel.toggleTableInSession(it) },
             onDismiss = { viewModel.dismissResourceManager() }
+        )
+    }
+
+    // Session Config Sheet
+    if (uiState.showSessionConfig) {
+        SessionConfigSheet(
+            selectedSystems = uiState.session?.gameSystems ?: emptyList(),
+            onSystemsChanged = { viewModel.updateGameSystems(it) },
+            availableSystems = uiState.availableSystems,
+            onDismiss = { viewModel.dismissSessionConfig() }
         )
     }
 
@@ -255,10 +276,6 @@ fun SessionScreen(
                             onDismissRequest = { menuExpanded = false }
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Ver tope del mazo") },
-                                onClick = { menuExpanded = false; viewModel.peekTopCard() }
-                            )
-                            DropdownMenuItem(
                                 text = { Text("Robar por palo…") },
                                 onClick = { menuExpanded = false; viewModel.openDrawBySuit() },
                                 enabled = uiState.selectedDeckId != null
@@ -272,6 +289,7 @@ fun SessionScreen(
                                 },
                                 enabled = uiState.selectedDeckId != null
                             )
+                            HorizontalDivider()
                             DropdownMenuItem(
                                 text = { Text("Exportar historial (.txt)") },
                                 onClick = {
@@ -280,12 +298,12 @@ fun SessionScreen(
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Repartir cartas…") },
-                                onClick = { menuExpanded = false; showDealDialog = true }
-                            )
-                            DropdownMenuItem(
                                 text = { Text("Gestionar recursos…") },
                                 onClick = { menuExpanded = false; viewModel.openResourceManager() }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Configuración sesión…") },
+                                onClick = { menuExpanded = false; viewModel.openSessionConfig() }
                             )
                             HorizontalDivider()
                             DropdownMenuItem(
@@ -348,7 +366,13 @@ fun SessionScreen(
                 selectedDeckName = selectedDeckName,
                 deckRefsSize = uiState.deckRefs.size,
                 hasActiveTable = tablesUiState.activeTable != null,
-                onDraw = { viewModel.drawCard() },
+                expanded = fabExpanded,
+                isSimplifiedMode = uiState.isSimplifiedMode,
+                onToggleExpand = { fabExpanded = !fabExpanded },
+                onDraw = { fabExpanded = false; viewModel.drawCard() },
+                onPeek = { fabExpanded = false; viewModel.peekTopCard() },
+                onDeal = { fabExpanded = false; showDealDialog = true },
+                onShufflePile = { fabExpanded = false; viewModel.shufflePileBack(uiState.selectedDeckId) },
                 onRoll = {
                     val activeTable = tablesUiState.activeTable
                     if (activeTable != null) {
@@ -370,6 +394,15 @@ fun SessionScreen(
                 .padding(padding)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
+                if (uiState.deckRefs.size > 1) {
+                    DeckBar(
+                        deckRefs = uiState.deckRefs,
+                        deckNames = uiState.deckNames,
+                        deckCounts = uiState.deckCardCounts,
+                        selectedDeckId = uiState.selectedDeckId,
+                        onSelect = { viewModel.selectDeck(it) }
+                    )
+                }
                 // ── Tab Row ──────────────────────────────────────────────
                 TabRow(selectedTabIndex = pagerState.currentPage) {
                     Tab(
@@ -390,12 +423,17 @@ fun SessionScreen(
                     Tab(
                         selected = pagerState.currentPage == 3,
                         onClick = { coroutineScope.launch { pagerState.animateScrollToPage(3) } },
+                        text = { Text("Ref.") }
+                    )
+                    Tab(
+                        selected = pagerState.currentPage == 4,
+                        onClick = { coroutineScope.launch { pagerState.animateScrollToPage(4) } },
                         text = { Text("Notas") }
                     )
                     if (uiState.hasActiveEncounter) {
                         Tab(
-                            selected = pagerState.currentPage == 4,
-                            onClick = { coroutineScope.launch { pagerState.animateScrollToPage(4) } },
+                            selected = pagerState.currentPage == 5,
+                            onClick = { coroutineScope.launch { pagerState.animateScrollToPage(5) } },
                             text = { Text("Combate") }
                         )
                     }
@@ -414,7 +452,9 @@ fun SessionScreen(
                             onRevealCard = { viewModel.revealCard(it) },
                             onToggleCollapse = { viewModel.toggleDeckCollapse(it) },
                             onInteractWithDeck = { viewModel.setLastInteractedDeck(it) },
+                            onDrawFromDeck = { viewModel.drawCardFromDeck(it) },
                             onResetDeck = { viewModel.resetSingleDeck(it) },
+
                             onShuffle = { viewModel.shufflePileBack(it) },
                             onRollTable = { tablesViewModel.rollTable(it, uiState.session?.id) },
                             onManageResources = { viewModel.openResourceManager() }
@@ -430,12 +470,19 @@ fun SessionScreen(
                             onCreateTable = onCreateTable,
                             onImportTable = onImportTable
                         )
-                        3 -> NotesTab(
+                        3 -> ReferenceTab(
+                            sessionGameSystems = uiState.session?.gameSystems ?: emptyList(),
+                            onEditTable = onEditReferenceTable,
+                            onEditRule = onEditSystemRule,
+                            onNewTable = { onNewReferenceTable(uiState.session?.gameSystems?.firstOrNull() ?: "") },
+                            onNewRule = { onNewSystemRule(uiState.session?.gameSystems?.firstOrNull() ?: "") }
+                        )
+                        4 -> NotesTab(
                             notes = uiState.dmNotes,
                             isSaving = uiState.isSavingNotes,
                             onNotesChange = { viewModel.updateNotes(it) }
                         )
-                        4 -> uiState.activeEncounter?.let { encounter ->
+                        5 -> uiState.activeEncounter?.let { encounter ->
                             CombatTab(
                                 encounter = encounter,
                                 players = uiState.playerParticipants,
@@ -495,49 +542,83 @@ private fun SessionFab(
     selectedDeckName: String,
     deckRefsSize: Int,
     hasActiveTable: Boolean,
+    expanded: Boolean,
+    isSimplifiedMode: Boolean,
+    onToggleExpand: () -> Unit,
     onDraw: () -> Unit,
+    onPeek: () -> Unit,
+    onDeal: () -> Unit,
+    onShufflePile: () -> Unit,
     onRoll: () -> Unit,
     onNote: () -> Unit
 ) {
-    val (label, action) = when (currentPage) {
-        0 -> "ROBAR" to onDraw
-        1 -> "BARAJAR" to { onDraw() }
-        2 -> "TIRAR" to onRoll
-        3 -> "NOTA" to onNote
-        else -> "ROBAR" to onDraw
-    }
-    // En tab Tablas, el FAB se atenúa si no hay tabla activa para indicar que hay que seleccionar una
     val containerColor = if (currentPage == 2 && !hasActiveTable)
         MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
     else
         MaterialTheme.colorScheme.primary
 
-    LargeFloatingActionButton(
-        onClick = action,
-        shape = CircleShape,
-        containerColor = containerColor
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
-            if (currentPage == 0 && deckRefsSize > 1) {
-                Text(
-                    text = if (selectedDeckName.length > 12)
-                        selectedDeckName.take(12) + "…"
-                    else selectedDeckName,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
-                )
+    Box(contentAlignment = Alignment.BottomCenter) {
+        // Sub-acciones — solo en Tab 0 (Mazos) y si NO está en modo simplificado
+        AnimatedVisibility(
+            visible = currentPage == 0 && expanded && !isSimplifiedMode,
+            enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
+            exit  = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 })
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.padding(bottom = 96.dp)
+            ) {
+                SmallFabWithLabel(Icons.Default.Visibility, "Pico", onPeek)
+                SmallFabWithLabel(Icons.Default.Style, "Repartir", onDeal)
+                SmallFabWithLabel(Icons.Default.History, "Barajar descarte", onShufflePile)
             }
-            if (currentPage == 2 && hasActiveTable) {
+        }
+
+        // FAB principal
+        val label = when {
+            currentPage == 0 && expanded && !isSimplifiedMode -> "CERRAR"
+            currentPage == 0 -> "ROBAR"
+            currentPage == 1 -> "BARAJAR"
+            currentPage == 2 -> "TIRAR"
+            currentPage == 3 -> "NOTA"
+            else -> "ROBAR"
+        }
+        val primaryAction: () -> Unit = when {
+            currentPage == 0 && isSimplifiedMode -> onDraw
+            currentPage == 0 -> onToggleExpand
+            currentPage == 1 -> onDraw // "Barajar" reutiliza onDraw? Revisar SessionScreen call
+            currentPage == 2 -> onRoll
+            currentPage == 3 -> onNote
+            else -> onDraw
+        }
+
+        LargeFloatingActionButton(
+            onClick = primaryAction,
+            shape = CircleShape,
+            containerColor = containerColor
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = "tabla activa",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                    text = label,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
+                if (currentPage == 0 && deckRefsSize > 1 && !expanded) {
+                    Text(
+                        text = if (selectedDeckName.length > 12)
+                            selectedDeckName.take(12) + "…" else selectedDeckName,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                    )
+                }
+                if (currentPage == 2 && hasActiveTable) {
+                    Text(
+                        text = "tabla activa",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                    )
+                }
             }
         }
     }
@@ -555,6 +636,7 @@ private fun DeckWorkspace(
     onRevealCard: (cardId: Long) -> Unit,
     onToggleCollapse: (stackId: Long) -> Unit,
     onInteractWithDeck: (stackId: Long) -> Unit,
+    onDrawFromDeck: (stackId: Long) -> Unit,
     onResetDeck: (stackId: Long) -> Unit,
     onShuffle: (Long?) -> Unit,
     onRollTable: (Long) -> Unit,
@@ -605,9 +687,10 @@ private fun DeckWorkspace(
                         aspectRatio = uiState.deckAspectRatios[ref.stackId] ?: CardAspectRatio.STANDARD,
                         backImagePath = uiState.deckBackImages[ref.stackId],
                         sessionId = uiState.session?.id ?: 0L,
+                        isSimplifiedMode = uiState.isSimplifiedMode,
                         onToggleCollapse = { onToggleCollapse(ref.stackId) },
                         onInteract = { onInteractWithDeck(ref.stackId) },
-                        onReset = { onResetDeck(ref.stackId) },
+                        onDraw = { onDrawFromDeck(ref.stackId) },
                         onCardClick = onCardClick,
                         onDiscard = onDiscard,
                         onRevealCard = onRevealCard,
@@ -642,32 +725,15 @@ private fun DeckClusterItem(
     aspectRatio: CardAspectRatio,
     backImagePath: String?,
     sessionId: Long,
+    isSimplifiedMode: Boolean,
     onToggleCollapse: () -> Unit,
     onInteract: () -> Unit,
-    onReset: () -> Unit,
+    onDraw: () -> Unit,
     onCardClick: (cardId: Long, sessionId: Long) -> Unit,
     onDiscard: (cardId: Long) -> Unit,
     onRevealCard: (cardId: Long) -> Unit,
     onRollTable: (Long) -> Unit
 ) {
-    var showResetConfirm by remember { mutableStateOf(false) }
-
-    if (showResetConfirm) {
-        AlertDialog(
-            onDismissRequest = { showResetConfirm = false },
-            title = { Text("Resetear \"$deckName\"") },
-            text = { Text("Todas las cartas de \"$deckName\" volverán al mazo. ¿Continuar?") },
-            confirmButton = {
-                TextButton(onClick = { showResetConfirm = false; onReset() }) {
-                    Text("Resetear", color = MaterialTheme.colorScheme.error)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showResetConfirm = false }) { Text("Cancelar") }
-            }
-        )
-    }
-
     Surface(
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -678,7 +744,14 @@ private fun DeckClusterItem(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onToggleCollapse() }
+                    .clickable {
+                        if (isSimplifiedMode) {
+                            onDraw()
+                            onInteract()
+                        } else {
+                            onToggleCollapse()
+                        }
+                    }
                     .padding(start = 16.dp, end = 4.dp, top = 10.dp, bottom = 10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -698,30 +771,18 @@ private fun DeckClusterItem(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                // Botón de reset: visible solo si hay cartas fuera del mazo
-                if (cards.isNotEmpty()) {
+                if (!isSimplifiedMode) {
                     IconButton(
-                        onClick = { showResetConfirm = true },
+                        onClick = { onToggleCollapse() },
                         modifier = Modifier.size(36.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = "Resetear $deckName",
+                            imageVector = if (isCollapsed) Icons.Default.ExpandMore else Icons.Default.ExpandLess,
+                            contentDescription = if (isCollapsed) "Expandir" else "Colapsar",
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(20.dp)
                         )
                     }
-                }
-                IconButton(
-                    onClick = { onToggleCollapse() },
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        imageVector = if (isCollapsed) Icons.Default.ExpandMore else Icons.Default.ExpandLess,
-                        contentDescription = if (isCollapsed) "Expandir" else "Colapsar",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
-                    )
                 }
             }
 
@@ -743,12 +804,17 @@ private fun DeckClusterItem(
                                 color = MaterialTheme.colorScheme.outlineVariant,
                                 shape = RoundedCornerShape(8.dp)
                             )
-                            .clickable { onInteract() }
+                            .clickable {
+                                if (isSimplifiedMode) {
+                                    onDraw()
+                                }
+                                onInteract()
+                            }
                             .padding(vertical = 20.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            "Selecciona y pulsa ROBAR",
+                            if (isSimplifiedMode) "Pulsa para ROBAR" else "Selecciona y pulsa ROBAR",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -1658,6 +1724,36 @@ private fun DrawBySuitSheet(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun SmallFabWithLabel(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Surface(
+            shape = RoundedCornerShape(8.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            shadowElevation = 2.dp
+        ) {
+            Text(
+                text = label,
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                style = MaterialTheme.typography.labelMedium
+            )
+        }
+        SmallFloatingActionButton(
+            onClick = onClick,
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        ) {
+            Icon(icon, contentDescription = label, modifier = Modifier.size(20.dp))
         }
     }
 }

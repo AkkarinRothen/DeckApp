@@ -1,0 +1,3091 @@
+﻿{
+    "systemRuleTags":  [
+
+                       ],
+    "referenceTableTags":  [
+
+                           ],
+    "referenceRows":  [
+
+                      ],
+    "cardFaces":  [
+
+                  ],
+    "tableBundles":  [
+
+                     ],
+    "tableEntries":  [
+                         {
+                             "id":  1,
+                             "text":  "Sin encuentro. El bosque está en calma.",
+                             "tableId":  1,
+                             "sortOrder":  0,
+                             "maxRoll":  2,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  2,
+                             "text":  "[1d4+1] ciervos pastando.",
+                             "tableId":  1,
+                             "sortOrder":  1,
+                             "maxRoll":  4,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  3,
+                             "text":  "Una manada de [1d4+1] lobos observa desde las sombras.",
+                             "tableId":  1,
+                             "sortOrder":  2,
+                             "maxRoll":  6,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  4,
+                             "text":  "[1d3] bandidos emboscadores (@Nombre Humano Masculino les lidera).",
+                             "tableId":  1,
+                             "sortOrder":  3,
+                             "maxRoll":  8,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5,
+                             "text":  "Una dríada emerge de un roble centenario. Parece hostil.",
+                             "tableId":  1,
+                             "sortOrder":  4,
+                             "maxRoll":  10,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  6,
+                             "text":  "[1d3] trolls de bosque hambrientos.",
+                             "tableId":  1,
+                             "sortOrder":  5,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  7,
+                             "text":  "Un dragón verde juvenil aterriza bloqueando el camino.",
+                             "tableId":  1,
+                             "sortOrder":  6,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  8,
+                             "text":  "Sin encuentro. Silencio sepulcral.",
+                             "tableId":  2,
+                             "sortOrder":  7,
+                             "maxRoll":  3,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  9,
+                             "text":  "[1d6+2] ratas gigantes.",
+                             "tableId":  2,
+                             "sortOrder":  8,
+                             "maxRoll":  5,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10,
+                             "text":  "[1d4] esqueletos patrullando.",
+                             "tableId":  2,
+                             "sortOrder":  9,
+                             "maxRoll":  7,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  11,
+                             "text":  "[1d3] zombis. Huele fatal.",
+                             "tableId":  2,
+                             "sortOrder":  10,
+                             "maxRoll":  9,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  12,
+                             "text":  "[2d4] goblins merodeadores.",
+                             "tableId":  2,
+                             "sortOrder":  11,
+                             "maxRoll":  11,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  13,
+                             "text":  "Un hombre araña acecha el techo.",
+                             "tableId":  2,
+                             "sortOrder":  12,
+                             "maxRoll":  13,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  14,
+                             "text":  "[1d3] ogros. Están comiendo.",
+                             "tableId":  2,
+                             "sortOrder":  13,
+                             "maxRoll":  15,
+                             "minRoll":  14,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15,
+                             "text":  "Un gelatinoso cubo llena el pasillo.",
+                             "tableId":  2,
+                             "sortOrder":  14,
+                             "maxRoll":  17,
+                             "minRoll":  16,
+                             "weight":  1
+                         },
+                         {
+                             "id":  16,
+                             "text":  "Un vampiro menor busca sangre fresca.",
+                             "tableId":  2,
+                             "sortOrder":  15,
+                             "maxRoll":  19,
+                             "minRoll":  18,
+                             "weight":  1
+                         },
+                         {
+                             "id":  17,
+                             "text":  "Un lich. Muy furioso por la intrusión.",
+                             "tableId":  2,
+                             "sortOrder":  16,
+                             "maxRoll":  20,
+                             "minRoll":  20,
+                             "weight":  1
+                         },
+                         {
+                             "id":  18,
+                             "text":  "Sin encuentro. El camino está despejado.",
+                             "tableId":  3,
+                             "sortOrder":  17,
+                             "maxRoll":  2,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  19,
+                             "text":  "Una caravana de mercaderes busca escolta por [1d6] monedas de plata.",
+                             "tableId":  3,
+                             "sortOrder":  18,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  20,
+                             "text":  "[1d4+2] bandidos en un falso retén de peaje.",
+                             "tableId":  3,
+                             "sortOrder":  19,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  21,
+                             "text":  "Un viajero herido al borde del camino. (@Nombre Humano Femenino, posible trampa.)",
+                             "tableId":  3,
+                             "sortOrder":  20,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  22,
+                             "text":  "Patrulla de soldados. Piden documentos o impuesto de camino.",
+                             "tableId":  3,
+                             "sortOrder":  21,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  23,
+                             "text":  "Un caballo sin jinete, con sillas y alforjas aún puestas.",
+                             "tableId":  3,
+                             "sortOrder":  22,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  24,
+                             "text":  "Un peregrino fanático que da sermones a quien le escuche.",
+                             "tableId":  3,
+                             "sortOrder":  23,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  25,
+                             "text":  "[1d3] ogros robando un carro volcado.",
+                             "tableId":  3,
+                             "sortOrder":  24,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  26,
+                             "text":  "Un mago errante que necesita ingredientes raros. Podría ser aliado.",
+                             "tableId":  3,
+                             "sortOrder":  25,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  27,
+                             "text":  "Sin encuentro. Viento frío y silencio.",
+                             "tableId":  4,
+                             "sortOrder":  26,
+                             "maxRoll":  2,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  28,
+                             "text":  "[1d4] águilas gigantes circulan en lo alto.",
+                             "tableId":  4,
+                             "sortOrder":  27,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  29,
+                             "text":  "Alud de piedras. Prueba de destreza o [2d6] de daño contundente.",
+                             "tableId":  4,
+                             "sortOrder":  28,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  30,
+                             "text":  "[2d4] kobolds mineros que defienden su veta de hierro.",
+                             "tableId":  4,
+                             "sortOrder":  29,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  31,
+                             "text":  "Un gigante de piedra dormido en el camino. Despertarlo es peligroso.",
+                             "tableId":  4,
+                             "sortOrder":  30,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  32,
+                             "text":  "Una cueva con señales de ocupación reciente. Fuego aún caliente.",
+                             "tableId":  4,
+                             "sortOrder":  31,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  33,
+                             "text":  "[1d3] grifos cazando. Los personajes son presa potencial.",
+                             "tableId":  4,
+                             "sortOrder":  32,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  34,
+                             "text":  "Un ermitaño enano con un mapa fragmentado. Desconfía de extraños.",
+                             "tableId":  4,
+                             "sortOrder":  33,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  35,
+                             "text":  "Un dragón plateado anciano que quiere ser entretenido con historias.",
+                             "tableId":  4,
+                             "sortOrder":  34,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  36,
+                             "text":  "Sin encuentro. Solo croar de ranas y niebla.",
+                             "tableId":  5,
+                             "sortOrder":  35,
+                             "maxRoll":  2,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  37,
+                             "text":  "[1d6] ranas toro gigantes.",
+                             "tableId":  5,
+                             "sortOrder":  36,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  38,
+                             "text":  "Una víbora pantanosa de enorme tamaño. Se camufla en el barro.",
+                             "tableId":  5,
+                             "sortOrder":  37,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  39,
+                             "text":  "[1d4] fuegos fatuos. Intentan guiar a los personajes a arenas movedizas.",
+                             "tableId":  5,
+                             "sortOrder":  38,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  40,
+                             "text":  "[2d4] lizardfolk pescando. Territoriales con los intrusos.",
+                             "tableId":  5,
+                             "sortOrder":  39,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  41,
+                             "text":  "Una bruja con cabaña flotante. Comercia con favores y secretos.",
+                             "tableId":  5,
+                             "sortOrder":  40,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  42,
+                             "text":  "Arenas movedizas. El personaje en cabeza debe superar una prueba o hundirse.",
+                             "tableId":  5,
+                             "sortOrder":  41,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  43,
+                             "text":  "Un hydra de [1d4+3] cabezas emerge del agua estancada.",
+                             "tableId":  5,
+                             "sortOrder":  42,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  44,
+                             "text":  "Un dragón negro joven acecha desde debajo del agua negra.",
+                             "tableId":  5,
+                             "sortOrder":  43,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  45,
+                             "text":  "Sin encuentro. Día tranquilo en la ciudad.",
+                             "tableId":  6,
+                             "sortOrder":  44,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  46,
+                             "text":  "Un carterista intenta robar a un personaje. Prueba de percepción para notarlo.",
+                             "tableId":  6,
+                             "sortOrder":  45,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  47,
+                             "text":  "Una pelea de taberna derrama participantes a la calle.",
+                             "tableId":  6,
+                             "sortOrder":  46,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  48,
+                             "text":  "Un guardia corrupto exige un \u0027impuesto\u0027 por circular armados.",
+                             "tableId":  6,
+                             "sortOrder":  47,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  49,
+                             "text":  "Un mensajero entrega una carta a un personaje. No es para ellos.",
+                             "tableId":  6,
+                             "sortOrder":  48,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  50,
+                             "text":  "Un culto menor hace una procesión ruidosa. Bloquea el camino 10 minutos.",
+                             "tableId":  6,
+                             "sortOrder":  49,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  51,
+                             "text":  "Alguien reconoce a un personaje y no parece contento de verle.",
+                             "tableId":  6,
+                             "sortOrder":  50,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  52,
+                             "text":  "Un noble en litera choca contra el grupo. Sus guardias son intimidantes.",
+                             "tableId":  6,
+                             "sortOrder":  51,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  53,
+                             "text":  "Un asesino gremial sigue al grupo desde las sombras.",
+                             "tableId":  6,
+                             "sortOrder":  52,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  54,
+                             "text":  "Toque de queda. Los guardias detienen a todo el que esté en la calle.",
+                             "tableId":  6,
+                             "sortOrder":  53,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  55,
+                             "text":  "Sin encuentro. Mar en calma.",
+                             "tableId":  7,
+                             "sortOrder":  54,
+                             "maxRoll":  2,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  56,
+                             "text":  "Barco pirata en el horizonte. Se acerca a velocidad.",
+                             "tableId":  7,
+                             "sortOrder":  55,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  57,
+                             "text":  "Banco de sirenas. Su canto afecta a la tripulación.",
+                             "tableId":  7,
+                             "sortOrder":  56,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  58,
+                             "text":  "[1d3] tiburones gigantes acosan el casco.",
+                             "tableId":  7,
+                             "sortOrder":  57,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  59,
+                             "text":  "Barco fantasma a la deriva. Sin tripulación visible.",
+                             "tableId":  7,
+                             "sortOrder":  58,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  60,
+                             "text":  "Tormenta repentina. [2d6] de daño al casco si no se navega correctamente.",
+                             "tableId":  7,
+                             "sortOrder":  59,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  61,
+                             "text":  "Un kraken joven emerge bajo el barco. Hambriento.",
+                             "tableId":  7,
+                             "sortOrder":  60,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  62,
+                             "text":  "Despejado y soleado. Temperatura agradable.",
+                             "tableId":  8,
+                             "sortOrder":  61,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  63,
+                             "text":  "Nublado. Luz difusa sin sombras.",
+                             "tableId":  8,
+                             "sortOrder":  62,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  64,
+                             "text":  "Llovizna persistente. El camino se vuelve barro.",
+                             "tableId":  8,
+                             "sortOrder":  63,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  65,
+                             "text":  "Tormenta con truenos. Visibilidad reducida.",
+                             "tableId":  8,
+                             "sortOrder":  64,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  66,
+                             "text":  "Niebla espesa. Visibilidad [1d4+1] metros.",
+                             "tableId":  8,
+                             "sortOrder":  65,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  67,
+                             "text":  "Tormenta eléctrica severa. Peligro de rayo.",
+                             "tableId":  8,
+                             "sortOrder":  66,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  68,
+                             "text":  "Sol de invierno. Frío pero sin viento. Sombras largas.",
+                             "tableId":  9,
+                             "sortOrder":  67,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  69,
+                             "text":  "Cielo plomizo. Parece que va a nevar.",
+                             "tableId":  9,
+                             "sortOrder":  68,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  70,
+                             "text":  "Nevada ligera. El suelo se cubre en horas.",
+                             "tableId":  9,
+                             "sortOrder":  69,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  71,
+                             "text":  "Ventisca moderada. El movimiento se reduce a la mitad.",
+                             "tableId":  9,
+                             "sortOrder":  70,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  72,
+                             "text":  "Hielo en el camino. Cada hora, prueba de equilibrio o caída.",
+                             "tableId":  9,
+                             "sortOrder":  71,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  73,
+                             "text":  "Ventisca severa. Sin refugio = 1d4 de daño frío por hora.",
+                             "tableId":  9,
+                             "sortOrder":  72,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  74,
+                             "text":  "Nieve profunda (1 metro). Avanzar sin equipo es imposible.",
+                             "tableId":  9,
+                             "sortOrder":  73,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  75,
+                             "text":  "Tormenta ártica. Visibilidad nula. Hipotermia en 30 minutos.",
+                             "tableId":  9,
+                             "sortOrder":  74,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  76,
+                             "text":  "Mar en calma. Viento favorable.",
+                             "tableId":  10,
+                             "sortOrder":  75,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  77,
+                             "text":  "Brisa suave. Navegación fácil.",
+                             "tableId":  10,
+                             "sortOrder":  76,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  78,
+                             "text":  "Niebla costera espesa. Navegación a ciegas.",
+                             "tableId":  10,
+                             "sortOrder":  77,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  79,
+                             "text":  "Viento fuerte. Las velas se llenan pero el barco balancea.",
+                             "tableId":  10,
+                             "sortOrder":  78,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  80,
+                             "text":  "Mar picada. Los marineros inexpertos se marean.",
+                             "tableId":  10,
+                             "sortOrder":  79,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  81,
+                             "text":  "Tormenta eléctrica. Riesgo para el mástil.",
+                             "tableId":  10,
+                             "sortOrder":  80,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  82,
+                             "text":  "Tempestad. El barco pierde [1d6] horas de ruta.",
+                             "tableId":  10,
+                             "sortOrder":  81,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  83,
+                             "text":  "Huracán. Tirada de navegación o el barco sufre daño crítico.",
+                             "tableId":  10,
+                             "sortOrder":  82,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  84,
+                             "text":  "El camino se bifurca. El mapa es ambiguo. ¿Cuál toman?",
+                             "tableId":  11,
+                             "sortOrder":  83,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  85,
+                             "text":  "Una montura se niega a avanzar. Huele algo que los humanos no pueden detectar.",
+                             "tableId":  11,
+                             "sortOrder":  84,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  86,
+                             "text":  "El proveedor de raciones del grupo tenía la comida en mal estado. -1 ración.",
+                             "tableId":  11,
+                             "sortOrder":  85,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  87,
+                             "text":  "Encuentran los restos de un campamento reciente. Alguien pasó aquí hace horas.",
+                             "tableId":  11,
+                             "sortOrder":  86,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  88,
+                             "text":  "Una fosa común no marcada al borde del camino. Reciente.",
+                             "tableId":  11,
+                             "sortOrder":  87,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  89,
+                             "text":  "Un puente está destruido. Hay que buscar un vado (+2 horas).",
+                             "tableId":  11,
+                             "sortOrder":  88,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  90,
+                             "text":  "Un altar olvidado en el bosque. Aún tiene ofrendas frescas.",
+                             "tableId":  11,
+                             "sortOrder":  89,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  91,
+                             "text":  "Un cartel de madera pintado: \u0027NO CONTINÚES\u0027. Sin firma.",
+                             "tableId":  11,
+                             "sortOrder":  90,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  92,
+                             "text":  "El terreno es ideal para una emboscada. Pueden preparar una trampa para seguidores.",
+                             "tableId":  11,
+                             "sortOrder":  91,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  93,
+                             "text":  "Ven a lo lejos humo negro. ¿Aldea en llamas? ¿Señal?",
+                             "tableId":  11,
+                             "sortOrder":  92,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  94,
+                             "text":  "Alguien escucha pasos alrededor del campamento. Se detienen al acercarse.",
+                             "tableId":  12,
+                             "sortOrder":  93,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  95,
+                             "text":  "Las llamas del fuego se apagan sin viento ni causa aparente.",
+                             "tableId":  12,
+                             "sortOrder":  94,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  96,
+                             "text":  "Un personaje tiene una pesadilla vívida. Despierta con 1 nivel de agotamiento.",
+                             "tableId":  12,
+                             "sortOrder":  95,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  97,
+                             "text":  "Algo robó una ración de comida durante la noche. Sin rastro claro.",
+                             "tableId":  12,
+                             "sortOrder":  96,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  98,
+                             "text":  "La guardia se queda dormida. Nadie vigiló por 2 horas.",
+                             "tableId":  12,
+                             "sortOrder":  97,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  99,
+                             "text":  "Una voz susurra en la oscuridad. Parece llamar por nombre a alguien del grupo.",
+                             "tableId":  12,
+                             "sortOrder":  98,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  100,
+                             "text":  "Lluvia repentina apaga el fuego. Mañana el grupo está empapado y frío.",
+                             "tableId":  12,
+                             "sortOrder":  99,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  101,
+                             "text":  "El cielo se ilumina con algo que no es un rayo. Al sur. Lejos.",
+                             "tableId":  12,
+                             "sortOrder":  100,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  102,
+                             "text":  "Una bolsa de monedas (3d6 gp). El dueño puede aparecer.",
+                             "tableId":  13,
+                             "sortOrder":  101,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  103,
+                             "text":  "Cadáver de un mensajero con alforjas aún selladas.",
+                             "tableId":  13,
+                             "sortOrder":  102,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  104,
+                             "text":  "Un caballo atado solo. Bien cuidado. Sin nombre visible.",
+                             "tableId":  13,
+                             "sortOrder":  103,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  105,
+                             "text":  "Ropa abandonada en el barro. Incluye una capa de noble.",
+                             "tableId":  13,
+                             "sortOrder":  104,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  106,
+                             "text":  "Un libro mojado y casi ilegible. Contiene notas en código.",
+                             "tableId":  13,
+                             "sortOrder":  105,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  107,
+                             "text":  "Un niño solo. Dice que su pueblo está \u0027vacío\u0027.",
+                             "tableId":  13,
+                             "sortOrder":  106,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  108,
+                             "text":  "Marcas de garras enormes en los árboles del camino.",
+                             "tableId":  13,
+                             "sortOrder":  107,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  109,
+                             "text":  "Una trampa para animales activa con algo atrapado.",
+                             "tableId":  13,
+                             "sortOrder":  108,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  110,
+                             "text":  "Un carromato volcado. Las mercancías siguen ahí.",
+                             "tableId":  13,
+                             "sortOrder":  109,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  111,
+                             "text":  "Una piedra con runas antiguas clavada en el suelo. Palpita con calor.",
+                             "tableId":  13,
+                             "sortOrder":  110,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  112,
+                             "text":  "Sala vacía. Signos de ocupación antigua: cenizas, huesos de animales.",
+                             "tableId":  14,
+                             "sortOrder":  111,
+                             "maxRoll":  2,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  113,
+                             "text":  "Guardia dormida de [1d4] criaturas del nivel actual.",
+                             "tableId":  14,
+                             "sortOrder":  112,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  114,
+                             "text":  "Un prisionero encadenado. Asustado. Tiene información.",
+                             "tableId":  14,
+                             "sortOrder":  113,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  115,
+                             "text":  "Almacén: comida en mal estado, herramientas oxidadas, barriles vacíos.",
+                             "tableId":  14,
+                             "sortOrder":  114,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  116,
+                             "text":  "Trampa activa sin monstruo. (@Trampa de Mazmorra)",
+                             "tableId":  14,
+                             "sortOrder":  115,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  117,
+                             "text":  "Altar abandonado. Aún emana un débil aura mágica.",
+                             "tableId":  14,
+                             "sortOrder":  116,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  118,
+                             "text":  "Habitación inundada hasta los tobillos. Algo se mueve bajo el agua.",
+                             "tableId":  14,
+                             "sortOrder":  117,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  119,
+                             "text":  "Sala de tortura en desuso. El torturador sigue aquí, muerto.",
+                             "tableId":  14,
+                             "sortOrder":  118,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  120,
+                             "text":  "Biblioteca pequeña. [1d4] libros legibles quedan.",
+                             "tableId":  14,
+                             "sortOrder":  119,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  121,
+                             "text":  "Portal inactivo. Las inscripciones describen a dónde llevaba.",
+                             "tableId":  14,
+                             "sortOrder":  120,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  122,
+                             "text":  "El jefe local. En plena reunión con [1d4] tenientes.",
+                             "tableId":  14,
+                             "sortOrder":  121,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  123,
+                             "text":  "Suelo hundible: [1d3] PJs caen [2d6] metros a una sala inferior.",
+                             "tableId":  15,
+                             "sortOrder":  122,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  124,
+                             "text":  "Dardos envenenados en la pared. [2d4] daño + veneno (CD 13 CON).",
+                             "tableId":  15,
+                             "sortOrder":  123,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  125,
+                             "text":  "Hoja giratoria oculta en el dintel. [3d6] tajo al que cruce.",
+                             "tableId":  15,
+                             "sortOrder":  124,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  126,
+                             "text":  "Gas somnífero: CD 14 CON o queda inconsciente 1 hora.",
+                             "tableId":  15,
+                             "sortOrder":  125,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  127,
+                             "text":  "Sala que se cierra herméticamente. El aire se agota en 10 minutos.",
+                             "tableId":  15,
+                             "sortOrder":  126,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  128,
+                             "text":  "Runa de alarma: activa a las criaturas del área en [1d4] turnos.",
+                             "tableId":  15,
+                             "sortOrder":  127,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  129,
+                             "text":  "Suelo de pinchos ocultos: [2d6] daño perforante al primer paso.",
+                             "tableId":  15,
+                             "sortOrder":  128,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  130,
+                             "text":  "Bola de fuego mágica al abrir el cofre. [4d6] fuego, CD 14 DES mitad.",
+                             "tableId":  15,
+                             "sortOrder":  129,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  131,
+                             "text":  "Techo descendente. 3 rondas para escapar o sufrir [8d6] aplastamiento.",
+                             "tableId":  15,
+                             "sortOrder":  130,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  132,
+                             "text":  "Trampa de ilusión: el pasillo parece sin fin. En realidad da círculos.",
+                             "tableId":  15,
+                             "sortOrder":  131,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  133,
+                             "text":  "Silencio absoluto. Ni el eco de los pasos propios.",
+                             "tableId":  16,
+                             "sortOrder":  132,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  134,
+                             "text":  "Goteo constante de agua. Viene de todos lados.",
+                             "tableId":  16,
+                             "sortOrder":  133,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  135,
+                             "text":  "Rasguños en la piedra. Rítmicos. Se acercan.",
+                             "tableId":  16,
+                             "sortOrder":  134,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  136,
+                             "text":  "Voces apagadas al otro lado del muro. En un idioma conocido.",
+                             "tableId":  16,
+                             "sortOrder":  135,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  137,
+                             "text":  "Un llanto de niño lejano. Intermitente.",
+                             "tableId":  16,
+                             "sortOrder":  136,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  138,
+                             "text":  "Viento que no debería existir a esta profundidad.",
+                             "tableId":  16,
+                             "sortOrder":  137,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  139,
+                             "text":  "Cadenas arrastrándose. Pesadas.",
+                             "tableId":  16,
+                             "sortOrder":  138,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  140,
+                             "text":  "Un tambor lejano con ritmo tribal.",
+                             "tableId":  16,
+                             "sortOrder":  139,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  141,
+                             "text":  "El zumbido de algo arcano. Las antorchas tiemblan.",
+                             "tableId":  16,
+                             "sortOrder":  140,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  142,
+                             "text":  "Pisadas enormes que hacen vibrar el suelo.",
+                             "tableId":  16,
+                             "sortOrder":  141,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  143,
+                             "text":  "Risas. Muchas. Se detienen cuando el grupo para.",
+                             "tableId":  16,
+                             "sortOrder":  142,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  144,
+                             "text":  "El nombre de un PJ, susurrado por algo invisible.",
+                             "tableId":  16,
+                             "sortOrder":  143,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  145,
+                             "text":  "Podredumbre y carne en descomposición.",
+                             "tableId":  17,
+                             "sortOrder":  144,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  146,
+                             "text":  "Azufre. Señal de actividad volcánica o demoníaca.",
+                             "tableId":  17,
+                             "sortOrder":  145,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  147,
+                             "text":  "Incienso quemado recientemente.",
+                             "tableId":  17,
+                             "sortOrder":  146,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  148,
+                             "text":  "Humedad y musgo. Como una cueva natural.",
+                             "tableId":  17,
+                             "sortOrder":  147,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  149,
+                             "text":  "Sangre fresca. Muy fresca.",
+                             "tableId":  17,
+                             "sortOrder":  148,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  150,
+                             "text":  "Ozono: presencia de magia eléctrica o tormenta.",
+                             "tableId":  17,
+                             "sortOrder":  149,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  151,
+                             "text":  "Comida cocinada. Extrañamente reconfortante.",
+                             "tableId":  17,
+                             "sortOrder":  150,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  152,
+                             "text":  "Nada. Aire esterilizado y sin olor. Inquietante.",
+                             "tableId":  17,
+                             "sortOrder":  151,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  153,
+                             "text":  "Catacumbas reales de una dinastía olvidada.",
+                             "tableId":  18,
+                             "sortOrder":  152,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  154,
+                             "text":  "Laboratorio arcano de un mago que buscaba la inmortalidad.",
+                             "tableId":  18,
+                             "sortOrder":  153,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  155,
+                             "text":  "Templo subterráneo a un dios ahora prohibido.",
+                             "tableId":  18,
+                             "sortOrder":  154,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  156,
+                             "text":  "Prisión de alta seguridad para presos políticos.",
+                             "tableId":  18,
+                             "sortOrder":  155,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  157,
+                             "text":  "Almacén secreto de un gremio de contrabandistas.",
+                             "tableId":  18,
+                             "sortOrder":  156,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  158,
+                             "text":  "Refugio construido antes de una guerra que nunca llegó.",
+                             "tableId":  18,
+                             "sortOrder":  157,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  159,
+                             "text":  "Mina abandonada que resultó ser algo más.",
+                             "tableId":  18,
+                             "sortOrder":  158,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  160,
+                             "text":  "Residencia subterránea de una raza no humana expulsada.",
+                             "tableId":  18,
+                             "sortOrder":  159,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  161,
+                             "text":  "Instalación de contención para algo que no debía salir.",
+                             "tableId":  18,
+                             "sortOrder":  160,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  162,
+                             "text":  "Fortaleza militar que cayó desde dentro.",
+                             "tableId":  18,
+                             "sortOrder":  161,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  163,
+                             "text":  "Inundación parcial: el agua llega a las rodillas. Movimiento reducido.",
+                             "tableId":  19,
+                             "sortOrder":  162,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  164,
+                             "text":  "Gas tóxico: [1d4] daño de veneno por turno sin protección.",
+                             "tableId":  19,
+                             "sortOrder":  163,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  165,
+                             "text":  "Oscuridad mágica: ninguna fuente de luz funciona aquí.",
+                             "tableId":  19,
+                             "sortOrder":  164,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  166,
+                             "text":  "Suelo inestable: cada turno, CD 12 DES o caer prono.",
+                             "tableId":  19,
+                             "sortOrder":  165,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  167,
+                             "text":  "Calor extremo: 1 nivel de agotamiento por hora sin resistencia al fuego.",
+                             "tableId":  19,
+                             "sortOrder":  166,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  168,
+                             "text":  "Hongos alucinógenos: CD 13 CON o tener visiones por 1 hora.",
+                             "tableId":  19,
+                             "sortOrder":  167,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  169,
+                             "text":  "Campo antimagia localizado en esta sala.",
+                             "tableId":  19,
+                             "sortOrder":  168,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  170,
+                             "text":  "Telarañas densas de araña gigante: movimiento a la mitad, fácilmente inflamables.",
+                             "tableId":  19,
+                             "sortOrder":  169,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  171,
+                             "text":  "Hex vacío. Solo terreno natural sin rasgos especiales.",
+                             "tableId":  20,
+                             "sortOrder":  170,
+                             "maxRoll":  3,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  172,
+                             "text":  "Señal de paso: camino viejo, piedras apiladas, tronco tallado.",
+                             "tableId":  20,
+                             "sortOrder":  171,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  173,
+                             "text":  "Recurso natural: agua limpia, frutos abundantes, piedra de construcción.",
+                             "tableId":  20,
+                             "sortOrder":  172,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  174,
+                             "text":  "Encuentro activo. (@Encuentro según terreno del hex)",
+                             "tableId":  20,
+                             "sortOrder":  173,
+                             "maxRoll":  7,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  175,
+                             "text":  "Ruinas menores: estructura caída, pozo seco, altar abandonado.",
+                             "tableId":  20,
+                             "sortOrder":  174,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  176,
+                             "text":  "Punto de interés notable. (@Punto de Interés en Hex)",
+                             "tableId":  20,
+                             "sortOrder":  175,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  177,
+                             "text":  "Asentamiento menor: aldea pequeña, granja aislada, campamento nómada.",
+                             "tableId":  20,
+                             "sortOrder":  176,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  178,
+                             "text":  "Peligro ambiental: terreno tramposo, niebla permanente, zona maldita.",
+                             "tableId":  20,
+                             "sortOrder":  177,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  179,
+                             "text":  "Lugar único: mazmorra, ruinas mayores, fortaleza, portal extraplanar.",
+                             "tableId":  20,
+                             "sortOrder":  178,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  180,
+                             "text":  "Bosque templado. Movimiento reducido. Cobertura abundante.",
+                             "tableId":  21,
+                             "sortOrder":  179,
+                             "maxRoll":  2,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  181,
+                             "text":  "Bosque denso/selva. Movimiento muy reducido. Orientación difícil.",
+                             "tableId":  21,
+                             "sortOrder":  180,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  182,
+                             "text":  "Llanura o pradera. Movimiento máximo. Sin cobertura.",
+                             "tableId":  21,
+                             "sortOrder":  181,
+                             "maxRoll":  5,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  183,
+                             "text":  "Colinas. Movimiento reducido. Vistas lejanas desde las cimas.",
+                             "tableId":  21,
+                             "sortOrder":  182,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  184,
+                             "text":  "Montaña. Movimiento muy reducido. Peligros de altitud.",
+                             "tableId":  21,
+                             "sortOrder":  183,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  185,
+                             "text":  "Pantano o marisma. Movimiento muy reducido. Riesgo de enfermedad.",
+                             "tableId":  21,
+                             "sortOrder":  184,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  186,
+                             "text":  "Desierto o baldío árido. Peligro de calor. Agua escasa.",
+                             "tableId":  21,
+                             "sortOrder":  185,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  187,
+                             "text":  "Costa, ribera o delta. Navegable por agua. Recursos pesqueros.",
+                             "tableId":  21,
+                             "sortOrder":  186,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  188,
+                             "text":  "Tundra o estepa fría. Viento constante. Forrajeo difícil.",
+                             "tableId":  21,
+                             "sortOrder":  187,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  189,
+                             "text":  "Terreno volcánico o baldío mágico. Hostil y extraño.",
+                             "tableId":  21,
+                             "sortOrder":  188,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  190,
+                             "text":  "Torre solitaria en ruinas. Algo vive en el piso superior.",
+                             "tableId":  22,
+                             "sortOrder":  189,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  191,
+                             "text":  "Círculo de piedras druídico. Activo en luna llena.",
+                             "tableId":  22,
+                             "sortOrder":  190,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  192,
+                             "text":  "Mina abandonada con su cartel de advertencia aún en pie.",
+                             "tableId":  22,
+                             "sortOrder":  191,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  193,
+                             "text":  "Aldea fantasma. Las casas están intactas pero vacías desde hace décadas.",
+                             "tableId":  22,
+                             "sortOrder":  192,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  194,
+                             "text":  "Campo de batalla antiguo. Los huesos aún están. Algo los protege.",
+                             "tableId":  22,
+                             "sortOrder":  193,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  195,
+                             "text":  "Monolito de piedra con inscripciones en una lengua perdida.",
+                             "tableId":  22,
+                             "sortOrder":  194,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  196,
+                             "text":  "Cueva poco profunda usada como refugio por algo grande.",
+                             "tableId":  22,
+                             "sortOrder":  195,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  197,
+                             "text":  "Lago con isla central y una estructura visible desde la orilla.",
+                             "tableId":  22,
+                             "sortOrder":  196,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  198,
+                             "text":  "Árbol enorme, más viejo que cualquier civilización conocida.",
+                             "tableId":  22,
+                             "sortOrder":  197,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  199,
+                             "text":  "Santuario de viajero con ofrendas recientes.",
+                             "tableId":  22,
+                             "sortOrder":  198,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  200,
+                             "text":  "Puente antiguo sobre río profundo. El único en kilómetros.",
+                             "tableId":  22,
+                             "sortOrder":  199,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  201,
+                             "text":  "Entrada sellada a catacumbas. El sello está casi roto.",
+                             "tableId":  22,
+                             "sortOrder":  200,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  202,
+                             "text":  "Campamento permanente de bandidos o merodeadores.",
+                             "tableId":  22,
+                             "sortOrder":  201,
+                             "maxRoll":  13,
+                             "minRoll":  13,
+                             "weight":  1
+                         },
+                         {
+                             "id":  203,
+                             "text":  "Templo en ruinas de un dios ya olvidado.",
+                             "tableId":  22,
+                             "sortOrder":  202,
+                             "maxRoll":  14,
+                             "minRoll":  14,
+                             "weight":  1
+                         },
+                         {
+                             "id":  204,
+                             "text":  "Pozo de agua que nunca se seca, incluso en sequía.",
+                             "tableId":  22,
+                             "sortOrder":  203,
+                             "maxRoll":  15,
+                             "minRoll":  15,
+                             "weight":  1
+                         },
+                         {
+                             "id":  205,
+                             "text":  "Granja incendiada hace poco. Las huellas van hacia el bosque.",
+                             "tableId":  22,
+                             "sortOrder":  204,
+                             "maxRoll":  16,
+                             "minRoll":  16,
+                             "weight":  1
+                         },
+                         {
+                             "id":  206,
+                             "text":  "Cruce de caminos con una horca usada recientemente.",
+                             "tableId":  22,
+                             "sortOrder":  205,
+                             "maxRoll":  17,
+                             "minRoll":  17,
+                             "weight":  1
+                         },
+                         {
+                             "id":  207,
+                             "text":  "Campamento de exploradores o cartógrafos con mapas parciales.",
+                             "tableId":  22,
+                             "sortOrder":  206,
+                             "maxRoll":  18,
+                             "minRoll":  18,
+                             "weight":  1
+                         },
+                         {
+                             "id":  208,
+                             "text":  "Cueva con pinturas prehistóricas que muestran algo monstruoso.",
+                             "tableId":  22,
+                             "sortOrder":  207,
+                             "maxRoll":  19,
+                             "minRoll":  19,
+                             "weight":  1
+                         },
+                         {
+                             "id":  209,
+                             "text":  "Portal extraplanar inactivo. Rezuma energía arcana débil.",
+                             "tableId":  22,
+                             "sortOrder":  208,
+                             "maxRoll":  20,
+                             "minRoll":  20,
+                             "weight":  1
+                         },
+                         {
+                             "id":  210,
+                             "text":  "Sin consecuencias. El grupo nota el error y se corrige.",
+                             "tableId":  23,
+                             "sortOrder":  209,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  211,
+                             "text":  "Desvío menor: llegan a un hex adyacente al destino sin saberlo.",
+                             "tableId":  23,
+                             "sortOrder":  210,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  212,
+                             "text":  "Pierden 4 horas dando vueltas antes de orientarse.",
+                             "tableId":  23,
+                             "sortOrder":  211,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  213,
+                             "text":  "Se desvían dos hexes del destino. El DM no revela la posición.",
+                             "tableId":  23,
+                             "sortOrder":  212,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  214,
+                             "text":  "Se adentran en un hex peligroso sin haberlo planeado.",
+                             "tableId":  23,
+                             "sortOrder":  213,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  215,
+                             "text":  "Completamente perdidos. El DM recoloca al grupo en el mapa en secreto.",
+                             "tableId":  23,
+                             "sortOrder":  214,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  216,
+                             "text":  "Rastro fresco de una criatura grande. Hace menos de dos horas.",
+                             "tableId":  24,
+                             "sortOrder":  215,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  217,
+                             "text":  "El terreno cambia: aparece un barranco o pantano no marcado en el mapa.",
+                             "tableId":  24,
+                             "sortOrder":  216,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  218,
+                             "text":  "Viajero perdido encontrado. Tiene información valiosa del hex siguiente.",
+                             "tableId":  24,
+                             "sortOrder":  217,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  219,
+                             "text":  "Hallazgo enterrado: monedas viejas, fragmento de arma, placa de identificación.",
+                             "tableId":  24,
+                             "sortOrder":  218,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  220,
+                             "text":  "El tiempo empeora súbitamente. (@Clima según la región)",
+                             "tableId":  24,
+                             "sortOrder":  219,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  221,
+                             "text":  "Señales de conflicto reciente: sangre, armas rotas, tierra removida.",
+                             "tableId":  24,
+                             "sortOrder":  220,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  222,
+                             "text":  "Una criatura observa al grupo desde lejos. No ataca. No huye.",
+                             "tableId":  24,
+                             "sortOrder":  221,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  223,
+                             "text":  "Recurso inesperado: refugio natural, agua, material de construcción.",
+                             "tableId":  24,
+                             "sortOrder":  222,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  224,
+                             "text":  "La exploración revela un rasgo oculto del hex. (@Punto de Interés en Hex)",
+                             "tableId":  24,
+                             "sortOrder":  223,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  225,
+                             "text":  "Señal dejada por alguien que pasó antes: marca en árbol, piedras alineadas.",
+                             "tableId":  24,
+                             "sortOrder":  224,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  226,
+                             "text":  "Nada. El terreno está agotado o es demasiado hostil.",
+                             "tableId":  25,
+                             "sortOrder":  225,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  227,
+                             "text":  "Agua potable encontrada. El grupo no gasta raciones de agua hoy.",
+                             "tableId":  25,
+                             "sortOrder":  226,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  228,
+                             "text":  "Bayas y raíces comestibles. 1 ración por forrajeador.",
+                             "tableId":  25,
+                             "sortOrder":  227,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  229,
+                             "text":  "Plantas medicinales. [1d4] usos equivalentes a curación básica.",
+                             "tableId":  25,
+                             "sortOrder":  228,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  230,
+                             "text":  "Buena cosecha. [1d4+1] raciones por forrajeador.",
+                             "tableId":  25,
+                             "sortOrder":  229,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  231,
+                             "text":  "Fruto o hongo desconocido. Comestible con prueba de supervivencia (CD 12) o [1d4] daño.",
+                             "tableId":  25,
+                             "sortOrder":  230,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  232,
+                             "text":  "Ingrediente alquímico raro. Valor 50 gp para el alquimista adecuado.",
+                             "tableId":  25,
+                             "sortOrder":  231,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  233,
+                             "text":  "Planta medicinal superior. Cura [2d4] PV al consumirla.",
+                             "tableId":  25,
+                             "sortOrder":  232,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  234,
+                             "text":  "Sin presa. El terreno está cazado o la técnica fue mala.",
+                             "tableId":  26,
+                             "sortOrder":  233,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  235,
+                             "text":  "Presa pequeña: conejo, pájaro. 1 ración.",
+                             "tableId":  26,
+                             "sortOrder":  234,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  236,
+                             "text":  "Presa mediana: jabalí, ciervo joven. [1d4+1] raciones.",
+                             "tableId":  26,
+                             "sortOrder":  235,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  237,
+                             "text":  "Presa grande. [2d6] raciones, pero preparar lleva 2 horas.",
+                             "tableId":  26,
+                             "sortOrder":  236,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  238,
+                             "text":  "La presa resultó ser un familiar de bruja o criatura mágica. Consecuencias.",
+                             "tableId":  26,
+                             "sortOrder":  237,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  239,
+                             "text":  "Presa monstruosa. Si la cazan: [1d6+2] raciones + componente raro.",
+                             "tableId":  26,
+                             "sortOrder":  238,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  240,
+                             "text":  "Sendero apenas visible. Usado con regularidad pero no mantenido.",
+                             "tableId":  27,
+                             "sortOrder":  239,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  241,
+                             "text":  "Tronco talado. Reciente. La madera fue llevada a algún lugar.",
+                             "tableId":  27,
+                             "sortOrder":  240,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  242,
+                             "text":  "Campo abandonado con surcos viejos. Nadie labra desde hace meses.",
+                             "tableId":  27,
+                             "sortOrder":  241,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  243,
+                             "text":  "Trampa para animales puesta. Alguien la revisa con regularidad.",
+                             "tableId":  27,
+                             "sortOrder":  242,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  244,
+                             "text":  "Hoguera apagada hace menos de un día. [1d3] personas la hicieron.",
+                             "tableId":  27,
+                             "sortOrder":  243,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  245,
+                             "text":  "Refugio rudimentario: ramas apiladas, cuero tensado. Usable.",
+                             "tableId":  27,
+                             "sortOrder":  244,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  246,
+                             "text":  "Marca de territorio: calavera en palo, trapo de color. Pertenece a alguien.",
+                             "tableId":  27,
+                             "sortOrder":  245,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  247,
+                             "text":  "Cimientos de piedra de una construcción demolida hace mucho.",
+                             "tableId":  27,
+                             "sortOrder":  246,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  248,
+                             "text":  "Carreta abandonada con rueda rota. Las alforjas siguen ahí.",
+                             "tableId":  27,
+                             "sortOrder":  247,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  249,
+                             "text":  "Humo a lo lejos. Podría ser una aldea, un campamento o un incendio.",
+                             "tableId":  27,
+                             "sortOrder":  248,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  250,
+                             "text":  "Mesa de madera pesada con cadenas en las patas. Para alguien que no quería quedarse.",
+                             "tableId":  28,
+                             "sortOrder":  249,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  251,
+                             "text":  "Estantería vacía con huecos donde había libros o frascos.",
+                             "tableId":  28,
+                             "sortOrder":  250,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  252,
+                             "text":  "Silla de piedra tallada sin cojín. Incómoda por diseño.",
+                             "tableId":  28,
+                             "sortOrder":  251,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  253,
+                             "text":  "Cama de campaña doblada contra la pared. Alguien dormía aquí.",
+                             "tableId":  28,
+                             "sortOrder":  252,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  254,
+                             "text":  "Pedestal de mármol vacío. Lo que sostenía fue llevado hace mucho.",
+                             "tableId":  28,
+                             "sortOrder":  253,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  255,
+                             "text":  "Caldero enorme sobre brasero apagado. Queda algo solidificado dentro.",
+                             "tableId":  28,
+                             "sortOrder":  254,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  256,
+                             "text":  "Armario con cerradura rota. Vacío excepto por un olor persistente a especias.",
+                             "tableId":  28,
+                             "sortOrder":  255,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  257,
+                             "text":  "Altar de trabajo: herramientas de alquimia o tortura en desuso.",
+                             "tableId":  28,
+                             "sortOrder":  256,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  258,
+                             "text":  "Trono de piedra orientado a una pared en blanco. Inquietante.",
+                             "tableId":  28,
+                             "sortOrder":  257,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  259,
+                             "text":  "Jaula colgante de tamaño humano. Vacía. La puerta está abierta.",
+                             "tableId":  28,
+                             "sortOrder":  258,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  260,
+                             "text":  "Escritorio inclinado con tintero seco y plumas rotas.",
+                             "tableId":  28,
+                             "sortOrder":  259,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  261,
+                             "text":  "Baúl con bisagras rotas. Fue forzado desde dentro.",
+                             "tableId":  28,
+                             "sortOrder":  260,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  262,
+                             "text":  "\u0027El que lea esto ya llegó tarde.\u0027 En lengua común. Trazo calmado.",
+                             "tableId":  29,
+                             "sortOrder":  261,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  263,
+                             "text":  "Un mapa tosco del nivel siguiente. Hecho con algo que parece sangre.",
+                             "tableId":  29,
+                             "sortOrder":  262,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  264,
+                             "text":  "Lista de nombres. Muy larga. Sin fechas ni contexto.",
+                             "tableId":  29,
+                             "sortOrder":  263,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  265,
+                             "text":  "\u0027No abras la tercera puerta.\u0027 Sin indicar cuál de las puertas es la tercera.",
+                             "tableId":  29,
+                             "sortOrder":  264,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  266,
+                             "text":  "Runa de advertencia cuidadosamente labrada. Alguien se tomó mucho tiempo.",
+                             "tableId":  29,
+                             "sortOrder":  265,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  267,
+                             "text":  "Cuenta de días marcada en la piedra. Termina de forma abrupta.",
+                             "tableId":  29,
+                             "sortOrder":  266,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  268,
+                             "text":  "Símbolo de una deidad prohibida. Aún vibra con residuo mágico.",
+                             "tableId":  29,
+                             "sortOrder":  267,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  269,
+                             "text":  "\u0027Volveré.\u0027 Firmado por alguien cuyo nombre fue borrado con fuerza.",
+                             "tableId":  29,
+                             "sortOrder":  268,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  270,
+                             "text":  "Instrucciones para un ritual. La última línea es ilegible deliberadamente.",
+                             "tableId":  29,
+                             "sortOrder":  269,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  271,
+                             "text":  "Caricatura grotesca de una figura con corona. Sátira de alguien con poder.",
+                             "tableId":  29,
+                             "sortOrder":  270,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  272,
+                             "text":  "Telarañas que cubren todo. Tan densas que cuelgan como cortinas.",
+                             "tableId":  30,
+                             "sortOrder":  271,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  273,
+                             "text":  "Las paredes tienen marcas de garras a la altura del techo.",
+                             "tableId":  30,
+                             "sortOrder":  272,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  274,
+                             "text":  "El suelo tiene una mancha circular oscura que no es sangre.",
+                             "tableId":  30,
+                             "sortOrder":  273,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  275,
+                             "text":  "Luz débil sin fuente visible. Emana de las propias paredes.",
+                             "tableId":  30,
+                             "sortOrder":  274,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  276,
+                             "text":  "Una ventana sellada que da a otra habitación de la mazmorra.",
+                             "tableId":  30,
+                             "sortOrder":  275,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  277,
+                             "text":  "Frescos desvaneciéndose. Representan una escena de guerra o sacrificio.",
+                             "tableId":  30,
+                             "sortOrder":  276,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  278,
+                             "text":  "Todo cubierto de sal. Alguien la puso aquí con un propósito.",
+                             "tableId":  30,
+                             "sortOrder":  277,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  279,
+                             "text":  "Losa central levantada y vuelto a poner torpemente. Hay marcas de palanca.",
+                             "tableId":  30,
+                             "sortOrder":  278,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  280,
+                             "text":  "Moscas. Muchas. Pero no hay nada podrido visible en la sala.",
+                             "tableId":  30,
+                             "sortOrder":  279,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  281,
+                             "text":  "Niebla baja que cubre el suelo. No se ve dónde se pone el pie.",
+                             "tableId":  30,
+                             "sortOrder":  280,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         }
+                     ],
+    "drawEvents":  [
+
+                   ],
+    "sessionDeckRefs":  [
+
+                        ],
+    "decks":  [
+
+              ],
+    "encounters":  [
+
+                   ],
+    "referenceTables":  [
+
+                        ],
+    "cardTags":  [
+
+                 ],
+    "systemRules":  [
+
+                    ],
+    "npcs":  [
+
+             ],
+    "cards":  [
+
+              ],
+    "sessionTableRefs":  [
+
+                         ],
+    "cardStackTags":  [
+
+                      ],
+    "encounterCreatures":  [
+
+                           ],
+    "tags":  [
+
+             ],
+    "wikiCategories":  [
+
+                       ],
+    "randomTables":  [
+                         {
+                             "rollFormula":  "1d12",
+                             "id":  1,
+                             "category":  "Encuentros",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Encuentro Aleatorio Bosque",
+                             "sortOrder":  0,
+                             "description":  "Tirar al entrar en el bosque o cada hora de viaje.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581223535,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d20",
+                             "id":  2,
+                             "category":  "Encuentros",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Encuentro Aleatorio Mazmorra",
+                             "sortOrder":  1,
+                             "description":  "Tirar cada turno de exploración o al abrir una puerta.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581225002,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  3,
+                             "category":  "Encuentros",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Encuentro Aleatorio Camino",
+                             "sortOrder":  2,
+                             "description":  "Tirar cada hora de viaje por carretera o camino conocido.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581225053,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  4,
+                             "category":  "Encuentros",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Encuentro Aleatorio Montaña",
+                             "sortOrder":  3,
+                             "description":  "Tirar cada hora de viaje en altitud o paso de montaña.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581225053,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  5,
+                             "category":  "Encuentros",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Encuentro Aleatorio Pantano",
+                             "sortOrder":  4,
+                             "description":  "Tirar cada hora en terreno pantanoso o marisma.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581225154,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  6,
+                             "category":  "Encuentros",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Encuentro Aleatorio Ciudad",
+                             "sortOrder":  5,
+                             "description":  "Tirar al explorar calles, mercados o callejones urbanos.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581225154,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d8",
+                             "id":  7,
+                             "category":  "Encuentros",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Encuentro Aleatorio Mar",
+                             "sortOrder":  6,
+                             "description":  "Tirar cada día de viaje marítimo o cerca de la costa.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581225154,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d6",
+                             "id":  8,
+                             "category":  "Clima",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Clima",
+                             "sortOrder":  7,
+                             "description":  "Condiciones meteorológicas durante el viaje.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581225261,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d8",
+                             "id":  9,
+                             "category":  "Clima",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Clima Invernal",
+                             "sortOrder":  8,
+                             "description":  "Condiciones en invierno o zonas de alta montaña.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581225261,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d8",
+                             "id":  10,
+                             "category":  "Clima",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Clima Marino",
+                             "sortOrder":  9,
+                             "description":  "Condiciones meteorológicas en el mar o zona costera.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581225261,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  11,
+                             "category":  "Viaje",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Evento de Viaje Diurno",
+                             "sortOrder":  10,
+                             "description":  "Algo ocurre durante el viaje de día, independiente de encuentros.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581225261,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d8",
+                             "id":  12,
+                             "category":  "Viaje",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Evento de Viaje Nocturno",
+                             "sortOrder":  11,
+                             "description":  "Algo ocurre durante el turno de guardia o campamento.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581225413,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  13,
+                             "category":  "Viaje",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Hallazgo en el Camino",
+                             "sortOrder":  12,
+                             "description":  "Algo interesante encontrado al borde del camino o sendero.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581225413,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d12",
+                             "id":  14,
+                             "category":  "Mazmorra",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Contenido de Habitación de Mazmorra",
+                             "sortOrder":  13,
+                             "description":  "Qué hay en una sala no explorada todavía.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581225413,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  15,
+                             "category":  "Mazmorra",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Trampa de Mazmorra",
+                             "sortOrder":  14,
+                             "description":  "Trampa mecánica o mágica encontrada en un pasillo o sala.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581225567,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d12",
+                             "id":  16,
+                             "category":  "Mazmorra",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Sonido en la Mazmorra",
+                             "sortOrder":  15,
+                             "description":  "Sonido ambiental que escucha el grupo al explorar.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581225619,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d8",
+                             "id":  17,
+                             "category":  "Mazmorra",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Olor en la Mazmorra",
+                             "sortOrder":  16,
+                             "description":  "Detalle sensorial del ambiente de una sala o pasillo.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581225671,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  18,
+                             "category":  "Mazmorra",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Propósito Original de la Mazmorra",
+                             "sortOrder":  17,
+                             "description":  "Qué era este lugar antes de convertirse en una mazmorra.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581225671,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d8",
+                             "id":  19,
+                             "category":  "Mazmorra",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Peligro Ambiental de Mazmorra",
+                             "sortOrder":  18,
+                             "description":  "Condición del entorno que complica la exploración.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581225671,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d12",
+                             "id":  20,
+                             "category":  "Hexcrawl",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Contenido de Hex",
+                             "sortOrder":  19,
+                             "description":  "Qué contiene un hex al explorarlo por primera vez.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581225824,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d12",
+                             "id":  21,
+                             "category":  "Hexcrawl",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Tipo de Terreno de Hex",
+                             "sortOrder":  20,
+                             "description":  "Genera el terreno de un hex nuevo al explorar el mapa.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581225824,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d20",
+                             "id":  22,
+                             "category":  "Hexcrawl",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Punto de Interés en Hex",
+                             "sortOrder":  21,
+                             "description":  "Rasgo notable que define un hex especial.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581225925,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d6",
+                             "id":  23,
+                             "category":  "Hexcrawl",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Resultado de Extravío",
+                             "sortOrder":  22,
+                             "description":  "Qué ocurre cuando el grupo falla la tirada de navegación.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581225976,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  24,
+                             "category":  "Hexcrawl",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Evento de Exploración de Hex",
+                             "sortOrder":  23,
+                             "description":  "Algo sucede mientras el grupo explora el hex actualmente ocupado.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581225976,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d8",
+                             "id":  25,
+                             "category":  "Hexcrawl",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Forrajeo",
+                             "sortOrder":  24,
+                             "description":  "Resultado al buscar comida y agua durante el viaje (media jornada).",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  17765258122613,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d6",
+                             "id":  26,
+                             "category":  "Hexcrawl",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Caza",
+                             "sortOrder":  25,
+                             "description":  "Resultado al cazar para conseguir comida durante el viaje.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  17765258122613,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  27,
+                             "category":  "Hexcrawl",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Señal de Civilización en Hex",
+                             "sortOrder":  26,
+                             "description":  "Indicios de que alguien estuvo o vive cerca de este hex.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581226283,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d12",
+                             "id":  28,
+                             "category":  "Mazmorra",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Mobiliario de Mazmorra",
+                             "sortOrder":  27,
+                             "description":  "Objeto o mueble encontrado en una sala o pasillo.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  17765258122635,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  29,
+                             "category":  "Mazmorra",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Inscripción en la Pared",
+                             "sortOrder":  28,
+                             "description":  "Mensaje grabado, pintado o trazado en una pared de la mazmorra.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581226403,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  30,
+                             "category":  "Mazmorra",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_adventure.json",
+                             "name":  "Detalle Visual de Sala",
+                             "sortOrder":  29,
+                             "description":  "Algo que llama la atención al entrar en una habitación.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652581226403,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_adventure.json"
+                         }
+                     ],
+    "sessions":  [
+
+                 ],
+    "wikiEntries":  [
+
+                    ],
+    "randomTableTags":  [
+
+                        ],
+    "combatLog":  [
+
+                  ],
+    "npcTags":  [
+
+                ],
+    "schemaVersion":  1
+}
+
+
+

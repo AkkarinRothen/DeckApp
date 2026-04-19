@@ -1,0 +1,1906 @@
+﻿{
+    "systemRuleTags":  [
+
+                       ],
+    "referenceTableTags":  [
+
+                           ],
+    "referenceRows":  [
+
+                      ],
+    "cardFaces":  [
+
+                  ],
+    "tableBundles":  [
+
+                     ],
+    "tableEntries":  [
+                         {
+                             "id":  15000,
+                             "text":  "Habla en voz muy baja, casi un susurro.",
+                             "tableId":  15000,
+                             "sortOrder":  0,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15001,
+                             "text":  "Ríe nerviosamente después de cada frase.",
+                             "tableId":  15000,
+                             "sortOrder":  1,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15002,
+                             "text":  "Repite la última palabra que dice el interlocutor.",
+                             "tableId":  15000,
+                             "sortOrder":  2,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15003,
+                             "text":  "No puede mantener el contacto visual. Mira al suelo.",
+                             "tableId":  15000,
+                             "sortOrder":  3,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15004,
+                             "text":  "Usa metáforas de pesca en cada frase.",
+                             "tableId":  15000,
+                             "sortOrder":  4,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15005,
+                             "text":  "Se toca la cicatriz en la mejilla cuando piensa.",
+                             "tableId":  15000,
+                             "sortOrder":  5,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15006,
+                             "text":  "Siempre huele a ajo. Mucho ajo.",
+                             "tableId":  15000,
+                             "sortOrder":  6,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15007,
+                             "text":  "Exagerada cortesía con títulos nobiliarios, incluso con desconocidos.",
+                             "tableId":  15000,
+                             "sortOrder":  7,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15008,
+                             "text":  "Interrumpe a los demás para terminar sus frases (siempre mal).",
+                             "tableId":  15000,
+                             "sortOrder":  8,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15009,
+                             "text":  "Gesticula en exceso con las manos al hablar.",
+                             "tableId":  15000,
+                             "sortOrder":  9,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15010,
+                             "text":  "Desconfía de cualquiera que lleve sombreros.",
+                             "tableId":  15000,
+                             "sortOrder":  10,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15011,
+                             "text":  "Colecciona botones y los cuenta en momentos de estrés.",
+                             "tableId":  15000,
+                             "sortOrder":  11,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15012,
+                             "text":  "Habla de sí mismo en tercera persona.",
+                             "tableId":  15000,
+                             "sortOrder":  12,
+                             "maxRoll":  13,
+                             "minRoll":  13,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15013,
+                             "text":  "Canta entre dientes cuando está nervioso.",
+                             "tableId":  15000,
+                             "sortOrder":  13,
+                             "maxRoll":  14,
+                             "minRoll":  14,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15014,
+                             "text":  "Evalúa el valor en oro de todo lo que ve con ojo experto.",
+                             "tableId":  15000,
+                             "sortOrder":  14,
+                             "maxRoll":  15,
+                             "minRoll":  15,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15015,
+                             "text":  "Cita proverbios de su cultura en todo momento.",
+                             "tableId":  15000,
+                             "sortOrder":  15,
+                             "maxRoll":  16,
+                             "minRoll":  16,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15016,
+                             "text":  "Tiene fobia declarada a los cuervos.",
+                             "tableId":  15000,
+                             "sortOrder":  16,
+                             "maxRoll":  17,
+                             "minRoll":  17,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15017,
+                             "text":  "Come sin parar. Siempre tiene algo en la mano.",
+                             "tableId":  15000,
+                             "sortOrder":  17,
+                             "maxRoll":  18,
+                             "minRoll":  18,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15018,
+                             "text":  "Mantiene distancia de dos pasos con cualquier desconocido.",
+                             "tableId":  15000,
+                             "sortOrder":  18,
+                             "maxRoll":  19,
+                             "minRoll":  19,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15019,
+                             "text":  "Habla con un acento extranjero muy marcado y cambiante.",
+                             "tableId":  15000,
+                             "sortOrder":  19,
+                             "maxRoll":  20,
+                             "minRoll":  20,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15020,
+                             "text":  "Venganza contra quien destruyó su familia.",
+                             "tableId":  15001,
+                             "sortOrder":  20,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15021,
+                             "text":  "Riqueza suficiente para retirarse y vivir tranquilo.",
+                             "tableId":  15001,
+                             "sortOrder":  21,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15022,
+                             "text":  "Proteger a alguien vulnerable (hijo, hermano, maestro).",
+                             "tableId":  15001,
+                             "sortOrder":  22,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15023,
+                             "text":  "Redimirse de una terrible acción pasada.",
+                             "tableId":  15001,
+                             "sortOrder":  23,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15024,
+                             "text":  "Conocimiento o poder arcano a cualquier precio.",
+                             "tableId":  15001,
+                             "sortOrder":  24,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15025,
+                             "text":  "El reconocimiento de sus pares o de la nobleza.",
+                             "tableId":  15001,
+                             "sortOrder":  25,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15026,
+                             "text":  "Escapar de una deuda, maldición o contrato.",
+                             "tableId":  15001,
+                             "sortOrder":  26,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15027,
+                             "text":  "Encontrar un familiar o amigo desaparecido.",
+                             "tableId":  15001,
+                             "sortOrder":  27,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15028,
+                             "text":  "Demostrar que su fe o filosofía es la correcta.",
+                             "tableId":  15001,
+                             "sortOrder":  28,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15029,
+                             "text":  "Sobrevivir día a día. Nada más.",
+                             "tableId":  15001,
+                             "sortOrder":  29,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15030,
+                             "text":  "Placer y entretenimiento sin consecuencias.",
+                             "tableId":  15001,
+                             "sortOrder":  30,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15031,
+                             "text":  "Dejar un legado que lo recuerde por siglos.",
+                             "tableId":  15001,
+                             "sortOrder":  31,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15032,
+                             "text":  "Adicto al juego. Siempre debe dinero a alguien peligroso.",
+                             "tableId":  15002,
+                             "sortOrder":  32,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15033,
+                             "text":  "Cobarde. Desaparece cuando hay problemas reales.",
+                             "tableId":  15002,
+                             "sortOrder":  33,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15034,
+                             "text":  "Mentiroso compulsivo, incluso cuando la verdad le beneficiaría.",
+                             "tableId":  15002,
+                             "sortOrder":  34,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15035,
+                             "text":  "Extremadamente avaro. Le duele cada moneda.",
+                             "tableId":  15002,
+                             "sortOrder":  35,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15036,
+                             "text":  "Bebedor. Toma decisiones pésimas con alcohol.",
+                             "tableId":  15002,
+                             "sortOrder":  36,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15037,
+                             "text":  "Demasiado orgulloso. Nunca pide ayuda aunque la necesite.",
+                             "tableId":  15002,
+                             "sortOrder":  37,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15038,
+                             "text":  "Celoso de quienes tienen más talento o fama.",
+                             "tableId":  15002,
+                             "sortOrder":  38,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15039,
+                             "text":  "Fobia irracional (arañas, oscuridad, mar) que le paraliza.",
+                             "tableId":  15002,
+                             "sortOrder":  39,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15040,
+                             "text":  "Impulsivo. Actúa sin pensar las consecuencias.",
+                             "tableId":  15002,
+                             "sortOrder":  40,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15041,
+                             "text":  "Crédulo. Cree cualquier historia con mínimo esfuerzo.",
+                             "tableId":  15002,
+                             "sortOrder":  41,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15042,
+                             "text":  "Lujurioso. Sus decisiones las toma con las emociones.",
+                             "tableId":  15002,
+                             "sortOrder":  42,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15043,
+                             "text":  "Paranoico. Ve conspiraciones en todo, incluso en aliados.",
+                             "tableId":  15002,
+                             "sortOrder":  43,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15044,
+                             "text":  "Cicatriz profunda que cruza un ojo (el ojo aún funciona).",
+                             "tableId":  15003,
+                             "sortOrder":  44,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15045,
+                             "text":  "Pelo completamente blanco a pesar de ser joven.",
+                             "tableId":  15003,
+                             "sortOrder":  45,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15046,
+                             "text":  "Tatuajes tribales en cuello y manos.",
+                             "tableId":  15003,
+                             "sortOrder":  46,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15047,
+                             "text":  "Extremadamente alto y delgado, casi desgarbado.",
+                             "tableId":  15003,
+                             "sortOrder":  47,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15048,
+                             "text":  "Ojos de dos colores distintos (heterocromía).",
+                             "tableId":  15003,
+                             "sortOrder":  48,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15049,
+                             "text":  "Le falta un dedo. Lleva un guante para ocultarlo.",
+                             "tableId":  15003,
+                             "sortOrder":  49,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15050,
+                             "text":  "Ropa siempre impecable, incluso en situaciones adversas.",
+                             "tableId":  15003,
+                             "sortOrder":  50,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15051,
+                             "text":  "Enormes manos que no corresponden con su cuerpo pequeño.",
+                             "tableId":  15003,
+                             "sortOrder":  51,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15052,
+                             "text":  "Voz profunda y resonante, intimidante sin proponérselo.",
+                             "tableId":  15003,
+                             "sortOrder":  52,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15053,
+                             "text":  "Camina con una ligera cojera de la pierna derecha.",
+                             "tableId":  15003,
+                             "sortOrder":  53,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15054,
+                             "text":  "Olor a especias o a bosque, nunca a sudor.",
+                             "tableId":  15003,
+                             "sortOrder":  54,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15055,
+                             "text":  "Siempre lleva un sombrero extravagante de diferente origen.",
+                             "tableId":  15003,
+                             "sortOrder":  55,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15056,
+                             "text":  "Es un agente infiltrado del gremio de ladrones.",
+                             "tableId":  15004,
+                             "sortOrder":  56,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15057,
+                             "text":  "Mató a alguien importante en su juventud. Fue un accidente.",
+                             "tableId":  15004,
+                             "sortOrder":  57,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15058,
+                             "text":  "Su \u0027negocio legítimo\u0027 financia a un culto local.",
+                             "tableId":  15004,
+                             "sortOrder":  58,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15059,
+                             "text":  "Es un noble disfrazado que huyó de sus responsabilidades.",
+                             "tableId":  15004,
+                             "sortOrder":  59,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15060,
+                             "text":  "Tiene una segunda familia en otra ciudad.",
+                             "tableId":  15004,
+                             "sortOrder":  60,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15061,
+                             "text":  "Puede ver brevemente el futuro en sueños. Le aterra.",
+                             "tableId":  15004,
+                             "sortOrder":  61,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15062,
+                             "text":  "Está siendo chantajeado por alguien del pasado.",
+                             "tableId":  15004,
+                             "sortOrder":  62,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15063,
+                             "text":  "No es quien dice ser. Su identidad es robada.",
+                             "tableId":  15004,
+                             "sortOrder":  63,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15064,
+                             "text":  "Tiene un pacto con un demonio menor aún vigente.",
+                             "tableId":  15004,
+                             "sortOrder":  64,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15065,
+                             "text":  "Conoce la ubicación de un tesoro que no es suyo.",
+                             "tableId":  15004,
+                             "sortOrder":  65,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15066,
+                             "text":  "Fue traicionado por su gremio y planea vengarse.",
+                             "tableId":  15004,
+                             "sortOrder":  66,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15067,
+                             "text":  "Es un hombre lobo. Lo controla bien. Casi siempre.",
+                             "tableId":  15004,
+                             "sortOrder":  67,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15068,
+                             "text":  "Herrero",
+                             "tableId":  15005,
+                             "sortOrder":  68,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15069,
+                             "text":  "Posadero/a",
+                             "tableId":  15005,
+                             "sortOrder":  69,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15070,
+                             "text":  "Guardabosques",
+                             "tableId":  15005,
+                             "sortOrder":  70,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15071,
+                             "text":  "Sacerdote/sa",
+                             "tableId":  15005,
+                             "sortOrder":  71,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15072,
+                             "text":  "Mercader de telas",
+                             "tableId":  15005,
+                             "sortOrder":  72,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15073,
+                             "text":  "Alquimista",
+                             "tableId":  15005,
+                             "sortOrder":  73,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15074,
+                             "text":  "Guardia de la ciudad",
+                             "tableId":  15005,
+                             "sortOrder":  74,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15075,
+                             "text":  "Escriba o bibliotecario",
+                             "tableId":  15005,
+                             "sortOrder":  75,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15076,
+                             "text":  "Cazador de recompensas",
+                             "tableId":  15005,
+                             "sortOrder":  76,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15077,
+                             "text":  "Bardo o juglar",
+                             "tableId":  15005,
+                             "sortOrder":  77,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15078,
+                             "text":  "Sanador o barbero-cirujano",
+                             "tableId":  15005,
+                             "sortOrder":  78,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15079,
+                             "text":  "Contrabandista",
+                             "tableId":  15005,
+                             "sortOrder":  79,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15080,
+                             "text":  "Granjero",
+                             "tableId":  15005,
+                             "sortOrder":  80,
+                             "maxRoll":  13,
+                             "minRoll":  13,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15081,
+                             "text":  "Marinero o capitán de barcaza",
+                             "tableId":  15005,
+                             "sortOrder":  81,
+                             "maxRoll":  14,
+                             "minRoll":  14,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15082,
+                             "text":  "Mago en retiro",
+                             "tableId":  15005,
+                             "sortOrder":  82,
+                             "maxRoll":  15,
+                             "minRoll":  15,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15083,
+                             "text":  "Noble menor sin tierra",
+                             "tableId":  15005,
+                             "sortOrder":  83,
+                             "maxRoll":  16,
+                             "minRoll":  16,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15084,
+                             "text":  "Ladrón de guante blanco",
+                             "tableId":  15005,
+                             "sortOrder":  84,
+                             "maxRoll":  17,
+                             "minRoll":  17,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15085,
+                             "text":  "Cazador o trampero",
+                             "tableId":  15005,
+                             "sortOrder":  85,
+                             "maxRoll":  18,
+                             "minRoll":  18,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15086,
+                             "text":  "Enterrador y embalsamador",
+                             "tableId":  15005,
+                             "sortOrder":  86,
+                             "maxRoll":  19,
+                             "minRoll":  19,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15087,
+                             "text":  "Espía con cobertura de mercader",
+                             "tableId":  15005,
+                             "sortOrder":  87,
+                             "maxRoll":  20,
+                             "minRoll":  20,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15088,
+                             "text":  "Dicen que el alcalde tiene tratos con el gremio de asesinos.",
+                             "tableId":  15006,
+                             "sortOrder":  88,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15089,
+                             "text":  "Un dragón fue visto sobrevolando las montañas del norte hace tres noches.",
+                             "tableId":  15006,
+                             "sortOrder":  89,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15090,
+                             "text":  "El cementerio viejo tiene luces por las noches. Nadie investiga.",
+                             "tableId":  15006,
+                             "sortOrder":  90,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15091,
+                             "text":  "Se buscan aventureros para limpiar una mina de algo que nadie describe bien.",
+                             "tableId":  15006,
+                             "sortOrder":  91,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15092,
+                             "text":  "Una caravana completa desapareció en el paso del este. Sin rastro.",
+                             "tableId":  15006,
+                             "sortOrder":  92,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15093,
+                             "text":  "El pozo central del pueblo da agua turbia desde la luna pasada.",
+                             "tableId":  15006,
+                             "sortOrder":  93,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15094,
+                             "text":  "Un niño encontró una espada brillante en el río. Los guardias se la quitaron.",
+                             "tableId":  15006,
+                             "sortOrder":  94,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15095,
+                             "text":  "Se dice que el mago de la torre lleva un mes sin salir. Ni a comprar.",
+                             "tableId":  15006,
+                             "sortOrder":  95,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15096,
+                             "text":  "Los lobos del bosque son más grandes de lo normal este invierno.",
+                             "tableId":  15006,
+                             "sortOrder":  96,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15097,
+                             "text":  "Alguien está robando el correo del rey. Sin dejar rastro.",
+                             "tableId":  15006,
+                             "sortOrder":  97,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15098,
+                             "text":  "Hay una recompensa de 500 gp por el bandido apodado \u0027La Máscara Roja\u0027.",
+                             "tableId":  15006,
+                             "sortOrder":  98,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15099,
+                             "text":  "El sacerdote de Pelor fue visto rezando a otro altar en secreto.",
+                             "tableId":  15006,
+                             "sortOrder":  99,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15100,
+                             "text":  "Estofado de tubérculos con pan duro. (3 cp)",
+                             "tableId":  15007,
+                             "sortOrder":  100,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15101,
+                             "text":  "Muslo de pollo asado con cebolla. (5 cp)",
+                             "tableId":  15007,
+                             "sortOrder":  101,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15102,
+                             "text":  "Sopa de pescado ahumado. Consistente. (8 cp)",
+                             "tableId":  15007,
+                             "sortOrder":  102,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15103,
+                             "text":  "Costillas de jabalí con salsa de mosto. (1 sp)",
+                             "tableId":  15007,
+                             "sortOrder":  103,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15104,
+                             "text":  "Queso de cabra, pan y encurtidos. (4 cp)",
+                             "tableId":  15007,
+                             "sortOrder":  104,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15105,
+                             "text":  "Guiso de carne sin identificar. Sabe mejor de lo que parece. (6 cp)",
+                             "tableId":  15007,
+                             "sortOrder":  105,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15106,
+                             "text":  "Pastel de caza (conejo, perdiz). (2 sp)",
+                             "tableId":  15007,
+                             "sortOrder":  106,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15107,
+                             "text":  "Festín del posadero: todo lo anterior más vino. (5 sp)",
+                             "tableId":  15007,
+                             "sortOrder":  107,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15108,
+                             "text":  "Pelea de borrachos. La mesa de al lado vuela por el aire.",
+                             "tableId":  15008,
+                             "sortOrder":  108,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15109,
+                             "text":  "Entra un mensajero empapado con noticias urgentes para nadie del grupo.",
+                             "tableId":  15008,
+                             "sortOrder":  109,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15110,
+                             "text":  "Un bardo entona la canción favorita de uno de los PJs. Sospechoso.",
+                             "tableId":  15008,
+                             "sortOrder":  110,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15111,
+                             "text":  "Un desconocido deja una nota en la mesa y desaparece.",
+                             "tableId":  15008,
+                             "sortOrder":  111,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15112,
+                             "text":  "El posadero baja el precio de la habitación a cambio de un favor.",
+                             "tableId":  15008,
+                             "sortOrder":  112,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15113,
+                             "text":  "Un jugador acusa de hacer trampa. Situación tensa.",
+                             "tableId":  15008,
+                             "sortOrder":  113,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15114,
+                             "text":  "Alguien intenta envenenar la bebida de un PJ. Percepción para notarlo.",
+                             "tableId":  15008,
+                             "sortOrder":  114,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15115,
+                             "text":  "Entran guardias buscando a un fugitivo. La descripción se parece a alguien del grupo.",
+                             "tableId":  15008,
+                             "sortOrder":  115,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15116,
+                             "text":  "El fuego de la chimenea se vuelve azul un instante. Nadie más parece notarlo.",
+                             "tableId":  15008,
+                             "sortOrder":  116,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15117,
+                             "text":  "Un viejo veterano ofrece información valiosa a cambio de una ronda de bebidas.",
+                             "tableId":  15008,
+                             "sortOrder":  117,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15118,
+                             "text":  "Su hijo o hija, que vive en otro pueblo.",
+                             "tableId":  15009,
+                             "sortOrder":  118,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15119,
+                             "text":  "La memoria de un mentor que murió por su culpa.",
+                             "tableId":  15009,
+                             "sortOrder":  119,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15120,
+                             "text":  "Una deuda de honor con alguien que le salvó la vida.",
+                             "tableId":  15009,
+                             "sortOrder":  120,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15121,
+                             "text":  "Un objeto heredado que valdría su vida proteger.",
+                             "tableId":  15009,
+                             "sortOrder":  121,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15122,
+                             "text":  "Su comunidad o aldea natal, aunque la dejó hace años.",
+                             "tableId":  15009,
+                             "sortOrder":  122,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15123,
+                             "text":  "Un amor que nunca fue correspondido.",
+                             "tableId":  15009,
+                             "sortOrder":  123,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15124,
+                             "text":  "El ideal de justicia que persigue sin importar el costo.",
+                             "tableId":  15009,
+                             "sortOrder":  124,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15125,
+                             "text":  "Una promesa hecha en el lecho de muerte de alguien.",
+                             "tableId":  15009,
+                             "sortOrder":  125,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15126,
+                             "text":  "Su reputación y nombre, que protege por encima de todo.",
+                             "tableId":  15009,
+                             "sortOrder":  126,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15127,
+                             "text":  "Un rival o enemigo que le da propósito al odiarle.",
+                             "tableId":  15009,
+                             "sortOrder":  127,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15128,
+                             "text":  "Habla demasiado rápido cuando se emociona. Ilegible.",
+                             "tableId":  15010,
+                             "sortOrder":  128,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15129,
+                             "text":  "Pausa larga antes de cada respuesta. Reflexivo o lento.",
+                             "tableId":  15010,
+                             "sortOrder":  129,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15130,
+                             "text":  "Usa \u0027eh\u0027 y \u0027pues\u0027 entre cada frase.",
+                             "tableId":  15010,
+                             "sortOrder":  130,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15131,
+                             "text":  "Todo lo formula como pregunta, incluso las afirmaciones.",
+                             "tableId":  15010,
+                             "sortOrder":  131,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15132,
+                             "text":  "Voz monótona. Sin entonación. Difícil saber cuándo termina.",
+                             "tableId":  15010,
+                             "sortOrder":  132,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15133,
+                             "text":  "Cambia de tema abruptamente cuando algo le incomoda.",
+                             "tableId":  15010,
+                             "sortOrder":  133,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15134,
+                             "text":  "Acento extranjero que aparece en palabras clave.",
+                             "tableId":  15010,
+                             "sortOrder":  134,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15135,
+                             "text":  "Siempre exagera los números. \u0027Eran cien, te lo juro.\u0027",
+                             "tableId":  15010,
+                             "sortOrder":  135,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15136,
+                             "text":  "Repite el nombre del interlocutor al principio de cada frase.",
+                             "tableId":  15010,
+                             "sortOrder":  136,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15137,
+                             "text":  "Susurra al final de cada oración, la parte importante.",
+                             "tableId":  15010,
+                             "sortOrder":  137,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15138,
+                             "text":  "Festival de la cosecha: comida gratis, competencias de lucha y música.",
+                             "tableId":  15011,
+                             "sortOrder":  138,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15139,
+                             "text":  "Ceremonia fúnebre de un héroe local. La ciudad está de luto.",
+                             "tableId":  15011,
+                             "sortOrder":  139,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15140,
+                             "text":  "Torneo de justas. Se pueden inscribir gladiadores amateurs.",
+                             "tableId":  15011,
+                             "sortOrder":  140,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15141,
+                             "text":  "Mercado de primavera: vendedores de tierras lejanas con mercancía exótica.",
+                             "tableId":  15011,
+                             "sortOrder":  141,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15142,
+                             "text":  "Noche de los ancestros: todos dejan ofrendas para los muertos. Los no-muertos se inquietan.",
+                             "tableId":  15011,
+                             "sortOrder":  142,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15143,
+                             "text":  "Coronación del nuevo alcalde o señor. Gran tensión política.",
+                             "tableId":  15011,
+                             "sortOrder":  143,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15144,
+                             "text":  "Feria de magia: magos ambulantes venden trucos y pociones dudosas.",
+                             "tableId":  15011,
+                             "sortOrder":  144,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15145,
+                             "text":  "Competencia de bardos. El ganador recibe acceso al archivo de la ciudad.",
+                             "tableId":  15011,
+                             "sortOrder":  145,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15146,
+                             "text":  "Festival del fuego: hogueras en cada esquina, saltar sobre el fuego da suerte.",
+                             "tableId":  15011,
+                             "sortOrder":  146,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15147,
+                             "text":  "Ejecución pública programada. La multitud está dividida sobre si es justa.",
+                             "tableId":  15011,
+                             "sortOrder":  147,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15148,
+                             "text":  "Prohibido llevar armas desenvainadas dentro de la muralla.",
+                             "tableId":  15012,
+                             "sortOrder":  148,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15149,
+                             "text":  "Todo extranjero debe registrarse con el guardián del puerto.",
+                             "tableId":  15012,
+                             "sortOrder":  149,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15150,
+                             "text":  "La magia arcana solo puede practicarse con licencia del alcalde.",
+                             "tableId":  15012,
+                             "sortOrder":  150,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15151,
+                             "text":  "Está prohibido mencionar el nombre del antiguo señor. Pena: látigos.",
+                             "tableId":  15012,
+                             "sortOrder":  151,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15152,
+                             "text":  "Los duelos están permitidos, pero deben anunciarse 24h antes.",
+                             "tableId":  15012,
+                             "sortOrder":  152,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15153,
+                             "text":  "El toque de queda es a medianoche. Las calles se limpian literalmente.",
+                             "tableId":  15012,
+                             "sortOrder":  153,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15154,
+                             "text":  "Está prohibido matar ratas. Son sagradas para el culto local.",
+                             "tableId":  15012,
+                             "sortOrder":  154,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15155,
+                             "text":  "Los curanderos no pueden cobrar por sus servicios al enfermo pobre.",
+                             "tableId":  15012,
+                             "sortOrder":  155,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15156,
+                             "text":  "Todo trato comercial mayor de 10 gp requiere testigo oficial.",
+                             "tableId":  15012,
+                             "sortOrder":  156,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15157,
+                             "text":  "Los elfos deben declarar su edad al entrar. Los de más de 500 años pagan impuesto doble.",
+                             "tableId":  15012,
+                             "sortOrder":  157,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15158,
+                             "text":  "Un vendedor vende algo que el grupo necesita, a precio inflado.",
+                             "tableId":  15013,
+                             "sortOrder":  158,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15159,
+                             "text":  "Alguien grita \u0027Ã‚¡ladrón!\u0027 Un ratero pasa corriendo entre la multitud.",
+                             "tableId":  15013,
+                             "sortOrder":  159,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15160,
+                             "text":  "Un mercader raro vende mapas de lugares que nadie ha explorado aún.",
+                             "tableId":  15013,
+                             "sortOrder":  160,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15161,
+                             "text":  "Subasta improvisada de objetos confiscados. Hay algo interesante.",
+                             "tableId":  15013,
+                             "sortOrder":  161,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15162,
+                             "text":  "Un sabio ambulante reconoce un objeto del grupo y quiere comprarlo urgente.",
+                             "tableId":  15013,
+                             "sortOrder":  162,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15163,
+                             "text":  "Un vendedor de \u0027pociones mágicas\u0027 que son agua teñida. Obvia estafa.",
+                             "tableId":  15013,
+                             "sortOrder":  163,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15164,
+                             "text":  "Pelea de precios entre dos gremios rivales. La mercancía está tirada.",
+                             "tableId":  15013,
+                             "sortOrder":  164,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15165,
+                             "text":  "Guardia de mercado pidiendo \u0027impuesto\u0027 a vendedores ambulantes extranjeros.",
+                             "tableId":  15013,
+                             "sortOrder":  165,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15166,
+                             "text":  "Gremio de mercaderes: amables si hay negocio, hostiles si hay competencia.",
+                             "tableId":  15014,
+                             "sortOrder":  166,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15167,
+                             "text":  "Orden de caballeros en misión. No revelan su objetivo.",
+                             "tableId":  15014,
+                             "sortOrder":  167,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15168,
+                             "text":  "Culto menor que cree que el grupo es parte de su profecía.",
+                             "tableId":  15014,
+                             "sortOrder":  168,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15169,
+                             "text":  "Banda de mercenarios que perdió a su capitán. Buscan liderazgo.",
+                             "tableId":  15014,
+                             "sortOrder":  169,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15170,
+                             "text":  "Inquisición religiosa investigando herejías en la zona.",
+                             "tableId":  15014,
+                             "sortOrder":  170,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15171,
+                             "text":  "Gremio de ladrones que quiere al grupo como herramienta.",
+                             "tableId":  15014,
+                             "sortOrder":  171,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15172,
+                             "text":  "Grupo de refugiados huyendo de algo río arriba.",
+                             "tableId":  15014,
+                             "sortOrder":  172,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15173,
+                             "text":  "Exploradores imperiales cartografiando la región para una \u0027anexión pacífica\u0027.",
+                             "tableId":  15014,
+                             "sortOrder":  173,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15174,
+                             "text":  "Cazadores de recompensas con una orden de captura que podría ser el grupo.",
+                             "tableId":  15014,
+                             "sortOrder":  174,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  15175,
+                             "text":  "Druidas protegiendo un lugar sagrado que el grupo necesita cruzar.",
+                             "tableId":  15014,
+                             "sortOrder":  175,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         }
+                     ],
+    "drawEvents":  [
+
+                   ],
+    "sessionDeckRefs":  [
+
+                        ],
+    "decks":  [
+
+              ],
+    "encounters":  [
+
+                   ],
+    "referenceTables":  [
+
+                        ],
+    "cardTags":  [
+
+                 ],
+    "systemRules":  [
+
+                    ],
+    "npcs":  [
+
+             ],
+    "cards":  [
+
+              ],
+    "sessionTableRefs":  [
+
+                         ],
+    "cardStackTags":  [
+
+                      ],
+    "encounterCreatures":  [
+
+                           ],
+    "tags":  [
+
+             ],
+    "wikiCategories":  [
+
+                       ],
+    "randomTables":  [
+                         {
+                             "rollFormula":  "1d20",
+                             "id":  15000,
+                             "category":  "NPCs",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_social.json",
+                             "name":  "Rasgo de Personalidad NPC",
+                             "sortOrder":  0,
+                             "description":  "Un rasgo de comportamiento o manierismo para un PNJ.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652596405212,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_social.json"
+                         },
+                         {
+                             "rollFormula":  "1d12",
+                             "id":  15001,
+                             "category":  "NPCs",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_social.json",
+                             "name":  "Motivación de NPC",
+                             "sortOrder":  1,
+                             "description":  "Qué quiere o busca este PNJ en el fondo.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652596406567,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_social.json"
+                         },
+                         {
+                             "rollFormula":  "1d12",
+                             "id":  15002,
+                             "category":  "NPCs",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_social.json",
+                             "name":  "Defecto de NPC",
+                             "sortOrder":  2,
+                             "description":  "Un defecto, vicio o debilidad que complica la vida del PNJ.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652596406619,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_social.json"
+                         },
+                         {
+                             "rollFormula":  "1d12",
+                             "id":  15003,
+                             "category":  "NPCs",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_social.json",
+                             "name":  "Apariencia de NPC",
+                             "sortOrder":  3,
+                             "description":  "Rasgo físico notable o primera impresión visual del PNJ.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652596406619,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_social.json"
+                         },
+                         {
+                             "rollFormula":  "1d12",
+                             "id":  15004,
+                             "category":  "NPCs",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_social.json",
+                             "name":  "Secreto de NPC",
+                             "sortOrder":  4,
+                             "description":  "Algo que el PNJ oculta y que podría cambiar la dinámica.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652596406619,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_social.json"
+                         },
+                         {
+                             "rollFormula":  "1d20",
+                             "id":  15005,
+                             "category":  "NPCs",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_social.json",
+                             "name":  "Ocupación de NPC",
+                             "sortOrder":  5,
+                             "description":  "Oficio o rol social del PNJ en la comunidad.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652596406773,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_social.json"
+                         },
+                         {
+                             "rollFormula":  "1d12",
+                             "id":  15006,
+                             "category":  "Tabernas",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_social.json",
+                             "name":  "Rumor en la Taberna",
+                             "sortOrder":  6,
+                             "description":  "Lo que se habla entre copa y copa.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652596406773,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_social.json"
+                         },
+                         {
+                             "rollFormula":  "1d8",
+                             "id":  15007,
+                             "category":  "Tabernas",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_social.json",
+                             "name":  "Plato del Día en la Taberna",
+                             "sortOrder":  7,
+                             "description":  "Qué sirven hoy, y a qué precio aproximado.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652596406875,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_social.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  15008,
+                             "category":  "Tabernas",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_social.json",
+                             "name":  "Evento en la Taberna",
+                             "sortOrder":  8,
+                             "description":  "Algo ocurre mientras los PJs están en la taberna.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652596406926,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_social.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  15009,
+                             "category":  "NPCs",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_social.json",
+                             "name":  "Vínculo de NPC",
+                             "sortOrder":  9,
+                             "description":  "A qué o quién está atado emocionalmente este PNJ.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652596406926,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_social.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  15010,
+                             "category":  "NPCs",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_social.json",
+                             "name":  "Forma de Hablar de NPC",
+                             "sortOrder":  10,
+                             "description":  "Peculiaridad en el lenguaje o forma de comunicarse del PNJ.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652596407027,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_social.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  15011,
+                             "category":  "Social",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_social.json",
+                             "name":  "Festival y Celebración",
+                             "sortOrder":  11,
+                             "description":  "Evento festivo que el grupo encuentra en una ciudad o aldea.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652596407027,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_social.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  15012,
+                             "category":  "Social",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_social.json",
+                             "name":  "Ley Local Extraña",
+                             "sortOrder":  12,
+                             "description":  "Norma vigente en esta ciudad que puede sorprender a los viajeros.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652596407184,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_social.json"
+                         },
+                         {
+                             "rollFormula":  "1d8",
+                             "id":  15013,
+                             "category":  "Social",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_social.json",
+                             "name":  "Evento en el Mercado",
+                             "sortOrder":  13,
+                             "description":  "Algo notable ocurre mientras el grupo recorre el mercado.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652596407291,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_social.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  15014,
+                             "category":  "Social",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_social.json",
+                             "name":  "Facción Encontrada",
+                             "sortOrder":  14,
+                             "description":  "Grupo organizado que el grupo cruza en su camino.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652596407291,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_social.json"
+                         }
+                     ],
+    "sessions":  [
+
+                 ],
+    "wikiEntries":  [
+
+                    ],
+    "randomTableTags":  [
+
+                        ],
+    "combatLog":  [
+
+                  ],
+    "npcTags":  [
+
+                ],
+    "schemaVersion":  1
+}
+
+
+

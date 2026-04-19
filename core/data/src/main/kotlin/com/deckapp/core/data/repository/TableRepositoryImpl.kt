@@ -103,6 +103,12 @@ class TableRepositoryImpl @Inject constructor(
             .map { it.toDomain() }
     }
 
+    override fun getSessionRollLog(sessionId: Long): Flow<List<TableRollResult>> =
+        tableRollResultDao.getResultsForSession(sessionId)
+            .map { entities -> entities.map { it.toDomain() } }
+
+    override suspend fun clearSessionRollLog(sessionId: Long) =
+        tableRollResultDao.clearSessionHistory(sessionId)
 
     override suspend fun saveRollResult(result: TableRollResult): Long =
         tableRollResultDao.insertResult(result.toEntity())

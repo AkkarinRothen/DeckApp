@@ -35,4 +35,6 @@ interface SessionRepository {
     fun getEventsForSession(sessionId: Long): Flow<List<DrawEvent>>
     suspend fun getLastEventForSession(sessionId: Long): DrawEvent?
     suspend fun deleteLastEvent(sessionId: Long)  // para Undo
+
+    suspend fun updateGameSystems(sessionId: Long, gameSystems: List<String>)
 }

@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "referenceTables": [
+    {
+      "id": -201,
+      "name": "Heridas Críticas",
+      "description": "Resultados de daño crítico.",
+      "gameSystem": "Twilight 2000 4th Ed",
+      "category": "Combate",
+      "columnsJson": "[{\"header\":\"D66\",\"widthWeight\":0.5},{\"header\":\"Efecto\",\"widthWeight\":1.5},{\"header\":\"Fatal?\",\"widthWeight\":0.5},{\"header\":\"Tiempo\",\"widthWeight\":0.5}]",
+      "isPinned": true,
+      "sortOrder": 0,
+      "createdAt": 1713430000000
+    },
+    {
+      "id": -202,
+      "name": "Acciones de Combate",
+      "description": "Acciones lentas y rápidas por turno.",
+      "gameSystem": "Twilight 2000 4th Ed",
+      "category": "Combate",
+      "columnsJson": "[{\"header\":\"Acción\",\"widthWeight\":1.0},{\"header\":\"Tipo\",\"widthWeight\":0.5},{\"header\":\"Descripción\",\"widthWeight\":1.5}]",
+      "isPinned": true,
+      "sortOrder": 1,
+      "createdAt": 1713430000000
+    }
+  ],
+  "referenceRows": [
+    { "id": -2011, "tableId": -201, "cellsJson": "[\"11-12\",\"Contusión en la cabeza. Aturdido por 1 round.\",\"No\",\"-\"]", "sortOrder": 0 },
+    { "id": -2012, "tableId": -201, "cellsJson": "[\"65-66\",\"Corazón perforado. Muerte instantánea.\",\"Sí\",\"-\"]", "sortOrder": 1 },
+    { "id": -2021, "tableId": -202, "cellsJson": "[\"Disparar\",\"Lenta\",\"Ataca con arma de fuego o arco.\"]", "sortOrder": 0 },
+    { "id": -2022, "tableId": -202, "cellsJson": "[\"Cuerpo a Cuerpo\",\"Lenta\",\"Ataca en combate cercano.\"]", "sortOrder": 1 },
+    { "id": -2023, "tableId": -202, "cellsJson": "[\"Moverse\",\"Rápida\",\"Muévete un sector o entra/sale de cobertura.\"]", "sortOrder": 2 },
+    { "id": -2024, "tableId": -202, "cellsJson": "[\"Apuntar\",\"Rápida\",\"Gana +1 a tu próximo disparo.\"]", "sortOrder": 3 }
+  ],
+  "systemRules": [
+    {
+      "id": -201,
+      "title": "Empujando Tiradas (Pushing)",
+      "content": "Vuelve a tirar dados que no sean 1 ni 6.\n- **Unos (1s)**: Causan 1 de Daño (físico) o Estrés (mental).\n- **Seises (6s)**: Éxitos adicionales.",
+      "gameSystem": "Twilight 2000 4th Ed",
+      "category": "Mecánicas",
+      "isPinned": true,
+      "sortOrder": 0,
+      "lastUpdated": 1713430000000
+    },
+    {
+      "id": -202,
+      "title": "Trastorno de Estrés (Stress)",
+      "content": "- **Acumulación**: Al empujar tiradas mentales o presenciar horrores.\n- **Colapso**: Si el Estrés supera tu Empatía, quedas incapacitado.\n- **Recuperación**: Descansando en un lugar seguro.",
+      "gameSystem": "Twilight 2000 4th Ed",
+      "category": "Mecánicas",
+      "isPinned": false,
+      "sortOrder": 1,
+      "lastUpdated": 1713430000000
+    }
+  ],
+  "randomTables": [
+    {
+      "id": -201,
+      "name": "T2000: Clima Diarios",
+      "description": "Determina las condiciones atmosféricas del día.",
+      "rollFormula": "1d6",
+      "rollMode": "RANGE",
+      "isNoRepeat": false,
+      "isPinned": false,
+      "sortOrder": 0
+    },
+    {
+      "id": -202,
+      "name": "T2000: Encuentros en Ruinas",
+      "description": "Qué encuentran los jugadores al entrar en una zona urbana.",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "isNoRepeat": true,
+      "isPinned": true,
+      "sortOrder": 1
+    }
+  ],
+  "tableEntries": [
+    { "tableId": -201, "minRoll": 1, "maxRoll": 3, "text": "Despejado. Visibilidad normal.", "sortOrder": 0 },
+    { "tableId": -201, "minRoll": 4, "maxRoll": 5, "text": "Nublado/Lluvia ligera. -1 a Supervivencia.", "sortOrder": 1 },
+    { "tableId": -201, "minRoll": 6, "maxRoll": 6, "text": "Tormenta/Niebla espesa. Visibilidad reducida a 1 sector.", "sortOrder": 2 },
+    { "tableId": -202, "minRoll": 1, "maxRoll": 2, "text": "Patrulla enemiga (D6 soldados).", "sortOrder": 0 },
+    { "tableId": -202, "minRoll": 3, "maxRoll": 4, "text": "Refugiados asustados pidiendo comida.", "sortOrder": 1 },
+    { "tableId": -202, "minRoll": 5, "maxRoll": 6, "text": "Francotirador oculto en un edificio alto.", "sortOrder": 2 },
+    { "tableId": -202, "minRoll": 7, "maxRoll": 8, "text": "Campo de minas señalizado (o no).", "sortOrder": 3 },
+    { "tableId": -202, "minRoll": 9, "maxRoll": 10, "text": "Escondite de suministros abandonado.", "sortOrder": 4 }
+  ]
+}

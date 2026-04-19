@@ -30,7 +30,7 @@ data class SessionUiState(
     val errorMessage: String? = null,
     val peekCard: Card? = null,    // carta visible en modo Peek (no robada)
     val sessionEnded: Boolean = false,
-    val activeTab: Int = 0,                  // 0=Mazos, 1=Pilas, 2=Tablas, 3=Notas, 4=Combate
+    val activeTab: Int = 0,                  // 0=Mazos, 1=Pilas, 2=Tablas, 3=Ref, 4=Notas, 5=Combate
     val hasActiveEncounter: Boolean = false, // habilita tab Combate (Sprint 7)
     val activeEncounter: Encounter? = null,  // datos del combate en curso
     val dmNotes: String = "",
@@ -48,6 +48,8 @@ data class SessionUiState(
     val allTables: List<RandomTable> = emptyList(),
     val tablesInSession: List<RandomTable> = emptyList(),
     val showResourceManager: Boolean = false,
+    val showSessionConfig: Boolean = false,
+    val availableSystems: List<String> = emptyList(),
     // C-5 — Animación de barajar
     val isShuffling: Boolean = false,
     // D-2 — Robar por palo
@@ -56,7 +58,8 @@ data class SessionUiState(
     // Sprint 15 — UX de Notas
     val isSavingNotes: Boolean = false,
     // Sprint 17 — Participantes temporales (PJs)
-    val playerParticipants: List<PlayerInitiativeParticipant> = emptyList()
+    val playerParticipants: List<PlayerInitiativeParticipant> = emptyList(),
+    val isSimplifiedMode: Boolean = false
 )
 
 
@@ -68,6 +71,7 @@ class SessionViewModel @Inject constructor(
     private val cardRepository: CardRepository,
     private val tableRepository: com.deckapp.core.domain.repository.TableRepository,
     private val encounterRepository: EncounterRepository,
+    private val referenceRepository: com.deckapp.core.domain.repository.ReferenceRepository,
     private val drawCardUseCase: DrawCardUseCase,
     private val discardCardUseCase: DiscardCardUseCase,
     private val resetDeckUseCase: ResetDeckUseCase,
@@ -80,6 +84,7 @@ class SessionViewModel @Inject constructor(
     private val calculateInitiativeOrderUseCase: CalculateInitiativeOrderUseCase,
     private val toggleConditionUseCase: ToggleConditionUseCase,
     private val cleanupCombatUseCase: CleanupCombatUseCase,
+    private val settingsRepository: com.deckapp.core.domain.repository.SettingsRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -89,6 +94,9 @@ class SessionViewModel @Inject constructor(
     val uiState: StateFlow<SessionUiState> = _uiState.asStateFlow()
 
     init {
+        // Modo simplificado (Sprint 17.5)
+        _uiState.update { it.copy(isSimplifiedMode = settingsRepository.getSimplifiedModeEnabled()) }
+
         // Sesión info
         viewModelScope.launch {
             sessionRepository.getSessionById(sessionId)
@@ -212,11 +220,16 @@ class SessionViewModel @Inject constructor(
         viewModelScope.launch {
             combine(
                 cardRepository.getAllDecks(),
-                tableRepository.getAllTables()
-            ) { decks, tables ->
-                decks to tables
-            }.collect { (decks, tables) ->
-                _uiState.update { it.copy(allDecks = decks, allTables = tables) }
+                tableRepository.getAllTables(),
+                referenceRepository.getDistinctSystems()
+            ) { decks, tables, systems ->
+                Triple(decks, tables, systems)
+            }.collect { (decks, tables, systems) ->
+                _uiState.update { it.copy(
+                    allDecks = decks, 
+                    allTables = tables,
+                    availableSystems = systems
+                ) }
             }
         }
     }
@@ -233,6 +246,9 @@ class SessionViewModel @Inject constructor(
 
     fun openResourceManager() = _uiState.update { it.copy(showResourceManager = true) }
     fun dismissResourceManager() = _uiState.update { it.copy(showResourceManager = false) }
+
+    fun openSessionConfig() = _uiState.update { it.copy(showSessionConfig = true) }
+    fun dismissSessionConfig() = _uiState.update { it.copy(showSessionConfig = false) }
 
     fun toggleDeckInSession(deckId: Long) {
         viewModelScope.launch {
@@ -303,7 +319,7 @@ class SessionViewModel @Inject constructor(
         val entry = "[$time] $text"
         val current = _uiState.value.dmNotes
         val updated = if (current.isBlank()) entry else "$current\n$entry"
-        _uiState.update { it.copy(dmNotes = updated, showQuickNoteDialog = false, activeTab = 3) }
+        _uiState.update { it.copy(dmNotes = updated, showQuickNoteDialog = false, activeTab = 4) }
         viewModelScope.launch {
             sessionRepository.updateDmNotes(sessionId, updated)
         }
@@ -319,6 +335,32 @@ class SessionViewModel @Inject constructor(
             // Pequeña pausa para que el indicador sea perceptible si la DB es muy rápida
             delay(400)
             _uiState.update { it.copy(isSavingNotes = false) }
+        }
+    }
+
+    /** Actualiza los sistemas de juego de la sesión. */
+    fun updateGameSystems(systems: List<String>) {
+        viewModelScope.launch {
+            sessionRepository.updateGameSystems(sessionId, systems)
+        }
+    }
+
+    /**
+     * Selecciona un mazo y roba una carta de él.
+     */
+    fun drawCardFromDeck(stackId: Long) {
+        _uiState.update { it.copy(selectedDeckId = stackId) }
+        viewModelScope.launch {
+            val deckRef = _uiState.value.deckRefs.find { it.stackId == stackId } ?: return@launch
+            val card = drawCardUseCase(
+                deckId = stackId,
+                sessionId = sessionId,
+                drawMode = deckRef.drawModeOverride ?: DrawMode.RANDOM
+            )
+            if (card == null) {
+                val deckName = _uiState.value.deckNames[stackId] ?: "Mazo"
+                _uiState.update { it.copy(snackbarMessage = "\"$deckName\" no tiene más cartas disponibles") }
+            }
         }
     }
 
@@ -678,7 +720,7 @@ class SessionViewModel @Inject constructor(
             encounterRepository.saveEncounter(encounter.copy(isActive = false))
             
             // 4. Volver a mazos si estábamos en combate
-            if (_uiState.value.activeTab == 4) {
+            if (_uiState.value.activeTab == 5) {
                 _uiState.update { it.copy(
                     activeTab = 0, 
                     snackbarMessage = "Combate finalizado y resumido en notas",

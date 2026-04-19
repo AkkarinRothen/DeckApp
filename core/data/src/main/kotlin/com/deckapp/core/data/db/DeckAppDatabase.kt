@@ -34,9 +34,20 @@ import androidx.room.RoomDatabase
         NpcEntity::class,
         NpcTagCrossRef::class,
         WikiCategoryEntity::class,
-        WikiEntryEntity::class
+        WikiEntryEntity::class,
+        ReferenceTableEntity::class,
+        ReferenceRowEntity::class,
+        ReferenceTableTagCrossRef::class,
+        SystemRuleEntity::class,
+        SystemRuleTagCrossRef::class,
+        ReferenceTableFtsEntity::class,
+        SystemRuleFtsEntity::class,
+        HexMapEntity::class,
+        HexTileEntity::class,
+        HexPoiEntity::class,
+        HexDayEntity::class
     ],
-    version = 26,
+    version = 31,
     exportSchema = true
 )
 abstract class DeckAppDatabase : RoomDatabase() {
@@ -56,6 +67,9 @@ abstract class DeckAppDatabase : RoomDatabase() {
     abstract fun collectionDao(): CollectionDao
     abstract fun npcDao(): NpcDao
     abstract fun wikiDao(): WikiDao
+    abstract fun referenceTableDao(): ReferenceTableDao
+    abstract fun hexDao(): HexDao
+    abstract fun systemRuleDao(): SystemRuleDao
     abstract fun backupDao(): com.deckapp.core.data.db.backup.BackupDao
 
     companion object {
@@ -77,5 +91,10 @@ abstract class DeckAppDatabase : RoomDatabase() {
         val MIGRATION_23_24 = com.deckapp.core.data.db.MIGRATION_23_24
         val MIGRATION_24_25 = com.deckapp.core.data.db.MIGRATION_24_25
         val MIGRATION_25_26 = com.deckapp.core.data.db.MIGRATION_25_26
+        val MIGRATION_26_27 = com.deckapp.core.data.db.MIGRATION_26_27
+        val MIGRATION_27_28 = com.deckapp.core.data.db.MIGRATION_27_28
+        val MIGRATION_28_29 = com.deckapp.core.data.db.MIGRATION_28_29
+        val MIGRATION_29_30 = com.deckapp.core.data.db.MIGRATION_29_30
+        val MIGRATION_30_31 = com.deckapp.core.data.db.MIGRATION_30_31
     }
 }

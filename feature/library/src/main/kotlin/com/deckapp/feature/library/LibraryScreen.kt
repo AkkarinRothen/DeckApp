@@ -62,6 +62,8 @@ fun LibraryScreen(
     onEncounterLibrary: () -> Unit,
     onNpcLibrary: () -> Unit,
     onWikiClick: () -> Unit,
+    onReferenceClick: () -> Unit,
+    onHexplorationClick: () -> Unit = {},
     viewModel: LibraryViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -244,6 +246,22 @@ fun LibraryScreen(
                                     onWikiClick()
                                 },
                                 leadingIcon = { Icon(Icons.Default.MenuBook, null) }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Tablas y Reglas") },
+                                onClick = {
+                                    showMenu = false
+                                    onReferenceClick()
+                                },
+                                leadingIcon = { Icon(Icons.Default.Description, null) }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Mapas Hex") },
+                                onClick = {
+                                    showMenu = false
+                                    onHexplorationClick()
+                                },
+                                leadingIcon = { Icon(Icons.Default.Layers, null) }
                             )
                         }
                     } else {

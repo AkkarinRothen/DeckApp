@@ -1,0 +1,1361 @@
+﻿{
+    "systemRuleTags":  [
+
+                       ],
+    "referenceTableTags":  [
+
+                           ],
+    "referenceRows":  [
+
+                      ],
+    "cardFaces":  [
+
+                  ],
+    "tableBundles":  [
+
+                     ],
+    "tableEntries":  [
+                         {
+                             "id":  10000,
+                             "text":  "Daño doble. El enemigo sangra ([1d4] daño al inicio de su turno).",
+                             "tableId":  10000,
+                             "sortOrder":  0,
+                             "maxRoll":  2,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10001,
+                             "text":  "Golpe ensordecedor. El enemigo tiene desventaja en percepción 1 turno.",
+                             "tableId":  10000,
+                             "sortOrder":  1,
+                             "maxRoll":  4,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10002,
+                             "text":  "Arma volando. El enemigo pierde su arma a [1d4] metros.",
+                             "tableId":  10000,
+                             "sortOrder":  2,
+                             "maxRoll":  6,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10003,
+                             "text":  "Rodilla rota. Velocidad del enemigo reducida a la mitad 2 turnos.",
+                             "tableId":  10000,
+                             "sortOrder":  3,
+                             "maxRoll":  8,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10004,
+                             "text":  "Golpe en la cabeza. El enemigo queda aturdido hasta su próximo turno.",
+                             "tableId":  10000,
+                             "sortOrder":  4,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10005,
+                             "text":  "Herida espectacular. +[1d6] daño adicional. El enemigo pierde moral.",
+                             "tableId":  10000,
+                             "sortOrder":  5,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10006,
+                             "text":  "Resbalón. Caes prono. Levantarse cuesta movimiento.",
+                             "tableId":  10001,
+                             "sortOrder":  6,
+                             "maxRoll":  2,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10007,
+                             "text":  "Golpeas a un aliado adyacente. Daño normal.",
+                             "tableId":  10001,
+                             "sortOrder":  7,
+                             "maxRoll":  4,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10008,
+                             "text":  "El arma se atasca. Acción para librarla.",
+                             "tableId":  10001,
+                             "sortOrder":  8,
+                             "maxRoll":  6,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10009,
+                             "text":  "Sobre-extensión. Desventaja en el siguiente ataque.",
+                             "tableId":  10001,
+                             "sortOrder":  9,
+                             "maxRoll":  8,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10010,
+                             "text":  "El arma se rompe. Pierde [1d4] puntos de daño permanentemente.",
+                             "tableId":  10001,
+                             "sortOrder":  10,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10011,
+                             "text":  "Crítico fallido total. Pierdes tu turno y quedas aturdido.",
+                             "tableId":  10001,
+                             "sortOrder":  11,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10012,
+                             "text":  "Se derrumba una sección del techo. Todo el que esté debajo recibe [2d6] daño.",
+                             "tableId":  10002,
+                             "sortOrder":  12,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10013,
+                             "text":  "Se rompe el suelo bajo un personaje. Cae [1d4] metros.",
+                             "tableId":  10002,
+                             "sortOrder":  13,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10014,
+                             "text":  "Una antorcha cae sobre algo inflamable. El fuego se expande.",
+                             "tableId":  10002,
+                             "sortOrder":  14,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10015,
+                             "text":  "Llegan [1d4] refuerzos para el bando que parece ganar.",
+                             "tableId":  10002,
+                             "sortOrder":  15,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10016,
+                             "text":  "El suelo está resbaladizo. Moverse requiere prueba de equilibrio.",
+                             "tableId":  10002,
+                             "sortOrder":  16,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10017,
+                             "text":  "Un estruendo ensordecedor. Todos quedan con desventaja en percepción 1 turno.",
+                             "tableId":  10002,
+                             "sortOrder":  17,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10018,
+                             "text":  "Una trampa olvidada se activa por el movimiento. [2d8] daño en un radio de 3m.",
+                             "tableId":  10002,
+                             "sortOrder":  18,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10019,
+                             "text":  "Niebla mágica. Todos quedan a cubierto hasta el final del combate.",
+                             "tableId":  10002,
+                             "sortOrder":  19,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10020,
+                             "text":  "Huyen en desbandada. No atacan más.",
+                             "tableId":  10003,
+                             "sortOrder":  20,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10021,
+                             "text":  "Uno rinde y suplica por su vida. El resto duda.",
+                             "tableId":  10003,
+                             "sortOrder":  21,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10022,
+                             "text":  "Reagrupan bajo el más fuerte. Formación defensiva.",
+                             "tableId":  10003,
+                             "sortOrder":  22,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10023,
+                             "text":  "Enfurecen. Atacan con frenesí (ventaja en ataques, +2 daño, ignoran CA).",
+                             "tableId":  10003,
+                             "sortOrder":  23,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10024,
+                             "text":  "Negocian una tregua. Quieren salvar el pellejo.",
+                             "tableId":  10003,
+                             "sortOrder":  24,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10025,
+                             "text":  "Lucha hasta la muerte. No tienen nada que perder.",
+                             "tableId":  10003,
+                             "sortOrder":  25,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10026,
+                             "text":  "El lanzador queda invisible por 1 minuto. Involuntariamente.",
+                             "tableId":  10004,
+                             "sortOrder":  26,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10027,
+                             "text":  "Todos en 6m cambian de idioma nativo por 1 hora.",
+                             "tableId":  10004,
+                             "sortOrder":  27,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10028,
+                             "text":  "El lanzador teletransporta [1d6] metros en dirección aleatoria.",
+                             "tableId":  10004,
+                             "sortOrder":  28,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10029,
+                             "text":  "Llueve confeti mágico. Absolutamente inútil.",
+                             "tableId":  10004,
+                             "sortOrder":  29,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10030,
+                             "text":  "El hechizo se duplica y golpea a un objetivo adicional aleatorio.",
+                             "tableId":  10004,
+                             "sortOrder":  30,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10031,
+                             "text":  "El lanzador envejece [1d10] años. Reversible.",
+                             "tableId":  10004,
+                             "sortOrder":  31,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10032,
+                             "text":  "Aparece una cabra mágica. Dura 1 minuto. Luego explota (inofensivamente).",
+                             "tableId":  10004,
+                             "sortOrder":  32,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10033,
+                             "text":  "El lanzador levita 1 metro durante 1 minuto.",
+                             "tableId":  10004,
+                             "sortOrder":  33,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10034,
+                             "text":  "Todos en 6m sienten euforia por 1 turno (ventaja en todo).",
+                             "tableId":  10004,
+                             "sortOrder":  34,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10035,
+                             "text":  "Aparece un duplicado del lanzador. Dura 1 turno y no coopera.",
+                             "tableId":  10004,
+                             "sortOrder":  35,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10036,
+                             "text":  "Fuego de color violeta rodea al lanzador. No quema, pero intimida.",
+                             "tableId":  10004,
+                             "sortOrder":  36,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10037,
+                             "text":  "El siguiente hechizo del lanzador tiene alcance máximo doble.",
+                             "tableId":  10004,
+                             "sortOrder":  37,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10038,
+                             "text":  "El lanzador habla solo en rimas durante 1 hora.",
+                             "tableId":  10004,
+                             "sortOrder":  38,
+                             "maxRoll":  13,
+                             "minRoll":  13,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10039,
+                             "text":  "Todo el metal en 3m queda magnetizado por 1 minuto.",
+                             "tableId":  10004,
+                             "sortOrder":  39,
+                             "maxRoll":  14,
+                             "minRoll":  14,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10040,
+                             "text":  "El lanzador se vuelve translúcido por 1 hora. Parcialmente visible.",
+                             "tableId":  10004,
+                             "sortOrder":  40,
+                             "maxRoll":  15,
+                             "minRoll":  15,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10041,
+                             "text":  "Surge un campo de silencio de 3m por 1 minuto.",
+                             "tableId":  10004,
+                             "sortOrder":  41,
+                             "maxRoll":  16,
+                             "minRoll":  16,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10042,
+                             "text":  "El tiempo se ralentiza para el lanzador (+1 acción este turno).",
+                             "tableId":  10004,
+                             "sortOrder":  42,
+                             "maxRoll":  17,
+                             "minRoll":  17,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10043,
+                             "text":  "Hierba y flores brotan del suelo en 3m a su alrededor.",
+                             "tableId":  10004,
+                             "sortOrder":  43,
+                             "maxRoll":  18,
+                             "minRoll":  18,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10044,
+                             "text":  "El hechizo falla y el lanzador sufre [2d10] de daño arcano.",
+                             "tableId":  10004,
+                             "sortOrder":  44,
+                             "maxRoll":  19,
+                             "minRoll":  19,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10045,
+                             "text":  "El hechizo se potencia. Daño o efectos al máximo posible.",
+                             "tableId":  10004,
+                             "sortOrder":  45,
+                             "maxRoll":  20,
+                             "minRoll":  20,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10046,
+                             "text":  "Curación: recupera [2d4+2] PV.",
+                             "tableId":  10005,
+                             "sortOrder":  46,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10047,
+                             "text":  "Veneno débil: [1d4] daño por hora durante 8 horas.",
+                             "tableId":  10005,
+                             "sortOrder":  47,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10048,
+                             "text":  "Fuerza de toro: +4 a FUE por 1 hora.",
+                             "tableId":  10005,
+                             "sortOrder":  48,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10049,
+                             "text":  "Reducción: el bebedor se encoge al tamaño de un gato por 1 hora.",
+                             "tableId":  10005,
+                             "sortOrder":  49,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10050,
+                             "text":  "Visión en la oscuridad: 18 metros durante 8 horas.",
+                             "tableId":  10005,
+                             "sortOrder":  50,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10051,
+                             "text":  "Insomnio: imposible descansar por [1d4] días.",
+                             "tableId":  10005,
+                             "sortOrder":  51,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10052,
+                             "text":  "Habla con animales durante 1 hora.",
+                             "tableId":  10005,
+                             "sortOrder":  52,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10053,
+                             "text":  "Cambio de color de cabello y ojos. Permanente hasta dispel magic.",
+                             "tableId":  10005,
+                             "sortOrder":  53,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10054,
+                             "text":  "Velocidad de movimiento duplicada por 1 hora.",
+                             "tableId":  10005,
+                             "sortOrder":  54,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10055,
+                             "text":  "Regeneración: recupera 1 PV al inicio de cada turno por 1 hora.",
+                             "tableId":  10005,
+                             "sortOrder":  55,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10056,
+                             "text":  "No puede soltarse. El portador no puede deshacerse del objeto voluntariamente.",
+                             "tableId":  10006,
+                             "sortOrder":  56,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10057,
+                             "text":  "Susurros: el objeto habla en la mente del portador. Distracción constante.",
+                             "tableId":  10006,
+                             "sortOrder":  57,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10058,
+                             "text":  "Inversión: el efecto beneficioso del objeto ocurre al enemigo más cercano.",
+                             "tableId":  10006,
+                             "sortOrder":  58,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10059,
+                             "text":  "Robo de suerte: el portador tiene desventaja en todas las tiradas de salvación.",
+                             "tableId":  10006,
+                             "sortOrder":  59,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10060,
+                             "text":  "Hambre sin fin: el portador necesita el doble de raciones diarias.",
+                             "tableId":  10006,
+                             "sortOrder":  60,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10061,
+                             "text":  "Marca visible: runas brillantes aparecen en la piel. Revelan la posición.",
+                             "tableId":  10006,
+                             "sortOrder":  61,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10062,
+                             "text":  "Sueño profundo: el portador duerme 2 horas extra. Siempre.",
+                             "tableId":  10006,
+                             "sortOrder":  62,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10063,
+                             "text":  "Atracción de no-muertos: los muertos vivientes atacan primero al portador.",
+                             "tableId":  10006,
+                             "sortOrder":  63,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10064,
+                             "text":  "Paranoico: desventaja en tiradas de Sabiduría e Insight.",
+                             "tableId":  10006,
+                             "sortOrder":  64,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10065,
+                             "text":  "Transformación lenta: cada semana, el portador adquiere un rasgo del objeto (escamas, garras, etc.).",
+                             "tableId":  10006,
+                             "sortOrder":  65,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10066,
+                             "text":  "Lágrima de un dragón vivo, vertida voluntariamente.",
+                             "tableId":  10007,
+                             "sortOrder":  66,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10067,
+                             "text":  "Ceniza de un libro de hechizos quemado en luna llena.",
+                             "tableId":  10007,
+                             "sortOrder":  67,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10068,
+                             "text":  "Pluma de un grifo arrancada en vida.",
+                             "tableId":  10007,
+                             "sortOrder":  68,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10069,
+                             "text":  "Arena del desierto que nunca ha sido tocada por lluvia.",
+                             "tableId":  10007,
+                             "sortOrder":  69,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10070,
+                             "text":  "El último suspiro de alguien que murió de risa.",
+                             "tableId":  10007,
+                             "sortOrder":  70,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10071,
+                             "text":  "Sangre de noble de sangre pura, donada sin coerción.",
+                             "tableId":  10007,
+                             "sortOrder":  71,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10072,
+                             "text":  "Eco atrapado en una piedra hueca de una cueva profunda.",
+                             "tableId":  10007,
+                             "sortOrder":  72,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10073,
+                             "text":  "Un recuerdo olvidado, extraído de la mente del lanzador.",
+                             "tableId":  10007,
+                             "sortOrder":  73,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10074,
+                             "text":  "Musgo de tumba que haya crecido sobre un rey.",
+                             "tableId":  10007,
+                             "sortOrder":  74,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10075,
+                             "text":  "El nombre verdadero de una criatura, escrito con su propia sangre.",
+                             "tableId":  10007,
+                             "sortOrder":  75,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10076,
+                             "text":  "El arma atraviesa el pecho del enemigo. Sus rodillas ceden antes de que sus ojos lo entiendan.",
+                             "tableId":  10008,
+                             "sortOrder":  76,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10077,
+                             "text":  "El golpe lo lanza hacia atrás. Se desploma contra la pared y no vuelve a levantarse.",
+                             "tableId":  10008,
+                             "sortOrder":  77,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10078,
+                             "text":  "Un giro fluido y el acero pasa por su garganta. Cae en silencio.",
+                             "tableId":  10008,
+                             "sortOrder":  78,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10079,
+                             "text":  "La magia impacta en su centro. Se convierte en ceniza en segundos.",
+                             "tableId":  10008,
+                             "sortOrder":  79,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10080,
+                             "text":  "La última expresión del enemigo es de sorpresa. Esperaba ganar.",
+                             "tableId":  10008,
+                             "sortOrder":  80,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10081,
+                             "text":  "Cae de rodillas, después de cara. Sin un sonido más.",
+                             "tableId":  10008,
+                             "sortOrder":  81,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10082,
+                             "text":  "El golpe derriba el arma del enemigo. El siguiente ya va al cuello.",
+                             "tableId":  10008,
+                             "sortOrder":  82,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10083,
+                             "text":  "Se derrumba lentamente. Sus ojos se apagan mirando al personaje.",
+                             "tableId":  10008,
+                             "sortOrder":  83,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10084,
+                             "text":  "Con un grito que hace temblar el aire, el enemigo cae fulminado.",
+                             "tableId":  10008,
+                             "sortOrder":  84,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10085,
+                             "text":  "El impacto lo levanta del suelo un momento. Cae definitivamente.",
+                             "tableId":  10008,
+                             "sortOrder":  85,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10086,
+                             "text":  "Campo abierto. Sin cobertura. El viento sopla en contra.",
+                             "tableId":  10009,
+                             "sortOrder":  86,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10087,
+                             "text":  "Pasillo estrecho. Solo pueden entrar en combate de uno en uno.",
+                             "tableId":  10009,
+                             "sortOrder":  87,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10088,
+                             "text":  "Terreno elevado para el enemigo. +2 a sus ataques por posición.",
+                             "tableId":  10009,
+                             "sortOrder":  88,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10089,
+                             "text":  "Escombros por todas partes. El movimiento es terreno difícil.",
+                             "tableId":  10009,
+                             "sortOrder":  89,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10090,
+                             "text":  "Luz tenue. Todos tienen desventaja en ataques a distancia.",
+                             "tableId":  10009,
+                             "sortOrder":  90,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10091,
+                             "text":  "Lluvia intensa. Las antorchas se apagan. Penalización a percepción.",
+                             "tableId":  10009,
+                             "sortOrder":  91,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10092,
+                             "text":  "Suelo resbaladizo de barro o hielo. Prueba de DES al correr.",
+                             "tableId":  10009,
+                             "sortOrder":  92,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10093,
+                             "text":  "Civiles presentes. Cada área de efecto puede dañarlos.",
+                             "tableId":  10009,
+                             "sortOrder":  93,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10094,
+                             "text":  "Columnas o pilares. Cobertura disponible para ambos bandos.",
+                             "tableId":  10009,
+                             "sortOrder":  94,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10095,
+                             "text":  "Orilla de un precipicio. Caer implica [4d10] daño.",
+                             "tableId":  10009,
+                             "sortOrder":  95,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10096,
+                             "text":  "ATAQUE INMEDIATO. Sin palabras, sin negociación. Golpea primero.",
+                             "tableId":  10010,
+                             "sortOrder":  96,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10097,
+                             "text":  "HOSTIL. Amenaza, adopta postura de ataque. Atacará si el grupo no retrocede.",
+                             "tableId":  10010,
+                             "sortOrder":  97,
+                             "maxRoll":  5,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10098,
+                             "text":  "INCIERTO. Observa y espera. El resultado depende de lo que haga el grupo.",
+                             "tableId":  10010,
+                             "sortOrder":  98,
+                             "maxRoll":  8,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10099,
+                             "text":  "NO HOSTIL. Curioso o indiferente. Podría hablar o ignorarlos.",
+                             "tableId":  10010,
+                             "sortOrder":  99,
+                             "maxRoll":  11,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10100,
+                             "text":  "AMISTOSO. Dispuesto a ayudar, negociar o incluso aliarse.",
+                             "tableId":  10010,
+                             "sortOrder":  100,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10101,
+                             "text":  "Patrullando su territorio. En alerta moderada.",
+                             "tableId":  10011,
+                             "sortOrder":  101,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10102,
+                             "text":  "Comiendo. Furioso si se le interrumpe.",
+                             "tableId":  10011,
+                             "sortOrder":  102,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10103,
+                             "text":  "Durmiendo. Prueba de sigilo para no despertarlo.",
+                             "tableId":  10011,
+                             "sortOrder":  103,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10104,
+                             "text":  "Acechando otra presa distinta al grupo. Podría ignorarlos.",
+                             "tableId":  10011,
+                             "sortOrder":  104,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10105,
+                             "text":  "Transportando algo a su guarida. No quiere testigos.",
+                             "tableId":  10011,
+                             "sortOrder":  105,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10106,
+                             "text":  "Herido y huyendo de algo más peligroso. Podría llevarlos hasta ello.",
+                             "tableId":  10011,
+                             "sortOrder":  106,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10107,
+                             "text":  "Disputando territorio con otro de su especie. El grupo es una distracción.",
+                             "tableId":  10011,
+                             "sortOrder":  107,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10108,
+                             "text":  "Protegiendo crías o huevos. Extremadamente agresivo sin provocación.",
+                             "tableId":  10011,
+                             "sortOrder":  108,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10109,
+                             "text":  "Realizando un comportamiento instintivo extraño o ritual.",
+                             "tableId":  10011,
+                             "sortOrder":  109,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10110,
+                             "text":  "Muriendo. Sus últimas acciones pueden ser desesperadas o inesperadamente cooperativas.",
+                             "tableId":  10011,
+                             "sortOrder":  110,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10111,
+                             "text":  "Carga directa. Sin estrategia. Fuerza bruta pura.",
+                             "tableId":  10012,
+                             "sortOrder":  111,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10112,
+                             "text":  "Flanqueo. Intenta rodear al grupo antes de atacar.",
+                             "tableId":  10012,
+                             "sortOrder":  112,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10113,
+                             "text":  "Ataca al más débil o al que parece el líder.",
+                             "tableId":  10012,
+                             "sortOrder":  113,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10114,
+                             "text":  "Usa el terreno: empuja al precipicio, usa la oscuridad, se esconde.",
+                             "tableId":  10012,
+                             "sortOrder":  114,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10115,
+                             "text":  "Huye si pierde más del 50% de PV. La supervivencia es lo primero.",
+                             "tableId":  10012,
+                             "sortOrder":  115,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10116,
+                             "text":  "Lucha hasta la muerte. No conoce ni entiende la retirada.",
+                             "tableId":  10012,
+                             "sortOrder":  116,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10117,
+                             "text":  "Atrae refuerzos con sonidos, señales o simplemente huyendo hacia su nido.",
+                             "tableId":  10012,
+                             "sortOrder":  117,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  10118,
+                             "text":  "Finge rendirse o estar herido para atacar por sorpresa.",
+                             "tableId":  10012,
+                             "sortOrder":  118,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         }
+                     ],
+    "drawEvents":  [
+
+                   ],
+    "sessionDeckRefs":  [
+
+                        ],
+    "decks":  [
+
+              ],
+    "encounters":  [
+
+                   ],
+    "referenceTables":  [
+
+                        ],
+    "cardTags":  [
+
+                 ],
+    "systemRules":  [
+
+                    ],
+    "npcs":  [
+
+             ],
+    "cards":  [
+
+              ],
+    "sessionTableRefs":  [
+
+                         ],
+    "cardStackTags":  [
+
+                      ],
+    "encounterCreatures":  [
+
+                           ],
+    "tags":  [
+
+             ],
+    "wikiCategories":  [
+
+                       ],
+    "randomTables":  [
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  10000,
+                             "category":  "Combate",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_combat_magic.json",
+                             "name":  "Resultado de Crítico",
+                             "sortOrder":  0,
+                             "description":  "Efectos adicionales en un golpe crítico.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  17765259178323,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_combat_magic.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  10001,
+                             "category":  "Combate",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_combat_magic.json",
+                             "name":  "Resultado de Pifia",
+                             "sortOrder":  1,
+                             "description":  "Efectos al sacar un 1 natural en un ataque.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652591784523,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_combat_magic.json"
+                         },
+                         {
+                             "rollFormula":  "1d8",
+                             "id":  10002,
+                             "category":  "Combate",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_combat_magic.json",
+                             "name":  "Evento Ambiental de Combate",
+                             "sortOrder":  2,
+                             "description":  "Algo sucede en el entorno durante el combate.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652591784523,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_combat_magic.json"
+                         },
+                         {
+                             "rollFormula":  "1d6",
+                             "id":  10003,
+                             "category":  "Combate",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_combat_magic.json",
+                             "name":  "Moral del Enemigo",
+                             "sortOrder":  3,
+                             "description":  "Reacción de los enemigos cuando la batalla se tuerce.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652591784523,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_combat_magic.json"
+                         },
+                         {
+                             "rollFormula":  "1d20",
+                             "id":  10004,
+                             "category":  "Magia",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_combat_magic.json",
+                             "name":  "Efecto de Magia Salvaje",
+                             "sortOrder":  4,
+                             "description":  "Qué ocurre cuando la magia se descontrola.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652591784675,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_combat_magic.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  10005,
+                             "category":  "Magia",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_combat_magic.json",
+                             "name":  "Poción Misteriosa",
+                             "sortOrder":  5,
+                             "description":  "Efecto de una poción sin etiquetar o de origen desconocido.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652591784675,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_combat_magic.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  10006,
+                             "category":  "Magia",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_combat_magic.json",
+                             "name":  "Maldición de Objeto Mágico",
+                             "sortOrder":  6,
+                             "description":  "Efecto negativo de un objeto mágico maldito.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652591784675,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_combat_magic.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  10007,
+                             "category":  "Magia",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_combat_magic.json",
+                             "name":  "Componente de Hechizo Inusual",
+                             "sortOrder":  7,
+                             "description":  "Ingrediente raro que un hechizo o ritual requiere encontrar.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652591784675,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_combat_magic.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  10008,
+                             "category":  "Combate",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_combat_magic.json",
+                             "name":  "Descripción de Golpe de Gracia",
+                             "sortOrder":  8,
+                             "description":  "Narración épica para cuando el personaje mata al enemigo final.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652591784829,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_combat_magic.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  10009,
+                             "category":  "Combate",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_combat_magic.json",
+                             "name":  "Condición del Terreno al Inicio de Combate",
+                             "sortOrder":  9,
+                             "description":  "Cómo es el escenario antes de que empiece la acción.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652591784829,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_combat_magic.json"
+                         },
+                         {
+                             "rollFormula":  "2d6",
+                             "id":  10010,
+                             "category":  "Monstruos",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_combat_magic.json",
+                             "name":  "Reacción Inicial de Criatura",
+                             "sortOrder":  10,
+                             "description":  "Cómo reacciona un monstruo o PNJ al ver al grupo por primera vez (2d6).",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  17765259178493,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_combat_magic.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  10011,
+                             "category":  "Monstruos",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_combat_magic.json",
+                             "name":  "Actividad del Monstruo al Encontrarlo",
+                             "sortOrder":  11,
+                             "description":  "Qué estaba haciendo la criatura antes de que llegara el grupo.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  17765259178493,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_combat_magic.json"
+                         },
+                         {
+                             "rollFormula":  "1d8",
+                             "id":  10012,
+                             "category":  "Monstruos",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_combat_magic.json",
+                             "name":  "Táctica de Combate del Monstruo",
+                             "sortOrder":  12,
+                             "description":  "Cómo pelea esta criatura cuando decide atacar.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652591784981,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_combat_magic.json"
+                         }
+                     ],
+    "sessions":  [
+
+                 ],
+    "wikiEntries":  [
+
+                    ],
+    "randomTableTags":  [
+
+                        ],
+    "combatLog":  [
+
+                  ],
+    "npcTags":  [
+
+                ],
+    "schemaVersion":  1
+}
+
+
+

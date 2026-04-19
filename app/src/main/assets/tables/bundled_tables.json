@@ -36,6 +36,95 @@
       ]
     },
     {
+      "name": "Encuentro Aleatorio Camino",
+      "description": "Tirar cada hora de viaje por carretera o camino conocido.",
+      "category": "Encuentros",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 2,  "text": "Sin encuentro. El camino está despejado." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Una caravana de mercaderes busca escolta por [1d6] monedas de plata." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "[1d4+2] bandidos en un falso retén de peaje." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Un viajero herido al borde del camino. (@Nombre Humano Femenino, posible trampa.)" },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Patrulla de soldados. Piden documentos o impuesto de camino." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Un caballo sin jinete, con sillas y alforjas aún puestas." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Un peregrino fanático que da sermones a quien le escuche." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "[1d3] ogros robando un carro volcado." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Un mago errante que necesita ingredientes raros. Podría ser aliado." }
+      ]
+    },
+    {
+      "name": "Encuentro Aleatorio Montaña",
+      "description": "Tirar cada hora de viaje en altitud o paso de montaña.",
+      "category": "Encuentros",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 2,  "text": "Sin encuentro. Viento frío y silencio." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "[1d4] águilas gigantes circulan en lo alto." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Alud de piedras. Prueba de destreza o [2d6] de daño contundente." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "[2d4] kobolds mineros que defienden su veta de hierro." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Un gigante de piedra dormido en el camino. Despertarlo es peligroso." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Una cueva con señales de ocupación reciente. Fuego aún caliente." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "[1d3] grifos cazando. Los personajes son presa potencial." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Un ermitaño enano con un mapa fragmentado. Desconfía de extraños." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Un dragón plateado anciano que quiere ser entretenido con historias." }
+      ]
+    },
+    {
+      "name": "Encuentro Aleatorio Pantano",
+      "description": "Tirar cada hora en terreno pantanoso o marisma.",
+      "category": "Encuentros",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 2,  "text": "Sin encuentro. Solo croar de ranas y niebla." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "[1d6] ranas toro gigantes." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Una víbora pantanosa de enorme tamaño. Se camufla en el barro." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "[1d4] fuegos fatuos. Intentan guiar a los personajes a arenas movedizas." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "[2d4] lizardfolk pescando. Territoriales con los intrusos." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Una bruja con cabaña flotante. Comercia con favores y secretos." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Arenas movedizas. El personaje en cabeza debe superar una prueba o hundirse." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Un hydra de [1d4+3] cabezas emerge del agua estancada." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Un dragón negro joven acecha desde debajo del agua negra." }
+      ]
+    },
+    {
+      "name": "Encuentro Aleatorio Ciudad",
+      "description": "Tirar al explorar calles, mercados o callejones urbanos.",
+      "category": "Encuentros",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Sin encuentro. Día tranquilo en la ciudad." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Un carterista intenta robar a un personaje. Prueba de percepción para notarlo." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Una pelea de taberna derrama participantes a la calle." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Un guardia corrupto exige un 'impuesto' por circular armados." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Un mensajero entrega una carta a un personaje. No es para ellos." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Un culto menor hace una procesión ruidosa. Bloquea el camino 10 minutos." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Alguien reconoce a un personaje y no parece contento de verle." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Un noble en litera choca contra el grupo. Sus guardias son intimidantes." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Un asesino gremial sigue al grupo desde las sombras." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Toque de queda. Los guardias detienen a todo el que esté en la calle." }
+      ]
+    },
+    {
+      "name": "Encuentro Aleatorio Mar",
+      "description": "Tirar cada día de viaje marítimo o cerca de la costa.",
+      "category": "Encuentros",
+      "rollFormula": "1d8",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 2,  "text": "Sin encuentro. Mar en calma." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Barco pirata en el horizonte. Se acerca a velocidad." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Banco de sirenas. Su canto afecta a la tripulación." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "[1d3] tiburones gigantes acosan el casco." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Barco fantasma a la deriva. Sin tripulación visible." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Tormenta repentina. [2d6] de daño al casco si no se navega correctamente." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Un kraken joven emerge bajo el barco. Hambriento." }
+      ]
+    },
+    {
       "name": "Nombre Humano Masculino",
       "description": "Nombres masculinos para personajes humanos.",
       "category": "Nombres",
@@ -115,6 +204,269 @@
       ]
     },
     {
+      "name": "Nombre Enano",
+      "description": "Nombres para personajes enanos, masculinos y femeninos.",
+      "category": "Nombres",
+      "rollFormula": "1d20",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Balin" },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Bromdur" },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Dagna" },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Dolgrin" },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Embla" },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Fjord" },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Gorm" },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Hilda" },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Ingrid" },
+        { "minRoll": 10, "maxRoll": 10, "text": "Kordra" },
+        { "minRoll": 11, "maxRoll": 11, "text": "Logrim" },
+        { "minRoll": 12, "maxRoll": 12, "text": "Marta" },
+        { "minRoll": 13, "maxRoll": 13, "text": "Nori" },
+        { "minRoll": 14, "maxRoll": 14, "text": "Okra" },
+        { "minRoll": 15, "maxRoll": 15, "text": "Randur" },
+        { "minRoll": 16, "maxRoll": 16, "text": "Sigrid" },
+        { "minRoll": 17, "maxRoll": 17, "text": "Thorin" },
+        { "minRoll": 18, "maxRoll": 18, "text": "Ulda" },
+        { "minRoll": 19, "maxRoll": 19, "text": "Valdris" },
+        { "minRoll": 20, "maxRoll": 20, "text": "Wyona" }
+      ]
+    },
+    {
+      "name": "Nombre Orco",
+      "description": "Nombres para personajes orcos o semiorcos.",
+      "category": "Nombres",
+      "rollFormula": "1d12",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Gorsha" },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Krusk" },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Mhurren" },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Nadar" },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Ovak" },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Ront" },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Shump" },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Tarak" },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Uthok" },
+        { "minRoll": 10, "maxRoll": 10, "text": "Vorg" },
+        { "minRoll": 11, "maxRoll": 11, "text": "Warka" },
+        { "minRoll": 12, "maxRoll": 12, "text": "Zarka" }
+      ]
+    },
+    {
+      "name": "Nombre Mediano",
+      "description": "Nombres para hobbits, halflings o medianos.",
+      "category": "Nombres",
+      "rollFormula": "1d12",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Andry Piesligeros" },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Bree Trébolgris" },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Cade Mantequilla" },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Daisy Bolson" },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Eldon Trépano" },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Finnan Zapatoancho" },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Garret Villapiedra" },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Halia Piernassuaves" },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Isla Cuerdarosada" },
+        { "minRoll": 10, "maxRoll": 10, "text": "Jinny Collinasverdes" },
+        { "minRoll": 11, "maxRoll": 11, "text": "Kym Barrilgordo" },
+        { "minRoll": 12, "maxRoll": 12, "text": "Lyle Agujeronegro" }
+      ]
+    },
+    {
+      "name": "Nombre de Taberna",
+      "description": "Nombres para tabernas, posadas y tugurios.",
+      "category": "Nombres",
+      "rollFormula": "1d20",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "El Dragón Ebrio" },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "La Daga Rota" },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "El Cuervo Negro" },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "La Rueda Oxidada" },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "El Escudo del Peregrino" },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "La Cabeza del Ogro" },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "El Martillo y el Yunque" },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "La Luna Roja" },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "El Cerdo Dorado" },
+        { "minRoll": 10, "maxRoll": 10, "text": "La Herradura Afortunada" },
+        { "minRoll": 11, "maxRoll": 11, "text": "El Grifo Durmiente" },
+        { "minRoll": 12, "maxRoll": 12, "text": "La Vela Perpetua" },
+        { "minRoll": 13, "maxRoll": 13, "text": "El Lobo y la Liebre" },
+        { "minRoll": 14, "maxRoll": 14, "text": "La Posada del Camino Largo" },
+        { "minRoll": 15, "maxRoll": 15, "text": "El Hueso Rojo" },
+        { "minRoll": 16, "maxRoll": 16, "text": "La Sirena Ahogada" },
+        { "minRoll": 17, "maxRoll": 17, "text": "El Último Descanso" },
+        { "minRoll": 18, "maxRoll": 18, "text": "La Horca Feliz" },
+        { "minRoll": 19, "maxRoll": 19, "text": "La Antorcha y el Mosto" },
+        { "minRoll": 20, "maxRoll": 20, "text": "El Troll Gentil" }
+      ]
+    },
+    {
+      "name": "Nombre de Ciudad",
+      "description": "Nombres de ciudades, pueblos y aldeas de fantasía.",
+      "category": "Nombres",
+      "rollFormula": "1d12",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Piedra Gris" },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Puente del Molino" },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Colina del Cuervo" },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Bahía Oscura" },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Torre del Centinela" },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Aldea de Aguamiel" },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Cascada del Amanecer" },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Puerto de la Madera" },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Encrucijada del Sur" },
+        { "minRoll": 10, "maxRoll": 10, "text": "Fortaleza de las Nieves" },
+        { "minRoll": 11, "maxRoll": 11, "text": "Valle del Roble" },
+        { "minRoll": 12, "maxRoll": 12, "text": "Refugio del Viajero" }
+      ]
+    },
+    {
+      "name": "Rasgo de Personalidad NPC",
+      "description": "Un rasgo de comportamiento o manierismo para un PNJ.",
+      "category": "NPCs",
+      "rollFormula": "1d20",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Habla en voz muy baja, casi un susurro." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Ríe nerviosamente después de cada frase." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Repite la última palabra que dice el interlocutor." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "No puede mantener el contacto visual. Mira al suelo." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Usa metáforas de pesca en cada frase." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Se toca la cicatriz en la mejilla cuando piensa." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Siempre huele a ajo. Mucho ajo." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Exagerada cortesía con títulos nobiliarios, incluso con desconocidos." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Interrumpe a los demás para terminar sus frases (siempre mal)." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Gesticula en exceso con las manos al hablar." },
+        { "minRoll": 11, "maxRoll": 11, "text": "Desconfía de cualquiera que lleve sombreros." },
+        { "minRoll": 12, "maxRoll": 12, "text": "Colecciona botones y los cuenta en momentos de estrés." },
+        { "minRoll": 13, "maxRoll": 13, "text": "Habla de sí mismo en tercera persona." },
+        { "minRoll": 14, "maxRoll": 14, "text": "Canta entre dientes cuando está nervioso." },
+        { "minRoll": 15, "maxRoll": 15, "text": "Evalúa el valor en oro de todo lo que ve con ojo experto." },
+        { "minRoll": 16, "maxRoll": 16, "text": "Cita proverbios de su cultura en todo momento." },
+        { "minRoll": 17, "maxRoll": 17, "text": "Tiene fobia declarada a los cuervos." },
+        { "minRoll": 18, "maxRoll": 18, "text": "Come sin parar. Siempre tiene algo en la mano." },
+        { "minRoll": 19, "maxRoll": 19, "text": "Mantiene distancia de dos pasos con cualquier desconocido." },
+        { "minRoll": 20, "maxRoll": 20, "text": "Habla con un acento extranjero muy marcado y cambiante." }
+      ]
+    },
+    {
+      "name": "Motivación de NPC",
+      "description": "Qué quiere o busca este PNJ en el fondo.",
+      "category": "NPCs",
+      "rollFormula": "1d12",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Venganza contra quien destruyó su familia." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Riqueza suficiente para retirarse y vivir tranquilo." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Proteger a alguien vulnerable (hijo, hermano, maestro)." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Redimirse de una terrible acción pasada." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Conocimiento o poder arcano a cualquier precio." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "El reconocimiento de sus pares o de la nobleza." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Escapar de una deuda, maldición o contrato." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Encontrar un familiar o amigo desaparecido." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Demostrar que su fe o filosofía es la correcta." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Sobrevivir día a día. Nada más." },
+        { "minRoll": 11, "maxRoll": 11, "text": "Placer y entretenimiento sin consecuencias." },
+        { "minRoll": 12, "maxRoll": 12, "text": "Dejar un legado que lo recuerde por siglos." }
+      ]
+    },
+    {
+      "name": "Defecto de NPC",
+      "description": "Un defecto, vicio o debilidad que complica la vida del PNJ.",
+      "category": "NPCs",
+      "rollFormula": "1d12",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Adicto al juego. Siempre debe dinero a alguien peligroso." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Cobarde. Desaparece cuando hay problemas reales." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Mentiroso compulsivo, incluso cuando la verdad le beneficiaría." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Extremadamente avaro. Le duele cada moneda." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Bebedor. Toma decisiones pésimas con alcohol." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Demasiado orgulloso. Nunca pide ayuda aunque la necesite." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Celoso de quienes tienen más talento o fama." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Fobia irracional (arañas, oscuridad, mar) que le paraliza." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Impulsivo. Actúa sin pensar las consecuencias." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Crédulo. Cree cualquier historia con mínimo esfuerzo." },
+        { "minRoll": 11, "maxRoll": 11, "text": "Lujurioso. Sus decisiones las toma con las emociones." },
+        { "minRoll": 12, "maxRoll": 12, "text": "Paranoico. Ve conspiraciones en todo, incluso en aliados." }
+      ]
+    },
+    {
+      "name": "Apariencia de NPC",
+      "description": "Rasgo físico notable o primera impresión visual del PNJ.",
+      "category": "NPCs",
+      "rollFormula": "1d12",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Cicatriz profunda que cruza un ojo (el ojo aún funciona)." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Pelo completamente blanco a pesar de ser joven." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Tatuajes tribales en cuello y manos." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Extremadamente alto y delgado, casi desgarbado." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Ojos de dos colores distintos (heterocromía)." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Le falta un dedo. Lleva un guante para ocultarlo." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Ropa siempre impecable, incluso en situaciones adversas." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Enormes manos que no corresponden con su cuerpo pequeño." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Voz profunda y resonante, intimidante sin proponérselo." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Camina con una ligera cojera de la pierna derecha." },
+        { "minRoll": 11, "maxRoll": 11, "text": "Olor a especias o a bosque, nunca a sudor." },
+        { "minRoll": 12, "maxRoll": 12, "text": "Siempre lleva un sombrero extravagante de diferente origen." }
+      ]
+    },
+    {
+      "name": "Secreto de NPC",
+      "description": "Algo que el PNJ oculta y que podría cambiar la dinámica.",
+      "category": "NPCs",
+      "rollFormula": "1d12",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Es un agente infiltrado del gremio de ladrones." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Mató a alguien importante en su juventud. Fue un accidente." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Su 'negocio legítimo' financia a un culto local." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Es un noble disfrazado que huyó de sus responsabilidades." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Tiene una segunda familia en otra ciudad." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Puede ver brevemente el futuro en sueños. Le aterra." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Está siendo chantajeado por alguien del pasado." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "No es quien dice ser. Su identidad es robada." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Tiene un pacto con un demonio menor aún vigente." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Conoce la ubicación de un tesoro que no es suyo." },
+        { "minRoll": 11, "maxRoll": 11, "text": "Fue traicionado por su gremio y planea vengarse." },
+        { "minRoll": 12, "maxRoll": 12, "text": "Es un hombre lobo. Lo controla bien. Casi siempre." }
+      ]
+    },
+    {
+      "name": "Ocupación de NPC",
+      "description": "Oficio o rol social del PNJ en la comunidad.",
+      "category": "NPCs",
+      "rollFormula": "1d20",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Herrero" },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Posadero/a" },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Guardabosques" },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Sacerdote/sa" },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Mercader de telas" },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Alquimista" },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Guardia de la ciudad" },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Escriba o bibliotecario" },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Cazador de recompensas" },
+        { "minRoll": 10, "maxRoll": 10, "text": "Bardo o juglar" },
+        { "minRoll": 11, "maxRoll": 11, "text": "Sanador o barbero-cirujano" },
+        { "minRoll": 12, "maxRoll": 12, "text": "Contrabandista" },
+        { "minRoll": 13, "maxRoll": 13, "text": "Granjero" },
+        { "minRoll": 14, "maxRoll": 14, "text": "Marinero o capitán de barcaza" },
+        { "minRoll": 15, "maxRoll": 15, "text": "Mago en retiro" },
+        { "minRoll": 16, "maxRoll": 16, "text": "Noble menor sin tierra" },
+        { "minRoll": 17, "maxRoll": 17, "text": "Ladrón de guante blanco" },
+        { "minRoll": 18, "maxRoll": 18, "text": "Cazador o trampero" },
+        { "minRoll": 19, "maxRoll": 19, "text": "Enterrador y embalsamador" },
+        { "minRoll": 20, "maxRoll": 20, "text": "Espía con cobertura de mercader" }
+      ]
+    },
+    {
       "name": "Clima",
       "description": "Condiciones meteorológicas durante el viaje.",
       "category": "Clima",
@@ -127,6 +479,40 @@
         { "minRoll": 4, "maxRoll": 4, "text": "Tormenta con truenos. Visibilidad reducida." },
         { "minRoll": 5, "maxRoll": 5, "text": "Niebla espesa. Visibilidad [1d4+1] metros." },
         { "minRoll": 6, "maxRoll": 6, "text": "Tormenta eléctrica severa. Peligro de rayo." }
+      ]
+    },
+    {
+      "name": "Clima Invernal",
+      "description": "Condiciones en invierno o zonas de alta montaña.",
+      "category": "Clima",
+      "rollFormula": "1d8",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1, "maxRoll": 1, "text": "Sol de invierno. Frío pero sin viento. Sombras largas." },
+        { "minRoll": 2, "maxRoll": 2, "text": "Cielo plomizo. Parece que va a nevar." },
+        { "minRoll": 3, "maxRoll": 3, "text": "Nevada ligera. El suelo se cubre en horas." },
+        { "minRoll": 4, "maxRoll": 4, "text": "Ventisca moderada. El movimiento se reduce a la mitad." },
+        { "minRoll": 5, "maxRoll": 5, "text": "Hielo en el camino. Cada hora, prueba de equilibrio o caída." },
+        { "minRoll": 6, "maxRoll": 6, "text": "Ventisca severa. Sin refugio = 1d4 de daño frío por hora." },
+        { "minRoll": 7, "maxRoll": 7, "text": "Nieve profunda (1 metro). Avanzar sin equipo es imposible." },
+        { "minRoll": 8, "maxRoll": 8, "text": "Tormenta ártica. Visibilidad nula. Hipotermia en 30 minutos." }
+      ]
+    },
+    {
+      "name": "Clima Marino",
+      "description": "Condiciones meteorológicas en el mar o zona costera.",
+      "category": "Clima",
+      "rollFormula": "1d8",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1, "maxRoll": 1, "text": "Mar en calma. Viento favorable." },
+        { "minRoll": 2, "maxRoll": 2, "text": "Brisa suave. Navegación fácil." },
+        { "minRoll": 3, "maxRoll": 3, "text": "Niebla costera espesa. Navegación a ciegas." },
+        { "minRoll": 4, "maxRoll": 4, "text": "Viento fuerte. Las velas se llenan pero el barco balancea." },
+        { "minRoll": 5, "maxRoll": 5, "text": "Mar picada. Los marineros inexpertos se marean." },
+        { "minRoll": 6, "maxRoll": 6, "text": "Tormenta eléctrica. Riesgo para el mástil." },
+        { "minRoll": 7, "maxRoll": 7, "text": "Tempestad. El barco pierde [1d6] horas de ruta." },
+        { "minRoll": 8, "maxRoll": 8, "text": "Huracán. Tirada de navegación o el barco sufre daño crítico." }
       ]
     },
     {
@@ -143,6 +529,78 @@
         { "minRoll": 6, "maxRoll": 6, "text": "Una poción de curación (2d4+2 PV) mal etiquetada." },
         { "minRoll": 7, "maxRoll": 7, "text": "Un mapa garabateado. Parece indicar un tesoro." },
         { "minRoll": 8, "maxRoll": 8, "text": "Nada. Solo pulgas." }
+      ]
+    },
+    {
+      "name": "Botín de Bandido",
+      "description": "Lo que llevan los bandidos de caminos.",
+      "category": "Botín",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 2,  "text": "[1d6] sp y ropa de poco valor." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Una espada corta desgastada pero funcional." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "[2d10] gp en bolsa de cuero. Recaudación del día." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Carta de un empleador. Sin nombre pero con sello." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Una joya robada con iniciales grabadas. Tiene dueño." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Frasco de veneno de contacto (3 usos)." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Un mapa parcial de la zona con rutas de escape marcadas." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "[1d4] pociones de curación de variada calidad." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Una proclama de 'se busca' con el retrato de uno de los PJs." }
+      ]
+    },
+    {
+      "name": "Botín de Soldado",
+      "description": "Equipamiento de soldados o guardianes caídos.",
+      "category": "Botín",
+      "rollFormula": "1d8",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "[1d10] sp, ración de viaje y sílex." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Espada larga estándar de ejército. Sin marcas." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Placa de identificación con nombre y regimiento." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Armadura de cuero en buen estado." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Órdenes selladas. Contienen información táctica sensible." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Una poción de curación estándar de dotación." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Carta a casa, no enviada. Nombre y ciudad del familiar." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Casco con decoración de oficial. Podría venderse caro." }
+      ]
+    },
+    {
+      "name": "Tesoro de Mazmorra",
+      "description": "Contenido de un cofre o tesoro escondido en una mazmorra.",
+      "category": "Botín",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "[2d6 × 10] cp en monedas antiguas." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "[3d6] gp + [1d4] gemas semipreciosas (50 gp c/u)." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Pergamino con un hechizo de nivel 1 escrito." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Estatuilla de plata (200 gp) de una deidad olvidada." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Armadura +1 (escondida bajo escombros)." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "[1d4] pociones de curación + [50] gp en joyas." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Mapa de la mazmorra con una sala no visitada marcada." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Arma +1 con nombre grabado en lengua desconocida." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Un grimorio de mago. Contiene [1d4+2] hechizos de nivel 1-2." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Objeto mágico maldito. Curioso y brillante. (@Maldición de Objeto Mágico)" }
+      ]
+    },
+    {
+      "name": "Gemas y Joyas",
+      "description": "Tipo y valor de piedras preciosas o joyería encontrada.",
+      "category": "Botín",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 2,  "text": "Turquesa pulida. Valor: 10 gp." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Ámbar con insecto preservado. Valor: 50 gp." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Granate rojo oscuro. Valor: 100 gp." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Jade verde tallado en forma de serpiente. Valor: 150 gp." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Amatista violeta de gran tamaño. Valor: 200 gp." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Topacio dorado con talla perfecta. Valor: 500 gp." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Zafiro azul profundo. Valor: 1.000 gp." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Rubí que parece brillar desde adentro. Valor: 2.000 gp." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Diamante perfecto sin inclusiones. Valor: 5.000 gp." }
       ]
     },
     {
@@ -173,6 +631,1444 @@
         { "minRoll": 7,  "maxRoll": 8,  "text": "Sobre-extensión. Desventaja en el siguiente ataque." },
         { "minRoll": 9,  "maxRoll": 9,  "text": "El arma se rompe. Pierde [1d4] puntos de daño permanentemente." },
         { "minRoll": 10, "maxRoll": 10, "text": "Crítico fallido total. Pierdes tu turno y quedas aturdido." }
+      ]
+    },
+    {
+      "name": "Evento Ambiental de Combate",
+      "description": "Algo sucede en el entorno durante el combate.",
+      "category": "Combate",
+      "rollFormula": "1d8",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1, "maxRoll": 1, "text": "Se derrumba una sección del techo. Todo el que esté debajo recibe [2d6] daño." },
+        { "minRoll": 2, "maxRoll": 2, "text": "Se rompe el suelo bajo un personaje. Cae [1d4] metros." },
+        { "minRoll": 3, "maxRoll": 3, "text": "Una antorcha cae sobre algo inflamable. El fuego se expande." },
+        { "minRoll": 4, "maxRoll": 4, "text": "Llegan [1d4] refuerzos para el bando que parece ganar." },
+        { "minRoll": 5, "maxRoll": 5, "text": "El suelo está resbaladizo. Moverse requiere prueba de equilibrio." },
+        { "minRoll": 6, "maxRoll": 6, "text": "Un estruendo ensordecedor. Todos quedan con desventaja en percepción 1 turno." },
+        { "minRoll": 7, "maxRoll": 7, "text": "Una trampa olvidada se activa por el movimiento. [2d8] daño en un radio de 3m." },
+        { "minRoll": 8, "maxRoll": 8, "text": "Niebla mágica. Todos quedan a cubierto hasta el final del combate." }
+      ]
+    },
+    {
+      "name": "Moral del Enemigo",
+      "description": "Reacción de los enemigos cuando la batalla se tuerce.",
+      "category": "Combate",
+      "rollFormula": "1d6",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1, "maxRoll": 1, "text": "Huyen en desbandada. No atacan más." },
+        { "minRoll": 2, "maxRoll": 2, "text": "Uno rinde y suplica por su vida. El resto duda." },
+        { "minRoll": 3, "maxRoll": 3, "text": "Reagrupan bajo el más fuerte. Formación defensiva." },
+        { "minRoll": 4, "maxRoll": 4, "text": "Enfurecen. Atacan con frenesí (ventaja en ataques, +2 daño, ignoran CA)." },
+        { "minRoll": 5, "maxRoll": 5, "text": "Negocian una tregua. Quieren salvar el pellejo." },
+        { "minRoll": 6, "maxRoll": 6, "text": "Lucha hasta la muerte. No tienen nada que perder." }
+      ]
+    },
+    {
+      "name": "Rumor en la Taberna",
+      "description": "Lo que se habla entre copa y copa.",
+      "category": "Tabernas",
+      "rollFormula": "1d12",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Dicen que el alcalde tiene tratos con el gremio de asesinos." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Un dragón fue visto sobrevolando las montañas del norte hace tres noches." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "El cementerio viejo tiene luces por las noches. Nadie investiga." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Se buscan aventureros para limpiar una mina de algo que nadie describe bien." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Una caravana completa desapareció en el paso del este. Sin rastro." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "El pozo central del pueblo da agua turbia desde la luna pasada." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Un niño encontró una espada brillante en el río. Los guardias se la quitaron." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Se dice que el mago de la torre lleva un mes sin salir. Ni a comprar." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Los lobos del bosque son más grandes de lo normal este invierno." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Alguien está robando el correo del rey. Sin dejar rastro." },
+        { "minRoll": 11, "maxRoll": 11, "text": "Hay una recompensa de 500 gp por el bandido apodado 'La Máscara Roja'." },
+        { "minRoll": 12, "maxRoll": 12, "text": "El sacerdote de Pelor fue visto rezando a otro altar en secreto." }
+      ]
+    },
+    {
+      "name": "Plato del Día en la Taberna",
+      "description": "Qué sirven hoy, y a qué precio aproximado.",
+      "category": "Tabernas",
+      "rollFormula": "1d8",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1, "maxRoll": 1, "text": "Estofado de tubérculos con pan duro. (3 cp)" },
+        { "minRoll": 2, "maxRoll": 2, "text": "Muslo de pollo asado con cebolla. (5 cp)" },
+        { "minRoll": 3, "maxRoll": 3, "text": "Sopa de pescado ahumado. Consistente. (8 cp)" },
+        { "minRoll": 4, "maxRoll": 4, "text": "Costillas de jabalí con salsa de mosto. (1 sp)" },
+        { "minRoll": 5, "maxRoll": 5, "text": "Queso de cabra, pan y encurtidos. (4 cp)" },
+        { "minRoll": 6, "maxRoll": 6, "text": "Guiso de carne sin identificar. Sabe mejor de lo que parece. (6 cp)" },
+        { "minRoll": 7, "maxRoll": 7, "text": "Pastel de caza (conejo, perdiz). (2 sp)" },
+        { "minRoll": 8, "maxRoll": 8, "text": "Festín del posadero: todo lo anterior más vino. (5 sp)" }
+      ]
+    },
+    {
+      "name": "Evento en la Taberna",
+      "description": "Algo ocurre mientras los PJs están en la taberna.",
+      "category": "Tabernas",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Pelea de borrachos. La mesa de al lado vuela por el aire." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Entra un mensajero empapado con noticias urgentes para nadie del grupo." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Un bardo entona la canción favorita de uno de los PJs. Sospechoso." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Un desconocido deja una nota en la mesa y desaparece." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "El posadero baja el precio de la habitación a cambio de un favor." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Un jugador acusa de hacer trampa. Situación tensa." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Alguien intenta envenenar la bebida de un PJ. Percepción para notarlo." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Entran guardias buscando a un fugitivo. La descripción se parece a alguien del grupo." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "El fuego de la chimenea se vuelve azul un instante. Nadie más parece notarlo." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Un viejo veterano ofrece información valiosa a cambio de una ronda de bebidas." }
+      ]
+    },
+    {
+      "name": "Evento de Viaje Diurno",
+      "description": "Algo ocurre durante el viaje de día, independiente de encuentros.",
+      "category": "Viaje",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "El camino se bifurca. El mapa es ambiguo. ¿Cuál toman?" },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Una montura se niega a avanzar. Huele algo que los humanos no pueden detectar." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "El proveedor de raciones del grupo tenía la comida en mal estado. -1 ración." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Encuentran los restos de un campamento reciente. Alguien pasó aquí hace horas." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Una fosa común no marcada al borde del camino. Reciente." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Un puente está destruido. Hay que buscar un vado (+2 horas)." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Un altar olvidado en el bosque. Aún tiene ofrendas frescas." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Un cartel de madera pintado: 'NO CONTINÚES'. Sin firma." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "El terreno es ideal para una emboscada. Pueden preparar una trampa para seguidores." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Ven a lo lejos humo negro. ¿Aldea en llamas? ¿Señal?" }
+      ]
+    },
+    {
+      "name": "Evento de Viaje Nocturno",
+      "description": "Algo ocurre durante el turno de guardia o campamento.",
+      "category": "Viaje",
+      "rollFormula": "1d8",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1, "maxRoll": 1, "text": "Alguien escucha pasos alrededor del campamento. Se detienen al acercarse." },
+        { "minRoll": 2, "maxRoll": 2, "text": "Las llamas del fuego se apagan sin viento ni causa aparente." },
+        { "minRoll": 3, "maxRoll": 3, "text": "Un personaje tiene una pesadilla vívida. Despierta con 1 nivel de agotamiento." },
+        { "minRoll": 4, "maxRoll": 4, "text": "Algo robó una ración de comida durante la noche. Sin rastro claro." },
+        { "minRoll": 5, "maxRoll": 5, "text": "La guardia se queda dormida. Nadie vigiló por 2 horas." },
+        { "minRoll": 6, "maxRoll": 6, "text": "Una voz susurra en la oscuridad. Parece llamar por nombre a alguien del grupo." },
+        { "minRoll": 7, "maxRoll": 7, "text": "Lluvia repentina apaga el fuego. Mañana el grupo está empapado y frío." },
+        { "minRoll": 8, "maxRoll": 8, "text": "El cielo se ilumina con algo que no es un rayo. Al sur. Lejos." }
+      ]
+    },
+    {
+      "name": "Hallazgo en el Camino",
+      "description": "Algo interesante encontrado al borde del camino o sendero.",
+      "category": "Viaje",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Una bolsa de monedas (3d6 gp). El dueño puede aparecer." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Cadáver de un mensajero con alforjas aún selladas." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Un caballo atado solo. Bien cuidado. Sin nombre visible." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Ropa abandonada en el barro. Incluye una capa de noble." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Un libro mojado y casi ilegible. Contiene notas en código." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Un niño solo. Dice que su pueblo está 'vacío'." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Marcas de garras enormes en los árboles del camino." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Una trampa para animales activa con algo atrapado." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Un carromato volcado. Las mercancías siguen ahí." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Una piedra con runas antiguas clavada en el suelo. Palpita con calor." }
+      ]
+    },
+    {
+      "name": "Efecto de Magia Salvaje",
+      "description": "Qué ocurre cuando la magia se descontrola.",
+      "category": "Magia",
+      "rollFormula": "1d20",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "El lanzador queda invisible por 1 minuto. Involuntariamente." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Todos en 6m cambian de idioma nativo por 1 hora." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "El lanzador teletransporta [1d6] metros en dirección aleatoria." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Llueve confeti mágico. Absolutamente inútil." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "El hechizo se duplica y golpea a un objetivo adicional aleatorio." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "El lanzador envejece [1d10] años. Reversible." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Aparece una cabra mágica. Dura 1 minuto. Luego explota (inofensivamente)." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "El lanzador levita 1 metro durante 1 minuto." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Todos en 6m sienten euforia por 1 turno (ventaja en todo)." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Aparece un duplicado del lanzador. Dura 1 turno y no coopera." },
+        { "minRoll": 11, "maxRoll": 11, "text": "Fuego de color violeta rodea al lanzador. No quema, pero intimida." },
+        { "minRoll": 12, "maxRoll": 12, "text": "El siguiente hechizo del lanzador tiene alcance máximo doble." },
+        { "minRoll": 13, "maxRoll": 13, "text": "El lanzador habla solo en rimas durante 1 hora." },
+        { "minRoll": 14, "maxRoll": 14, "text": "Todo el metal en 3m queda magnetizado por 1 minuto." },
+        { "minRoll": 15, "maxRoll": 15, "text": "El lanzador se vuelve translúcido por 1 hora. Parcialmente visible." },
+        { "minRoll": 16, "maxRoll": 16, "text": "Surge un campo de silencio de 3m por 1 minuto." },
+        { "minRoll": 17, "maxRoll": 17, "text": "El tiempo se ralentiza para el lanzador (+1 acción este turno)." },
+        { "minRoll": 18, "maxRoll": 18, "text": "Hierba y flores brotan del suelo en 3m a su alrededor." },
+        { "minRoll": 19, "maxRoll": 19, "text": "El hechizo falla y el lanzador sufre [2d10] de daño arcano." },
+        { "minRoll": 20, "maxRoll": 20, "text": "El hechizo se potencia. Daño o efectos al máximo posible." }
+      ]
+    },
+    {
+      "name": "Poción Misteriosa",
+      "description": "Efecto de una poción sin etiquetar o de origen desconocido.",
+      "category": "Magia",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Curación: recupera [2d4+2] PV." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Veneno débil: [1d4] daño por hora durante 8 horas." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Fuerza de toro: +4 a FUE por 1 hora." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Reducción: el bebedor se encoge al tamaño de un gato por 1 hora." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Visión en la oscuridad: 18 metros durante 8 horas." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Insomnio: imposible descansar por [1d4] días." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Habla con animales durante 1 hora." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Cambio de color de cabello y ojos. Permanente hasta dispel magic." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Velocidad de movimiento duplicada por 1 hora." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Regeneración: recupera 1 PV al inicio de cada turno por 1 hora." }
+      ]
+    },
+    {
+      "name": "Maldición de Objeto Mágico",
+      "description": "Efecto negativo de un objeto mágico maldito.",
+      "category": "Magia",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "No puede soltarse. El portador no puede deshacerse del objeto voluntariamente." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Susurros: el objeto habla en la mente del portador. Distracción constante." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Inversión: el efecto beneficioso del objeto ocurre al enemigo más cercano." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Robo de suerte: el portador tiene desventaja en todas las tiradas de salvación." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Hambre sin fin: el portador necesita el doble de raciones diarias." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Marca visible: runas brillantes aparecen en la piel. Revelan la posición." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Sueño profundo: el portador duerme 2 horas extra. Siempre." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Atracción de no-muertos: los muertos vivientes atacan primero al portador." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Paranoico: desventaja en tiradas de Sabiduría e Insight." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Transformación lenta: cada semana, el portador adquiere un rasgo del objeto (escamas, garras, etc.)." }
+      ]
+    },
+    {
+      "name": "Gancho de Misión",
+      "description": "Punto de partida para una aventura o misión.",
+      "category": "Aventura",
+      "rollFormula": "1d12",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Un noble paga bien por recuperar un objeto robado de su mansión." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Los aldeanos piden protección: algo se lleva a sus hijos de noche." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Un mago desaparecido dejó un pergamino indicando coordenadas de un lugar peligroso." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Una carta interceptada revela una conspiración contra el rey." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Se contrata al grupo como escolta de una caravana con secretos propios." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Un fantasma pide que recuperen algo suyo para poder descansar en paz." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Un gremio de ladrones quiere al grupo para un golpe 'limpio y rápido'." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "El grupo hereda un mapa de alguien que murió sin dejar claro por qué se lo dio." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Una recompensa oficial por limpiar ruinas que amenazan la ruta comercial." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Un oráculo predice que el grupo es la única esperanza contra algo que viene." },
+        { "minRoll": 11, "maxRoll": 11, "text": "El grupo es acusado de un crimen que no cometió. Deben demostrar su inocencia." },
+        { "minRoll": 12, "maxRoll": 12, "text": "Un anciano sabio muere justo cuando iba a revelar algo crucial. Dejó pistas." }
+      ]
+    },
+    {
+      "name": "Rasgo de Villano",
+      "description": "Una característica que define al antagonista principal.",
+      "category": "Aventura",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Genuinamente cree que sus actos son por el bien mayor." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Tiene un código de honor que nunca rompe, incluso con los héroes." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Es carismático. Sus seguidores le aman de verdad." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Le une un vínculo del pasado con uno de los PJs." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Colecciona recuerdos de sus víctimas. Documentado." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Opera desde las sombras. Nadie sabe su nombre real." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Su debilidad es alguien a quien ama y no puede proteger." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Fue un héroe antes. Algo lo cambió." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Siempre ofrece una salida pacífica primero. Los que la rechazan lo lamentan." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Es paciente. Planea a décadas vista. Los héroes solo retrasan lo inevitable." }
+      ]
+    },
+    {
+      "name": "Complicación en la Misión",
+      "description": "Algo sale mal o se complica durante la aventura.",
+      "category": "Aventura",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "El empleador miente: el objeto a recuperar es peligroso o ilegal." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Un grupo rival llega al objetivo antes que los PJs." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "La víctima a rescatar no quiere ser rescatada." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "El camino de vuelta está bloqueado. Deben buscar otra ruta." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Hay un traidor en el grupo contratante que informa al villano." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "El objetivo ya fue robado o destruido antes de que llegaran." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Las autoridades locales arrestan al grupo por confusión de identidad." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Una tormenta o desastre natural obliga a improvisar el plan." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "El villano tiene un rehén inocente que complica el enfrentamiento final." },
+        { "minRoll": 10, "maxRoll": 10, "text": "La misión era una trampa desde el principio. El empleador también es el villano." }
+      ]
+    },
+    {
+      "name": "Recompensa Inusual de Misión",
+      "description": "El empleador no puede pagar en oro. Ofrece otra cosa.",
+      "category": "Aventura",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Un favor de un noble local. Canjearlo en cualquier momento." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Acceso a una biblioteca arcana privada por un mes." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Un título honorífico sin valor práctico pero con peso social." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Un mapa de una zona inexplorada con anotaciones." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "La propiedad de una casita en ruinas fuera de la ciudad." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Un contacto en el gremio de magos dispuesto a un encargo." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Entrenamiento gratuito en una habilidad ofrecida por el gremio del empleador." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Un objeto heredado sin valor monetario pero con historia." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Paso libre por las tierras del señor durante un año." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Información sobre el origen o familia de uno de los PJs." }
+      ]
+    },
+    {
+      "name": "Contenido de Habitación de Mazmorra",
+      "description": "Qué hay en una sala no explorada todavía.",
+      "category": "Mazmorra",
+      "rollFormula": "1d12",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 2,  "text": "Sala vacía. Signos de ocupación antigua: cenizas, huesos de animales." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Guardia dormida de [1d4] criaturas del nivel actual." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Un prisionero encadenado. Asustado. Tiene información." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Almacén: comida en mal estado, herramientas oxidadas, barriles vacíos." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Trampa activa sin monstruo. (@Trampa de Mazmorra)" },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Altar abandonado. Aún emana un débil aura mágica." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Habitación inundada hasta los tobillos. Algo se mueve bajo el agua." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Sala de tortura en desuso. El torturador sigue aquí, muerto." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Biblioteca pequeña. [1d4] libros legibles quedan." },
+        { "minRoll": 11, "maxRoll": 11, "text": "Portal inactivo. Las inscripciones describen a dónde llevaba." },
+        { "minRoll": 12, "maxRoll": 12, "text": "El jefe local. En plena reunión con [1d4] tenientes." }
+      ]
+    },
+    {
+      "name": "Trampa de Mazmorra",
+      "description": "Trampa mecánica o mágica encontrada en un pasillo o sala.",
+      "category": "Mazmorra",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Suelo hundible: [1d3] PJs caen [2d6] metros a una sala inferior." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Dardos envenenados en la pared. [2d4] daño + veneno (CD 13 CON)." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Hoja giratoria oculta en el dintel. [3d6] tajo al que cruce." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Gas somnífero: CD 14 CON o queda inconsciente 1 hora." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Sala que se cierra herméticamente. El aire se agota en 10 minutos." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Runa de alarma: activa a las criaturas del área en [1d4] turnos." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Suelo de pinchos ocultos: [2d6] daño perforante al primer paso." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Bola de fuego mágica al abrir el cofre. [4d6] fuego, CD 14 DES mitad." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Techo descendente. 3 rondas para escapar o sufrir [8d6] aplastamiento." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Trampa de ilusión: el pasillo parece sin fin. En realidad da círculos." }
+      ]
+    },
+    {
+      "name": "Sonido en la Mazmorra",
+      "description": "Sonido ambiental que escucha el grupo al explorar.",
+      "category": "Mazmorra",
+      "rollFormula": "1d12",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Silencio absoluto. Ni el eco de los pasos propios." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Goteo constante de agua. Viene de todos lados." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Rasguños en la piedra. Rítmicos. Se acercan." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Voces apagadas al otro lado del muro. En un idioma conocido." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Un llanto de niño lejano. Intermitente." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Viento que no debería existir a esta profundidad." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Cadenas arrastrándose. Pesadas." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Un tambor lejano con ritmo tribal." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "El zumbido de algo arcano. Las antorchas tiemblan." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Pisadas enormes que hacen vibrar el suelo." },
+        { "minRoll": 11, "maxRoll": 11, "text": "Risas. Muchas. Se detienen cuando el grupo para." },
+        { "minRoll": 12, "maxRoll": 12, "text": "El nombre de un PJ, susurrado por algo invisible." }
+      ]
+    },
+    {
+      "name": "Olor en la Mazmorra",
+      "description": "Detalle sensorial del ambiente de una sala o pasillo.",
+      "category": "Mazmorra",
+      "rollFormula": "1d8",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1, "maxRoll": 1, "text": "Podredumbre y carne en descomposición." },
+        { "minRoll": 2, "maxRoll": 2, "text": "Azufre. Señal de actividad volcánica o demoníaca." },
+        { "minRoll": 3, "maxRoll": 3, "text": "Incienso quemado recientemente." },
+        { "minRoll": 4, "maxRoll": 4, "text": "Humedad y musgo. Como una cueva natural." },
+        { "minRoll": 5, "maxRoll": 5, "text": "Sangre fresca. Muy fresca." },
+        { "minRoll": 6, "maxRoll": 6, "text": "Ozono: presencia de magia eléctrica o tormenta." },
+        { "minRoll": 7, "maxRoll": 7, "text": "Comida cocinada. Extrañamente reconfortante." },
+        { "minRoll": 8, "maxRoll": 8, "text": "Nada. Aire esterilizado y sin olor. Inquietante." }
+      ]
+    },
+    {
+      "name": "Propósito Original de la Mazmorra",
+      "description": "Qué era este lugar antes de convertirse en una mazmorra.",
+      "category": "Mazmorra",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Catacumbas reales de una dinastía olvidada." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Laboratorio arcano de un mago que buscaba la inmortalidad." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Templo subterráneo a un dios ahora prohibido." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Prisión de alta seguridad para presos políticos." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Almacén secreto de un gremio de contrabandistas." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Refugio construido antes de una guerra que nunca llegó." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Mina abandonada que resultó ser algo más." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Residencia subterránea de una raza no humana expulsada." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Instalación de contención para algo que no debía salir." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Fortaleza militar que cayó desde dentro." }
+      ]
+    },
+    {
+      "name": "Peligro Ambiental de Mazmorra",
+      "description": "Condición del entorno que complica la exploración.",
+      "category": "Mazmorra",
+      "rollFormula": "1d8",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1, "maxRoll": 1, "text": "Inundación parcial: el agua llega a las rodillas. Movimiento reducido." },
+        { "minRoll": 2, "maxRoll": 2, "text": "Gas tóxico: [1d4] daño de veneno por turno sin protección." },
+        { "minRoll": 3, "maxRoll": 3, "text": "Oscuridad mágica: ninguna fuente de luz funciona aquí." },
+        { "minRoll": 4, "maxRoll": 4, "text": "Suelo inestable: cada turno, CD 12 DES o caer prono." },
+        { "minRoll": 5, "maxRoll": 5, "text": "Calor extremo: 1 nivel de agotamiento por hora sin resistencia al fuego." },
+        { "minRoll": 6, "maxRoll": 6, "text": "Hongos alucinógenos: CD 13 CON o tener visiones por 1 hora." },
+        { "minRoll": 7, "maxRoll": 7, "text": "Campo antimagia localizado en esta sala." },
+        { "minRoll": 8, "maxRoll": 8, "text": "Telarañas densas de araña gigante: movimiento a la mitad, fácilmente inflamables." }
+      ]
+    },
+    {
+      "name": "Apellido Humano",
+      "description": "Apellidos o nombres de familia para personajes humanos.",
+      "category": "Nombres",
+      "rollFormula": "1d20",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Piedranegra" },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "del Valle" },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Hierroforja" },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Vientos del Norte" },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Roble Gris" },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Cuervo" },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Aguamiel" },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Espada Rota" },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "de la Marca" },
+        { "minRoll": 10, "maxRoll": 10, "text": "Cenizas" },
+        { "minRoll": 11, "maxRoll": 11, "text": "Colmillo" },
+        { "minRoll": 12, "maxRoll": 12, "text": "Largoviaje" },
+        { "minRoll": 13, "maxRoll": 13, "text": "Puerta de Hierro" },
+        { "minRoll": 14, "maxRoll": 14, "text": "Río Oscuro" },
+        { "minRoll": 15, "maxRoll": 15, "text": "Escudo Blanco" },
+        { "minRoll": 16, "maxRoll": 16, "text": "de la Torre" },
+        { "minRoll": 17, "maxRoll": 17, "text": "Maldespada" },
+        { "minRoll": 18, "maxRoll": 18, "text": "Torbellino" },
+        { "minRoll": 19, "maxRoll": 19, "text": "Sombra Larga" },
+        { "minRoll": 20, "maxRoll": 20, "text": "Filo Frío" }
+      ]
+    },
+    {
+      "name": "Nombre Dragonborn",
+      "description": "Nombres para razas dracónicas o tieflings marciales.",
+      "category": "Nombres",
+      "rollFormula": "1d12",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Arjhan" },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Balasar" },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Donaar" },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Ghesh" },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Heskan" },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Kriv" },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Medrash" },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Nadarr" },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Patrin" },
+        { "minRoll": 10, "maxRoll": 10, "text": "Rhogar" },
+        { "minRoll": 11, "maxRoll": 11, "text": "Shamash" },
+        { "minRoll": 12, "maxRoll": 12, "text": "Torinn" }
+      ]
+    },
+    {
+      "name": "Nombre de Objeto Mágico",
+      "description": "Nombre épico para una espada, bastón u objeto legendario.",
+      "category": "Nombres",
+      "rollFormula": "1d12",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Filo de la Última Noche" },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Corazón de Piedra" },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Lengua de Ceniza" },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Ojo del Amanecer" },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Espina del Dragón Muerto" },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Susurro del Abismo" },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Cruz de la Marea Alta" },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Llama sin Combustible" },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Sello del Rey Olvidado" },
+        { "minRoll": 10, "maxRoll": 10, "text": "Voz del Invierno" },
+        { "minRoll": 11, "maxRoll": 11, "text": "Diente del Primer Lobo" },
+        { "minRoll": 12, "maxRoll": 12, "text": "Juramento Roto" }
+      ]
+    },
+    {
+      "name": "Objeto Mágico Menor",
+      "description": "Objeto mágico de baja rareza con efecto útil.",
+      "category": "Botín",
+      "rollFormula": "1d12",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Bolsa de guardar (capacidad 50 kg, pesa siempre 0,5 kg)." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Manto de protección: +1 CA y tiradas de salvación." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Botas de velocidad: movimiento +3 metros." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Piedra mensajera: par vinculado. Comunicación a distancia ilimitada." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Antorcha eterna: nunca se apaga, ni bajo el agua." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Anillo de caída suave: daño por caída siempre 0." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Guantes de escalada: velocidad de escalar = velocidad normal." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Silbato de perro fantasma: invoca un perro espectral por 1 hora, 1/día." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Pergamino de detectar magia (un solo uso)." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Capa de prestidigitación: siempre parece limpia y sin daños." },
+        { "minRoll": 11, "maxRoll": 11, "text": "Daga +1 que regresa a la mano al lanzarla." },
+        { "minRoll": 12, "maxRoll": 12, "text": "Amuleto de salud: PV máximos +5 mientras se lleve puesto." }
+      ]
+    },
+    {
+      "name": "Botín de No-Muerto",
+      "description": "Lo que queda tras destruir a un muerto viviente poderoso.",
+      "category": "Botín",
+      "rollFormula": "1d8",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1, "maxRoll": 2, "text": "Cenizas y polvo. Nada más." },
+        { "minRoll": 3, "maxRoll": 3, "text": "Joya que llevaba en vida. Grabada con su nombre." },
+        { "minRoll": 4, "maxRoll": 4, "text": "Fragmento de hueso con runa de vinculación. Aún activo." },
+        { "minRoll": 5, "maxRoll": 5, "text": "Un diario de cuando estaba vivo. Las últimas páginas son perturbadoras." },
+        { "minRoll": 6, "maxRoll": 6, "text": "Monedas de una época que ya no existe (valor numismático: [3d6 × 10] gp)." },
+        { "minRoll": 7, "maxRoll": 7, "text": "El objeto que lo mantenía activo como no-muerto. Podría reactivarlo." },
+        { "minRoll": 8, "maxRoll": 8, "text": "Polvo de hueso con propiedades alquímicas. [1d4] dosis a 50 gp c/u." }
+      ]
+    },
+    {
+      "name": "Tesoro de Dragón",
+      "description": "Ítems notables en el botín de un dragón adulto.",
+      "category": "Botín",
+      "rollFormula": "1d8",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1, "maxRoll": 1, "text": "[5d6 × 100] gp en monedas antiguas de varias civilizaciones." },
+        { "minRoll": 2, "maxRoll": 2, "text": "[1d6] gemas raras (@Gemas y Joyas, tirar dos veces cada una)." },
+        { "minRoll": 3, "maxRoll": 3, "text": "Armadura completa +2 con grabados dracónicos." },
+        { "minRoll": 4, "maxRoll": 4, "text": "Un grimorio completo de mago de nivel 9." },
+        { "minRoll": 5, "maxRoll": 5, "text": "Escamas del propio dragón. [1d4], material para armadura mágica." },
+        { "minRoll": 6, "maxRoll": 6, "text": "Un huevo de dragón de otro ejemplar. Aún caliente." },
+        { "minRoll": 7, "maxRoll": 7, "text": "Corona de un rey al que el dragón devoró hace un siglo." },
+        { "minRoll": 8, "maxRoll": 8, "text": "Un arma legendaria (@Nombre de Objeto Mágico) con historia propia." }
+      ]
+    },
+    {
+      "name": "Vínculo de NPC",
+      "description": "A qué o quién está atado emocionalmente este PNJ.",
+      "category": "NPCs",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Su hijo o hija, que vive en otro pueblo." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "La memoria de un mentor que murió por su culpa." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Una deuda de honor con alguien que le salvó la vida." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Un objeto heredado que valdría su vida proteger." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Su comunidad o aldea natal, aunque la dejó hace años." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Un amor que nunca fue correspondido." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "El ideal de justicia que persigue sin importar el costo." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Una promesa hecha en el lecho de muerte de alguien." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Su reputación y nombre, que protege por encima de todo." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Un rival o enemigo que le da propósito al odiarle." }
+      ]
+    },
+    {
+      "name": "Forma de Hablar de NPC",
+      "description": "Peculiaridad en el lenguaje o forma de comunicarse del PNJ.",
+      "category": "NPCs",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Habla demasiado rápido cuando se emociona. Ilegible." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Pausa larga antes de cada respuesta. Reflexivo o lento." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Usa 'eh' y 'pues' entre cada frase." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Todo lo formula como pregunta, incluso las afirmaciones." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Voz monótona. Sin entonación. Difícil saber cuándo termina." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Cambia de tema abruptamente cuando algo le incomoda." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Acento extranjero que aparece en palabras clave." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Siempre exagera los números. 'Eran cien, te lo juro.'" },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Repite el nombre del interlocutor al principio de cada frase." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Susurra al final de cada oración, la parte importante." }
+      ]
+    },
+    {
+      "name": "Festival y Celebración",
+      "description": "Evento festivo que el grupo encuentra en una ciudad o aldea.",
+      "category": "Social",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Festival de la cosecha: comida gratis, competencias de lucha y música." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Ceremonia fúnebre de un héroe local. La ciudad está de luto." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Torneo de justas. Se pueden inscribir gladiadores amateurs." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Mercado de primavera: vendedores de tierras lejanas con mercancía exótica." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Noche de los ancestros: todos dejan ofrendas para los muertos. Los no-muertos se inquietan." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Coronación del nuevo alcalde o señor. Gran tensión política." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Feria de magia: magos ambulantes venden trucos y pociones dudosas." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Competencia de bardos. El ganador recibe acceso al archivo de la ciudad." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Festival del fuego: hogueras en cada esquina, saltar sobre el fuego da suerte." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Ejecución pública programada. La multitud está dividida sobre si es justa." }
+      ]
+    },
+    {
+      "name": "Ley Local Extraña",
+      "description": "Norma vigente en esta ciudad que puede sorprender a los viajeros.",
+      "category": "Social",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Prohibido llevar armas desenvainadas dentro de la muralla." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Todo extranjero debe registrarse con el guardián del puerto." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "La magia arcana solo puede practicarse con licencia del alcalde." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Está prohibido mencionar el nombre del antiguo señor. Pena: látigos." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Los duelos están permitidos, pero deben anunciarse 24h antes." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "El toque de queda es a medianoche. Las calles se limpian literalmente." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Está prohibido matar ratas. Son sagradas para el culto local." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Los curanderos no pueden cobrar por sus servicios al enfermo pobre." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Todo trato comercial mayor de 10 gp requiere testigo oficial." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Los elfos deben declarar su edad al entrar. Los de más de 500 años pagan impuesto doble." }
+      ]
+    },
+    {
+      "name": "Evento en el Mercado",
+      "description": "Algo notable ocurre mientras el grupo recorre el mercado.",
+      "category": "Social",
+      "rollFormula": "1d8",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1, "maxRoll": 1, "text": "Un vendedor vende algo que el grupo necesita, a precio inflado." },
+        { "minRoll": 2, "maxRoll": 2, "text": "Alguien grita '¡ladrón!' Un ratero pasa corriendo entre la multitud." },
+        { "minRoll": 3, "maxRoll": 3, "text": "Un mercader raro vende mapas de lugares que nadie ha explorado aún." },
+        { "minRoll": 4, "maxRoll": 4, "text": "Subasta improvisada de objetos confiscados. Hay algo interesante." },
+        { "minRoll": 5, "maxRoll": 5, "text": "Un sabio ambulante reconoce un objeto del grupo y quiere comprarlo urgente." },
+        { "minRoll": 6, "maxRoll": 6, "text": "Un vendedor de 'pociones mágicas' que son agua teñida. Obvia estafa." },
+        { "minRoll": 7, "maxRoll": 7, "text": "Pelea de precios entre dos gremios rivales. La mercancía está tirada." },
+        { "minRoll": 8, "maxRoll": 8, "text": "Guardia de mercado pidiendo 'impuesto' a vendedores ambulantes extranjeros." }
+      ]
+    },
+    {
+      "name": "Facción Encontrada",
+      "description": "Grupo organizado que el grupo cruza en su camino.",
+      "category": "Social",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Gremio de mercaderes: amables si hay negocio, hostiles si hay competencia." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Orden de caballeros en misión. No revelan su objetivo." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Culto menor que cree que el grupo es parte de su profecía." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Banda de mercenarios que perdió a su capitán. Buscan liderazgo." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Inquisición religiosa investigando herejías en la zona." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Gremio de ladrones que quiere al grupo como herramienta." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Grupo de refugiados huyendo de algo río arriba." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Exploradores imperiales cartografiando la región para una 'anexión pacífica'." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Cazadores de recompensas con una orden de captura que podría ser el grupo." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Druidas protegiendo un lugar sagrado que el grupo necesita cruzar." }
+      ]
+    },
+    {
+      "name": "Deidad Menor",
+      "description": "Dios, espíritu o entidad de culto local que puede intervenir.",
+      "category": "Religión",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "El Guardián del Umbral: protege los puentes y los pasos. Exige una ofrenda para cruzar." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "La Madre del Bosque: cuida los árboles viejos. Otorga guía a los que la respetan." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "El Dios Sin Nombre: culto secreto. Sus seguidores no revelan sus creencias." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "El Heraldo de la Tormenta: dios de la guerra y del mar. Violento y caprichoso." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "La Dama de las Monedas: patrona de mercaderes. Todo tiene un precio para ella." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "El Portero Gris: psicopompo local. Guía almas pero también las roba." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "El Tejedor de Mentiras: dios del engaño. Sus templos parecen otra cosa." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "La Voz del Hielo: espíritu del invierno. Hostil pero predecible." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "El Primer Forjador: deidad enana del metal. Solo acepta ofrendas de obra propia." },
+        { "minRoll": 10, "maxRoll": 10, "text": "La Tejedora de Destinos: no tiene clérigos. Solo oráculos que enloquecen." }
+      ]
+    },
+    {
+      "name": "Ritual o Señal Religiosa",
+      "description": "El grupo presencia un evento religioso que puede involucrarlos.",
+      "category": "Religión",
+      "rollFormula": "1d8",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1, "maxRoll": 1, "text": "Una procesión bloquea el camino. Llevan algo cubierto que se mueve." },
+        { "minRoll": 2, "maxRoll": 2, "text": "Un altar pide un sacrificio de sangre. Deja algo a cambio si se cumple." },
+        { "minRoll": 3, "maxRoll": 3, "text": "Un sacerdote muere en el suelo. Sus últimas palabras son una advertencia." },
+        { "minRoll": 4, "maxRoll": 4, "text": "La estatua de un dios llora sangre. Los fieles lo ven como presagio." },
+        { "minRoll": 5, "maxRoll": 5, "text": "Un exorcismo fallido. El poseído ataca a los presentes." },
+        { "minRoll": 6, "maxRoll": 6, "text": "Un peregrino ofrece una profecía a cambio de escolta." },
+        { "minRoll": 7, "maxRoll": 7, "text": "El templo pide voluntarios para una 'prueba de fe' con premio." },
+        { "minRoll": 8, "maxRoll": 8, "text": "Plaga de langostas sobre el templo. Los sacerdotes dicen que es un castigo." }
+      ]
+    },
+    {
+      "name": "Componente de Hechizo Inusual",
+      "description": "Ingrediente raro que un hechizo o ritual requiere encontrar.",
+      "category": "Magia",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Lágrima de un dragón vivo, vertida voluntariamente." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Ceniza de un libro de hechizos quemado en luna llena." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Pluma de un grifo arrancada en vida." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Arena del desierto que nunca ha sido tocada por lluvia." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "El último suspiro de alguien que murió de risa." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Sangre de noble de sangre pura, donada sin coerción." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Eco atrapado en una piedra hueca de una cueva profunda." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Un recuerdo olvidado, extraído de la mente del lanzador." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Musgo de tumba que haya crecido sobre un rey." },
+        { "minRoll": 10, "maxRoll": 10, "text": "El nombre verdadero de una criatura, escrito con su propia sangre." }
+      ]
+    },
+    {
+      "name": "Descripción de Golpe de Gracia",
+      "description": "Narración épica para cuando el personaje mata al enemigo final.",
+      "category": "Combate",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "El arma atraviesa el pecho del enemigo. Sus rodillas ceden antes de que sus ojos lo entiendan." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "El golpe lo lanza hacia atrás. Se desploma contra la pared y no vuelve a levantarse." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Un giro fluido y el acero pasa por su garganta. Cae en silencio." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "La magia impacta en su centro. Se convierte en ceniza en segundos." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "La última expresión del enemigo es de sorpresa. Esperaba ganar." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Cae de rodillas, después de cara. Sin un sonido más." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "El golpe derriba el arma del enemigo. El siguiente ya va al cuello." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Se derrumba lentamente. Sus ojos se apagan mirando al personaje." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Con un grito que hace temblar el aire, el enemigo cae fulminado." },
+        { "minRoll": 10, "maxRoll": 10, "text": "El impacto lo levanta del suelo un momento. Cae definitivamente." }
+      ]
+    },
+    {
+      "name": "Condición del Terreno al Inicio de Combate",
+      "description": "Cómo es el escenario antes de que empiece la acción.",
+      "category": "Combate",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Campo abierto. Sin cobertura. El viento sopla en contra." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Pasillo estrecho. Solo pueden entrar en combate de uno en uno." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Terreno elevado para el enemigo. +2 a sus ataques por posición." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Escombros por todas partes. El movimiento es terreno difícil." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Luz tenue. Todos tienen desventaja en ataques a distancia." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Lluvia intensa. Las antorchas se apagan. Penalización a percepción." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Suelo resbaladizo de barro o hielo. Prueba de DES al correr." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Civiles presentes. Cada área de efecto puede dañarlos." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Columnas o pilares. Cobertura disponible para ambos bandos." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Orilla de un precipicio. Caer implica [4d10] daño." }
+      ]
+    },
+    {
+      "name": "Contenido de Hex",
+      "description": "Qué contiene un hex al explorarlo por primera vez.",
+      "category": "Hexcrawl",
+      "rollFormula": "1d12",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 3,  "text": "Hex vacío. Solo terreno natural sin rasgos especiales." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Señal de paso: camino viejo, piedras apiladas, tronco tallado." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Recurso natural: agua limpia, frutos abundantes, piedra de construcción." },
+        { "minRoll": 6,  "maxRoll": 7,  "text": "Encuentro activo. (@Encuentro según terreno del hex)" },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Ruinas menores: estructura caída, pozo seco, altar abandonado." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Punto de interés notable. (@Punto de Interés en Hex)" },
+        { "minRoll": 10, "maxRoll": 10, "text": "Asentamiento menor: aldea pequeña, granja aislada, campamento nómada." },
+        { "minRoll": 11, "maxRoll": 11, "text": "Peligro ambiental: terreno tramposo, niebla permanente, zona maldita." },
+        { "minRoll": 12, "maxRoll": 12, "text": "Lugar único: mazmorra, ruinas mayores, fortaleza, portal extraplanar." }
+      ]
+    },
+    {
+      "name": "Tipo de Terreno de Hex",
+      "description": "Genera el terreno de un hex nuevo al explorar el mapa.",
+      "category": "Hexcrawl",
+      "rollFormula": "1d12",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 2,  "text": "Bosque templado. Movimiento reducido. Cobertura abundante." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Bosque denso/selva. Movimiento muy reducido. Orientación difícil." },
+        { "minRoll": 4,  "maxRoll": 5,  "text": "Llanura o pradera. Movimiento máximo. Sin cobertura." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Colinas. Movimiento reducido. Vistas lejanas desde las cimas." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Montaña. Movimiento muy reducido. Peligros de altitud." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Pantano o marisma. Movimiento muy reducido. Riesgo de enfermedad." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Desierto o baldío árido. Peligro de calor. Agua escasa." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Costa, ribera o delta. Navegable por agua. Recursos pesqueros." },
+        { "minRoll": 11, "maxRoll": 11, "text": "Tundra o estepa fría. Viento constante. Forrajeo difícil." },
+        { "minRoll": 12, "maxRoll": 12, "text": "Terreno volcánico o baldío mágico. Hostil y extraño." }
+      ]
+    },
+    {
+      "name": "Punto de Interés en Hex",
+      "description": "Rasgo notable que define un hex especial.",
+      "category": "Hexcrawl",
+      "rollFormula": "1d20",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Torre solitaria en ruinas. Algo vive en el piso superior." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Círculo de piedras druídico. Activo en luna llena." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Mina abandonada con su cartel de advertencia aún en pie." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Aldea fantasma. Las casas están intactas pero vacías desde hace décadas." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Campo de batalla antiguo. Los huesos aún están. Algo los protege." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Monolito de piedra con inscripciones en una lengua perdida." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Cueva poco profunda usada como refugio por algo grande." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Lago con isla central y una estructura visible desde la orilla." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Árbol enorme, más viejo que cualquier civilización conocida." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Santuario de viajero con ofrendas recientes." },
+        { "minRoll": 11, "maxRoll": 11, "text": "Puente antiguo sobre río profundo. El único en kilómetros." },
+        { "minRoll": 12, "maxRoll": 12, "text": "Entrada sellada a catacumbas. El sello está casi roto." },
+        { "minRoll": 13, "maxRoll": 13, "text": "Campamento permanente de bandidos o merodeadores." },
+        { "minRoll": 14, "maxRoll": 14, "text": "Templo en ruinas de un dios ya olvidado." },
+        { "minRoll": 15, "maxRoll": 15, "text": "Pozo de agua que nunca se seca, incluso en sequía." },
+        { "minRoll": 16, "maxRoll": 16, "text": "Granja incendiada hace poco. Las huellas van hacia el bosque." },
+        { "minRoll": 17, "maxRoll": 17, "text": "Cruce de caminos con una horca usada recientemente." },
+        { "minRoll": 18, "maxRoll": 18, "text": "Campamento de exploradores o cartógrafos con mapas parciales." },
+        { "minRoll": 19, "maxRoll": 19, "text": "Cueva con pinturas prehistóricas que muestran algo monstruoso." },
+        { "minRoll": 20, "maxRoll": 20, "text": "Portal extraplanar inactivo. Rezuma energía arcana débil." }
+      ]
+    },
+    {
+      "name": "Resultado de Extravío",
+      "description": "Qué ocurre cuando el grupo falla la tirada de navegación.",
+      "category": "Hexcrawl",
+      "rollFormula": "1d6",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Sin consecuencias. El grupo nota el error y se corrige." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Desvío menor: llegan a un hex adyacente al destino sin saberlo." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Pierden 4 horas dando vueltas antes de orientarse." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Se desvían dos hexes del destino. El DM no revela la posición." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Se adentran en un hex peligroso sin haberlo planeado." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Completamente perdidos. El DM recoloca al grupo en el mapa en secreto." }
+      ]
+    },
+    {
+      "name": "Evento de Exploración de Hex",
+      "description": "Algo sucede mientras el grupo explora el hex actualmente ocupado.",
+      "category": "Hexcrawl",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Rastro fresco de una criatura grande. Hace menos de dos horas." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "El terreno cambia: aparece un barranco o pantano no marcado en el mapa." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Viajero perdido encontrado. Tiene información valiosa del hex siguiente." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Hallazgo enterrado: monedas viejas, fragmento de arma, placa de identificación." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "El tiempo empeora súbitamente. (@Clima según la región)" },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Señales de conflicto reciente: sangre, armas rotas, tierra removida." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Una criatura observa al grupo desde lejos. No ataca. No huye." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Recurso inesperado: refugio natural, agua, material de construcción." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "La exploración revela un rasgo oculto del hex. (@Punto de Interés en Hex)" },
+        { "minRoll": 10, "maxRoll": 10, "text": "Señal dejada por alguien que pasó antes: marca en árbol, piedras alineadas." }
+      ]
+    },
+    {
+      "name": "Forrajeo",
+      "description": "Resultado al buscar comida y agua durante el viaje (media jornada).",
+      "category": "Hexcrawl",
+      "rollFormula": "1d8",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Nada. El terreno está agotado o es demasiado hostil." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Agua potable encontrada. El grupo no gasta raciones de agua hoy." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Bayas y raíces comestibles. 1 ración por forrajeador." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Plantas medicinales. [1d4] usos equivalentes a curación básica." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Buena cosecha. [1d4+1] raciones por forrajeador." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Fruto o hongo desconocido. Comestible con prueba de supervivencia (CD 12) o [1d4] daño." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Ingrediente alquímico raro. Valor 50 gp para el alquimista adecuado." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Planta medicinal superior. Cura [2d4] PV al consumirla." }
+      ]
+    },
+    {
+      "name": "Caza",
+      "description": "Resultado al cazar para conseguir comida durante el viaje.",
+      "category": "Hexcrawl",
+      "rollFormula": "1d6",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Sin presa. El terreno está cazado o la técnica fue mala." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Presa pequeña: conejo, pájaro. 1 ración." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Presa mediana: jabalí, ciervo joven. [1d4+1] raciones." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Presa grande. [2d6] raciones, pero preparar lleva 2 horas." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "La presa resultó ser un familiar de bruja o criatura mágica. Consecuencias." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Presa monstruosa. Si la cazan: [1d6+2] raciones + componente raro." }
+      ]
+    },
+    {
+      "name": "Señal de Civilización en Hex",
+      "description": "Indicios de que alguien estuvo o vive cerca de este hex.",
+      "category": "Hexcrawl",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Sendero apenas visible. Usado con regularidad pero no mantenido." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Tronco talado. Reciente. La madera fue llevada a algún lugar." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Campo abandonado con surcos viejos. Nadie labra desde hace meses." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Trampa para animales puesta. Alguien la revisa con regularidad." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Hoguera apagada hace menos de un día. [1d3] personas la hicieron." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Refugio rudimentario: ramas apiladas, cuero tensado. Usable." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Marca de territorio: calavera en palo, trapo de color. Pertenece a alguien." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Cimientos de piedra de una construcción demolida hace mucho." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Carreta abandonada con rueda rota. Las alforjas siguen ahí." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Humo a lo lejos. Podría ser una aldea, un campamento o un incendio." }
+      ]
+    },
+    {
+      "name": "REF: Velocidad de Viaje por Terreno",
+      "description": "Hexes recorridos por día según terreno y modo de movimiento (hex = 6 millas).",
+      "category": "Referencia",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Carretera / camino: 4 hexes/día a pie · 6 hexes/día a caballo." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Llanura / pradera: 3 hexes/día a pie · 5 hexes/día a caballo." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Colinas: 2 hexes/día a pie · 3 hexes/día a caballo." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Bosque: 2 hexes/día a pie · 2 hexes/día a caballo." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Bosque denso / selva: 1 hex/día a pie · 1 hex/día a caballo." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Montaña: 1 hex/día a pie · imposible a caballo sin sendero." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Pantano: 1 hex/día a pie · imposible a caballo." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Desierto: 2 hexes/día a pie (con agua suficiente)." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Barca / río a favor: 4 hexes/día. Contra corriente: 1 hex/día." },
+        { "minRoll": 10, "maxRoll": 10, "text": "PENALIZACIONES: carga pesada −1 hex. Clima adverso −1 hex. Exploración activa: velocidad ÷ 2." }
+      ]
+    },
+    {
+      "name": "REF: Procedimiento de Turno de Viaje",
+      "description": "Secuencia de acciones por turno (watch) durante el hexcrawl.",
+      "category": "Referencia",
+      "rollFormula": "1d8",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "PASO 1 — El grupo declara actividad del turno: viajar, explorar, forrajear, cazar o descansar." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "PASO 2 — Tirada de clima si el grupo está al aire libre. (@Clima)" },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "PASO 3 — Tirada de navegación si el terreno es complicado (CD 10–15 según terreno)." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "PASO 4 — Tirada de encuentro: 1d6, en 1 hay encuentro. En exploración: 1-2 hay encuentro." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "PASO 5 — Si viajan, avanzar los hexes correspondientes al terreno." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "PASO 6 — Al entrar en hex nuevo: tirar contenido si no está keyed. (@Contenido de Hex)" },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "PASO 7 — Gestionar recursos: consumir 1 ración + agua por PJ y caballo por día." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "REFERENCIA: Un día = 3 turnos (watches): mañana, tarde, noche. Dormir = 1 watch mínimo." }
+      ]
+    },
+    {
+      "name": "REF: Tiradas de Supervivencia en Viaje",
+      "description": "Cuándo y cómo tirar para gestionar recursos y peligros del viaje.",
+      "category": "Referencia",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "HAMBRE: sin raciones, 1 nivel de agotamiento por día. Al 6to nivel: muerte." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "SED: sin agua, 1 nivel de agotamiento por día (x2 en desierto/calor)." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "DESCANSO: sin dormir 1 noche = 1 nivel de agotamiento. Dormir en armadura: descanso parcial." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "AGOTAMIENTO: 6 niveles. 1=desventaja en pruebas · 2=velocidad mitad · 3=desv. en ataq/salvac · 4=PV máx mitad · 5=velocidad 0 · 6=muerte." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "FRÍO EXTREMO: CD 10 CON cada hora sin equipo de invierno. Fallo = 1 nivel agotamiento." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "CALOR EXTREMO: CD 5 CON cada hora. Sube a CD 10 si lleva armadura metálica." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "FORRAJEO: prueba de Sabiduría (Supervivencia) CD 15 en terreno hostil, CD 10 en normal." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "NAVEGACIÓN: CD 10 en terreno abierto · CD 15 en bosque/pantano · CD 20 en tormenta o noche." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "ENFERMEDAD: al beber agua dudosa o contacto con criaturas enfermas, CD 12–15 CON o contraer enfermedad." },
+        { "minRoll": 10, "maxRoll": 10, "text": "RECUPERACIÓN: descanso largo completo (8h) elimina 1 nivel de agotamiento y restaura PV." }
+      ]
+    },
+    {
+      "name": "REF: Condiciones de Iluminación",
+      "description": "Efectos de la visibilidad y la luz sobre las acciones.",
+      "category": "Referencia",
+      "rollFormula": "1d6",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "LUZ BRILLANTE: visión normal. Sin penalizaciones." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "LUZ TENUE: zona en penumbra. Desventaja en pruebas de Percepción (vista)." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "OSCURIDAD: sin visión en la oscuridad = ciego. Ataques con desventaja, ataques entrantes con ventaja." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "VISIÓN EN LA OSCURIDAD: ve en oscuridad como luz tenue. No distingue colores." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "ANTORCHA: radio de luz brillante 6m, luz tenue otros 6m. Dura 1 hora." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "HECHIZO LUZ: radio 6m brillante, 6m tenue. Dura 1 hora. Puede aplicarse a objeto." }
+      ]
+    },
+    {
+      "name": "REF: Condiciones de Estado",
+      "description": "Referencia rápida de las condiciones más comunes en combate.",
+      "category": "Referencia",
+      "rollFormula": "1d12",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "CEGADO: falla pruebas de vista, ataques con desventaja, ataques entrantes con ventaja." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "ENCANTADO: no puede atacar al encantador, el encantador tiene ventaja en interacción social." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "ASUSTADO: desventaja en pruebas y ataques mientras vea la fuente del miedo. No puede acercarse." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "AFERRADO: velocidad 0, desventaja en ataques, ventaja en ataques contra él." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "INCAPACITADO: no puede realizar acciones ni reacciones." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "INVISIBLE: imposible de ver sin magia. Ataques con ventaja, ataques entrantes con desventaja." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "PARALIZADO: incapacitado, no puede moverse ni hablar. Falla salvaciones de FUE/DES. Crits a 1,5m." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "PRONO: desventaja en ataques. Ataques en melé con ventaja, a distancia con desventaja. Costar movimiento levantarse." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "RESTRINGIDO: velocidad 0, desventaja en salvaciones DES, ataques entrantes con ventaja." },
+        { "minRoll": 10, "maxRoll": 10, "text": "ATURDIDO: incapacitado, no puede moverse, habla farfullante. Falla FUE/DES. Ataques entrantes con ventaja." },
+        { "minRoll": 11, "maxRoll": 11, "text": "INCONSCIENTE: incapacitado, prono, no consciente. Falla FUE/DES. Crits a 1,5m." },
+        { "minRoll": 12, "maxRoll": 12, "text": "ENVENENADO: desventaja en tiradas de ataque y pruebas de característica." }
+      ]
+    },
+    {
+      "name": "REF: Acciones en Combate",
+      "description": "Acciones disponibles en un turno de combate (resumen rápido).",
+      "category": "Referencia",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "ATACAR: uno o más ataques según nivel/clase. Melé o a distancia." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "LANZAR HECHIZO: hechizo con tiempo de lanzamiento 1 acción." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "CORRER: movimiento extra igual a tu velocidad este turno." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "RETIRARSE: el movimiento no provoca ataques de oportunidad." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "ESQUIVAR: ataques entrantes con desventaja si puedes verlos. Ventaja en salvaciones DES." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "AYUDAR: concedes ventaja en el siguiente ataque o prueba del aliado." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "ESCONDERSE: prueba de Sigilo. Si supera la Percepción pasiva, queda oculto." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "PREPARAR: defines un trigger y una reacción que se ejecuta antes de tu próximo turno." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "BUSCAR: prueba de Percepción o Investigación para localizar algo o alguien oculto." },
+        { "minRoll": 10, "maxRoll": 10, "text": "USAR OBJETO: interactuar con un objeto (segunda interacción del turno requiere acción)." }
+      ]
+    },
+    {
+      "name": "Tipo de Gobierno",
+      "description": "Cómo está organizado el poder en esta ciudad o región.",
+      "category": "Worldbuilding",
+      "rollFormula": "1d8",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1, "maxRoll": 1, "text": "Teocracia: el sumo sacerdote gobierna en nombre del dios. La ley religiosa es la ley." },
+        { "minRoll": 2, "maxRoll": 2, "text": "Oligarquía: un consejo de mercaderes ricos decide todo. El dinero es el voto." },
+        { "minRoll": 3, "maxRoll": 3, "text": "Monarquía hereditaria: rey o reina con poder absoluto o casi absoluto." },
+        { "minRoll": 4, "maxRoll": 4, "text": "República gremial: representantes elegidos por los gremios, no por el pueblo." },
+        { "minRoll": 5, "maxRoll": 5, "text": "Tiranía militar: un señor de guerra tomó el poder. Lo mantiene con fuerza." },
+        { "minRoll": 6, "maxRoll": 6, "text": "Democracia directa: la asamblea ciudadana vota. Lenta y caótica pero legítima." },
+        { "minRoll": 7, "maxRoll": 7, "text": "Anarquía funcional: sin gobierno formal. Facciones negocian equilibrios inestables." },
+        { "minRoll": 8, "maxRoll": 8, "text": "Colonia imperial: gobernada por decreto de un imperio lejano. El gobernador es detestado." }
+      ]
+    },
+    {
+      "name": "Problema Actual de la Ciudad",
+      "description": "Crisis o conflicto vigente que afecta la vida cotidiana.",
+      "category": "Worldbuilding",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Escasez de alimentos. Los precios se han triplicado en un mes." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Plaga que afecta al ganado, no a las personas… todavía." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "El crimen organizado extorsiona al comercio sin que la guardia actúe." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Una facción religiosa exige representación en el consejo de gobierno." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Refugiados de una guerra cercana saturan la ciudad. Tensión racial." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "El agua del pozo central está contaminada desde hace semanas." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Asesino en serie activo. Todas las víctimas son del mismo gremio." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "La guardia lleva dos meses sin cobrar. El descontento es palpable." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Un noble acusó a otro de traición. La ciudad toma partido." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Ejército extranjero acampado afuera. Dicen que son aliados." }
+      ]
+    },
+    {
+      "name": "Cultura o Tradición Local",
+      "description": "Costumbre o norma social específica de este lugar.",
+      "category": "Worldbuilding",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Los saludos se hacen cubriendo el corazón con la mano derecha." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Rechazar comida ofrecida por un anfitrión es un insulto grave." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Los contratos solo son válidos si se sellan con vino derramado sobre la mesa." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Los muertos se entierran con sus herramientas de trabajo." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Las peleas de puños entre borrachos son entretenimiento aceptado y arbitrado." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Los niños reciben su nombre definitivo a los 5 años, no al nacer." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Hablar de dinero en una mesa de comida es muy mala educación." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Los tatuajes indican rango social: más tinta visible = más estatus." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Los extranjeros que entran por primera vez deben gritar su nombre en la puerta." },
+        { "minRoll": 10, "maxRoll": 10, "text": "La primera luna del año se celebra con máscaras. Nadie debe ser reconocido." }
+      ]
+    },
+    {
+      "name": "Arquitectura Típica",
+      "description": "Estilo constructivo dominante del asentamiento.",
+      "category": "Worldbuilding",
+      "rollFormula": "1d6",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1, "maxRoll": 1, "text": "Piedra gris y pizarra. Compacta, funcional, gris como el cielo que la cubre." },
+        { "minRoll": 2, "maxRoll": 2, "text": "Madera oscura con vigas expuestas. Callejones tan estrechos que se tocan los tejados." },
+        { "minRoll": 3, "maxRoll": 3, "text": "Adobe y cal blanca. Techos planos, jardines internos silenciosos." },
+        { "minRoll": 4, "maxRoll": 4, "text": "Madera tallada con detalles ornamentales. Colorida, caótica, viva." },
+        { "minRoll": 5, "maxRoll": 5, "text": "Fortaleza central con barrios amurallados concéntricos. Diseñada para resistir." },
+        { "minRoll": 6, "maxRoll": 6, "text": "Pilotes sobre el agua. Canales en vez de calles. Todo se mueve." }
+      ]
+    },
+    {
+      "name": "Reacción Inicial de Criatura",
+      "description": "Cómo reacciona un monstruo o PNJ al ver al grupo por primera vez (2d6).",
+      "category": "Monstruos",
+      "rollFormula": "2d6",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 2,  "maxRoll": 2,  "text": "ATAQUE INMEDIATO. Sin palabras, sin negociación. Golpea primero." },
+        { "minRoll": 3,  "maxRoll": 5,  "text": "HOSTIL. Amenaza, adopta postura de ataque. Atacará si el grupo no retrocede." },
+        { "minRoll": 6,  "maxRoll": 8,  "text": "INCIERTO. Observa y espera. El resultado depende de lo que haga el grupo." },
+        { "minRoll": 9,  "maxRoll": 11, "text": "NO HOSTIL. Curioso o indiferente. Podría hablar o ignorarlos." },
+        { "minRoll": 12, "maxRoll": 12, "text": "AMISTOSO. Dispuesto a ayudar, negociar o incluso aliarse." }
+      ]
+    },
+    {
+      "name": "Actividad del Monstruo al Encontrarlo",
+      "description": "Qué estaba haciendo la criatura antes de que llegara el grupo.",
+      "category": "Monstruos",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Patrullando su territorio. En alerta moderada." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Comiendo. Furioso si se le interrumpe." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Durmiendo. Prueba de sigilo para no despertarlo." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Acechando otra presa distinta al grupo. Podría ignorarlos." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Transportando algo a su guarida. No quiere testigos." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Herido y huyendo de algo más peligroso. Podría llevarlos hasta ello." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Disputando territorio con otro de su especie. El grupo es una distracción." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Protegiendo crías o huevos. Extremadamente agresivo sin provocación." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Realizando un comportamiento instintivo extraño o ritual." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Muriendo. Sus últimas acciones pueden ser desesperadas o inesperadamente cooperativas." }
+      ]
+    },
+    {
+      "name": "Táctica de Combate del Monstruo",
+      "description": "Cómo pelea esta criatura cuando decide atacar.",
+      "category": "Monstruos",
+      "rollFormula": "1d8",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1, "maxRoll": 1, "text": "Carga directa. Sin estrategia. Fuerza bruta pura." },
+        { "minRoll": 2, "maxRoll": 2, "text": "Flanqueo. Intenta rodear al grupo antes de atacar." },
+        { "minRoll": 3, "maxRoll": 3, "text": "Ataca al más débil o al que parece el líder." },
+        { "minRoll": 4, "maxRoll": 4, "text": "Usa el terreno: empuja al precipicio, usa la oscuridad, se esconde." },
+        { "minRoll": 5, "maxRoll": 5, "text": "Huye si pierde más del 50% de PV. La supervivencia es lo primero." },
+        { "minRoll": 6, "maxRoll": 6, "text": "Lucha hasta la muerte. No conoce ni entiende la retirada." },
+        { "minRoll": 7, "maxRoll": 7, "text": "Atrae refuerzos con sonidos, señales o simplemente huyendo hacia su nido." },
+        { "minRoll": 8, "maxRoll": 8, "text": "Finge rendirse o estar herido para atacar por sorpresa." }
+      ]
+    },
+    {
+      "name": "Evento en Puerto",
+      "description": "Algo ocurre mientras el grupo está en zona portuaria.",
+      "category": "Mar y Piratería",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Un barco llega con cargamento sellado y sin manifiesto visible." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "La guardia de aduanas registra todo. Lenta y abiertamente corrupta." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Subasta de un barco confiscado por deudas. La carga aún está a bordo." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Un marinero borracho ofrece información que nadie debería tener." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Una nave de guerra bloquea la salida del puerto. Sin explicaciones." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Pelea entre tripulaciones rivales en el muelle. Se expande rápido." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Un náufrago llega solo en balsa. Delirante. Habla de algo en el mar." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Contrabandistas descargando de noche. No quieren testigos." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Un capitán busca tripulación urgente. No explica qué pasó con la anterior." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Un mago inspecciona la carga de todos los barcos. Busca algo concreto." }
+      ]
+    },
+    {
+      "name": "Personaje Notable de Tripulación",
+      "description": "Un miembro de la tripulación con historia propia.",
+      "category": "Mar y Piratería",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "El viejo marinero que conoce todas las rutas pero tiene miedo al mar abierto." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "El contramaestre que odia al capitán en silencio. Desde hace años." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "El cocinero que guarda secretos de todos los puertos que han visitado." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "El grumete que en realidad es noble disfrazado huyendo de algo." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "El navegante que es un astrónomo fracasado buscando redención." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "La médica de a bordo que practica magia de forma muy discreta." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "El cazador de ballenas retirado que jura haber visto algo más grande." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "El desertor militar que huye de algo en tierra firme." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "El filósofo que claramente no debería estar en un barco de este tipo." },
+        { "minRoll": 10, "maxRoll": 10, "text": "El silencioso que lleva tres travesías sin hablar con nadie. Nadie sabe su nombre." }
+      ]
+    },
+    {
+      "name": "Carga del Barco",
+      "description": "Qué transporta este barco (declarado o no).",
+      "category": "Mar y Piratería",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Especias de tierras lejanas. Valor alto. Muy codiciadas." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Prisioneros. No están marcados como esclavos pero tampoco son libres." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Armas sin marcar. Destinadas a alguien que no quiere ser identificado." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Cereales y comida básica. Aburrido pero necesario en un asedio." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Artefactos arqueológicos de dudosa procedencia." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Animales exóticos en jaulas. Algunas jaulas están abiertas." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Medicinas y pociones. El manifiesto no coincide con el contenido real." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Oro sin acuñar en lingotes. Sin sello de ningún reino conocido." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Cartas y documentos sellados para múltiples destinatarios en distintas ciudades." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Las bodegas están vacías y húmedas. La carga fue descargada en otro lugar." }
+      ]
+    },
+    {
+      "name": "Secreto del Capitán",
+      "description": "Lo que el capitán del barco oculta a su tripulación y pasajeros.",
+      "category": "Mar y Piratería",
+      "rollFormula": "1d8",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1, "maxRoll": 1, "text": "Trabaja para dos bandos en conflicto. Cobra de ambos." },
+        { "minRoll": 2, "maxRoll": 2, "text": "Su barco está maldito. Cada tripulación anterior murió. No lo menciona." },
+        { "minRoll": 3, "maxRoll": 3, "text": "Es un agente de inteligencia de un gobierno lejano con otra agenda." },
+        { "minRoll": 4, "maxRoll": 4, "text": "Debe una deuda enorme a algo que no es humano y que no perdona." },
+        { "minRoll": 5, "maxRoll": 5, "text": "Lleva décadas buscando una isla que puede que no exista." },
+        { "minRoll": 6, "maxRoll": 6, "text": "La patente de corso que lo 'legitima' es una falsificación." },
+        { "minRoll": 7, "maxRoll": 7, "text": "Su nombre real aparece en carteles de 'se busca' en tres puertos." },
+        { "minRoll": 8, "maxRoll": 8, "text": "Tiene familia en tierra que no sabe lo que hace realmente en el mar." }
+      ]
+    },
+    {
+      "name": "Evento Formativo del Personaje",
+      "description": "Algo del pasado que define quién es el PJ hoy.",
+      "category": "Trasfondo de PJ",
+      "rollFormula": "1d12",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Presenció la destrucción de su hogar cuando era niño." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Fue aprendiz de alguien que resultó no ser lo que parecía." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Sobrevivió a algo que mató a todos sus compañeros. No sabe por qué él." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Descubrió una verdad sobre su familia que cambió todo lo que creía." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Fue traicionado por alguien en quien confiaba ciegamente." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Pasó un año perdido en un lugar que nadie más conoce." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Fue prisionero injustamente. Alguien lo liberó sin revelar quién ni por qué." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Mató a alguien por primera vez por razones que aún intenta justificar." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Encontró algo que no debería existir y no pudo ignorarlo." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Una enfermedad lo cambió física o mentalmente de forma permanente." },
+        { "minRoll": 11, "maxRoll": 11, "text": "Fue elegido o señalado para algo sin que nadie le explicara por qué." },
+        { "minRoll": 12, "maxRoll": 12, "text": "Hizo una promesa que no puede cumplir fácilmente y que no puede ignorar." }
+      ]
+    },
+    {
+      "name": "Aliado del Pasado",
+      "description": "Alguien del pasado del PJ que podría reaparecer.",
+      "category": "Trasfondo de PJ",
+      "rollFormula": "1d8",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1, "maxRoll": 1, "text": "Un mentor que sigue vivo pero en paradero desconocido." },
+        { "minRoll": 2, "maxRoll": 2, "text": "Un amigo de infancia que tomó un camino completamente diferente." },
+        { "minRoll": 3, "maxRoll": 3, "text": "Un oficial militar que le debe la vida y lo sabe." },
+        { "minRoll": 4, "maxRoll": 4, "text": "Un curandero que lo salvó sin pedir nada a cambio." },
+        { "minRoll": 5, "maxRoll": 5, "text": "Un ladrón que le enseñó a sobrevivir en los barrios bajos." },
+        { "minRoll": 6, "maxRoll": 6, "text": "Un noble que lo apoyó en secreto durante años sin que el PJ lo supiera." },
+        { "minRoll": 7, "maxRoll": 7, "text": "Una criatura no humana que lo consideró su igual." },
+        { "minRoll": 8, "maxRoll": 8, "text": "Un rival de otro tiempo que terminó siendo más aliado que enemigo." }
+      ]
+    },
+    {
+      "name": "Enemigo del Pasado",
+      "description": "Alguien que tiene cuentas pendientes con el PJ.",
+      "category": "Trasfondo de PJ",
+      "rollFormula": "1d8",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1, "maxRoll": 1, "text": "Un antiguo empleador que se sintió traicionado y no lo olvidó." },
+        { "minRoll": 2, "maxRoll": 2, "text": "El asesino que mató a alguien cercano y aún vive y sigue activo." },
+        { "minRoll": 3, "maxRoll": 3, "text": "Un oficial corrupto que culpó al PJ de su propio crimen." },
+        { "minRoll": 4, "maxRoll": 4, "text": "Un mago que lo usó como sujeto de experimento sin consentimiento." },
+        { "minRoll": 5, "maxRoll": 5, "text": "Un rival de gremio que arruinó su reputación con mentiras." },
+        { "minRoll": 6, "maxRoll": 6, "text": "El líder de un culto del que el PJ logró escapar." },
+        { "minRoll": 7, "maxRoll": 7, "text": "Un noble que cree que el PJ le debe algo que nunca podrá pagar." },
+        { "minRoll": 8, "maxRoll": 8, "text": "Un familiar que lo traicionó por herencia, poder o miedo." }
+      ]
+    },
+    {
+      "name": "Primer Recuerdo de Aventura",
+      "description": "La primera vez que el PJ hizo algo que no era vida normal.",
+      "category": "Trasfondo de PJ",
+      "rollFormula": "1d8",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1, "maxRoll": 1, "text": "Entró a una cueva donde todo el mundo sabía que no debía entrar." },
+        { "minRoll": 2, "maxRoll": 2, "text": "Encontró el cadáver de alguien famoso en un lugar inexplicable." },
+        { "minRoll": 3, "maxRoll": 3, "text": "Persiguió algo que resultó ser mucho más grande de lo esperado." },
+        { "minRoll": 4, "maxRoll": 4, "text": "Hizo un trato que tardó años en entender del todo." },
+        { "minRoll": 5, "maxRoll": 5, "text": "Sobrevivió una noche en un lugar donde se decía que nadie sobrevivía." },
+        { "minRoll": 6, "maxRoll": 6, "text": "Robó algo que resultó ser importante para alguien muy poderoso." },
+        { "minRoll": 7, "maxRoll": 7, "text": "Salvó a alguien que luego no quería haber sido salvado." },
+        { "minRoll": 8, "maxRoll": 8, "text": "Abrió una puerta que alguien claramente no quería que se abriera." }
+      ]
+    },
+    {
+      "name": "Mobiliario de Mazmorra",
+      "description": "Objeto o mueble encontrado en una sala o pasillo.",
+      "category": "Mazmorra",
+      "rollFormula": "1d12",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Mesa de madera pesada con cadenas en las patas. Para alguien que no quería quedarse." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Estantería vacía con huecos donde había libros o frascos." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Silla de piedra tallada sin cojín. Incómoda por diseño." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Cama de campaña doblada contra la pared. Alguien dormía aquí." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Pedestal de mármol vacío. Lo que sostenía fue llevado hace mucho." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Caldero enorme sobre brasero apagado. Queda algo solidificado dentro." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Armario con cerradura rota. Vacío excepto por un olor persistente a especias." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Altar de trabajo: herramientas de alquimia o tortura en desuso." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Trono de piedra orientado a una pared en blanco. Inquietante." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Jaula colgante de tamaño humano. Vacía. La puerta está abierta." },
+        { "minRoll": 11, "maxRoll": 11, "text": "Escritorio inclinado con tintero seco y plumas rotas." },
+        { "minRoll": 12, "maxRoll": 12, "text": "Baúl con bisagras rotas. Fue forzado desde dentro." }
+      ]
+    },
+    {
+      "name": "Inscripción en la Pared",
+      "description": "Mensaje grabado, pintado o trazado en una pared de la mazmorra.",
+      "category": "Mazmorra",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "'El que lea esto ya llegó tarde.' En lengua común. Trazo calmado." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Un mapa tosco del nivel siguiente. Hecho con algo que parece sangre." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Lista de nombres. Muy larga. Sin fechas ni contexto." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "'No abras la tercera puerta.' Sin indicar cuál de las puertas es la tercera." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Runa de advertencia cuidadosamente labrada. Alguien se tomó mucho tiempo." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Cuenta de días marcada en la piedra. Termina de forma abrupta." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Símbolo de una deidad prohibida. Aún vibra con residuo mágico." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "'Volveré.' Firmado por alguien cuyo nombre fue borrado con fuerza." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Instrucciones para un ritual. La última línea es ilegible deliberadamente." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Caricatura grotesca de una figura con corona. Sátira de alguien con poder." }
+      ]
+    },
+    {
+      "name": "Detalle Visual de Sala",
+      "description": "Algo que llama la atención al entrar en una habitación.",
+      "category": "Mazmorra",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Telarañas que cubren todo. Tan densas que cuelgan como cortinas." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Las paredes tienen marcas de garras a la altura del techo." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "El suelo tiene una mancha circular oscura que no es sangre." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Luz débil sin fuente visible. Emana de las propias paredes." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Una ventana sellada que da a otra habitación de la mazmorra." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Frescos desvaneciéndose. Representan una escena de guerra o sacrificio." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Todo cubierto de sal. Alguien la puso aquí con un propósito." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Losa central levantada y vuelto a poner torpemente. Hay marcas de palanca." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Moscas. Muchas. Pero no hay nada podrido visible en la sala." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Niebla baja que cubre el suelo. No se ve dónde se pone el pie." }
+      ]
+    },
+    {
+      "name": "Rumor de Corte Noble",
+      "description": "Lo que se susurra en pasillos palaciegos y salones de banquetes.",
+      "category": "Política",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "El heredero tiene una enfermedad grave que la familia oculta activamente." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "La consejera principal lleva años trabajando para el bando enemigo." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Un noble menor descubrió irregularidades fiscales en palacio." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "El matrimonio entre familias rivales está casi acordado. Sin consultar a los novios." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Alguien envenena al gobernante lentamente. Nadie sabe quién." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "La hija del noble mayor huyó disfrazada de sirvienta hace un mes." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Un espía extranjero fue capturado y luego liberado. Nadie da explicaciones." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "La guardia real tiene dos capitanes que se odian. La tensión es visible." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Alguien en palacio envía mensajes codificados a los bandidos del este." },
+        { "minRoll": 10, "maxRoll": 10, "text": "El heredero no es hijo del gobernante. Toda la corte lo sabe menos él." }
+      ]
+    },
+    {
+      "name": "Trama Política en Curso",
+      "description": "Conflicto de poder activo en la región.",
+      "category": "Política",
+      "rollFormula": "1d8",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1, "maxRoll": 1, "text": "Dos casas nobles disputan la herencia de tierras fronterizas ricas." },
+        { "minRoll": 2, "maxRoll": 2, "text": "Un gremio poderoso exige representación en el consejo o bloqueará el comercio." },
+        { "minRoll": 3, "maxRoll": 3, "text": "La facción militar presiona para declarar guerra preventiva a un vecino." },
+        { "minRoll": 4, "maxRoll": 4, "text": "Un culto ha infiltrado los cargos administrativos clave de la ciudad." },
+        { "minRoll": 5, "maxRoll": 5, "text": "Una familia noble intenta deponer al gobernante sin violencia aparente." },
+        { "minRoll": 6, "maxRoll": 6, "text": "El gobierno central impone un nuevo impuesto que nadie acepta." },
+        { "minRoll": 7, "maxRoll": 7, "text": "Un reformador popular amenaza el orden con apoyo de las clases bajas." },
+        { "minRoll": 8, "maxRoll": 8, "text": "Un tratado de paz está a punto de firmarse. Alguien no quiere que ocurra." }
+      ]
+    },
+    {
+      "name": "Conflicto entre Facciones",
+      "description": "Dos grupos organizados enfrentados que el grupo puede encontrar.",
+      "category": "Política",
+      "rollFormula": "1d8",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1, "maxRoll": 1, "text": "Gremio de mercaderes vs. Gremio de artesanos: guerra de precios que se vuelve violenta." },
+        { "minRoll": 2, "maxRoll": 2, "text": "Templo A vs. Templo B: disputa sobre cuál deidad merece más donaciones de la ciudad." },
+        { "minRoll": 3, "maxRoll": 3, "text": "Guardia de la ciudad vs. Gremio de ladrones: tregua rota recientemente." },
+        { "minRoll": 4, "maxRoll": 4, "text": "Nobles del norte vs. Nobles del sur: frontera en disputa desde hace generaciones." },
+        { "minRoll": 5, "maxRoll": 5, "text": "Magos del arco interno vs. Magos independientes: monopolio del conocimiento arcano." },
+        { "minRoll": 6, "maxRoll": 6, "text": "Contrabandistas vs. Aduanas: la corrupción está profundamente en ambos lados." },
+        { "minRoll": 7, "maxRoll": 7, "text": "Clan enano de la montaña vs. Elfos del bosque: los árboles crecen sobre la mina." },
+        { "minRoll": 8, "maxRoll": 8, "text": "Inquisición religiosa en expansión vs. prácticamente todo lo que no aprueba." }
+      ]
+    },
+    {
+      "name": "Objeto en el Bolsillo de un Cadáver",
+      "description": "Qué lleva encima alguien que acaba de morir.",
+      "category": "Botín",
+      "rollFormula": "1d20",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Una carta de amor sin enviar. Con nombre del destinatario." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Monedas de un país que ya no existe." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Un diente en un saquito de cuero." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Una llave sin etiqueta ni marca identificable." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Un trozo de mapa sin orientación ni nombres." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Dados cargados. Llevaba ventaja en todos los juegos." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Una semilla inusual envuelta cuidadosamente en tela." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "El retrato pintado de alguien en miniatura." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Una lista de nombres sin contexto ni explicación." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Un sello de cera con un blasón parcialmente raspado." },
+        { "minRoll": 11, "maxRoll": 11, "text": "Piedras de colores vivos. No tienen valor aparente." },
+        { "minRoll": 12, "maxRoll": 12, "text": "Una receta de cocina arrugada y muy usada." },
+        { "minRoll": 13, "maxRoll": 13, "text": "Una deuda firmada a su favor. Nunca cobrada." },
+        { "minRoll": 14, "maxRoll": 14, "text": "Un escudo de identificación de una organización disuelta." },
+        { "minRoll": 15, "maxRoll": 15, "text": "Hilo rojo atado en el dedo meñique." },
+        { "minRoll": 16, "maxRoll": 16, "text": "Un trozo de carbón de buena calidad." },
+        { "minRoll": 17, "maxRoll": 17, "text": "Instrucciones de navegación hacia un lugar sin nombre." },
+        { "minRoll": 18, "maxRoll": 18, "text": "Un pañuelo con iniciales bordadas que no son suyas." },
+        { "minRoll": 19, "maxRoll": 19, "text": "Una ficha de apuesta de un juego ilegal." },
+        { "minRoll": 20, "maxRoll": 20, "text": "Un ojo de cristal de repuesto. Su ojo real era de cristal también." }
+      ]
+    },
+    {
+      "name": "Contenido de Casa Abandonada",
+      "description": "Qué queda dentro de una vivienda abandonada o saqueada.",
+      "category": "Botín",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Muebles volcados. Señales de pelea rápida o huida más rápida." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Comida en la mesa. Se estropeó hace semanas pero la mesa está puesta." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Un diario cuyas últimas páginas fueron arrancadas con violencia." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Ropa de niño bien doblada. No hay niños." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Una habitación perfectamente ordenada. El resto de la casa, no." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Monedas esparcidas en el suelo como si cayeron de alguien que corría." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Una trampilla recién forzada. La cerradura está rota desde abajo." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Un altar casero aún con ofrendas frescas." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Una mascota muerta junto a su cuenco vacío." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Un libro de cuentas con entradas de dinero que no tienen sentido." }
+      ]
+    },
+    {
+      "name": "Mercancía de Caravana",
+      "description": "Qué transporta una caravana mercante.",
+      "category": "Botín",
+      "rollFormula": "1d10",
+      "rollMode": "RANGE",
+      "entries": [
+        { "minRoll": 1,  "maxRoll": 1,  "text": "Telas finas y tintes de importación. Ligeras y muy valiosas." },
+        { "minRoll": 2,  "maxRoll": 2,  "text": "Especias y hierbas medicinales de tierras lejanas." },
+        { "minRoll": 3,  "maxRoll": 3,  "text": "Herramientas de metal: hachas, picos, clavos a granel." },
+        { "minRoll": 4,  "maxRoll": 4,  "text": "Libros y pergaminos encargados por un erudito." },
+        { "minRoll": 5,  "maxRoll": 5,  "text": "Vino y licores embotellados de una bodega con nombre." },
+        { "minRoll": 6,  "maxRoll": 6,  "text": "Cerámicas y vajilla de una alfarería famosa y frágil." },
+        { "minRoll": 7,  "maxRoll": 7,  "text": "Animales de cría en jaulas: gallinas, cabras, un cerdo nervioso." },
+        { "minRoll": 8,  "maxRoll": 8,  "text": "Armas básicas sin marcar. El destino declarado suena sospechoso." },
+        { "minRoll": 9,  "maxRoll": 9,  "text": "Sal y conservas. Básico pero valioso lejos de la costa." },
+        { "minRoll": 10, "maxRoll": 10, "text": "Algo pesado en un crate sellado. El mercader no responde preguntas." }
       ]
     }
   ]

@@ -1,5 +1,7 @@
 package com.deckapp.core.domain.usecase
 
+import com.deckapp.core.model.ImportPreviewData
+import com.deckapp.core.model.ReferenceImportSource
 import com.deckapp.core.model.TableEntry
 
 /**
@@ -88,5 +90,28 @@ class MarkdownTableParser : TableParser {
         if (lines.size < 2) return false
         val markdownDelimiterRegex = Regex("""^\|?\s*:?-+:?\s*(\|?\s*:?-+:?\s*)+\|?$""")
         return lines.getOrNull(1)?.let { markdownDelimiterRegex.matches(it) } ?: false
+    }
+
+    companion object {
+        /**
+         * Parsea una tabla Markdown como tabla de referencia (todas las columnas, sin lógica de rangos).
+         * Separador de columnas separador (|---|) descartado. Primera fila = headers.
+         */
+        fun parseReference(text: String): ImportPreviewData {
+            val delimiterRegex = Regex("""^\|?\s*:?-+:?\s*(\|?\s*:?-+:?\s*)+\|?$""")
+            val tableLines = text.lines()
+                .map { it.trim() }
+                .filter { it.startsWith("|") }
+                .filterNot { delimiterRegex.matches(it) }
+
+            if (tableLines.isEmpty()) return ImportPreviewData(emptyList(), emptyList(), ReferenceImportSource.MARKDOWN)
+
+            val headers = parseCells(tableLines.first())
+            val rows = tableLines.drop(1).map { parseCells(it) }
+            return ImportPreviewData(headers, rows, ReferenceImportSource.MARKDOWN)
+        }
+
+        private fun parseCells(line: String): List<String> =
+            line.trim('|').split("|").map { it.trim() }
     }
 }

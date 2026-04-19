@@ -42,3 +42,17 @@ data class RandomTableFtsEntity(
 data class TableEntryFtsEntity(
     val text: String
 )
+
+@Fts4(contentEntity = ReferenceTableEntity::class)
+@Entity(tableName = "reference_tables_fts")
+data class ReferenceTableFtsEntity(
+    val name: String,
+    val description: String
+)
+
+@Fts4(contentEntity = SystemRuleEntity::class)
+@Entity(tableName = "system_rules_fts")
+data class SystemRuleFtsEntity(
+    val title: String,
+    val content: String
+)

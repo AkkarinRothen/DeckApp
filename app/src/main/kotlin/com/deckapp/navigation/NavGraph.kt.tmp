@@ -1,0 +1,24 @@
+                    onBrowseDeck = { deckId -> navController.navigate(DeckDetailRoute(deckId)) },
+                    onCreateTable = { navController.navigate(TableEditorRoute()) },
+                    onImportTable = { navController.navigate(TableImportRoute) },
+                    onExplorePacks = { navController.navigate(ReferenceListRoute) },
+                    onEditReferenceTable = { id -> navController.navigate(ReferenceTableEditorRoute(tableId = id)) },
+                    onEditSystemRule = { id -> navController.navigate(RuleEditorRoute(ruleId = id)) },
+                    onNewReferenceTable = { system -> navController.navigate(ReferenceTableEditorRoute(prefilledSystem = system)) },
+                    onNewSystemRule = { system -> navController.navigate(RuleEditorRoute(prefilledSystem = system)) }
+                )
+            }
+            composable<TablesListRoute> {
+               com.deckapp.feature.tables.library.TableLibraryScreen(
+                   onTableClick = { id -> navController.navigate(TableEditorRoute(id)) },
+                   onImportClick = { navController.navigate(TableImportRoute) },
+                   onExplorePacks = { navController.navigate(ReferenceListRoute) },
+                   onCreateTable = { navController.navigate(TableEditorRoute()) }
+               )
+            }
+            composable<TableEditorRoute> {
+                TableEditorScreen(onBack = { navController.popBackStack() })
+            }
+            composable<SessionHistoryRoute> {
+                SessionHistoryScreen(onBack = { navController.popBackStack() })
+            }

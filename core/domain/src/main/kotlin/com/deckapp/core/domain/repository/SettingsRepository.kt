@@ -9,4 +9,6 @@ interface SettingsRepository {
     fun setJpegQuality(quality: Int)
     fun getAutoVisionEnabled(): Boolean
     fun setAutoVisionEnabled(enabled: Boolean)
+    fun getSimplifiedModeEnabled(): Boolean
+    fun setSimplifiedModeEnabled(enabled: Boolean)
 }

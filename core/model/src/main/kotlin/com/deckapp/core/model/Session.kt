@@ -10,7 +10,8 @@ data class Session(
     val showCardTitles: Boolean = true,
     val dmNotes: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
-    val endedAt: Long? = null
+    val endedAt: Long? = null,
+    val gameSystems: List<String> = listOf("General")
 )
 
 enum class SessionStatus {

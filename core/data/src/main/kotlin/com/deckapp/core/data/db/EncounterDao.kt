@@ -17,6 +17,12 @@ interface EncounterDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEncounter(encounter: EncounterEntity): Long
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertEncounters(encounters: List<EncounterEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCombatLogs(logs: List<CombatLogEntryEntity>)
+
     @Update
     suspend fun updateEncounter(encounter: EncounterEntity)
 

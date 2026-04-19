@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.*
@@ -26,11 +27,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.deckapp.core.model.RandomTable
+import com.deckapp.core.model.TableRollResult
 import com.deckapp.core.ui.components.SelectionActionBar
+import com.deckapp.feature.tables.library.TablePackDialog
+import com.deckapp.feature.tables.library.components.TableGridItem
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -44,6 +49,15 @@ fun TablesTab(
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     var showExportDialog by remember { mutableStateOf(false) }
+
+    if (uiState.showPackDialog) {
+        com.deckapp.feature.tables.library.TablePackDialog(
+            packs = uiState.availableTablePacks,
+            onDismiss = { viewModel.setShowPackDialog(false) },
+            onInstall = viewModel::installTablePack,
+            onRemove = viewModel::removeTablePack
+        )
+    }
 
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("*/*")
@@ -191,6 +205,16 @@ fun TablesTab(
                         modifier = Modifier.scale(0.7f)
                     )
                 }
+
+                if (uiState.sessionRollLog.isNotEmpty()) {
+                    RollLogPanel(
+                        log = uiState.sessionRollLog,
+                        expanded = uiState.rollLogExpanded,
+                        onToggleExpanded = { viewModel.toggleRollLogExpanded() },
+                        onClear = { viewModel.clearSessionRollLog(sessionId) },
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                    )
+                }
             }
 
             when {
@@ -202,14 +226,37 @@ fun TablesTab(
                 uiState.groupedTables.isEmpty() -> {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                Icons.Default.Casino,
+                                contentDescription = null,
+                                modifier = Modifier.size(64.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                            )
+                            Spacer(Modifier.height(16.dp))
                             Text(
                                 "No hay tablas",
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+                            Text(
+                                "Crea una o activa un pack predefinido",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            )
+                            Spacer(Modifier.height(24.dp))
+                            
+                            Button(onClick = onCreateTable) {
+                                Icon(Icons.Default.Add, contentDescription = null)
+                                Spacer(Modifier.width(8.dp))
+                                Text("Crear tabla")
+                            }
+                            
                             Spacer(Modifier.height(8.dp))
-                            TextButton(onClick = onCreateTable) {
-                                Text("Crear primera tabla")
+                            
+                            OutlinedButton(onClick = { viewModel.setShowPackDialog(true) }) {
+                                Icon(Icons.Default.AutoAwesome, contentDescription = null)
+                                Spacer(Modifier.width(8.dp))
+                                Text("Explorar packs de tablas")
                             }
                         }
                     }
@@ -237,11 +284,26 @@ fun TablesTab(
                                 TableGridItem(
                                     table = table,
                                     isSelected = table.id in uiState.selectedTableIds,
-                                    onClick = { 
-                                        if (uiState.selectedTableIds.isNotEmpty()) viewModel.toggleTableSelection(table.id)
-                                        else viewModel.openTable(table)
+                                    onClick = {
+                                        if (uiState.selectedTableIds.isNotEmpty()) {
+                                            viewModel.toggleTableSelection(table.id)
+                                        } else if (uiState.isSimplifiedMode) {
+                                            viewModel.rollTable(table.id, sessionId)
+                                        } else {
+                                            viewModel.openTable(table)
+                                        }
                                     },
-                                    onLongClick = { viewModel.toggleTableSelection(table.id) }
+                                    onLongClick = {
+                                        if (uiState.selectedTableIds.isEmpty() && uiState.isSimplifiedMode) {
+                                            viewModel.openTable(table)
+                                        } else {
+                                            viewModel.toggleTableSelection(table.id)
+                                        }
+                                    },
+                                    onQuickRoll = { viewModel.rollTable(table.id, sessionId) },
+                                    onTogglePin = { viewModel.togglePin(table) },
+                                    quickRollResult = uiState.quickRollResults[table.id],
+                                    onDismissResult = { viewModel.clearQuickRoll(table.id) }
                                 )
                             }
                         }
@@ -274,16 +336,26 @@ fun TablesTab(
                                     table = table,
                                     isSelected = isSelected,
                                     isSelectionMode = uiState.selectedTableIds.isNotEmpty(),
-                                    onLongClick = { viewModel.toggleTableSelection(table.id) },
+                                    onLongClick = { 
+                                        if (uiState.selectedTableIds.isEmpty() && uiState.isSimplifiedMode) {
+                                            viewModel.openTable(table)
+                                        } else {
+                                            viewModel.toggleTableSelection(table.id)
+                                        }
+                                    },
                                     onClick = {
                                         if (uiState.selectedTableIds.isNotEmpty()) {
                                             viewModel.toggleTableSelection(table.id)
+                                        } else if (uiState.isSimplifiedMode) {
+                                            viewModel.rollTable(table.id, sessionId)
                                         } else {
                                             viewModel.openTable(table)
                                         }
                                     },
                                     onQuickRoll = { viewModel.rollTable(table.id, sessionId) },
-                                    onTogglePin = { viewModel.togglePin(table) }
+                                    onTogglePin = { viewModel.togglePin(table) },
+                                    quickRollResult = uiState.quickRollResults[table.id],
+                                    onDismissResult = { viewModel.clearQuickRoll(table.id) }
                                 )
                             }
                         }
@@ -305,9 +377,17 @@ fun TablesTab(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(end = 16.dp, bottom = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalAlignment = Alignment.End
             ) {
+                SmallFloatingActionButton(
+                    onClick = { viewModel.setShowPackDialog(true) },
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                ) {
+                    Icon(Icons.Default.AutoAwesome, contentDescription = "Packs de tablas")
+                }
+
                 SmallFloatingActionButton(
                     onClick = onImportTable,
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -326,60 +406,94 @@ fun TablesTab(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun TableGridItem(
-    table: RandomTable,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    onLongClick: () -> Unit
+private fun RollLogPanel(
+    log: List<TableRollResult>,
+    expanded: Boolean,
+    onToggleExpanded: () -> Unit,
+    onClear: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(1f)
-            .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick
-            ),
-        colors = if (isSelected) CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-                 else CardDefaults.cardColors(),
-        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Box(
+        Column {
+            Row(
                 modifier = Modifier
-                    .size(48.dp)
-                    .background(
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                        MaterialTheme.shapes.medium
-                    ),
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    Icons.Default.Casino,
+                    Icons.Default.History,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    "Historial de sesión · ${log.size} tiradas",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = onClear, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Default.DeleteSweep, contentDescription = "Limpiar historial", modifier = Modifier.size(16.dp))
+                }
+                IconButton(onClick = onToggleExpanded, modifier = Modifier.size(32.dp)) {
+                    Icon(
+                        if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
             }
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = table.name,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                maxLines = 2,
-                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-            )
-            Text(
-                text = table.rollFormula,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            if (expanded) {
+                HorizontalDivider()
+                LazyColumn(
+                    modifier = Modifier.heightIn(max = 200.dp),
+                    contentPadding = PaddingValues(vertical = 4.dp)
+                ) {
+                    items(log, key = { it.id }) { result ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.secondary,
+                                shape = MaterialTheme.shapes.extraSmall
+                            ) {
+                                Text(
+                                    text = result.rollValue.toString(),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Black,
+                                    color = MaterialTheme.colorScheme.onSecondary,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                )
+                            }
+                            Text(
+                                text = result.tableName,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(0.4f)
+                            )
+                            Text(
+                                text = result.resolvedText,
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(0.6f)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -393,7 +507,9 @@ private fun TableListItem(
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     onQuickRoll: () -> Unit,
-    onTogglePin: () -> Unit
+    onTogglePin: () -> Unit,
+    quickRollResult: TableRollResult? = null,
+    onDismissResult: () -> Unit = {}
 ) {
     Card(
         modifier = Modifier
@@ -421,53 +537,86 @@ private fun TableListItem(
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold
                 )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 2.dp)
-                ) {
-                    table.tags.take(3).forEach { tag ->
+                if (quickRollResult != null) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.padding(top = 4.dp)
+                    ) {
                         Surface(
-                            color = Color(tag.color).copy(alpha = 0.2f),
+                            color = MaterialTheme.colorScheme.secondary,
                             shape = MaterialTheme.shapes.extraSmall
                         ) {
                             Text(
-                                text = tag.name,
+                                text = quickRollResult.rollValue.toString(),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Color(tag.color),
-                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                                fontWeight = FontWeight.Black,
+                                color = MaterialTheme.colorScheme.onSecondary,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
                         }
-                    }
-                    if (table.tags.size > 3) {
                         Text(
-                            text = "+${table.tags.size - 3}",
+                            text = quickRollResult.resolvedText,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 2,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                } else {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(top = 2.dp)
+                    ) {
+                        table.tags.take(3).forEach { tag ->
+                            Surface(
+                                color = Color(tag.color).copy(alpha = 0.2f),
+                                shape = MaterialTheme.shapes.extraSmall
+                            ) {
+                                Text(
+                                    text = tag.name,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color(tag.color),
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                                )
+                            }
+                        }
+                        if (table.tags.size > 3) {
+                            Text(
+                                text = "+${table.tags.size - 3}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        if (table.tags.isNotEmpty()) Text("·", style = MaterialTheme.typography.labelSmall)
+                        Text(
+                            text = "${table.rollFormula} · ${table.entries.size} entradas",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    if (table.tags.isNotEmpty()) {
-                        Text("·", style = MaterialTheme.typography.labelSmall)
-                    }
-                    Text(
-                        text = "${table.rollFormula} · ${table.entries.size} entradas",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                 }
             }
             if (!isSelectionMode) {
-                IconButton(onClick = onTogglePin) {
-                    Icon(
-                        imageVector = if (table.isPinned) Icons.Default.PushPin else Icons.Outlined.PushPin,
-                        contentDescription = if (table.isPinned) "Quitar pin" else "Fijar tabla",
-                        tint = if (table.isPinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                        modifier = Modifier.size(18.dp)
-                    )
+                if (quickRollResult != null) {
+                    IconButton(onClick = onDismissResult, modifier = Modifier.size(36.dp)) {
+                        Icon(Icons.Default.Close, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                } else {
+                    IconButton(onClick = onTogglePin) {
+                        Icon(
+                            imageVector = if (table.isPinned) Icons.Default.PushPin else Icons.Outlined.PushPin,
+                            contentDescription = null,
+                            tint = if (table.isPinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
                 IconButton(onClick = onQuickRoll) {
                     Icon(
-                        Icons.Default.Casino,
+                        if (quickRollResult != null) Icons.Default.Refresh else Icons.Default.Casino,
                         contentDescription = "Tirar ${table.name}",
                         tint = MaterialTheme.colorScheme.primary
                     )

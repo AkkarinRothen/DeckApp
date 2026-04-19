@@ -11,6 +11,15 @@ interface WikiDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCategory(category: WikiCategoryEntity): Long
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCategories(categories: List<WikiCategoryEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertEntry(entry: WikiEntryEntity): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertEntries(entries: List<WikiEntryEntity>)
+
     @Query("SELECT * FROM wiki_entries WHERE categoryId = :categoryId ORDER BY lastUpdated DESC")
     fun getEntriesByCategory(categoryId: Long): Flow<List<WikiEntryEntity>>
 
@@ -19,9 +28,6 @@ interface WikiDao {
 
     @Query("SELECT * FROM wiki_entries WHERE title LIKE '%' || :query || '%'")
     fun searchEntries(query: String): Flow<List<WikiEntryEntity>>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertEntry(entry: WikiEntryEntity): Long
 
     @Delete
     suspend fun deleteEntry(entry: WikiEntryEntity)

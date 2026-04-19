@@ -14,6 +14,9 @@ interface NpcDao {
     @Upsert
     suspend fun upsertNpc(npc: NpcEntity): Long
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertNpcs(npcs: List<NpcEntity>)
+
     @Query("DELETE FROM npcs WHERE id = :npcId")
     suspend fun deleteNpc(npcId: Long)
 

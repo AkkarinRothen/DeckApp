@@ -85,8 +85,13 @@ fun SessionHistoryScreen(
                         )
                     }
                 } else {
-                    items(uiState.timeline) { item ->
-                        TimelineItem(item)
+                    items(uiState.timeline, key = { event ->
+                        when (event) {
+                            is TimelineEvent.CardEvent -> "card_${event.event.id}"
+                            is TimelineEvent.TableEvent -> "table_${event.result.id}"
+                        }
+                    }) { event ->
+                        TimelineItem(event)
                     }
                 }
 
@@ -112,7 +117,7 @@ fun SessionHistoryScreen(
                         }
                     }
                 }
-                
+
                 item { Spacer(Modifier.height(32.dp)) }
             }
         }
@@ -141,9 +146,9 @@ private fun SessionHeader(uiState: SessionHistoryUiState) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
             )
-            
+
             Spacer(Modifier.height(16.dp))
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -158,6 +163,13 @@ private fun SessionHeader(uiState: SessionHistoryUiState) {
                     value = uiState.totalDiscarded.toString(),
                     icon = Icons.Default.Delete
                 )
+                if (uiState.totalRolls > 0) {
+                    StatItem(
+                        label = "Tiradas",
+                        value = uiState.totalRolls.toString(),
+                        icon = Icons.Default.Casino
+                    )
+                }
                 StatItem(
                     label = "Duración",
                     value = "${uiState.durationMinutes}m",
@@ -194,15 +206,14 @@ private fun StatItem(label: String, value: String, icon: ImageVector) {
 }
 
 @Composable
-private fun TimelineItem(item: EventItem) {
+private fun TimelineItem(event: TimelineEvent) {
     val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-    val timeText = timeFormat.format(Date(item.event.timestamp))
+    val timeText = timeFormat.format(Date(event.timestamp))
 
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Indicador de tiempo y punto del timeline
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.width(48.dp)
@@ -222,68 +233,112 @@ private fun TimelineItem(item: EventItem) {
 
         Spacer(Modifier.width(12.dp))
 
-        // Contenido del evento
         Surface(
             modifier = Modifier.weight(1f),
             color = MaterialTheme.colorScheme.surfaceContainer,
             shape = RoundedCornerShape(12.dp)
         ) {
-            Row(
-                modifier = Modifier.padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                val icon = when (item.event.action) {
-                    DrawAction.DRAW -> Icons.Default.Style
-                    DrawAction.DISCARD -> Icons.Default.Delete
-                    DrawAction.FLIP -> Icons.Default.Refresh
-                    DrawAction.RESET -> Icons.Default.Restore
-                    DrawAction.PEEK -> Icons.Default.Visibility
-                    else -> Icons.Default.Info
-                }
-                
-                val actionText = when (item.event.action) {
-                    DrawAction.DRAW -> "Robó"
-                    DrawAction.DISCARD -> "Descartó"
-                    DrawAction.FLIP -> "Giró"
-                    DrawAction.RESET -> "Reseteó mazo"
-                    DrawAction.PEEK -> "Vió tope"
-                    else -> item.event.action.name
-                }
-
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.secondary
-                )
-                
-                Spacer(Modifier.width(12.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = actionText,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = item.card?.title ?: "Carta #${item.event.cardId}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-
-                item.card?.activeFace?.imagePath?.let { path ->
-                    AsyncImage(
-                        model = File(path),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(Color.Gray.copy(alpha = 0.1f)),
-                        contentScale = ContentScale.Crop
-                    )
-                }
+            when (event) {
+                is TimelineEvent.CardEvent -> CardEventContent(event)
+                is TimelineEvent.TableEvent -> TableEventContent(event)
             }
+        }
+    }
+}
+
+@Composable
+private fun CardEventContent(event: TimelineEvent.CardEvent) {
+    Row(
+        modifier = Modifier.padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val icon = when (event.event.action) {
+            DrawAction.DRAW -> Icons.Default.Style
+            DrawAction.DISCARD -> Icons.Default.Delete
+            DrawAction.FLIP -> Icons.Default.Refresh
+            DrawAction.RESET -> Icons.Default.Restore
+            DrawAction.PEEK -> Icons.Default.Visibility
+            else -> Icons.Default.Info
+        }
+        val actionText = when (event.event.action) {
+            DrawAction.DRAW -> "Robó"
+            DrawAction.DISCARD -> "Descartó"
+            DrawAction.FLIP -> "Giró"
+            DrawAction.RESET -> "Reseteó mazo"
+            DrawAction.PEEK -> "Vió tope"
+            else -> event.event.action.name
+        }
+
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = MaterialTheme.colorScheme.secondary
+        )
+        Spacer(Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = actionText,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = event.card?.title ?: "Carta #${event.event.cardId}",
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium
+            )
+        }
+        event.card?.activeFace?.imagePath?.let { path ->
+            AsyncImage(
+                model = File(path),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(Color.Gray.copy(alpha = 0.1f)),
+                contentScale = ContentScale.Crop
+            )
+        }
+    }
+}
+
+@Composable
+private fun TableEventContent(event: TimelineEvent.TableEvent) {
+    val result = event.result
+    Row(
+        modifier = Modifier.padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Default.Casino,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = MaterialTheme.colorScheme.tertiary
+        )
+        Spacer(Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "Tiró ${result.tableName}",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = result.resolvedText,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium
+            )
+        }
+        Surface(
+            color = MaterialTheme.colorScheme.tertiary,
+            shape = MaterialTheme.shapes.extraSmall
+        ) {
+            Text(
+                text = result.rollValue.toString(),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Black,
+                color = MaterialTheme.colorScheme.onTertiary,
+                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+            )
         }
     }
 }

@@ -20,91 +20,104 @@ class BackupRepositoryImpl @Inject constructor(
         FullBackupDto(
             schemaVersion = 1,
             tags = backupDao.getAllTags().map { TagBackupDto(it.id, it.name, it.color) },
-            decks = backupDao.getAllDecks().map { CardStackBackupDto(it.id, it.name, it.type, it.description, it.coverImagePath, it.sourceFolderPath, it.defaultContentMode, it.drawMode, it.drawFaceDown, it.backImagePath, it.displayCount, it.aspectRatio, it.isArchived, it.sortOrder, it.createdAt) },
-            cards = backupDao.getAllCards().map { CardBackupDto(it.id, it.stackId, it.originDeckId, it.title, it.suit, it.value, it.currentFaceIndex, it.currentRotation, it.isReversed, it.isDrawn, it.isRevealed, it.sortOrder, it.linkedTableId, it.dmNotes, it.lastDrawnAt) },
-            cardFaces = backupDao.getAllCardFaces().map { CardFaceBackupDto(it.id, it.cardId, it.faceIndex, it.name, it.imagePath, it.contentMode, it.zonesJson, it.reversedImagePath) },
+            decks = backupDao.getAllDecks().map { it.toBackupDto() },
+            cards = backupDao.getAllCards().map { it.toBackupDto() },
+            cardFaces = backupDao.getAllCardFaces().map { it.toBackupDto() },
             cardStackTags = backupDao.getAllCardStackTags().map { CardStackTagBackupDto(it.stackId, it.tagId) },
             cardTags = backupDao.getAllCardTags().map { CardTagBackupDto(it.cardId, it.tagId) },
             randomTableTags = backupDao.getAllRandomTableTags().map { RandomTableTagBackupDto(it.tableId, it.tagId) },
             tableBundles = backupDao.getAllTableBundles().map { TableBundleBackupDto(it.id, it.name, it.description, it.sourceUri, it.createdAt) },
-            randomTables = backupDao.getAllRandomTables().map { RandomTableBackupDto(it.id, it.bundleId, it.name, it.description, it.rollFormula, it.rollMode, it.isNoRepeat, it.isPinned, it.sourceType, it.sourceName, it.isBuiltIn, it.sortOrder, it.createdAt) },
-            tableEntries = backupDao.getAllTableEntries().map { TableEntryBackupDto(it.id, it.tableId, it.minRoll, it.maxRoll, it.weight, it.text, it.subTableRef, it.subTableId, it.sortOrder) },
-            sessions = backupDao.getAllSessions().map { SessionBackupDto(it.id, it.name, it.status, it.scheduledDate, it.summary, it.createdAt, it.endedAt, it.showCardTitles, it.dmNotes) },
+            randomTables = backupDao.getAllRandomTables().map { it.toBackupDto() },
+            tableEntries = backupDao.getAllTableEntries().map { it.toBackupDto() },
+            sessions = backupDao.getAllSessions().map { it.toBackupDto() },
             sessionDeckRefs = backupDao.getAllSessionDeckRefs().map { SessionDeckRefBackupDto(it.sessionId, it.stackId, it.drawModeOverride, it.sortOrder) },
             sessionTableRefs = backupDao.getAllSessionTableRefs().map { SessionTableRefBackupDto(it.sessionId, it.tableId, it.sortOrder) },
-            drawEvents = backupDao.getAllDrawEvents().map { DrawEventBackupDto(it.id, it.sessionId, it.cardId, it.action, it.metadata, it.timestamp) },
-            encounters = backupDao.getAllEncounters().map { EncounterBackupDto(it.id, it.name, it.description, it.linkedSessionId, it.isActive, it.currentRound, it.currentTurnIndex, it.createdAt) },
-            encounterCreatures = backupDao.getAllEncounterCreatures().map { EncounterCreatureBackupDto(it.id, it.encounterId, it.name, it.maxHp, it.currentHp, it.armorClass, it.initiativeBonus, it.initiativeRoll, it.conditionsJson, it.notes, it.sortOrder, it.npcId, it.imagePath) },
-            combatLog = backupDao.getAllCombatLogEntries().map { CombatLogEntryBackupDto(it.id, it.encounterId, it.message, it.type, it.timestamp) },
-            npcs = backupDao.getAllNpcs().map { NpcBackupDto(it.id, it.name, it.description, it.imagePath, it.maxHp, it.currentHp, it.armorClass, it.initiativeBonus, it.notes, it.isMonster, it.createdAt) },
+            drawEvents = backupDao.getAllDrawEvents().map { it.toBackupDto() },
+            encounters = backupDao.getAllEncounters().map { it.toBackupDto() },
+            encounterCreatures = backupDao.getAllEncounterCreatures().map { it.toBackupDto() },
+            combatLog = backupDao.getAllCombatLogEntries().map { it.toBackupDto() },
+            npcs = backupDao.getAllNpcs().map { it.toBackupDto() },
             npcTags = backupDao.getAllNpcTags().map { NpcTagBackupDto(it.npcId, it.tagId) },
             wikiCategories = backupDao.getAllWikiCategories().map { WikiCategoryBackupDto(it.id, it.name, it.iconName) },
-            wikiEntries = backupDao.getAllWikiEntries().map { WikiEntryBackupDto(it.id, it.title, it.content, it.categoryId, it.imagePath, it.lastUpdated) }
+            wikiEntries = backupDao.getAllWikiEntries().map { it.toBackupDto() },
+            referenceTables = db.referenceTableDao().getAllTablesSync().map { it.toBackupDto() },
+            referenceRows = db.referenceTableDao().getAllRowsSync().map { it.toBackupDto() },
+            referenceTableTags = db.referenceTableDao().getAllTagRefsSync().map { ReferenceTableTagBackupDto(it.tableId, it.tagId) },
+            systemRules = db.systemRuleDao().getAllRulesSync().map { it.toBackupDto() },
+            systemRuleTags = db.systemRuleDao().getAllTagRefsSync().map { SystemRuleTagBackupDto(it.ruleId, it.tagId) }
         )
     }
 
     override suspend fun restoreFullBackup(backup: FullBackupDto) = withContext(Dispatchers.IO) {
         db.withTransaction {
-            // 1. Limpiar base de datos completa
             db.clearAllTables()
 
-            // 2. Insertar Tags
             db.tagDao().insertTags(backup.tags.map { TagEntity(it.id, it.name, it.color) })
 
-            // 3. Insertar Mazos y Cartas
             db.cardStackDao().insertStacks(backup.decks.map { 
-                CardStackEntity(it.id, it.name, it.type, it.description, it.coverImagePath, it.sourceFolderPath, it.defaultContentMode, it.drawMode, it.drawFaceDown, it.backImagePath, it.displayCount, it.aspectRatio, it.isArchived, it.sortOrder, it.createdAt) 
+                CardStackEntity(id = it.id, name = it.name, type = it.type, description = it.description, coverImagePath = it.coverImagePath, sourceFolderPath = it.sourceFolderPath, defaultContentMode = it.defaultContentMode, drawMode = it.drawMode, drawFaceDown = it.drawFaceDown, backImagePath = it.backImagePath, displayCount = it.displayCount, aspectRatio = it.aspectRatio, isArchived = it.isArchived, sortOrder = it.sortOrder, createdAt = it.createdAt) 
             })
             db.cardDao().insertCards(backup.cards.map { 
-                CardEntity(it.id, it.stackId, it.originDeckId, it.title, it.suit, it.value, it.currentFaceIndex, it.currentRotation, it.isReversed, it.isDrawn, it.isRevealed, it.sortOrder, it.linkedTableId, it.dmNotes, it.lastDrawnAt) 
+                CardEntity(id = it.id, stackId = it.stackId, originDeckId = it.originDeckId, title = it.title, suit = it.suit, value = it.value, currentFaceIndex = it.currentFaceIndex, currentRotation = it.currentRotation, isReversed = it.isReversed, isDrawn = it.isDrawn, isRevealed = it.isRevealed, sortOrder = it.sortOrder, linkedTableId = it.linkedTableId, dmNotes = it.dmNotes, lastDrawnAt = it.lastDrawnAt) 
             })
             db.cardFaceDao().insertFaces(backup.cardFaces.map { 
-                CardFaceEntity(it.id, it.cardId, it.faceIndex, it.name, it.imagePath, it.contentMode, it.zonesJson, it.reversedImagePath) 
+                CardFaceEntity(id = it.id, cardId = it.cardId, faceIndex = it.faceIndex, name = it.name, imagePath = it.imagePath, contentMode = it.contentMode, zonesJson = it.zonesJson, reversedImagePath = it.reversedImagePath) 
             })
 
-            // 4. Insertar Relaciones (Cross-Refs)
-            backup.cardStackTags.forEach { db.cardStackDao().insertStackTagCrossRef(CardStackTagCrossRef(it.stackId, it.tagId)) }
-            backup.cardTags.forEach { db.cardDao().insertCardTagCrossRef(CardTagCrossRef(it.cardId, it.tagId)) }
-            backup.randomTableTags.forEach { db.randomTableDao().insertTableTagCrossRef(RandomTableTagCrossRef(it.tableId, it.tagId)) }
+            backup.cardStackTags.forEach { db.tagDao().insertStackTagRef(CardStackTagCrossRef(it.stackId, it.tagId)) }
+            backup.cardTags.forEach { db.tagDao().insertCardTagRef(CardTagCrossRef(it.cardId, it.tagId)) }
+            backup.randomTableTags.forEach { db.tagDao().insertTableTagRef(RandomTableTagCrossRef(it.tableId, it.tagId)) }
 
-            // 5. Insertar Tablas Aleatorias
             db.tableBundleDao().insertBundles(backup.tableBundles.map { TableBundleEntity(it.id, it.name, it.description, it.sourceUri, it.createdAt) })
             db.randomTableDao().insertTables(backup.randomTables.map { 
-                RandomTableEntity(it.id, it.bundleId, it.name, it.description, it.rollFormula, it.rollMode, it.isNoRepeat, it.isPinned, it.sourceType, it.sourceName, it.isBuiltIn, it.sortOrder, it.createdAt) 
+                RandomTableEntity(id = it.id, bundleId = it.bundleId, name = it.name, category = it.category, description = it.description, rollFormula = it.rollFormula, rollMode = it.rollMode, isNoRepeat = it.isNoRepeat, isPinned = it.isPinned, sourceType = it.sourceType, sourceName = it.sourceName, isBuiltIn = it.isBuiltIn, sortOrder = it.sortOrder, sourcePack = it.sourcePack, createdAt = it.createdAt) 
             })
             db.randomTableDao().insertEntries(backup.tableEntries.map { 
-                TableEntryEntity(it.id, it.tableId, it.minRoll, it.maxRoll, it.weight, it.text, it.subTableRef, it.subTableId, it.sortOrder) 
+                TableEntryEntity(id = it.id, tableId = it.tableId, minRoll = it.minRoll, maxRoll = it.maxRoll, weight = it.weight, text = it.text, subTableRef = it.subTableRef, subTableId = it.subTableId, sortOrder = it.sortOrder) 
             })
 
-            // 6. Insertar Sesiones e Historial
             db.sessionDao().insertSessions(backup.sessions.map { 
-                SessionEntity(it.id, it.name, it.status, it.scheduledDate, it.summary, it.createdAt, it.endedAt, it.showCardTitles, it.dmNotes) 
+                SessionEntity(id = it.id, name = it.name, status = it.status, scheduledDate = it.scheduledDate, summary = it.summary, createdAt = it.createdAt, endedAt = it.endedAt, showCardTitles = it.showCardTitles, dmNotes = it.dmNotes, gameSystemsJson = it.gameSystemsJson) 
             })
-            backup.sessionDeckRefs.forEach { db.sessionDao().insertDeckRef(SessionDeckRefEntity(it.sessionId, it.stackId, it.drawModeOverride, it.sortOrder)) }
-            backup.sessionTableRefs.forEach { db.sessionDao().insertTableRef(SessionTableRefEntity(it.sessionId, it.tableId, it.sortOrder)) }
+            backup.sessionDeckRefs.forEach { db.sessionDao().insertSessionDeckRef(SessionDeckRefEntity(it.sessionId, it.stackId, it.drawModeOverride, it.sortOrder)) }
+            backup.sessionTableRefs.forEach { db.sessionDao().insertSessionTableRef(SessionTableRefEntity(it.sessionId, it.tableId, it.sortOrder)) }
             db.drawEventDao().insertEvents(backup.drawEvents.map { DrawEventEntity(it.id, it.sessionId, it.cardId, it.action, it.metadata, it.timestamp) })
 
-            // 7. Insertar Encuentros
             db.encounterDao().insertEncounters(backup.encounters.map { 
-                EncounterEntity(it.id, it.name, it.description, it.linkedSessionId, it.isActive, it.currentRound, it.currentTurnIndex, it.createdAt) 
+                EncounterEntity(id = it.id, name = it.name, description = it.description, linkedSessionId = it.linkedSessionId, isActive = it.isActive, currentRound = it.currentRound, currentTurnIndex = it.currentTurnIndex, createdAt = it.createdAt) 
             })
             db.encounterDao().insertCreatures(backup.encounterCreatures.map { 
-                EncounterCreatureEntity(it.id, it.encounterId, it.name, it.maxHp, it.currentHp, it.armorClass, it.initiativeBonus, it.initiativeRoll, it.conditionsJson, it.notes, it.sortOrder, it.npcId, it.imagePath) 
+                EncounterCreatureEntity(id = it.id, encounterId = it.encounterId, name = it.name, maxHp = it.maxHp, currentHp = it.currentHp, armorClass = it.armorClass, initiativeBonus = it.initiativeBonus, initiativeRoll = it.initiativeRoll, conditionsJson = it.conditionsJson, notes = it.notes, sortOrder = it.sortOrder, npcId = it.npcId, imagePath = it.imagePath) 
             })
-            db.encounterDao().insertLogs(backup.combatLog.map { 
-                CombatLogEntryEntity(it.id, it.encounterId, it.message, it.type, it.timestamp) 
+            db.encounterDao().insertCombatLogs(backup.combatLog.map { 
+                CombatLogEntryEntity(id = it.id, encounterId = it.encounterId, message = it.message, type = it.type, timestamp = it.timestamp) 
             })
 
-            // 8. Insertar NPCs y Wiki
             db.npcDao().insertNpcs(backup.npcs.map { 
-                NpcEntity(it.id, it.name, it.description, it.imagePath, it.maxHp, it.currentHp, it.armorClass, it.initiativeBonus, it.notes, it.isMonster, it.createdAt) 
+                NpcEntity(id = it.id, name = it.name, description = it.description, imagePath = it.imagePath, maxHp = it.maxHp, currentHp = it.currentHp, armorClass = it.armorClass, initiativeBonus = it.initiativeBonus, notes = it.notes, isMonster = it.isMonster, createdAt = it.createdAt) 
             })
-            backup.npcTags.forEach { db.npcDao().insertNpcTagCrossRef(NpcTagCrossRef(it.npcId, it.tagId)) }
+            backup.npcTags.forEach { db.npcDao().insertCrossRef(NpcTagCrossRef(it.npcId, it.tagId)) }
 
             db.wikiDao().insertCategories(backup.wikiCategories.map { WikiCategoryEntity(it.id, it.name, it.iconName) })
             db.wikiDao().insertEntries(backup.wikiEntries.map { 
-                WikiEntryEntity(it.id, it.title, it.content, it.categoryId, it.imagePath, it.lastUpdated) 
+                WikiEntryEntity(id = it.id, title = it.title, content = it.content, categoryId = it.categoryId, imagePath = it.imagePath, lastUpdated = it.lastUpdated) 
             })
+
+            db.referenceTableDao().insertTables(backup.referenceTables.map {
+                ReferenceTableEntity(id = it.id, name = it.name, description = it.description, gameSystem = it.gameSystem, category = it.category, columnsJson = it.columnsJson, isPinned = it.isPinned, sortOrder = it.sortOrder, createdAt = it.createdAt, sourcePack = it.sourcePack)
+            })
+            db.referenceTableDao().insertRows(backup.referenceRows.map {
+                ReferenceRowEntity(id = it.id, tableId = it.tableId, cellsJson = it.cellsJson, sortOrder = it.sortOrder)
+            })
+            backup.referenceTableTags.forEach { 
+                db.referenceTableDao().addTagToTable(ReferenceTableTagCrossRef(it.tableId, it.tagId)) 
+            }
+            db.systemRuleDao().insertRules(backup.systemRules.map {
+                SystemRuleEntity(id = it.id, title = it.title, content = it.content, gameSystem = it.gameSystem, category = it.category, isPinned = it.isPinned, sortOrder = it.sortOrder, lastUpdated = it.lastUpdated, sourcePack = it.sourcePack)
+            })
+            backup.systemRuleTags.forEach { 
+                db.systemRuleDao().addTagToRule(SystemRuleTagCrossRef(it.ruleId, it.tagId)) 
+            }
         }
     }
 }

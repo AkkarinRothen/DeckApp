@@ -36,4 +36,12 @@ class SettingsRepositoryImpl @Inject constructor(
     override fun setAutoVisionEnabled(enabled: Boolean) {
         prefs.edit().putBoolean("auto_vision_enabled", enabled).apply()
     }
+
+    override fun getSimplifiedModeEnabled(): Boolean {
+        return prefs.getBoolean("simplified_mode_enabled", false)
+    }
+
+    override fun setSimplifiedModeEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean("simplified_mode_enabled", enabled).apply()
+    }
 }

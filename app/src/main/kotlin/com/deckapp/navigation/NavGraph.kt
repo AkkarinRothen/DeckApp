@@ -44,9 +44,12 @@ import com.deckapp.feature.npcs.NpcListScreen
 import com.deckapp.feature.wiki.WikiHomeScreen
 import com.deckapp.feature.wiki.WikiEntryEditorScreen
 import com.deckapp.feature.tables.TableEditorScreen
-
-@Serializable object WikiRoute
-@Serializable data class WikiEntryRoute(val entryId: Long? = null, val categoryId: Long? = null)
+import com.deckapp.feature.reference.ReferenceListScreen
+import com.deckapp.feature.reference.ReferenceTableEditorScreen
+import com.deckapp.feature.reference.RuleEditorScreen
+import com.deckapp.feature.hexploration.HexMapListScreen
+import com.deckapp.feature.hexploration.HexMapEditorScreen
+import com.deckapp.feature.hexploration.HexMapSessionScreen
 
 @Composable
 fun DeckAppNavHost() {
@@ -143,7 +146,9 @@ fun DeckAppNavHost() {
                     onAddToSession = { deckId -> navController.navigate(SessionSetupRoute(deckId)) },
                     onEncounterLibrary = { navController.navigate(EncounterListRoute) },
                     onNpcLibrary = { navController.navigate(NpcListRoute) },
-                    onWikiClick = { navController.navigate(WikiRoute) }
+                    onWikiClick = { navController.navigate(WikiRoute) },
+                    onReferenceClick = { navController.navigate(ReferenceListRoute) },
+                    onHexplorationClick = { navController.navigate(HexMapListRoute) }
                 )
             }
             composable<SessionListRoute> {
@@ -205,15 +210,19 @@ fun DeckAppNavHost() {
                     },
                     onBrowseDeck = { deckId -> navController.navigate(DeckDetailRoute(deckId)) },
                     onCreateTable = { navController.navigate(TableEditorRoute()) },
-                    onImportTable = { navController.navigate(TableImportRoute) }
+                    onImportTable = { navController.navigate(TableImportRoute) },
+                    onEditReferenceTable = { id -> navController.navigate(ReferenceTableEditorRoute(tableId = id)) },
+                    onEditSystemRule = { id -> navController.navigate(RuleEditorRoute(ruleId = id)) },
+                    onNewReferenceTable = { system -> navController.navigate(ReferenceTableEditorRoute(prefilledSystem = system)) },
+                    onNewSystemRule = { system -> navController.navigate(RuleEditorRoute(prefilledSystem = system)) }
                 )
             }
             composable<TablesListRoute> {
-                com.deckapp.feature.tables.library.TableLibraryScreen(
-                    onTableClick = { id -> navController.navigate(TableEditorRoute(id)) },
-                    onImportClick = { navController.navigate(TableImportRoute) },
-                    onCreateTable = { navController.navigate(TableEditorRoute()) }
-                )
+               com.deckapp.feature.tables.library.TableLibraryScreen(
+                   onTableClick = { id -> navController.navigate(TableEditorRoute(id)) },
+                   onImportClick = { navController.navigate(TableImportRoute) },
+                   onCreateTable = { navController.navigate(TableEditorRoute()) }
+               )
             }
             composable<TableEditorRoute> {
                 TableEditorScreen(onBack = { navController.popBackStack() })
@@ -268,7 +277,52 @@ fun DeckAppNavHost() {
             composable<WikiEntryRoute> {
                 WikiEntryEditorScreen(onBack = { navController.popBackStack() })
             }
+            composable<ReferenceListRoute> {
+                ReferenceListScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onEditTable = { id -> navController.navigate(ReferenceTableEditorRoute(tableId = id)) },
+                    onEditRule = { id -> navController.navigate(RuleEditorRoute(ruleId = id)) },
+                    onNewTable = { navController.navigate(ReferenceTableEditorRoute()) },
+                    onNewRule = { navController.navigate(RuleEditorRoute()) }
+                )
+            }
+            composable<ReferenceTableEditorRoute> { backStack ->
+                val route = backStack.toRoute<ReferenceTableEditorRoute>()
+                ReferenceTableEditorScreen(
+                    tableId = route.tableId,
+                    prefilledSystem = route.prefilledSystem,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable<RuleEditorRoute> { backStack ->
+                val route = backStack.toRoute<RuleEditorRoute>()
+                RuleEditorScreen(
+                    ruleId = route.ruleId,
+                    prefilledSystem = route.prefilledSystem,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            // Hexploración
+            composable<HexMapListRoute> {
+                HexMapListScreen(
+                    onMapClick = { id -> navController.navigate(HexMapEditorRoute(id)) },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable<HexMapEditorRoute> {
+                HexMapEditorScreen(
+                    onStartSession = { id -> navController.navigate(HexMapSessionRoute(id)) },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable<HexMapSessionRoute> {
+                HexMapSessionScreen(
+                    onNavigateToEncounter = { id -> navController.navigate(EncounterEditorRoute(id)) },
+                    onNavigateToEncounterList = { navController.navigate(EncounterListRoute) },
+                    onBack = { navController.popBackStack() }
+                )
+            }
         }
     }
 }
-

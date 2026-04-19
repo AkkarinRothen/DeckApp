@@ -24,8 +24,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.deckapp.core.model.Npc
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,6 +39,9 @@ fun NpcListScreen(
     viewModel: NpcListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isSimplified by viewModel.isSimplifiedMode
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     var searchQuery by remember { mutableStateOf("") }
 
     Scaffold(
@@ -58,14 +63,25 @@ fun NpcListScreen(
                 )
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             LargeFloatingActionButton(
-                onClick = onAddNpc,
+                onClick = {
+                    if (isSimplified) {
+                        viewModel.quickGenerateNpc { name ->
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Generado: $name")
+                            }
+                        }
+                    } else {
+                        onAddNpc()
+                    }
+                },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = Color.White,
                 shape = CircleShape
             ) {
-                Icon(Icons.Default.Add, contentDescription = "AÃ±adir NPC")
+                Icon(Icons.Default.Add, contentDescription = "Añadir NPC")
             }
         },
         containerColor = MaterialTheme.colorScheme.background
@@ -208,13 +224,13 @@ fun EmptyNpcsMessage() {
     Box(Modifier.fillMaxSize(), Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                "La biblioteca estÃ¡ vacÃ­a",
+                "La biblioteca está vacía",
                 style = MaterialTheme.typography.titleLarge,
                 color = Color.White.copy(alpha = 0.6f)
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                "¡Crea a tus hÃ©roes y villanos!",
+                "¡Crea a tus héroes y villanos!",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White.copy(alpha = 0.4f)
             )

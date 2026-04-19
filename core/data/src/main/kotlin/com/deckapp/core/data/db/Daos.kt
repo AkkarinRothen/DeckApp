@@ -26,6 +26,9 @@ interface CardStackDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertStack(stack: CardStackEntity): Long
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertStacks(stacks: List<CardStackEntity>)
+
     @Update
     suspend fun updateStack(stack: CardStackEntity)
 
@@ -146,6 +149,9 @@ interface TagDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTag(tag: TagEntity): Long
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTags(tags: List<TagEntity>)
+
     @Query("DELETE FROM tags WHERE id = :id")
     suspend fun deleteTag(id: Long)
 
@@ -200,6 +206,9 @@ interface SessionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSession(session: SessionEntity): Long
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSessions(sessions: List<SessionEntity>)
+
     @Query("UPDATE sessions SET status = 'COMPLETED', endedAt = :endedAt WHERE id = :sessionId")
     suspend fun endSession(sessionId: Long, endedAt: Long)
 
@@ -235,6 +244,9 @@ interface SessionDao {
 
     @Query("UPDATE sessions SET dm_notes = :notes WHERE id = :sessionId")
     suspend fun updateDmNotes(sessionId: Long, notes: String)
+
+    @Query("UPDATE sessions SET gameSystemsJson = :gameSystemsJson WHERE id = :sessionId")
+    suspend fun updateGameSystems(sessionId: Long, gameSystemsJson: String)
 }
 
 @Dao
@@ -252,6 +264,9 @@ interface RandomTableDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTable(table: RandomTableEntity): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTables(tables: List<RandomTableEntity>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEntries(entries: List<TableEntryEntity>)
@@ -282,6 +297,15 @@ interface RandomTableDao {
 
     @Query("SELECT * FROM random_tables WHERE name = :name LIMIT 1")
     suspend fun getTableByName(name: String): RandomTableEntity?
+
+    @Query("DELETE FROM random_tables WHERE sourcePack = :packName")
+    suspend fun deleteByPack(packName: String)
+
+    @Query("SELECT * FROM random_tables WHERE name = :name AND (sourcePack = :packName OR sourcePack IS NULL) LIMIT 1")
+    suspend fun getTableByPackAndName(packName: String, name: String): RandomTableEntity?
+
+    @Query("SELECT DISTINCT sourcePack FROM random_tables WHERE sourcePack IS NOT NULL AND sourcePack != ''")
+    fun getDistinctSourcePacks(): Flow<List<String>>
 }
 
 @Dao
@@ -294,6 +318,9 @@ interface TableBundleDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBundle(bundle: TableBundleEntity): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertBundles(bundles: List<TableBundleEntity>)
 
     @Update
     suspend fun updateBundle(bundle: TableBundleEntity)
@@ -325,8 +352,11 @@ interface TableRollResultDao {
 
 @Dao
 interface DrawEventDao {
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEvent(event: DrawEventEntity): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertEvents(events: List<DrawEventEntity>)
 
     @Query("SELECT * FROM draw_events WHERE sessionId = :sessionId ORDER BY timestamp ASC")
     fun getEventsForSession(sessionId: Long): Flow<List<DrawEventEntity>>

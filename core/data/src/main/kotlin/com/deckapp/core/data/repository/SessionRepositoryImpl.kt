@@ -5,6 +5,7 @@ import com.deckapp.core.domain.repository.SessionRepository
 import com.deckapp.core.model.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.encodeToString
 import javax.inject.Inject
 
 class SessionRepositoryImpl @Inject constructor(
@@ -80,4 +81,8 @@ class SessionRepositoryImpl @Inject constructor(
 
     override suspend fun deleteLastEvent(sessionId: Long) =
         drawEventDao.deleteLastEvent(sessionId)
+
+    override suspend fun updateGameSystems(sessionId: Long, systems: List<String>) {
+        sessionDao.updateGameSystems(sessionId, json.encodeToString(systems))
+    }
 }

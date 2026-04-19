@@ -1,0 +1,1052 @@
+﻿{
+    "systemRuleTags":  [
+
+                       ],
+    "referenceTableTags":  [
+
+                           ],
+    "referenceRows":  [
+
+                      ],
+    "cardFaces":  [
+
+                  ],
+    "tableBundles":  [
+
+                     ],
+    "tableEntries":  [
+                         {
+                             "id":  5000,
+                             "text":  "Carretera / camino: 4 hexes/día a pie · 6 hexes/día a caballo.",
+                             "tableId":  5000,
+                             "sortOrder":  0,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5001,
+                             "text":  "Llanura / pradera: 3 hexes/día a pie · 5 hexes/día a caballo.",
+                             "tableId":  5000,
+                             "sortOrder":  1,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5002,
+                             "text":  "Colinas: 2 hexes/día a pie · 3 hexes/día a caballo.",
+                             "tableId":  5000,
+                             "sortOrder":  2,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5003,
+                             "text":  "Bosque: 2 hexes/día a pie · 2 hexes/día a caballo.",
+                             "tableId":  5000,
+                             "sortOrder":  3,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5004,
+                             "text":  "Bosque denso / selva: 1 hex/día a pie · 1 hex/día a caballo.",
+                             "tableId":  5000,
+                             "sortOrder":  4,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5005,
+                             "text":  "Montaña: 1 hex/día a pie · imposible a caballo sin sendero.",
+                             "tableId":  5000,
+                             "sortOrder":  5,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5006,
+                             "text":  "Pantano: 1 hex/día a pie · imposible a caballo.",
+                             "tableId":  5000,
+                             "sortOrder":  6,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5007,
+                             "text":  "Desierto: 2 hexes/día a pie (con agua suficiente).",
+                             "tableId":  5000,
+                             "sortOrder":  7,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5008,
+                             "text":  "Barca / río a favor: 4 hexes/día. Contra corriente: 1 hex/día.",
+                             "tableId":  5000,
+                             "sortOrder":  8,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5009,
+                             "text":  "PENALIZACIONES: carga pesada −1 hex. Clima adverso −1 hex. Exploración activa: velocidad ÷ 2.",
+                             "tableId":  5000,
+                             "sortOrder":  9,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5010,
+                             "text":  "PASO 1 — El grupo declara actividad del turno: viajar, explorar, forrajear, cazar o descansar.",
+                             "tableId":  5001,
+                             "sortOrder":  10,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5011,
+                             "text":  "PASO 2 — Tirada de clima si el grupo está al aire libre. (@Clima)",
+                             "tableId":  5001,
+                             "sortOrder":  11,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5012,
+                             "text":  "PASO 3 — Tirada de navegación si el terreno es complicado (CD 10–15 según terreno).",
+                             "tableId":  5001,
+                             "sortOrder":  12,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5013,
+                             "text":  "PASO 4 — Tirada de encuentro: 1d6, en 1 hay encuentro. En exploración: 1-2 hay encuentro.",
+                             "tableId":  5001,
+                             "sortOrder":  13,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5014,
+                             "text":  "PASO 5 — Si viajan, avanzar los hexes correspondientes al terreno.",
+                             "tableId":  5001,
+                             "sortOrder":  14,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5015,
+                             "text":  "PASO 6 — Al entrar en hex nuevo: tirar contenido si no está keyed. (@Contenido de Hex)",
+                             "tableId":  5001,
+                             "sortOrder":  15,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5016,
+                             "text":  "PASO 7 — Gestionar recursos: consumir 1 ración + agua por PJ y caballo por día.",
+                             "tableId":  5001,
+                             "sortOrder":  16,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5017,
+                             "text":  "REFERENCIA: Un día = 3 turnos (watches): mañana, tarde, noche. Dormir = 1 watch mínimo.",
+                             "tableId":  5001,
+                             "sortOrder":  17,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5018,
+                             "text":  "HAMBRE: sin raciones, 1 nivel de agotamiento por día. Al 6to nivel: muerte.",
+                             "tableId":  5002,
+                             "sortOrder":  18,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5019,
+                             "text":  "SED: sin agua, 1 nivel de agotamiento por día (x2 en desierto/calor).",
+                             "tableId":  5002,
+                             "sortOrder":  19,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5020,
+                             "text":  "DESCANSO: sin dormir 1 noche = 1 nivel de agotamiento. Dormir en armadura: descanso parcial.",
+                             "tableId":  5002,
+                             "sortOrder":  20,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5021,
+                             "text":  "AGOTAMIENTO: 6 niveles. 1=desventaja en pruebas · 2=velocidad mitad · 3=desv. en ataq/salvac · 4=PV máx mitad · 5=velocidad 0 · 6=muerte.",
+                             "tableId":  5002,
+                             "sortOrder":  21,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5022,
+                             "text":  "FRÍO EXTREMO: CD 10 CON cada hora sin equipo de invierno. Fallo = 1 nivel agotamiento.",
+                             "tableId":  5002,
+                             "sortOrder":  22,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5023,
+                             "text":  "CALOR EXTREMO: CD 5 CON cada hora. Sube a CD 10 si lleva armadura metálica.",
+                             "tableId":  5002,
+                             "sortOrder":  23,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5024,
+                             "text":  "FORRAJEO: prueba de Sabiduría (Supervivencia) CD 15 en terreno hostil, CD 10 en normal.",
+                             "tableId":  5002,
+                             "sortOrder":  24,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5025,
+                             "text":  "NAVEGACIÓN: CD 10 en terreno abierto · CD 15 en bosque/pantano · CD 20 en tormenta o noche.",
+                             "tableId":  5002,
+                             "sortOrder":  25,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5026,
+                             "text":  "ENFERMEDAD: al beber agua dudosa o contacto con criaturas enfermas, CD 12–15 CON o contraer enfermedad.",
+                             "tableId":  5002,
+                             "sortOrder":  26,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5027,
+                             "text":  "RECUPERACIÓN: descanso largo completo (8h) elimina 1 nivel de agotamiento y restaura PV.",
+                             "tableId":  5002,
+                             "sortOrder":  27,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5028,
+                             "text":  "LUZ BRILLANTE: visión normal. Sin penalizaciones.",
+                             "tableId":  5003,
+                             "sortOrder":  28,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5029,
+                             "text":  "LUZ TENUE: zona en penumbra. Desventaja en pruebas de Percepción (vista).",
+                             "tableId":  5003,
+                             "sortOrder":  29,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5030,
+                             "text":  "OSCURIDAD: sin visión en la oscuridad = ciego. Ataques con desventaja, ataques entrantes con ventaja.",
+                             "tableId":  5003,
+                             "sortOrder":  30,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5031,
+                             "text":  "VISIÓN EN LA OSCURIDAD: ve en oscuridad como luz tenue. No distingue colores.",
+                             "tableId":  5003,
+                             "sortOrder":  31,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5032,
+                             "text":  "ANTORCHA: radio de luz brillante 6m, luz tenue otros 6m. Dura 1 hora.",
+                             "tableId":  5003,
+                             "sortOrder":  32,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5033,
+                             "text":  "HECHIZO LUZ: radio 6m brillante, 6m tenue. Dura 1 hora. Puede aplicarse a objeto.",
+                             "tableId":  5003,
+                             "sortOrder":  33,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5034,
+                             "text":  "CEGADO: falla pruebas de vista, ataques con desventaja, ataques entrantes con ventaja.",
+                             "tableId":  5004,
+                             "sortOrder":  34,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5035,
+                             "text":  "ENCANTADO: no puede atacar al encantador, el encantador tiene ventaja en interacción social.",
+                             "tableId":  5004,
+                             "sortOrder":  35,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5036,
+                             "text":  "ASUSTADO: desventaja en pruebas y ataques mientras vea la fuente del miedo. No puede acercarse.",
+                             "tableId":  5004,
+                             "sortOrder":  36,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5037,
+                             "text":  "AFERRADO: velocidad 0, desventaja en ataques, ventaja en ataques contra él.",
+                             "tableId":  5004,
+                             "sortOrder":  37,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5038,
+                             "text":  "INCAPACITADO: no puede realizar acciones ni reacciones.",
+                             "tableId":  5004,
+                             "sortOrder":  38,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5039,
+                             "text":  "INVISIBLE: imposible de ver sin magia. Ataques con ventaja, ataques entrantes con desventaja.",
+                             "tableId":  5004,
+                             "sortOrder":  39,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5040,
+                             "text":  "PARALIZADO: incapacitado, no puede moverse ni hablar. Falla salvaciones de FUE/DES. Crits a 1,5m.",
+                             "tableId":  5004,
+                             "sortOrder":  40,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5041,
+                             "text":  "PRONO: desventaja en ataques. Ataques en melé con ventaja, a distancia con desventaja. Costar movimiento levantarse.",
+                             "tableId":  5004,
+                             "sortOrder":  41,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5042,
+                             "text":  "RESTRINGIDO: velocidad 0, desventaja en salvaciones DES, ataques entrantes con ventaja.",
+                             "tableId":  5004,
+                             "sortOrder":  42,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5043,
+                             "text":  "ATURDIDO: incapacitado, no puede moverse, habla farfullante. Falla FUE/DES. Ataques entrantes con ventaja.",
+                             "tableId":  5004,
+                             "sortOrder":  43,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5044,
+                             "text":  "INCONSCIENTE: incapacitado, prono, no consciente. Falla FUE/DES. Crits a 1,5m.",
+                             "tableId":  5004,
+                             "sortOrder":  44,
+                             "maxRoll":  11,
+                             "minRoll":  11,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5045,
+                             "text":  "ENVENENADO: desventaja en tiradas de ataque y pruebas de característica.",
+                             "tableId":  5004,
+                             "sortOrder":  45,
+                             "maxRoll":  12,
+                             "minRoll":  12,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5046,
+                             "text":  "ATACAR: uno o más ataques según nivel/clase. Melé o a distancia.",
+                             "tableId":  5005,
+                             "sortOrder":  46,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5047,
+                             "text":  "LANZAR HECHIZO: hechizo con tiempo de lanzamiento 1 acción.",
+                             "tableId":  5005,
+                             "sortOrder":  47,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5048,
+                             "text":  "CORRER: movimiento extra igual a tu velocidad este turno.",
+                             "tableId":  5005,
+                             "sortOrder":  48,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5049,
+                             "text":  "RETIRARSE: el movimiento no provoca ataques de oportunidad.",
+                             "tableId":  5005,
+                             "sortOrder":  49,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5050,
+                             "text":  "ESQUIVAR: ataques entrantes con desventaja si puedes verlos. Ventaja en salvaciones DES.",
+                             "tableId":  5005,
+                             "sortOrder":  50,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5051,
+                             "text":  "AYUDAR: concedes ventaja en el siguiente ataque o prueba del aliado.",
+                             "tableId":  5005,
+                             "sortOrder":  51,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5052,
+                             "text":  "ESCONDERSE: prueba de Sigilo. Si supera la Percepción pasiva, queda oculto.",
+                             "tableId":  5005,
+                             "sortOrder":  52,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5053,
+                             "text":  "PREPARAR: defines un trigger y una reacción que se ejecuta antes de tu próximo turno.",
+                             "tableId":  5005,
+                             "sortOrder":  53,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5054,
+                             "text":  "BUSCAR: prueba de Percepción o Investigación para localizar algo o alguien oculto.",
+                             "tableId":  5005,
+                             "sortOrder":  54,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5055,
+                             "text":  "USAR OBJETO: interactuar con un objeto (segunda interacción del turno requiere acción).",
+                             "tableId":  5005,
+                             "sortOrder":  55,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5056,
+                             "text":  "Teocracia: el sumo sacerdote gobierna en nombre del dios. La ley religiosa es la ley.",
+                             "tableId":  5006,
+                             "sortOrder":  56,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5057,
+                             "text":  "Oligarquía: un consejo de mercaderes ricos decide todo. El dinero es el voto.",
+                             "tableId":  5006,
+                             "sortOrder":  57,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5058,
+                             "text":  "Monarquía hereditaria: rey o reina con poder absoluto o casi absoluto.",
+                             "tableId":  5006,
+                             "sortOrder":  58,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5059,
+                             "text":  "República gremial: representantes elegidos por los gremios, no por el pueblo.",
+                             "tableId":  5006,
+                             "sortOrder":  59,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5060,
+                             "text":  "Tiranía militar: un señor de guerra tomó el poder. Lo mantiene con fuerza.",
+                             "tableId":  5006,
+                             "sortOrder":  60,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5061,
+                             "text":  "Democracia directa: la asamblea ciudadana vota. Lenta y caótica pero legítima.",
+                             "tableId":  5006,
+                             "sortOrder":  61,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5062,
+                             "text":  "Anarquía funcional: sin gobierno formal. Facciones negocian equilibrios inestables.",
+                             "tableId":  5006,
+                             "sortOrder":  62,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5063,
+                             "text":  "Colonia imperial: gobernada por decreto de un imperio lejano. El gobernador es detestado.",
+                             "tableId":  5006,
+                             "sortOrder":  63,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5064,
+                             "text":  "Escasez de alimentos. Los precios se han triplicado en un mes.",
+                             "tableId":  5007,
+                             "sortOrder":  64,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5065,
+                             "text":  "Plaga que afecta al ganado, no a las personas… todavía.",
+                             "tableId":  5007,
+                             "sortOrder":  65,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5066,
+                             "text":  "El crimen organizado extorsiona al comercio sin que la guardia actúe.",
+                             "tableId":  5007,
+                             "sortOrder":  66,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5067,
+                             "text":  "Una facción religiosa exige representación en el consejo de gobierno.",
+                             "tableId":  5007,
+                             "sortOrder":  67,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5068,
+                             "text":  "Refugiados de una guerra cercana saturan la ciudad. Tensión racial.",
+                             "tableId":  5007,
+                             "sortOrder":  68,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5069,
+                             "text":  "El agua del pozo central está contaminada desde hace semanas.",
+                             "tableId":  5007,
+                             "sortOrder":  69,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5070,
+                             "text":  "Asesino en serie activo. Todas las víctimas son del mismo gremio.",
+                             "tableId":  5007,
+                             "sortOrder":  70,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5071,
+                             "text":  "La guardia lleva dos meses sin cobrar. El descontento es palpable.",
+                             "tableId":  5007,
+                             "sortOrder":  71,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5072,
+                             "text":  "Un noble acusó a otro de traición. La ciudad toma partido.",
+                             "tableId":  5007,
+                             "sortOrder":  72,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5073,
+                             "text":  "Ejército extranjero acampado afuera. Dicen que son aliados.",
+                             "tableId":  5007,
+                             "sortOrder":  73,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5074,
+                             "text":  "Los saludos se hacen cubriendo el corazón con la mano derecha.",
+                             "tableId":  5008,
+                             "sortOrder":  74,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5075,
+                             "text":  "Rechazar comida ofrecida por un anfitrión es un insulto grave.",
+                             "tableId":  5008,
+                             "sortOrder":  75,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5076,
+                             "text":  "Los contratos solo son válidos si se sellan con vino derramado sobre la mesa.",
+                             "tableId":  5008,
+                             "sortOrder":  76,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5077,
+                             "text":  "Los muertos se entierran con sus herramientas de trabajo.",
+                             "tableId":  5008,
+                             "sortOrder":  77,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5078,
+                             "text":  "Las peleas de puños entre borrachos son entretenimiento aceptado y arbitrado.",
+                             "tableId":  5008,
+                             "sortOrder":  78,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5079,
+                             "text":  "Los niños reciben su nombre definitivo a los 5 años, no al nacer.",
+                             "tableId":  5008,
+                             "sortOrder":  79,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5080,
+                             "text":  "Hablar de dinero en una mesa de comida es muy mala educación.",
+                             "tableId":  5008,
+                             "sortOrder":  80,
+                             "maxRoll":  7,
+                             "minRoll":  7,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5081,
+                             "text":  "Los tatuajes indican rango social: más tinta visible = más estatus.",
+                             "tableId":  5008,
+                             "sortOrder":  81,
+                             "maxRoll":  8,
+                             "minRoll":  8,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5082,
+                             "text":  "Los extranjeros que entran por primera vez deben gritar su nombre en la puerta.",
+                             "tableId":  5008,
+                             "sortOrder":  82,
+                             "maxRoll":  9,
+                             "minRoll":  9,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5083,
+                             "text":  "La primera luna del año se celebra con máscaras. Nadie debe ser reconocido.",
+                             "tableId":  5008,
+                             "sortOrder":  83,
+                             "maxRoll":  10,
+                             "minRoll":  10,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5084,
+                             "text":  "Piedra gris y pizarra. Compacta, funcional, gris como el cielo que la cubre.",
+                             "tableId":  5009,
+                             "sortOrder":  84,
+                             "maxRoll":  1,
+                             "minRoll":  1,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5085,
+                             "text":  "Madera oscura con vigas expuestas. Callejones tan estrechos que se tocan los tejados.",
+                             "tableId":  5009,
+                             "sortOrder":  85,
+                             "maxRoll":  2,
+                             "minRoll":  2,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5086,
+                             "text":  "Adobe y cal blanca. Techos planos, jardines internos silenciosos.",
+                             "tableId":  5009,
+                             "sortOrder":  86,
+                             "maxRoll":  3,
+                             "minRoll":  3,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5087,
+                             "text":  "Madera tallada con detalles ornamentales. Colorida, caótica, viva.",
+                             "tableId":  5009,
+                             "sortOrder":  87,
+                             "maxRoll":  4,
+                             "minRoll":  4,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5088,
+                             "text":  "Fortaleza central con barrios amurallados concéntricos. Diseñada para resistir.",
+                             "tableId":  5009,
+                             "sortOrder":  88,
+                             "maxRoll":  5,
+                             "minRoll":  5,
+                             "weight":  1
+                         },
+                         {
+                             "id":  5089,
+                             "text":  "Pilotes sobre el agua. Canales en vez de calles. Todo se mueve.",
+                             "tableId":  5009,
+                             "sortOrder":  89,
+                             "maxRoll":  6,
+                             "minRoll":  6,
+                             "weight":  1
+                         }
+                     ],
+    "drawEvents":  [
+
+                   ],
+    "sessionDeckRefs":  [
+
+                        ],
+    "decks":  [
+
+              ],
+    "encounters":  [
+
+                   ],
+    "referenceTables":  [
+
+                        ],
+    "cardTags":  [
+
+                 ],
+    "systemRules":  [
+
+                    ],
+    "npcs":  [
+
+             ],
+    "cards":  [
+
+              ],
+    "sessionTableRefs":  [
+
+                         ],
+    "cardStackTags":  [
+
+                      ],
+    "encounterCreatures":  [
+
+                           ],
+    "tags":  [
+
+             ],
+    "wikiCategories":  [
+
+                       ],
+    "randomTables":  [
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  5000,
+                             "category":  "Referencia",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_world.json",
+                             "name":  "REF: Velocidad de Viaje por Terreno",
+                             "sortOrder":  0,
+                             "description":  "Hexes recorridos por día según terreno y modo de movimiento (hex = 6 millas).",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652587301337,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_world.json"
+                         },
+                         {
+                             "rollFormula":  "1d8",
+                             "id":  5001,
+                             "category":  "Referencia",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_world.json",
+                             "name":  "REF: Procedimiento de Turno de Viaje",
+                             "sortOrder":  1,
+                             "description":  "Secuencia de acciones por turno (watch) durante el hexcrawl.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652587302546,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_world.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  5002,
+                             "category":  "Referencia",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_world.json",
+                             "name":  "REF: Tiradas de Supervivencia en Viaje",
+                             "sortOrder":  2,
+                             "description":  "Cuándo y cómo tirar para gestionar recursos y peligros del viaje.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652587302546,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_world.json"
+                         },
+                         {
+                             "rollFormula":  "1d6",
+                             "id":  5003,
+                             "category":  "Referencia",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_world.json",
+                             "name":  "REF: Condiciones de Iluminación",
+                             "sortOrder":  3,
+                             "description":  "Efectos de la visibilidad y la luz sobre las acciones.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652587302755,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_world.json"
+                         },
+                         {
+                             "rollFormula":  "1d12",
+                             "id":  5004,
+                             "category":  "Referencia",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_world.json",
+                             "name":  "REF: Condiciones de Estado",
+                             "sortOrder":  4,
+                             "description":  "Referencia rápida de las condiciones más comunes en combate.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652587302808,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_world.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  5005,
+                             "category":  "Referencia",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_world.json",
+                             "name":  "REF: Acciones en Combate",
+                             "sortOrder":  5,
+                             "description":  "Acciones disponibles en un turno de combate (resumen rápido).",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652587302808,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_world.json"
+                         },
+                         {
+                             "rollFormula":  "1d8",
+                             "id":  5006,
+                             "category":  "Worldbuilding",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_world.json",
+                             "name":  "Tipo de Gobierno",
+                             "sortOrder":  6,
+                             "description":  "Cómo está organizado el poder en esta ciudad o región.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  17765258730291,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_world.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  5007,
+                             "category":  "Worldbuilding",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_world.json",
+                             "name":  "Problema Actual de la Ciudad",
+                             "sortOrder":  7,
+                             "description":  "Crisis o conflicto vigente que afecta la vida cotidiana.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652587302961,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_world.json"
+                         },
+                         {
+                             "rollFormula":  "1d10",
+                             "id":  5008,
+                             "category":  "Worldbuilding",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_world.json",
+                             "name":  "Cultura o Tradición Local",
+                             "sortOrder":  8,
+                             "description":  "Costumbre o norma social específica de este lugar.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652587302961,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_world.json"
+                         },
+                         {
+                             "rollFormula":  "1d6",
+                             "id":  5009,
+                             "category":  "Worldbuilding",
+                             "isBuiltIn":  true,
+                             "isPinned":  false,
+                             "sourceName":  "tables_world.json",
+                             "name":  "Arquitectura Típica",
+                             "sortOrder":  9,
+                             "description":  "Estilo constructivo dominante del asentamiento.",
+                             "isNoRepeat":  false,
+                             "rollMode":  "RANGE",
+                             "createdAt":  177652587302961,
+                             "sourceType":  "JSON",
+                             "sourcePack":  "tables_world.json"
+                         }
+                     ],
+    "sessions":  [
+
+                 ],
+    "wikiEntries":  [
+
+                    ],
+    "randomTableTags":  [
+
+                        ],
+    "combatLog":  [
+
+                  ],
+    "npcTags":  [
+
+                ],
+    "schemaVersion":  1
+}
+
+
+

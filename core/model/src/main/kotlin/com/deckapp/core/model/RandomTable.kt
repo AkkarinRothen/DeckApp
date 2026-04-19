@@ -5,6 +5,7 @@ data class RandomTable(
     val bundleId: Long? = null,
     val bundleName: String? = null,
     val name: String,
+    val category: String = "General",
     val description: String = "",
     val tags: List<Tag> = emptyList(),
     val rollFormula: String = "1d6",
@@ -14,6 +15,7 @@ data class RandomTable(
     val isPinned: Boolean = false,
     val isBuiltIn: Boolean = false,
     val sortOrder: Int = 0,
+    val sourcePack: String? = null,
     val createdAt: Long = System.currentTimeMillis()
 )
 

@@ -25,7 +25,8 @@ fun MarkdownText(
     markdown: String,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.onSurface,
-    style: TextStyle = MaterialTheme.typography.bodyMedium
+    style: TextStyle = MaterialTheme.typography.bodyMedium,
+    maxLines: Int? = null
 ) {
     val context = LocalContext.current
     val colorInt = color.toArgb()
@@ -39,11 +40,13 @@ fun MarkdownText(
                 setTextColor(colorInt)
                 textSize = fontSizeSp
                 background = null
+                maxLines?.let { setMaxLines(it) }
             }
         },
         update = { textView ->
             textView.setTextColor(colorInt)
             textView.textSize = fontSizeSp
+            maxLines?.let { textView.setMaxLines(it) }
             markwon.setMarkdown(textView, markdown)
         },
         modifier = modifier

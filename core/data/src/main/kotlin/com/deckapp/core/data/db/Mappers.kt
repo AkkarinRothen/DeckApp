@@ -1,11 +1,11 @@
 package com.deckapp.core.data.db
 
 import com.deckapp.core.model.*
-import com.deckapp.core.model.CardAspectRatio
+import com.deckapp.core.model.backup.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-private val json = Json { ignoreUnknownKeys = true }
+val json = Json { ignoreUnknownKeys = true }
 
 // --- CardStack ---
 
@@ -21,7 +21,7 @@ fun CardStackEntity.toDomain(tags: List<Tag> = emptyList()) = CardStack(
     drawFaceDown = drawFaceDown,
     backImagePath = backImagePath,
     displayCount = displayCount,
-    aspectRatio = runCatching { CardAspectRatio.valueOf(aspectRatio) }.getOrDefault(CardAspectRatio.STANDARD),
+    aspectRatio = CardAspectRatio.valueOf(aspectRatio),
     isArchived = isArchived,
     sortOrder = sortOrder,
     tags = tags,
@@ -46,6 +46,38 @@ fun CardStack.toEntity() = CardStackEntity(
     createdAt = createdAt
 )
 
+fun CardStackEntity.toBackupDto() = CardStackBackupDto(
+    id = id, name = name, type = type, description = description, 
+    coverImagePath = coverImagePath, sourceFolderPath = sourceFolderPath, 
+    defaultContentMode = defaultContentMode, drawMode = drawMode, 
+    drawFaceDown = drawFaceDown, backImagePath = backImagePath, 
+    displayCount = displayCount, aspectRatio = aspectRatio, 
+    isArchived = isArchived, sortOrder = sortOrder, createdAt = createdAt
+)
+
+// --- DeckCollection ---
+
+fun CollectionEntity.toDomain(resourceCount: Int = 0) = DeckCollection(
+    id = id,
+    name = name,
+    description = description,
+    color = color,
+    icon = runCatching { CollectionIcon.valueOf(iconName) }.getOrDefault(CollectionIcon.CHEST),
+    resourceCount = resourceCount,
+    createdAt = createdAt
+)
+
+fun DeckCollection.toEntity() = CollectionEntity(
+    id = id,
+    name = name,
+    description = description,
+    color = color,
+    iconName = icon.name,
+    createdAt = createdAt
+)
+
+fun CollectionWithCount.toDomain() = collection.toDomain(resourceCount)
+
 // --- Card ---
 
 fun CardEntity.toDomain(faces: List<CardFace> = emptyList(), tags: List<Tag> = emptyList()) = Card(
@@ -56,13 +88,13 @@ fun CardEntity.toDomain(faces: List<CardFace> = emptyList(), tags: List<Tag> = e
     suit = suit,
     value = value,
     faces = faces,
+    tags = tags,
     currentFaceIndex = currentFaceIndex,
     currentRotation = currentRotation,
     isReversed = isReversed,
     isDrawn = isDrawn,
     isRevealed = isRevealed,
     sortOrder = sortOrder,
-    tags = tags,
     linkedTableId = linkedTableId,
     dmNotes = dmNotes,
     lastDrawnAt = lastDrawnAt
@@ -86,20 +118,23 @@ fun Card.toEntity() = CardEntity(
     lastDrawnAt = lastDrawnAt
 )
 
+fun CardEntity.toBackupDto() = CardBackupDto(
+    id = id, stackId = stackId, originDeckId = originDeckId, title = title, 
+    suit = suit, value = value, currentFaceIndex = currentFaceIndex, 
+    currentRotation = currentRotation, isReversed = isReversed, 
+    isDrawn = isDrawn, isRevealed = isRevealed, sortOrder = sortOrder, 
+    linkedTableId = linkedTableId, dmNotes = dmNotes, lastDrawnAt = lastDrawnAt
+)
+
 // --- CardFace ---
 
-fun CardFaceEntity.toDomain(): CardFace {
-    val zones: List<ContentZone> = try {
-        json.decodeFromString(zonesJson)
-    } catch (e: Exception) { emptyList() }
-    return CardFace(
-        name = name,
-        imagePath = imagePath,
-        contentMode = CardContentMode.valueOf(contentMode),
-        zones = zones,
-        reversedImagePath = reversedImagePath
-    )
-}
+fun CardFaceEntity.toDomain() = CardFace(
+    name = name,
+    imagePath = imagePath,
+    contentMode = CardContentMode.valueOf(contentMode),
+    zones = runCatching { json.decodeFromString<List<ContentZone>>(zonesJson) }.getOrDefault(emptyList()),
+    reversedImagePath = reversedImagePath
+)
 
 fun CardFace.toEntity(cardId: Long, faceIndex: Int) = CardFaceEntity(
     cardId = cardId,
@@ -111,52 +146,24 @@ fun CardFace.toEntity(cardId: Long, faceIndex: Int) = CardFaceEntity(
     reversedImagePath = reversedImagePath
 )
 
+fun CardFaceEntity.toBackupDto() = CardFaceBackupDto(
+    id = id, cardId = cardId, faceIndex = faceIndex, name = name, 
+    imagePath = imagePath, contentMode = contentMode, 
+    zonesJson = zonesJson, reversedImagePath = reversedImagePath
+)
+
 // --- Tag ---
 
-fun TagEntity.toDomain() = Tag(id = id, name = name, color = color)
-fun Tag.toEntity() = TagEntity(id = id, name = name, color = color)
-
-// --- Session ---
-
-fun SessionEntity.toDomain() = Session(
+fun TagEntity.toDomain() = Tag(
     id = id,
     name = name,
-    status = SessionStatus.valueOf(status),
-    scheduledDate = scheduledDate,
-    summary = summary,
-    showCardTitles = showCardTitles,
-    dmNotes = dmNotes,
-    createdAt = createdAt,
-    endedAt = endedAt
+    color = color
 )
 
-fun Session.toEntity() = SessionEntity(
+fun Tag.toEntity() = TagEntity(
     id = id,
     name = name,
-    status = status.name,
-    scheduledDate = scheduledDate,
-    summary = summary,
-    showCardTitles = showCardTitles,
-    dmNotes = dmNotes,
-    createdAt = createdAt,
-    endedAt = endedAt
-)
-
-
-// --- SessionDeckRef ---
-
-fun SessionDeckRefEntity.toDomain() = SessionDeckRef(
-    sessionId = sessionId,
-    stackId = stackId,
-    drawModeOverride = drawModeOverride?.let { DrawMode.valueOf(it) },
-    sortOrder = sortOrder
-)
-
-fun SessionDeckRef.toEntity() = SessionDeckRefEntity(
-    sessionId = sessionId,
-    stackId = stackId,
-    drawModeOverride = drawModeOverride?.name,
-    sortOrder = sortOrder
+    color = color
 )
 
 // --- RandomTable ---
@@ -166,27 +173,29 @@ fun RandomTableEntity.toDomain(
     tags: List<Tag> = emptyList(),
     bundleName: String? = null
 ) = com.deckapp.core.model.RandomTable(
-        id = id,
-        bundleId = bundleId,
-        bundleName = bundleName,
-        name = name,
-        description = description,
-        tags = tags,
-        rollFormula = rollFormula,
-        rollMode = runCatching { com.deckapp.core.model.TableRollMode.valueOf(rollMode) }
-            .getOrDefault(com.deckapp.core.model.TableRollMode.RANGE),
-        entries = entries.map { it.toDomain() },
-        isNoRepeat = isNoRepeat,
-        isPinned = isPinned,
-        isBuiltIn = isBuiltIn,
-        sortOrder = sortOrder,
-        createdAt = createdAt
-    )
+    id = id,
+    bundleId = bundleId,
+    bundleName = bundleName,
+    name = name,
+    category = category,
+    description = description,
+    tags = tags,
+    rollFormula = rollFormula,
+    rollMode = TableRollMode.valueOf(rollMode),
+    entries = entries.map { it.toDomain() },
+    isNoRepeat = isNoRepeat,
+    isPinned = isPinned,
+    isBuiltIn = isBuiltIn,
+    sortOrder = sortOrder,
+    sourcePack = sourcePack,
+    createdAt = createdAt
+)
 
 fun com.deckapp.core.model.RandomTable.toEntity() = RandomTableEntity(
     id = id,
     bundleId = bundleId,
     name = name,
+    category = category,
     description = description,
     rollFormula = rollFormula,
     rollMode = rollMode.name,
@@ -194,12 +203,19 @@ fun com.deckapp.core.model.RandomTable.toEntity() = RandomTableEntity(
     isPinned = isPinned,
     isBuiltIn = isBuiltIn,
     sortOrder = sortOrder,
+    sourcePack = sourcePack,
     createdAt = createdAt
 )
 
-// --- TableBundle ---
+fun RandomTableEntity.toBackupDto() = RandomTableBackupDto(
+    id = id, bundleId = bundleId, name = name, category = category, 
+    description = description, rollFormula = rollFormula, rollMode = rollMode, 
+    isNoRepeat = isNoRepeat, isPinned = isPinned, sourceType = sourceType, 
+    sourceName = sourceName, isBuiltIn = isBuiltIn, sortOrder = sortOrder, 
+    createdAt = createdAt, sourcePack = sourcePack
+)
 
-fun TableBundleEntity.toDomain(tables: List<RandomTable> = emptyList()) = TableBundle(
+fun TableBundleEntity.toDomain(tables: List<com.deckapp.core.model.RandomTable> = emptyList()) = TableBundle(
     id = id,
     name = name,
     description = description,
@@ -215,6 +231,8 @@ fun TableBundle.toEntity() = TableBundleEntity(
     sourceUri = sourceUri,
     createdAt = createdAt
 )
+
+// --- TableEntry ---
 
 fun TableEntryEntity.toDomain() = com.deckapp.core.model.TableEntry(
     id = id,
@@ -239,6 +257,14 @@ fun com.deckapp.core.model.TableEntry.toEntity(tableId: Long) = TableEntryEntity
     subTableId = subTableId,
     sortOrder = sortOrder
 )
+
+fun TableEntryEntity.toBackupDto() = TableEntryBackupDto(
+    id = id, tableId = tableId, minRoll = minRoll, maxRoll = maxRoll, 
+    weight = weight, text = text, subTableRef = subTableRef, 
+    subTableId = subTableId, sortOrder = sortOrder
+)
+
+// --- TableRollResult ---
 
 fun TableRollResultEntity.toDomain() = com.deckapp.core.model.TableRollResult(
     id = id,
@@ -278,6 +304,11 @@ fun DrawEvent.toEntity() = DrawEventEntity(
     action = action.name, metadata = metadata, timestamp = timestamp
 )
 
+fun DrawEventEntity.toBackupDto() = DrawEventBackupDto(
+    id = id, sessionId = sessionId, cardId = cardId, action = action, 
+    metadata = metadata, timestamp = timestamp
+)
+
 // --- Encounters ---
 
 fun EncounterEntity.toDomain(creatures: List<EncounterCreature> = emptyList()) = Encounter(
@@ -303,27 +334,27 @@ fun Encounter.toEntity() = EncounterEntity(
     createdAt = createdAt
 )
 
-fun EncounterCreatureEntity.toDomain(): EncounterCreature {
-    val conditions: Set<Condition> = try {
-        json.decodeFromString(conditionsJson)
-    } catch (e: Exception) { emptySet() }
-    
-    return EncounterCreature(
-        id = id,
-        encounterId = encounterId,
-        name = name,
-        maxHp = maxHp,
-        currentHp = currentHp,
-        armorClass = armorClass,
-        initiativeBonus = initiativeBonus,
-        initiativeRoll = initiativeRoll,
-        conditions = conditions,
-        notes = notes,
-        sortOrder = sortOrder,
-        imagePath = imagePath,
-        npcId = npcId
-    )
-}
+fun EncounterEntity.toBackupDto() = EncounterBackupDto(
+    id = id, name = name, description = description, linkedSessionId = linkedSessionId, 
+    isActive = isActive, currentRound = currentRound, 
+    currentTurnIndex = currentTurnIndex, createdAt = createdAt
+)
+
+fun EncounterCreatureEntity.toDomain() = EncounterCreature(
+    id = id,
+    encounterId = encounterId,
+    name = name,
+    maxHp = maxHp,
+    currentHp = currentHp,
+    armorClass = armorClass,
+    initiativeBonus = initiativeBonus,
+    initiativeRoll = initiativeRoll,
+    conditions = runCatching { json.decodeFromString<Set<Condition>>(conditionsJson) }.getOrDefault(emptySet()),
+    notes = notes,
+    sortOrder = sortOrder,
+    imagePath = imagePath,
+    npcId = npcId
+)
 
 fun EncounterCreature.toEntity() = EncounterCreatureEntity(
     id = id,
@@ -337,71 +368,127 @@ fun EncounterCreature.toEntity() = EncounterCreatureEntity(
     conditionsJson = json.encodeToString(conditions),
     notes = notes,
     sortOrder = sortOrder,
-    npcId = npcId,
-    imagePath = imagePath
+    imagePath = imagePath,
+    npcId = npcId
 )
 
-// --- Collections ---
+fun EncounterCreatureEntity.toBackupDto() = EncounterCreatureBackupDto(
+    id = id, encounterId = encounterId, name = name, maxHp = maxHp, currentHp = currentHp, 
+    armorClass = armorClass, initiativeBonus = initiativeBonus, 
+    initiativeRoll = initiativeRoll, conditionsJson = conditionsJson, 
+    notes = notes, sortOrder = sortOrder, npcId = npcId, imagePath = imagePath
+)
 
-fun CollectionEntity.toDomain(resourceCount: Int = 0) = DeckCollection(
+fun CombatLogEntryEntity.toDomain() = CombatLogEntry(
     id = id,
-    name = name,
-    description = description,
-    color = color,
-    icon = runCatching { CollectionIcon.valueOf(iconName) }.getOrDefault(CollectionIcon.FOLDER),
-    resourceCount = resourceCount,
-    createdAt = createdAt
+    encounterId = encounterId,
+    message = message,
+    type = CombatLogType.valueOf(type),
+    timestamp = timestamp
 )
 
-fun DeckCollection.toEntity() = CollectionEntity(
+fun CombatLogEntry.toEntity() = CombatLogEntryEntity(
     id = id,
-    name = name,
-    description = description,
-    color = color,
-    iconName = icon.name,
-    createdAt = createdAt
+    encounterId = encounterId,
+    message = message,
+    type = type.name,
+    timestamp = timestamp
 )
 
-fun CollectionWithCount.toDomain() = collection.toDomain(resourceCount = resourceCount)
+fun CombatLogEntryEntity.toBackupDto() = CombatLogEntryBackupDto(
+    id = id, encounterId = encounterId, message = message, type = type, timestamp = timestamp
+)
 
 // --- NPCs ---
 
 fun NpcEntity.toDomain(tags: List<Tag> = emptyList()) = Npc(
-    id = id,
-    name = name,
-    description = description,
-    imagePath = imagePath,
-    maxHp = maxHp,
-    currentHp = currentHp,
-    armorClass = armorClass,
-    initiativeBonus = initiativeBonus,
-    notes = notes,
-    isMonster = isMonster,
-    tags = tags,
-    createdAt = createdAt
+    id = id, name = name, description = description, imagePath = imagePath, 
+    maxHp = maxHp, currentHp = currentHp, armorClass = armorClass, 
+    initiativeBonus = initiativeBonus, notes = notes, isMonster = isMonster, 
+    tags = tags, createdAt = createdAt
 )
 
 fun Npc.toEntity() = NpcEntity(
-    id = id,
-    name = name,
-    description = description,
-    imagePath = imagePath,
-    maxHp = maxHp,
-    currentHp = currentHp,
-    armorClass = armorClass,
-    initiativeBonus = initiativeBonus,
-    notes = notes,
-    isMonster = isMonster,
+    id = id, name = name, description = description, imagePath = imagePath, 
+    maxHp = maxHp, currentHp = currentHp, armorClass = armorClass, 
+    initiativeBonus = initiativeBonus, notes = notes, isMonster = isMonster, 
     createdAt = createdAt
 )
 
-// --- World Wiki ---
+fun NpcEntity.toBackupDto() = NpcBackupDto(
+    id = id, name = name, description = description, imagePath = imagePath, 
+    maxHp = maxHp, currentHp = currentHp, armorClass = armorClass, 
+    initiativeBonus = initiativeBonus, notes = notes, isMonster = isMonster, 
+    createdAt = createdAt
+)
 
-fun WikiCategoryEntity.toDomain(count: Int = 0) = WikiCategory(
+// --- Sessions ---
+
+fun SessionEntity.toDomain() = Session(
+    id = id,
+    name = name,
+    status = SessionStatus.valueOf(status),
+    scheduledDate = scheduledDate,
+    summary = summary,
+    showCardTitles = showCardTitles,
+    dmNotes = dmNotes,
+    createdAt = createdAt,
+    endedAt = endedAt,
+    gameSystems = runCatching { json.decodeFromString<List<String>>(gameSystemsJson) }.getOrDefault(listOf("General"))
+)
+
+fun Session.toEntity() = SessionEntity(
+    id = id,
+    name = name,
+    status = status.name,
+    scheduledDate = scheduledDate,
+    summary = summary,
+    showCardTitles = showCardTitles,
+    dmNotes = dmNotes,
+    createdAt = createdAt,
+    endedAt = endedAt,
+    gameSystemsJson = json.encodeToString(gameSystems)
+)
+
+fun SessionEntity.toBackupDto() = SessionBackupDto(
+    id = id, name = name, status = status, scheduledDate = scheduledDate, 
+    summary = summary, createdAt = createdAt, endedAt = endedAt, 
+    showCardTitles = showCardTitles, dmNotes = dmNotes, gameSystemsJson = gameSystemsJson
+)
+
+fun SessionDeckRefEntity.toDomain() = SessionDeckRef(
+    sessionId = sessionId,
+    stackId = stackId,
+    drawModeOverride = drawModeOverride?.let { DrawMode.valueOf(it) },
+    sortOrder = sortOrder
+)
+
+fun SessionDeckRef.toEntity() = SessionDeckRefEntity(
+    sessionId = sessionId,
+    stackId = stackId,
+    drawModeOverride = drawModeOverride?.name,
+    sortOrder = sortOrder
+)
+
+fun SessionTableRefEntity.toDomain() = SessionTableRef(
+    sessionId = sessionId,
+    tableId = tableId,
+    sortOrder = sortOrder
+)
+
+fun SessionTableRef.toEntity() = SessionTableRefEntity(
+    sessionId = sessionId,
+    tableId = tableId,
+    sortOrder = sortOrder
+)
+
+// --- Wiki ---
+
+fun WikiCategoryEntity.toDomain(entryCount: Int = 0) = WikiCategory(
     id = id,
     name = name,
     iconName = iconName,
-    entryCount = count
+    entryCount = entryCount
 )
 
 fun WikiCategory.toEntity() = WikiCategoryEntity(
@@ -425,5 +512,104 @@ fun WikiEntry.toEntity() = WikiEntryEntity(
     content = content,
     categoryId = categoryId,
     imagePath = imagePath,
+    lastUpdated = lastUpdated
+)
+
+fun WikiEntryEntity.toBackupDto() = WikiEntryBackupDto(
+    id = id, title = title, content = content, categoryId = categoryId, 
+    imagePath = imagePath, lastUpdated = lastUpdated
+)
+
+// --- Reference ---
+
+fun ReferenceTableEntity.toDomain(
+    rows: List<ReferenceRowEntity> = emptyList(),
+    tags: List<Tag> = emptyList()
+) = ReferenceTable(
+    id = id,
+    name = name,
+    description = description,
+    gameSystem = gameSystem,
+    category = category,
+    columns = runCatching { json.decodeFromString<List<ReferenceColumn>>(columnsJson) }.getOrDefault(emptyList()),
+    rows = rows.map { it.toDomain() },
+    tags = tags,
+    isPinned = isPinned,
+    sortOrder = sortOrder,
+    sourcePack = sourcePack,
+    createdAt = createdAt
+)
+
+fun ReferenceTable.toEntity() = ReferenceTableEntity(
+    id = id,
+    name = name,
+    description = description,
+    gameSystem = gameSystem,
+    category = category,
+    columnsJson = json.encodeToString(columns),
+    isPinned = isPinned,
+    sortOrder = sortOrder,
+    sourcePack = sourcePack,
+    createdAt = createdAt
+)
+
+fun ReferenceTableEntity.toBackupDto() = ReferenceTableBackupDto(
+    id = id, name = name, description = description, gameSystem = gameSystem, 
+    category = category, columnsJson = columnsJson, isPinned = isPinned, 
+    sortOrder = sortOrder, createdAt = createdAt, sourcePack = sourcePack
+)
+
+fun ReferenceRowEntity.toDomain() = ReferenceRow(
+    id = id,
+    tableId = tableId,
+    cells = runCatching { json.decodeFromString<List<String>>(cellsJson) }.getOrDefault(emptyList()),
+    sortOrder = sortOrder
+)
+
+fun ReferenceRow.toEntity(tableId: Long) = ReferenceRowEntity(
+    id = id,
+    tableId = tableId,
+    cellsJson = json.encodeToString(cells),
+    sortOrder = sortOrder
+)
+
+fun ReferenceRowEntity.toBackupDto() = ReferenceRowBackupDto(
+    id = id, tableId = tableId, cellsJson = cellsJson, sortOrder = sortOrder
+)
+
+fun SystemRuleEntity.toDomain(tags: List<Tag> = emptyList()) = SystemRule(
+    id = id,
+    title = title,
+    content = content,
+    gameSystem = gameSystem,
+    category = category,
+    tags = tags,
+    isPinned = isPinned,
+    sortOrder = sortOrder,
+    sourcePack = sourcePack,
+    lastUpdated = lastUpdated
+)
+
+fun SystemRule.toEntity() = SystemRuleEntity(
+    id = id,
+    title = title,
+    content = content,
+    gameSystem = gameSystem,
+    category = category,
+    isPinned = isPinned,
+    sortOrder = sortOrder,
+    sourcePack = sourcePack,
+    lastUpdated = lastUpdated
+)
+
+fun SystemRuleEntity.toBackupDto() = SystemRuleBackupDto(
+    id = id,
+    title = title,
+    content = content,
+    gameSystem = gameSystem,
+    category = category,
+    isPinned = isPinned,
+    sortOrder = sortOrder,
+    sourcePack = sourcePack,
     lastUpdated = lastUpdated
 )

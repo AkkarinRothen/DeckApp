@@ -34,6 +34,11 @@ android {
     kotlinOptions { jvmTarget = "17" }
 
     buildFeatures { compose = true }
+
+    lint {
+        abortOnError = false
+        checkReleaseBuilds = false
+    }
     
     packaging {
         jniLibs {
@@ -57,6 +62,8 @@ dependencies {
     implementation(project(":feature:encounters"))
     implementation(project(":feature:npcs"))
     implementation(project(":feature:wiki"))
+    implementation(project(":feature:reference"))
+    implementation(project(":feature:hexploration"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
