@@ -59,6 +59,9 @@ class HexRepositoryImpl @Inject constructor(
     override suspend fun deleteHexMap(id: Long) =
         hexDao.deleteMap(id)
 
+    override suspend fun deleteHexTile(mapId: Long, q: Int, r: Int) =
+        hexDao.deleteTile(mapId, q, r)
+
     override suspend fun deleteHexPoi(id: Long) =
         hexDao.deletePoi(id)
 }

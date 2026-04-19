@@ -19,6 +19,9 @@ interface FileRepository {
 
     suspend fun deleteImagesForDeck(deckId: Long)
 
+    /** Borra un archivo específico dada su ruta absoluta en el almacenamiento interno. */
+    suspend fun deleteFile(path: String)
+
     /**
      * Copia todas las imágenes del mazo [sourceDeckId] al directorio del mazo [targetDeckId].
      * @return Mapa de ruta original → ruta nueva (para reasignar imagePath en cartas duplicadas).

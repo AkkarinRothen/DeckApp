@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.deckapp.core.domain.usecase.hex.AddHexPoiUseCase
 import com.deckapp.core.domain.usecase.hex.AddHexTileUseCase
 import com.deckapp.core.domain.usecase.hex.DeleteHexPoiUseCase
+import com.deckapp.core.domain.usecase.hex.DeleteHexTileUseCase
 import com.deckapp.core.domain.usecase.hex.ExpandHexMapUseCase
 import com.deckapp.core.domain.usecase.hex.GetHexMapWithTilesUseCase
 import com.deckapp.core.domain.usecase.hex.UpdateHexMapUseCase
@@ -39,7 +40,8 @@ val defaultBrushes = listOf(
     TerrainBrush(1, "Agua", 0xFF4A90D9L),
     TerrainBrush(1, "Llanura", 0xFFD4C875L),
     TerrainBrush(2, "Bosque", 0xFF3A7D44L),
-    TerrainBrush(3, "Montaña", 0xFF9E9E9EL)
+    TerrainBrush(3, "Montaña", 0xFF9E9E9EL),
+    TerrainBrush(-1, "Borrar", 0x00000000L)
 )
 
 data class HexMapEditorUiState(
@@ -72,7 +74,8 @@ class HexMapEditorViewModel @Inject constructor(
     private val addHexPoiUseCase: AddHexPoiUseCase,
     private val deleteHexPoiUseCase: DeleteHexPoiUseCase,
     private val expandHexMapUseCase: ExpandHexMapUseCase,
-    private val addHexTileUseCase: AddHexTileUseCase
+    private val addHexTileUseCase: AddHexTileUseCase,
+    private val deleteHexTileUseCase: DeleteHexTileUseCase
 ) : ViewModel() {
 
     private val mapId: Long = savedStateHandle["mapId"] ?: 0L
@@ -100,18 +103,23 @@ class HexMapEditorViewModel @Inject constructor(
     }
 
     fun onTileClick(tile: HexTile) {
-        // In design mode, tap applies the active brush
-        val painted = tile.copy(
-            terrainCost = _uiState.value.activeBrush.cost,
-            terrainLabel = _uiState.value.activeBrush.label,
-            terrainColor = _uiState.value.activeBrush.color
-        )
-        viewModelScope.launch { updateHexTileUseCase(painted) }
+        val brush = _uiState.value.activeBrush
+        if (brush.cost == -1) {
+            viewModelScope.launch { deleteHexTileUseCase(mapId, tile.q, tile.r) }
+        } else {
+            val painted = tile.copy(
+                terrainCost = brush.cost,
+                terrainLabel = brush.label,
+                terrainColor = brush.color
+            )
+            viewModelScope.launch { updateHexTileUseCase(painted) }
+        }
     }
 
     fun onEmptySpaceClick(q: Int, r: Int) {
-        // Add a single hex manually using the active brush
         val brush = _uiState.value.activeBrush
+        if (brush.cost == -1) return
+        
         viewModelScope.launch {
             addHexTileUseCase(
                 mapId = mapId,

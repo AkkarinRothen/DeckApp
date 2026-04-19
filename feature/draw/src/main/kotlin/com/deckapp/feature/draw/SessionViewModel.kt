@@ -89,35 +89,45 @@ class SessionViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val sessionId: Long = checkNotNull(savedStateHandle["sessionId"])
+    private var peekCardId: Long? by savedStateHandle.delegate("peekCardId")
 
     private val _uiState = MutableStateFlow(SessionUiState())
     val uiState: StateFlow<SessionUiState> = _uiState.asStateFlow()
 
-    init {
-        // Modo simplificado (Sprint 17.5)
-        _uiState.update { it.copy(isSimplifiedMode = settingsRepository.getSimplifiedModeEnabled()) }
+    // Un flujo que emite la hora actual cada minuto para cálculos reactivos
+    private val minuteTicker = flow {
+        while (true) {
+            emit(System.currentTimeMillis())
+            delay(60000)
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), System.currentTimeMillis())
 
-        // Sesión info
+    init {
+        // ... rest of init ...
+        // Re-load peek card if exists in saved state
+        peekCardId?.let { id ->
+            viewModelScope.launch {
+                cardRepository.getCardById(id).first()?.let { card ->
+                    _uiState.update { it.copy(peekCard = card) }
+                }
+            }
+        }
+...
+        // Combine everything including the ticker for elapsed time
         viewModelScope.launch {
-            sessionRepository.getSessionById(sessionId)
-                .collect { session -> 
+            combine(
+                sessionRepository.getSessionById(sessionId),
+                minuteTicker
+            ) { session, now ->
+                if (session != null) {
+                    val elapsed = (now - session.createdAt) / (1000 * 60)
                     _uiState.update { it.copy(
                         session = session,
-                        dmNotes = session?.dmNotes ?: ""
-                    ) } 
+                        dmNotes = session.dmNotes,
+                        sessionElapsedMinutes = elapsed
+                    ) }
                 }
-        }
-
-        // Timer de sesión
-        viewModelScope.launch {
-            while (true) {
-                val session = _uiState.value.session
-                if (session != null) {
-                    val elapsed = (System.currentTimeMillis() - session.createdAt) / (1000 * 60)
-                    _uiState.update { it.copy(sessionElapsedMinutes = elapsed) }
-                }
-                delay(60000) // cada minuto
-            }
+            }.collect()
         }
 
         // Mazos asignados a la sesión + nombres reactivos
@@ -565,11 +575,15 @@ class SessionViewModel @Inject constructor(
                 _uiState.update { it.copy(snackbarMessage = "No hay cartas disponibles") }
             } else {
                 _uiState.update { it.copy(peekCard = card) }
+                peekCardId = card.id
             }
         }
     }
 
-    fun clearPeek() = _uiState.update { it.copy(peekCard = null) }
+    fun clearPeek() {
+        _uiState.update { it.copy(peekCard = null) }
+        peekCardId = null
+    }
 
     /** Revela una carta que fue robada boca abajo. Loguea FLIP como evento de revelación. */
     fun revealCard(cardId: Long) {

@@ -24,8 +24,11 @@ interface ReferenceTableDao {
     """)
     fun searchTables(query: String): Flow<List<ReferenceTableEntity>>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertTable(table: ReferenceTableEntity): Long
+
+    @Update
+    suspend fun updateTable(table: ReferenceTableEntity)
 
     @Query("DELETE FROM reference_rows WHERE tableId = :tableId")
     suspend fun deleteRowsForTable(tableId: Long)
@@ -101,8 +104,11 @@ interface SystemRuleDao {
     @Query("SELECT * FROM system_rules WHERE id = :id")
     suspend fun getRuleById(id: Long): SystemRuleEntity?
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertRule(rule: SystemRuleEntity): Long
+
+    @Update
+    suspend fun updateRule(rule: SystemRuleEntity)
 
     @Query("DELETE FROM system_rules WHERE id = :id")
     suspend fun deleteRule(id: Long)

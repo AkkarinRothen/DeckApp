@@ -15,6 +15,7 @@ data class HexMapEntity(
     val hexStyle: String = "FLAT_TOP",
     val partyQ: Int? = null,
     val partyR: Int? = null,
+    val isRadial: Boolean = false,
     val maxActivitiesPerDay: Int = 8,
     val mapNotes: String = "",
     val createdAt: Long = System.currentTimeMillis()

@@ -29,7 +29,13 @@ class WikiRepositoryImpl @Inject constructor(
     }
 
     override suspend fun saveCategory(category: WikiCategory): Long {
-        return wikiDao.insertCategory(category.toEntity())
+        val entity = category.toEntity()
+        val id = wikiDao.insertCategory(entity)
+        if (id == -1L) {
+            wikiDao.updateCategory(entity)
+            return entity.id
+        }
+        return id
     }
 
     override fun getEntriesByCategory(categoryId: Long): Flow<List<WikiEntry>> {
@@ -49,10 +55,19 @@ class WikiRepositoryImpl @Inject constructor(
     }
 
     override suspend fun saveEntry(entry: WikiEntry): Long {
-        return wikiDao.insertEntry(entry.toEntity())
+        val entity = entry.toEntity()
+        val id = wikiDao.insertEntry(entity)
+        if (id == -1L) {
+            wikiDao.updateEntry(entity)
+            return entity.id
+        }
+        return id
     }
 
     override suspend fun deleteEntry(entry: WikiEntry) {
+        entry.imagePath?.let { path ->
+            fileRepository.deleteFile(path)
+        }
         wikiDao.deleteEntry(entry.toEntity())
     }
 

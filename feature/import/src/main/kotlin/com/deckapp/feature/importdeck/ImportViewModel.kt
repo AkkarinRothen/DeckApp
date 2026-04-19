@@ -36,6 +36,7 @@ data class DeckImportUiState(
     val browsedPdfs: List<Pair<Uri, String>> = emptyList(),
     // Progress
     val importProgress: Float = 0f,
+    val totalItemsToImport: Int = 0,
     val importedCardCount: Int = 0,
     val isImporting: Boolean = false,
     val importedDeckId: Long? = null,
@@ -334,8 +335,23 @@ class DeckImportViewModel @Inject constructor(
 
         _uiState.update { it.copy(phase = DeckImportPhase.IMPORTING, isImporting = true) }
 
-        val failedFiles = mutableListOf<String>()
         viewModelScope.launch {
+            // Calculate total items for better progress reporting
+            val total = when (state.source) {
+                DeckImportSource.FOLDER -> fileRepository.listImagesInFolder(uri).size
+                DeckImportSource.PDF -> {
+                    val pages = if (state.pdfPageCount > 0) state.pdfPageCount else fileRepository.getPdfPageCount(uri)
+                    val effectivePages = when (state.pdfLayoutMode) {
+                        PdfLayoutMode.ALTERNATING_PAGES, PdfLayoutMode.FIRST_HALF_FRONTS -> (pages - state.pdfSkipPages) / 2
+                        else -> pages - state.pdfSkipPages
+                    }
+                    effectivePages.coerceAtLeast(0) * state.pdfGridCols * state.pdfGridRows
+                }
+                else -> 0
+            }
+            _uiState.update { it.copy(totalItemsToImport = total) }
+
+            val failedFiles = mutableListOf<String>()
             importDeckUseCase(
                 uri = uri,
                 deckName = state.deckName,
@@ -379,4 +395,15 @@ class DeckImportViewModel @Inject constructor(
     }
 
     fun clearError() = _uiState.update { it.copy(errorMessage = null) }
+
+    fun clearPreviews() {
+        _uiState.value.pdfPreviewBitmap?.recycle()
+        _uiState.value.previewCardBitmaps.forEach { it.recycle() }
+        _uiState.update { it.copy(pdfPreviewBitmap = null, previewCardBitmaps = emptyList()) }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        clearPreviews()
+    }
 }

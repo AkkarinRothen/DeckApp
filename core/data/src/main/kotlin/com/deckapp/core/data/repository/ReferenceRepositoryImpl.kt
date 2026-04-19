@@ -42,7 +42,13 @@ class ReferenceRepositoryImpl @Inject constructor(
         }
 
     override suspend fun saveReferenceTable(table: ReferenceTable): Long {
-        val tableId = tableDao.insertTable(table.toEntity())
+        val entity = table.toEntity()
+        val id = tableDao.insertTable(entity)
+        val tableId = if (id == -1L) {
+            tableDao.updateTable(entity)
+            entity.id
+        } else id
+
         tableDao.deleteRowsForTable(tableId)
         tableDao.insertRows(table.rows.map { it.toEntity(tableId) })
         return tableId
@@ -78,7 +84,13 @@ class ReferenceRepositoryImpl @Inject constructor(
     }
 
     override suspend fun saveSystemRule(rule: SystemRule): Long {
-        return ruleDao.insertRule(rule.toEntity())
+        val entity = rule.toEntity()
+        val id = ruleDao.insertRule(entity)
+        if (id == -1L) {
+            ruleDao.updateRule(entity)
+            return entity.id
+        }
+        return id
     }
 
     override suspend fun deleteSystemRule(ruleId: Long) {

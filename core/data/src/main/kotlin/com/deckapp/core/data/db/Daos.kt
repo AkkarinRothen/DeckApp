@@ -23,10 +23,10 @@ interface CardStackDao {
     @Query("UPDATE card_stacks SET isArchived = :archived WHERE id = :deckId")
     suspend fun setArchived(deckId: Long, archived: Boolean)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertStack(stack: CardStackEntity): Long
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertStacks(stacks: List<CardStackEntity>)
 
     @Update
@@ -203,8 +203,11 @@ interface SessionDao {
     @Query("SELECT * FROM sessions WHERE id = :id")
     fun getSessionById(id: Long): Flow<SessionEntity?>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertSession(session: SessionEntity): Long
+
+    @Update
+    suspend fun updateSession(session: SessionEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSessions(sessions: List<SessionEntity>)
@@ -262,10 +265,10 @@ interface RandomTableDao {
     @Query("SELECT * FROM random_tables ORDER BY name ASC")
     fun getAllTablesWithEntries(): Flow<List<TableWithEntries>>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertTable(table: RandomTableEntity): Long
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertTables(tables: List<RandomTableEntity>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -316,10 +319,10 @@ interface TableBundleDao {
     @Query("SELECT * FROM table_bundles WHERE id = :id")
     fun getBundleById(id: Long): Flow<TableBundleEntity?>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertBundle(bundle: TableBundleEntity): Long
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertBundles(bundles: List<TableBundleEntity>)
 
     @Update

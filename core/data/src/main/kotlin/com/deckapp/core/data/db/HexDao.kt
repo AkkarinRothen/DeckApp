@@ -34,6 +34,9 @@ interface HexDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTiles(tiles: List<HexTileEntity>)
 
+    @Query("DELETE FROM hex_tiles WHERE mapId = :mapId AND q = :q AND r = :r")
+    suspend fun deleteTile(mapId: Long, q: Int, r: Int)
+
     // --- POIs ---
 
     @Query("SELECT * FROM hex_pois WHERE mapId = :mapId")

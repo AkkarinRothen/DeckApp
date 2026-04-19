@@ -47,6 +47,12 @@ fun ImportScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.clearPreviews()
+        }
+    }
+
     LaunchedEffect(uiState.importedDeckId) {
         uiState.importedDeckId?.let { onImportSuccess(it) }
     }
@@ -138,7 +144,8 @@ fun ImportScreen(
 
                 DeckImportPhase.IMPORTING -> ImportingPhase(
                     progress = uiState.importProgress,
-                    cardCount = uiState.importedCardCount
+                    cardCount = uiState.importedCardCount,
+                    totalCount = uiState.totalItemsToImport
                 )
 
                 DeckImportPhase.SUCCESS -> SuccessPhase(
@@ -680,14 +687,40 @@ private fun NumberField(
 }
 
 @Composable
-private fun ImportingPhase(progress: Float, cardCount: Int) {
-    Box(Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
+private fun ImportingPhase(progress: Float, cardCount: Int, totalCount: Int) {
+    Box(Modifier.fillMaxWidth().height(250.dp), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            CircularProgressIndicator(progress = { progress })
-            Text("Importando cartas...", style = MaterialTheme.typography.bodyLarge)
-            if (cardCount > 0) {
-                Text("$cardCount cartas procesadas", style = MaterialTheme.typography.labelMedium)
+            CircularProgressIndicator(
+                progress = { progress },
+                modifier = Modifier.size(64.dp),
+                strokeWidth = 6.dp
+            )
+            Text("Procesando mazo...", style = MaterialTheme.typography.titleMedium)
+
+            val progressText = if (totalCount > 0) {
+                "Carta $cardCount de $totalCount"
+            } else {
+                "$cardCount cartas procesadas"
             }
+
+            Text(
+                progressText,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            LinearProgressIndicator(
+                progress = { progress },
+                modifier = Modifier.fillMaxWidth(0.7f).clip(RoundedCornerShape(4.dp))
+            )
+
+            Text(
+                "Esto puede tardar unos segundos según el tamaño del archivo.",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 8.dp)
+            )
         }
     }
 }

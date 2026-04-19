@@ -22,5 +22,6 @@ interface HexRepository {
     suspend fun updatePartyLocation(mapId: Long, q: Int, r: Int)
 
     suspend fun deleteHexMap(id: Long)
+    suspend fun deleteHexTile(mapId: Long, q: Int, r: Int)
     suspend fun deleteHexPoi(id: Long)
 }

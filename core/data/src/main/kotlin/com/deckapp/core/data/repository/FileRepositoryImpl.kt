@@ -149,6 +149,13 @@ class FileRepositoryImpl @Inject constructor(
         if (deckDir.exists()) deckDir.deleteRecursively()
     }
 
+    override suspend fun deleteFile(path: String) {
+        val file = File(path)
+        if (file.exists() && file.isFile) {
+            file.delete()
+        }
+    }
+
     override suspend fun duplicateDeckImages(
         sourceDeckId: Long,
         targetDeckId: Long

@@ -8,16 +8,22 @@ interface WikiDao {
     @Query("SELECT * FROM wiki_categories")
     fun getAllCategories(): Flow<List<WikiCategoryEntity>>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertCategory(category: WikiCategoryEntity): Long
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Update
+    suspend fun updateCategory(category: WikiCategoryEntity)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertCategories(categories: List<WikiCategoryEntity>)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertEntry(entry: WikiEntryEntity): Long
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Update
+    suspend fun updateEntry(entry: WikiEntryEntity)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertEntries(entries: List<WikiEntryEntity>)
 
     @Query("SELECT * FROM wiki_entries WHERE categoryId = :categoryId ORDER BY lastUpdated DESC")

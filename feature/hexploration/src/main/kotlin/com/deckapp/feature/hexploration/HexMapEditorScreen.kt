@@ -169,12 +169,30 @@ fun HexMapEditorScreen(
             )
         },
         bottomBar = {
-            TerrainBrushToolbar(
-                brushes = uiState.brushes,
-                activeBrush = uiState.activeBrush,
-                onBrushSelect = viewModel::selectBrush,
-                onAddBrush = viewModel::showAddBrushDialog
-            )
+            Column {
+                // Inline Details Panel
+                AnimatedVisibility(
+                    visible = uiState.showTileSheet && uiState.selectedTile != null,
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut()
+                ) {
+                    if (uiState.selectedTile != null) {
+                        EditorTileDetails(
+                            tile = uiState.selectedTile!!,
+                            pois = uiState.pois.filter { it.tileQ == uiState.selectedTile!!.q && it.tileR == uiState.selectedTile!!.r },
+                            onDismiss = viewModel::dismissTileSheet,
+                            onAddPoi = { viewModel.showAddPoiDialog() },
+                            onDeletePoi = viewModel::deletePoi
+                        )
+                    }
+                }
+                TerrainBrushToolbar(
+                    brushes = uiState.brushes,
+                    activeBrush = uiState.activeBrush,
+                    onBrushSelect = viewModel::selectBrush,
+                    onAddBrush = { viewModel.showAddBrushDialog() }
+                )
+            }
         }
     ) { padding ->
         if (uiState.isLoading) {

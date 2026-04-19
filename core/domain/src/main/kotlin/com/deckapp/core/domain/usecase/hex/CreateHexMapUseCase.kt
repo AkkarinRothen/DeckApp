@@ -9,11 +9,22 @@ class CreateHexMapUseCase @Inject constructor(
     private val hexRepository: HexRepository
 ) {
     suspend operator fun invoke(name: String, rows: Int, cols: Int, radius: Int? = null): Long {
-        val mapId = hexRepository.upsertHexMap(HexMap(name = name, rows = rows, cols = cols))
-        val tiles = if (radius != null && radius > 0) {
-            generateRadialTiles(mapId, radius)
+        val finalIsRadial = radius != null && radius > 0
+        val finalRows = if (finalIsRadial) radius!! else rows
+        val finalCols = if (finalIsRadial) radius!! else cols
+        
+        val mapId = hexRepository.upsertHexMap(
+            HexMap(
+                name = name, 
+                rows = finalRows, 
+                cols = finalCols,
+                isRadial = finalIsRadial
+            )
+        )
+        val tiles = if (finalIsRadial) {
+            generateRadialTiles(mapId, radius!!)
         } else {
-            generateRectangularTiles(mapId, rows, cols)
+            generateRectangularTiles(mapId, finalRows, finalCols)
         }
         hexRepository.upsertHexTiles(tiles)
         return mapId

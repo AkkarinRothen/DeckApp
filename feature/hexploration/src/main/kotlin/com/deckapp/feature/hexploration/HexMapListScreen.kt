@@ -164,8 +164,13 @@ private fun HexMapCard(map: HexMap, onEdit: () -> Unit, onDelete: () -> Unit) {
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                val sizeText = if (map.isRadial) {
+                    "Radio: ${map.cols} (Anillos)" 
+                } else {
+                    "${map.cols}×${map.rows} hexes"
+                }
                 Text(
-                    text = "${map.cols}×${map.rows} hexes · ${map.hexStyle.name.lowercase().replaceFirstChar { it.uppercase() }}",
+                    text = "$sizeText · ${map.hexStyle.name.lowercase().replaceFirstChar { it.uppercase() }}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

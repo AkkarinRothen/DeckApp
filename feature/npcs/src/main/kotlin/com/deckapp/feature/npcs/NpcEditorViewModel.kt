@@ -25,6 +25,13 @@ class NpcEditorViewModel @Inject constructor(
     
     var npc by mutableStateOf(Npc(name = ""))
         private set
+
+    var hpInput by mutableStateOf("10")
+        private set
+    var acInput by mutableStateOf("10")
+        private set
+    var initiativeInput by mutableStateOf("0")
+        private set
         
     var selectedImageUri by mutableStateOf<Uri?>(null)
         private set
@@ -32,16 +39,21 @@ class NpcEditorViewModel @Inject constructor(
     init {
         npcId?.let { id ->
             viewModelScope.launch {
-                getNpcByIdUseCase(id)?.let { npc = it }
+                getNpcByIdUseCase(id)?.let { 
+                    npc = it 
+                    hpInput = it.maxHp.toString()
+                    acInput = it.armorClass.toString()
+                    initiativeInput = it.initiativeBonus.toString()
+                }
             }
         }
     }
 
     fun updateName(name: String) { npc = npc.copy(name = name) }
     fun updateDescription(desc: String) { npc = npc.copy(description = desc) }
-    fun updateHp(hp: Int) { npc = npc.copy(maxHp = hp, currentHp = hp) }
-    fun updateAc(ac: Int) { npc = npc.copy(armorClass = ac) }
-    fun updateInitiative(bonus: Int) { npc = npc.copy(initiativeBonus = bonus) }
+    fun updateHp(hp: String) { hpInput = hp }
+    fun updateAc(ac: String) { acInput = ac }
+    fun updateInitiative(bonus: String) { initiativeInput = bonus }
     fun updateNotes(notes: String) { npc = npc.copy(notes = notes) }
     fun updateMonster(isMonster: Boolean) { npc = npc.copy(isMonster = isMonster) }
 
@@ -51,7 +63,13 @@ class NpcEditorViewModel @Inject constructor(
 
     fun save(onSaved: () -> Unit) {
         viewModelScope.launch {
-            saveNpcUseCase(npc, selectedImageUri)
+            val finalNpc = npc.copy(
+                maxHp = hpInput.toIntOrNull() ?: npc.maxHp,
+                currentHp = hpInput.toIntOrNull() ?: npc.currentHp,
+                armorClass = acInput.toIntOrNull() ?: npc.armorClass,
+                initiativeBonus = initiativeInput.toIntOrNull() ?: npc.initiativeBonus
+            )
+            saveNpcUseCase(finalNpc, selectedImageUri)
             onSaved()
         }
     }

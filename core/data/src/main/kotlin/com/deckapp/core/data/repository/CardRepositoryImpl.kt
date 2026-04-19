@@ -14,7 +14,8 @@ class CardRepositoryImpl @Inject constructor(
     private val cardDao: CardDao,
     private val faceDao: CardFaceDao,
     private val tagDao: TagDao,
-    private val searchDao: SearchDao
+    private val searchDao: SearchDao,
+    private val fileRepository: com.deckapp.core.domain.repository.FileRepository
 ) : CardRepository {
 
     override fun getAllDecks(): Flow<List<CardStack>> =
@@ -63,7 +64,10 @@ class CardRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteStack(id: Long) = stackDao.deleteStack(id)
+    override suspend fun deleteStack(id: Long) {
+        fileRepository.deleteImagesForDeck(id)
+        stackDao.deleteStack(id)
+    }
 
     override suspend fun updateStacksSortOrder(orderedIds: List<Long>) {
         orderedIds.forEachIndexed { index, id ->
@@ -180,6 +184,7 @@ class CardRepositoryImpl @Inject constructor(
     }
 
     override suspend fun bulkDeleteDecks(ids: List<Long>) {
+        ids.forEach { fileRepository.deleteImagesForDeck(it) }
         stackDao.bulkDeleteStacks(ids)
     }
 

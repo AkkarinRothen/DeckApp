@@ -63,7 +63,9 @@ fun NpcEditorScreen(
         Column(
             modifier = Modifier
                 .padding(padding)
+                .consumeWindowInsets(padding)
                 .fillMaxSize()
+                .imePadding()
                 .verticalScroll(scrollState)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -108,14 +110,14 @@ fun NpcEditorScreen(
             Row(modifier = Modifier.fillMaxWidth()) {
                 StatField(
                     label = "HP Máx",
-                    value = npc.maxHp,
+                    value = viewModel.hpInput,
                     onValueChange = viewModel::updateHp,
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(Modifier.width(16.dp))
                 StatField(
                     label = "AC (Armadura)",
-                    value = npc.armorClass,
+                    value = viewModel.acInput,
                     onValueChange = viewModel::updateAc,
                     modifier = Modifier.weight(1f)
                 )
@@ -125,7 +127,7 @@ fun NpcEditorScreen(
 
             StatField(
                 label = "Iniciativa (Bono)",
-                value = npc.initiativeBonus,
+                value = viewModel.initiativeInput,
                 onValueChange = viewModel::updateInitiative,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -186,18 +188,21 @@ fun EditorTextField(
 @Composable
 fun StatField(
     label: String,
-    value: Int,
-    onValueChange: (Int) -> Unit,
+    value: String,
+    onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier) {
         Text(label, fontWeight = FontWeight.Bold, color = Color.White.copy(alpha = 0.6f), fontSize = 14.sp)
         Spacer(Modifier.height(8.dp))
         OutlinedTextField(
-            value = value.toString(),
-            onValueChange = { onValueChange(it.toIntOrNull() ?: 0) },
+            value = value,
+            onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
+            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
+            ),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = Color.White.copy(alpha = 0.2f)

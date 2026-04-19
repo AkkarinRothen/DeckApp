@@ -106,8 +106,8 @@ fun HexGridCanvas(
             bottom = (-offset.y + size.height) / scale
         )
 
-        // Culling: only draw hexes visible in viewport (+1 hex margin)
-        val margin = HEX_SIZE_DEFAULT * 2
+        // Culling: only draw hexes visible in viewport (+3 hex margin)
+        val margin = HEX_SIZE_DEFAULT * 3
         val visibleTiles = tiles.filter { tile ->
             val center = axialToPixel(tile.q, tile.r, HEX_SIZE_DEFAULT)
             center.x >= viewportBounds.left - margin &&
@@ -131,13 +131,14 @@ fun HexGridCanvas(
                 pois = tilePois
             )
 
-            val showLabel = tile.terrainLabel.isNotBlank() &&
-                (mode == HexCanvasMode.DESIGN || tile.isExplored)
-            if (showLabel) {
-                drawTerrainLabel(tile.terrainLabel, screenCenter, hexSize, textMeasurer, scale)
-            }
-            if (showCoordinates && (mode == HexCanvasMode.DESIGN || tile.isExplored)) {
-                drawTerrainLabel("${tile.q},${tile.r}", screenCenter.copy(y = screenCenter.y - hexSize * 0.5f), hexSize * 0.7f, textMeasurer, scale)
+            val isExplored = mode == HexCanvasMode.DESIGN || tile.isExplored
+            if (isExplored) {
+                if (showCoordinates) {
+                    drawTerrainLabel("${tile.q},${tile.r}", screenCenter.copy(y = screenCenter.y - hexSize * 0.45f), hexSize, textMeasurer, scale)
+                }
+                if (tile.terrainLabel.isNotBlank()) {
+                    drawTerrainLabel(tile.terrainLabel, screenCenter, hexSize, textMeasurer, scale)
+                }
             }
         }
 
@@ -302,21 +303,29 @@ private fun DrawScope.drawHexTile(
     // POI indicator: filled circle in center
     if (pois.isNotEmpty() && (mode == HexCanvasMode.DESIGN || tile.isExplored)) {
         val poiColor = poiColor(pois.first().type)
+        val hasMultiple = pois.size > 1
         drawCircle(color = poiColor, radius = hexSize * 0.18f, center = center)
-        drawCircle(color = Color.White, radius = hexSize * 0.18f, center = center, style = Stroke(width = 1.5f))
+        drawCircle(
+            color = Color.White,
+            radius = if (hasMultiple) hexSize * 0.22f else hexSize * 0.18f,
+            center = center,
+            style = Stroke(width = if (hasMultiple) 3f else 1.5f)
+        )
     }
 
     // Terrain cost indicator (in design mode, show dots for cost 2 or 3)
     if (mode == HexCanvasMode.DESIGN && tile.terrainCost >= 2) {
-        val dotRadius = hexSize * 0.07f
-        val spacing = dotRadius * 2.8f
+        val dotRadius = hexSize * 0.05f
+        val spacing = dotRadius * 2.5f
         val count = tile.terrainCost.coerceAtMost(3)
-        val startX = center.x - spacing * (count - 1) / 2f
+        // Positioned at top-right
+        val startX = center.x + hexSize * 0.35f
+        val startY = center.y - hexSize * 0.45f
         for (i in 0 until count) {
             drawCircle(
-                color = Color.White.copy(alpha = 0.8f),
+                color = Color.White.copy(alpha = 0.7f),
                 radius = dotRadius,
-                center = Offset(startX + spacing * i, center.y + hexSize * 0.55f)
+                center = Offset(startX, startY + spacing * i)
             )
         }
     }
