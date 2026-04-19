@@ -136,13 +136,19 @@ fun HexMapEditorScreen(
                 terrainTableConfig = uiState.terrainTableConfig,
                 allTables = uiState.allTables,
                 brushes = uiState.brushes,
+                sessionResources = uiState.sessionResources,
+                allDecks = uiState.allDecks,
+                allRules = uiState.allRules,
                 onNotesChange = viewModel::updateMapNotes,
                 onMaxActivitiesChange = viewModel::updateMaxActivities,
                 onPickWeatherTable = viewModel::showWeatherTablePicker,
                 onClearWeatherTable = { viewModel.setWeatherTable(null) },
                 onPickTravelTable = viewModel::showTravelTablePicker,
                 onClearTravelTable = { viewModel.setTravelTable(null) },
-                onSetTerrainTable = viewModel::setTerrainTable
+                onSetTerrainTable = viewModel::setTerrainTable,
+                onToggleTable = viewModel::toggleTableInResources,
+                onToggleDeck = viewModel::toggleDeckInResources,
+                onToggleRule = viewModel::toggleRuleInResources
             )
         }
     }
@@ -392,13 +398,19 @@ private fun MapSettingsSheet(
     terrainTableConfig: String,
     allTables: List<RandomTable>,
     brushes: List<TerrainBrush>,
+    sessionResources: com.deckapp.core.model.HexSessionResources,
+    allDecks: List<com.deckapp.core.model.CardStack>,
+    allRules: List<com.deckapp.core.model.SystemRule>,
     onNotesChange: (String) -> Unit,
     onMaxActivitiesChange: (Int) -> Unit,
     onPickWeatherTable: () -> Unit,
     onClearWeatherTable: () -> Unit,
     onPickTravelTable: () -> Unit,
     onClearTravelTable: () -> Unit,
-    onSetTerrainTable: (String, Long?) -> Unit
+    onSetTerrainTable: (String, Long?) -> Unit,
+    onToggleTable: (Long) -> Unit,
+    onToggleDeck: (Long) -> Unit,
+    onToggleRule: (Long) -> Unit
 ) {
     var notes by remember(mapNotes) { mutableStateOf(mapNotes) }
     var showTerrainSection by remember { mutableStateOf(false) }
@@ -501,6 +513,58 @@ private fun MapSettingsSheet(
         item {
             HorizontalDivider()
             Spacer(Modifier.height(4.dp))
+            Text("Recursos de sesión", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+            Text("Seleccioná qué tendrás a mano durante la sesión",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        if (allTables.isNotEmpty()) {
+            item {
+                Text("Tablas", style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            items(allTables) { table ->
+                ResourceToggleRow(
+                    name = table.name,
+                    subtitle = table.category.takeIf { it.isNotBlank() },
+                    isSelected = table.id in sessionResources.tableIds,
+                    onToggle = { onToggleTable(table.id) }
+                )
+            }
+        }
+        if (allDecks.isNotEmpty()) {
+            item {
+                Spacer(Modifier.height(4.dp))
+                Text("Mazos", style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            items(allDecks) { deck ->
+                ResourceToggleRow(
+                    name = deck.name,
+                    subtitle = null,
+                    isSelected = deck.id in sessionResources.deckIds,
+                    onToggle = { onToggleDeck(deck.id) }
+                )
+            }
+        }
+        if (allRules.isNotEmpty()) {
+            item {
+                Spacer(Modifier.height(4.dp))
+                Text("Reglas de referencia", style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            items(allRules) { rule ->
+                ResourceToggleRow(
+                    name = rule.title,
+                    subtitle = rule.category.takeIf { it.isNotBlank() },
+                    isSelected = rule.id in sessionResources.ruleIds,
+                    onToggle = { onToggleRule(rule.id) }
+                )
+            }
+        }
+        item {
+            HorizontalDivider()
+            Spacer(Modifier.height(4.dp))
             OutlinedTextField(
                 value = notes,
                 onValueChange = { notes = it },
@@ -574,6 +638,32 @@ private fun AddBrushDialog(
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
     )
+}
+
+@Composable
+private fun ResourceToggleRow(
+    name: String,
+    subtitle: String?,
+    isSelected: Boolean,
+    onToggle: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onToggle() }
+            .padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(name, style = MaterialTheme.typography.bodyMedium)
+            if (subtitle != null) {
+                Text(subtitle, style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        androidx.compose.material3.Checkbox(checked = isSelected, onCheckedChange = { onToggle() })
+    }
 }
 
 @Composable

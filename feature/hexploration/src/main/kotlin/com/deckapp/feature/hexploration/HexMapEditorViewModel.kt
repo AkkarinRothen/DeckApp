@@ -3,6 +3,8 @@ package com.deckapp.feature.hexploration
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.deckapp.core.domain.repository.CardRepository
+import com.deckapp.core.domain.repository.ReferenceRepository
 import com.deckapp.core.domain.usecase.GetAllTablesUseCase
 import com.deckapp.core.domain.usecase.hex.AddHexPoiUseCase
 import com.deckapp.core.domain.usecase.hex.AddHexTileUseCase
@@ -12,11 +14,14 @@ import com.deckapp.core.domain.usecase.hex.ExpandHexMapUseCase
 import com.deckapp.core.domain.usecase.hex.GetHexMapWithTilesUseCase
 import com.deckapp.core.domain.usecase.hex.UpdateHexMapUseCase
 import com.deckapp.core.domain.usecase.hex.UpdateHexTileUseCase
+import com.deckapp.core.model.CardStack
 import com.deckapp.core.model.HexMap
 import com.deckapp.core.model.HexPoi
+import com.deckapp.core.model.HexSessionResources
 import com.deckapp.core.model.HexTile
 import com.deckapp.core.model.PoiType
 import com.deckapp.core.model.RandomTable
+import com.deckapp.core.model.SystemRule
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -66,6 +71,9 @@ data class HexMapEditorUiState(
     val currentMap: HexMap? = null,
     val isLoading: Boolean = true,
     val allTables: List<RandomTable> = emptyList(),
+    val allDecks: List<CardStack> = emptyList(),
+    val allRules: List<SystemRule> = emptyList(),
+    val sessionResources: HexSessionResources = HexSessionResources(),
     val weatherTableId: Long? = null,
     val travelEventTableId: Long? = null,
     val terrainTableConfig: String = "{}",
@@ -84,7 +92,9 @@ class HexMapEditorViewModel @Inject constructor(
     private val expandHexMapUseCase: ExpandHexMapUseCase,
     private val addHexTileUseCase: AddHexTileUseCase,
     private val deleteHexTileUseCase: DeleteHexTileUseCase,
-    private val getAllTablesUseCase: GetAllTablesUseCase
+    private val getAllTablesUseCase: GetAllTablesUseCase,
+    private val cardRepository: CardRepository,
+    private val referenceRepository: ReferenceRepository
 ) : ViewModel() {
 
     private val mapId: Long = savedStateHandle["mapId"] ?: 0L
@@ -104,6 +114,7 @@ class HexMapEditorViewModel @Inject constructor(
                         weatherTableId = data.map.weatherTableId,
                         travelEventTableId = data.map.travelEventTableId,
                         terrainTableConfig = data.map.terrainTableConfig,
+                        sessionResources = parseSessionResources(data.map.sessionResources),
                         tiles = data.tiles,
                         pois = data.pois,
                         currentMap = data.map,
@@ -115,6 +126,14 @@ class HexMapEditorViewModel @Inject constructor(
 
         getAllTablesUseCase()
             .onEach { tables -> _uiState.update { it.copy(allTables = tables) } }
+            .launchIn(viewModelScope)
+
+        cardRepository.getAllDecks()
+            .onEach { decks -> _uiState.update { it.copy(allDecks = decks) } }
+            .launchIn(viewModelScope)
+
+        referenceRepository.getAllSystemRules()
+            .onEach { rules -> _uiState.update { it.copy(allRules = rules) } }
             .launchIn(viewModelScope)
     }
 
@@ -228,6 +247,37 @@ class HexMapEditorViewModel @Inject constructor(
         _uiState.update { it.copy(brushes = it.brushes + brush, activeBrush = brush, showAddBrushDialog = false) }
     }
 
+    fun toggleTableInResources(tableId: Long) {
+        val current = _uiState.value.sessionResources
+        val updated = if (tableId in current.tableIds)
+            current.copy(tableIds = current.tableIds - tableId)
+        else current.copy(tableIds = current.tableIds + tableId)
+        saveSessionResources(updated)
+    }
+
+    fun toggleDeckInResources(deckId: Long) {
+        val current = _uiState.value.sessionResources
+        val updated = if (deckId in current.deckIds)
+            current.copy(deckIds = current.deckIds - deckId)
+        else current.copy(deckIds = current.deckIds + deckId)
+        saveSessionResources(updated)
+    }
+
+    fun toggleRuleInResources(ruleId: Long) {
+        val current = _uiState.value.sessionResources
+        val updated = if (ruleId in current.ruleIds)
+            current.copy(ruleIds = current.ruleIds - ruleId)
+        else current.copy(ruleIds = current.ruleIds + ruleId)
+        saveSessionResources(updated)
+    }
+
+    private fun saveSessionResources(resources: HexSessionResources) {
+        val map = _uiState.value.currentMap ?: return
+        val encoded = encodeSessionResources(resources)
+        viewModelScope.launch { updateHexMapUseCase(map.copy(sessionResources = encoded)) }
+        _uiState.update { it.copy(sessionResources = resources) }
+    }
+
     fun showWeatherTablePicker() = _uiState.update { it.copy(showWeatherTablePicker = true) }
     fun dismissWeatherTablePicker() = _uiState.update { it.copy(showWeatherTablePicker = false) }
     fun setWeatherTable(tableId: Long?) {
@@ -258,6 +308,16 @@ internal fun parseTerrainConfig(json: String): Map<String, Long> =
     runCatching {
         kotlinx.serialization.json.Json.decodeFromString<Map<String, Long>>(json)
     }.getOrDefault(emptyMap())
+
+private val hexResJson = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+
+internal fun parseSessionResources(json: String): HexSessionResources =
+    runCatching { hexResJson.decodeFromString(HexSessionResources.serializer(), json) }
+        .getOrDefault(HexSessionResources())
+
+internal fun encodeSessionResources(res: HexSessionResources): String =
+    runCatching { hexResJson.encodeToString(HexSessionResources.serializer(), res) }
+        .getOrDefault("{}")
 
 internal fun encodeTerrainConfig(map: Map<String, Long>): String = buildString {
     append("{")

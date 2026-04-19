@@ -678,6 +678,12 @@ val MIGRATION_31_32 = object : Migration(31, 32) {
     }
 }
 
+val MIGRATION_34_35 = object : Migration(34, 35) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE `hex_maps` ADD COLUMN `sessionResources` TEXT NOT NULL DEFAULT '{}'")
+    }
+}
+
 val MIGRATION_33_34 = object : Migration(33, 34) {
     override fun migrate(database: SupportSQLiteDatabase) {
         database.execSQL("ALTER TABLE `hex_maps` ADD COLUMN `weatherTableId` INTEGER DEFAULT NULL")

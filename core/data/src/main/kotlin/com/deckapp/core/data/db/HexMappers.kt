@@ -27,6 +27,7 @@ fun HexMapEntity.toDomain() = HexMap(
     weatherTableId = weatherTableId,
     travelEventTableId = travelEventTableId,
     terrainTableConfig = terrainTableConfig,
+    sessionResources = sessionResources,
     createdAt = createdAt
 )
 
@@ -45,6 +46,7 @@ fun HexMap.toEntity() = HexMapEntity(
     weatherTableId = weatherTableId,
     travelEventTableId = travelEventTableId,
     terrainTableConfig = terrainTableConfig,
+    sessionResources = sessionResources,
     createdAt = createdAt
 )
 

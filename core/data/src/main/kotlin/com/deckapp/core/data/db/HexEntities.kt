@@ -27,6 +27,8 @@ data class HexMapEntity(
     val travelEventTableId: Long? = null,
     @ColumnInfo(defaultValue = "{}")
     val terrainTableConfig: String = "{}",
+    @ColumnInfo(defaultValue = "{}")
+    val sessionResources: String = "{}",
     val createdAt: Long = System.currentTimeMillis()
 )
 

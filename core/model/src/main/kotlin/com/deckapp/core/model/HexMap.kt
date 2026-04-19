@@ -15,6 +15,7 @@ data class HexMap(
     val weatherTableId: Long? = null,
     val travelEventTableId: Long? = null,
     val terrainTableConfig: String = "{}",
+    val sessionResources: String = "{}",
     val createdAt: Long = System.currentTimeMillis()
 )
 

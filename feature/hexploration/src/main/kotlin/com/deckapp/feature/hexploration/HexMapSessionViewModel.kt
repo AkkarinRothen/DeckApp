@@ -3,9 +3,13 @@ package com.deckapp.feature.hexploration
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.deckapp.core.domain.repository.CardRepository
 import com.deckapp.core.domain.repository.ReferenceRepository
 import com.deckapp.core.domain.repository.SessionRepository
+import com.deckapp.core.domain.usecase.DiscardCardUseCase
+import com.deckapp.core.domain.usecase.DrawCardUseCase
 import com.deckapp.core.domain.usecase.GetAllTablesUseCase
+import com.deckapp.core.domain.usecase.ResetDeckUseCase
 import com.deckapp.core.domain.usecase.RollTableUseCase
 import com.deckapp.core.domain.usecase.hex.ExploreHexUseCase
 import com.deckapp.core.domain.usecase.hex.GetHexDaysUseCase
@@ -16,8 +20,11 @@ import com.deckapp.core.domain.usecase.hex.MapHexUseCase
 import com.deckapp.core.domain.usecase.hex.MovePartyUseCase
 import com.deckapp.core.domain.usecase.hex.ReconnoiterHexUseCase
 import com.deckapp.core.domain.usecase.hex.StartNewHexDayUseCase
+import com.deckapp.core.model.Card
+import com.deckapp.core.model.CardStack
 import com.deckapp.core.model.HexDay
 import com.deckapp.core.model.HexPoi
+import com.deckapp.core.model.HexSessionResources
 import com.deckapp.core.model.HexTile
 import com.deckapp.core.model.RandomTable
 import com.deckapp.core.model.SystemRule
@@ -59,7 +66,16 @@ data class HexMapSessionUiState(
     val weatherTableId: Long? = null,
     val travelEventTableId: Long? = null,
     val terrainTableConfig: String = "{}",
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val sessionResources: HexSessionResources = HexSessionResources(),
+    val pinnedTables: List<RandomTable> = emptyList(),
+    val pinnedDecks: List<CardStack> = emptyList(),
+    val pinnedRules: List<SystemRule> = emptyList(),
+    val allDecks: List<CardStack> = emptyList(),
+    val drawnCardsByDeck: Map<Long, List<Card>> = emptyMap(),
+    val lastDrawnCard: Card? = null,
+    val showLastDrawnCard: Boolean = false,
+    val showResourcesPanel: Boolean = false
 )
 
 @HiltViewModel
@@ -77,7 +93,11 @@ class HexMapSessionViewModel @Inject constructor(
     private val getHexDaysUseCase: GetHexDaysUseCase,
     private val logHexActivityUseCase: LogHexActivityUseCase,
     private val getAllTablesUseCase: GetAllTablesUseCase,
-    private val referenceRepository: ReferenceRepository
+    private val referenceRepository: ReferenceRepository,
+    private val drawCardUseCase: DrawCardUseCase,
+    private val discardCardUseCase: DiscardCardUseCase,
+    private val resetDeckUseCase: ResetDeckUseCase,
+    private val cardRepository: CardRepository
 ) : ViewModel() {
 
     private val mapId: Long = savedStateHandle["mapId"] ?: 0L
@@ -90,10 +110,7 @@ class HexMapSessionViewModel @Inject constructor(
             getHexMapWithTilesUseCase(mapId).filterNotNull(),
             sessionRepository.getActiveSession()
         ) { mapData, activeSession ->
-            val days = mapData.map.let { _ ->
-                // days come through the hex repo — re-use the flow below
-                emptyList<HexDay>()
-            }
+            val resources = parseSessionResources(mapData.map.sessionResources)
             _uiState.update {
                 it.copy(
                     mapName = mapData.map.name,
@@ -107,10 +124,11 @@ class HexMapSessionViewModel @Inject constructor(
                     weatherTableId = mapData.map.weatherTableId,
                     travelEventTableId = mapData.map.travelEventTableId,
                     terrainTableConfig = mapData.map.terrainTableConfig,
+                    sessionResources = resources,
                     isLoading = false
                 )
             }
-            // Auto-link map to active session if not already linked
+            updatePinnedResources()
             if (activeSession != null && mapData.map.sessionId != activeSession.id) {
                 linkHexMapToSessionUseCase(mapId, activeSession.id)
             }
@@ -119,12 +137,47 @@ class HexMapSessionViewModel @Inject constructor(
         observeDays()
 
         getAllTablesUseCase()
-            .onEach { tables -> _uiState.update { it.copy(allTables = tables) } }
+            .onEach { tables ->
+                _uiState.update { it.copy(allTables = tables) }
+                updatePinnedResources()
+            }
             .launchIn(viewModelScope)
 
         referenceRepository.getAllSystemRules()
-            .onEach { rules -> _uiState.update { it.copy(allRules = rules) } }
+            .onEach { rules ->
+                _uiState.update { it.copy(allRules = rules) }
+                updatePinnedResources()
+            }
             .launchIn(viewModelScope)
+
+        cardRepository.getAllDecks()
+            .onEach { decks ->
+                _uiState.update { it.copy(allDecks = decks) }
+                updatePinnedResources()
+            }
+            .launchIn(viewModelScope)
+
+        cardRepository.getDrawnCards()
+            .onEach { drawnCards ->
+                val pinnedDeckIds = _uiState.value.pinnedDecks.map { it.id }.toSet()
+                val byDeck = drawnCards
+                    .filter { it.stackId in pinnedDeckIds }
+                    .groupBy { it.stackId }
+                _uiState.update { it.copy(drawnCardsByDeck = byDeck) }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    private fun updatePinnedResources() {
+        val state = _uiState.value
+        val res = state.sessionResources
+        _uiState.update {
+            it.copy(
+                pinnedTables = it.allTables.filter { t -> t.id in res.tableIds },
+                pinnedDecks = it.allDecks.filter { d -> d.id in res.deckIds },
+                pinnedRules = it.allRules.filter { r -> r.id in res.ruleIds }
+            )
+        }
     }
 
     private fun observeDays() {
@@ -237,6 +290,36 @@ class HexMapSessionViewModel @Inject constructor(
         viewModelScope.launch {
             val context = _uiState.value.allTables.find { it.id == tableId }?.name ?: ""
             autoRoll(tableId, context)
+        }
+    }
+
+    fun showResourcesPanel() = _uiState.update { it.copy(showResourcesPanel = true) }
+    fun dismissResourcesPanel() = _uiState.update { it.copy(showResourcesPanel = false) }
+    fun dismissLastDrawnCard() = _uiState.update { it.copy(showLastDrawnCard = false, lastDrawnCard = null) }
+
+    fun drawCardFromDeck(deckId: Long) {
+        viewModelScope.launch {
+            val sessionId = _uiState.value.activeSessionId ?: return@launch
+            val deck = _uiState.value.pinnedDecks.find { it.id == deckId } ?: return@launch
+            val card = drawCardUseCase(sessionId, deckId, deck.drawMode)
+            if (card != null) {
+                _uiState.update { it.copy(lastDrawnCard = card, showLastDrawnCard = true) }
+            }
+        }
+    }
+
+    fun discardCard(cardId: Long) {
+        viewModelScope.launch {
+            val sessionId = _uiState.value.activeSessionId ?: return@launch
+            discardCardUseCase(sessionId, cardId)
+            _uiState.update { it.copy(showLastDrawnCard = false, lastDrawnCard = null) }
+        }
+    }
+
+    fun resetDeck(deckId: Long) {
+        viewModelScope.launch {
+            val sessionId = _uiState.value.activeSessionId ?: return@launch
+            resetDeckUseCase(sessionId, deckId)
         }
     }
 

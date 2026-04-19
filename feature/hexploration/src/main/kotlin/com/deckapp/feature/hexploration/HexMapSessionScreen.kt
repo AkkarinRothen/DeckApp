@@ -1,5 +1,6 @@
 package com.deckapp.feature.hexploration
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,12 +14,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material.icons.filled.TableChart
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
@@ -37,26 +34,27 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.deckapp.core.model.Card
+import com.deckapp.core.model.CardStack
 import com.deckapp.core.model.HexActivityEntry
 import com.deckapp.core.model.HexPoi
 import com.deckapp.core.model.HexTile
+import com.deckapp.core.ui.components.CardThumbnail
 import com.deckapp.feature.hexploration.components.HexCanvasMode
 import com.deckapp.feature.hexploration.components.HexGridCanvas
-import com.deckapp.feature.hexploration.components.HexRulesSheet
-import com.deckapp.feature.hexploration.components.HexSessionTablesSheet
+import com.deckapp.feature.hexploration.components.HexResourcesPanel
 import com.deckapp.feature.hexploration.components.hexDistance
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -96,35 +94,32 @@ fun HexMapSessionScreen(
         )
     }
 
-    val tablesSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    if (uiState.showTablesSheet) {
-        ModalBottomSheet(
-            onDismissRequest = viewModel::dismissTablesSheet,
-            sheetState = tablesSheetState,
-            dragHandle = { BottomSheetDefaults.DragHandle() }
-        ) {
-            HexSessionTablesSheet(
-                weatherTableId = uiState.weatherTableId,
-                travelEventTableId = uiState.travelEventTableId,
-                allTables = uiState.allTables,
-                recentRolls = uiState.recentRolls,
-                onRoll = viewModel::rollTableManually,
-                onDismiss = viewModel::dismissTablesSheet
-            )
-        }
+    if (uiState.showLastDrawnCard && uiState.lastDrawnCard != null) {
+        DrawnCardDialog(
+            card = uiState.lastDrawnCard!!,
+            deck = uiState.pinnedDecks.find { it.id == uiState.lastDrawnCard!!.stackId },
+            onDiscard = { viewModel.discardCard(uiState.lastDrawnCard!!.id) },
+            onDismiss = viewModel::dismissLastDrawnCard
+        )
     }
 
-    val rulesSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    if (uiState.showRulesSheet) {
+    val resourcesSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    if (uiState.showResourcesPanel) {
         ModalBottomSheet(
-            onDismissRequest = viewModel::dismissRulesSheet,
-            sheetState = rulesSheetState,
+            onDismissRequest = viewModel::dismissResourcesPanel,
+            sheetState = resourcesSheetState,
             dragHandle = { BottomSheetDefaults.DragHandle() }
         ) {
-            HexRulesSheet(
-                rules = uiState.allRules,
-                searchQuery = uiState.rulesSearchQuery,
-                onSearchChanged = viewModel::onRulesSearchChanged
+            HexResourcesPanel(
+                pinnedTables = uiState.pinnedTables,
+                pinnedDecks = uiState.pinnedDecks,
+                pinnedRules = uiState.pinnedRules,
+                drawnCardsByDeck = uiState.drawnCardsByDeck,
+                recentRolls = uiState.recentRolls,
+                onRollTable = viewModel::rollTableManually,
+                onDrawCard = viewModel::drawCardFromDeck,
+                onDiscardCard = viewModel::discardCard,
+                onResetDeck = viewModel::resetDeck
             )
         }
     }
@@ -177,11 +172,8 @@ fun HexMapSessionScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = viewModel::showTablesSheet) {
-                        Icon(Icons.Default.TableChart, contentDescription = "Tablas")
-                    }
-                    IconButton(onClick = viewModel::showRulesSheet) {
-                        Icon(Icons.Default.MenuBook, contentDescription = "Reglas")
+                    IconButton(onClick = viewModel::showResourcesPanel) {
+                        Icon(Icons.Default.Apps, contentDescription = "Recursos")
                     }
                 }
             )
@@ -211,6 +203,64 @@ fun HexMapSessionScreen(
             modifier = Modifier.fillMaxSize().padding(padding)
         )
     }
+}
+
+@Composable
+private fun DrawnCardDialog(
+    card: Card,
+    deck: CardStack?,
+    onDiscard: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Column {
+                if (deck != null) {
+                    Text(deck.name, style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Text(card.title)
+            }
+        },
+        text = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                if (!card.isRevealed) {
+                    Box(
+                        modifier = Modifier
+                            .height(200.dp)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Carta boca abajo", style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                } else {
+                    CardThumbnail(
+                        card = card,
+                        height = 200.dp,
+                        showTitle = false
+                    )
+                }
+                val zoneText = card.activeFace.zones.firstOrNull { it.text.isNotBlank() }?.text
+                if (zoneText != null) {
+                    Text(zoneText, style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onDiscard,
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+            ) { Text("Descartar") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cerrar") }
+        }
+    )
 }
 
 @Composable
@@ -258,7 +308,6 @@ private fun SessionTileSheet(
             }
         }
 
-        // Estado del hex
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             StatusChip("Explorado", tile.isExplored)
             StatusChip("Reconocido", tile.isReconnoitered)
@@ -267,7 +316,6 @@ private fun SessionTileSheet(
 
         HorizontalDivider()
 
-        // Acciones de exploración
         Text("Exploración", style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant)
 
@@ -294,7 +342,6 @@ private fun SessionTileSheet(
             ) { Text("Mapear\n(1 act.)", maxLines = 2) }
         }
 
-        // Notas (visibles solo si explorado)
         if (tile.isExplored && tile.playerNotes.isNotBlank()) {
             HorizontalDivider()
             Text("Notas", style = MaterialTheme.typography.labelMedium,
@@ -302,7 +349,6 @@ private fun SessionTileSheet(
             Text(tile.playerNotes, style = MaterialTheme.typography.bodyMedium)
         }
 
-        // POIs
         if (pois.isNotEmpty() && tile.isExplored) {
             HorizontalDivider()
             Text("Puntos de interés", style = MaterialTheme.typography.labelMedium,
@@ -346,7 +392,6 @@ private fun SessionTileSheet(
             }
         }
 
-        // Historial del día
         if (todayLog.isNotEmpty()) {
             HorizontalDivider()
             var expanded by remember { mutableStateOf(false) }
