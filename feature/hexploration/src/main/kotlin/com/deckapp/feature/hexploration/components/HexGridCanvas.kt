@@ -329,31 +329,40 @@ private fun DrawScope.drawTerrainLabel(
     textMeasurer: TextMeasurer,
     scale: Float
 ) {
-    if (hexSize < 20f) return // Don't draw labels if too small to avoid crash and clutter
+    if (hexSize < 30f) return // Labels require a minimum size to be safe and readable
 
-    val fontSize = (hexSize * 0.14f).coerceIn(8f, 18f).sp
+    // Safety: ignore if coordinates are extreme or NaN
+    if (center.x < -10000f || center.x > 10000f || center.y < -10000f || center.y > 10000f) return
+    if (center.x.isNaN() || center.y.isNaN()) return
+
+    val fontSize = (hexSize * 0.14f).coerceIn(9f, 18f).sp
+    val style = TextStyle(fontSize = fontSize, color = Color.White.copy(alpha = 0.85f))
     
-    // Safety check for measurements
-    val measured = try {
-        textMeasurer.measure(label, TextStyle(fontSize = fontSize))
+    // Measure explicitly with infinite constraints to avoid negative width calculation inside drawText
+    val textLayoutResult = try {
+        textMeasurer.measure(
+            text = label,
+            style = style,
+            softWrap = false,
+            maxLines = 1
+        )
     } catch (e: Exception) {
         return
     }
 
-    val textWidth = measured.size.width.toFloat()
-    val textHeight = measured.size.height.toFloat()
+    val textWidth = textLayoutResult.size.width.toFloat()
+    val textHeight = textLayoutResult.size.height.toFloat()
     
     val textX = center.x - textWidth / 2f
     val textY = center.y + hexSize * 0.42f - textHeight / 2f
     
-    // Final safety: don't draw if coordinates are NaN or Infinite
+    // Ensure final coordinates are valid before drawing
     if (textX.isNaN() || textY.isNaN()) return
 
+    // Use the TextLayoutResult version of drawText which is more stable
     drawText(
-        textMeasurer = textMeasurer,
-        text = label,
-        topLeft = Offset(textX, textY),
-        style = TextStyle(fontSize = fontSize, color = Color.White.copy(alpha = 0.85f))
+        textLayoutResult = textLayoutResult,
+        topLeft = Offset(textX, textY)
     )
 }
 

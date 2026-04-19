@@ -52,16 +52,16 @@ data class HexMapSessionUiState(
 class HexMapSessionViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getHexMapWithTilesUseCase: GetHexMapWithTilesUseCase,
-    private val getHexDaysUseCase: GetHexDaysUseCase,
     private val exploreHexUseCase: ExploreHexUseCase,
     private val reconnoiterHexUseCase: ReconnoiterHexUseCase,
     private val mapHexUseCase: MapHexUseCase,
     private val startNewHexDayUseCase: StartNewHexDayUseCase,
-    private val movePartyUseCase: MovePartyUseCase,
-    private val logHexActivityUseCase: LogHexActivityUseCase,
     private val linkHexMapToSessionUseCase: LinkHexMapToSessionUseCase,
     private val rollTableUseCase: RollTableUseCase,
-    private val sessionRepository: SessionRepository
+    private val sessionRepository: SessionRepository,
+    private val movePartyUseCase: MovePartyUseCase,
+    private val getHexDaysUseCase: GetHexDaysUseCase,
+    private val logHexActivityUseCase: LogHexActivityUseCase
 ) : ViewModel() {
 
     private val mapId: Long = savedStateHandle["mapId"] ?: 0L

@@ -183,15 +183,15 @@ private fun HexMapCard(map: HexMap, onEdit: () -> Unit, onDelete: () -> Unit) {
 @Composable
 private fun CreateHexMapDialog(
     name: String,
-    rows: Int,
-    cols: Int,
+    rows: String,
+    cols: String,
     isRadial: Boolean,
-    radius: Int,
+    radius: String,
     onNameChange: (String) -> Unit,
-    onRowsChange: (Int) -> Unit,
-    onColsChange: (Int) -> Unit,
+    onRowsChange: (String) -> Unit,
+    onColsChange: (String) -> Unit,
     onRadialChange: (Boolean) -> Unit,
-    onRadiusChange: (Int) -> Unit,
+    onRadiusChange: (String) -> Unit,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -224,16 +224,16 @@ private fun CreateHexMapDialog(
                 if (!isRadial) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedTextField(
-                            value = cols.toString(),
-                            onValueChange = { it.toIntOrNull()?.let(onColsChange) },
+                            value = cols,
+                            onValueChange = onColsChange,
                             label = { Text("Columnas") },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.weight(1f),
                             singleLine = true
                         )
                         OutlinedTextField(
-                            value = rows.toString(),
-                            onValueChange = { it.toIntOrNull()?.let(onRowsChange) },
+                            value = rows,
+                            onValueChange = onRowsChange,
                             label = { Text("Filas") },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.weight(1f),
@@ -242,8 +242,8 @@ private fun CreateHexMapDialog(
                     }
                 } else {
                     OutlinedTextField(
-                        value = radius.toString(),
-                        onValueChange = { it.toIntOrNull()?.let(onRadiusChange) },
+                        value = radius,
+                        onValueChange = onRadiusChange,
                         label = { Text("Radio (anillos)") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.fillMaxWidth(),
@@ -251,7 +251,10 @@ private fun CreateHexMapDialog(
                     )
                 }
 
-                val totalHexes = if (isRadial) 1 + 3 * radius * (radius + 1) else cols * rows
+                val rInt = radius.toIntOrNull() ?: 0
+                val cInt = cols.toIntOrNull() ?: 0
+                val rowsInt = rows.toIntOrNull() ?: 0
+                val totalHexes = if (isRadial) 1 + 3 * rInt * (rInt + 1) else cInt * rowsInt
                 Text(
                     text = "$totalHexes hexes en total",
                     style = MaterialTheme.typography.bodySmall,

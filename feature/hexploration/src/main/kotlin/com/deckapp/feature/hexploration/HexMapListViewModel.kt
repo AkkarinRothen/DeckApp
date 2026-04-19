@@ -21,10 +21,10 @@ data class HexMapListUiState(
     val isLoading: Boolean = true,
     val showCreateDialog: Boolean = false,
     val newMapName: String = "",
-    val newMapRows: Int = 10,
-    val newMapCols: Int = 10,
+    val newMapRows: String = "10",
+    val newMapCols: String = "10",
     val isRadial: Boolean = false,
-    val newMapRadius: Int = 5
+    val newMapRadius: String = "5"
 )
 
 @HiltViewModel
@@ -47,20 +47,25 @@ class HexMapListViewModel @Inject constructor(
     fun dismissCreateDialog() = _uiState.update { it.copy(showCreateDialog = false, newMapName = "") }
 
     fun onNameChange(name: String) = _uiState.update { it.copy(newMapName = name) }
-    fun onRowsChange(rows: Int) = _uiState.update { it.copy(newMapRows = rows.coerceIn(3, 40)) }
-    fun onColsChange(cols: Int) = _uiState.update { it.copy(newMapCols = cols.coerceIn(3, 40)) }
+    fun onRowsChange(rows: String) = _uiState.update { it.copy(newMapRows = rows) }
+    fun onColsChange(cols: String) = _uiState.update { it.copy(newMapCols = cols) }
     fun onRadialChange(radial: Boolean) = _uiState.update { it.copy(isRadial = radial) }
-    fun onRadiusChange(radius: Int) = _uiState.update { it.copy(newMapRadius = radius.coerceIn(1, 25)) }
+    fun onRadiusChange(radius: String) = _uiState.update { it.copy(newMapRadius = radius) }
 
     fun createMap(onCreated: (Long) -> Unit) {
         val state = _uiState.value
         if (state.newMapName.isBlank()) return
+
+        val rows = state.newMapRows.toIntOrNull()?.coerceIn(3, 40) ?: 10
+        val cols = state.newMapCols.toIntOrNull()?.coerceIn(3, 40) ?: 10
+        val radius = state.newMapRadius.toIntOrNull()?.coerceIn(1, 25) ?: 5
+
         viewModelScope.launch {
             val id = createHexMapUseCase(
                 name = state.newMapName.trim(),
-                rows = state.newMapRows,
-                cols = state.newMapCols,
-                radius = if (state.isRadial) state.newMapRadius else null
+                rows = rows,
+                cols = cols,
+                radius = if (state.isRadial) radius else null
             )
             _uiState.update { it.copy(showCreateDialog = false, newMapName = "") }
             onCreated(id)

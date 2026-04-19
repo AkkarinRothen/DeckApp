@@ -31,8 +31,15 @@ class HexRepositoryImpl @Inject constructor(
     override fun getHexDays(mapId: Long): Flow<List<HexDay>> =
         hexDao.getDaysForMap(mapId).map { it.map { e -> e.toDomain() } }
 
-    override suspend fun upsertHexMap(map: HexMap): Long =
-        hexDao.insertMap(map.toEntity())
+    override suspend fun upsertHexMap(map: HexMap): Long {
+        val entity = map.toEntity()
+        val id = hexDao.insertMap(entity)
+        if (id == -1L) {
+            hexDao.updateMap(entity)
+            return entity.id
+        }
+        return id
+    }
 
     override suspend fun upsertHexTile(tile: HexTile) =
         hexDao.insertTile(tile.toEntity())

@@ -14,8 +14,11 @@ interface HexDao {
     @Query("SELECT * FROM hex_maps WHERE id = :id")
     fun getMapById(id: Long): Flow<HexMapEntity?>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertMap(map: HexMapEntity): Long
+
+    @Update
+    suspend fun updateMap(map: HexMapEntity)
 
     @Query("DELETE FROM hex_maps WHERE id = :id")
     suspend fun deleteMap(id: Long)
