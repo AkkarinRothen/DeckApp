@@ -17,8 +17,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextMeasurer
+import androidx.compose.ui.text.TextPainter
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -368,11 +370,16 @@ private fun DrawScope.drawTerrainLabel(
     // Ensure final coordinates are valid before drawing
     if (textX.isNaN() || textY.isNaN()) return
 
-    // Use the TextLayoutResult version of drawText which is more stable
-    drawText(
-        textLayoutResult = textLayoutResult,
-        topLeft = Offset(textX, textY)
-    )
+    // Use drawIntoCanvas with TextPainter directly to avoid maxWidth constraints check
+    // which fails if textX is outside the canvas bounds (maxWidth = constraints.maxWidth - topLeft.x)
+    drawIntoCanvas { canvas ->
+        TextPainter.drawText(
+            canvas = canvas,
+            textLayoutResult = textLayoutResult,
+            color = Color.White.copy(alpha = 0.85f),
+            topLeft = Offset(textX, textY)
+        )
+    }
 }
 
 private fun DrawScope.drawTerrainDecoration(tile: HexTile, center: Offset, hexSize: Float) {

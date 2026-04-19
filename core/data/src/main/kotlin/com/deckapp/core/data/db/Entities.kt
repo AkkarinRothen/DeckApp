@@ -17,6 +17,7 @@ data class CardStackEntity(
     val displayCount: Boolean,
     val aspectRatio: String = "STANDARD", // CardAspectRatio.name
     val isArchived: Boolean = false,
+    @ColumnInfo(defaultValue = "0")
     val sortOrder: Int = 0,
     val createdAt: Long
 )
@@ -123,6 +124,7 @@ data class SessionEntity(
     val endedAt: Long?,
     val showCardTitles: Boolean = true,
     @ColumnInfo(name = "dm_notes") val dmNotes: String? = null,
+    @ColumnInfo(defaultValue = "[\"General\"]")
     val gameSystemsJson: String = "[\"General\"]"
 )
 
@@ -195,15 +197,19 @@ data class RandomTableEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val bundleId: Long? = null,
     val name: String,
+    @ColumnInfo(defaultValue = "General")
     val category: String = "General",
     val description: String = "",
     val rollFormula: String = "1d6",
     val rollMode: String = "RANGE",       // TableRollMode.name
+    @ColumnInfo(defaultValue = "0")
     val isNoRepeat: Boolean = false,
+    @ColumnInfo(defaultValue = "0")
     val isPinned: Boolean = false,
     val sourceType: String = "MANUAL",    // OCR, CSV, JSON, MANUAL
     val sourceName: String? = null,
     val isBuiltIn: Boolean = false,
+    @ColumnInfo(defaultValue = "0")
     val sortOrder: Int = 0,
     val createdAt: Long = System.currentTimeMillis(),
     val sourcePack: String? = null
@@ -228,7 +234,9 @@ data class TableEntryEntity(
     val text: String,
     val subTableRef: String? = null,
     val subTableId: Long? = null,
-    val sortOrder: Int = 0
+    val sortOrder: Int = 0,
+    @ColumnInfo(defaultValue = "1.0")
+    val confidence: Float = 1.0f
 )
 
 @Entity(
@@ -256,6 +264,7 @@ data class TableRollResultEntity(
     val sessionId: Long?,
     val rollValue: Int,
     val resolvedText: String,
+    @ColumnInfo(defaultValue = "0")
     val timestamp: Long = System.currentTimeMillis()
 )
 

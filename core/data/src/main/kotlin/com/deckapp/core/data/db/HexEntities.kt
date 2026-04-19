@@ -12,11 +12,15 @@ data class HexMapEntity(
     val rows: Int,
     val cols: Int,
     val sessionId: Long? = null,
+    @ColumnInfo(defaultValue = "FLAT_TOP")
     val hexStyle: String = "FLAT_TOP",
     val partyQ: Int? = null,
     val partyR: Int? = null,
+    @ColumnInfo(defaultValue = "0")
     val isRadial: Boolean = false,
+    @ColumnInfo(defaultValue = "8")
     val maxActivitiesPerDay: Int = 8,
+    @ColumnInfo(defaultValue = "")
     val mapNotes: String = "",
     val createdAt: Long = System.currentTimeMillis()
 )
@@ -38,13 +42,21 @@ data class HexTileEntity(
     val mapId: Long,
     val q: Int,
     val r: Int,
+    @ColumnInfo(defaultValue = "1")
     val terrainCost: Int = 1,
+    @ColumnInfo(defaultValue = "")
     val terrainLabel: String = "",
+    @ColumnInfo(defaultValue = "-2183045")
     val terrainColor: Long = 0xFF7CB87BL,
+    @ColumnInfo(defaultValue = "")
     val dmNotes: String = "",
+    @ColumnInfo(defaultValue = "")
     val playerNotes: String = "",
+    @ColumnInfo(defaultValue = "0")
     val isExplored: Boolean = false,
+    @ColumnInfo(defaultValue = "0")
     val isReconnoitered: Boolean = false,
+    @ColumnInfo(defaultValue = "0")
     val isMapped: Boolean = false
 )
 
@@ -67,6 +79,7 @@ data class HexPoiEntity(
     val tileR: Int,
     val name: String,
     val type: String,
+    @ColumnInfo(defaultValue = "")
     val description: String = "",
     val encounterId: Long? = null,
     val tableId: Long? = null
@@ -88,6 +101,8 @@ data class HexDayEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val mapId: Long,
     val dayNumber: Int,
+    @ColumnInfo(defaultValue = "[]")
     val activitiesLog: String = "[]",   // JSON array of HexActivityEntry
+    @ColumnInfo(defaultValue = "")
     val notes: String = ""
 )

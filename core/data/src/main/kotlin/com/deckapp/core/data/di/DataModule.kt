@@ -29,6 +29,7 @@ import com.deckapp.core.data.db.MIGRATION_28_29
 import com.deckapp.core.data.db.MIGRATION_29_30
 import com.deckapp.core.data.db.MIGRATION_30_31
 import com.deckapp.core.data.db.MIGRATION_31_32
+import com.deckapp.core.data.db.MIGRATION_32_33
 import com.deckapp.core.data.repository.*
 import com.deckapp.core.data.repository.WikiRepositoryImpl
 import com.deckapp.core.domain.repository.CardRepository
@@ -89,9 +90,10 @@ object DatabaseModule {
                 MIGRATION_28_29,
                 MIGRATION_29_30,
                 MIGRATION_30_31,
-                MIGRATION_31_32
+                MIGRATION_31_32,
+                MIGRATION_32_33
             )
-            .fallbackToDestructiveMigrationFrom(1, 2, 3, 4, 5)
+            .fallbackToDestructiveMigration()
             .build()
 
     @Provides fun provideCardStackDao(db: DeckAppDatabase) = db.cardStackDao()
