@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -159,8 +160,22 @@ class HexMapSessionViewModel @Inject constructor(
 
         cardRepository.getDrawnCards()
             .onEach { drawnCards ->
+                val sessionId = _uiState.value.activeSessionId
                 val pinnedDeckIds = _uiState.value.pinnedDecks.map { it.id }.toSet()
-                val byDeck = drawnCards
+                
+                // Si hay sesión activa, filtramos por eventos para asegurar aislamiento
+                val sessionDrawnCards = if (sessionId != null) {
+                    val sessionEvents = sessionRepository.getEventsForSession(sessionId).first()
+                    val sessionDrawnIds = sessionEvents
+                        .filter { it.action == com.deckapp.core.model.DrawAction.DRAW }
+                        .map { it.cardId }
+                        .toSet()
+                    drawnCards.filter { it.id in sessionDrawnIds }
+                } else {
+                    drawnCards
+                }
+
+                val byDeck = sessionDrawnCards
                     .filter { it.stackId in pinnedDeckIds }
                     .groupBy { it.stackId }
                 _uiState.update { it.copy(drawnCardsByDeck = byDeck) }
@@ -317,8 +332,8 @@ class HexMapSessionViewModel @Inject constructor(
     }
 
     fun resetDeck(deckId: Long) {
+        val sessionId = _uiState.value.activeSessionId ?: return
         viewModelScope.launch {
-            val sessionId = _uiState.value.activeSessionId ?: return@launch
             resetDeckUseCase(sessionId, deckId)
         }
     }
