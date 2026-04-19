@@ -14,6 +14,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
@@ -32,6 +35,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,6 +48,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.deckapp.core.model.HexActivityEntry
 import com.deckapp.core.model.HexPoi
 import com.deckapp.core.model.HexTile
 import com.deckapp.feature.hexploration.components.HexCanvasMode
@@ -89,6 +97,9 @@ fun HexMapSessionScreen(
                     it.tileQ == uiState.selectedTile!!.q && it.tileR == uiState.selectedTile!!.r
                 },
                 partyLocation = uiState.partyLocation,
+                activitiesUsed = uiState.activitiesUsedToday,
+                maxActivities = uiState.maxActivitiesPerDay,
+                todayLog = uiState.todayLog,
                 onExplore = { viewModel.explore(uiState.selectedTile!!) },
                 onReconnoiter = { viewModel.reconnoiter(uiState.selectedTile!!) },
                 onMap = { viewModel.mapTile(uiState.selectedTile!!) },
@@ -109,7 +120,7 @@ fun HexMapSessionScreen(
                     Column {
                         Text(uiState.mapName, maxLines = 1)
                         val dayLabel = if (uiState.currentDay != null)
-                            "Día ${uiState.currentDay!!.dayNumber} · ${uiState.activitiesUsedToday} actividades usadas"
+                            "Día ${uiState.currentDay!!.dayNumber} · ${uiState.activitiesUsedToday}/${uiState.maxActivitiesPerDay} actividades"
                         else "Sin día activo — toca + para empezar"
                         Text(dayLabel, style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -154,12 +165,16 @@ private fun SessionTileSheet(
     tile: HexTile,
     pois: List<HexPoi>,
     partyLocation: Pair<Int, Int>?,
+    activitiesUsed: Int,
+    maxActivities: Int,
+    todayLog: List<HexActivityEntry>,
     onExplore: () -> Unit,
     onReconnoiter: () -> Unit,
     onMap: () -> Unit,
     onRollTable: (Long) -> Unit,
     onStartEncounter: (Long?) -> Unit
 ) {
+    val atLimit = activitiesUsed >= maxActivities
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -209,19 +224,19 @@ private fun SessionTileSheet(
         ) {
             FilledTonalButton(
                 onClick = onExplore,
-                enabled = !tile.isExplored,
+                enabled = !tile.isExplored && !atLimit,
                 modifier = Modifier.weight(1f)
             ) { Text("Explorar\n(1 act.)", maxLines = 2) }
 
             FilledTonalButton(
                 onClick = onReconnoiter,
-                enabled = !tile.isReconnoitered,
+                enabled = !tile.isReconnoitered && !atLimit,
                 modifier = Modifier.weight(1f)
             ) { Text("Reconocer\n(${tile.terrainCost.coerceAtLeast(1)} act.)", maxLines = 2) }
 
             FilledTonalButton(
                 onClick = onMap,
-                enabled = tile.isReconnoitered && !tile.isMapped,
+                enabled = tile.isReconnoitered && !tile.isMapped && !atLimit,
                 modifier = Modifier.weight(1f)
             ) { Text("Mapear\n(1 act.)", maxLines = 2) }
         }
@@ -275,6 +290,37 @@ private fun SessionTileSheet(
                     }
                 }
                 Spacer(Modifier.height(4.dp))
+            }
+        }
+
+        // Historial del día
+        if (todayLog.isNotEmpty()) {
+            HorizontalDivider()
+            var expanded by remember { mutableStateOf(false) }
+            Row(
+                modifier = Modifier.fillMaxWidth().clickable { expanded = !expanded },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Historial de hoy (${todayLog.size})",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    if (expanded) "▲" else "▼",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            if (expanded) {
+                todayLog.reversed().forEach { entry ->
+                    Text(
+                        "· ${entry.description}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }

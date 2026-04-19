@@ -8,7 +8,9 @@ import com.deckapp.core.domain.usecase.hex.AddHexTileUseCase
 import com.deckapp.core.domain.usecase.hex.DeleteHexPoiUseCase
 import com.deckapp.core.domain.usecase.hex.ExpandHexMapUseCase
 import com.deckapp.core.domain.usecase.hex.GetHexMapWithTilesUseCase
+import com.deckapp.core.domain.usecase.hex.UpdateHexMapUseCase
 import com.deckapp.core.domain.usecase.hex.UpdateHexTileUseCase
+import com.deckapp.core.model.HexMap
 import com.deckapp.core.model.HexPoi
 import com.deckapp.core.model.HexTile
 import com.deckapp.core.model.PoiType
@@ -43,6 +45,8 @@ val defaultBrushes = listOf(
 data class HexMapEditorUiState(
     val mapId: Long = 0,
     val mapName: String = "",
+    val mapNotes: String = "",
+    val maxActivitiesPerDay: Int = 8,
     val tiles: List<HexTile> = emptyList(),
     val pois: List<HexPoi> = emptyList(),
     val selectedTile: HexTile? = null,
@@ -50,9 +54,12 @@ data class HexMapEditorUiState(
     val brushes: List<TerrainBrush> = defaultBrushes,
     val showTileSheet: Boolean = false,
     val showAddPoiDialog: Boolean = false,
+    val showAddBrushDialog: Boolean = false,
     val newPoiName: String = "",
     val newPoiType: PoiType = PoiType.LANDMARK,
     val newPoiDescription: String = "",
+    val showCoordinates: Boolean = false,
+    val currentMap: HexMap? = null,
     val isLoading: Boolean = true
 )
 
@@ -61,6 +68,7 @@ class HexMapEditorViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getHexMapWithTilesUseCase: GetHexMapWithTilesUseCase,
     private val updateHexTileUseCase: UpdateHexTileUseCase,
+    private val updateHexMapUseCase: UpdateHexMapUseCase,
     private val addHexPoiUseCase: AddHexPoiUseCase,
     private val deleteHexPoiUseCase: DeleteHexPoiUseCase,
     private val expandHexMapUseCase: ExpandHexMapUseCase,
@@ -79,8 +87,11 @@ class HexMapEditorViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         mapName = data.map.name,
+                        mapNotes = data.map.mapNotes,
+                        maxActivitiesPerDay = data.map.maxActivitiesPerDay,
                         tiles = data.tiles,
                         pois = data.pois,
+                        currentMap = data.map,
                         isLoading = false
                     )
                 }
@@ -167,5 +178,29 @@ class HexMapEditorViewModel @Inject constructor(
 
     fun deletePoi(poiId: Long) {
         viewModelScope.launch { deleteHexPoiUseCase(poiId) }
+    }
+
+    fun updateMapNotes(notes: String) {
+        val map = _uiState.value.currentMap ?: return
+        viewModelScope.launch { updateHexMapUseCase(map.copy(mapNotes = notes)) }
+        _uiState.update { it.copy(mapNotes = notes) }
+    }
+
+    fun updateMaxActivities(max: Int) {
+        val map = _uiState.value.currentMap ?: return
+        val clamped = max.coerceIn(1, 30)
+        viewModelScope.launch { updateHexMapUseCase(map.copy(maxActivitiesPerDay = clamped)) }
+        _uiState.update { it.copy(maxActivitiesPerDay = clamped) }
+    }
+
+    fun toggleCoordinates() = _uiState.update { it.copy(showCoordinates = !it.showCoordinates) }
+
+    fun showAddBrushDialog() = _uiState.update { it.copy(showAddBrushDialog = true) }
+    fun dismissAddBrushDialog() = _uiState.update { it.copy(showAddBrushDialog = false) }
+
+    fun addCustomBrush(label: String, cost: Int, color: Long) {
+        if (label.isBlank()) return
+        val brush = TerrainBrush(cost = cost.coerceIn(0, 3), label = label.trim(), color = color)
+        _uiState.update { it.copy(brushes = it.brushes + brush, activeBrush = brush, showAddBrushDialog = false) }
     }
 }

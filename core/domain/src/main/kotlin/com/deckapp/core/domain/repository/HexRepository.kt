@@ -19,6 +19,8 @@ interface HexRepository {
     suspend fun upsertHexPoi(poi: HexPoi): Long
     suspend fun upsertHexDay(day: HexDay): Long
 
+    suspend fun updatePartyLocation(mapId: Long, q: Int, r: Int)
+
     suspend fun deleteHexMap(id: Long)
     suspend fun deleteHexPoi(id: Long)
 }

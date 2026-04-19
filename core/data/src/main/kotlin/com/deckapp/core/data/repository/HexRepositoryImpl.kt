@@ -46,6 +46,9 @@ class HexRepositoryImpl @Inject constructor(
     override suspend fun upsertHexDay(day: HexDay): Long =
         hexDao.insertDay(day.toEntity())
 
+    override suspend fun updatePartyLocation(mapId: Long, q: Int, r: Int) =
+        hexDao.updatePartyLocation(mapId, q, r)
+
     override suspend fun deleteHexMap(id: Long) =
         hexDao.deleteMap(id)
 

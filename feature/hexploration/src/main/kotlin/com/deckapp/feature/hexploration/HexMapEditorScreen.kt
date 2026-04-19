@@ -23,7 +23,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.GridOn
 import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.Notes
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
@@ -39,6 +41,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -84,6 +87,30 @@ fun HexMapEditorScreen(
         )
     }
 
+    if (uiState.showAddBrushDialog) {
+        AddBrushDialog(
+            onConfirm = viewModel::addCustomBrush,
+            onDismiss = viewModel::dismissAddBrushDialog
+        )
+    }
+
+    var showMapSettingsSheet by remember { mutableStateOf(false) }
+    val mapSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    if (showMapSettingsSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showMapSettingsSheet = false },
+            sheetState = mapSheetState,
+            dragHandle = { BottomSheetDefaults.DragHandle() }
+        ) {
+            MapSettingsSheet(
+                mapNotes = uiState.mapNotes,
+                maxActivitiesPerDay = uiState.maxActivitiesPerDay,
+                onNotesChange = viewModel::updateMapNotes,
+                onMaxActivitiesChange = viewModel::updateMaxActivities
+            )
+        }
+    }
+
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     if (uiState.showTileSheet && uiState.selectedTile != null) {
         ModalBottomSheet(
@@ -111,6 +138,17 @@ fun HexMapEditorScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { showMapSettingsSheet = true }) {
+                        Icon(Icons.Default.Notes, contentDescription = "Configuración del mapa")
+                    }
+                    IconButton(onClick = viewModel::toggleCoordinates) {
+                        Icon(
+                            Icons.Default.GridOn,
+                            contentDescription = "Toggle coordenadas",
+                            tint = if (uiState.showCoordinates) MaterialTheme.colorScheme.primary
+                                   else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                     IconButton(onClick = viewModel::addRing) {
                         Icon(Icons.Default.Layers, contentDescription = "Agregar Anillo")
                     }
@@ -134,7 +172,8 @@ fun HexMapEditorScreen(
             TerrainBrushToolbar(
                 brushes = uiState.brushes,
                 activeBrush = uiState.activeBrush,
-                onBrushSelect = viewModel::selectBrush
+                onBrushSelect = viewModel::selectBrush,
+                onAddBrush = viewModel::showAddBrushDialog
             )
         }
     ) { padding ->
@@ -153,6 +192,7 @@ fun HexMapEditorScreen(
             onTileClick = viewModel::onTileClick,
             onTileLongPress = viewModel::onTileLongPress,
             onEmptySpaceClick = viewModel::onEmptySpaceClick,
+            showCoordinates = uiState.showCoordinates,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
@@ -164,7 +204,8 @@ fun HexMapEditorScreen(
 private fun TerrainBrushToolbar(
     brushes: List<TerrainBrush>,
     activeBrush: TerrainBrush,
-    onBrushSelect: (TerrainBrush) -> Unit
+    onBrushSelect: (TerrainBrush) -> Unit,
+    onAddBrush: () -> Unit
 ) {
     LazyRow(
         modifier = Modifier
@@ -174,6 +215,29 @@ private fun TerrainBrushToolbar(
         contentPadding = PaddingValues(horizontal = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        item {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable { onAddBrush() }
+                    .padding(6.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Nuevo terreno",
+                        modifier = Modifier.size(18.dp))
+                }
+                Spacer(Modifier.height(4.dp))
+                Text("Nuevo", style = MaterialTheme.typography.labelSmall, maxLines = 1)
+            }
+        }
         items(brushes) { brush ->
             val isActive = brush == activeBrush
             Column(
@@ -295,6 +359,107 @@ private fun TileDetailSheet(
             }
         }
     }
+}
+
+@Composable
+private fun MapSettingsSheet(
+    mapNotes: String,
+    maxActivitiesPerDay: Int,
+    onNotesChange: (String) -> Unit,
+    onMaxActivitiesChange: (Int) -> Unit
+) {
+    var notes by remember(mapNotes) { mutableStateOf(mapNotes) }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 32.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text("Configuración del mapa", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        HorizontalDivider()
+        Text("Actividades por día: $maxActivitiesPerDay", style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Slider(
+            value = maxActivitiesPerDay.toFloat(),
+            onValueChange = { onMaxActivitiesChange(it.toInt()) },
+            valueRange = 1f..30f,
+            steps = 28,
+            modifier = Modifier.fillMaxWidth()
+        )
+        HorizontalDivider()
+        OutlinedTextField(
+            value = notes,
+            onValueChange = { notes = it },
+            label = { Text("Notas del mapa (DM)") },
+            modifier = Modifier.fillMaxWidth(),
+            minLines = 3,
+            maxLines = 8
+        )
+        TextButton(onClick = { onNotesChange(notes) }) { Text("Guardar notas") }
+    }
+}
+
+@Composable
+private fun AddBrushDialog(
+    onConfirm: (label: String, cost: Int, color: Long) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var label by remember { mutableStateOf("") }
+    var cost by remember { mutableStateOf(1) }
+    var selectedColorIndex by remember { mutableStateOf(0) }
+    val paletteColors = listOf(
+        0xFF7CB87BL, 0xFF4A90D9L, 0xFF8B7355L, 0xFF9E9E9EL,
+        0xFFD4C875L, 0xFF3A7D44L, 0xFF8B0000L, 0xFF9370DBL,
+        0xFFFF6B35L, 0xFF2C3E50L
+    )
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Nuevo terreno") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = label,
+                    onValueChange = { label = it },
+                    label = { Text("Nombre del terreno") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Text("Coste de movimiento: $cost", style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Slider(
+                    value = cost.toFloat(),
+                    onValueChange = { cost = it.toInt() },
+                    valueRange = 0f..3f,
+                    steps = 2,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Text("Color:", style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    paletteColors.forEachIndexed { idx, color ->
+                        Box(
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clip(CircleShape)
+                                .background(Color(color))
+                                .then(if (idx == selectedColorIndex)
+                                    Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                                else Modifier)
+                                .clickable { selectedColorIndex = idx }
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm(label, cost, paletteColors[selectedColorIndex]) },
+                enabled = label.isNotBlank()
+            ) { Text("Agregar") }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
+    )
 }
 
 @Composable

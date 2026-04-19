@@ -18,6 +18,11 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.TextMeasurer
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.sp
 import com.deckapp.core.model.HexPoi
 import com.deckapp.core.model.HexTile
 import com.deckapp.core.model.PoiType
@@ -44,8 +49,10 @@ fun HexGridCanvas(
     onEmptySpaceClick: ((Int, Int) -> Unit)? = null,
     partyLocation: Pair<Int, Int>? = null,
     onMoveParty: ((Int, Int) -> Unit)? = null,
+    showCoordinates: Boolean = false,
     modifier: Modifier = Modifier
 ) {
+    val textMeasurer = rememberTextMeasurer()
     var scale by remember { mutableFloatStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
     
@@ -123,6 +130,15 @@ fun HexGridCanvas(
                 isSelected = isSelected,
                 pois = tilePois
             )
+
+            val showLabel = tile.terrainLabel.isNotBlank() &&
+                (mode == HexCanvasMode.DESIGN || tile.isExplored)
+            if (showLabel) {
+                drawTerrainLabel(tile.terrainLabel, screenCenter, hexSize, textMeasurer, scale)
+            }
+            if (showCoordinates && (mode == HexCanvasMode.DESIGN || tile.isExplored)) {
+                drawTerrainLabel("${tile.q},${tile.r}", screenCenter.copy(y = screenCenter.y - hexSize * 0.5f), hexSize * 0.7f, textMeasurer, scale)
+            }
         }
 
         // Draw Party Token
@@ -304,6 +320,25 @@ private fun DrawScope.drawHexTile(
             )
         }
     }
+}
+
+private fun DrawScope.drawTerrainLabel(
+    label: String,
+    center: Offset,
+    hexSize: Float,
+    textMeasurer: TextMeasurer,
+    scale: Float
+) {
+    val fontSize = (hexSize * 0.14f).coerceIn(8f, 18f).sp
+    val measured = textMeasurer.measure(label, TextStyle(fontSize = fontSize, color = Color.Black.copy(alpha = 0.5f)))
+    val textX = center.x - measured.size.width / 2f
+    val textY = center.y + hexSize * 0.42f - measured.size.height / 2f
+    drawText(
+        textMeasurer = textMeasurer,
+        text = label,
+        topLeft = Offset(textX, textY),
+        style = TextStyle(fontSize = fontSize, color = Color.White.copy(alpha = 0.85f))
+    )
 }
 
 private fun DrawScope.drawTerrainDecoration(tile: HexTile, center: Offset, hexSize: Float) {

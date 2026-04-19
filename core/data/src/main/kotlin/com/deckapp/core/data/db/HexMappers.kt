@@ -21,6 +21,8 @@ fun HexMapEntity.toDomain() = HexMap(
     hexStyle = runCatching { HexStyle.valueOf(hexStyle) }.getOrDefault(HexStyle.FLAT_TOP),
     partyQ = partyQ,
     partyR = partyR,
+    maxActivitiesPerDay = maxActivitiesPerDay,
+    mapNotes = mapNotes,
     createdAt = createdAt
 )
 
@@ -33,6 +35,8 @@ fun HexMap.toEntity() = HexMapEntity(
     hexStyle = hexStyle.name,
     partyQ = partyQ,
     partyR = partyR,
+    maxActivitiesPerDay = maxActivitiesPerDay,
+    mapNotes = mapNotes,
     createdAt = createdAt
 )
 

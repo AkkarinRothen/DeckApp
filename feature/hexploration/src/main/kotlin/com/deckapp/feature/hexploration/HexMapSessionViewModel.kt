@@ -6,9 +6,12 @@ import androidx.lifecycle.viewModelScope
 import com.deckapp.core.domain.repository.SessionRepository
 import com.deckapp.core.domain.usecase.RollTableUseCase
 import com.deckapp.core.domain.usecase.hex.ExploreHexUseCase
+import com.deckapp.core.domain.usecase.hex.GetHexDaysUseCase
 import com.deckapp.core.domain.usecase.hex.GetHexMapWithTilesUseCase
 import com.deckapp.core.domain.usecase.hex.LinkHexMapToSessionUseCase
+import com.deckapp.core.domain.usecase.hex.LogHexActivityUseCase
 import com.deckapp.core.domain.usecase.hex.MapHexUseCase
+import com.deckapp.core.domain.usecase.hex.MovePartyUseCase
 import com.deckapp.core.domain.usecase.hex.ReconnoiterHexUseCase
 import com.deckapp.core.domain.usecase.hex.StartNewHexDayUseCase
 import com.deckapp.core.model.HexDay
@@ -34,6 +37,8 @@ data class HexMapSessionUiState(
     val pois: List<HexPoi> = emptyList(),
     val currentDay: HexDay? = null,
     val activitiesUsedToday: Int = 0,
+    val maxActivitiesPerDay: Int = 8,
+    val todayLog: List<com.deckapp.core.model.HexActivityEntry> = emptyList(),
     val partyLocation: Pair<Int, Int>? = null,
     val selectedTile: HexTile? = null,
     val showTileSheet: Boolean = false,
@@ -47,10 +52,13 @@ data class HexMapSessionUiState(
 class HexMapSessionViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getHexMapWithTilesUseCase: GetHexMapWithTilesUseCase,
+    private val getHexDaysUseCase: GetHexDaysUseCase,
     private val exploreHexUseCase: ExploreHexUseCase,
     private val reconnoiterHexUseCase: ReconnoiterHexUseCase,
     private val mapHexUseCase: MapHexUseCase,
     private val startNewHexDayUseCase: StartNewHexDayUseCase,
+    private val movePartyUseCase: MovePartyUseCase,
+    private val logHexActivityUseCase: LogHexActivityUseCase,
     private val linkHexMapToSessionUseCase: LinkHexMapToSessionUseCase,
     private val rollTableUseCase: RollTableUseCase,
     private val sessionRepository: SessionRepository
@@ -75,6 +83,7 @@ class HexMapSessionViewModel @Inject constructor(
                     mapName = mapData.map.name,
                     tiles = mapData.tiles,
                     pois = mapData.pois,
+                    maxActivitiesPerDay = mapData.map.maxActivitiesPerDay,
                     partyLocation = if (mapData.map.partyQ != null && mapData.map.partyR != null)
                         mapData.map.partyQ!! to mapData.map.partyR!!
                     else null,
@@ -97,11 +106,16 @@ class HexMapSessionViewModel @Inject constructor(
     }
 
     private fun observeDays() {
-        // We get days via the HexRepository indirectly — inject it as a flow from the use case
-        // Since GetHexMapWithTilesUseCase only exposes map+tiles+pois, we need HexRepository.
-        // The cleanest approach per architecture: add a GetHexDaysUseCase or use the repository.
-        // For now, StartNewHexDayUseCase and activity logging handle state changes,
-        // and we observe via a dedicated flow if needed. Days are reflected after each action.
+        getHexDaysUseCase(mapId)
+            .onEach { days ->
+                val latest = days.maxByOrNull { it.dayNumber }
+                _uiState.update { it.copy(
+                    currentDay = latest,
+                    activitiesUsedToday = latest?.activitiesLog?.size ?: 0,
+                    todayLog = latest?.activitiesLog ?: emptyList()
+                ) }
+            }
+            .launchIn(viewModelScope)
     }
 
     fun selectTile(tile: HexTile) {
@@ -114,30 +128,33 @@ class HexMapSessionViewModel @Inject constructor(
 
     fun explore(tile: HexTile) {
         if (tile.isExplored) return
+        val state = _uiState.value
+        if (state.activitiesUsedToday >= state.maxActivitiesPerDay) return
         viewModelScope.launch {
             val dayId = ensureDayExists()
             exploreHexUseCase(tile, dayId)
-            _uiState.update { it.copy(activitiesUsedToday = it.activitiesUsedToday + 1) }
         }
         dismissTileSheet()
     }
 
     fun reconnoiter(tile: HexTile) {
         if (tile.isReconnoitered) return
+        val state = _uiState.value
+        if (state.activitiesUsedToday >= state.maxActivitiesPerDay) return
         viewModelScope.launch {
             val dayId = ensureDayExists()
             reconnoiterHexUseCase(tile, dayId)
-            _uiState.update { it.copy(activitiesUsedToday = it.activitiesUsedToday + tile.terrainCost.coerceAtLeast(1)) }
         }
         dismissTileSheet()
     }
 
     fun mapTile(tile: HexTile) {
         if (tile.isMapped || !tile.isReconnoitered) return
+        val state = _uiState.value
+        if (state.activitiesUsedToday >= state.maxActivitiesPerDay) return
         viewModelScope.launch {
             val dayId = ensureDayExists()
             mapHexUseCase(tile, dayId)
-            _uiState.update { it.copy(activitiesUsedToday = it.activitiesUsedToday + 1) }
         }
         dismissTileSheet()
     }
@@ -161,13 +178,21 @@ class HexMapSessionViewModel @Inject constructor(
     }
 
     fun moveParty(q: Int, r: Int) {
-        val targetTile = _uiState.value.tiles.find { it.q == q && it.r == r }
-        if (targetTile != null) {
-            viewModelScope.launch {
-                // For now, update local state. 
-                // In a full implementation, we would persist this via a UseCase.
-                _uiState.update { it.copy(partyLocation = q to r) }
-            }
+        val state = _uiState.value
+        if (state.tiles.none { it.q == q && it.r == r }) return
+        viewModelScope.launch {
+            movePartyUseCase(mapId, q, r)
+            _uiState.update { it.copy(partyLocation = q to r) }
+            val dayId = ensureDayExists()
+            logHexActivityUseCase(
+                dayId,
+                com.deckapp.core.model.HexActivityEntry(
+                    type = com.deckapp.core.model.HexActivityType.TRAVEL,
+                    description = "Viaje a ($q, $r)",
+                    tileQ = q,
+                    tileR = r
+                )
+            )
         }
     }
 

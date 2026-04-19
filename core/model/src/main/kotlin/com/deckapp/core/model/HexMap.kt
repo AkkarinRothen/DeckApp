@@ -9,6 +9,8 @@ data class HexMap(
     val hexStyle: HexStyle = HexStyle.FLAT_TOP,
     val partyQ: Int? = null,
     val partyR: Int? = null,
+    val maxActivitiesPerDay: Int = 8,
+    val mapNotes: String = "",
     val createdAt: Long = System.currentTimeMillis()
 )
 
