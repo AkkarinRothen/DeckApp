@@ -329,10 +329,26 @@ private fun DrawScope.drawTerrainLabel(
     textMeasurer: TextMeasurer,
     scale: Float
 ) {
+    if (hexSize < 20f) return // Don't draw labels if too small to avoid crash and clutter
+
     val fontSize = (hexSize * 0.14f).coerceIn(8f, 18f).sp
-    val measured = textMeasurer.measure(label, TextStyle(fontSize = fontSize, color = Color.Black.copy(alpha = 0.5f)))
-    val textX = center.x - measured.size.width / 2f
-    val textY = center.y + hexSize * 0.42f - measured.size.height / 2f
+    
+    // Safety check for measurements
+    val measured = try {
+        textMeasurer.measure(label, TextStyle(fontSize = fontSize))
+    } catch (e: Exception) {
+        return
+    }
+
+    val textWidth = measured.size.width.toFloat()
+    val textHeight = measured.size.height.toFloat()
+    
+    val textX = center.x - textWidth / 2f
+    val textY = center.y + hexSize * 0.42f - textHeight / 2f
+    
+    // Final safety: don't draw if coordinates are NaN or Infinite
+    if (textX.isNaN() || textY.isNaN()) return
+
     drawText(
         textMeasurer = textMeasurer,
         text = label,
