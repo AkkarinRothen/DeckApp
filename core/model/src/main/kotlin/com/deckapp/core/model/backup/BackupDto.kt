@@ -59,7 +59,7 @@ data class FullBackupDto(
 @Serializable data class NpcTagBackupDto(val npcId: Long = 0L, val tagId: Long = 0L)
 
 @Serializable data class WikiCategoryBackupDto(val id: Long = 0L, val name: String = "", val iconName: String = "folder")
-@Serializable data class WikiEntryBackupDto(val id: Long = 0L, val title: String = "", val content: String = "", val categoryId: Long = 0L, val imagePath: String? = null, val lastUpdated: Long = 0L)
+@Serializable data class WikiEntryBackupDto(val id: Long = 0L, val title: String = "", val content: String = "", val categoryId: Long = 0L, val imagePath: String? = null, val isPinned: Boolean = false, val lastUpdated: Long = 0L)
 
 @Serializable data class ReferenceTableBackupDto(val id: Long = 0L, val name: String = "", val description: String = "", val gameSystem: String = "General", val category: String = "General", val columnsJson: String = "[]", val isPinned: Boolean = false, val sortOrder: Int = 0, val createdAt: Long = 0L, val sourcePack: String? = null)
 @Serializable data class ReferenceRowBackupDto(val id: Long = 0L, val tableId: Long = 0L, val cellsJson: String = "[]", val sortOrder: Int = 0)

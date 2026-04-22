@@ -13,6 +13,8 @@ import javax.inject.Inject
 data class WikiUiState(
     val categories: List<WikiCategory> = emptyList(),
     val entries: List<WikiEntry> = emptyList(),
+    val pinnedEntries: List<WikiEntry> = emptyList(),
+    val recentEntries: List<WikiEntry> = emptyList(),
     val selectedCategoryId: Long? = null,
     val searchQuery: String = "",
     val isLoading: Boolean = true
@@ -32,11 +34,15 @@ class WikiViewModel @Inject constructor(
             if (id != null) wikiRepository.getEntriesByCategory(id)
             else flowOf(emptyList())
         },
+        wikiRepository.getPinnedEntries(),
+        wikiRepository.getRecentEntries(5),
         _searchQuery
-    ) { categories, entries, query ->
+    ) { categories, entries, pinned, recent, query ->
         WikiUiState(
             categories = categories,
             entries = if (query.isBlank()) entries else emptyList(), // Search replaces entry list
+            pinnedEntries = pinned,
+            recentEntries = recent,
             selectedCategoryId = _selectedCategoryId.value,
             searchQuery = query,
             isLoading = false

@@ -9,4 +9,5 @@ data class ReferenceTableAiResult(
 
 interface AiReferenceRepository {
     suspend fun recognizeReferenceTableFromImage(bitmap: Bitmap, apiKey: String): ReferenceTableAiResult
+    suspend fun extractTextFromImage(bitmap: Bitmap, apiKey: String): String
 }

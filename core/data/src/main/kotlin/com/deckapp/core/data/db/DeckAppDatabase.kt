@@ -45,9 +45,16 @@ import androidx.room.RoomDatabase
         HexMapEntity::class,
         HexTileEntity::class,
         HexPoiEntity::class,
-        HexDayEntity::class
+        HexDayEntity::class,
+        MythicSessionEntity::class,
+        MythicCharacterEntity::class,
+        MythicThreadEntity::class,
+        MythicRollEntity::class,
+        ManualEntity::class,
+        ManualBookmarkEntity::class,
+        SceneEntity::class
     ],
-    version = 35,
+    version = 40,
     exportSchema = true
 )
 abstract class DeckAppDatabase : RoomDatabase() {
@@ -70,6 +77,9 @@ abstract class DeckAppDatabase : RoomDatabase() {
     abstract fun referenceTableDao(): ReferenceTableDao
     abstract fun hexDao(): HexDao
     abstract fun systemRuleDao(): SystemRuleDao
+    abstract fun mythicDao(): MythicDao
+    abstract fun manualDao(): ManualDao
+    abstract fun sceneDao(): SceneDao
     abstract fun backupDao(): com.deckapp.core.data.db.backup.BackupDao
 
     companion object {
@@ -94,11 +104,16 @@ abstract class DeckAppDatabase : RoomDatabase() {
         val MIGRATION_26_27 = com.deckapp.core.data.db.MIGRATION_26_27
         val MIGRATION_27_28 = com.deckapp.core.data.db.MIGRATION_27_28
         val MIGRATION_28_29 = com.deckapp.core.data.db.MIGRATION_28_29
-        val MIGRATION_29_30 = com.deckapp.core.data.db.MIGRATION_29_30
+        val MIGRATION_29_30 = com.deckapp.core.data.db.MIGRATION_30_31
         val MIGRATION_30_31 = com.deckapp.core.data.db.MIGRATION_30_31
         val MIGRATION_31_32 = com.deckapp.core.data.db.MIGRATION_31_32
         val MIGRATION_32_33 = com.deckapp.core.data.db.MIGRATION_32_33
         val MIGRATION_33_34 = com.deckapp.core.data.db.MIGRATION_33_34
         val MIGRATION_34_35 = com.deckapp.core.data.db.MIGRATION_34_35
+        val MIGRATION_35_36 = com.deckapp.core.data.db.MIGRATION_35_36
+        val MIGRATION_36_37 = com.deckapp.core.data.db.MIGRATION_36_37
+        val MIGRATION_37_38 = com.deckapp.core.data.db.MIGRATION_37_38
+        val MIGRATION_38_39 = com.deckapp.core.data.db.MIGRATION_38_39
+        val MIGRATION_39_40 = com.deckapp.core.data.db.MIGRATION_39_40
     }
 }

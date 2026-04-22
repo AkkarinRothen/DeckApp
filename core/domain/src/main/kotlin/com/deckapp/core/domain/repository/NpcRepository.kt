@@ -10,6 +10,9 @@ interface NpcRepository {
     suspend fun saveNpc(npc: Npc): Long
     suspend fun deleteNpc(id: Long)
     
-    // Almacenamiento de imagen
+    // Almacenamiento de multimedia
     suspend fun saveNpcAvatar(uri: android.net.Uri, npcId: Long): String?
+    suspend fun saveNpcVoiceSample(tempFile: java.io.File, npcId: Long): String?
+    suspend fun saveNpcVoiceSampleFromUri(uri: android.net.Uri, npcId: Long): String?
+    suspend fun deleteNpcVoiceSample(npcId: Long)
 }

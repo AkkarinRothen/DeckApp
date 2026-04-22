@@ -47,6 +47,8 @@ interface TableImportEntryPoint {
     fun transcribeTableWithAiUseCase(): TranscribeTableWithAiUseCase
     fun recognizeTableStreamingUseCase(): RecognizeTableStreamingUseCase
     fun tableRepository(): TableRepository
+    fun sessionRepository(): com.deckapp.core.domain.repository.SessionRepository
+    fun cardRepository(): com.deckapp.core.domain.repository.CardRepository
     fun recentFileRepository(): RecentFileRepository
     fun fileRepository(): FileRepository
     fun settingsRepository(): SettingsRepository
@@ -55,6 +57,7 @@ interface TableImportEntryPoint {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TableImportScreen(
+    sessionId: Long? = null,
     onBack: () -> Unit,
     onNavigateToTable: (Long) -> Unit
 ) {
@@ -63,15 +66,18 @@ fun TableImportScreen(
     
     val viewModel: TableImportViewModel = viewModel(
         factory = TableImportViewModel.Factory(
+            sessionId,
             entryPoint.renderPdfPageUseCase(),
             entryPoint.importTableUseCase(),
             entryPoint.readTextFromUriUseCase(),
             entryPoint.tableRepository(),
+            entryPoint.sessionRepository(),
             entryPoint.transcribeTableWithAiUseCase(),
             entryPoint.recognizeTableStreamingUseCase(),
             entryPoint.recentFileRepository(),
             entryPoint.fileRepository(),
-            entryPoint.settingsRepository()
+            entryPoint.settingsRepository(),
+            entryPoint.cardRepository()
         )
     )
     
@@ -220,11 +226,13 @@ fun TableImportScreen(
                         TableReviewView(
                             entries = uiState.editableEntries,
                             tableName = uiState.tableNameDraft,
-                            tableTag = uiState.tableTagDraft,
+                            tableTags = uiState.tableTagsDraft,
+                            allTags = uiState.allTags,
                             tableFormula = uiState.tableFormulaDraft,
                             onEntryChange = { idx, entry -> viewModel.updateEntry(idx, entry) },
                             onNameChange = { viewModel.setDraftName(it) },
-                            onTagChange = { viewModel.setDraftTag(it) },
+                            onToggleTag = { viewModel.toggleTag(it) },
+                            onCreateTag = { viewModel.createAndAddTag(it) },
                             onFormulaChange = { viewModel.setDraftFormula(it) },
                             onConfirm = { viewModel.nextTable() },
                             validationResult = uiState.validationResult,

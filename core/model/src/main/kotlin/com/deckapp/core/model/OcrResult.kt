@@ -12,6 +12,11 @@ data class OcrBlock(
     val confidence: Float
 )
 
+data class OcrResult(
+    val text: String,
+    val confidence: Float
+)
+
 /**
  * Rectángulo en coordenadas Float para preservar precisión al escalar bitmaps.
  */

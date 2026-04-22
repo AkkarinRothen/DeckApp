@@ -5,9 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.deckapp.core.domain.repository.CardRepository
 import com.deckapp.core.domain.repository.EncounterRepository
+import com.deckapp.core.domain.repository.NpcRepository
 import com.deckapp.core.domain.repository.SessionRepository
 import com.deckapp.core.domain.usecase.*
+import com.deckapp.core.domain.usecase.hex.*
 import com.deckapp.core.model.*
+import com.deckapp.feature.hexploration.HexMapSessionUiState
+import com.deckapp.feature.mythic.MythicSessionUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -59,8 +63,33 @@ data class SessionUiState(
     val isSavingNotes: Boolean = false,
     // Sprint 17 — Participantes temporales (PJs)
     val playerParticipants: List<PlayerInitiativeParticipant> = emptyList(),
-    val isSimplifiedMode: Boolean = false
+    val isSimplifiedMode: Boolean = false,
+    val linkedMythicSession: MythicSession? = null,
+    val allMythicSessions: List<MythicSession> = emptyList(),
+    // Universal Hub - Sidebar State
+    val activeLeftSidebar: SidebarTool = SidebarTool.NONE,
+    val activeRightSidebar: SidebarTool = SidebarTool.NONE,
+    val mainViewMode: SessionViewMode = SessionViewMode.MAP,
+    val linkedHexMapId: Long? = null,
+    val sessionId: Long = 0,
+    // Module Aggregate States
+    val hplState: HexMapSessionUiState? = null,
+    val mythicState: MythicSessionUiState? = null,
+    // Sprint 18 — NPCs & Voice
+    val npcs: List<Npc> = emptyList(),
+    val playingNpcVoicePath: String? = null,
+    // Session Planner
+    val scenes: List<Scene> = emptyList(),
+    val wikiEntries: List<WikiEntry> = emptyList()
 )
+
+enum class SidebarTool {
+    NONE, TABLES, DECKS, COMBAT, NOTES, JOURNAL, MYTHIC_CONTEXT, WIKI, NPCS, PLAN
+}
+
+enum class SessionViewMode {
+    MAP, MYTHIC_LOG
+}
 
 
 
@@ -69,8 +98,11 @@ data class SessionUiState(
 class SessionViewModel @Inject constructor(
     private val sessionRepository: SessionRepository,
     private val cardRepository: CardRepository,
+    private val mythicRepository: com.deckapp.core.domain.repository.MythicRepository,
     private val tableRepository: com.deckapp.core.domain.repository.TableRepository,
     private val encounterRepository: EncounterRepository,
+    private val npcRepository: NpcRepository,
+    private val wikiRepository: com.deckapp.core.domain.repository.WikiRepository,
     private val referenceRepository: com.deckapp.core.domain.repository.ReferenceRepository,
     private val drawCardUseCase: DrawCardUseCase,
     private val discardCardUseCase: DiscardCardUseCase,
@@ -84,16 +116,26 @@ class SessionViewModel @Inject constructor(
     private val calculateInitiativeOrderUseCase: CalculateInitiativeOrderUseCase,
     private val toggleConditionUseCase: ToggleConditionUseCase,
     private val cleanupCombatUseCase: CleanupCombatUseCase,
+    private val rollTableUseCase: RollTableUseCase,
     private val settingsRepository: com.deckapp.core.domain.repository.SettingsRepository,
+    // HPL & Mythic Integration
+    private val getHexMapWithTilesUseCase: GetHexMapWithTilesUseCase,
+    private val getHexDaysUseCase: GetHexDaysUseCase,
+    private val rollMythicFateUseCase: com.deckapp.core.domain.usecase.mythic.RollMythicFateUseCase,
+    private val sceneCheckUseCase: com.deckapp.core.domain.usecase.mythic.SceneCheckUseCase,
+    private val hexRepository: com.deckapp.core.domain.repository.HexRepository,
+    @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+
+    private val voicePlayer by lazy { com.deckapp.feature.npcs.AudioPlayer(context) }
 
     private val sessionId: Long = checkNotNull(savedStateHandle["sessionId"])
     private var peekCardId: Long?
         get() = savedStateHandle.get<Long>("peekCardId")
         set(value) { savedStateHandle["peekCardId"] = value }
 
-    private val _uiState = MutableStateFlow(SessionUiState())
+    private val _uiState = MutableStateFlow(SessionUiState(sessionId = sessionId))
     val uiState: StateFlow<SessionUiState> = _uiState.asStateFlow()
 
     // Un flujo que emite la hora actual cada minuto para cálculos reactivos
@@ -240,6 +282,115 @@ class SessionViewModel @Inject constructor(
 
         // Cargar estado de modo simplificado
         _uiState.update { it.copy(isSimplifiedMode = settingsRepository.getSimplifiedModeEnabled()) }
+
+        // Vinculación Mythic
+        viewModelScope.launch {
+            sessionRepository.getSessionById(sessionId)
+                .flatMapLatest { session ->
+                    if (session?.linkedMythicSessionId != null) {
+                        mythicRepository.getSessionById(session.linkedMythicSessionId!!)
+                    } else flowOf(null)
+                }
+                .collect { mythicSession ->
+                    _uiState.update { it.copy(linkedMythicSession = mythicSession) }
+                }
+        }
+
+        viewModelScope.launch {
+            mythicRepository.getSessions().collect { sessions ->
+                _uiState.update { it.copy(allMythicSessions = sessions) }
+            }
+        }
+
+        // Recuperar mapa vinculado si existe (buscando mapas que pertenezcan a esta sesión)
+        viewModelScope.launch {
+            hexRepository.getHexMaps()
+                .flatMapLatest { maps ->
+                    val linkedMap = maps.find { it.sessionId == sessionId }
+                    if (linkedMap != null) {
+                        getHexMapWithTilesUseCase(linkedMap.id)
+                            .map { mapData -> mapData to linkedMap.id }
+                    } else flowOf(null to null)
+                }
+                .collect { (mapData, mapId) ->
+                    if (mapData != null && mapId != null) {
+                        _uiState.update { it.copy(
+                            linkedHexMapId = mapId,
+                            hplState = HexMapSessionUiState(
+                                mapId = mapId,
+                                mapName = mapData.map.name,
+                                tiles = mapData.tiles,
+                                pois = mapData.pois,
+                                isLoading = false
+                            )
+                        ) }
+                    } else {
+                        _uiState.update { it.copy(linkedHexMapId = null, hplState = null) }
+                    }
+                }
+        }
+
+        // Recuperar Mythic vinculado y sus datos (Personajes, Hilos, Rolls)
+        viewModelScope.launch {
+            sessionRepository.getSessionById(sessionId)
+                .flatMapLatest { session ->
+                    if (session?.linkedMythicSessionId != null) {
+                        val mythicId = session.linkedMythicSessionId!!
+                        combine(
+                            mythicRepository.getCharacters(mythicId),
+                            mythicRepository.getThreads(mythicId),
+                            mythicRepository.getRolls(mythicId)
+                        ) { chars, threads, rolls ->
+                            Triple(chars, threads, rolls)
+                        }.map { data -> data to mythicId }
+                    } else flowOf(null to null)
+                }
+                .collect { (data, mythicId) ->
+                    if (data != null && mythicId != null) {
+                        val (chars, threads, rolls) = data
+                        _uiState.update { state ->
+                            state.copy(
+                                mythicState = MythicSessionUiState(
+                                    session = state.linkedMythicSession,
+                                    characters = chars,
+                                    threads = threads,
+                                    rolls = rolls,
+                                    isLoading = false
+                                )
+                            )
+                        }
+                    } else {
+                        _uiState.update { it.copy(mythicState = null) }
+                    }
+                }
+        }
+
+        // Recuperar NPCs de la biblioteca
+        viewModelScope.launch {
+            npcRepository.getAllNpcs().collect { npcs ->
+                _uiState.update { it.copy(npcs = npcs) }
+            }
+        }
+
+        // Recuperar Escenas del planificador para seguimiento en vivo
+        viewModelScope.launch {
+            sessionRepository.getScenesForSession(sessionId).collect { scenes ->
+                _uiState.update { it.copy(scenes = scenes) }
+            }
+        }
+
+        // Recuperar entradas de la Wiki para detección de Smart Tags
+        viewModelScope.launch {
+            wikiRepository.getAllEntries().collect { entries ->
+                _uiState.update { it.copy(wikiEntries = entries) }
+            }
+        }
+    }
+
+    fun linkMythicSession(mythicSessionId: Long?) {
+        viewModelScope.launch {
+            sessionRepository.updateLinkedMythicSession(sessionId, mythicSessionId)
+        }
     }
 
     /** Selecciona el mazo activo para la siguiente acción ROBAR. */
@@ -250,6 +401,54 @@ class SessionViewModel @Inject constructor(
     /** Actualiza el tab activo del workspace de sesión. */
     fun setActiveTab(tab: Int) {
         _uiState.update { it.copy(activeTab = tab) }
+    }
+
+    fun toggleLeftSidebar(tool: SidebarTool) {
+        _uiState.update { state ->
+            val next = if (state.activeLeftSidebar == tool) SidebarTool.NONE else tool
+            state.copy(activeLeftSidebar = next)
+        }
+    }
+
+    fun toggleRightSidebar(tool: SidebarTool) {
+        _uiState.update { state ->
+            val next = if (state.activeRightSidebar == tool) SidebarTool.NONE else tool
+            state.copy(activeRightSidebar = next)
+        }
+    }
+
+    fun setMainViewMode(mode: SessionViewMode) {
+        _uiState.update { it.copy(mainViewMode = mode) }
+    }
+
+    // --- Mythic Unified Actions ---
+    
+    fun performMythicFateCheck(question: String, prob: ProbabilityLevel) {
+        val mythicId = _uiState.value.linkedMythicSession?.id ?: return
+        viewModelScope.launch {
+            rollMythicFateUseCase(mythicId, question, prob)
+        }
+    }
+
+    fun quickMythicCheck() = performMythicFateCheck("Consulta rápida", ProbabilityLevel.FIFTY_FIFTY)
+
+    fun updateMythicChaos(delta: Int) {
+        val session = _uiState.value.linkedMythicSession ?: return
+        val next = (session.chaosFactor + delta).coerceIn(1, 9)
+        viewModelScope.launch {
+            mythicRepository.updateChaosFactor(session.id, next)
+        }
+    }
+
+    // --- HPL Unified Actions ---
+
+    fun startHplNewDay() {
+        val mapId = _uiState.value.linkedHexMapId ?: return
+        viewModelScope.launch {
+            // Logica básica de nuevo día
+            val newDayId = com.deckapp.core.domain.usecase.hex.StartNewHexDayUseCase(hexRepository)(mapId)
+            // (En una implementación real usaríamos el UseCase inyectado pero para demo basta así)
+        }
     }
 
     fun openResourceManager() = _uiState.update { it.copy(showResourceManager = true) }
@@ -300,8 +499,13 @@ class SessionViewModel @Inject constructor(
         _uiState.update { it.copy(selectedDeckId = stackId) }
     }
 
-    /** Stub — lógica de tirada activa implementada en Sprint 5. */
-    fun rollActiveTable() { /* Implementado en feature:tables */ }
+    /** Tira una tabla aleatoria vinculada a un recurso (ej: carta) y muestra el resultado. */
+    fun rollActiveTable(tableId: Long) {
+        viewModelScope.launch {
+            val result = rollTableUseCase(tableId, sessionId)
+            _uiState.update { it.copy(snackbarMessage = "${result.tableName}: ${result.resolvedText}") }
+        }
+    }
 
     /** Abre el dialog de nota rápida. */
     fun showQuickNote() {
@@ -626,6 +830,31 @@ class SessionViewModel @Inject constructor(
         _uiState.update { it.copy(errorMessage = null) }
     }
 
+    // --- NPCs & Voice ---
+
+    fun playNpcVoice(path: String) {
+        if (_uiState.value.playingNpcVoicePath == path) {
+            stopNpcVoice()
+            return
+        }
+        
+        stopNpcVoice()
+        _uiState.update { it.copy(playingNpcVoicePath = path) }
+        voicePlayer.playPath(path) {
+            _uiState.update { it.copy(playingNpcVoicePath = null) }
+        }
+    }
+
+    fun stopNpcVoice() {
+        voicePlayer.stop()
+        _uiState.update { it.copy(playingNpcVoicePath = null) }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        voicePlayer.stop()
+    }
+
     // --- Combat Actions ---
 
     fun applyDamage(creatureId: Long, delta: Int) {
@@ -789,5 +1018,20 @@ class SessionViewModel @Inject constructor(
                 _uiState.update { it.copy(errorMessage = "Error al exportar log: ${e.message}") }
             }
         }
+    }
+    fun toggleSceneCompletion(sceneId: Long, completed: Boolean) {
+        viewModelScope.launch {
+            sessionRepository.updateSceneCompletion(sceneId, completed)
+        }
+    }
+
+    // --- Scene Triggers (D-2+) ---
+
+    fun rollSceneTable(tableId: Long) {
+        rollActiveTable(tableId)
+    }
+
+    fun drawSceneCard(deckId: Long) {
+        drawCardFromDeck(deckId)
     }
 }

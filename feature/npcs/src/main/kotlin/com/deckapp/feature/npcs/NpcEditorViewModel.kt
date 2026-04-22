@@ -13,13 +13,30 @@ import com.deckapp.core.model.Npc
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
+import java.io.File
 
 @HiltViewModel
 class NpcEditorViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getNpcByIdUseCase: GetNpcByIdUseCase,
-    private val saveNpcUseCase: SaveNpcUseCase
+    private val saveNpcUseCase: SaveNpcUseCase,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
+
+    private val recorder by lazy { AudioRecorder(context) }
+    private val player by lazy { AudioPlayer(context) }
+    private var tempAudioFile: File? = null
+
+    var isRecording by mutableStateOf(false)
+        private set
+    var isPlaying by mutableStateOf(false)
+        private set
+    var hasNewSample by mutableStateOf(false)
+        private set
+    var selectedVoiceUri by mutableStateOf<Uri?>(null)
+        private set
 
     private val npcId: Long? = savedStateHandle.get<Long>("npcId")?.takeIf { it != -1L }
     
@@ -61,6 +78,65 @@ class NpcEditorViewModel @Inject constructor(
         selectedImageUri = uri
     }
 
+    fun onVoiceFileSelected(uri: Uri?) {
+        selectedVoiceUri = uri
+        if (uri != null) {
+            hasNewSample = true
+            tempAudioFile = null // Si elegimos archivo, descartamos grabacion temporal
+        }
+    }
+
+    // --- Voz ---
+
+    fun startRecording() {
+        try {
+            val file = File(context.cacheDir, "temp_voice_${System.currentTimeMillis()}.m4a")
+            tempAudioFile = file
+            recorder.start(file)
+            isRecording = true
+        } catch (e: Exception) {
+            // Handle error
+        }
+    }
+
+    fun stopRecording() {
+        recorder.stop()
+        isRecording = false
+        hasNewSample = true
+    }
+
+    fun playSample() {
+        if (selectedVoiceUri != null) {
+            isPlaying = true
+            player.playUri(selectedVoiceUri!!) {
+                isPlaying = false
+            }
+            return
+        }
+        
+        val fileToPlay = if (hasNewSample) tempAudioFile else npc.voiceSamplePath?.let { File(it) }
+        if (fileToPlay != null && fileToPlay.exists()) {
+            isPlaying = true
+            player.playFile(fileToPlay) {
+                isPlaying = false
+            }
+        }
+    }
+
+    fun stopPlayback() {
+        player.stop()
+        isPlaying = false
+    }
+
+    fun deleteSample() {
+        stopPlayback()
+        tempAudioFile?.delete()
+        tempAudioFile = null
+        selectedVoiceUri = null
+        hasNewSample = false
+        npc = npc.copy(voiceSamplePath = null)
+    }
+
     fun save(onSaved: () -> Unit) {
         viewModelScope.launch {
             val finalNpc = npc.copy(
@@ -69,8 +145,20 @@ class NpcEditorViewModel @Inject constructor(
                 armorClass = acInput.toIntOrNull() ?: npc.armorClass,
                 initiativeBonus = initiativeInput.toIntOrNull() ?: npc.initiativeBonus
             )
-            saveNpcUseCase(finalNpc, selectedImageUri)
+            saveNpcUseCase(
+                npc = finalNpc, 
+                imageUri = selectedImageUri, 
+                voiceSampleFile = if (hasNewSample && tempAudioFile != null) tempAudioFile else null,
+                voiceSampleUri = selectedVoiceUri
+            )
             onSaved()
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        recorder.stop()
+        player.stop()
+        tempAudioFile?.delete()
     }
 }

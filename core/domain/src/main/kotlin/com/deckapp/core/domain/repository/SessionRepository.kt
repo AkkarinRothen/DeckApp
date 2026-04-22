@@ -2,6 +2,7 @@ package com.deckapp.core.domain.repository
 
 import com.deckapp.core.model.DrawEvent
 import com.deckapp.core.model.RandomTable
+import com.deckapp.core.model.Scene
 import com.deckapp.core.model.Session
 import com.deckapp.core.model.SessionDeckRef
 import com.deckapp.core.model.SessionStatus
@@ -33,8 +34,17 @@ interface SessionRepository {
     // Event log — append only
     suspend fun logEvent(event: DrawEvent)
     fun getEventsForSession(sessionId: Long): Flow<List<DrawEvent>>
+    fun getAllEvents(): Flow<List<DrawEvent>>
     suspend fun getLastEventForSession(sessionId: Long): DrawEvent?
     suspend fun deleteLastEvent(sessionId: Long)  // para Undo
 
     suspend fun updateGameSystems(sessionId: Long, gameSystems: List<String>)
+    suspend fun updateLinkedMythicSession(sessionId: Long, mythicSessionId: Long?)
+
+    // Scenes (Planning)
+    fun getScenesForSession(sessionId: Long): Flow<List<Scene>>
+    suspend fun upsertScene(scene: Scene): Long
+    suspend fun deleteScene(sceneId: Long)
+    suspend fun updateSceneOrder(sceneId: Long, order: Int)
+    suspend fun updateSceneCompletion(sceneId: Long, completed: Boolean)
 }

@@ -10,6 +10,7 @@ import com.deckapp.core.domain.repository.ReferenceRepository
 import com.deckapp.core.domain.usecase.ExportTableUseCase
 import com.deckapp.core.domain.usecase.InvertTableRangesUseCase
 import com.deckapp.core.domain.usecase.RollTableUseCase
+import com.deckapp.core.domain.usecase.AddQuickNoteUseCase
 import com.deckapp.core.domain.usecase.reference.InstallStarterPackUseCase
 import com.deckapp.core.domain.usecase.reference.RemoveStarterPackUseCase
 import com.deckapp.core.model.RandomTable
@@ -35,6 +36,8 @@ data class TablePackInfo(
 data class TablesUiState(
     val tables: List<RandomTable> = emptyList(),
     val filteredTables: List<RandomTable> = emptyList(),
+    val pinnedTables: List<RandomTable> = emptyList(),
+    val recentTables: List<RandomTable> = emptyList(),
     val bundles: List<TableBundle> = emptyList(),
     val groupedTables: Map<String, List<RandomTable>> = emptyMap(),
     val allTags: List<Tag> = emptyList(),
@@ -75,11 +78,14 @@ class TablesViewModel @Inject constructor(
     private val settingsRepository: com.deckapp.core.domain.repository.SettingsRepository,
     private val installStarterPackUseCase: InstallStarterPackUseCase,
     private val removeStarterPackUseCase: RemoveStarterPackUseCase,
+    private val addQuickNoteUseCase: AddQuickNoteUseCase,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TablesUiState())
     val uiState: StateFlow<TablesUiState> = _uiState.asStateFlow()
+
+    private val _sessionId = MutableStateFlow<Long?>(null)
 
     init {
         _uiState.update { it.copy(isSimplifiedMode = settingsRepository.getSimplifiedModeEnabled()) }
@@ -126,6 +132,30 @@ class TablesViewModel @Inject constructor(
         }
     }
 
+    fun setSessionId(id: Long?) {
+        if (_sessionId.value == id) return
+        _sessionId.value = id
+        
+        // Cargar tablas de la sesión y log de resultados si hay sesión
+        id?.let { sid ->
+            viewModelScope.launch {
+                sessionRepository.getTablesForSession(sid).collect { tables ->
+                    _uiState.update { it.copy(
+                        sessionTableIds = tables.map { t -> t.id }.toSet(),
+                        showAllTables = false // Por defecto mostrar solo las de la sesión si estamos en una
+                    ) }
+                }
+            }
+            
+            viewModelScope.launch {
+                sessionRepository.getEventsForSession(sid).collect { events ->
+                    // Filtrar eventos de tablas y convertirlos a resultados
+                    // (Lógica simplificada para el log de la sesión)
+                }
+            }
+        }
+    }
+
     private fun loadData() {
         combine(
             tableRepository.getAllTables(),
@@ -164,6 +194,13 @@ class TablesViewModel @Inject constructor(
         sessionTableIds: Set<Long>
     ): TablesUiState {
         val bundleMap = bundles.associate { it.id to it.name }
+        
+        // Tablas ancladas (siempre de entre las disponibles en la vista actual)
+        val pinned = tables.filter { it.isPinned && (showAll || it.id in sessionTableIds) }
+        
+        // Tablas recientes basadas en el log de la sesión
+        val recentIds = _uiState.value.sessionRollLog.take(10).map { it.tableId }.distinct()
+        val recent = tables.filter { it.id in recentIds }
 
         val filtered = tables.filter { table ->
             val matchesSession = showAll || table.id in sessionTableIds
@@ -187,6 +224,8 @@ class TablesViewModel @Inject constructor(
         return _uiState.value.copy(
             tables = tables,
             filteredTables = filtered,
+            pinnedTables = pinned,
+            recentTables = recent,
             bundles = bundles,
             groupedTables = grouped,
             allTags = tags,
@@ -316,6 +355,14 @@ class TablesViewModel @Inject constructor(
             _uiState.update { it.copy(isRolling = true) }
             try {
                 val result = rollTableUseCase(tableId, sessionId)
+                
+                // Registrar en el historial automáticamente
+                val tableName = _uiState.value.tables.find { it.id == tableId }?.name ?: "Tabla"
+                addQuickNoteUseCase(
+                    content = "[$tableName] Resultado: ${result.resolvedText}",
+                    sessionId = sessionId
+                )
+
                 _uiState.update { state ->
                     state.copy(
                         lastResult = result,

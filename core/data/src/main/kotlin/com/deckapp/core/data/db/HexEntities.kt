@@ -29,6 +29,7 @@ data class HexMapEntity(
     val terrainTableConfig: String = "{}",
     @ColumnInfo(defaultValue = "{}")
     val sessionResources: String = "{}",
+    val linkedMythicSessionId: Long? = null,
     val createdAt: Long = System.currentTimeMillis()
 )
 

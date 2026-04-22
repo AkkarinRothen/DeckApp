@@ -103,10 +103,12 @@ fun TableMappingView(
                         
                         // 1. Revertir Zoom y Pan en el tapOffset
                         val centerX = containerSize.width / 2f
+                        val centerY = containerSize.height / 2f
                         val relativeX = (tapOffset.x - centerX - offset.x) / scale + centerX
+                        val relativeY = (tapOffset.y - centerY - offset.y) / scale + centerY
                         
                         // 2. Comprobar si está dentro de imageBounds
-                        if (imageBounds.contains(Offset(relativeX, tapOffset.y))) { // Solo nos importa el X para anclas
+                        if (imageBounds.contains(Offset(relativeX, relativeY))) { 
                             val xNormalized = (relativeX - imageBounds.left) / imageBounds.width
                             
                             val threshold = 0.04f / scale

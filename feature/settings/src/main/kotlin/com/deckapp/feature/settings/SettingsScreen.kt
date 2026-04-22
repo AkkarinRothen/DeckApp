@@ -1,8 +1,10 @@
 package com.deckapp.feature.settings
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DeleteSweep
@@ -141,6 +143,8 @@ fun SettingsScreen(
             item {
                 StorageSummaryCard(
                     totalSizeBytes = uiState.totalSizeBytes,
+                    systemTotalBytes = uiState.systemTotalBytes,
+                    systemFreeBytes = uiState.systemFreeBytes,
                     deckCount = uiState.decksStorage.size,
                     isClearing = uiState.isClearingCache,
                     onClearCache = { viewModel.clearCache() }
@@ -259,17 +263,22 @@ fun SettingsScreen(
 @Composable
 private fun StorageSummaryCard(
     totalSizeBytes: Long,
+    systemTotalBytes: Long,
+    systemFreeBytes: Long,
     deckCount: Int,
     isClearing: Boolean,
     onClearCache: () -> Unit
 ) {
+    val usedByAppPercent = if (systemTotalBytes > 0) totalSizeBytes.toFloat() / systemTotalBytes else 0f
+    val otherUsedPercent = if (systemTotalBytes > 0) (systemTotalBytes - systemFreeBytes - totalSizeBytes).toFloat() / systemTotalBytes else 0f
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
         )
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -277,37 +286,69 @@ private fun StorageSummaryCard(
             ) {
                 Column {
                     Text(
-                        formatBytes(totalSizeBytes),
-                        style = MaterialTheme.typography.headlineSmall,
+                        "Biblioteca: ${formatBytes(totalSizeBytes)}",
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                     Text(
-                        "$deckCount mazo${if (deckCount != 1) "s" else ""}",
+                        "$deckCount recursos guardados",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                        color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
                     )
                 }
 
                 if (isClearing) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Button(
+                    OutlinedButton(
                         onClick = onClearCache,
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            contentColor = MaterialTheme.colorScheme.primaryContainer
+                        contentPadding = PaddingValues(horizontal = 8.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                         )
                     ) {
-                        Icon(Icons.Default.DeleteSweep, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Default.DeleteSweep, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text("Limpiar caché", style = MaterialTheme.typography.labelMedium)
+                        Text("Vaciar caché", style = MaterialTheme.typography.labelSmall)
                     }
+                }
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    Row(Modifier.fillMaxSize()) {
+                        // Otros (gris/oscuro)
+                        Box(Modifier.fillMaxHeight().fillMaxWidth(otherUsedPercent).background(MaterialTheme.colorScheme.outlineVariant))
+                        // App (Primary)
+                        Box(Modifier.fillMaxHeight().fillMaxWidth(if (1f - otherUsedPercent > 0) usedByAppPercent / (1f - otherUsedPercent) else 0f).background(MaterialTheme.colorScheme.primary))
+                    }
+                }
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.size(8.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary))
+                        Spacer(Modifier.width(4.dp))
+                        Text("Esta App", style = MaterialTheme.typography.labelSmall)
+                    }
+                    Text(
+                        "Libre: ${formatBytes(systemFreeBytes)} de ${formatBytes(systemTotalBytes)}", 
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         }

@@ -6,6 +6,7 @@ data class WikiEntry(
     val content: String,
     val categoryId: Long,
     val imagePath: String? = null,
+    val isPinned: Boolean = false,
     val lastUpdated: Long = System.currentTimeMillis()
 )
 

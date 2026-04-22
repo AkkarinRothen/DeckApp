@@ -5,9 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.deckapp.core.domain.repository.TableRepository
 import com.deckapp.core.domain.repository.CardRepository
+import com.deckapp.core.domain.repository.SessionRepository
 import com.deckapp.core.domain.usecase.RollTableUseCase
 import com.deckapp.core.domain.usecase.DiceEvaluator
 import com.deckapp.core.domain.usecase.ValidateTableUseCase
+import com.deckapp.core.domain.usecase.GetOrCreateTagUseCase
 import com.deckapp.core.model.RandomTable
 import com.deckapp.core.model.Tag
 import com.deckapp.core.model.TableEntry
@@ -47,12 +49,15 @@ data class TableEditorUiState(
 class TableEditorViewModel @Inject constructor(
     private val tableRepository: TableRepository,
     private val cardRepository: CardRepository,
+    private val sessionRepository: SessionRepository,
     private val rollTableUseCase: RollTableUseCase,
     private val validateTableUseCase: ValidateTableUseCase,
+    private val getOrCreateTagUseCase: GetOrCreateTagUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val tableId: Long = savedStateHandle["tableId"] ?: -1L
+    private val sessionId: Long? = savedStateHandle["sessionId"]
 
     private val _uiState = MutableStateFlow(TableEditorUiState(isNewTable = tableId == -1L))
     val uiState: StateFlow<TableEditorUiState> = _uiState.asStateFlow()
@@ -131,6 +136,22 @@ class TableEditorViewModel @Inject constructor(
         }
         validate()
     }
+
+    fun createAndAddTag(tagName: String) {
+        if (tagName.isBlank()) return
+        viewModelScope.launch {
+            try {
+                val tag = getOrCreateTagUseCase(tagName)
+                if (tag !in _uiState.value.tags) {
+                    _uiState.update { it.copy(tags = it.tags + tag, isDirty = true) }
+                    validate()
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(errorMessage = "Error al crear etiqueta") }
+            }
+        }
+    }
+
     fun setRollFormula(formula: String) {
         _uiState.update { it.copy(rollFormula = formula, isDirty = true) }
         validate()
@@ -230,7 +251,10 @@ class TableEditorViewModel @Inject constructor(
         }
         _uiState.update { it.copy(isSaving = true) }
         viewModelScope.launch {
-            tableRepository.saveTable(buildTableFromState(tableId.coerceAtLeast(0)))
+            val newId = tableRepository.saveTable(buildTableFromState(tableId.coerceAtLeast(0)))
+            if (state.isNewTable && sessionId != null) {
+                sessionRepository.addTableToSession(sessionId, newId)
+            }
             _uiState.update { it.copy(isSaving = false, isDirty = false, successMessage = "Tabla guardada") }
         }
     }

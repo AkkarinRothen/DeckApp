@@ -1,0 +1,711 @@
+﻿Reusing configuration cache.
+> Task :feature:draw:clean
+> Task :feature:dice:clean
+> Task :core:ui:clean
+> Task :core:data:clean
+> Task :feature:encounters:clean
+> Task :feature:import:clean
+> Task :feature:reference:clean
+> Task :app:clean
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core:data:preBuild UP-TO-DATE
+> Task :core:data:preDebugBuild UP-TO-DATE
+> Task :feature:deck:clean
+> Task :core:domain:preBuild UP-TO-DATE
+> Task :core:domain:preDebugBuild UP-TO-DATE
+> Task :core:model:preBuild UP-TO-DATE
+> Task :core:model:preDebugBuild UP-TO-DATE
+> Task :core:ui:preBuild UP-TO-DATE
+> Task :core:ui:preDebugBuild UP-TO-DATE
+> Task :feature:mythic:clean
+> Task :feature:deck:preBuild UP-TO-DATE
+> Task :feature:deck:preDebugBuild UP-TO-DATE
+> Task :core:model:clean
+> Task :feature:deck:writeDebugAarMetadata
+> Task :feature:npcs:clean
+> Task :core:data:writeDebugAarMetadata
+> Task :feature:library:clean
+> Task :feature:draw:preBuild UP-TO-DATE
+> Task :feature:dice:preBuild UP-TO-DATE
+> Task :feature:hexploration:preBuild UP-TO-DATE
+> Task :feature:encounters:preBuild UP-TO-DATE
+> Task :feature:hexploration:preDebugBuild UP-TO-DATE
+> Task :feature:dice:preDebugBuild UP-TO-DATE
+> Task :feature:draw:preDebugBuild UP-TO-DATE
+> Task :feature:encounters:preDebugBuild UP-TO-DATE
+> Task :feature:import:preBuild UP-TO-DATE
+> Task :feature:import:preDebugBuild UP-TO-DATE
+> Task :feature:encounters:writeDebugAarMetadata
+> Task :feature:dice:writeDebugAarMetadata
+> Task :feature:library:preBuild UP-TO-DATE
+> Task :feature:mythic:preBuild UP-TO-DATE
+> Task :feature:library:preDebugBuild UP-TO-DATE
+> Task :feature:mythic:preDebugBuild UP-TO-DATE
+> Task :feature:draw:writeDebugAarMetadata
+> Task :feature:npcs:preBuild UP-TO-DATE
+> Task :feature:npcs:preDebugBuild UP-TO-DATE
+> Task :feature:npcs:writeDebugAarMetadata
+> Task :feature:mythic:writeDebugAarMetadata
+> Task :feature:library:writeDebugAarMetadata
+> Task :feature:reference:preBuild UP-TO-DATE
+> Task :feature:session:preBuild UP-TO-DATE
+> Task :feature:session:preDebugBuild UP-TO-DATE
+> Task :feature:settings:preBuild UP-TO-DATE
+> Task :feature:reference:preDebugBuild UP-TO-DATE
+> Task :feature:settings:preDebugBuild UP-TO-DATE
+> Task :feature:tables:preBuild UP-TO-DATE
+> Task :feature:tables:preDebugBuild UP-TO-DATE
+> Task :feature:wiki:preBuild UP-TO-DATE
+> Task :feature:wiki:preDebugBuild UP-TO-DATE
+> Task :core:data:processDebugNavigationResources
+> Task :core:model:processDebugNavigationResources
+> Task :feature:reference:writeDebugAarMetadata
+> Task :core:ui:processDebugNavigationResources
+> Task :feature:dice:processDebugNavigationResources
+> Task :feature:deck:processDebugNavigationResources
+> Task :feature:draw:processDebugNavigationResources
+> Task :feature:encounters:processDebugNavigationResources
+> Task :feature:import:processDebugNavigationResources
+> Task :feature:library:processDebugNavigationResources
+> Task :feature:reference:processDebugNavigationResources
+> Task :app:generateDebugResValues
+> Task :core:data:generateDebugResValues
+> Task :core:ui:writeDebugAarMetadata
+> Task :core:model:writeDebugAarMetadata
+> Task :feature:import:writeDebugAarMetadata
+> Task :core:model:generateDebugResValues
+> Task :feature:deck:generateDebugResValues
+> Task :core:ui:generateDebugResValues
+> Task :feature:npcs:processDebugNavigationResources
+> Task :feature:dice:generateDebugResValues
+> Task :feature:hexploration:clean
+> Task :core:model:generateDebugResources
+> Task :core:ui:generateDebugResources
+> Task :core:data:generateDebugResources
+> Task :feature:dice:generateDebugResources
+> Task :feature:mythic:processDebugNavigationResources
+> Task :feature:settings:clean
+> Task :feature:settings:writeDebugAarMetadata
+> Task :feature:settings:processDebugNavigationResources
+> Task :feature:draw:generateDebugResValues
+> Task :feature:draw:generateDebugResources
+> Task :feature:deck:generateDebugResources
+> Task :feature:hexploration:processDebugNavigationResources
+> Task :feature:hexploration:writeDebugAarMetadata
+> Task :feature:encounters:generateDebugResValues
+> Task :feature:hexploration:generateDebugResValues
+> Task :feature:encounters:generateDebugResources
+> Task :feature:hexploration:generateDebugResources
+> Task :feature:tables:clean
+> Task :feature:session:clean
+> Task :feature:wiki:clean
+> Task :feature:session:processDebugNavigationResources
+> Task :feature:session:writeDebugAarMetadata
+> Task :feature:wiki:writeDebugAarMetadata
+> Task :feature:tables:writeDebugAarMetadata
+> Task :feature:tables:processDebugNavigationResources
+> Task :feature:import:generateDebugResValues
+> Task :feature:wiki:processDebugNavigationResources
+> Task :feature:library:generateDebugResValues
+> Task :feature:mythic:generateDebugResValues
+> Task :feature:import:generateDebugResources
+> Task :feature:library:generateDebugResources
+> Task :feature:mythic:generateDebugResources
+> Task :feature:reference:generateDebugResValues
+> Task :feature:npcs:generateDebugResValues
+> Task :feature:session:generateDebugResValues
+> Task :feature:reference:generateDebugResources
+> Task :feature:npcs:generateDebugResources
+> Task :feature:session:generateDebugResources
+> Task :feature:settings:generateDebugResValues
+> Task :feature:tables:generateDebugResValues
+> Task :feature:wiki:generateDebugResValues
+> Task :feature:settings:generateDebugResources
+> Task :feature:tables:generateDebugResources
+> Task :feature:wiki:generateDebugResources
+> Task :app:generateDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug
+> Task :core:data:extractDeepLinksDebug
+> Task :core:model:extractDeepLinksDebug
+> Task :core:ui:extractDeepLinksDebug
+> Task :feature:deck:packageDebugResources
+> Task :core:model:packageDebugResources
+> Task :feature:draw:packageDebugResources
+> Task :feature:encounters:packageDebugResources
+> Task :core:ui:packageDebugResources
+> Task :core:data:packageDebugResources
+> Task :feature:hexploration:packageDebugResources
+> Task :feature:dice:packageDebugResources
+> Task :feature:mythic:packageDebugResources
+> Task :feature:library:packageDebugResources
+> Task :core:data:processDebugManifest
+> Task :feature:deck:extractDeepLinksDebug
+> Task :feature:wiki:packageDebugResources
+> Task :core:model:processDebugManifest
+> Task :feature:session:packageDebugResources
+> Task :core:ui:processDebugManifest
+> Task :feature:dice:extractDeepLinksDebug
+> Task :feature:settings:packageDebugResources
+> Task :feature:tables:packageDebugResources
+> Task :feature:encounters:extractDeepLinksDebug
+> Task :feature:draw:extractDeepLinksDebug
+> Task :feature:import:packageDebugResources
+> Task :feature:npcs:packageDebugResources
+> Task :feature:hexploration:extractDeepLinksDebug
+> Task :feature:reference:packageDebugResources
+> Task :feature:library:extractDeepLinksDebug
+> Task :feature:import:extractDeepLinksDebug
+> Task :feature:deck:processDebugManifest
+> Task :feature:mythic:extractDeepLinksDebug
+> Task :feature:npcs:extractDeepLinksDebug
+> Task :feature:reference:extractDeepLinksDebug
+> Task :feature:draw:processDebugManifest
+> Task :feature:encounters:processDebugManifest
+> Task :feature:dice:processDebugManifest
+> Task :feature:session:extractDeepLinksDebug
+> Task :feature:settings:extractDeepLinksDebug
+> Task :feature:import:processDebugManifest
+> Task :feature:wiki:extractDeepLinksDebug
+> Task :feature:hexploration:processDebugManifest
+> Task :feature:tables:extractDeepLinksDebug
+> Task :feature:library:processDebugManifest
+> Task :feature:reference:processDebugManifest
+> Task :core:data:compileDebugLibraryResources
+> Task :feature:npcs:processDebugManifest
+> Task :feature:mythic:processDebugManifest
+> Task :core:model:compileDebugLibraryResources
+> Task :feature:deck:compileDebugLibraryResources
+> Task :core:ui:compileDebugLibraryResources
+> Task :feature:settings:processDebugManifest
+> Task :core:data:parseDebugLocalResources
+> Task :core:model:parseDebugLocalResources
+> Task :feature:session:processDebugManifest
+> Task :feature:tables:processDebugManifest
+> Task :core:ui:parseDebugLocalResources
+> Task :feature:dice:compileDebugLibraryResources
+> Task :feature:dice:parseDebugLocalResources
+> Task :feature:deck:parseDebugLocalResources
+> Task :feature:encounters:compileDebugLibraryResources
+> Task :feature:draw:parseDebugLocalResources
+> Task :feature:draw:compileDebugLibraryResources
+> Task :feature:hexploration:compileDebugLibraryResources
+> Task :feature:import:compileDebugLibraryResources
+> Task :core:ui:generateDebugRFile
+> Task :feature:dice:generateDebugRFile
+> Task :feature:wiki:processDebugManifest
+> Task :feature:encounters:parseDebugLocalResources
+> Task :feature:draw:generateDebugRFile
+> Task :core:model:generateDebugRFile
+> Task :feature:library:compileDebugLibraryResources
+> Task :feature:npcs:compileDebugLibraryResources
+> Task :feature:reference:compileDebugLibraryResources
+> Task :feature:mythic:compileDebugLibraryResources
+> Task :feature:import:parseDebugLocalResources
+> Task :feature:session:compileDebugLibraryResources
+> Task :feature:encounters:generateDebugRFile
+> Task :feature:library:parseDebugLocalResources
+> Task :feature:reference:parseDebugLocalResources
+> Task :feature:settings:compileDebugLibraryResources
+> Task :feature:hexploration:parseDebugLocalResources
+> Task :feature:npcs:parseDebugLocalResources
+> Task :feature:mythic:parseDebugLocalResources
+> Task :feature:import:generateDebugRFile
+> Task :feature:library:generateDebugRFile
+> Task :feature:tables:compileDebugLibraryResources
+> Task :feature:hexploration:generateDebugRFile
+> Task :feature:wiki:compileDebugLibraryResources
+> Task :feature:settings:parseDebugLocalResources
+> Task :core:data:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core:domain:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core:model:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :feature:session:parseDebugLocalResources
+> Task :feature:tables:parseDebugLocalResources
+> Task :feature:reference:generateDebugRFile
+> Task :feature:deck:generateDebugRFile
+> Task :core:model:javaPreCompileDebug
+> Task :core:ui:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:packageDebugResources
+> Task :feature:deck:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :feature:mythic:generateDebugRFile
+> Task :feature:dice:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :feature:wiki:parseDebugLocalResources
+> Task :core:ui:javaPreCompileDebug
+> Task :feature:draw:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :feature:encounters:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :feature:npcs:generateDebugRFile
+> Task :feature:hexploration:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core:data:generateDebugRFile
+> Task :feature:tables:generateDebugRFile
+> Task :feature:mythic:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :feature:session:generateDebugRFile
+> Task :feature:settings:generateDebugRFile
+> Task :feature:npcs:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :feature:reference:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :feature:tables:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :feature:deck:javaPreCompileDebug
+> Task :feature:wiki:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :feature:dice:javaPreCompileDebug
+> Task :feature:encounters:javaPreCompileDebug
+> Task :feature:import:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :feature:reference:javaPreCompileDebug
+> Task :feature:library:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core:data:javaPreCompileDebug
+> Task :feature:tables:javaPreCompileDebug
+> Task :feature:hexploration:javaPreCompileDebug
+> Task :feature:session:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :feature:npcs:javaPreCompileDebug
+> Task :feature:draw:javaPreCompileDebug
+> Task :feature:settings:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :feature:wiki:javaPreCompileDebug
+> Task :feature:wiki:generateDebugRFile
+> Task :core:data:mergeDebugShaders
+> Task :core:model:mergeDebugShaders
+> Task :core:ui:mergeDebugShaders
+> Task :core:data:compileDebugShaders NO-SOURCE
+> Task :core:data:generateDebugAssets UP-TO-DATE
+> Task :core:model:compileDebugShaders NO-SOURCE
+> Task :core:model:generateDebugAssets UP-TO-DATE
+> Task :core:ui:compileDebugShaders NO-SOURCE
+> Task :core:ui:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugShaders
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :feature:session:javaPreCompileDebug
+> Task :feature:import:javaPreCompileDebug
+> Task :feature:mythic:javaPreCompileDebug
+> Task :feature:library:javaPreCompileDebug
+> Task :feature:deck:mergeDebugShaders
+> Task :core:model:mergeDebugAssets
+> Task :feature:deck:compileDebugShaders NO-SOURCE
+> Task :feature:deck:generateDebugAssets UP-TO-DATE
+> Task :core:ui:mergeDebugAssets
+> Task :feature:draw:mergeDebugShaders
+> Task :feature:encounters:mergeDebugShaders
+> Task :feature:encounters:compileDebugShaders NO-SOURCE
+> Task :feature:encounters:generateDebugAssets UP-TO-DATE
+> Task :feature:draw:compileDebugShaders NO-SOURCE
+> Task :feature:draw:generateDebugAssets UP-TO-DATE
+> Task :feature:dice:mergeDebugShaders
+> Task :feature:hexploration:mergeDebugShaders
+> Task :feature:import:mergeDebugShaders
+> Task :feature:deck:mergeDebugAssets
+> Task :feature:dice:compileDebugShaders NO-SOURCE
+> Task :feature:dice:generateDebugAssets UP-TO-DATE
+> Task :feature:import:compileDebugShaders NO-SOURCE
+> Task :feature:import:generateDebugAssets UP-TO-DATE
+> Task :feature:hexploration:compileDebugShaders NO-SOURCE
+> Task :app:javaPreCompileDebug
+> Task :feature:hexploration:generateDebugAssets UP-TO-DATE
+> Task :feature:encounters:mergeDebugAssets
+> Task :feature:draw:mergeDebugAssets
+> Task :feature:settings:javaPreCompileDebug
+> Task :feature:library:mergeDebugShaders
+> Task :feature:library:compileDebugShaders NO-SOURCE
+> Task :feature:library:generateDebugAssets UP-TO-DATE
+> Task :feature:npcs:mergeDebugShaders
+> Task :feature:hexploration:mergeDebugAssets
+> Task :feature:import:mergeDebugAssets
+> Task :feature:npcs:compileDebugShaders NO-SOURCE
+> Task :feature:npcs:generateDebugAssets UP-TO-DATE
+> Task :feature:reference:mergeDebugShaders
+> Task :feature:dice:mergeDebugAssets
+> Task :feature:reference:compileDebugShaders NO-SOURCE
+> Task :feature:reference:generateDebugAssets UP-TO-DATE
+> Task :feature:tables:mergeDebugShaders
+> Task :feature:mythic:mergeDebugShaders
+> Task :feature:tables:compileDebugShaders NO-SOURCE
+> Task :feature:tables:generateDebugAssets UP-TO-DATE
+> Task :feature:mythic:compileDebugShaders NO-SOURCE
+> Task :feature:mythic:generateDebugAssets UP-TO-DATE
+> Task :feature:npcs:mergeDebugAssets
+> Task :feature:tables:mergeDebugAssets
+> Task :feature:wiki:mergeDebugShaders
+> Task :feature:wiki:compileDebugShaders NO-SOURCE
+> Task :feature:wiki:generateDebugAssets UP-TO-DATE
+> Task :feature:session:mergeDebugShaders
+> Task :feature:session:compileDebugShaders NO-SOURCE
+> Task :feature:session:generateDebugAssets UP-TO-DATE
+> Task :app:desugarDebugFileDependencies
+> Task :feature:settings:mergeDebugShaders
+> Task :app:mergeDebugJniLibFolders
+> Task :feature:settings:compileDebugShaders NO-SOURCE
+> Task :feature:settings:generateDebugAssets UP-TO-DATE
+> Task :feature:mythic:mergeDebugAssets
+> Task :feature:library:mergeDebugAssets
+> Task :feature:session:mergeDebugAssets
+> Task :feature:wiki:mergeDebugAssets
+> Task :core:data:mergeDebugJniLibFolders
+> Task :feature:reference:mergeDebugAssets
+> Task :core:ui:mergeDebugJniLibFolders
+> Task :feature:settings:mergeDebugAssets
+> Task :core:ui:mergeDebugNativeLibs NO-SOURCE
+> Task :core:data:mergeDebugNativeLibs NO-SOURCE
+> Task :feature:dice:mergeDebugJniLibFolders
+> Task :core:model:mergeDebugJniLibFolders
+> Task :feature:dice:mergeDebugNativeLibs NO-SOURCE
+> Task :core:model:mergeDebugNativeLibs NO-SOURCE
+> Task :core:data:copyDebugJniLibsProjectOnly
+> Task :feature:draw:mergeDebugJniLibFolders
+> Task :feature:encounters:mergeDebugJniLibFolders
+> Task :feature:draw:mergeDebugNativeLibs NO-SOURCE
+> Task :feature:hexploration:mergeDebugJniLibFolders
+> Task :core:model:copyDebugJniLibsProjectOnly
+> Task :feature:encounters:mergeDebugNativeLibs NO-SOURCE
+> Task :core:ui:copyDebugJniLibsProjectOnly
+> Task :feature:hexploration:mergeDebugNativeLibs NO-SOURCE
+> Task :feature:deck:mergeDebugJniLibFolders
+> Task :feature:deck:mergeDebugNativeLibs NO-SOURCE
+> Task :feature:dice:copyDebugJniLibsProjectOnly
+> Task :feature:hexploration:copyDebugJniLibsProjectOnly
+> Task :feature:draw:copyDebugJniLibsProjectOnly
+> Task :feature:encounters:copyDebugJniLibsProjectOnly
+> Task :feature:library:mergeDebugJniLibFolders
+> Task :feature:library:mergeDebugNativeLibs NO-SOURCE
+> Task :feature:import:mergeDebugJniLibFolders
+> Task :feature:import:mergeDebugNativeLibs NO-SOURCE
+> Task :feature:mythic:mergeDebugJniLibFolders
+> Task :feature:deck:copyDebugJniLibsProjectOnly
+> Task :feature:mythic:mergeDebugNativeLibs NO-SOURCE
+> Task :feature:library:copyDebugJniLibsProjectOnly
+> Task :feature:session:mergeDebugJniLibFolders
+> Task :feature:reference:mergeDebugJniLibFolders
+> Task :feature:session:mergeDebugNativeLibs NO-SOURCE
+> Task :feature:reference:mergeDebugNativeLibs NO-SOURCE
+> Task :feature:import:copyDebugJniLibsProjectOnly
+> Task :feature:settings:mergeDebugJniLibFolders
+> Task :feature:npcs:mergeDebugJniLibFolders
+> Task :feature:settings:mergeDebugNativeLibs NO-SOURCE
+> Task :feature:npcs:mergeDebugNativeLibs NO-SOURCE
+> Task :feature:mythic:copyDebugJniLibsProjectOnly
+> Task :feature:reference:copyDebugJniLibsProjectOnly
+> Task :feature:wiki:mergeDebugJniLibFolders
+> Task :feature:wiki:mergeDebugNativeLibs NO-SOURCE
+> Task :feature:tables:mergeDebugJniLibFolders
+> Task :feature:tables:mergeDebugNativeLibs NO-SOURCE
+> Task :feature:session:copyDebugJniLibsProjectOnly
+> Task :app:validateSigningDebug
+> Task :feature:wiki:copyDebugJniLibsProjectOnly
+> Task :feature:settings:copyDebugJniLibsProjectOnly
+> Task :app:writeDebugSigningConfigVersions
+> Task :feature:npcs:copyDebugJniLibsProjectOnly
+> Task :app:writeDebugAppMetadata
+> Task :feature:tables:copyDebugJniLibsProjectOnly
+> Task :app:checkDebugDuplicateClasses
+> Task :core:data:mergeDebugAssets
+> Task :core:domain:clean
+> Task :core:domain:processDebugNavigationResources
+> Task :core:domain:generateDebugResValues
+> Task :core:domain:writeDebugAarMetadata
+> Task :core:domain:mergeDebugShaders
+> Task :core:domain:mergeDebugJniLibFolders
+> Task :core:domain:javaPreCompileDebug
+> Task :core:domain:compileDebugShaders NO-SOURCE
+> Task :core:domain:generateDebugAssets UP-TO-DATE
+> Task :core:domain:mergeDebugNativeLibs NO-SOURCE
+> Task :core:domain:extractDeepLinksDebug
+> Task :core:domain:copyDebugJniLibsProjectOnly
+> Task :core:domain:mergeDebugAssets
+> Task :core:domain:generateDebugResources
+> Task :core:domain:processDebugManifest
+> Task :app:processDebugNavigationResources
+> Task :app:checkDebugAarMetadata
+> Task :core:domain:packageDebugResources
+> Task :app:mapDebugSourceSetPaths
+> Task :core:domain:compileDebugLibraryResources
+> Task :app:parseDebugLocalResources
+> Task :app:compileDebugNavigationResources
+> Task :core:domain:parseDebugLocalResources
+> Task :core:domain:generateDebugRFile
+> Task :app:mergeDebugAssets
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
+> Task :app:compressDebugAssets
+> Task :app:mergeDebugNativeLibs
+
+> Task :app:stripDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so, libimage_processing_util_jni.so, libmlkit_google_ocr_pipeline.so, libsurface_util_jni.so. Run with --info option to learn more.
+
+> Task :core:model:compileDebugKotlin
+> Task :core:model:compileDebugJavaWithJavac NO-SOURCE
+> Task :core:model:processDebugJavaRes
+> Task :core:model:bundleLibCompileToJarDebug
+> Task :core:model:bundleLibRuntimeToJarDebug
+> Task :app:mergeDebugResources
+> Task :core:model:bundleLibRuntimeToDirDebug
+> Task :app:processDebugResources
+
+> Task :core:ui:compileDebugKotlin
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/core/ui/src/main/kotlin/com/deckapp/core/ui/components/QuickNoteOverlay.kt:104:43 'val Icons.Filled.Notes: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.Notes.
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/core/ui/src/main/kotlin/com/deckapp/core/ui/components/QuickNoteOverlay.kt:148:48 'val Icons.Filled.Send: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.Send.
+
+> Task :core:ui:compileDebugJavaWithJavac NO-SOURCE
+> Task :core:ui:processDebugJavaRes
+> Task :core:ui:bundleLibCompileToJarDebug
+> Task :core:ui:bundleLibRuntimeToJarDebug
+> Task :core:ui:bundleLibRuntimeToDirDebug
+> Task :core:domain:kspDebugKotlin
+> Task :app:mergeExtDexDebug
+
+> Task :core:domain:compileDebugKotlin
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/core/domain/src/main/kotlin/com/deckapp/core/domain/usecase/ImportDeckUseCase.kt:80:29 Redundant creation of Json format. Creating instances for each usage can be slow.
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/core/domain/src/main/kotlin/com/deckapp/core/domain/usecase/backup/CreateBackupUseCase.kt:28:32 Redundant creation of Json format. Creating instances for each usage can be slow.
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/core/domain/src/main/kotlin/com/deckapp/core/domain/usecase/backup/CreateBackupUseCase.kt:46:32 Redundant creation of Json format. Creating instances for each usage can be slow.
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/core/domain/src/main/kotlin/com/deckapp/core/domain/usecase/backup/RestoreBackupUseCase.kt:35:29 Redundant creation of Json format. Creating instances for each usage can be slow.
+
+> Task :core:domain:processDebugJavaRes
+> Task :core:domain:compileDebugJavaWithJavac
+> Task :core:domain:bundleLibCompileToJarDebug
+> Task :core:domain:bundleLibRuntimeToJarDebug
+> Task :core:domain:bundleLibRuntimeToDirDebug
+
+> Task :feature:wiki:kaptGenerateStubsDebugKotlin
+w: Kapt currently doesn't support language version 2.0+. Falling back to 1.9.
+
+> Task :feature:npcs:kaptGenerateStubsDebugKotlin
+w: Kapt currently doesn't support language version 2.0+. Falling back to 1.9.
+
+> Task :feature:library:kspDebugKotlin
+> Task :feature:encounters:kspDebugKotlin
+> Task :feature:dice:kspDebugKotlin
+> Task :feature:hexploration:kspDebugKotlin
+> Task :feature:wiki:kaptDebugKotlin
+> Task :feature:deck:kspDebugKotlin
+> Task :feature:npcs:kaptDebugKotlin
+
+> Task :feature:tables:kaptGenerateStubsDebugKotlin
+w: Kapt currently doesn't support language version 2.0+. Falling back to 1.9.
+
+> Task :feature:mythic:kspDebugKotlin
+> Task :feature:import:kspDebugKotlin
+
+> Task :feature:library:compileDebugKotlin
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/feature/library/src/main/kotlin/com/deckapp/feature/library/LibraryScreen.kt:199:116 'val Icons.Filled.Sort: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.Sort.
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/feature/library/src/main/kotlin/com/deckapp/feature/library/LibraryScreen.kt:253:68 'val Icons.Filled.MenuBook: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.MenuBook.
+
+> Task :feature:encounters:compileDebugKotlin
+
+> Task :feature:wiki:compileDebugKotlin
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/feature/wiki/src/main/kotlin/com/deckapp/feature/wiki/WikiHomeScreen.kt:314:60 'val Icons.Filled.KeyboardArrowRight: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.KeyboardArrowRight.
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/feature/wiki/src/main/kotlin/com/deckapp/feature/wiki/WikiHomeScreen.kt:381:37 'val Icons.Filled.MenuBook: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.MenuBook.
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/feature/wiki/src/main/kotlin/com/deckapp/feature/wiki/WikiViewModel.kt:33:29 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+
+> Task :feature:encounters:compileDebugJavaWithJavac
+> Task :feature:library:compileDebugJavaWithJavac
+> Task :feature:wiki:compileDebugJavaWithJavac
+> Task :feature:dice:compileDebugKotlin
+> Task :feature:session:kspDebugKotlin
+> Task :feature:tables:kaptDebugKotlin
+> Task :feature:dice:compileDebugJavaWithJavac
+> Task :feature:wiki:transformDebugClassesWithAsm
+> Task :feature:wiki:bundleLibCompileToJarDebug
+> Task :feature:wiki:bundleLibRuntimeToJarDebug
+> Task :feature:dice:transformDebugClassesWithAsm
+> Task :feature:dice:bundleLibCompileToJarDebug
+> Task :feature:encounters:transformDebugClassesWithAsm
+> Task :feature:encounters:bundleLibCompileToJarDebug
+> Task :feature:encounters:bundleLibRuntimeToJarDebug
+> Task :feature:dice:bundleLibRuntimeToJarDebug
+
+> Task :feature:mythic:compileDebugKotlin
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/feature/mythic/src/main/kotlin/com/deckapp/feature/mythic/MythicSessionScreen.kt:151:44 'val Icons.Filled.HelpOutline: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.HelpOutline.
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/feature/mythic/src/main/kotlin/com/deckapp/feature/mythic/MythicSessionScreen.kt:428:59 'val Icons.Filled.Notes: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.Notes.
+
+> Task :feature:library:transformDebugClassesWithAsm
+> Task :feature:library:bundleLibCompileToJarDebug
+> Task :feature:library:bundleLibRuntimeToJarDebug
+> Task :core:data:kaptGenerateStubsDebugKotlin
+> Task :feature:settings:kspDebugKotlin
+> Task :feature:dice:processDebugJavaRes
+
+> Task :feature:npcs:compileDebugKotlin
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/feature/npcs/src/main/kotlin/com/deckapp/feature/npcs/AudioRecorder.kt:38:13 'constructor(): MediaRecorder' is deprecated. Deprecated in Java.
+
+> Task :feature:encounters:processDebugJavaRes
+> Task :feature:library:processDebugJavaRes
+> Task :feature:mythic:processDebugJavaRes
+> Task :feature:wiki:processDebugJavaRes
+> Task :feature:deck:compileDebugKotlin
+> Task :feature:deck:processDebugJavaRes
+> Task :feature:mythic:compileDebugJavaWithJavac
+> Task :feature:npcs:compileDebugJavaWithJavac
+> Task :feature:deck:compileDebugJavaWithJavac
+> Task :feature:encounters:bundleLibRuntimeToDirDebug
+> Task :feature:npcs:processDebugJavaRes
+> Task :feature:npcs:transformDebugClassesWithAsm
+> Task :feature:npcs:bundleLibCompileToJarDebug
+> Task :feature:npcs:bundleLibRuntimeToJarDebug
+
+> Task :feature:hexploration:compileDebugKotlin
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/feature/hexploration/src/main/kotlin/com/deckapp/feature/hexploration/HexMapSessionScreen.kt:224:60 'val Icons.Filled.DirectionsRun: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.DirectionsRun.
+
+> Task :feature:wiki:bundleLibRuntimeToDirDebug
+> Task :feature:library:bundleLibRuntimeToDirDebug
+> Task :feature:mythic:transformDebugClassesWithAsm
+> Task :feature:mythic:bundleLibRuntimeToJarDebug
+> Task :feature:mythic:bundleLibCompileToJarDebug
+> Task :feature:hexploration:processDebugJavaRes
+> Task :feature:npcs:bundleLibRuntimeToDirDebug
+> Task :feature:deck:transformDebugClassesWithAsm
+> Task :feature:deck:bundleLibCompileToJarDebug
+> Task :feature:deck:bundleLibRuntimeToJarDebug
+> Task :feature:hexploration:compileDebugJavaWithJavac
+> Task :feature:settings:compileDebugKotlin
+> Task :feature:dice:bundleLibRuntimeToDirDebug
+> Task :feature:settings:processDebugJavaRes
+> Task :feature:mythic:bundleLibRuntimeToDirDebug
+> Task :feature:settings:compileDebugJavaWithJavac
+
+> Task :core:data:kaptGenerateStubsDebugKotlin
+w: Kapt currently doesn't support language version 2.0+. Falling back to 1.9.
+
+> Task :feature:settings:transformDebugClassesWithAsm
+> Task :feature:settings:bundleLibRuntimeToJarDebug
+> Task :feature:settings:bundleLibCompileToJarDebug
+> Task :feature:deck:bundleLibRuntimeToDirDebug
+> Task :feature:settings:bundleLibRuntimeToDirDebug
+
+> Task :feature:session:compileDebugKotlin
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/feature/session/src/main/kotlin/com/deckapp/feature/session/SessionHistoryScreen.kt:208:39 'val Icons.Filled.TrendingUp: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.TrendingUp.
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/feature/session/src/main/kotlin/com/deckapp/feature/session/SessionHistoryViewModel.kt:75:31 Unchecked cast of 'kotlin.Any?' to 'kotlin.collections.List<com.deckapp.core.model.DrawEvent>'.
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/feature/session/src/main/kotlin/com/deckapp/feature/session/SessionHistoryViewModel.kt:76:36 Unchecked cast of 'kotlin.Any?' to 'kotlin.collections.List<com.deckapp.core.model.TableRollResult>'.
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/feature/session/src/main/kotlin/com/deckapp/feature/session/SessionListScreen.kt:76:44 'val Icons.Filled.TrendingUp: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.TrendingUp.
+
+> Task :feature:tables:compileDebugKotlin
+> Task :feature:session:processDebugJavaRes
+> Task :feature:import:compileDebugKotlin
+> Task :feature:hexploration:transformDebugClassesWithAsm
+> Task :feature:import:processDebugJavaRes
+> Task :feature:hexploration:bundleLibCompileToJarDebug
+> Task :feature:hexploration:bundleLibRuntimeToJarDebug
+> Task :feature:import:compileDebugJavaWithJavac
+> Task :feature:session:compileDebugJavaWithJavac
+> Task :feature:tables:compileDebugJavaWithJavac
+> Task :feature:tables:processDebugJavaRes
+> Task :feature:hexploration:bundleLibRuntimeToDirDebug
+> Task :feature:import:transformDebugClassesWithAsm
+> Task :feature:import:bundleLibRuntimeToJarDebug
+> Task :feature:import:bundleLibCompileToJarDebug
+> Task :feature:session:transformDebugClassesWithAsm
+> Task :feature:session:bundleLibCompileToJarDebug
+> Task :feature:session:bundleLibRuntimeToJarDebug
+> Task :feature:tables:transformDebugClassesWithAsm
+> Task :feature:tables:bundleLibCompileToJarDebug
+> Task :feature:tables:bundleLibRuntimeToJarDebug
+> Task :feature:import:bundleLibRuntimeToDirDebug
+> Task :feature:session:bundleLibRuntimeToDirDebug
+> Task :feature:tables:bundleLibRuntimeToDirDebug
+> Task :core:data:kaptDebugKotlin
+
+> Task :core:data:compileDebugKotlin
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/core/data/src/main/kotlin/com/deckapp/core/data/repository/NpcRepositoryImpl.kt:24:36 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
+
+> Task :core:data:compileDebugJavaWithJavac
+> Task :core:data:processDebugJavaRes
+> Task :core:data:transformDebugClassesWithAsm
+> Task :core:data:bundleLibRuntimeToJarDebug
+> Task :core:data:bundleLibCompileToJarDebug
+> Task :feature:reference:kspDebugKotlin
+> Task :core:data:bundleLibRuntimeToDirDebug
+
+> Task :feature:reference:compileDebugKotlin
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/feature/reference/src/main/kotlin/com/deckapp/feature/reference/ManualViewerScreen.kt:195:64 'val Icons.Filled.LastPage: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.LastPage.
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/feature/reference/src/main/kotlin/com/deckapp/feature/reference/ReferenceListViewModel.kt:67:31 Unchecked cast of 'kotlin.Any' to 'kotlin.collections.List<com.deckapp.core.model.ReferenceTable>'.
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/feature/reference/src/main/kotlin/com/deckapp/feature/reference/ReferenceListViewModel.kt:68:30 Unchecked cast of 'kotlin.Any' to 'kotlin.collections.List<com.deckapp.core.model.SystemRule>'.
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/feature/reference/src/main/kotlin/com/deckapp/feature/reference/ReferenceListViewModel.kt:69:32 Unchecked cast of 'kotlin.Any' to 'kotlin.collections.List<com.deckapp.core.model.Manual>'.
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/feature/reference/src/main/kotlin/com/deckapp/feature/reference/ReferenceListViewModel.kt:70:32 Unchecked cast of 'kotlin.Any' to 'kotlin.collections.List<kotlin.String>'.
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/feature/reference/src/main/kotlin/com/deckapp/feature/reference/ReferenceListViewModel.kt:74:32 Unchecked cast of 'kotlin.Any' to 'kotlin.collections.Set<kotlin.String>'.
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/feature/reference/src/main/kotlin/com/deckapp/feature/reference/ReferenceTabViewModel.kt:66:118 'fun String.capitalize(): String' is deprecated. Use replaceFirstChar instead.
+
+> Task :feature:reference:processDebugJavaRes
+> Task :feature:reference:compileDebugJavaWithJavac
+> Task :feature:reference:transformDebugClassesWithAsm
+> Task :feature:reference:bundleLibCompileToJarDebug
+> Task :feature:reference:bundleLibRuntimeToJarDebug
+> Task :feature:reference:bundleLibRuntimeToDirDebug
+> Task :feature:draw:kspDebugKotlin
+
+> Task :feature:draw:compileDebugKotlin
+w: file:///I:/TTRPG/Visuales/Decks/Deckapp/feature/draw/src/main/kotlin/com/deckapp/feature/draw/components/WikiTab.kt:138:40 'val Icons.Filled.MenuBook: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.MenuBook.
+
+> Task :feature:draw:processDebugJavaRes
+> Task :feature:draw:compileDebugJavaWithJavac
+> Task :feature:draw:transformDebugClassesWithAsm
+> Task :feature:draw:bundleLibRuntimeToJarDebug
+> Task :feature:draw:bundleLibCompileToJarDebug
+> Task :feature:draw:bundleLibRuntimeToDirDebug
+> Task :app:kspDebugKotlin
+> Task :app:mergeLibDexDebug
+> Task :app:compileDebugKotlin
+> Task :app:compileDebugJavaWithJavac
+> Task :app:hiltAggregateDepsDebug
+
+> Task :app:hiltJavaCompileDebug
+./gradlew : I:\TTRPG\Visuales\Decks\Deckapp\app\build\generated\hilt\component_sources\debug\com\deckapp\DeckApplicatio
+n_HiltComponents.java:177: error: [Dagger/MissingBinding] com.deckapp.core.data.db.SceneDao cannot be provided without 
+an @Provides-annotated method.
+En línea: 1 Carácter: 1
++ ./gradlew clean :app:assembleDebug > build_result.txt 2>&1; Select-St ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (I:\TTRPG\Visual...notated method.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  public abstract static class SingletonC implements DeckApplication_GeneratedInjector,
+                         ^
+  
+      com.deckapp.core.data.db.SceneDao is injected at
+          [com.deckapp.DeckApplication_HiltComponents.SingletonC] 
+com.deckapp.core.data.repository.SessionRepositoryImpl(à, sceneDao)
+      com.deckapp.core.data.repository.SessionRepositoryImpl is injected at
+          [com.deckapp.DeckApplication_HiltComponents.SingletonC] 
+com.deckapp.core.data.di.RepositoryModule.bindSessionRepository(impl)
+      com.deckapp.core.domain.repository.SessionRepository is requested at
+          [com.deckapp.DeckApplication_HiltComponents.SingletonC] 
+com.deckapp.feature.importdeck.table.TableImportEntryPoint.sessionRepository()
+  The following other entry points also depend on it:
+      dagger.hilt.android.internal.lifecycle.HiltViewModelFactory.ViewModelFactoriesEntryPoint.getHiltViewModelMap() 
+[com.deckapp.DeckApplication_HiltComponents.SingletonC ? com.deckapp.DeckApplication_HiltComponents.ActivityRetainedC 
+? com.deckapp.DeckApplication_HiltComponents.ViewModelC]
+1 error
+
+> Task :app:hiltJavaCompileDebug FAILED
+
+[Incubating] Problems report is available at: file:///I:/TTRPG/Visuales/Decks/Deckapp/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:hiltJavaCompileDebug'.
+> Compilation failed; see the compiler output below.
+  I:\TTRPG\Visuales\Decks\Deckapp\app\build\generated\hilt\component_sources\debug\com\deckapp\DeckApplication_HiltComp
+onents.java:177: error: [Dagger/MissingBinding] com.deckapp.core.data.db.SceneDao cannot be provided without an 
+@Provides-annotated method.
+    public abstract static class SingletonC implements DeckApplication_GeneratedInjector,
+                           ^
+    
+        com.deckapp.core.data.db.SceneDao is injected at
+            [com.deckapp.DeckApplication_HiltComponents.SingletonC] 
+com.deckapp.core.data.repository.SessionRepositoryImpl(à, sceneDao)
+        com.deckapp.core.data.repository.SessionRepositoryImpl is injected at
+            [com.deckapp.DeckApplication_HiltComponents.SingletonC] 
+com.deckapp.core.data.di.RepositoryModule.bindSessionRepository(impl)
+        com.deckapp.core.domain.repository.SessionRepository is requested at
+            [com.deckapp.DeckApplication_HiltComponents.SingletonC] 
+com.deckapp.feature.importdeck.table.TableImportEntryPoint.sessionRepository()
+    The following other entry points also depend on it:
+        dagger.hilt.android.internal.lifecycle.HiltViewModelFactory.ViewModelFactoriesEntryPoint.getHiltViewModelMap() 
+[com.deckapp.DeckApplication_HiltComponents.SingletonC ? com.deckapp.DeckApplication_HiltComponents.ActivityRetainedC 
+? com.deckapp.DeckApplication_HiltComponents.ViewModelC]
+  1 error
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+BUILD FAILED in 3m 9s
+464 actionable tasks: 464 executed
+Configuration cache entry reused.

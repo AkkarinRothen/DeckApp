@@ -10,10 +10,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,13 +44,32 @@ fun NpcEditorScreen(
         viewModel.onImageSelected(uri)
     }
 
+    val voiceFileLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        viewModel.onVoiceFileSelected(uri)
+    }
+
+    val context = LocalContext.current
+    var hasPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        hasPermission = isGranted
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(if (npc.id == 0L) "Nuevo NPC" else "Editar NPC", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                     }
                 },
                 actions = {
@@ -156,7 +178,133 @@ fun NpcEditorScreen(
                 placeholder = { Text("Describe a tu personaje...", color = Color.White.copy(alpha = 0.3f)) }
             )
             
+            Spacer(Modifier.height(24.dp))
+
+            // Referencia de Voz
+            VoiceSampleSection(
+                isRecording = viewModel.isRecording,
+                isPlaying = viewModel.isPlaying,
+                hasSample = viewModel.hasNewSample || npc.voiceSamplePath != null,
+                onRecord = {
+                    if (hasPermission) {
+                        viewModel.startRecording()
+                    } else {
+                        permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                    }
+                },
+                onStopRecording = viewModel::stopRecording,
+                onPlay = viewModel::playSample,
+                onStopPlayback = viewModel::stopPlayback,
+                onDelete = viewModel::deleteSample,
+                onSelectFile = { voiceFileLauncher.launch("audio/*") }
+            )
+            
             Spacer(Modifier.height(100.dp))
+        }
+    }
+}
+
+@Composable
+fun VoiceSampleSection(
+    isRecording: Boolean,
+    isPlaying: Boolean,
+    hasSample: Boolean,
+    onRecord: () -> Unit,
+    onStopRecording: () -> Unit,
+    onPlay: () -> Unit,
+    onStopPlayback: () -> Unit,
+    onDelete: () -> Unit,
+    onSelectFile: () -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            "Referencia de Voz",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
+        Spacer(Modifier.height(8.dp))
+        
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            color = Color.White.copy(alpha = 0.05f),
+            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                if (isRecording) {
+                    // Recording State
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .clip(CircleShape)
+                            .background(Color.Red)
+                    )
+                    Text("Grabando...", color = Color.Red, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                    IconButton(
+                        onClick = onStopRecording,
+                        colors = IconButtonDefaults.iconButtonColors(containerColor = Color.Red.copy(alpha = 0.2f))
+                    ) {
+                        Icon(Icons.Default.Stop, contentDescription = "Detener", tint = Color.Red)
+                    }
+                } else {
+                    // Idle or Playing State
+                    IconButton(
+                        onClick = onRecord,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                        )
+                    ) {
+                        Icon(Icons.Default.Mic, contentDescription = "Grabar", tint = MaterialTheme.colorScheme.primary)
+                    }
+                    
+                    IconButton(
+                        onClick = onSelectFile,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = Color.White.copy(alpha = 0.05f)
+                        )
+                    ) {
+                        Icon(Icons.Default.UploadFile, contentDescription = "Seleccionar archivo", tint = Color.White.copy(alpha = 0.6f))
+                    }
+
+                    if (hasSample) {
+                        Surface(
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp),
+                            color = Color.White.copy(alpha = 0.05f)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Default.MusicNote, contentDescription = null, tint = Color.White.copy(alpha = 0.4f), modifier = Modifier.size(16.dp))
+                                Spacer(Modifier.width(8.dp))
+                                Text("Muestra de voz", fontSize = 14.sp, color = Color.White.copy(alpha = 0.8f))
+                            }
+                        }
+
+                        IconButton(onClick = if (isPlaying) onStopPlayback else onPlay) {
+                            Icon(
+                                imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                contentDescription = if (isPlaying) "Pausar" else "Reproducir",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+
+                        IconButton(onClick = onDelete) {
+                            Icon(Icons.Default.Delete, contentDescription = "Borrar", tint = Color.White.copy(alpha = 0.3f))
+                        }
+                    } else {
+                        Text("No hay muestra grabada", color = Color.White.copy(alpha = 0.3f), fontSize = 14.sp, modifier = Modifier.weight(1f))
+                    }
+                }
+            }
         }
     }
 }

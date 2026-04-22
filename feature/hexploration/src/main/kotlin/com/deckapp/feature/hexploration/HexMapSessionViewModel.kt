@@ -6,40 +6,22 @@ import androidx.lifecycle.viewModelScope
 import com.deckapp.core.domain.repository.CardRepository
 import com.deckapp.core.domain.repository.ReferenceRepository
 import com.deckapp.core.domain.repository.SessionRepository
+import com.deckapp.core.domain.repository.HexRepository
+import com.deckapp.core.domain.repository.MythicRepository
 import com.deckapp.core.domain.usecase.DiscardCardUseCase
 import com.deckapp.core.domain.usecase.DrawCardUseCase
 import com.deckapp.core.domain.usecase.GetAllTablesUseCase
 import com.deckapp.core.domain.usecase.ResetDeckUseCase
 import com.deckapp.core.domain.usecase.RollTableUseCase
-import com.deckapp.core.domain.usecase.hex.ExploreHexUseCase
-import com.deckapp.core.domain.usecase.hex.GetHexDaysUseCase
-import com.deckapp.core.domain.usecase.hex.GetHexMapWithTilesUseCase
-import com.deckapp.core.domain.usecase.hex.LinkHexMapToSessionUseCase
-import com.deckapp.core.domain.usecase.hex.LogHexActivityUseCase
-import com.deckapp.core.domain.usecase.hex.MapHexUseCase
-import com.deckapp.core.domain.usecase.hex.MovePartyUseCase
-import com.deckapp.core.domain.usecase.hex.ReconnoiterHexUseCase
-import com.deckapp.core.domain.usecase.hex.StartNewHexDayUseCase
-import com.deckapp.core.model.Card
-import com.deckapp.core.model.CardStack
-import com.deckapp.core.model.HexDay
-import com.deckapp.core.model.HexPoi
-import com.deckapp.core.model.HexSessionResources
-import com.deckapp.core.model.HexTile
-import com.deckapp.core.model.RandomTable
-import com.deckapp.core.model.SystemRule
-import com.deckapp.core.model.TableRollResult
+import com.deckapp.core.domain.usecase.hex.*
+import com.deckapp.core.domain.usecase.AddQuickNoteUseCase
+import com.deckapp.core.domain.usecase.SearchResult
+import com.deckapp.core.domain.usecase.GlobalSearchResultType
+import com.deckapp.core.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 data class HexMapSessionUiState(
@@ -50,7 +32,7 @@ data class HexMapSessionUiState(
     val currentDay: HexDay? = null,
     val activitiesUsedToday: Int = 0,
     val maxActivitiesPerDay: Int = 8,
-    val todayLog: List<com.deckapp.core.model.HexActivityEntry> = emptyList(),
+    val todayLog: List<HexActivityEntry> = emptyList(),
     val partyLocation: Pair<Int, Int>? = null,
     val selectedTile: HexTile? = null,
     val showTileSheet: Boolean = false,
@@ -76,7 +58,18 @@ data class HexMapSessionUiState(
     val drawnCardsByDeck: Map<Long, List<Card>> = emptyMap(),
     val lastDrawnCard: Card? = null,
     val showLastDrawnCard: Boolean = false,
-    val showResourcesPanel: Boolean = false
+    val showResourcesPanel: Boolean = false,
+    val allDays: List<HexDay> = emptyList(),
+    val showJournalPanel: Boolean = false,
+    val exportText: String = "",
+    val showExportDialog: Boolean = false,
+    val linkedMythicSession: MythicSession? = null,
+    val allMythicSessions: List<MythicSession> = emptyList(),
+    // Edit mode support
+    val isEditMode: Boolean = false,
+    val activeBrush: TerrainBrush = defaultBrushes.first(),
+    val brushes: List<TerrainBrush> = defaultBrushes,
+    val resourceSearchQuery: String = ""
 )
 
 @HiltViewModel
@@ -90,6 +83,8 @@ class HexMapSessionViewModel @Inject constructor(
     private val linkHexMapToSessionUseCase: LinkHexMapToSessionUseCase,
     private val rollTableUseCase: RollTableUseCase,
     private val sessionRepository: SessionRepository,
+    private val hexRepository: HexRepository,
+    private val mythicRepository: MythicRepository,
     private val movePartyUseCase: MovePartyUseCase,
     private val getHexDaysUseCase: GetHexDaysUseCase,
     private val logHexActivityUseCase: LogHexActivityUseCase,
@@ -98,7 +93,13 @@ class HexMapSessionViewModel @Inject constructor(
     private val drawCardUseCase: DrawCardUseCase,
     private val discardCardUseCase: DiscardCardUseCase,
     private val resetDeckUseCase: ResetDeckUseCase,
-    private val cardRepository: CardRepository
+    private val cardRepository: CardRepository,
+    private val exportSessionSummaryUseCase: ExportSessionSummaryUseCase,
+    private val addQuickNoteUseCase: AddQuickNoteUseCase,
+    private val updateHexTileUseCase: UpdateHexTileUseCase,
+    private val addHexTileUseCase: AddHexTileUseCase,
+    private val deleteHexTileUseCase: DeleteHexTileUseCase,
+    private val updateHexDayNotesUseCase: UpdateHexDayNotesUseCase
 ) : ViewModel() {
 
     private val mapId: Long = savedStateHandle["mapId"] ?: 0L
@@ -107,33 +108,40 @@ class HexMapSessionViewModel @Inject constructor(
     val uiState: StateFlow<HexMapSessionUiState> = _uiState.asStateFlow()
 
     init {
-        combine(
-            getHexMapWithTilesUseCase(mapId).filterNotNull(),
-            sessionRepository.getActiveSession()
-        ) { mapData, activeSession ->
-            val resources = parseSessionResources(mapData.map.sessionResources)
-            _uiState.update {
-                it.copy(
-                    mapName = mapData.map.name,
-                    tiles = mapData.tiles,
-                    pois = mapData.pois,
-                    maxActivitiesPerDay = mapData.map.maxActivitiesPerDay,
-                    partyLocation = if (mapData.map.partyQ != null && mapData.map.partyR != null)
-                        mapData.map.partyQ!! to mapData.map.partyR!!
-                    else null,
-                    activeSessionId = activeSession?.id,
-                    weatherTableId = mapData.map.weatherTableId,
-                    travelEventTableId = mapData.map.travelEventTableId,
-                    terrainTableConfig = mapData.map.terrainTableConfig,
-                    sessionResources = resources,
-                    isLoading = false
-                )
-            }
-            updatePinnedResources()
-            if (activeSession != null && mapData.map.sessionId != activeSession.id) {
-                linkHexMapToSessionUseCase(mapId, activeSession.id)
-            }
-        }.launchIn(viewModelScope)
+        getHexMapWithTilesUseCase(mapId)
+            .filterNotNull()
+            .onEach { mapData ->
+                val resources = parseSessionResources(mapData.map.sessionResources)
+                _uiState.update {
+                    it.copy(
+                        mapName = mapData.map.name,
+                        tiles = mapData.tiles,
+                        pois = mapData.pois,
+                        maxActivitiesPerDay = mapData.map.maxActivitiesPerDay,
+                        partyLocation = if (mapData.map.partyQ != null && mapData.map.partyR != null)
+                            mapData.map.partyQ!! to mapData.map.partyR!!
+                        else null,
+                        weatherTableId = mapData.map.weatherTableId,
+                        travelEventTableId = mapData.map.travelEventTableId,
+                        terrainTableConfig = mapData.map.terrainTableConfig,
+                        sessionResources = resources,
+                        isLoading = false
+                    )
+                }
+                updatePinnedResources()
+                
+                // Cargar Mythic vinculado
+                if (mapData.map.linkedMythicSessionId != null) {
+                    loadLinkedMythic(mapData.map.linkedMythicSessionId!!)
+                } else {
+                    _uiState.update { it.copy(linkedMythicSession = null) }
+                }
+            }.launchIn(viewModelScope)
+
+        sessionRepository.getActiveSession()
+            .onEach { activeSession ->
+                _uiState.update { it.copy(activeSessionId = activeSession?.id) }
+            }.launchIn(viewModelScope)
 
         observeDays()
 
@@ -158,16 +166,20 @@ class HexMapSessionViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
 
+        mythicRepository.getSessions()
+            .onEach { sessions ->
+                _uiState.update { it.copy(allMythicSessions = sessions) }
+            }.launchIn(viewModelScope)
+
         cardRepository.getDrawnCards()
             .onEach { drawnCards ->
                 val sessionId = _uiState.value.activeSessionId
                 val pinnedDeckIds = _uiState.value.pinnedDecks.map { it.id }.toSet()
                 
-                // Si hay sesión activa, filtramos por eventos para asegurar aislamiento
                 val sessionDrawnCards = if (sessionId != null) {
                     val sessionEvents = sessionRepository.getEventsForSession(sessionId).first()
                     val sessionDrawnIds = sessionEvents
-                        .filter { it.action == com.deckapp.core.model.DrawAction.DRAW }
+                        .filter { it.action == DrawAction.DRAW }
                         .map { it.cardId }
                         .toSet()
                     drawnCards.filter { it.id in sessionDrawnIds }
@@ -181,6 +193,14 @@ class HexMapSessionViewModel @Inject constructor(
                 _uiState.update { it.copy(drawnCardsByDeck = byDeck) }
             }
             .launchIn(viewModelScope)
+    }
+
+    private fun loadLinkedMythic(id: Long) {
+        viewModelScope.launch {
+            mythicRepository.getSessionById(id).collect { mythic ->
+                _uiState.update { it.copy(linkedMythicSession = mythic) }
+            }
+        }
     }
 
     private fun updatePinnedResources() {
@@ -202,7 +222,8 @@ class HexMapSessionViewModel @Inject constructor(
                 _uiState.update { it.copy(
                     currentDay = latest,
                     activitiesUsedToday = latest?.activitiesLog?.size ?: 0,
-                    todayLog = latest?.activitiesLog ?: emptyList()
+                    todayLog = latest?.activitiesLog ?: emptyList(),
+                    allDays = days.sortedByDescending { it.dayNumber }
                 ) }
             }
             .launchIn(viewModelScope)
@@ -279,8 +300,8 @@ class HexMapSessionViewModel @Inject constructor(
             val dayId = ensureDayExists()
             logHexActivityUseCase(
                 dayId,
-                com.deckapp.core.model.HexActivityEntry(
-                    type = com.deckapp.core.model.HexActivityType.TRAVEL,
+                HexActivityEntry(
+                    type = HexActivityType.TRAVEL,
                     description = "Viaje a ($q, $r)",
                     tileQ = q,
                     tileR = r
@@ -310,6 +331,19 @@ class HexMapSessionViewModel @Inject constructor(
 
     fun showResourcesPanel() = _uiState.update { it.copy(showResourcesPanel = true) }
     fun dismissResourcesPanel() = _uiState.update { it.copy(showResourcesPanel = false) }
+
+    fun showJournalPanel() = _uiState.update { it.copy(showJournalPanel = true) }
+    fun dismissJournalPanel() = _uiState.update { it.copy(showJournalPanel = false) }
+    fun dismissExportDialog() = _uiState.update { it.copy(showExportDialog = false, exportText = "") }
+
+    fun updateDayNotes(day: HexDay, notes: String) {
+        viewModelScope.launch { updateHexDayNotesUseCase(day, notes) }
+    }
+
+    fun exportSummary() {
+        val text = exportSessionSummaryUseCase(_uiState.value.mapName, _uiState.value.allDays)
+        _uiState.update { it.copy(exportText = text, showExportDialog = true) }
+    }
     fun dismissLastDrawnCard() = _uiState.update { it.copy(showLastDrawnCard = false, lastDrawnCard = null) }
 
     fun drawCardFromDeck(deckId: Long) {
@@ -338,9 +372,71 @@ class HexMapSessionViewModel @Inject constructor(
         }
     }
 
+    fun linkMythicSession(mythicId: Long?) {
+        viewModelScope.launch {
+            hexRepository.updateLinkedMythicSession(mapId, mythicId)
+        }
+    }
+
+    // --- Edit Mode Functions ---
+
+    fun toggleEditMode() {
+        _uiState.update { it.copy(isEditMode = !it.isEditMode) }
+    }
+
+    fun selectBrush(brush: TerrainBrush) {
+        _uiState.update { it.copy(activeBrush = brush) }
+    }
+
+    fun onTileClickInEditMode(tile: HexTile) {
+        val brush = _uiState.value.activeBrush
+        if (brush.cost == -1) {
+            viewModelScope.launch { deleteHexTileUseCase(mapId, tile.q, tile.r) }
+        } else {
+            val painted = tile.copy(
+                terrainCost = brush.cost,
+                terrainLabel = brush.label,
+                terrainColor = brush.color
+            )
+            viewModelScope.launch { updateHexTileUseCase(painted) }
+        }
+    }
+
+    fun onEmptySpaceClickInEditMode(q: Int, r: Int) {
+        val brush = _uiState.value.activeBrush
+        if (brush.cost == -1) return
+        viewModelScope.launch {
+            addHexTileUseCase(
+                mapId = mapId,
+                q = q,
+                r = r,
+                terrainCost = brush.cost,
+                terrainLabel = brush.label,
+                terrainColor = brush.color
+            )
+        }
+    }
+
+    fun onResourceSearchQueryChanged(q: String) {
+        _uiState.update { it.copy(resourceSearchQuery = q) }
+    }
+
+    // --- End Edit Mode ---
+
     private suspend fun autoRoll(tableId: Long, context: String) {
         if (_uiState.value.showRollResultDialog) return
         val result = rollTableUseCase(tableId, _uiState.value.activeSessionId)
+        
+        // Registrar en el historial de la sesión automáticamente
+        viewModelScope.launch {
+            val noteContent = "[$context] Resultado: ${result.resolvedText}"
+            addQuickNoteUseCase(
+                content = noteContent,
+                sessionId = _uiState.value.activeSessionId,
+                mythicSessionId = _uiState.value.linkedMythicSession?.id
+            )
+        }
+
         _uiState.update { it.copy(
             lastRollResult = result,
             rollResultContext = context,
@@ -351,8 +447,46 @@ class HexMapSessionViewModel @Inject constructor(
 
     private suspend fun autoRollTerrainIfConfigured(tile: HexTile) {
         if (tile.terrainLabel.isBlank()) return
-        val tableId = parseTerrainConfig(_uiState.value.terrainTableConfig)[tile.terrainLabel] ?: return
+        val terrainConfig = parseTerrainConfig(_uiState.value.terrainTableConfig)
+        val tableId = terrainConfig[tile.terrainLabel] ?: return
         autoRoll(tableId, "Encuentro: ${tile.terrainLabel}")
+    }
+
+    fun linkSearchResultToTile(result: SearchResult, q: Int, r: Int) {
+        viewModelScope.launch {
+            when (result.type) {
+                GlobalSearchResultType.NPC -> {
+                    // Añadir como un POI tipo Landmark/Enemigo
+                    val poi = HexPoi(
+                        mapId = mapId,
+                        tileQ = q,
+                        tileR = r,
+                        name = result.title,
+                        type = PoiType.LANDMARK,
+                        description = "Vinculado desde buscador: ${result.subtitle}"
+                    )
+                    hexRepository.upsertHexPoi(poi)
+                }
+                GlobalSearchResultType.TABLE -> {
+                    autoRoll(result.id, "Tabla en hex ($q,$r)")
+                }
+                GlobalSearchResultType.MANUAL, GlobalSearchResultType.RULE, GlobalSearchResultType.WIKI -> {
+                    // Crear un POI Landmark que sirva de acceso directo
+                    val poi = HexPoi(
+                        mapId = mapId,
+                        tileQ = q,
+                        tileR = r,
+                        name = result.title,
+                        type = PoiType.LANDMARK,
+                        description = "Referencia: ${result.subtitle}. Haz clic para abrir.",
+                        tableId = if (result.type == GlobalSearchResultType.TABLE) result.id else null
+                        // Nota: En el futuro, podríamos guardar el 'referenciaId' en el POI 
+                        // para abrir el visor directamente.
+                    )
+                    hexRepository.upsertHexPoi(poi)
+                }
+            }
+        }
     }
 
     private suspend fun ensureDayExists(): Long {
@@ -364,5 +498,17 @@ class HexMapSessionViewModel @Inject constructor(
             activitiesUsedToday = 0
         ) }
         return id
+    }
+
+    private fun parseSessionResources(json: String): HexSessionResources {
+        return try {
+            Json { ignoreUnknownKeys = true }.decodeFromString<HexSessionResources>(json)
+        } catch (e: Exception) { HexSessionResources() }
+    }
+
+    private fun parseTerrainConfig(json: String): Map<String, Long> {
+        return try {
+            Json { ignoreUnknownKeys = true }.decodeFromString<Map<String, Long>>(json)
+        } catch (e: Exception) { emptyMap() }
     }
 }

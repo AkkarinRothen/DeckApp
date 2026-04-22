@@ -21,5 +21,5 @@ data class HexActivityEntry(
 
 @Serializable
 enum class HexActivityType {
-    TRAVEL, RECONNOITER, FORTIFY_CAMP, MAP_AREA, CUSTOM
+    TRAVEL, EXPLORE, RECONNOITER, FORTIFY_CAMP, MAP_AREA, CUSTOM
 }

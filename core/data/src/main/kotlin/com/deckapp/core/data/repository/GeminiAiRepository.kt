@@ -111,6 +111,42 @@ class GeminiAiRepository @Inject constructor() : AiTableRepository, AiReferenceR
         if (apiKey.isBlank()) throw AiApiException("La API Key de Gemini no está configurada en Ajustes.")
     }
 
+    override suspend fun extractTextFromImage(bitmap: Bitmap, apiKey: String): String {
+        requireApiKey(apiKey)
+        val model = getVisionModel(apiKey)
+        val scaledBitmap = scaleBitmapForVision(bitmap)
+
+        val prompt = """
+            Eres un asistente para GMs de TTRPG. 
+            Extrae el texto de esta imagen (puede ser un párrafo de ambientación, stats de un monstruo o una regla).
+            
+            REGLAS:
+            1. Devuelve el texto EXACTO y limpio de errores de OCR.
+            2. Mantén la estructura de párrafos o listas si es posible.
+            3. Si es un bloque de estadísticas (stat-block), asegúrate de que sea legible.
+            4. Responde ÚNICAMENTE con el texto extraído.
+            5. Sin explicaciones ni intros.
+        """.trimIndent()
+
+        var lastEx: Exception? = null
+        repeat(MAX_RETRY_ATTEMPTS) { attempt ->
+            try {
+                val response = model.generateContent(content {
+                    image(scaledBitmap)
+                    text(prompt)
+                })
+                return response.text?.trim() ?: throw AiApiException("Gemini devolvió una respuesta vacía.")
+            } catch (e: Exception) {
+                if (!isRateLimitError(e) || attempt == MAX_RETRY_ATTEMPTS - 1) {
+                    throw AiApiException(friendlyGeminiError(e), e)
+                }
+                lastEx = e
+                delay(parseRetryDelayMs(e) ?: (RETRY_BASE_DELAY_MS shl attempt))
+            }
+        }
+        throw AiApiException(friendlyGeminiError(lastEx!!), lastEx)
+    }
+
     override suspend fun reconstructTable(rawText: String, apiKey: String): AiTableSuggestions {
         requireApiKey(apiKey)
         val model = getTextModel(apiKey)

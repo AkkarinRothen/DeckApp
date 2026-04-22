@@ -64,6 +64,7 @@ fun LibraryScreen(
     onWikiClick: () -> Unit,
     onReferenceClick: () -> Unit,
     onHexplorationClick: () -> Unit = {},
+    onShowDiceRoller: () -> Unit = {},
     viewModel: LibraryViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -200,6 +201,10 @@ fun LibraryScreen(
                                     tint = if (uiState.isReorderMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                                 )
                             }
+                        }
+
+                        IconButton(onClick = onShowDiceRoller) {
+                            Icon(Icons.Default.Casino, contentDescription = "Rodillo de dados")
                         }
 
                         IconButton(onClick = onImportClick) {

@@ -28,6 +28,7 @@ fun HexMapEntity.toDomain() = HexMap(
     travelEventTableId = travelEventTableId,
     terrainTableConfig = terrainTableConfig,
     sessionResources = sessionResources,
+    linkedMythicSessionId = linkedMythicSessionId,
     createdAt = createdAt
 )
 
@@ -47,6 +48,7 @@ fun HexMap.toEntity() = HexMapEntity(
     travelEventTableId = travelEventTableId,
     terrainTableConfig = terrainTableConfig,
     sessionResources = sessionResources,
+    linkedMythicSessionId = linkedMythicSessionId,
     createdAt = createdAt
 )
 

@@ -1,6 +1,7 @@
 package com.deckapp.feature.importdeck.table.components
 
 import android.graphics.Bitmap
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -9,6 +10,9 @@ import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,17 +23,20 @@ import androidx.compose.ui.unit.dp
 import com.deckapp.core.domain.usecase.RangeParser
 import com.deckapp.core.model.OcrBlock
 import com.deckapp.core.model.TableEntry
+import com.deckapp.core.model.Tag
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun TableReviewView(
     entries: List<TableEntry>,
     tableName: String,
-    tableTag: String,
+    tableTags: List<Tag>,
+    allTags: List<Tag>,
     tableFormula: String = "1d6",
     onEntryChange: (Int, TableEntry) -> Unit,
     onNameChange: (String) -> Unit,
-    onTagChange: (String) -> Unit,
+    onToggleTag: (Tag) -> Unit,
+    onCreateTag: (String) -> Unit,
     onFormulaChange: (String) -> Unit = {},
     onConfirm: () -> Unit,
     validationResult: RangeParser.ValidationResult?,
@@ -146,21 +153,112 @@ fun TableReviewView(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedTextField(
                     value = tableFormula,
                     onValueChange = onFormulaChange,
-                    label = { Text("Fórmula de dado") },
+                    label = { Text("Fórmula") },
                     placeholder = { Text("1d6") },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.width(100.dp)
                 )
-                OutlinedTextField(
-                    value = tableTag,
-                    onValueChange = onTagChange,
-                    label = { Text("Categoría") },
-                    modifier = Modifier.weight(2f)
-                )
+                
+                // Selector de Etiquetas
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Etiquetas", style = MaterialTheme.typography.labelSmall)
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        tableTags.forEach { tag ->
+                            InputChip(
+                                selected = true,
+                                onClick = { onToggleTag(tag) },
+                                label = { Text(tag.name, style = MaterialTheme.typography.labelSmall) },
+                                trailingIcon = { Icon(Icons.Default.Close, null, modifier = Modifier.size(12.dp)) },
+                                colors = InputChipDefaults.inputChipColors(
+                                    selectedContainerColor = Color(tag.color).copy(alpha = 0.2f),
+                                    selectedLabelColor = Color(tag.color)
+                                )
+                            )
+                        }
+                        
+                        var showTagDialog by remember { mutableStateOf(false) }
+                        var tagSearchQuery by remember { mutableStateOf("") }
+
+                        IconButton(onClick = { showTagDialog = true }, modifier = Modifier.size(32.dp)) {
+                            Icon(Icons.Default.Add, contentDescription = "Añadir etiqueta", modifier = Modifier.size(16.dp))
+                        }
+
+                        if (showTagDialog) {
+                            AlertDialog(
+                                onDismissRequest = { 
+                                    showTagDialog = false
+                                    tagSearchQuery = ""
+                                },
+                                title = { Text("Añadir Etiqueta") },
+                                text = {
+                                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                        OutlinedTextField(
+                                            value = tagSearchQuery,
+                                            onValueChange = { tagSearchQuery = it },
+                                            placeholder = { Text("Buscar o crear etiqueta...") },
+                                            leadingIcon = { Icon(Icons.Default.Search, null) },
+                                            singleLine = true,
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+
+                                        val filteredTags = allTags.filter { 
+                                            it.name.contains(tagSearchQuery, ignoreCase = true) 
+                                        }
+
+                                        if (filteredTags.isNotEmpty() || tagSearchQuery.isNotBlank()) {
+                                            HorizontalDivider()
+                                            LazyColumn(modifier = Modifier.heightIn(max = 200.dp)) {
+                                                if (tagSearchQuery.isNotBlank() && filteredTags.none { it.name.equals(tagSearchQuery, ignoreCase = true) }) {
+                                                    item {
+                                                        ListItem(
+                                                            headlineContent = { Text("Crear \"$tagSearchQuery\"") },
+                                                            leadingContent = { Icon(Icons.Default.Add, null, tint = MaterialTheme.colorScheme.primary) },
+                                                            modifier = Modifier.clickable {
+                                                                onCreateTag(tagSearchQuery)
+                                                                showTagDialog = false
+                                                                tagSearchQuery = ""
+                                                            }
+                                                        )
+                                                    }
+                                                }
+
+                                                itemsIndexed(filteredTags) { _, tag ->
+                                                    val isSelected = tag in tableTags
+                                                    ListItem(
+                                                        headlineContent = { Text(tag.name) },
+                                                        modifier = Modifier.clickable {
+                                                            onToggleTag(tag)
+                                                            showTagDialog = false
+                                                            tagSearchQuery = ""
+                                                        },
+                                                        trailingContent = {
+                                                            if (isSelected) Icon(Icons.Default.Check, null, tint = MaterialTheme.colorScheme.primary)
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                confirmButton = {
+                                    TextButton(onClick = { 
+                                        showTagDialog = false
+                                        tagSearchQuery = ""
+                                    }) { Text("Cerrar") }
+                                }
+                            )
+                        }
+                    }
+                }
             }
             
             Spacer(Modifier.height(16.dp))
@@ -187,13 +285,6 @@ fun TableReviewView(
             enabled = validationResult?.isValid == true || showOverlay
         ) {
             Text(if (showOverlay) "Volver a la lista" else "Continuar")
-        }
-    }
-
-    // Al hacer click en el botón de confirmar en modo overlay, simplemente volvemos a la lista
-    LaunchedEffect(showOverlay) {
-        if (!showOverlay && validationResult?.isValid == false) {
-            // Opcional: scroll al primer error
         }
     }
 }

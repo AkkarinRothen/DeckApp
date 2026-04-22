@@ -51,6 +51,9 @@ interface HexDao {
     @Query("UPDATE hex_maps SET partyQ = :q, partyR = :r WHERE id = :mapId")
     suspend fun updatePartyLocation(mapId: Long, q: Int, r: Int)
 
+    @Query("UPDATE hex_maps SET linkedMythicSessionId = :mythicSessionId WHERE id = :mapId")
+    suspend fun updateLinkedMythicSession(mapId: Long, mythicSessionId: Long?)
+
     // --- Days ---
 
     @Query("SELECT * FROM hex_days WHERE mapId = :mapId ORDER BY dayNumber ASC")

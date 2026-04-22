@@ -1,20 +1,22 @@
 package com.deckapp.feature.hexploration.components
 
+import android.content.ClipData
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
@@ -23,22 +25,19 @@ import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.deckapp.core.model.HexPoi
 import com.deckapp.core.model.HexTile
 import com.deckapp.core.model.PoiType
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.floor
-import kotlin.math.roundToInt
-import kotlin.math.sin
-import kotlin.math.sqrt
+import kotlin.math.*
 
 enum class HexCanvasMode { DESIGN, SESSION }
 
-private const val HEX_SIZE_DEFAULT = 80f   // radius in px at scale=1
+internal const val HEX_SIZE_DEFAULT = 80f   // radius in px at scale=1
 private const val FOG_ALPHA = 0.75f
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HexGridCanvas(
     tiles: List<HexTile>,
@@ -48,6 +47,9 @@ fun HexGridCanvas(
     onTileClick: (HexTile) -> Unit,
     onTileLongPress: (HexTile) -> Unit,
     onEmptySpaceClick: ((Int, Int) -> Unit)? = null,
+    onExploreTile: ((HexTile) -> Unit)? = null,
+    onStateChanged: ((Float, Offset) -> Unit)? = null,
+    onTimeSkip: (() -> Unit)? = null,
     partyLocation: Pair<Int, Int>? = null,
     onMoveParty: ((Int, Int) -> Unit)? = null,
     showCoordinates: Boolean = false,
@@ -57,12 +59,23 @@ fun HexGridCanvas(
     var scale by remember { mutableFloatStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
     
-    // Ruler state: temporary destination while dragging or long-pressing
-    var rulerTarget by remember { mutableStateOf<Pair<Int, Int>?>(null) }
+    val transformState = rememberTransformableState { zoomChange, offsetChange, _ ->
+        scale = (scale * zoomChange).coerceIn(0.2f, 5f)
+        offset += offsetChange
+    }
 
-    val transformState = rememberTransformableState { zoomChange, panChange, _ ->
-        scale = (scale * zoomChange).coerceIn(0.3f, 4f)
-        offset += panChange
+    // Time-Skip Logic: Gesto circular
+    var lastAngle by remember { mutableFloatStateOf(0f) }
+    var totalRotation by remember { mutableFloatStateOf(0f) }
+    var isRotating by remember { mutableStateOf(false) }
+
+    // Rascado para explorar
+    var scratchedTile by remember { mutableStateOf<Pair<Int, Int>?>(null) }
+    var scratchPoints by remember { mutableStateOf<List<Offset>>(emptyList()) }
+
+    // Sincronizar estado con el exterior
+    LaunchedEffect(scale, offset) {
+        onStateChanged?.invoke(scale, offset)
     }
 
     val tileMap = remember(tiles) { tiles.associateBy { it.q to it.r } }
@@ -70,6 +83,7 @@ fun HexGridCanvas(
 
     Canvas(
         modifier = modifier
+            .fillMaxSize()
             .transformable(state = transformState)
             .pointerInput(tileMap, scale, offset) {
                 detectTapGestures(
@@ -88,15 +102,78 @@ fun HexGridCanvas(
                         val (q, r) = worldToAxial(worldPos, HEX_SIZE_DEFAULT)
                         val tile = tileMap[q to r]
                         if (tile != null) {
-                            if (mode == HexCanvasMode.SESSION && partyLocation != null) {
-                                // If long press on a different tile in session mode, move party
-                                onMoveParty?.invoke(q, r)
-                            } else {
-                                onTileLongPress(tile)
-                            }
+                            onTileLongPress(tile)
                         }
                     }
                 )
+            }
+            .pointerInput(mode, onTimeSkip) {
+                if (mode == HexCanvasMode.SESSION && onTimeSkip != null) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            if (event.changes.size == 2) {
+                                val change1 = event.changes[0]
+                                val change2 = event.changes[1]
+                                val center = (change1.position + change2.position) / 2f
+                                val currentVector = change1.position - center
+                                val angle = Math.toDegrees(atan2(currentVector.y.toDouble(), currentVector.x.toDouble())).toFloat()
+
+                                if (!isRotating) {
+                                    lastAngle = angle
+                                    isRotating = true
+                                    totalRotation = 0f
+                                } else {
+                                    var delta = angle - lastAngle
+                                    if (delta > 180f) delta -= 360f
+                                    if (delta < -180f) delta += 360f
+                                    totalRotation += delta
+                                    lastAngle = angle
+
+                                    if (abs(totalRotation) > 300f) {
+                                        onTimeSkip()
+                                        totalRotation = 0f
+                                        isRotating = false
+                                    }
+                                }
+                            } else {
+                                isRotating = false
+                            }
+                        }
+                    }
+                }
+            }
+            .pointerInput(mode, tileMap, scale, offset) {
+                if (mode == HexCanvasMode.SESSION) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            val position = event.changes.first().position
+                            val worldPos = screenToWorld(position, offset, scale)
+                            val (q, r) = worldToAxial(worldPos, HEX_SIZE_DEFAULT)
+                            val tile = tileMap[q to r]
+
+                            if (tile != null && !tile.isExplored) {
+                                if (scratchedTile != (q to r)) {
+                                    scratchedTile = q to r
+                                    scratchPoints = emptyList()
+                                }
+                                
+                                if (event.changes.first().pressed) {
+                                    scratchPoints = scratchPoints + position
+                                    if (scratchPoints.size > 15) {
+                                        onExploreTile?.invoke(tile)
+                                        scratchedTile = null
+                                        scratchPoints = emptyList()
+                                    }
+                                }
+                            } else {
+                                scratchedTile = null
+                                scratchPoints = emptyList()
+                            }
+                        }
+                    }
+                }
             }
     ) {
         val hexSize = HEX_SIZE_DEFAULT * scale
@@ -107,7 +184,6 @@ fun HexGridCanvas(
             bottom = (-offset.y + size.height) / scale
         )
 
-        // Culling: only draw hexes visible in viewport (+3 hex margin)
         val margin = HEX_SIZE_DEFAULT * 3
         val visibleTiles = tiles.filter { tile ->
             val center = axialToPixel(tile.q, tile.r, HEX_SIZE_DEFAULT)
@@ -135,24 +211,20 @@ fun HexGridCanvas(
             val isExplored = mode == HexCanvasMode.DESIGN || tile.isExplored
             if (isExplored) {
                 if (showCoordinates) {
-                    drawTerrainLabel("${tile.q},${tile.r}", screenCenter.copy(y = screenCenter.y - hexSize * 0.45f), hexSize, textMeasurer, scale)
+                    drawTerrainLabel("${tile.q},${tile.r}", screenCenter.copy(y = screenCenter.y - hexSize * 0.45f), hexSize, textMeasurer)
                 }
                 if (tile.terrainLabel.isNotBlank()) {
-                    drawTerrainLabel(tile.terrainLabel, screenCenter, hexSize, textMeasurer, scale)
+                    drawTerrainLabel(tile.terrainLabel, screenCenter, hexSize, textMeasurer)
                 }
             }
         }
 
-        // Draw Party Token
         partyLocation?.let { (q, r) ->
             val center = axialToPixel(q, r, HEX_SIZE_DEFAULT)
             val screenCenter = worldToScreen(center, offset, scale)
             drawPartyToken(screenCenter, hexSize)
         }
 
-        // Draw Ruler if a tile is selected (Measure from selected to... nowhere yet, 
-        // let's simplify: if selectedTile is active, we can draw distance to party or just highlight distance)
-        // For now, let's draw a line between selectedTile and Party if both exist
         if (selectedTile != null && partyLocation != null && (selectedTile.q != partyLocation.first || selectedTile.r != partyLocation.second)) {
             val startCenter = axialToPixel(partyLocation.first, partyLocation.second, HEX_SIZE_DEFAULT)
             val endCenter = axialToPixel(selectedTile.q, selectedTile.r, HEX_SIZE_DEFAULT)
@@ -160,50 +232,39 @@ fun HexGridCanvas(
             val startScreen = worldToScreen(startCenter, offset, scale)
             val endScreen = worldToScreen(endCenter, offset, scale)
             
-            val distance = hexDistance(partyLocation.first, partyLocation.second, selectedTile.q, selectedTile.r)
-            
             drawLine(
                 color = Color.White.copy(alpha = 0.6f),
                 start = startScreen,
                 end = endScreen,
                 strokeWidth = 2f * scale,
-                pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(10f * scale, 10f * scale))
+                pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f * scale, 10f * scale))
             )
-            
-            // Note: Drawing text in Canvas requires native canvas or a specialized drawText call (available in latest Compose)
-            // For simplicity in this environment, we will skip the floating text and let the UI show distance in the sheet
         }
     }
 }
 
 private fun DrawScope.drawPartyToken(center: Offset, hexSize: Float) {
     val tokenSize = hexSize * 0.4f
-    // Draw a "Shield" shape for the party
     val path = Path().apply {
         moveTo(center.x, center.y - tokenSize)
         lineTo(center.x + tokenSize * 0.8f, center.y - tokenSize * 0.2f)
         lineTo(center.x + tokenSize * 0.6f, center.y + tokenSize * 0.8f)
-        quadraticBezierTo(center.x, center.y + tokenSize * 1.1f, center.x - tokenSize * 0.6f, center.y + tokenSize * 0.8f)
+        quadraticTo(center.x, center.y + tokenSize * 1.1f, center.x - tokenSize * 0.6f, center.y + tokenSize * 0.8f)
         lineTo(center.x - tokenSize * 0.8f, center.y - tokenSize * 0.2f)
         close()
     }
     
-    drawPath(path, Color(0xFFE91E63)) // Pink/Red for party
+    drawPath(path, Color(0xFFE91E63))
     drawPath(path, Color.White, style = Stroke(width = 2f))
-    
-    // Minimal "inner shield" decoration
     drawCircle(Color.White.copy(alpha = 0.3f), radius = tokenSize * 0.3f, center = center)
 }
 
 fun hexDistance(q1: Int, r1: Int, q2: Int, r2: Int): Int {
-    return (kotlin.math.abs(q1 - q2) + 
-            kotlin.math.abs(q1 + r1 - q2 - r2) + 
-            kotlin.math.abs(r1 - r2)) / 2
+    return (abs(q1 - q2) + 
+            abs(q1 + r1 - q2 - r2) + 
+            abs(r1 - r2)) / 2
 }
 
-// --- Geometry helpers ---
-
-// Flat-top hex: vertex i is at angle = 60°*i
 private fun hexCorner(center: Offset, size: Float, i: Int): Offset {
     val angleDeg = 60.0 * i
     val angleRad = PI / 180.0 * angleDeg
@@ -223,15 +284,13 @@ private fun hexPath(center: Offset, size: Float): Path = Path().apply {
     close()
 }
 
-// Flat-top axial → pixel
 fun axialToPixel(q: Int, r: Int, size: Float): Offset {
     val x = size * (3f / 2f * q)
     val y = size * (sqrt(3f) / 2f * q + sqrt(3f) * r)
     return Offset(x, y)
 }
 
-// Pixel → axial (flat-top), returns nearest hex (q, r)
-private fun worldToAxial(pos: Offset, size: Float): Pair<Int, Int> {
+fun worldToAxial(pos: Offset, size: Float): Pair<Int, Int> {
     val q = (2f / 3f * pos.x) / size
     val r = (-1f / 3f * pos.x + sqrt(3f) / 3f * pos.y) / size
     return axialRound(q, r)
@@ -242,21 +301,19 @@ private fun axialRound(q: Float, r: Float): Pair<Int, Int> {
     var rQ = q.roundToInt()
     var rR = r.roundToInt()
     val rS = s.roundToInt()
-    val dq = kotlin.math.abs(rQ - q)
-    val dr = kotlin.math.abs(rR - r)
-    val ds = kotlin.math.abs(rS - s)
+    val dq = abs(rQ - q)
+    val dr = abs(rR - r)
+    val ds = abs(rS - s)
     if (dq > dr && dq > ds) rQ = -rR - rS
     else if (dr > ds) rR = -rQ - rS
     return rQ to rR
 }
 
-private fun screenToWorld(screen: Offset, offset: Offset, scale: Float): Offset =
+fun screenToWorld(screen: Offset, offset: Offset, scale: Float): Offset =
     Offset((screen.x - offset.x) / scale, (screen.y - offset.y) / scale)
 
-private fun worldToScreen(world: Offset, offset: Offset, scale: Float): Offset =
+fun worldToScreen(world: Offset, offset: Offset, scale: Float): Offset =
     Offset(world.x * scale + offset.x, world.y * scale + offset.y)
-
-// --- Drawing ---
 
 private data class ViewportBounds(val left: Float, val top: Float, val right: Float, val bottom: Float)
 
@@ -271,37 +328,45 @@ private fun DrawScope.drawHexTile(
     val path = hexPath(center, hexSize - 1f)
     val terrainColor = Color(tile.terrainColor)
 
-    // Fill
     if (mode == HexCanvasMode.SESSION && !tile.isExplored) {
-        // Fog of war: dark overlay
-        drawPath(path, Color(0xFF1A1A2E))
-        drawPath(path, Color.Black.copy(alpha = FOG_ALPHA))
+        val fogBrush = Brush.radialGradient(
+            colors = listOf(Color(0xFF1A1A2E), Color(0xFF0D0D1A)),
+            center = center,
+            radius = hexSize * 1.2f
+        )
+        drawPath(path, fogBrush)
+        drawPath(path, Color.Black.copy(alpha = 0.4f), style = Stroke(width = 4f))
     } else {
         drawPath(path, terrainColor)
-        
-        // Advanced Terrain Rendering: Draw abstract icons/decorations
+        val highlightBrush = Brush.verticalGradient(
+            colors = listOf(Color.White.copy(alpha = 0.1f), Color.Transparent),
+            startY = center.y - hexSize,
+            endY = center.y + hexSize
+        )
+        drawPath(path, highlightBrush)
         drawTerrainDecoration(tile, center, hexSize)
 
-        // Reconnoitered tint (lighter, info available)
         if (mode == HexCanvasMode.SESSION && tile.isReconnoitered && !tile.isMapped) {
             drawPath(path, Color.White.copy(alpha = 0.15f))
         }
-        // Mapped tint (gold shimmer)
         if (tile.isMapped) {
-            drawPath(path, Color(0xFFFFD700).copy(alpha = 0.18f))
+            val goldBrush = Brush.linearGradient(
+                colors = listOf(Color(0xFFFFD700).copy(alpha = 0.25f), Color(0xFFFFD700).copy(alpha = 0.05f)),
+                start = Offset(center.x - hexSize, center.y - hexSize),
+                end = Offset(center.x + hexSize, center.y + hexSize)
+            )
+            drawPath(path, goldBrush)
         }
     }
 
-    // Stroke
     val strokeColor = when {
         isSelected -> Color(0xFFFFD700)
-        mode == HexCanvasMode.SESSION && !tile.isExplored -> Color(0xFF2A2A4E)
-        else -> Color.Black.copy(alpha = 0.3f)
+        mode == HexCanvasMode.SESSION && !tile.isExplored -> Color(0xFF2A2A4E).copy(alpha = 0.6f)
+        else -> Color.Black.copy(alpha = 0.25f)
     }
     val strokeWidth = if (isSelected) 3f else 1.5f
     drawPath(path, strokeColor, style = Stroke(width = strokeWidth))
-
-    // POI indicator: filled circle in center
+    
     if (pois.isNotEmpty() && (mode == HexCanvasMode.DESIGN || tile.isExplored)) {
         val poiColor = poiColor(pois.first().type)
         val hasMultiple = pois.size > 1
@@ -314,12 +379,10 @@ private fun DrawScope.drawHexTile(
         )
     }
 
-    // Terrain cost indicator (in design mode, show dots for cost 2 or 3)
     if (mode == HexCanvasMode.DESIGN && tile.terrainCost >= 2) {
         val dotRadius = hexSize * 0.05f
         val spacing = dotRadius * 2.5f
         val count = tile.terrainCost.coerceAtMost(3)
-        // Positioned at top-right
         val startX = center.x + hexSize * 0.35f
         val startY = center.y - hexSize * 0.45f
         for (i in 0 until count) {
@@ -336,19 +399,15 @@ private fun DrawScope.drawTerrainLabel(
     label: String,
     center: Offset,
     hexSize: Float,
-    textMeasurer: TextMeasurer,
-    scale: Float
+    textMeasurer: TextMeasurer
 ) {
-    if (hexSize < 30f) return // Labels require a minimum size to be safe and readable
-
-    // Safety: ignore if coordinates are extreme or NaN
+    if (hexSize < 30f) return
     if (center.x < -10000f || center.x > 10000f || center.y < -10000f || center.y > 10000f) return
     if (center.x.isNaN() || center.y.isNaN()) return
 
     val fontSize = (hexSize * 0.14f).coerceIn(9f, 18f).sp
     val style = TextStyle(fontSize = fontSize, color = Color.White.copy(alpha = 0.85f))
     
-    // Measure explicitly with infinite constraints to avoid negative width calculation inside drawText
     val textLayoutResult = try {
         textMeasurer.measure(
             text = label,
@@ -356,21 +415,15 @@ private fun DrawScope.drawTerrainLabel(
             softWrap = false,
             maxLines = 1
         )
-    } catch (e: Exception) {
-        return
-    }
+    } catch (e: Exception) { return }
 
     val textWidth = textLayoutResult.size.width.toFloat()
     val textHeight = textLayoutResult.size.height.toFloat()
-    
     val textX = center.x - textWidth / 2f
     val textY = center.y + hexSize * 0.42f - textHeight / 2f
     
-    // Ensure final coordinates are valid before drawing
     if (textX.isNaN() || textY.isNaN()) return
 
-    // Use drawIntoCanvas with multiParagraph.paint directly to avoid maxWidth constraints check
-    // which fails in TextPainter.drawText if the text position is outside canvas bounds.
     drawIntoCanvas { canvas ->
         canvas.save()
         canvas.translate(textX, textY)
@@ -388,32 +441,27 @@ private fun DrawScope.drawTerrainDecoration(tile: HexTile, center: Offset, hexSi
     
     when {
         label.contains("bosque") || label.contains("selva") -> {
-            // Draw small tree triangles
             val treeSize = hexSize * 0.25f
             drawTree(center.copy(y = center.y - hexSize * 0.2f), treeSize, decorationColor)
             drawTree(center.copy(x = center.x - hexSize * 0.25f, y = center.y + hexSize * 0.15f), treeSize * 0.8f, decorationColor)
             drawTree(center.copy(x = center.x + hexSize * 0.25f, y = center.y + hexSize * 0.15f), treeSize * 0.8f, decorationColor)
         }
         label.contains("montaña") || label.contains("pico") -> {
-            // Draw mountain peaks
             val mountainWidth = hexSize * 0.4f
             val mountainHeight = hexSize * 0.35f
             drawMountain(center.copy(y = center.y + hexSize * 0.1f), mountainWidth, mountainHeight, decorationColor)
             drawMountain(center.copy(x = center.x - hexSize * 0.3f, y = center.y + hexSize * 0.2f), mountainWidth * 0.7f, mountainHeight * 0.7f, decorationColor)
         }
         label.contains("agua") || label.contains("mar") || label.contains("lago") -> {
-            // Draw waves
             val waveWidth = hexSize * 0.3f
             drawWave(center.copy(x = center.x - waveWidth/2, y = center.y - hexSize * 0.1f), waveWidth, decorationColor)
             drawWave(center.copy(x = center.x - waveWidth/4, y = center.y + hexSize * 0.1f), waveWidth, decorationColor)
         }
         label.contains("colina") -> {
-            // Draw curves
             val arcWidth = hexSize * 0.4f
             drawHill(center.copy(y = center.y + hexSize * 0.1f), arcWidth, decorationColor)
         }
         label.contains("llanura") || label.contains("pasto") -> {
-            // Draw some grass tufts
             drawGrass(center.copy(x = center.x - hexSize * 0.2f, y = center.y - hexSize * 0.1f), hexSize * 0.15f, decorationColor)
             drawGrass(center.copy(x = center.x + hexSize * 0.1f, y = center.y + hexSize * 0.15f), hexSize * 0.15f, decorationColor)
         }
@@ -443,8 +491,8 @@ private fun DrawScope.drawMountain(center: Offset, width: Float, height: Float, 
 private fun DrawScope.drawWave(start: Offset, width: Float, color: Color) {
     val path = Path().apply {
         moveTo(start.x, start.y)
-        quadraticBezierTo(start.x + width / 4, start.y - width / 8, start.x + width / 2, start.y)
-        quadraticBezierTo(start.x + 3 * width / 4, start.y + width / 8, start.x + width, start.y)
+        quadraticTo(start.x + width / 4, start.y - width / 8, start.x + width / 2, start.y)
+        quadraticTo(start.x + 3 * width / 4, start.y + width / 8, start.x + width, start.y)
     }
     drawPath(path, color, style = Stroke(width = 1.5f))
 }
@@ -452,7 +500,7 @@ private fun DrawScope.drawWave(start: Offset, width: Float, color: Color) {
 private fun DrawScope.drawHill(center: Offset, width: Float, color: Color) {
     val path = Path().apply {
         moveTo(center.x - width / 2, center.y)
-        quadraticBezierTo(center.x, center.y - width / 2, center.x + width / 2, center.y)
+        quadraticTo(center.x, center.y - width / 2, center.x + width / 2, center.y)
     }
     drawPath(path, color, style = Stroke(width = 1.5f))
 }

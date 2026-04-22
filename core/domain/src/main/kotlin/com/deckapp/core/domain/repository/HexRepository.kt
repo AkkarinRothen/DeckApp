@@ -20,6 +20,7 @@ interface HexRepository {
     suspend fun upsertHexDay(day: HexDay): Long
 
     suspend fun updatePartyLocation(mapId: Long, q: Int, r: Int)
+    suspend fun updateLinkedMythicSession(mapId: Long, mythicSessionId: Long?)
 
     suspend fun deleteHexMap(id: Long)
     suspend fun deleteHexTile(mapId: Long, q: Int, r: Int)

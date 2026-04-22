@@ -32,6 +32,8 @@ import com.deckapp.core.data.db.MIGRATION_31_32
 import com.deckapp.core.data.db.MIGRATION_32_33
 import com.deckapp.core.data.db.MIGRATION_33_34
 import com.deckapp.core.data.db.MIGRATION_34_35
+import com.deckapp.core.data.db.MIGRATION_35_36
+import com.deckapp.core.data.db.MIGRATION_36_37
 import com.deckapp.core.data.repository.*
 import com.deckapp.core.data.repository.WikiRepositoryImpl
 import com.deckapp.core.domain.repository.CardRepository
@@ -95,7 +97,9 @@ object DatabaseModule {
                 MIGRATION_31_32,
                 MIGRATION_32_33,
                 MIGRATION_33_34,
-                MIGRATION_34_35
+                MIGRATION_34_35,
+                MIGRATION_35_36,
+                MIGRATION_36_37
             )
             .fallbackToDestructiveMigration()
             .build()
@@ -120,6 +124,9 @@ object DatabaseModule {
     @Provides fun provideSystemRuleDao(db: DeckAppDatabase) = db.systemRuleDao()
     @Provides fun provideBackupDao(db: DeckAppDatabase) = db.backupDao()
     @Provides fun provideHexDao(db: DeckAppDatabase) = db.hexDao()
+    @Provides fun provideMythicDao(db: DeckAppDatabase) = db.mythicDao()
+    @Provides fun provideManualDao(db: DeckAppDatabase) = db.manualDao()
+    @Provides fun provideSceneDao(db: DeckAppDatabase) = db.sceneDao()
 }
 
 @Module
@@ -185,4 +192,12 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindHexRepository(impl: HexRepositoryImpl): HexRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindMythicRepository(impl: MythicRepositoryImpl): com.deckapp.core.domain.repository.MythicRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindManualRepository(impl: ManualRepositoryImpl): com.deckapp.core.domain.repository.ManualRepository
 }

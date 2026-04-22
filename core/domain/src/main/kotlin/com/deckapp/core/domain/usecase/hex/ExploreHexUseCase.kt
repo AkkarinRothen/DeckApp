@@ -15,7 +15,7 @@ class ExploreHexUseCase @Inject constructor(
         logHexActivityUseCase(
             dayId,
             HexActivityEntry(
-                type = HexActivityType.TRAVEL,
+                type = HexActivityType.EXPLORE,
                 description = "Explorado (${tile.q}, ${tile.r})",
                 tileQ = tile.q,
                 tileR = tile.r

@@ -36,7 +36,7 @@ import androidx.compose.animation.core.animateDpAsState
 @Composable
 fun TableLibraryScreen(
     onTableClick: (Long) -> Unit,
-    onImportClick: () -> Unit,
+    onImportClick: (Long?) -> Unit,
     onCreateTable: () -> Unit,
     viewModel: TablesViewModel = hiltViewModel()
 ) {
@@ -114,7 +114,7 @@ fun TableLibraryScreen(
                         IconButton(onClick = { viewModel.setShowPackDialog(true) }) {
                             Icon(Icons.Default.AutoAwesome, contentDescription = "Packs de tablas")
                         }
-                        IconButton(onClick = onImportClick) {
+                        IconButton(onClick = { onImportClick(null) }) {
                             Icon(Icons.Default.UploadFile, contentDescription = "Importar")
                         }
                     } else {

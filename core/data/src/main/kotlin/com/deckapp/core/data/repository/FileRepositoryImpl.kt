@@ -131,9 +131,27 @@ class FileRepositoryImpl @Inject constructor(
         category: String,
         fileName: String
     ): String {
-        val catDir = File(context.filesDir, category)
-        catDir.mkdirs()
-        val destFile = File(catDir, sanitizeFileName(fileName))
+        val categoryDir = File(context.filesDir, category)
+        categoryDir.mkdirs()
+        val destFile = File(categoryDir, sanitizeFileName(fileName))
+
+        context.contentResolver.openInputStream(sourceUri)?.use { input ->
+            FileOutputStream(destFile).use { output ->
+                input.copyTo(output, bufferSize = DEFAULT_BUFFER_SIZE)
+            }
+        }
+
+        return destFile.absolutePath
+    }
+
+    override suspend fun copyFileToInternalByCategory(
+        sourceUri: Uri,
+        category: String,
+        fileName: String
+    ): String {
+        val categoryDir = File(context.filesDir, category)
+        categoryDir.mkdirs()
+        val destFile = File(categoryDir, sanitizeFileName(fileName))
 
         context.contentResolver.openInputStream(sourceUri)?.use { input ->
             FileOutputStream(destFile).use { output ->

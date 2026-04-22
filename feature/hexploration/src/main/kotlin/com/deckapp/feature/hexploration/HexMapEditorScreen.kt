@@ -8,55 +8,17 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.GridOn
-import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.filled.Notes
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -65,13 +27,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.text.style.TextOverflow
 import com.deckapp.core.model.HexPoi
 import com.deckapp.core.model.HexTile
 import com.deckapp.core.model.PoiType
 import com.deckapp.core.model.RandomTable
+import com.deckapp.core.model.TerrainBrush
 import com.deckapp.feature.hexploration.components.HexCanvasMode
 import com.deckapp.feature.hexploration.components.HexGridCanvas
+import com.deckapp.feature.hexploration.components.TerrainBrushToolbar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -121,6 +86,8 @@ fun HexMapEditorScreen(
     }
 
     var showMapSettingsSheet by remember { mutableStateOf(false) }
+    var showResourcesSheet by remember { mutableStateOf(false) }
+
     val mapSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     if (showMapSettingsSheet) {
         ModalBottomSheet(
@@ -136,24 +103,33 @@ fun HexMapEditorScreen(
                 terrainTableConfig = uiState.terrainTableConfig,
                 allTables = uiState.allTables,
                 brushes = uiState.brushes,
-                sessionResources = uiState.sessionResources,
-                allDecks = uiState.allDecks,
-                allRules = uiState.allRules,
                 onNotesChange = viewModel::updateMapNotes,
                 onMaxActivitiesChange = viewModel::updateMaxActivities,
                 onPickWeatherTable = viewModel::showWeatherTablePicker,
                 onClearWeatherTable = { viewModel.setWeatherTable(null) },
                 onPickTravelTable = viewModel::showTravelTablePicker,
                 onClearTravelTable = { viewModel.setTravelTable(null) },
-                onSetTerrainTable = viewModel::setTerrainTable,
+                onSetTerrainTable = viewModel::setTerrainTable
+            )
+        }
+    }
+
+    if (showResourcesSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showResourcesSheet = false },
+            dragHandle = { BottomSheetDefaults.DragHandle() }
+        ) {
+            MapResourcesSheet(
+                sessionResources = uiState.sessionResources,
+                allTables = uiState.allTables,
+                allDecks = uiState.allDecks,
+                allRules = uiState.allRules,
                 onToggleTable = viewModel::toggleTableInResources,
                 onToggleDeck = viewModel::toggleDeckInResources,
                 onToggleRule = viewModel::toggleRuleInResources
             )
         }
     }
-
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     Scaffold(
         topBar = {
@@ -165,8 +141,25 @@ fun HexMapEditorScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = viewModel::undo, enabled = uiState.canUndo) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.Undo,
+                            contentDescription = "Deshacer",
+                            tint = if (uiState.canUndo) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        )
+                    }
+                    IconButton(onClick = viewModel::redo, enabled = uiState.canRedo) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.Redo,
+                            contentDescription = "Rehacer",
+                            tint = if (uiState.canRedo) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        )
+                    }
+                    IconButton(onClick = { showResourcesSheet = true }) {
+                        Icon(Icons.AutoMirrored.Filled.LibraryBooks, contentDescription = "Recursos de sesión")
+                    }
                     IconButton(onClick = { showMapSettingsSheet = true }) {
-                        Icon(Icons.Default.Notes, contentDescription = "Configuración del mapa")
+                        Icon(Icons.AutoMirrored.Filled.Notes, contentDescription = "Configuración del mapa")
                     }
                     IconButton(onClick = viewModel::toggleCoordinates) {
                         Icon(
@@ -209,7 +202,9 @@ fun HexMapEditorScreen(
                             pois = uiState.pois.filter { it.tileQ == uiState.selectedTile!!.q && it.tileR == uiState.selectedTile!!.r },
                             onDismiss = viewModel::dismissTileSheet,
                             onAddPoi = { viewModel.showAddPoiDialog() },
-                            onDeletePoi = viewModel::deletePoi
+                            onDeletePoi = viewModel::deletePoi,
+                            onDmNotesChange = { viewModel.updateTileNotes(uiState.selectedTile!!, it, uiState.selectedTile!!.playerNotes) },
+                            onPlayerNotesChange = { viewModel.updateTileNotes(uiState.selectedTile!!, uiState.selectedTile!!.dmNotes, it) }
                         )
                     }
                 }
@@ -246,90 +241,21 @@ fun HexMapEditorScreen(
 }
 
 @Composable
-private fun TerrainBrushToolbar(
-    brushes: List<TerrainBrush>,
-    activeBrush: TerrainBrush,
-    onBrushSelect: (TerrainBrush) -> Unit,
-    onAddBrush: () -> Unit
-) {
-    LazyRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .padding(vertical = 8.dp),
-        contentPadding = PaddingValues(horizontal = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        item {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .clickable { onAddBrush() }
-                    .padding(6.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "Nuevo terreno",
-                        modifier = Modifier.size(18.dp))
-                }
-                Spacer(Modifier.height(4.dp))
-                Text("Nuevo", style = MaterialTheme.typography.labelSmall, maxLines = 1)
-            }
-        }
-        items(brushes) { brush ->
-            val isActive = brush == activeBrush
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .clickable { onBrushSelect(brush) }
-                    .background(
-                        if (isActive) MaterialTheme.colorScheme.primaryContainer
-                        else Color.Transparent
-                    )
-                    .padding(6.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(Color(brush.color))
-                        .then(
-                            if (isActive) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                            else Modifier
-                        )
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = brush.label,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
-                    maxLines = 1
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun EditorTileDetails(
     tile: HexTile,
     pois: List<HexPoi>,
     onDismiss: () -> Unit,
     onAddPoi: () -> Unit,
-    onDeletePoi: (Long) -> Unit
+    onDeletePoi: (Long) -> Unit,
+    onDmNotesChange: (String) -> Unit,
+    onPlayerNotesChange: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(max = 400.dp)
             .background(MaterialTheme.colorScheme.surface)
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp)
             .padding(bottom = 16.dp, top = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -386,6 +312,238 @@ private fun EditorTileDetails(
                 }
             }
         }
+
+        HorizontalDivider()
+
+        Text(
+            text = "Notas del DJ",
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.primary
+        )
+        OutlinedTextField(
+            value = tile.dmNotes,
+            onValueChange = onDmNotesChange,
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text("Solo visible para el DJ...") },
+            textStyle = MaterialTheme.typography.bodySmall,
+            colors = OutlinedTextFieldDefaults.colors(
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            )
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = "Notas para Jugadores",
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.secondary
+        )
+        OutlinedTextField(
+            value = tile.playerNotes,
+            onValueChange = onPlayerNotesChange,
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text("Visible para todos los jugadores...") },
+            textStyle = MaterialTheme.typography.bodySmall,
+            colors = OutlinedTextFieldDefaults.colors(
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            )
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MapResourcesSheet(
+    sessionResources: com.deckapp.core.model.HexSessionResources,
+    allTables: List<RandomTable>,
+    allDecks: List<com.deckapp.core.model.CardStack>,
+    allRules: List<com.deckapp.core.model.SystemRule>,
+    onToggleTable: (Long) -> Unit,
+    onToggleDeck: (Long) -> Unit,
+    onToggleRule: (Long) -> Unit
+) {
+    var selectedTab by remember { mutableIntStateOf(0) }
+    var searchQuery by remember { mutableStateOf("") }
+    
+    val filteredTables = remember(allTables, searchQuery) {
+        allTables.filter { it.name.contains(searchQuery, ignoreCase = true) }
+    }
+    val filteredDecks = remember(allDecks, searchQuery) {
+        allDecks.filter { it.name.contains(searchQuery, ignoreCase = true) }
+    }
+    val filteredRules = remember(allRules, searchQuery) {
+        allRules.filter { it.title.contains(searchQuery, ignoreCase = true) }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(max = 600.dp)
+            .padding(bottom = 16.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                "Recursos de sesión",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                "Configura qué herramientas tendrás a mano durante la exploración",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            
+            Spacer(Modifier.height(16.dp))
+            
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                placeholder = { Text("Buscar recursos...") },
+                leadingIcon = { Icon(Icons.Default.Search, null) },
+                trailingIcon = if (searchQuery.isNotEmpty()) {
+                    { IconButton(onClick = { searchQuery = "" }) { Icon(Icons.Default.Close, null) } }
+                } else null,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                singleLine = true
+            )
+        }
+
+        TabRow(
+            selectedTabIndex = selectedTab,
+            containerColor = Color.Transparent,
+            divider = {}
+        ) {
+            val tabs = listOf(
+                "Mazos" to sessionResources.deckIds.size,
+                "Tablas" to sessionResources.tableIds.size,
+                "Reglas" to sessionResources.ruleIds.size
+            )
+            tabs.forEachIndexed { index, (label, count) ->
+                Tab(
+                    selected = selectedTab == index,
+                    onClick = { selectedTab = index },
+                    text = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(label)
+                            if (count > 0) {
+                                Badge(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(start = 6.dp)
+                                ) {
+                                    Text(count.toString(), color = MaterialTheme.colorScheme.onPrimary)
+                                }
+                            }
+                        }
+                    }
+                )
+            }
+        }
+
+        HorizontalDivider(thickness = 0.5.dp)
+
+        Box(modifier = Modifier.weight(1f)) {
+            when (selectedTab) {
+                0 -> ResourceGrid(
+                    items = filteredDecks,
+                    selectedIds = sessionResources.deckIds,
+                    onToggle = onToggleDeck,
+                    emptyMessage = "No se encontraron mazos",
+                    itemContent = { deck -> ResourceCardContent(deck.name, "Mazo") }
+                )
+                1 -> ResourceGrid(
+                    items = filteredTables,
+                    selectedIds = sessionResources.tableIds,
+                    onToggle = onToggleTable,
+                    emptyMessage = "No se encontraron tablas",
+                    itemContent = { table -> ResourceCardContent(table.name, table.category) }
+                )
+                2 -> ResourceGrid(
+                    items = filteredRules,
+                    selectedIds = sessionResources.ruleIds,
+                    onToggle = onToggleRule,
+                    emptyMessage = "No se encontraron reglas",
+                    itemContent = { rule -> ResourceCardContent(rule.title, rule.category) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun <T> ResourceGrid(
+    items: List<T>,
+    selectedIds: List<Long>,
+    onToggle: (Long) -> Unit,
+    emptyMessage: String,
+    itemContent: @Composable (T) -> Unit
+) {
+    if (items.isEmpty()) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(emptyMessage, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    } else {
+        androidx.compose.foundation.lazy.grid.LazyVerticalGrid(
+            columns = androidx.compose.foundation.lazy.grid.GridCells.Adaptive(160.dp),
+            contentPadding = PaddingValues(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            items(items.size) { index ->
+                val item = items[index]
+                val id = when (item) {
+                    is com.deckapp.core.model.RandomTable -> item.id
+                    is com.deckapp.core.model.CardStack -> item.id
+                    is com.deckapp.core.model.SystemRule -> item.id
+                    else -> 0L
+                }
+                val isSelected = id in selectedIds
+                
+                Card(
+                    onClick = { onToggle(id) },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer 
+                                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                    ),
+                    border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
+                ) {
+                    Box {
+                        itemContent(item)
+                        if (isSelected) {
+                            Icon(
+                                Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.align(Alignment.TopEnd).padding(8.dp).size(20.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ResourceCardContent(title: String, subtitle: String?) {
+    Column(modifier = Modifier.padding(12.dp)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+        if (subtitle != null) {
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 
@@ -398,39 +556,35 @@ private fun MapSettingsSheet(
     terrainTableConfig: String,
     allTables: List<RandomTable>,
     brushes: List<TerrainBrush>,
-    sessionResources: com.deckapp.core.model.HexSessionResources,
-    allDecks: List<com.deckapp.core.model.CardStack>,
-    allRules: List<com.deckapp.core.model.SystemRule>,
     onNotesChange: (String) -> Unit,
     onMaxActivitiesChange: (Int) -> Unit,
     onPickWeatherTable: () -> Unit,
     onClearWeatherTable: () -> Unit,
     onPickTravelTable: () -> Unit,
     onClearTravelTable: () -> Unit,
-    onSetTerrainTable: (String, Long?) -> Unit,
-    onToggleTable: (Long) -> Unit,
-    onToggleDeck: (Long) -> Unit,
-    onToggleRule: (Long) -> Unit
+    onSetTerrainTable: (String, Long?) -> Unit
 ) {
     var notes by remember(mapNotes) { mutableStateOf(mapNotes) }
     var showTerrainSection by remember { mutableStateOf(false) }
-    val terrainConfig = remember(terrainTableConfig) { parseTerrainConfig(terrainTableConfig) }
-    val terrainLabels = remember(brushes) {
+    val terrainConfig: Map<String, Long> = remember(terrainTableConfig) { parseTerrainConfig(terrainTableConfig) }
+    val terrainLabels: List<String> = remember(brushes) {
         brushes.filter { it.cost >= 0 && it.label.isNotBlank() }.map { it.label }
     }
 
-    LazyColumn(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
-            .padding(bottom = 32.dp),
+            .padding(bottom = 32.dp)
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        item {
+        Column {
             Text("Configuración del mapa", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             HorizontalDivider(modifier = Modifier.padding(top = 8.dp))
         }
-        item {
+
+        Column {
             Text("Actividades por día: $maxActivitiesPerDay", style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
             Slider(
@@ -441,140 +595,62 @@ private fun MapSettingsSheet(
                 modifier = Modifier.fillMaxWidth()
             )
         }
-        item {
+
+        Column {
             HorizontalDivider()
             Spacer(Modifier.height(4.dp))
             Text("Tablas automáticas", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
         }
-        item {
-            TableLinkRow(
-                label = "Clima (inicio de día)",
-                currentTableName = weatherTableName,
-                onPick = onPickWeatherTable,
-                onClear = onClearWeatherTable
-            )
-        }
-        item {
-            TableLinkRow(
-                label = "Eventos de viaje (movimiento)",
-                currentTableName = travelTableName,
-                onPick = onPickTravelTable,
-                onClear = onClearTravelTable
-            )
-        }
+
+        TableLinkRow(
+            label = "Clima (inicio de día)",
+            currentTableName = weatherTableName,
+            onPick = onPickWeatherTable,
+            onClear = onClearWeatherTable
+        )
+
+        TableLinkRow(
+            label = "Eventos de viaje (movimiento)",
+            currentTableName = travelTableName,
+            onPick = onPickTravelTable,
+            onClear = onClearTravelTable
+        )
+
         if (terrainLabels.isNotEmpty()) {
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { showTerrainSection = !showTerrainSection },
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        "Tablas de encuentro por terreno",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Text(
-                        if (showTerrainSection) "▲" else "▼",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showTerrainSection = !showTerrainSection },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Tablas de encuentro por terreno",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    if (showTerrainSection) "▲" else "▼",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
+
             if (showTerrainSection) {
-                items(terrainLabels) { label ->
-                    val linkedId = terrainConfig[label]
-                    val linkedName = allTables.find { it.id == linkedId }?.name
-                    var showPickerForTerrain by remember { mutableStateOf(false) }
-                    if (showPickerForTerrain) {
-                        HexTablePickerDialog(
-                            tables = allTables,
-                            onDismiss = { showPickerForTerrain = false },
-                            onTableSelected = { id ->
-                                onSetTerrainTable(label, id)
-                                showPickerForTerrain = false
-                            },
-                            onClear = {
-                                onSetTerrainTable(label, null)
-                                showPickerForTerrain = false
-                            }
-                        )
-                    }
-                    TableLinkRow(
-                        label = label,
-                        currentTableName = linkedName,
-                        onPick = { showPickerForTerrain = true },
-                        onClear = { onSetTerrainTable(label, null) }
+                terrainLabels.forEach { labelStr: String ->
+                    TerrainConfigRow(
+                        label = labelStr,
+                        terrainConfig = terrainConfig,
+                        allTables = allTables,
+                        onSetTerrainTable = onSetTerrainTable
                     )
                 }
             }
         }
-        item {
-            HorizontalDivider()
-            Spacer(Modifier.height(4.dp))
-            Text("Recursos de sesión", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-            Text("Seleccioná qué tendrás a mano durante la sesión",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        if (allTables.isNotEmpty()) {
-            item {
-                Text("Tablas", style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            items(allTables) { table ->
-                ResourceToggleRow(
-                    name = table.name,
-                    subtitle = table.category.takeIf { it.isNotBlank() },
-                    isSelected = table.id in sessionResources.tableIds,
-                    onToggle = { onToggleTable(table.id) }
-                )
-            }
-        }
-        if (allDecks.isNotEmpty()) {
-            item {
-                Spacer(Modifier.height(4.dp))
-                Text("Mazos", style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            items(allDecks) { deck ->
-                ResourceToggleRow(
-                    name = deck.name,
-                    subtitle = null,
-                    isSelected = deck.id in sessionResources.deckIds,
-                    onToggle = { onToggleDeck(deck.id) }
-                )
-            }
-        }
-        if (allRules.isNotEmpty()) {
-            item {
-                Spacer(Modifier.height(4.dp))
-                Text("Reglas de referencia", style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            items(allRules) { rule ->
-                ResourceToggleRow(
-                    name = rule.title,
-                    subtitle = rule.category.takeIf { it.isNotBlank() },
-                    isSelected = rule.id in sessionResources.ruleIds,
-                    onToggle = { onToggleRule(rule.id) }
-                )
-            }
-        }
-        item {
-            HorizontalDivider()
-            Spacer(Modifier.height(4.dp))
-            OutlinedTextField(
-                value = notes,
-                onValueChange = { notes = it },
-                label = { Text("Notas del mapa (DM)") },
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 3,
-                maxLines = 8
-            )
-            TextButton(onClick = { onNotesChange(notes) }) { Text("Guardar notas") }
-        }
+
+        NotesSection(
+            notes = mapNotes,
+            onNotesChange = onNotesChange
+        )
     }
 }
 
@@ -664,6 +740,59 @@ private fun ResourceToggleRow(
         }
         androidx.compose.material3.Checkbox(checked = isSelected, onCheckedChange = { onToggle() })
     }
+}
+
+@Composable
+private fun NotesSection(
+    notes: String,
+    onNotesChange: (String) -> Unit
+) {
+    var notesState by remember(notes) { mutableStateOf(notes) }
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        HorizontalDivider()
+        Spacer(Modifier.height(4.dp))
+        OutlinedTextField(
+            value = notesState,
+            onValueChange = { notesState = it },
+            label = { Text("Notas del mapa (DM)") },
+            modifier = Modifier.fillMaxWidth(),
+            minLines = 3,
+            maxLines = 8
+        )
+        TextButton(onClick = { onNotesChange(notesState) }) { Text("Guardar notas") }
+    }
+}
+
+@Composable
+private fun TerrainConfigRow(
+    label: String,
+    terrainConfig: Map<String, Long>,
+    allTables: List<RandomTable>,
+    onSetTerrainTable: (String, Long?) -> Unit
+) {
+    val linkedId = terrainConfig[label]
+    val linkedName = allTables.find { it.id == linkedId }?.name
+    var showPickerForTerrain by remember { mutableStateOf(false) }
+    if (showPickerForTerrain) {
+        HexTablePickerDialog(
+            tables = allTables,
+            onDismiss = { showPickerForTerrain = false },
+            onTableSelected = { id ->
+                onSetTerrainTable(label, id)
+                showPickerForTerrain = false
+            },
+            onClear = {
+                onSetTerrainTable(label, null)
+                showPickerForTerrain = false
+            }
+        )
+    }
+    TableLinkRow(
+        label = label,
+        currentTableName = linkedName,
+        onPick = { showPickerForTerrain = true },
+        onClear = { onSetTerrainTable(label, null) }
+    )
 }
 
 @Composable

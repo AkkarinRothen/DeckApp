@@ -11,6 +11,7 @@ data class Npc(
     val name: String,
     val description: String = "",
     val imagePath: String? = null,
+    val voiceSamplePath: String? = null,
     val maxHp: Int = 10,
     val currentHp: Int = 10,
     val armorClass: Int = 10,

@@ -17,6 +17,9 @@ interface FileRepository {
     /** Copia imagen a una categoría general (ej: "npcs") en lugar de un mazo específico. */
     suspend fun copyImageToInternalByCategory(sourceUri: Uri, category: String, fileName: String): String
 
+    /** Copia cualquier tipo de archivo a una categoría general. */
+    suspend fun copyFileToInternalByCategory(sourceUri: Uri, category: String, fileName: String): String
+
     suspend fun deleteImagesForDeck(deckId: Long)
 
     /** Borra un archivo específico dada su ruta absoluta en el almacenamiento interno. */

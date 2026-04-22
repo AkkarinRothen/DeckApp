@@ -55,14 +55,29 @@ class AnalyzeTableImageUseCase @Inject constructor() {
             clusterBlocks(segmentedBlocks)
         }
 
+        // Si el usuario espera más de 1 tabla, aplicamos splitLinesIntoTables dentro de cada
+        // cluster para separar tablas que están espacialmente cercanas pero son lógicamente distintas.
+        // Esto garantiza que el conteo declarado se respete incluso cuando las tablas
+        // no tienen un espacio visual amplio entre ellas.
+        if (expectedTableCount > 1) {
+            return clusters.flatMap { cluster ->
+                val sortedBlocks = cluster.sortedBy { it.boundingBox.centerY }
+                val lines = groupIntoLines(sortedBlocks)
+                val tableGroups = splitLinesIntoTables(lines, expectedTableCount)
+                tableGroups.map { linesInGroup ->
+                    val blocksInGroup = linesInGroup.flatten()
+                    blocksInGroup to detectColumns(linesInGroup)
+                }
+            }
+        }
+
         return clusters.map { cluster ->
             val sortedBlocks = cluster.sortedBy { it.boundingBox.centerY }
             val lines = groupIntoLines(sortedBlocks)
-            // Aquí simplificamos: el pre-mapeo visual se suele hacer sobre la tabla principal
-            // Si hay múltiples clusters, tomamos sus gutters.
             cluster to detectColumns(lines)
         }
     }
+
 
     /**
      * Paso 2: Procesar un cluster usando columnas (anchors) específicas (manuales o detectadas).

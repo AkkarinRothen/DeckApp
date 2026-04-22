@@ -14,7 +14,7 @@ class ResetDeckUseCase @Inject constructor(
     suspend operator fun invoke(sessionId: Long, deckId: Long) {
         cardRepository.resetDeck(deckId)
         sessionRepository.logEvent(
-            DrawEvent(sessionId = sessionId, cardId = -1, action = DrawAction.RESET,
+            DrawEvent(sessionId = sessionId, cardId = null, action = DrawAction.RESET,
                 metadata = """{"deckId": $deckId}""")
         )
     }

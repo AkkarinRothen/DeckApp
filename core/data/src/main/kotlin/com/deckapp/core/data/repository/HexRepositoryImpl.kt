@@ -56,6 +56,9 @@ class HexRepositoryImpl @Inject constructor(
     override suspend fun updatePartyLocation(mapId: Long, q: Int, r: Int) =
         hexDao.updatePartyLocation(mapId, q, r)
 
+    override suspend fun updateLinkedMythicSession(mapId: Long, mythicSessionId: Long?) =
+        hexDao.updateLinkedMythicSession(mapId, mythicSessionId)
+
     override suspend fun deleteHexMap(id: Long) =
         hexDao.deleteMap(id)
 

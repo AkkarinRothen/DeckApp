@@ -12,27 +12,52 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.viewinterop.AndroidView
 import io.noties.markwon.Markwon
 
-/**
- * Renderiza texto Markdown usando Markwon dentro de Compose.
- * Usa AndroidView con un TextView para compatibilidad con Markwon (View-based).
- *
- * @param markdown Texto en formato Markdown a renderizar.
- * @param color    Color del texto — por defecto `onSurface` del tema actual.
- * @param style    Estilo de tipografía — por defecto `bodyMedium`.
- */
 @Composable
 fun MarkdownText(
     markdown: String,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.onSurface,
     style: TextStyle = MaterialTheme.typography.bodyMedium,
-    maxLines: Int? = null
+    maxLines: Int? = null,
+    onWikiLinkClicked: ((String) -> Unit)? = null
 ) {
     val context = LocalContext.current
     val colorInt = color.toArgb()
     val fontSizeSp = style.fontSize.value
 
-    val markwon = remember(context) { Markwon.create(context) }
+    // Procesar [[Links]] bidireccionales antes de pasar a Markwon
+    val processedMarkdown = remember(markdown) {
+        val regex = Regex("\\[\\[(.*?)\\]\\]")
+        markdown.replace(regex) { matchResult ->
+            val title = matchResult.groupValues[1]
+            "[$title](wiki://$title)"
+        }
+    }
+
+    val markwon = remember(context) { 
+        Markwon.builder(context)
+            .usePlugin(object : io.noties.markwon.AbstractMarkwonPlugin() {
+                override fun configureConfiguration(builder: io.noties.markwon.MarkwonConfiguration.Builder) {
+                    builder.linkResolver { _, link ->
+                        if (link.startsWith("wiki://")) {
+                            val title = link.removePrefix("wiki://")
+                            onWikiLinkClicked?.invoke(title)
+                        } else {
+                            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(link))
+                            context.startActivity(intent)
+                        }
+                    }
+                }
+
+                override fun configureTheme(builder: io.noties.markwon.core.MarkwonTheme.Builder) {
+                    // Estilo para Box Text (Blockquote)
+                    builder.blockQuoteColor(colorInt)
+                        .blockQuoteWidth(4)
+                        .blockMargin(24)
+                }
+            })
+            .build()
+    }
 
     AndroidView(
         factory = { ctx ->
@@ -47,7 +72,7 @@ fun MarkdownText(
             textView.setTextColor(colorInt)
             textView.textSize = fontSizeSp
             maxLines?.let { textView.setMaxLines(it) }
-            markwon.setMarkdown(textView, markdown)
+            markwon.setMarkdown(textView, processedMarkdown)
         },
         modifier = modifier
     )

@@ -1,15 +1,20 @@
 package com.deckapp.feature.reference
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.deckapp.core.model.Manual
 import com.deckapp.feature.reference.components.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -18,12 +23,23 @@ fun ReferenceListScreen(
     onNavigateBack: () -> Unit,
     onEditTable: (Long) -> Unit,
     onEditRule: (Long) -> Unit,
+    onOpenManual: (Long) -> Unit,
     onNewTable: () -> Unit,
     onNewRule: () -> Unit,
     viewModel: ReferenceListViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var isSearching by remember { mutableStateOf(false) }
+
+    val pdfLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument(),
+        onResult = { uri ->
+            uri?.let {
+                // Por ahora usamos el nombre del archivo como título
+                viewModel.addManual(it.lastPathSegment ?: "Manual", it.toString(), "General")
+            }
+        }
+    )
 
     if (uiState.showStarterPackDialog) {
         StarterPackDialog(
@@ -56,7 +72,7 @@ fun ReferenceListScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = if (isSearching) { { isSearching = false; viewModel.onSearchQueryChanged("") } } else onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Atrás")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
                     }
                 },
                 actions = {
@@ -70,10 +86,16 @@ fun ReferenceListScreen(
             )
         },
         floatingActionButton = {
-            ReferenceSpeedDial(
-                onNewTableClick = onNewTable,
-                onNewRuleClick = onNewRule
-            )
+            if (uiState.activePage == 2) {
+                FloatingActionButton(onClick = { pdfLauncher.launch(arrayOf("application/pdf")) }) {
+                    Icon(Icons.Default.PictureAsPdf, contentDescription = "Añadir manual")
+                }
+            } else {
+                ReferenceSpeedDial(
+                    onNewTableClick = onNewTable,
+                    onNewRuleClick = onNewRule
+                )
+            }
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {
@@ -94,36 +116,95 @@ fun ReferenceListScreen(
                     onClick = { viewModel.setPage(1) },
                     text = { Text("Reglas") }
                 )
+                Tab(
+                    selected = uiState.activePage == 2,
+                    onClick = { viewModel.setPage(2) },
+                    text = { Text("Manuales") }
+                )
             }
 
-            if (uiState.activePage == 0) {
-                LazyColumn(
+            when (uiState.activePage) {
+                0 -> LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(uiState.tables) { table ->
+                    items(uiState.tables, key = { it.id }) { table ->
                         ReferenceTableCard(
                             table = table,
                             onClick = { onEditTable(table.id) },
-                            onLongClick = { /* Dropdown menu logic */ }
+                            onLongClick = { viewModel.deleteTable(table.id) }
                         )
                     }
                 }
-            } else {
-                LazyColumn(
+                1 -> LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(uiState.rules) { rule ->
+                    items(uiState.rules, key = { it.id }) { rule ->
                         SystemRuleCard(
                             rule = rule,
                             onClick = { onEditRule(rule.id) },
-                            onLongClick = { /* Dropdown menu logic */ }
+                            onLongClick = { viewModel.deleteRule(rule.id) }
                         )
                     }
                 }
+                2 -> LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    if (uiState.manuals.isEmpty()) {
+                        item {
+                            Text(
+                                "No has añadido manuales todavía. Pulsa el botón + para añadir un archivo PDF.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(16.dp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    items(uiState.manuals, key = { it.id }) { manual ->
+                        ManualItemCard(
+                            manual = manual,
+                            onClick = { onOpenManual(manual.id) },
+                            onDelete = { viewModel.deleteManual(manual) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ManualItemCard(
+    manual: Manual,
+    onClick: () -> Unit,
+    onDelete: () -> Unit
+) {
+    ElevatedCard(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Default.PictureAsPdf,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.size(32.dp)
+            )
+            Spacer(Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(manual.title, style = MaterialTheme.typography.titleMedium)
+                Text(manual.gameSystem, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            IconButton(onClick = onDelete) {
+                Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = MaterialTheme.colorScheme.error)
             }
         }
     }

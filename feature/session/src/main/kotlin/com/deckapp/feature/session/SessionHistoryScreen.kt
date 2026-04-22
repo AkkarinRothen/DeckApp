@@ -74,10 +74,21 @@ fun SessionHistoryScreen(
                     )
                 }
 
-                if (uiState.timeline.isEmpty()) {
+                if (uiState.timeline.isNotEmpty()) {
+                    item {
+                        FilterSection(
+                            uiState = uiState,
+                            onDeckFilterChange = viewModel::setDeckFilter,
+                            onActionFilterChange = viewModel::setActionFilter,
+                            onSearchChange = viewModel::setSearchQuery
+                        )
+                    }
+                }
+
+                if (uiState.filteredTimeline.isEmpty()) {
                     item {
                         Text(
-                            "No hubo actividad registrada en esta sesión.",
+                            "No hay eventos que coincidan con los filtros.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.fillMaxWidth().padding(32.dp),
@@ -85,7 +96,7 @@ fun SessionHistoryScreen(
                         )
                     }
                 } else {
-                    items(uiState.timeline, key = { event ->
+                    items(uiState.filteredTimeline, key = { event ->
                         when (event) {
                             is TimelineEvent.CardEvent -> "card_${event.event.id}"
                             is TimelineEvent.TableEvent -> "table_${event.result.id}"
@@ -127,6 +138,7 @@ fun SessionHistoryScreen(
 @Composable
 private fun SessionHeader(uiState: SessionHistoryUiState) {
     val session = uiState.session ?: return
+    val stats = uiState.stats
     val dateFormat = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault())
     val dateText = dateFormat.format(Date(session.createdAt))
 
@@ -135,65 +147,96 @@ private fun SessionHeader(uiState: SessionHistoryUiState) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
     ) {
         Column(Modifier.padding(20.dp)) {
-            Text(
-                text = session.name,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-            Text(
-                text = dateText,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-            )
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Column {
+                    Text(
+                        text = session.name,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Text(
+                        text = dateText,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                    )
+                }
+                Surface(
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f),
+                    shape = CircleShape
+                ) {
+                    Text(
+                        text = if (session.endedAt != null) "Finalizada" else "Activa",
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
 
             Spacer(Modifier.height(16.dp))
 
+            // Main Stats
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 StatItem(
                     label = "Robadas",
-                    value = uiState.totalDrawn.toString(),
-                    icon = Icons.Default.Style
+                    value = stats.totalDrawn.toString(),
+                    icon = Icons.Default.Style,
+                    modifier = Modifier.weight(1f)
                 )
                 StatItem(
-                    label = "Descartadas",
-                    value = uiState.totalDiscarded.toString(),
-                    icon = Icons.Default.Delete
+                    label = "Tiradas",
+                    value = stats.totalRolls.toString(),
+                    icon = Icons.Default.Casino,
+                    modifier = Modifier.weight(1f)
                 )
-                if (uiState.totalRolls > 0) {
-                    StatItem(
-                        label = "Tiradas",
-                        value = uiState.totalRolls.toString(),
-                        icon = Icons.Default.Casino
-                    )
-                }
                 StatItem(
                     label = "Duración",
-                    value = "${uiState.durationMinutes}m",
-                    icon = Icons.Default.Timer
+                    value = "${stats.durationMinutes}m",
+                    icon = Icons.Default.Timer,
+                    modifier = Modifier.weight(1f)
                 )
+            }
+
+            if (stats.mostUsedDeckName != null) {
+                HorizontalDivider(Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.TrendingUp, 
+                        null, 
+                        modifier = Modifier.size(16.dp), 
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "Mazo más activo: ${stats.mostUsedDeckName}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun StatItem(label: String, value: String, icon: ImageVector) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+private fun StatItem(label: String, value: String, icon: ImageVector, modifier: Modifier = Modifier) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            modifier = Modifier.size(16.dp),
+            modifier = Modifier.size(20.dp),
             tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
         )
-        Spacer(Modifier.width(4.dp))
+        Spacer(Modifier.width(8.dp))
         Column {
             Text(
                 text = value,
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
             Text(
@@ -202,6 +245,81 @@ private fun StatItem(label: String, value: String, icon: ImageVector) {
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
             )
         }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun FilterSection(
+    uiState: SessionHistoryUiState,
+    onDeckFilterChange: (Long?) -> Unit,
+    onActionFilterChange: (com.deckapp.core.model.DrawAction?) -> Unit,
+    onSearchChange: (String) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+        OutlinedTextField(
+            value = uiState.searchQuery,
+            onValueChange = onSearchChange,
+            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+            placeholder = { Text("Buscar en el historial...") },
+            leadingIcon = { Icon(Icons.Default.Search, null) },
+            trailingIcon = if (uiState.searchQuery.isNotEmpty()) {
+                { IconButton(onClick = { onSearchChange("") }) { Icon(Icons.Default.Close, null) } }
+            } else null,
+            shape = RoundedCornerShape(12.dp),
+            singleLine = true
+        )
+
+        Text("Filtrar por mazo", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        FlowRow(
+            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            FilterChip(
+                selected = uiState.deckFilter == null,
+                onClick = { onDeckFilterChange(null) },
+                label = { Text("Todos") }
+            )
+            uiState.availableDecks.forEach { (id, name) ->
+                FilterChip(
+                    selected = uiState.deckFilter == id,
+                    onClick = { onDeckFilterChange(id) },
+                    label = { Text(name) }
+                )
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        Text("Filtrar por acción", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        FlowRow(
+            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            FilterChip(
+                selected = uiState.actionFilter == null,
+                onClick = { onActionFilterChange(null) },
+                label = { Text("Todas") }
+            )
+            uiState.availableActions.forEach { action ->
+                FilterChip(
+                    selected = uiState.actionFilter == action,
+                    onClick = { onActionFilterChange(action) },
+                    label = { 
+                        Text(when(action) {
+                            com.deckapp.core.model.DrawAction.DRAW -> "Robar"
+                            com.deckapp.core.model.DrawAction.DISCARD -> "Descartar"
+                            com.deckapp.core.model.DrawAction.FLIP -> "Girar"
+                            com.deckapp.core.model.DrawAction.RESET -> "Reset"
+                            com.deckapp.core.model.DrawAction.PEEK -> "Peek"
+                            else -> action.name
+                        })
+                    }
+                )
+            }
+        }
+        
+        HorizontalDivider(modifier = Modifier.padding(top = 12.dp))
     }
 }
 

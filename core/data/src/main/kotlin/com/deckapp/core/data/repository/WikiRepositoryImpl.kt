@@ -44,6 +44,24 @@ class WikiRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun getAllEntries(): Flow<List<WikiEntry>> {
+        return wikiDao.getAllEntries().map { entities ->
+            entities.map { it.toDomain() }
+        }
+    }
+
+    override fun getPinnedEntries(): Flow<List<WikiEntry>> {
+        return wikiDao.getPinnedEntries().map { entities ->
+            entities.map { it.toDomain() }
+        }
+    }
+
+    override fun getRecentEntries(limit: Int): Flow<List<WikiEntry>> {
+        return wikiDao.getRecentEntries(limit).map { entities ->
+            entities.map { it.toDomain() }
+        }
+    }
+
     override suspend fun getEntryById(id: Long): WikiEntry? {
         return wikiDao.getEntryById(id)?.toDomain()
     }

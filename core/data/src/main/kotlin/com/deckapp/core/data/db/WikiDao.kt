@@ -29,6 +29,9 @@ interface WikiDao {
     @Query("SELECT * FROM wiki_entries WHERE categoryId = :categoryId ORDER BY lastUpdated DESC")
     fun getEntriesByCategory(categoryId: Long): Flow<List<WikiEntryEntity>>
 
+    @Query("SELECT * FROM wiki_entries ORDER BY lastUpdated DESC")
+    fun getAllEntries(): Flow<List<WikiEntryEntity>>
+
     @Query("SELECT * FROM wiki_entries WHERE id = :id")
     suspend fun getEntryById(id: Long): WikiEntryEntity?
 
@@ -40,6 +43,12 @@ interface WikiDao {
 
     @Query("SELECT categoryId, COUNT(*) as count FROM wiki_entries GROUP BY categoryId")
     fun getCategoryCounts(): Flow<List<WikiCategoryCount>>
+
+    @Query("SELECT * FROM wiki_entries WHERE isPinned = 1 ORDER BY lastUpdated DESC")
+    fun getPinnedEntries(): Flow<List<WikiEntryEntity>>
+
+    @Query("SELECT * FROM wiki_entries ORDER BY lastUpdated DESC LIMIT :limit")
+    fun getRecentEntries(limit: Int): Flow<List<WikiEntryEntity>>
 }
 
 data class WikiCategoryCount(

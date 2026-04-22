@@ -12,14 +12,17 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Collections
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.LowPriority
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.foundation.verticalScroll
@@ -182,11 +185,25 @@ fun DeckDetailScreen(
                     if ((uiState.deck?.isArchived != true) && uiState.cards.size >= 2) {
                         if (uiState.isReorderMode) {
                             IconButton(onClick = { viewModel.saveReorder(localCards.map { it.id }) }) {
-                                Icon(Icons.Default.Check, contentDescription = "Guardar orden")
+                                Icon(Icons.Default.Check, contentDescription = "Guardar orden", tint = MaterialTheme.colorScheme.primary)
                             }
                         } else {
-                            IconButton(onClick = { viewModel.toggleReorderMode() }) {
-                                Icon(Icons.Default.LowPriority, contentDescription = "Reordenar cartas")
+                            val isFiltered = uiState.suitFilter != null
+                            IconButton(
+                                onClick = { 
+                                    if (!isFiltered) viewModel.toggleReorderMode()
+                                    else {
+                                        // Opcional: Mostrar snackbar avisando que no se puede reordenar con filtros
+                                    }
+                                },
+                                enabled = !isFiltered
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.LowPriority, 
+                                    contentDescription = "Reordenar cartas",
+                                    tint = if (isFiltered) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) 
+                                           else MaterialTheme.colorScheme.onSurface
+                                )
                             }
                         }
                     }
@@ -382,18 +399,49 @@ fun DeckDetailScreen(
                         }
                     }
 
-                    Text(
-                        text = if (uiState.isReorderMode)
-                            "Arrastrá las cartas para reordenar · toca ✓ para guardar"
-                        else
-                            "Mantén presionada una carta para eliminarla",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (uiState.isReorderMode)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
-                    )
+                    if (uiState.isReorderMode) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                            shape = MaterialTheme.shapes.medium,
+                            tonalElevation = 4.dp
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Default.Edit, null, tint = MaterialTheme.colorScheme.primary)
+                                Spacer(Modifier.width(12.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Modo Reordenamiento",
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = "Usa las flechas o arrastra el icono superior de cada carta.",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                                    )
+                                }
+                                Button(
+                                    onClick = { viewModel.saveReorder(localCards.map { it.id }) },
+                                    contentPadding = PaddingValues(horizontal = 16.dp),
+                                    modifier = Modifier.height(32.dp)
+                                ) {
+                                    Text("Listo", style = MaterialTheme.typography.labelMedium)
+                                }
+                            }
+                        }
+                    } else {
+                        Text(
+                            text = "Mantén presionada una carta para eliminarla",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    }
 
                     HorizontalDivider()
 
@@ -415,6 +463,15 @@ fun DeckDetailScreen(
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         }
 
+                        // Lógica para mover un paso
+                        val onMoveStep = { index: Int, delta: Int ->
+                            val targetIndex = index + delta
+                            if (targetIndex in localCards.indices) {
+                                localCards.add(targetIndex, localCards.removeAt(index))
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            }
+                        }
+
                         LazyVerticalGrid(
                             state = gridState,
                             columns = GridCells.Adaptive(minSize = 100.dp),
@@ -424,6 +481,8 @@ fun DeckDetailScreen(
                             modifier = Modifier.fillMaxSize()
                         ) {
                             items(localCards, key = { it.id }) { card ->
+                                val currentIndex = localCards.indexOf(card)
+                                
                                 ReorderableItem(reorderState, key = card.id) { isDragging ->
                                     val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp, label = "elevation")
                                     
@@ -433,11 +492,7 @@ fun DeckDetailScreen(
                                         CardThumbnail(
                                             card = card,
                                             modifier = if (uiState.isReorderMode) {
-                                                Modifier.longPressDraggableHandle(
-                                                    onDragStarted = {
-                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                    }
-                                                )
+                                                Modifier // No draggable aquí para evitar activación accidental
                                             } else {
                                                 Modifier.combinedClickable(
                                                     onClick = { onCardClick(card.id) },
@@ -450,25 +505,79 @@ fun DeckDetailScreen(
                                                 ?: com.deckapp.core.model.CardAspectRatio.STANDARD,
                                             showModeBadge = true
                                         )
+
                                         if (uiState.isReorderMode) {
-                                            Icon(
-                                                imageVector = Icons.Default.DragHandle,
-                                                contentDescription = "Arrastrar",
-                                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                            // Handle de Arrastre (Área específica)
+                                            Surface(
                                                 modifier = Modifier
                                                     .align(Alignment.TopEnd)
-                                                    .padding(4.dp)
-                                            )
+                                                    .padding(2.dp)
+                                                    .longPressDraggableHandle(
+                                                        onDragStarted = {
+                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                        }
+                                                    ),
+                                                shape = CircleShape,
+                                                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f)
+                                            ) {
+                                                Icon(
+                                                    Icons.Default.DragHandle,
+                                                    "Arrastrar",
+                                                    modifier = Modifier.padding(4.dp).size(20.dp),
+                                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                                )
+                                            }
+
+                                            // Flechas de movimiento manual
+                                            Row(
+                                                modifier = Modifier
+                                                    .align(Alignment.BottomCenter)
+                                                    .fillMaxWidth()
+                                                    .padding(bottom = 24.dp), // Encima del título
+                                                horizontalArrangement = Arrangement.SpaceBetween
+                                            ) {
+                                                if (currentIndex > 0) {
+                                                    Surface(
+                                                        onClick = { onMoveStep(currentIndex, -1) },
+                                                        shape = CircleShape,
+                                                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                                                        modifier = Modifier.size(28.dp),
+                                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                                                    ) {
+                                                        Box(contentAlignment = Alignment.Center) {
+                                                            Icon(Icons.AutoMirrored.Filled.ArrowBack, null, modifier = Modifier.size(16.dp))
+                                                        }
+                                                    }
+                                                } else {
+                                                    Spacer(Modifier.size(28.dp))
+                                                }
+
+                                                if (currentIndex < localCards.size - 1) {
+                                                    Surface(
+                                                        onClick = { onMoveStep(currentIndex, 1) },
+                                                        shape = CircleShape,
+                                                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                                                        modifier = Modifier.size(28.dp),
+                                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                                                    ) {
+                                                        Box(contentAlignment = Alignment.Center) {
+                                                            Icon(Icons.AutoMirrored.Filled.ArrowForward, null, modifier = Modifier.size(16.dp))
+                                                        }
+                                                    }
+                                                } else {
+                                                    Spacer(Modifier.size(28.dp))
+                                                }
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-                    }
                 }
             }
         }
     }
+}
 
     if (uiState.showConfigSheet) {
         DeckConfigSheet(

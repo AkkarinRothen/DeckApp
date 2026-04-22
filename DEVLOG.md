@@ -1302,3 +1302,25 @@ opcional de auto-detección cuando el usuario no conoce el layout del PDF.
 
 **INTEGRATION — Build y Estabilidad**
 - **BUILD SUCCESSFUL** — Todas las referencias circulares y de sintaxis resueltas.
+
+---
+
+### Sprint 18: Estabilidad del Mapa e Integridad de Datos (19 de abril de 2026)
+
+**FIX — Crash de Renderizado en HexGrid (maxWidth < 0)**
+- Refactorizado `drawTerrainLabel` en `HexGridCanvas.kt` para usar `TextLayoutResult.multiParagraph.paint` directamente con `canvas.translate`.
+- Esta solución evita que `DrawScope.drawText` lance una `IllegalArgumentException` cuando las etiquetas están parcialmente fuera de los límites del canvas durante el desplazamiento o zoom.
+
+**FIX — Integridad de Base de Datos (Identity Hash Mismatch)**
+- Sincronizadas las entidades Room con las migraciones SQL mediante la adición selectiva de `@ColumnInfo(defaultValue = "...")`.
+- Identificados y corregidos campos con valores por defecto inconsistentes entre recreaciones de tablas (especialmente `isPinned`, `confidence` y campos de `hex_maps`).
+- Incrementada versión de DB a **33** con una migración robusta (`MIGRATION_32_33`) que verifica y añade columnas faltantes de forma segura mediante `try-catch`.
+- Activado `fallbackToDestructiveMigration()` global como salvaguarda final para entornos de desarrollo.
+
+**FEATURE — Mejoras en Modo Simplificado y Aislamiento**
+- Corregido bug de inicialización en `SessionViewModel`: el modo simplificado ahora se activa correctamente según las preferencias del usuario.
+- **Sesiones desde Cero:** Implementado reset automático de mazos al crear nuevas sesiones en `SessionSetupViewModel`.
+- **Aislamiento de Hexcrawl:** El mapa de exploración ahora filtra las cartas "en mano" basándose estrictamente en los eventos de la sesión actual, evitando que aparezcan cartas robadas en otras sesiones.
+
+**INTEGRATION — Build y Estabilidad**
+- **BUILD SUCCESSFUL** — APK generado y verificado (v33). App estable en navegación y gestión de recursos.

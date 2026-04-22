@@ -1,7 +1,8 @@
 package com.deckapp.feature.npcs
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -10,7 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,7 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,6 +46,18 @@ fun NpcListScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var searchQuery by remember { mutableStateOf("") }
+    
+    var peekedNpc by remember { mutableStateOf<Npc?>(null) }
+    val haptic = LocalHapticFeedback.current
+
+    if (peekedNpc != null) {
+        ModalBottomSheet(onDismissRequest = { peekedNpc = null }) {
+            NpcPeekContent(npc = peekedNpc!!, onEdit = { 
+                onEditNpc(peekedNpc!!.id)
+                peekedNpc = null
+            })
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -50,7 +65,7 @@ fun NpcListScreen(
                 title = { Text("Biblioteca de NPCs", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                     }
                 },
                 actions = {
@@ -99,7 +114,11 @@ fun NpcListScreen(
                     } else {
                         NpcGrid(
                             npcs = state.npcs,
-                            onEditNpc = onEditNpc
+                            onEditNpc = onEditNpc,
+                            onLongPressNpc = { npc ->
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                peekedNpc = npc
+                            }
                         )
                     }
                 }
@@ -111,7 +130,8 @@ fun NpcListScreen(
 @Composable
 fun NpcGrid(
     npcs: List<Npc>,
-    onEditNpc: (Long) -> Unit
+    onEditNpc: (Long) -> Unit,
+    onLongPressNpc: (Npc) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(160.dp),
@@ -121,20 +141,29 @@ fun NpcGrid(
         modifier = Modifier.fillMaxSize()
     ) {
         items(npcs) { npc ->
-            NpcCard(npc = npc, onClick = { onEditNpc(npc.id) })
+            NpcCard(
+                npc = npc, 
+                onClick = { onEditNpc(npc.id) },
+                onLongClick = { onLongPressNpc(npc) }
+            )
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NpcCard(
     npc: Npc,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onLongClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            ),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.White.copy(alpha = 0.05f)
@@ -190,6 +219,84 @@ fun NpcCard(
                 StatBadge(label = "AC", value = npc.armorClass.toString(), color = Color(0xFF42A5F5))
             }
         }
+    }
+}
+
+@Composable
+fun NpcPeekContent(npc: Npc, onEdit: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .padding(bottom = 32.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                if (npc.imagePath != null) {
+                    AsyncImage(model = npc.imagePath, contentDescription = null, contentScale = ContentScale.Crop)
+                } else {
+                    Text(npc.name.take(1).uppercase(), style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                }
+            }
+            Spacer(Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(npc.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                if (npc.description.isNotBlank()) {
+                    Text(npc.description, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+            Button(onClick = onEdit) {
+                Text("Editar")
+            }
+        }
+
+        Spacer(Modifier.height(24.dp))
+
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            StatPeekBox("HP", npc.maxHp.toString(), Color(0xFFEF5350))
+            StatPeekBox("AC", npc.armorClass.toString(), Color(0xFF42A5F5))
+            StatPeekBox("INIT", if (npc.initiativeBonus >= 0) "+${npc.initiativeBonus}" else npc.initiativeBonus.toString(), Color(0xFFFFB74D))
+        }
+
+        if (npc.notes.isNotBlank()) {
+            Spacer(Modifier.height(24.dp))
+            Text("Notas", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+            Spacer(Modifier.height(4.dp))
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    npc.notes, 
+                    modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+        
+        if (npc.tags.isNotEmpty()) {
+            Spacer(Modifier.height(16.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                npc.tags.forEach { tag ->
+                    SuggestionChip(onClick = {}, label = { Text(tag.name) })
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun StatPeekBox(label: String, value: String, color: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(label, style = MaterialTheme.typography.labelSmall, color = color, fontWeight = FontWeight.Bold)
+        Text(value, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Black)
     }
 }
 

@@ -5,8 +5,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.HistoryEdu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,6 +23,8 @@ import com.deckapp.core.model.Session
 fun SessionListScreen(
     onSessionClick: (Long) -> Unit,
     onHistoryClick: (Long) -> Unit,
+    onPlannerClick: (Long) -> Unit,
+    onAnalyticsClick: () -> Unit,
     onNewSession: () -> Unit,
     viewModel: SessionListViewModel = hiltViewModel()
 ) {
@@ -65,7 +69,14 @@ fun SessionListScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Sesiones") })
+            TopAppBar(
+                title = { Text("Sesiones") },
+                actions = {
+                    IconButton(onClick = onAnalyticsClick) {
+                        Icon(Icons.Default.TrendingUp, contentDescription = "Analíticas Globales")
+                    }
+                }
+            )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onNewSession) {
@@ -102,6 +113,7 @@ fun SessionListScreen(
                             session = session,
                             statusText = "Programada",
                             onClick = { onSessionClick(session.id) },
+                            onPlanner = { onPlannerClick(session.id) },
                             onRename = { sessionToRename = session },
                             onClone = { viewModel.cloneSession(session.id) },
                             onDelete = { sessionToDelete = session },
@@ -133,6 +145,7 @@ fun SessionListScreen(
                             session = session,
                             statusText = "En curso",
                             onClick = { onSessionClick(session.id) },
+                            onPlanner = { onPlannerClick(session.id) },
                             onRename = { sessionToRename = session },
                             onClone = { viewModel.cloneSession(session.id) },
                             onDelete = { sessionToDelete = session },
@@ -162,6 +175,7 @@ fun SessionListScreen(
                             session = session,
                             statusText = "Finalizada",
                             onClick = { onHistoryClick(session.id) },
+                            onPlanner = { onPlannerClick(session.id) },
                             onRename = { sessionToRename = session },
                             onClone = { viewModel.cloneSession(session.id) },
                             onDelete = { sessionToDelete = session }
@@ -178,6 +192,7 @@ private fun SessionCard(
     session: Session,
     statusText: String,
     onClick: () -> Unit,
+    onPlanner: () -> Unit,
     onRename: () -> Unit,
     onClone: () -> Unit,
     onDelete: () -> Unit,
@@ -212,6 +227,14 @@ private fun SessionCard(
                     expanded = showMenu,
                     onDismissRequest = { showMenu = false }
                 ) {
+                    DropdownMenuItem(
+                        text = { Text("Planificar") },
+                        onClick = {
+                            showMenu = false
+                            onPlanner()
+                        },
+                        leadingIcon = { Icon(Icons.Default.HistoryEdu, null) }
+                    )
                     DropdownMenuItem(
                         text = { Text("Renombrar") },
                         onClick = {

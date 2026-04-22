@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable object LibraryRoute
 @Serializable object SessionListRoute
+@Serializable object GlobalAnalyticsRoute
 @Serializable object SettingsRoute
 @Serializable object TagManagerRoute
 @Serializable object ImportRoute
@@ -17,11 +18,12 @@ import kotlinx.serialization.Serializable
 @Serializable data class SessionRoute(val sessionId: Long)
 @Serializable data class SessionSetupRoute(val preselectedDeckId: Long? = null)
 @Serializable data class SessionHistoryRoute(val sessionId: Long)
+@Serializable data class SessionPlannerRoute(val sessionId: Long)
 
 // Tablas aleatorias
 @Serializable object TablesListRoute
-@Serializable data class TableEditorRoute(val tableId: Long = -1L)
-@Serializable object TableImportRoute
+@Serializable data class TableEditorRoute(val tableId: Long = -1L, val sessionId: Long? = null)
+@Serializable data class TableImportRoute(val sessionId: Long? = null)
 
 // Encuentros y Combate
 @Serializable object EncounterListRoute
@@ -44,3 +46,9 @@ import kotlinx.serialization.Serializable
 @Serializable object ReferenceListRoute
 @Serializable data class ReferenceTableEditorRoute(val tableId: Long = -1L, val prefilledSystem: String = "")
 @Serializable data class RuleEditorRoute(val ruleId: Long = -1L, val prefilledSystem: String = "")
+@Serializable data class ManualViewerRoute(val manualId: Long)
+
+// Mythic GM Emulator
+@Serializable object MythicListRoute
+@Serializable data class MythicSessionRoute(val sessionId: Long)
+@Serializable object MythicReferenceRoute

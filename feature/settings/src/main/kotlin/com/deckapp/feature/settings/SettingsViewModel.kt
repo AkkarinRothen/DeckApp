@@ -36,7 +36,9 @@ data class SettingsUiState(
     val simplifiedModeEnabled: Boolean = false,
     val isBackingUp: Boolean = false,
     val isRestoring: Boolean = false,
-    val backupMessage: String? = null
+    val backupMessage: String? = null,
+    val systemTotalBytes: Long = 0L,
+    val systemFreeBytes: Long = 0L
 )
 
 @HiltViewModel
@@ -86,10 +88,16 @@ class SettingsViewModel @Inject constructor(
                 DeckStorageInfo(id = deck.id, name = deck.name, sizeBytes = sizeBytes)
             }.sortedByDescending { it.sizeBytes }
 
+            val internalStorage = android.os.StatFs(context.filesDir.absolutePath)
+            val totalSystem = internalStorage.blockCountLong * internalStorage.blockSizeLong
+            val freeSystem = internalStorage.availableBlocksLong * internalStorage.blockSizeLong
+
             _uiState.update {
                 it.copy(
                     decksStorage = storageList,
                     totalSizeBytes = storageList.sumOf { d -> d.sizeBytes },
+                    systemTotalBytes = totalSystem,
+                    systemFreeBytes = freeSystem,
                     isLoading = false
                 )
             }

@@ -11,7 +11,8 @@ data class Session(
     val dmNotes: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
     val endedAt: Long? = null,
-    val gameSystems: List<String> = listOf("General")
+    val gameSystems: List<String> = listOf("General"),
+    val linkedMythicSessionId: Long? = null
 )
 
 enum class SessionStatus {

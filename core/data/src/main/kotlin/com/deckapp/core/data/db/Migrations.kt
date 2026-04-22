@@ -678,20 +678,6 @@ val MIGRATION_31_32 = object : Migration(31, 32) {
     }
 }
 
-val MIGRATION_34_35 = object : Migration(34, 35) {
-    override fun migrate(database: SupportSQLiteDatabase) {
-        database.execSQL("ALTER TABLE `hex_maps` ADD COLUMN `sessionResources` TEXT NOT NULL DEFAULT '{}'")
-    }
-}
-
-val MIGRATION_33_34 = object : Migration(33, 34) {
-    override fun migrate(database: SupportSQLiteDatabase) {
-        database.execSQL("ALTER TABLE `hex_maps` ADD COLUMN `weatherTableId` INTEGER DEFAULT NULL")
-        database.execSQL("ALTER TABLE `hex_maps` ADD COLUMN `travelEventTableId` INTEGER DEFAULT NULL")
-        database.execSQL("ALTER TABLE `hex_maps` ADD COLUMN `terrainTableConfig` TEXT NOT NULL DEFAULT '{}'")
-    }
-}
-
 val MIGRATION_32_33 = object : Migration(32, 33) {
     override fun migrate(database: SupportSQLiteDatabase) {
         // 1. table_entries.confidence (missing from recreate in 19-20)
@@ -716,6 +702,116 @@ val MIGRATION_32_33 = object : Migration(32, 33) {
         try {
             database.execSQL("ALTER TABLE `random_tables` ADD COLUMN `sourcePack` TEXT")
         } catch (e: Exception) { /* already exists */ }
+    }
+}
+
+val MIGRATION_33_34 = object : Migration(33, 34) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE `hex_maps` ADD COLUMN `weatherTableId` INTEGER DEFAULT NULL")
+        database.execSQL("ALTER TABLE `hex_maps` ADD COLUMN `travelEventTableId` INTEGER DEFAULT NULL")
+        database.execSQL("ALTER TABLE `hex_maps` ADD COLUMN `terrainTableConfig` TEXT NOT NULL DEFAULT '{}'")
+    }
+}
+
+val MIGRATION_34_35 = object : Migration(34, 35) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE `hex_maps` ADD COLUMN `sessionResources` TEXT NOT NULL DEFAULT '{}'")
+    }
+}
+
+val MIGRATION_35_36 = object : Migration(35, 36) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `mythic_sessions` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `name` TEXT NOT NULL,
+                `chaosFactor` INTEGER NOT NULL DEFAULT 5,
+                `sceneNumber` INTEGER NOT NULL DEFAULT 1,
+                `actionTableId` INTEGER DEFAULT NULL,
+                `subjectTableId` INTEGER DEFAULT NULL,
+                `createdAt` INTEGER NOT NULL
+            )""")
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `mythic_characters` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `sessionId` INTEGER NOT NULL,
+                `name` TEXT NOT NULL,
+                `notes` TEXT NOT NULL DEFAULT '',
+                `sortOrder` INTEGER NOT NULL DEFAULT 0,
+                FOREIGN KEY(`sessionId`) REFERENCES `mythic_sessions`(`id`) ON DELETE CASCADE
+            )""")
+        database.execSQL("CREATE INDEX IF NOT EXISTS `idx_mythic_chars_session` ON `mythic_characters`(`sessionId`)")
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `mythic_threads` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `sessionId` INTEGER NOT NULL,
+                `description` TEXT NOT NULL,
+                `isResolved` INTEGER NOT NULL DEFAULT 0,
+                `sortOrder` INTEGER NOT NULL DEFAULT 0,
+                FOREIGN KEY(`sessionId`) REFERENCES `mythic_sessions`(`id`) ON DELETE CASCADE
+            )""")
+        database.execSQL("CREATE INDEX IF NOT EXISTS `idx_mythic_threads_session` ON `mythic_threads`(`sessionId`)")
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `mythic_rolls` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `sessionId` INTEGER NOT NULL,
+                `question` TEXT NOT NULL DEFAULT '',
+                `probability` TEXT NOT NULL,
+                `chaosFactor` INTEGER NOT NULL,
+                `roll` INTEGER NOT NULL,
+                `result` TEXT NOT NULL,
+                `isRandomEvent` INTEGER NOT NULL DEFAULT 0,
+                `eventAction` TEXT NOT NULL DEFAULT '',
+                `eventSubject` TEXT NOT NULL DEFAULT '',
+                `sceneNumber` INTEGER NOT NULL DEFAULT 1,
+                `timestamp` INTEGER NOT NULL,
+                FOREIGN KEY(`sessionId`) REFERENCES `mythic_sessions`(`id`) ON DELETE CASCADE
+            )""")
+        database.execSQL("CREATE INDEX IF NOT EXISTS `idx_mythic_rolls_session` ON `mythic_rolls`(`sessionId`)")
+    }
+}
+
+val MIGRATION_36_37 = object : Migration(36, 37) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        try {
+            database.execSQL("ALTER TABLE `sessions` ADD COLUMN `linkedMythicSessionId` INTEGER DEFAULT NULL")
+        } catch (e: Exception) { /* already exists */ }
+        
+        try {
+            database.execSQL("ALTER TABLE `hex_maps` ADD COLUMN `linkedMythicSessionId` INTEGER DEFAULT NULL")
+        } catch (e: Exception) { /* already exists */ }
+    }
+}
+
+val MIGRATION_37_38 = object : Migration(37, 38) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE `npcs` ADD COLUMN `voiceSamplePath` TEXT DEFAULT NULL")
+    }
+}
+
+val MIGRATION_38_39 = object : Migration(38, 39) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `scenes` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+                `sessionId` INTEGER NOT NULL, 
+                `title` TEXT NOT NULL, 
+                `content` TEXT NOT NULL, 
+                `isCompleted` INTEGER NOT NULL, 
+                `sortOrder` INTEGER NOT NULL, 
+                FOREIGN KEY(`sessionId`) REFERENCES `sessions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE 
+            )
+        """.trimIndent())
+        database.execSQL("CREATE INDEX IF NOT EXISTS `index_scenes_sessionId` ON `scenes` (`sessionId`)")
+    }
+}
+
+val MIGRATION_39_40 = object : Migration(39, 40) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE `scenes` ADD COLUMN `linkedTableId` INTEGER")
+        database.execSQL("ALTER TABLE `scenes` ADD COLUMN `linkedDeckId` INTEGER")
+        database.execSQL("ALTER TABLE `scenes` ADD COLUMN `imagePath` TEXT")
+        database.execSQL("ALTER TABLE `scenes` ADD COLUMN `isAlternative` INTEGER NOT NULL DEFAULT 0")
     }
 }
 

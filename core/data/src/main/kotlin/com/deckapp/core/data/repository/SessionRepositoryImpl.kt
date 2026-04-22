@@ -6,12 +6,16 @@ import com.deckapp.core.model.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
+
+val json = Json { ignoreUnknownKeys = true }
 
 class SessionRepositoryImpl @Inject constructor(
     private val sessionDao: SessionDao,
     private val drawEventDao: DrawEventDao,
-    private val randomTableDao: RandomTableDao
+    private val randomTableDao: RandomTableDao,
+    private val sceneDao: SceneDao
 ) : SessionRepository {
 
     override fun getAllSessions(): Flow<List<Session>> =
@@ -76,6 +80,9 @@ class SessionRepositoryImpl @Inject constructor(
     override fun getEventsForSession(sessionId: Long): Flow<List<DrawEvent>> =
         drawEventDao.getEventsForSession(sessionId).map { it.map { e -> e.toDomain() } }
 
+    override fun getAllEvents(): Flow<List<DrawEvent>> =
+        drawEventDao.getAllEvents().map { it.map { e -> e.toDomain() } }
+
     override suspend fun getLastEventForSession(sessionId: Long): DrawEvent? =
         drawEventDao.getLastEvent(sessionId)?.toDomain()
 
@@ -85,4 +92,25 @@ class SessionRepositoryImpl @Inject constructor(
     override suspend fun updateGameSystems(sessionId: Long, systems: List<String>) {
         sessionDao.updateGameSystems(sessionId, json.encodeToString(systems))
     }
+
+    override suspend fun updateLinkedMythicSession(sessionId: Long, mythicSessionId: Long?) {
+        sessionDao.updateLinkedMythicSession(sessionId, mythicSessionId)
+    }
+
+    // ── Scenes (Planning) ───────────────────────────────────────────────────
+
+    override fun getScenesForSession(sessionId: Long): Flow<List<Scene>> =
+        sceneDao.getScenesForSession(sessionId).map { it.map { e -> e.toDomain() } }
+
+    override suspend fun upsertScene(scene: Scene): Long =
+        sceneDao.insertScene(scene.toEntity())
+
+    override suspend fun deleteScene(sceneId: Long) =
+        sceneDao.deleteScene(sceneId)
+
+    override suspend fun updateSceneOrder(sceneId: Long, order: Int) =
+        sceneDao.updateSortOrder(sceneId, order)
+
+    override suspend fun updateSceneCompletion(sceneId: Long, completed: Boolean) =
+        sceneDao.updateCompletion(sceneId, completed)
 }

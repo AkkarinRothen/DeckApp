@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -56,6 +57,13 @@ fun WikiEntryEditorScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { viewModel.togglePinned() }) {
+                        Icon(
+                            if (uiState.isPinned) Icons.Default.PushPin else Icons.Default.PushPin, // No hay Outlined por defecto en default core?
+                            contentDescription = "Fijar Entrada",
+                            tint = if (uiState.isPinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                     IconButton(onClick = { viewModel.togglePreview() }) {
                         Icon(
                             if (uiState.isPreviewMode) Icons.Default.VisibilityOff else Icons.Default.Visibility,
@@ -106,7 +114,13 @@ fun WikiEntryEditorScreen(
             if (uiState.isPreviewMode) {
                 Text(uiState.title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(8.dp))
-                MarkdownText(markdown = uiState.content.text)
+                MarkdownText(
+                    markdown = uiState.content.text,
+                    onWikiLinkClicked = { title ->
+                        // En el editor, solo navegamos si existe la entrada
+                        // Podríamos implementar una navegación real aquí si fuera necesario
+                    }
+                )
             } else {
                 OutlinedTextField(
                     value = uiState.title,

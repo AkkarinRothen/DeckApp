@@ -4,10 +4,12 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.deckapp.core.domain.repository.ReferenceRepository
+import com.deckapp.core.domain.repository.ManualRepository
 import com.deckapp.core.domain.usecase.reference.InstallStarterPackUseCase
 import com.deckapp.core.domain.usecase.reference.RemoveStarterPackUseCase
 import com.deckapp.core.model.ReferenceTable
 import com.deckapp.core.model.SystemRule
+import com.deckapp.core.model.Manual
 import com.deckapp.core.model.backup.FullBackupDto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -25,6 +27,7 @@ data class StarterPackInfo(
 data class ReferenceListUiState(
     val tables: List<ReferenceTable> = emptyList(),
     val rules: List<SystemRule> = emptyList(),
+    val manuals: List<Manual> = emptyList(),
     val availableSystems: List<String> = emptyList(),
     val activeSystemFilters: Set<String> = emptySet(),
     val searchQuery: String = "",
@@ -38,6 +41,7 @@ data class ReferenceListUiState(
 @HiltViewModel
 class ReferenceListViewModel @Inject constructor(
     private val referenceRepository: ReferenceRepository,
+    private val manualRepository: ManualRepository,
     private val installStarterPackUseCase: InstallStarterPackUseCase,
     private val removeStarterPackUseCase: RemoveStarterPackUseCase,
     @ApplicationContext private val context: Context
@@ -52,6 +56,7 @@ class ReferenceListViewModel @Inject constructor(
     val uiState: StateFlow<ReferenceListUiState> = combine(
         referenceRepository.getAllReferenceTables(),
         referenceRepository.getAllSystemRules(),
+        manualRepository.getAllManuals(),
         referenceRepository.getDistinctSystems(),
         referenceRepository.getInstalledPackNames(),
         _searchQuery,
@@ -61,13 +66,14 @@ class ReferenceListViewModel @Inject constructor(
     ) { flows ->
         val tables = flows[0] as List<ReferenceTable>
         val rules = flows[1] as List<SystemRule>
-        val systems = flows[2] as List<String>
+        val manuals = flows[2] as List<Manual>
+        val systems = flows[3] as List<String>
         @Suppress("UNCHECKED_CAST")
-        val installed = flows[3] as Set<String>
-        val query = flows[4] as String
-        val filters = flows[5] as Set<String>
-        val page = flows[6] as Int
-        val showStarter = flows[7] as Boolean
+        val installed = flows[4] as Set<String>
+        val query = flows[5] as String
+        val filters = flows[6] as Set<String>
+        val page = flows[7] as Int
+        val showStarter = flows[8] as Boolean
 
         val filteredTables = tables.filter { table ->
             (filters.isEmpty() || filters.contains(table.gameSystem)) &&
@@ -79,7 +85,11 @@ class ReferenceListViewModel @Inject constructor(
             (query.isBlank() || rule.title.contains(query, ignoreCase = true) || rule.content.contains(query, ignoreCase = true))
         }
 
-        // Escaneo dinámico de assets
+        val filteredManuals = manuals.filter { manual ->
+            (filters.isEmpty() || filters.contains(manual.gameSystem)) &&
+            (query.isBlank() || manual.title.contains(query, ignoreCase = true))
+        }
+
         val availableAssets = context.assets.list("starter_packs") ?: emptyArray()
         val packsInfo = availableAssets.filter { it.endsWith(".json") }.map { fileName ->
             StarterPackInfo(
@@ -95,6 +105,7 @@ class ReferenceListViewModel @Inject constructor(
         ReferenceListUiState(
             tables = filteredTables,
             rules = filteredRules,
+            manuals = filteredManuals,
             availableSystems = systems,
             activeSystemFilters = filters,
             searchQuery = query,
@@ -123,7 +134,17 @@ class ReferenceListViewModel @Inject constructor(
         _showStarterPackDialog.value = show
     }
 
-    val snackbarMessage = MutableStateFlow<String?>(null)
+    fun addManual(title: String, uri: String, system: String) {
+        viewModelScope.launch {
+            manualRepository.saveManual(Manual(title = title, uri = uri, gameSystem = system))
+        }
+    }
+
+    fun deleteManual(manual: Manual) {
+        viewModelScope.launch {
+            manualRepository.deleteManual(manual)
+        }
+    }
 
     fun installPack(assetName: String) {
         viewModelScope.launch {
@@ -132,10 +153,8 @@ class ReferenceListViewModel @Inject constructor(
                 val pack = json.decodeFromString<FullBackupDto>(jsonString)
                 installStarterPackUseCase(pack, assetName)
                 _showStarterPackDialog.value = false
-                snackbarMessage.value = "Pack instalado correctamente"
             } catch (e: Exception) {
                 e.printStackTrace()
-                snackbarMessage.value = "Error al instalar: ${e.message}"
             }
         }
     }
@@ -145,38 +164,23 @@ class ReferenceListViewModel @Inject constructor(
             try {
                 removeStarterPackUseCase(assetName)
                 _showStarterPackDialog.value = false
-                snackbarMessage.value = "Pack eliminado"
-            } catch (e: Exception) {
-                snackbarMessage.value = "Error al eliminar: ${e.message}"
-            }
+            } catch (e: Exception) { }
         }
-    }
-
-    fun clearSnackbar() {
-        snackbarMessage.value = null
     }
 
     fun deleteTable(id: Long) {
-        viewModelScope.launch {
-            referenceRepository.deleteReferenceTable(id)
-        }
+        viewModelScope.launch { referenceRepository.deleteReferenceTable(id) }
     }
 
     fun deleteRule(id: Long) {
-        viewModelScope.launch {
-            referenceRepository.deleteSystemRule(id)
-        }
+        viewModelScope.launch { referenceRepository.deleteSystemRule(id) }
     }
 
     fun togglePinnedTable(id: Long, pinned: Boolean) {
-        viewModelScope.launch {
-            referenceRepository.updateTablePinned(id, pinned)
-        }
+        viewModelScope.launch { referenceRepository.updateTablePinned(id, pinned) }
     }
 
     fun togglePinnedRule(id: Long, pinned: Boolean) {
-        viewModelScope.launch {
-            referenceRepository.updateRulePinned(id, pinned)
-        }
+        viewModelScope.launch { referenceRepository.updateRulePinned(id, pinned) }
     }
 }

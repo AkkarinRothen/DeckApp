@@ -25,6 +25,7 @@ data class ImportResult(
     val suggestedFormula: String = "1d6",
     val sourceType: String,
     val entries: List<TableEntry>,
+    val tags: List<com.deckapp.core.model.Tag> = emptyList(),
     /** Índices de [entries] con confianza OCR baja. Vacío para fuentes no-OCR. */
     val lowConfidenceIndices: Set<Int> = emptySet()
 )

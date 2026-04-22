@@ -1,18 +1,20 @@
 package com.deckapp.feature.tables
 
+import android.content.ClipData
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.draganddrop.dragAndDropSource
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.*
@@ -22,13 +24,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.draganddrop.DragAndDropTransferData
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.deckapp.core.model.RandomTable
@@ -41,17 +45,32 @@ import com.deckapp.feature.tables.library.components.TableGridItem
 @Composable
 fun TablesTab(
     sessionId: Long?,
-    onCreateTable: () -> Unit,
+    onCreateTable: (Long?) -> Unit,
+    onEditTable: (Long) -> Unit,
     onImportTable: () -> Unit,
     viewModel: TablesViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val clipboard = LocalClipboardManager.current
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
+    
     var showExportDialog by remember { mutableStateOf(false) }
+    
+    // Sincronizar ID de sesión con el ViewModel para filtrado reactivo
+    LaunchedEffect(sessionId) {
+        viewModel.setSessionId(sessionId)
+    }
+
+    // Auto-copiar al portapapeles cuando sale un resultado (Quick Roll o Detail)
+    LaunchedEffect(uiState.lastResult) {
+        uiState.lastResult?.let { result ->
+            clipboard.setText(AnnotatedString(result.resolvedText))
+        }
+    }
 
     if (uiState.showPackDialog) {
-        com.deckapp.feature.tables.library.TablePackDialog(
+        TablePackDialog(
             packs = uiState.availableTablePacks,
             onDismiss = { viewModel.setShowPackDialog(false) },
             onInstall = viewModel::installTablePack,
@@ -98,6 +117,10 @@ fun TablesTab(
             isRolling = uiState.isRolling,
             onRoll = { viewModel.rollTable(activeTable.id, sessionId) },
             onExport = { showExportDialog = true },
+            onEdit = {
+                viewModel.closeTable()
+                onEditTable(activeTable.id)
+            },
             onDismiss = { viewModel.closeTable() }
         )
     }
@@ -186,178 +209,107 @@ fun TablesTab(
                 Spacer(Modifier.height(4.dp))
             }
 
-            if (sessionId != null) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        if (uiState.showAllTables) "Mostrando todas las tablas" else "Tablas de la sesión",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Switch(
-                        checked = uiState.showAllTables,
-                        onCheckedChange = { viewModel.setShowAllTables(it) },
-                        modifier = Modifier.scale(0.7f)
-                    )
-                }
-
-                if (uiState.sessionRollLog.isNotEmpty()) {
-                    RollLogPanel(
-                        log = uiState.sessionRollLog,
-                        expanded = uiState.rollLogExpanded,
-                        onToggleExpanded = { viewModel.toggleRollLogExpanded() },
-                        onClear = { viewModel.clearSessionRollLog(sessionId) },
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-                    )
-                }
+            if (sessionId != null && uiState.sessionRollLog.isNotEmpty()) {
+                RollLogPanel(
+                    log = uiState.sessionRollLog,
+                    expanded = uiState.rollLogExpanded,
+                    onToggleExpanded = { viewModel.toggleRollLogExpanded() },
+                    onClear = { viewModel.clearSessionRollLog(sessionId) },
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                )
             }
 
-            when {
-                uiState.isLoading -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
+            if (uiState.isLoading) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
-                uiState.groupedTables.isEmpty() -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                Icons.Default.Casino,
-                                contentDescription = null,
-                                modifier = Modifier.size(64.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-                            )
-                            Spacer(Modifier.height(16.dp))
-                            Text(
-                                "No hay tablas",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                "Crea una o activa un pack predefinido",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                            )
-                            Spacer(Modifier.height(24.dp))
-                            
-                            Button(onClick = onCreateTable) {
-                                Icon(Icons.Default.Add, contentDescription = null)
-                                Spacer(Modifier.width(8.dp))
-                                Text("Crear tabla")
-                            }
-                            
-                            Spacer(Modifier.height(8.dp))
-                            
-                            OutlinedButton(onClick = { viewModel.setShowPackDialog(true) }) {
-                                Icon(Icons.Default.AutoAwesome, contentDescription = null)
-                                Spacer(Modifier.width(8.dp))
-                                Text("Explorar packs de tablas")
-                            }
+            } else if (uiState.groupedTables.isEmpty()) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Default.Casino,
+                            contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            "No hay tablas",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.height(24.dp))
+                        Button(onClick = { onCreateTable(sessionId) }) {
+                            Icon(Icons.Default.Add, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Crear tabla")
                         }
                     }
                 }
-                uiState.isGridView -> {
-                    // Vista de Cuadrícula con Sticky Headers
-                    androidx.compose.foundation.lazy.grid.LazyVerticalGrid(
-                        columns = androidx.compose.foundation.lazy.grid.GridCells.Adaptive(160.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        uiState.groupedTables.forEach { (bundle, tables) ->
-                            item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+            } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(bottom = 80.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    // Sección Destacados: Anclados y Recientes
+                    if (uiState.pinnedTables.isNotEmpty() || uiState.recentTables.isNotEmpty()) {
+                        item {
+                            FeaturedTablesSections(
+                                pinnedTables = uiState.pinnedTables,
+                                recentTables = uiState.recentTables,
+                                onTableClick = { table ->
+                                    if (uiState.isSimplifiedMode) viewModel.rollTable(table.id, sessionId)
+                                    else viewModel.openTable(table)
+                                },
+                                onQuickRoll = { id -> viewModel.rollTable(id, sessionId) }
+                            )
+                        }
+                    }
+
+                    // Lista principal agrupada
+                    uiState.groupedTables.forEach { (bundle, tables) ->
+                        stickyHeader {
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                color = MaterialTheme.colorScheme.surface
+                            ) {
                                 Text(
                                     text = bundle,
                                     style = MaterialTheme.typography.labelLarge,
                                     color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
-                                )
-                            }
-                            items(tables.size) { index ->
-                                val table = tables[index]
-                                TableGridItem(
-                                    table = table,
-                                    isSelected = table.id in uiState.selectedTableIds,
-                                    onClick = {
-                                        if (uiState.selectedTableIds.isNotEmpty()) {
-                                            viewModel.toggleTableSelection(table.id)
-                                        } else if (uiState.isSimplifiedMode) {
-                                            viewModel.rollTable(table.id, sessionId)
-                                        } else {
-                                            viewModel.openTable(table)
-                                        }
-                                    },
-                                    onLongClick = {
-                                        if (uiState.selectedTableIds.isEmpty() && uiState.isSimplifiedMode) {
-                                            viewModel.openTable(table)
-                                        } else {
-                                            viewModel.toggleTableSelection(table.id)
-                                        }
-                                    },
-                                    onQuickRoll = { viewModel.rollTable(table.id, sessionId) },
-                                    onTogglePin = { viewModel.togglePin(table) },
-                                    quickRollResult = uiState.quickRollResults[table.id],
-                                    onDismissResult = { viewModel.clearQuickRoll(table.id) }
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                                 )
                             }
                         }
-                    }
-                }
-                else -> {
-                    // Vista de Lista con Sticky Headers
-                    LazyColumn(
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        uiState.groupedTables.forEach { (bundle, tables) ->
-                            stickyHeader {
-                                Surface(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    color = MaterialTheme.colorScheme.surface
-                                ) {
-                                    Text(
-                                        text = bundle,
-                                        style = MaterialTheme.typography.labelLarge,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.padding(vertical = 8.dp)
-                                    )
-                                }
-                            }
-                            items(tables, key = { it.id }) { table ->
-                                val isSelected = table.id in uiState.selectedTableIds
-                                TableListItem(
-                                    table = table,
-                                    isSelected = isSelected,
-                                    isSelectionMode = uiState.selectedTableIds.isNotEmpty(),
-                                    onLongClick = { 
-                                        if (uiState.selectedTableIds.isEmpty() && uiState.isSimplifiedMode) {
-                                            viewModel.openTable(table)
-                                        } else {
-                                            viewModel.toggleTableSelection(table.id)
-                                        }
-                                    },
-                                    onClick = {
-                                        if (uiState.selectedTableIds.isNotEmpty()) {
-                                            viewModel.toggleTableSelection(table.id)
-                                        } else if (uiState.isSimplifiedMode) {
-                                            viewModel.rollTable(table.id, sessionId)
-                                        } else {
-                                            viewModel.openTable(table)
-                                        }
-                                    },
-                                    onQuickRoll = { viewModel.rollTable(table.id, sessionId) },
-                                    onTogglePin = { viewModel.togglePin(table) },
-                                    quickRollResult = uiState.quickRollResults[table.id],
-                                    onDismissResult = { viewModel.clearQuickRoll(table.id) }
-                                )
-                            }
+                        
+                        items(tables, key = { it.id }) { table ->
+                            val isSelected = table.id in uiState.selectedTableIds
+                            TableListItem(
+                                table = table,
+                                isSelected = isSelected,
+                                isSelectionMode = uiState.selectedTableIds.isNotEmpty(),
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                                onLongClick = { 
+                                    if (uiState.selectedTableIds.isEmpty() && uiState.isSimplifiedMode) {
+                                        viewModel.openTable(table)
+                                    } else {
+                                        viewModel.toggleTableSelection(table.id)
+                                    }
+                                },
+                                onClick = {
+                                    if (uiState.selectedTableIds.isNotEmpty()) {
+                                        viewModel.toggleTableSelection(table.id)
+                                    } else if (uiState.isSimplifiedMode) {
+                                        viewModel.rollTable(table.id, sessionId)
+                                    } else {
+                                        viewModel.openTable(table)
+                                    }
+                                },
+                                onQuickRoll = { viewModel.rollTable(table.id, sessionId) },
+                                onTogglePin = { viewModel.togglePin(table) },
+                                quickRollResult = uiState.quickRollResults[table.id],
+                                onDismissResult = { viewModel.clearQuickRoll(table.id) }
+                            )
                         }
                     }
                 }
@@ -397,10 +349,108 @@ fun TablesTab(
                 }
 
                 FloatingActionButton(
-                    onClick = onCreateTable
+                    onClick = { onCreateTable(sessionId) }
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "Nueva tabla")
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FeaturedTablesSections(
+    pinnedTables: List<RandomTable>,
+    recentTables: List<RandomTable>,
+    onTableClick: (RandomTable) -> Unit,
+    onQuickRoll: (Long) -> Unit
+) {
+    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+        if (pinnedTables.isNotEmpty()) {
+            Text(
+                "Favoritos",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+            )
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                items(pinnedTables) { table ->
+                    FeaturedTableCard(table, onTableClick, onQuickRoll)
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+        }
+
+        if (recentTables.isNotEmpty()) {
+            Text(
+                "Utilizadas recientemente",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+            )
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                items(recentTables) { table ->
+                    FeaturedTableCard(table, onTableClick, onQuickRoll)
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+        }
+    }
+}
+
+@Composable
+private fun FeaturedTableCard(
+    table: RandomTable,
+    onClick: (RandomTable) -> Unit,
+    onQuickRoll: (Long) -> Unit
+) {
+    ElevatedCard(
+        onClick = { onClick(table) },
+        modifier = Modifier.width(160.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Default.Casino,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    table.name,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            
+            Spacer(Modifier.height(4.dp))
+            
+            Text(
+                table.category,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            
+            Spacer(Modifier.height(12.dp))
+            
+            FilledTonalButton(
+                onClick = { onQuickRoll(table.id) },
+                modifier = Modifier.fillMaxWidth().height(32.dp),
+                contentPadding = PaddingValues(0.dp)
+            ) {
+                Text("Tirar", style = MaterialTheme.typography.labelSmall)
             }
         }
     }
@@ -504,6 +554,7 @@ private fun TableListItem(
     table: RandomTable,
     isSelected: Boolean,
     isSelectionMode: Boolean,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     onQuickRoll: () -> Unit,
@@ -512,7 +563,7 @@ private fun TableListItem(
     onDismissResult: () -> Unit = {}
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .combinedClickable(
                 onClick = onClick,
@@ -541,7 +592,22 @@ private fun TableListItem(
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        modifier = Modifier.padding(top = 4.dp)
+                        modifier = Modifier
+                            .padding(top = 4.dp)
+                            .dragAndDropSource {
+                                detectTapGestures(
+                                    onLongPress = {
+                                        startTransfer(
+                                            DragAndDropTransferData(
+                                                clipData = ClipData.newPlainText(
+                                                    "table_result",
+                                                    quickRollResult.resolvedText
+                                                )
+                                            )
+                                        )
+                                    }
+                                )
+                            }
                     ) {
                         Surface(
                             color = MaterialTheme.colorScheme.secondary,
@@ -560,7 +626,7 @@ private fun TableListItem(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 2,
-                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                            overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f)
                         )
                     }

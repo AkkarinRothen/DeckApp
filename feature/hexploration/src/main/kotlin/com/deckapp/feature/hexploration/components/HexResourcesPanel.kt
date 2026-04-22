@@ -14,6 +14,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -43,14 +45,32 @@ fun HexResourcesPanel(
     pinnedTables: List<RandomTable>,
     pinnedDecks: List<CardStack>,
     pinnedRules: List<SystemRule>,
+    allTables: List<RandomTable>,
+    allRules: List<SystemRule>,
+    searchQuery: String,
     drawnCardsByDeck: Map<Long, List<Card>>,
     recentRolls: List<TableRollResult>,
+    onSearchQueryChanged: (String) -> Unit,
     onRollTable: (Long) -> Unit,
     onDrawCard: (Long) -> Unit,
     onDiscardCard: (Long) -> Unit,
     onResetDeck: (Long) -> Unit
 ) {
-    if (pinnedTables.isEmpty() && pinnedDecks.isEmpty() && pinnedRules.isEmpty()) {
+    val isSearching = searchQuery.isNotBlank()
+    
+    val filteredTables = if (isSearching) {
+        allTables.filter { it.name.contains(searchQuery, ignoreCase = true) }
+    } else {
+        pinnedTables
+    }
+
+    val filteredRules = if (isSearching) {
+        allRules.filter { it.title.contains(searchQuery, ignoreCase = true) || it.content.contains(searchQuery, ignoreCase = true) }
+    } else {
+        pinnedRules
+    }
+
+    if (!isSearching && pinnedTables.isEmpty() && pinnedDecks.isEmpty() && pinnedRules.isEmpty()) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -74,11 +94,26 @@ fun HexResourcesPanel(
             .padding(bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(0.dp)
     ) {
-        if (pinnedTables.isNotEmpty()) {
+        item {
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = onSearchQueryChanged,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                placeholder = { Text("Buscar tablas o reglas...") },
+                leadingIcon = { Icon(Icons.Default.Search, null) },
+                singleLine = true,
+                shape = MaterialTheme.shapes.medium
+            )
+        }
+
+        if (filteredTables.isNotEmpty()) {
             item {
-                CollapsibleSection(title = "Tablas (${pinnedTables.size})") {
+                val title = if (isSearching) "Resultados de Tablas" else "Tablas (${pinnedTables.size})"
+                CollapsibleSection(title = title) {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        pinnedTables.forEach { table ->
+                        filteredTables.forEach { table ->
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically
@@ -117,7 +152,7 @@ fun HexResourcesPanel(
             }
         }
 
-        if (pinnedDecks.isNotEmpty()) {
+        if (!isSearching && pinnedDecks.isNotEmpty()) {
             item {
                 CollapsibleSection(title = "Mazos (${pinnedDecks.size})") {
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -174,11 +209,12 @@ fun HexResourcesPanel(
             }
         }
 
-        if (pinnedRules.isNotEmpty()) {
+        if (filteredRules.isNotEmpty()) {
             item {
-                CollapsibleSection(title = "Reglas (${pinnedRules.size})") {
+                val title = if (isSearching) "Resultados de Reglas" else "Reglas (${pinnedRules.size})"
+                CollapsibleSection(title = title) {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        pinnedRules.forEach { rule ->
+                        filteredRules.forEach { rule ->
                             ExpandableRuleCard(rule)
                         }
                     }

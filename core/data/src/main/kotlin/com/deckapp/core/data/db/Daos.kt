@@ -250,6 +250,9 @@ interface SessionDao {
 
     @Query("UPDATE sessions SET gameSystemsJson = :gameSystemsJson WHERE id = :sessionId")
     suspend fun updateGameSystems(sessionId: Long, gameSystemsJson: String)
+
+    @Query("UPDATE sessions SET linkedMythicSessionId = :mythicSessionId WHERE id = :sessionId")
+    suspend fun updateLinkedMythicSession(sessionId: Long, mythicSessionId: Long?)
 }
 
 @Dao
@@ -351,6 +354,9 @@ interface TableRollResultDao {
 
     @Query("DELETE FROM table_roll_results WHERE sessionId = :sessionId")
     suspend fun clearSessionHistory(sessionId: Long)
+
+    @Query("SELECT * FROM table_roll_results ORDER BY timestamp DESC")
+    fun getAllResults(): Flow<List<TableRollResultEntity>>
 }
 
 @Dao
@@ -369,6 +375,9 @@ interface DrawEventDao {
 
     @Query("DELETE FROM draw_events WHERE id = (SELECT id FROM draw_events WHERE sessionId = :sessionId ORDER BY timestamp DESC LIMIT 1)")
     suspend fun deleteLastEvent(sessionId: Long)
+
+    @Query("SELECT * FROM draw_events ORDER BY timestamp DESC")
+    fun getAllEvents(): Flow<List<DrawEventEntity>>
 }
 
 @Dao
@@ -395,4 +404,117 @@ interface RecentFileDao {
         )
     """)
     suspend fun pruneOldRecords(limit: Int)
+}
+
+@Dao
+interface MythicDao {
+    // Sessions
+    @Query("SELECT * FROM mythic_sessions ORDER BY createdAt DESC")
+    fun getSessions(): Flow<List<MythicSessionEntity>>
+
+    @Query("SELECT * FROM mythic_sessions WHERE id = :id")
+    fun getSessionById(id: Long): Flow<MythicSessionEntity?>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSession(session: MythicSessionEntity): Long
+
+    @Query("DELETE FROM mythic_sessions WHERE id = :id")
+    suspend fun deleteSession(id: Long)
+
+    @Query("UPDATE mythic_sessions SET chaosFactor = :chaosFactor WHERE id = :id")
+    suspend fun updateChaosFactor(id: Long, chaosFactor: Int)
+
+    @Query("UPDATE mythic_sessions SET sceneNumber = :sceneNumber WHERE id = :id")
+    suspend fun updateSceneNumber(id: Long, sceneNumber: Int)
+
+    // Characters
+    @Query("SELECT * FROM mythic_characters WHERE sessionId = :sessionId ORDER BY sortOrder ASC")
+    fun getCharacters(sessionId: Long): Flow<List<MythicCharacterEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCharacter(character: MythicCharacterEntity): Long
+
+    @Query("DELETE FROM mythic_characters WHERE id = :id")
+    suspend fun deleteCharacter(id: Long)
+
+    @Query("UPDATE mythic_characters SET notes = :notes WHERE id = :id")
+    suspend fun updateCharacterNotes(id: Long, notes: String)
+
+    // Threads
+    @Query("SELECT * FROM mythic_threads WHERE sessionId = :sessionId ORDER BY sortOrder ASC")
+    fun getThreads(sessionId: Long): Flow<List<MythicThreadEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertThread(thread: MythicThreadEntity): Long
+
+    @Query("UPDATE mythic_threads SET isResolved = :isResolved WHERE id = :id")
+    suspend fun updateThreadStatus(id: Long, isResolved: Boolean)
+
+    @Query("DELETE FROM mythic_threads WHERE id = :id")
+    suspend fun deleteThread(id: Long)
+
+    // Rolls
+    @Query("SELECT * FROM mythic_rolls WHERE sessionId = :sessionId ORDER BY timestamp DESC")
+    fun getRolls(sessionId: Long): Flow<List<MythicRollEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertRoll(roll: MythicRollEntity): Long
+
+    @Query("DELETE FROM mythic_rolls WHERE sessionId = :sessionId")
+    suspend fun deleteRolls(sessionId: Long)
+}
+
+@Dao
+interface ManualDao {
+    @Query("SELECT * FROM manuals ORDER BY lastOpened DESC, title ASC")
+    fun getAllManuals(): kotlinx.coroutines.flow.Flow<List<ManualEntity>>
+
+    @Query("SELECT * FROM manuals WHERE id = :id")
+    fun getManualById(id: Long): kotlinx.coroutines.flow.Flow<ManualEntity?>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertManual(manual: ManualEntity): Long
+
+    @Query("UPDATE manuals SET lastOpened = :timestamp WHERE id = :id")
+    suspend fun updateLastOpened(id: Long, timestamp: Long)
+
+    @Delete
+    suspend fun deleteManual(manual: ManualEntity)
+
+    @Query("SELECT DISTINCT gameSystem FROM manuals")
+    fun getDistinctSystems(): kotlinx.coroutines.flow.Flow<List<String>>
+
+    // Bookmarks
+    @Query("SELECT * FROM manual_bookmarks WHERE manualId = :manualId ORDER BY pageIndex ASC")
+    fun getBookmarksForManual(manualId: Long): kotlinx.coroutines.flow.Flow<List<ManualBookmarkEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertBookmark(bookmark: ManualBookmarkEntity): Long
+
+    @Query("DELETE FROM manual_bookmarks WHERE id = :id")
+    suspend fun deleteBookmark(id: Long)
+
+    @Query("DELETE FROM manual_bookmarks WHERE manualId = :manualId AND pageIndex = :pageIndex")
+    suspend fun deleteBookmarkAtPage(manualId: Long, pageIndex: Int)
+}
+
+@Dao
+interface SceneDao {
+    @Query("SELECT * FROM scenes WHERE sessionId = :sessionId ORDER BY sortOrder ASC")
+    fun getScenesForSession(sessionId: Long): Flow<List<SceneEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertScene(scene: SceneEntity): Long
+
+    @Update
+    suspend fun updateScene(scene: SceneEntity)
+
+    @Query("DELETE FROM scenes WHERE id = :id")
+    suspend fun deleteScene(id: Long)
+
+    @Query("UPDATE scenes SET sortOrder = :order WHERE id = :id")
+    suspend fun updateSortOrder(id: Long, order: Int)
+
+    @Query("UPDATE scenes SET isCompleted = :completed WHERE id = :id")
+    suspend fun updateCompletion(id: Long, completed: Boolean)
 }

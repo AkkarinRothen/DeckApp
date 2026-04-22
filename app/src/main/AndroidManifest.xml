@@ -11,6 +11,9 @@
     <!-- Wake lock para mantener pantalla activa durante sesiones de juego -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+    <!-- Permiso para grabar muestras de voz de NPCs -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
     <!-- Haptic feedback con VibrationEffect: pulso fuerte al robar carta (CLAUDE.md mandate) -->
     <uses-permission android:name="android.permission.VIBRATE" />
 

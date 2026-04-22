@@ -18,6 +18,7 @@ interface TableRepository {
     fun getRecentResultsForTable(sessionId: Long, tableId: Long): Flow<List<TableRollResult>>
     suspend fun getRecentResultsForTable(sessionId: Long, tableId: Long, limit: Int): List<TableRollResult>
     fun getSessionRollLog(sessionId: Long): Flow<List<TableRollResult>>
+    fun getAllRollLog(): Flow<List<TableRollResult>>
     suspend fun clearSessionRollLog(sessionId: Long)
 
     suspend fun saveRollResult(result: TableRollResult): Long

@@ -162,35 +162,84 @@ fun TableEditorScreen(
                             )
                         }
                         
-                        var showTagMenu by remember { mutableStateOf(false) }
-                        IconButton(onClick = { showTagMenu = true }) {
+                        var showTagDialog by remember { mutableStateOf(false) }
+                        var tagSearchQuery by remember { mutableStateOf("") }
+
+                        IconButton(onClick = { showTagDialog = true }) {
                             Icon(Icons.Default.Add, contentDescription = "Añadir etiqueta")
                         }
-                        
-                        DropdownMenu(
-                            expanded = showTagMenu,
-                            onDismissRequest = { showTagMenu = false }
-                        ) {
-                            if (uiState.allTags.isEmpty()) {
-                                DropdownMenuItem(
-                                    text = { Text("No hay etiquetas creadas") },
-                                    onClick = { },
-                                    enabled = false
-                                )
-                            }
-                            uiState.allTags.forEach { tag ->
-                                val isSelected = tag in uiState.tags
-                                DropdownMenuItem(
-                                    text = { Text(tag.name) },
-                                    onClick = { 
-                                        viewModel.toggleTag(tag)
-                                        showTagMenu = false 
-                                    },
-                                    trailingIcon = {
-                                        if (isSelected) Icon(Icons.Default.Check, null)
+
+                        if (showTagDialog) {
+                            AlertDialog(
+                                onDismissRequest = { 
+                                    showTagDialog = false
+                                    tagSearchQuery = ""
+                                },
+                                title = { Text("Añadir Etiqueta") },
+                                text = {
+                                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                        OutlinedTextField(
+                                            value = tagSearchQuery,
+                                            onValueChange = { tagSearchQuery = it },
+                                            placeholder = { Text("Buscar o crear etiqueta...") },
+                                            leadingIcon = { Icon(Icons.Default.Search, null) },
+                                            singleLine = true,
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+
+                                        val filteredTags = uiState.allTags.filter { 
+                                            it.name.contains(tagSearchQuery, ignoreCase = true) 
+                                        }
+
+                                        if (filteredTags.isNotEmpty() || tagSearchQuery.isNotBlank()) {
+                                            HorizontalDivider()
+                                            LazyColumn(modifier = Modifier.heightIn(max = 200.dp)) {
+                                                // Opción de crear si no hay coincidencia exacta
+                                                if (tagSearchQuery.isNotBlank() && filteredTags.none { it.name.equals(tagSearchQuery, ignoreCase = true) }) {
+                                                    item {
+                                                        ListItem(
+                                                            headlineContent = { Text("Crear \"$tagSearchQuery\"") },
+                                                            leadingContent = { Icon(Icons.Default.Add, null, tint = MaterialTheme.colorScheme.primary) },
+                                                            modifier = Modifier.clickable {
+                                                                viewModel.createAndAddTag(tagSearchQuery)
+                                                                showTagDialog = false
+                                                                tagSearchQuery = ""
+                                                            }
+                                                        )
+                                                    }
+                                                }
+
+                                                itemsIndexed(filteredTags) { _, tag ->
+                                                    val isSelected = tag in uiState.tags
+                                                    ListItem(
+                                                        headlineContent = { Text(tag.name) },
+                                                        modifier = Modifier.clickable {
+                                                            viewModel.toggleTag(tag)
+                                                            showTagDialog = false
+                                                            tagSearchQuery = ""
+                                                        },
+                                                        trailingContent = {
+                                                            if (isSelected) Icon(Icons.Default.Check, null, tint = MaterialTheme.colorScheme.primary)
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                        } else if (tagSearchQuery.isBlank() && uiState.allTags.isEmpty()) {
+                                            Text(
+                                                "No hay etiquetas disponibles. Escribe para crear una.",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
                                     }
-                                )
-                            }
+                                },
+                                confirmButton = {
+                                    TextButton(onClick = { 
+                                        showTagDialog = false
+                                        tagSearchQuery = ""
+                                    }) { Text("Cerrar") }
+                                }
+                            )
                         }
                     }
                 }

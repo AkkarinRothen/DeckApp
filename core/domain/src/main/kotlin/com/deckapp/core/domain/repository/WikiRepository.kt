@@ -9,6 +9,9 @@ interface WikiRepository {
     suspend fun saveCategory(category: WikiCategory): Long
     
     fun getEntriesByCategory(categoryId: Long): Flow<List<WikiEntry>>
+    fun getAllEntries(): Flow<List<WikiEntry>>
+    fun getPinnedEntries(): Flow<List<WikiEntry>>
+    fun getRecentEntries(limit: Int): Flow<List<WikiEntry>>
     suspend fun getEntryById(id: Long): WikiEntry?
     fun searchEntries(query: String): Flow<List<WikiEntry>>
     

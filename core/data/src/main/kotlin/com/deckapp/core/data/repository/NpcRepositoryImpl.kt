@@ -16,7 +16,8 @@ import javax.inject.Inject
 
 class NpcRepositoryImpl @Inject constructor(
     private val npcDao: NpcDao,
-    private val fileRepository: FileRepository
+    private val fileRepository: FileRepository,
+    @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context
 ) : NpcRepository {
 
     override fun getAllNpcs(): Flow<List<Npc>> {
@@ -60,6 +61,39 @@ class NpcRepositoryImpl @Inject constructor(
             fileRepository.copyImageToInternalByCategory(uri, "npcs", fileName)
         } catch (e: Exception) {
             null
+        }
+    }
+
+    override suspend fun saveNpcVoiceSample(tempFile: java.io.File, npcId: Long): String? {
+        return try {
+            val fileName = "voice_$npcId.m4a"
+            val destDir = java.io.File(context.filesDir, "npcs/voices")
+            destDir.mkdirs()
+            val destFile = java.io.File(destDir, fileName)
+            tempFile.copyTo(destFile, overwrite = true)
+            destFile.absolutePath
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    override suspend fun saveNpcVoiceSampleFromUri(uri: android.net.Uri, npcId: Long): String? {
+        return try {
+            val fileName = "voice_$npcId.m4a" // O detectar extensión del Uri
+            fileRepository.copyFileToInternalByCategory(uri, "npcs/voices", fileName)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    override suspend fun deleteNpcVoiceSample(npcId: Long) {
+        try {
+            val npc = getNpcById(npcId)
+            npc?.voiceSamplePath?.let { path ->
+                fileRepository.deleteFile(path)
+            }
+        } catch (e: Exception) {
+            // Log or handle error
         }
     }
 }

@@ -403,6 +403,7 @@ fun CombatLogEntryEntity.toBackupDto() = CombatLogEntryBackupDto(
 
 fun NpcEntity.toDomain(tags: List<Tag> = emptyList()) = Npc(
     id = id, name = name, description = description, imagePath = imagePath, 
+    voiceSamplePath = voiceSamplePath,
     maxHp = maxHp, currentHp = currentHp, armorClass = armorClass, 
     initiativeBonus = initiativeBonus, notes = notes, isMonster = isMonster, 
     tags = tags, createdAt = createdAt
@@ -410,6 +411,7 @@ fun NpcEntity.toDomain(tags: List<Tag> = emptyList()) = Npc(
 
 fun Npc.toEntity() = NpcEntity(
     id = id, name = name, description = description, imagePath = imagePath, 
+    voiceSamplePath = voiceSamplePath,
     maxHp = maxHp, currentHp = currentHp, armorClass = armorClass, 
     initiativeBonus = initiativeBonus, notes = notes, isMonster = isMonster, 
     createdAt = createdAt
@@ -434,7 +436,8 @@ fun SessionEntity.toDomain() = Session(
     dmNotes = dmNotes,
     createdAt = createdAt,
     endedAt = endedAt,
-    gameSystems = runCatching { json.decodeFromString<List<String>>(gameSystemsJson) }.getOrDefault(listOf("General"))
+    gameSystems = runCatching { json.decodeFromString<List<String>>(gameSystemsJson) }.getOrDefault(listOf("General")),
+    linkedMythicSessionId = linkedMythicSessionId
 )
 
 fun Session.toEntity() = SessionEntity(
@@ -447,7 +450,8 @@ fun Session.toEntity() = SessionEntity(
     dmNotes = dmNotes,
     createdAt = createdAt,
     endedAt = endedAt,
-    gameSystemsJson = json.encodeToString(gameSystems)
+    gameSystemsJson = json.encodeToString(gameSystems),
+    linkedMythicSessionId = linkedMythicSessionId
 )
 
 fun SessionEntity.toBackupDto() = SessionBackupDto(
@@ -503,6 +507,7 @@ fun WikiEntryEntity.toDomain() = WikiEntry(
     content = content,
     categoryId = categoryId,
     imagePath = imagePath,
+    isPinned = isPinned,
     lastUpdated = lastUpdated
 )
 
@@ -512,12 +517,13 @@ fun WikiEntry.toEntity() = WikiEntryEntity(
     content = content,
     categoryId = categoryId,
     imagePath = imagePath,
+    isPinned = isPinned,
     lastUpdated = lastUpdated
 )
 
 fun WikiEntryEntity.toBackupDto() = WikiEntryBackupDto(
     id = id, title = title, content = content, categoryId = categoryId, 
-    imagePath = imagePath, lastUpdated = lastUpdated
+    imagePath = imagePath, isPinned = isPinned, lastUpdated = lastUpdated
 )
 
 // --- Reference ---
@@ -612,4 +618,32 @@ fun SystemRuleEntity.toBackupDto() = SystemRuleBackupDto(
     sortOrder = sortOrder,
     sourcePack = sourcePack,
     lastUpdated = lastUpdated
+)
+
+// ── Session Planning ────────────────────────────────────────────────────────
+
+fun SceneEntity.toDomain() = Scene(
+    id = id,
+    sessionId = sessionId,
+    title = title,
+    content = content,
+    isCompleted = isCompleted,
+    sortOrder = sortOrder,
+    linkedTableId = linkedTableId,
+    linkedDeckId = linkedDeckId,
+    imagePath = imagePath,
+    isAlternative = isAlternative
+)
+
+fun Scene.toEntity() = SceneEntity(
+    id = id,
+    sessionId = sessionId,
+    title = title,
+    content = content,
+    isCompleted = isCompleted,
+    sortOrder = sortOrder,
+    linkedTableId = linkedTableId,
+    linkedDeckId = linkedDeckId,
+    imagePath = imagePath,
+    isAlternative = isAlternative
 )

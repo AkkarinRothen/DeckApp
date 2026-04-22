@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.deckapp.core.domain.repository.AiStreamEvent
 import com.deckapp.core.domain.repository.TableRepository
+import com.deckapp.core.domain.repository.SessionRepository
+import com.deckapp.core.domain.repository.CardRepository
 import com.deckapp.core.domain.repository.RecentFileRepository
 import com.deckapp.core.domain.repository.FileRepository
 import com.deckapp.core.domain.repository.RecentFileType
@@ -22,13 +24,13 @@ import com.deckapp.core.domain.usecase.CsvTableParser
 import com.deckapp.core.domain.usecase.RangeParser
 import com.deckapp.core.domain.usecase.TranscribeTableWithAiUseCase
 import com.deckapp.core.domain.usecase.RecognizeTableStreamingUseCase
+import com.deckapp.core.domain.usecase.GetOrCreateTagUseCase
 import com.deckapp.core.model.OcrBlock
 import com.deckapp.core.model.TableEntry
+import com.deckapp.core.model.RandomTable
+import com.deckapp.core.model.Tag
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -40,19 +42,22 @@ import java.util.zip.CRC32
  * interno de KSP (Internal Compiler Error) que bloquea el build del módulo :feature:import.
  */
 class TableImportViewModel(
+    private val sessionId: Long?,
     private val renderPdfPageUseCase: RenderPdfPageUseCase,
     private val importTableUseCase: ImportTableUseCase,
     private val readTextFromUriUseCase: ReadTextFromUriUseCase,
     private val tableRepository: TableRepository,
+    private val sessionRepository: SessionRepository,
     private val transcribeTableWithAiUseCase: TranscribeTableWithAiUseCase,
     private val recognizeTableStreamingUseCase: RecognizeTableStreamingUseCase,
     private val recentFileRepository: RecentFileRepository,
     private val fileRepository: FileRepository,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val cardRepository: CardRepository
 ) : ViewModel() {
 
     private val analyzeTableImageUseCase = AnalyzeTableImageUseCase()
-    private val csvParser = CsvTableParser()
+    private val getOrCreateTagUseCase = GetOrCreateTagUseCase(cardRepository)
 
     private val AUTO_VISION_THRESHOLD = 0.80f
 
@@ -65,6 +70,7 @@ class TableImportViewModel(
 
     init {
         loadRecents()
+        loadAllTags()
     }
 
     private fun loadRecents() {
@@ -74,6 +80,14 @@ class TableImportViewModel(
                     .filter { it.type == RecentFileType.PDF }
                     .map { it.uri to it.name }
                 _uiState.update { it.copy(recentPdfs = mapped) }
+            }
+        }
+    }
+
+    private fun loadAllTags() {
+        viewModelScope.launch {
+            cardRepository.getAllTags().collect { tags ->
+                _uiState.update { it.copy(allTags = tags) }
             }
         }
     }
@@ -110,7 +124,6 @@ class TableImportViewModel(
             ImportMode.MARKDOWN -> TableImportSource.MARKDOWN_TABLE
             else -> TableImportSource.PLAIN_TEXT
         }
-
 
         viewModelScope.launch {
             _uiState.update { it.copy(isProcessing = true, selectedUri = uri) }
@@ -167,7 +180,6 @@ class TableImportViewModel(
                 _uiState.update { it.copy(browsedPdfs = files, isProcessing = false) }
 
                 files.forEach { (uri, _) ->
-                    // 400px es suficiente para thumbnails — 1200px era innecesariamente lento.
                     val thumb = renderPdfPageUseCase.renderPage(uri, 0, targetWidth = 400)
                     _uiState.update { s -> s.copy(browsedThumbnails = s.browsedThumbnails + (uri to thumb)) }
                 }
@@ -406,6 +418,7 @@ class TableImportViewModel(
         _uiState.update { it.copy(
             editableEntries = entries,
             tableNameDraft = result.suggestedName,
+            tableTagsDraft = result.tags,
             tableFormulaDraft = result.suggestedFormula.ifBlank { "1d6" },
             validationResult = RangeParser.validateIntegrity(entries.map { it.minRoll to it.maxRoll }),
             lowConfidenceIndices = lowConf
@@ -436,7 +449,26 @@ class TableImportViewModel(
     }
 
     fun setDraftName(name: String) = _uiState.update { it.copy(tableNameDraft = name) }
-    fun setDraftTag(tag: String) = _uiState.update { it.copy(tableTagDraft = tag) }
+    
+    fun toggleTag(tag: Tag) {
+        _uiState.update { state ->
+            val updatedTags = if (tag in state.tableTagsDraft) state.tableTagsDraft - tag else state.tableTagsDraft + tag
+            state.copy(tableTagsDraft = updatedTags)
+        }
+    }
+
+    fun createAndAddTag(tagName: String) {
+        if (tagName.isBlank()) return
+        viewModelScope.launch {
+            try {
+                val tag = getOrCreateTagUseCase(tagName)
+                if (tag !in _uiState.value.tableTagsDraft) {
+                    _uiState.update { it.copy(tableTagsDraft = it.tableTagsDraft + tag) }
+                }
+            } catch (_: Exception) { }
+        }
+    }
+
     fun setDraftFormula(formula: String) = _uiState.update { it.copy(tableFormulaDraft = formula) }
     fun clearError() = _uiState.update { it.copy(errorMessage = null) }
     fun clearAutoVisionMessage() = _uiState.update { it.copy(autoVisionMessage = null) }
@@ -444,13 +476,17 @@ class TableImportViewModel(
     fun nextTable() {
         val state = _uiState.value
         val currentIndex = state.currentTableIndex
-        if (currentIndex < state.detectedTables.size - 1) {
-            val updatedTables = state.detectedTables.toMutableList()
+        val updatedTables = state.detectedTables.toMutableList()
+        if (currentIndex in updatedTables.indices) {
             updatedTables[currentIndex] = updatedTables[currentIndex].copy(
                 entries = state.editableEntries,
-                suggestedName = state.tableNameDraft
+                suggestedName = state.tableNameDraft,
+                tags = state.tableTagsDraft,
+                suggestedFormula = state.tableFormulaDraft
             )
+        }
 
+        if (currentIndex < state.detectedTables.size - 1) {
             val nextIndex = currentIndex + 1
             _uiState.update { it.copy(
                 detectedTables = updatedTables,
@@ -458,17 +494,32 @@ class TableImportViewModel(
             ) }
             loadResultToDraft(updatedTables[nextIndex])
         } else {
-            _uiState.update { it.copy(step = ImportStep.REVIEW) }
+            _uiState.update { it.copy(detectedTables = updatedTables, step = ImportStep.REVIEW) }
         }
     }
 
     fun saveAll() {
+        val state = _uiState.value
         viewModelScope.launch {
             _uiState.update { it.copy(isProcessing = true) }
             try {
+                state.detectedTables.forEach { result ->
+                    val table = RandomTable(
+                        name = result.suggestedName.ifBlank { "Tabla importada" },
+                        description = result.suggestedDescription,
+                        rollFormula = result.suggestedFormula,
+                        entries = result.entries,
+                        tags = result.tags,
+                        createdAt = System.currentTimeMillis()
+                    )
+                    val tableId = tableRepository.saveTable(table)
+                    if (sessionId != null) {
+                        sessionRepository.addTableToSession(sessionId, tableId)
+                    }
+                }
                 _uiState.update { it.copy(savedSuccessfully = true, isProcessing = false) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(errorMessage = e.message, isProcessing = false) }
+                _uiState.update { it.copy(errorMessage = "Error al guardar: ${e.message}", isProcessing = false) }
             }
         }
     }
@@ -477,34 +528,41 @@ class TableImportViewModel(
         visionCache = null
         _uiState.value = TableImportUiState()
         loadRecents()
+        loadAllTags()
     }
 
     /**
      * Factory manual para evitar Hilt en esta clase específica.
      */
     class Factory(
+        private val sessionId: Long?,
         private val renderPdfPageUseCase: RenderPdfPageUseCase,
         private val importTableUseCase: ImportTableUseCase,
         private val readTextFromUriUseCase: ReadTextFromUriUseCase,
         private val tableRepository: TableRepository,
+        private val sessionRepository: SessionRepository,
         private val transcribeTableWithAiUseCase: TranscribeTableWithAiUseCase,
         private val recognizeTableStreamingUseCase: RecognizeTableStreamingUseCase,
         private val recentFileRepository: RecentFileRepository,
         private val fileRepository: FileRepository,
-        private val settingsRepository: SettingsRepository
+        private val settingsRepository: SettingsRepository,
+        private val cardRepository: CardRepository
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return TableImportViewModel(
+                sessionId,
                 renderPdfPageUseCase,
                 importTableUseCase,
                 readTextFromUriUseCase,
                 tableRepository,
+                sessionRepository,
                 transcribeTableWithAiUseCase,
                 recognizeTableStreamingUseCase,
                 recentFileRepository,
                 fileRepository,
-                settingsRepository
+                settingsRepository,
+                cardRepository
             ) as T
         }
     }

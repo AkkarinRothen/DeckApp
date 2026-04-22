@@ -125,7 +125,8 @@ data class SessionEntity(
     val showCardTitles: Boolean = true,
     @ColumnInfo(name = "dm_notes") val dmNotes: String? = null,
     @ColumnInfo(defaultValue = "[\"General\"]")
-    val gameSystemsJson: String = "[\"General\"]"
+    val gameSystemsJson: String = "[\"General\"]",
+    val linkedMythicSessionId: Long? = null
 )
 
 @Entity(
@@ -392,6 +393,7 @@ data class NpcEntity(
     val name: String,
     val description: String,
     val imagePath: String?,
+    val voiceSamplePath: String? = null,
     val maxHp: Int,
     val currentHp: Int,
     val armorClass: Int,
@@ -437,6 +439,7 @@ data class WikiEntryEntity(
     val content: String,
     val categoryId: Long,
     val imagePath: String?,
+    val isPinned: Boolean = false,
     val lastUpdated: Long
 )
 
@@ -512,4 +515,139 @@ data class ReferenceTableWithRows(
     @Embedded val table: ReferenceTableEntity,
     @Relation(parentColumn = "id", entityColumn = "tableId")
     val rows: List<ReferenceRowEntity>
+)
+
+@Entity(tableName = "mythic_sessions")
+data class MythicSessionEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    @ColumnInfo(defaultValue = "5") val chaosFactor: Int = 5,
+    @ColumnInfo(defaultValue = "1") val sceneNumber: Int = 1,
+    val actionTableId: Long? = null,
+    val subjectTableId: Long? = null,
+    val createdAt: Long = System.currentTimeMillis()
+)
+
+@Entity(
+    tableName = "mythic_characters",
+    foreignKeys = [
+        ForeignKey(
+            entity = MythicSessionEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["sessionId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index(value = ["sessionId"], name = "idx_mythic_chars_session")]
+)
+data class MythicCharacterEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val sessionId: Long,
+    val name: String,
+    @ColumnInfo(defaultValue = "") val notes: String = "",
+    @ColumnInfo(defaultValue = "0") val sortOrder: Int = 0
+)
+
+@Entity(
+    tableName = "mythic_threads",
+    foreignKeys = [
+        ForeignKey(
+            entity = MythicSessionEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["sessionId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index(value = ["sessionId"], name = "idx_mythic_threads_session")]
+)
+data class MythicThreadEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val sessionId: Long,
+    val description: String,
+    @ColumnInfo(defaultValue = "0") val isResolved: Boolean = false,
+    @ColumnInfo(defaultValue = "0") val sortOrder: Int = 0
+)
+
+@Entity(
+    tableName = "mythic_rolls",
+    foreignKeys = [
+        ForeignKey(
+            entity = MythicSessionEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["sessionId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index(value = ["sessionId"], name = "idx_mythic_rolls_session")]
+)
+data class MythicRollEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val sessionId: Long,
+    @ColumnInfo(defaultValue = "") val question: String = "",
+    val probability: String, // Enum name
+    val chaosFactor: Int,
+    val roll: Int,
+    val result: String,      // Enum name
+    @ColumnInfo(defaultValue = "0") val isRandomEvent: Boolean = false,
+    @ColumnInfo(defaultValue = "") val eventAction: String = "",
+    @ColumnInfo(defaultValue = "") val eventSubject: String = "",
+    @ColumnInfo(defaultValue = "1") val sceneNumber: Int = 1,
+    val timestamp: Long = System.currentTimeMillis()
+)
+
+@Entity(tableName = "manuals")
+data class ManualEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val title: String,
+    val uri: String,
+    @ColumnInfo(defaultValue = "General") val gameSystem: String = "General",
+    val fileName: String = "",
+    val fileSize: Long = 0,
+    val lastOpened: Long = 0,
+    val createdAt: Long = System.currentTimeMillis()
+)
+
+@Entity(
+    tableName = "manual_bookmarks",
+    foreignKeys = [
+        ForeignKey(
+            entity = ManualEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["manualId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index("manualId")]
+)
+data class ManualBookmarkEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val manualId: Long,
+    val pageIndex: Int,
+    val label: String,
+    val createdAt: Long = System.currentTimeMillis()
+)
+
+// ── Session Planning ────────────────────────────────────────────────────────
+
+@Entity(
+    tableName = "scenes",
+    foreignKeys = [ForeignKey(
+        entity = SessionEntity::class,
+        parentColumns = ["id"],
+        childColumns = ["sessionId"],
+        onDelete = ForeignKey.CASCADE
+    )],
+    indices = [Index("sessionId")]
+)
+data class SceneEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val sessionId: Long,
+    val title: String,
+    val content: String = "",
+    val isCompleted: Boolean = false,
+    val sortOrder: Int = 0,
+    val linkedTableId: Long? = null,
+    val linkedDeckId: Long? = null,
+    val imagePath: String? = null,
+    val isAlternative: Boolean = false
 )

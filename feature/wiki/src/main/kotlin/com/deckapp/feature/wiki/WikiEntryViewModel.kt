@@ -21,6 +21,7 @@ data class WikiEntryUiState(
     val title: String = "",
     val content: TextFieldValue = TextFieldValue(""),
     val imagePath: String? = null,
+    val isPinned: Boolean = false,
     val isSaving: Boolean = false,
     val isSaved: Boolean = false,
     val isPreviewMode: Boolean = false
@@ -53,6 +54,10 @@ class WikiEntryViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun togglePinned() {
+        _uiState.update { it.copy(isPinned = !it.isPinned, isSaved = false) }
     }
 
     fun onTitleChange(newTitle: String) {
@@ -97,6 +102,7 @@ class WikiEntryViewModel @Inject constructor(
                 content = state.content.text,
                 categoryId = state.categoryId,
                 imagePath = currentImagePath,
+                isPinned = state.isPinned,
                 lastUpdated = now
             )
             val newId = wikiRepository.saveEntry(entry)

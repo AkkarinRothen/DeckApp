@@ -7,6 +7,7 @@ import com.deckapp.core.domain.repository.CollectionRepository
 import com.deckapp.core.domain.repository.FileRepository
 import com.deckapp.core.domain.repository.TableRepository
 import com.deckapp.core.domain.usecase.*
+import com.deckapp.core.domain.usecase.GlobalSearchResultType
 import com.deckapp.core.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -142,7 +143,19 @@ class LibraryViewModel @Inject constructor(
                     globalSearchUseCase(query)
                 }
                 .collect { matches ->
-                    _uiState.update { it.copy(searchResults = matches) }
+                    val mappedMatches = matches.map { result ->
+                        SearchMatch(
+                            id = result.id,
+                            type = when (result.type) {
+                                GlobalSearchResultType.TABLE -> com.deckapp.core.model.SearchResultType.TABLE
+                                GlobalSearchResultType.NPC -> com.deckapp.core.model.SearchResultType.CARD // TODO: Mapear mejor
+                                else -> com.deckapp.core.model.SearchResultType.BAUL
+                            },
+                            title = result.title,
+                            subtitle = result.subtitle
+                        )
+                    }
+                    _uiState.update { it.copy(searchResults = mappedMatches) }
                 }
         }
     }
@@ -324,7 +337,7 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
-    fun addResourceToCollection(collectionId: Long, resourceId: Long, type: SearchResultType) {
+    fun addResourceToCollection(collectionId: Long, resourceId: Long, type: com.deckapp.core.model.SearchResultType) {
         viewModelScope.launch {
             manageCollectionResourceUseCase.add(collectionId, resourceId, type)
             _uiState.update { it.copy(snackbarMessage = "Añadido al Baúl") }

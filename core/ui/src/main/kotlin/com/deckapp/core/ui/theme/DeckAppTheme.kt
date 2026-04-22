@@ -7,16 +7,16 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-// Paleta oscura — la app usa dark theme por defecto (mesas de juego con poca luz)
+// Paleta oscura optimizada para OLED (True Black)
 private val DeckDarkColorScheme = darkColorScheme(
     primary = Color(0xFFBB86FC),
     onPrimary = Color(0xFF21005D),
     primaryContainer = Color(0xFF4A0080),
     secondary = Color(0xFF03DAC5),
     onSecondary = Color(0xFF003731),
-    background = Color(0xFF121212),
-    surface = Color(0xFF1E1E1E),
-    surfaceVariant = Color(0xFF2A2A2A),
+    background = Color(0xFF000000), // Negro puro para OLED
+    surface = Color(0xFF121212),    // Superficies muy oscuras
+    surfaceVariant = Color(0xFF1E1E1E),
     onBackground = Color(0xFFE0E0E0),
     onSurface = Color(0xFFE0E0E0),
     error = Color(0xFFCF6679)

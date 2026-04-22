@@ -64,6 +64,8 @@ dependencies {
     implementation(project(":feature:wiki"))
     implementation(project(":feature:reference"))
     implementation(project(":feature:hexploration"))
+    implementation(project(":feature:mythic"))
+    implementation(project(":feature:dice"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

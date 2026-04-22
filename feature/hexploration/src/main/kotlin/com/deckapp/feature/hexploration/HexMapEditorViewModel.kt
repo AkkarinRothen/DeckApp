@@ -22,6 +22,8 @@ import com.deckapp.core.model.HexTile
 import com.deckapp.core.model.PoiType
 import com.deckapp.core.model.RandomTable
 import com.deckapp.core.model.SystemRule
+import com.deckapp.core.model.TerrainBrush
+import com.deckapp.core.model.defaultBrushes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,23 +35,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class TerrainBrush(
-    val cost: Int,         // 1, 2, 3, or 0 (impassable)
-    val label: String,
-    val color: Long
-)
 
-val defaultBrushes = listOf(
-    TerrainBrush(1, "Abierto", 0xFF7CB87BL),
-    TerrainBrush(2, "Difícil", 0xFF8B7355L),
-    TerrainBrush(3, "Muy difícil", 0xFF6B6B6BL),
-    TerrainBrush(0, "Infranqueable", 0xFF2D2D2DL),
-    TerrainBrush(1, "Agua", 0xFF4A90D9L),
-    TerrainBrush(1, "Llanura", 0xFFD4C875L),
-    TerrainBrush(2, "Bosque", 0xFF3A7D44L),
-    TerrainBrush(3, "Montaña", 0xFF9E9E9EL),
-    TerrainBrush(-1, "Borrar", 0x00000000L)
-)
+sealed class HexAction {
+    data class TileChanged(val oldTile: HexTile?, val newTile: HexTile?) : HexAction()
+    data class PoiAdded(val poi: HexPoi) : HexAction()
+    data class PoiDeleted(val poi: HexPoi) : HexAction()
+}
 
 data class HexMapEditorUiState(
     val mapId: Long = 0,
@@ -78,7 +69,9 @@ data class HexMapEditorUiState(
     val travelEventTableId: Long? = null,
     val terrainTableConfig: String = "{}",
     val showWeatherTablePicker: Boolean = false,
-    val showTravelTablePicker: Boolean = false
+    val showTravelTablePicker: Boolean = false,
+    val canUndo: Boolean = false,
+    val canRedo: Boolean = false
 )
 
 @HiltViewModel
@@ -101,6 +94,9 @@ class HexMapEditorViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(HexMapEditorUiState(mapId = mapId))
     val uiState: StateFlow<HexMapEditorUiState> = _uiState.asStateFlow()
+
+    private val undoStack = mutableListOf<HexAction>()
+    private val redoStack = mutableListOf<HexAction>()
 
     init {
         getHexMapWithTilesUseCase(mapId)
@@ -140,14 +136,20 @@ class HexMapEditorViewModel @Inject constructor(
     fun onTileClick(tile: HexTile) {
         val brush = _uiState.value.activeBrush
         if (brush.cost == -1) {
-            viewModelScope.launch { deleteHexTileUseCase(mapId, tile.q, tile.r) }
+            viewModelScope.launch { 
+                deleteHexTileUseCase(mapId, tile.q, tile.r)
+                pushAction(HexAction.TileChanged(tile, null))
+            }
         } else {
             val painted = tile.copy(
                 terrainCost = brush.cost,
                 terrainLabel = brush.label,
                 terrainColor = brush.color
             )
-            viewModelScope.launch { updateHexTileUseCase(painted) }
+            viewModelScope.launch { 
+                updateHexTileUseCase(painted)
+                pushAction(HexAction.TileChanged(tile, painted))
+            }
         }
     }
 
@@ -164,6 +166,60 @@ class HexMapEditorViewModel @Inject constructor(
                 terrainLabel = brush.label,
                 terrainColor = brush.color
             )
+            val newTile = HexTile(mapId = mapId, q = q, r = r, terrainCost = brush.cost, terrainLabel = brush.label, terrainColor = brush.color)
+            pushAction(HexAction.TileChanged(null, newTile))
+        }
+    }
+
+    private fun pushAction(action: HexAction) {
+        undoStack.add(action)
+        redoStack.clear()
+        _uiState.update { it.copy(canUndo = true, canRedo = false) }
+    }
+
+    fun undo() {
+        if (undoStack.isEmpty()) return
+        val action = undoStack.removeAt(undoStack.size - 1)
+        redoStack.add(action)
+        
+        viewModelScope.launch {
+            when (action) {
+                is HexAction.TileChanged -> {
+                    if (action.oldTile == null && action.newTile != null) {
+                        deleteHexTileUseCase(mapId, action.newTile.q, action.newTile.r)
+                    } else if (action.oldTile != null && action.newTile == null) {
+                        addHexTileUseCase(mapId, action.oldTile.q, action.oldTile.r, action.oldTile.terrainCost, action.oldTile.terrainLabel, action.oldTile.terrainColor)
+                    } else if (action.oldTile != null && action.newTile != null) {
+                        updateHexTileUseCase(action.oldTile)
+                    }
+                }
+                is HexAction.PoiAdded -> deleteHexPoiUseCase(action.poi.id)
+                is HexAction.PoiDeleted -> addHexPoiUseCase(action.poi)
+            }
+            _uiState.update { it.copy(canUndo = undoStack.isNotEmpty(), canRedo = true) }
+        }
+    }
+
+    fun redo() {
+        if (redoStack.isEmpty()) return
+        val action = redoStack.removeAt(redoStack.size - 1)
+        undoStack.add(action)
+
+        viewModelScope.launch {
+            when (action) {
+                is HexAction.TileChanged -> {
+                    if (action.oldTile == null && action.newTile != null) {
+                        addHexTileUseCase(mapId, action.newTile.q, action.newTile.r, action.newTile.terrainCost, action.newTile.terrainLabel, action.newTile.terrainColor)
+                    } else if (action.oldTile != null && action.newTile == null) {
+                        deleteHexTileUseCase(mapId, action.oldTile.q, action.oldTile.r)
+                    } else if (action.oldTile != null && action.newTile != null) {
+                        updateHexTileUseCase(action.newTile)
+                    }
+                }
+                is HexAction.PoiAdded -> addHexPoiUseCase(action.poi)
+                is HexAction.PoiDeleted -> deleteHexPoiUseCase(action.poi.id)
+            }
+            _uiState.update { it.copy(canUndo = true, canRedo = redoStack.isNotEmpty()) }
         }
     }
 
@@ -205,23 +261,28 @@ class HexMapEditorViewModel @Inject constructor(
         val tile = state.selectedTile ?: return
         if (state.newPoiName.isBlank()) return
         viewModelScope.launch {
-            addHexPoiUseCase(
-                HexPoi(
-                    mapId = state.mapId,
-                    tileQ = tile.q,
-                    tileR = tile.r,
-                    name = state.newPoiName.trim(),
-                    type = state.newPoiType,
-                    description = state.newPoiDescription.trim()
-                )
+            val poi = HexPoi(
+                mapId = state.mapId,
+                tileQ = tile.q,
+                tileR = tile.r,
+                name = state.newPoiName.trim(),
+                type = state.newPoiType,
+                description = state.newPoiDescription.trim()
             )
+            val newId = addHexPoiUseCase(poi)
+            pushAction(HexAction.PoiAdded(poi.copy(id = newId)))
         }
         dismissAddPoiDialog()
     }
 
     fun deletePoi(poiId: Long) {
-        viewModelScope.launch { deleteHexPoiUseCase(poiId) }
+        val poi = _uiState.value.pois.find { it.id == poiId } ?: return
+        viewModelScope.launch { 
+            deleteHexPoiUseCase(poiId)
+            pushAction(HexAction.PoiDeleted(poi))
+        }
     }
+
 
     fun updateMapNotes(notes: String) {
         val map = _uiState.value.currentMap ?: return
