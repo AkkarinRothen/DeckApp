@@ -21,4 +21,5 @@ interface CollectionRepository {
     fun getTablesInCollection(collectionId: Long): Flow<List<RandomTable>>
     
     fun searchCollections(query: String): Flow<List<DeckCollection>>
+    suspend fun updateCollectionImage(collectionId: Long, imageUrl: String?)
 }

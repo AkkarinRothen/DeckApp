@@ -815,4 +815,12 @@ val MIGRATION_39_40 = object : Migration(39, 40) {
     }
 }
 
+val MIGRATION_40_41 = object : Migration(40, 41) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE `random_tables` ADD COLUMN `imageUrl` TEXT")
+        database.execSQL("ALTER TABLE `table_bundles` ADD COLUMN `imageUrl` TEXT")
+        database.execSQL("ALTER TABLE `collections` ADD COLUMN `imageUrl` TEXT")
+    }
+}
+
 

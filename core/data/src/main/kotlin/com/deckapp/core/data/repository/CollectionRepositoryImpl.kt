@@ -79,4 +79,8 @@ class CollectionRepositoryImpl @Inject constructor(
             }
         }
     }
+
+    override suspend fun updateCollectionImage(collectionId: Long, imageUrl: String?) {
+        collectionDao.updateCollectionImage(collectionId, imageUrl)
+    }
 }

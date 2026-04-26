@@ -28,6 +28,9 @@ interface CollectionDao {
     @Query("DELETE FROM collections WHERE id = :id")
     suspend fun deleteCollection(id: Long)
 
+    @Query("UPDATE collections SET imageUrl = :imageUrl WHERE id = :id")
+    suspend fun updateCollectionImage(id: Long, imageUrl: String?)
+
     // --- Relaciones de Recursos ---
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

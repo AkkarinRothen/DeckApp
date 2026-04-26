@@ -20,6 +20,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.deckapp.core.model.DeckCollection
 import com.deckapp.core.model.CollectionIcon
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
@@ -44,19 +46,41 @@ fun CollectionGridItem(
         border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // Fondo con el color de la colección y un gradiente suave
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(
-                        Brush.linearGradient(
-                            colors = listOf(
-                                Color(collection.color).copy(alpha = 0.6f),
-                                Color(collection.color).copy(alpha = 0.9f)
+            if (collection.imageUrl != null) {
+                AsyncImage(
+                    model = collection.imageUrl,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+                // Overlay
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Black.copy(alpha = 0.2f),
+                                    Color.Black.copy(alpha = 0.8f)
+                                )
                             )
                         )
-                    )
-            )
+                )
+            } else {
+                // Fondo con el color de la colección y un gradiente suave
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(
+                                    Color(collection.color).copy(alpha = 0.6f),
+                                    Color(collection.color).copy(alpha = 0.9f)
+                                )
+                            )
+                        )
+                )
+            }
 
             // Decoración: Círculo sutil de fondo
             Surface(

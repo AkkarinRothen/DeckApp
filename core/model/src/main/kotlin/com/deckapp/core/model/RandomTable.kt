@@ -19,6 +19,7 @@ data class RandomTable(
     val isBuiltIn: Boolean = false,
     val sortOrder: Int = 0,
     val sourcePack: String? = null,
+    val imageUrl: String? = null,
     val createdAt: Long = System.currentTimeMillis()
 )
 
@@ -54,6 +55,7 @@ data class TableBundle(
     val name: String,
     val description: String = "",
     val sourceUri: String? = null,
+    val imageUrl: String? = null,
     val tables: List<RandomTable> = emptyList(),
     val createdAt: Long = System.currentTimeMillis()
 )

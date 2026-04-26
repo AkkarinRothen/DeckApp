@@ -57,6 +57,9 @@ class TableRepositoryImpl @Inject constructor(
     override suspend fun deleteBundle(bundleId: Long) =
         tableBundleDao.deleteBundle(bundleId)
 
+    override suspend fun updateBundleImage(bundleId: Long, imageUrl: String?) =
+        tableBundleDao.updateBundleImage(bundleId, imageUrl)
+
 
     override suspend fun getTableWithEntries(id: Long): RandomTable? {
         val withEntries = randomTableDao.getTableWithEntries(id) ?: return null
@@ -127,6 +130,9 @@ class TableRepositoryImpl @Inject constructor(
 
     override suspend fun updatePinnedState(tableId: Long, isPinned: Boolean) =
         randomTableDao.updatePinnedState(tableId, isPinned)
+
+    override suspend fun updateTableImage(tableId: Long, imageUrl: String?) =
+        randomTableDao.updateTableImage(tableId, imageUrl)
 
     override suspend fun addTagToTable(tableId: Long, tagId: Long) {
         tagDao.insertTableTagRef(com.deckapp.core.data.db.RandomTableTagCrossRef(tableId, tagId))

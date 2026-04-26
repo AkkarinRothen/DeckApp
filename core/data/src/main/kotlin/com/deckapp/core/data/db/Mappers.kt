@@ -64,6 +64,7 @@ fun CollectionEntity.toDomain(resourceCount: Int = 0) = DeckCollection(
     color = color,
     icon = runCatching { CollectionIcon.valueOf(iconName) }.getOrDefault(CollectionIcon.CHEST),
     resourceCount = resourceCount,
+    imageUrl = imageUrl,
     createdAt = createdAt
 )
 
@@ -73,6 +74,7 @@ fun DeckCollection.toEntity() = CollectionEntity(
     description = description,
     color = color,
     iconName = icon.name,
+    imageUrl = imageUrl,
     createdAt = createdAt
 )
 
@@ -188,6 +190,7 @@ fun RandomTableEntity.toDomain(
     isBuiltIn = isBuiltIn,
     sortOrder = sortOrder,
     sourcePack = sourcePack,
+    imageUrl = imageUrl,
     createdAt = createdAt
 )
 
@@ -204,7 +207,8 @@ fun com.deckapp.core.model.RandomTable.toEntity() = RandomTableEntity(
     isBuiltIn = isBuiltIn,
     sortOrder = sortOrder,
     sourcePack = sourcePack,
-    createdAt = createdAt
+    createdAt = createdAt,
+    imageUrl = imageUrl
 )
 
 fun RandomTableEntity.toBackupDto() = RandomTableBackupDto(
@@ -220,6 +224,7 @@ fun TableBundleEntity.toDomain(tables: List<com.deckapp.core.model.RandomTable> 
     name = name,
     description = description,
     sourceUri = sourceUri,
+    imageUrl = imageUrl,
     tables = tables,
     createdAt = createdAt
 )
@@ -229,6 +234,7 @@ fun TableBundle.toEntity() = TableBundleEntity(
     name = name,
     description = description,
     sourceUri = sourceUri,
+    imageUrl = imageUrl,
     createdAt = createdAt
 )
 

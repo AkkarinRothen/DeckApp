@@ -54,7 +54,7 @@ import androidx.room.RoomDatabase
         ManualBookmarkEntity::class,
         SceneEntity::class
     ],
-    version = 40,
+    version = 41,
     exportSchema = true
 )
 abstract class DeckAppDatabase : RoomDatabase() {
@@ -115,5 +115,6 @@ abstract class DeckAppDatabase : RoomDatabase() {
         val MIGRATION_37_38 = com.deckapp.core.data.db.MIGRATION_37_38
         val MIGRATION_38_39 = com.deckapp.core.data.db.MIGRATION_38_39
         val MIGRATION_39_40 = com.deckapp.core.data.db.MIGRATION_39_40
+        val MIGRATION_40_41 = com.deckapp.core.data.db.MIGRATION_40_41
     }
 }

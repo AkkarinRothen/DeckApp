@@ -43,6 +43,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import com.deckapp.core.model.CardStack
 import com.deckapp.core.model.CollectionIcon
 import com.deckapp.core.model.SearchResultType
@@ -114,6 +116,40 @@ fun LibraryScreen(
     var collectionToDelete by remember { mutableStateOf<com.deckapp.core.model.DeckCollection?>(null) }
     var resourceToAddToCollection by remember { mutableStateOf<Pair<Long, SearchResultType>?>(null) }
     var tagPickerTargetIds by remember { mutableStateOf<List<Long>?>(null) }
+    var tableToEdit by remember { mutableStateOf<com.deckapp.core.model.RandomTable?>(null) }
+
+    tableToEdit?.let { table ->
+        TableActionSheet(
+            table = table,
+            onDismiss = { tableToEdit = null },
+            onPin = { viewModel.updateTablePinnedState(table.id, !table.isPinned) },
+            onAddToCollection = { resourceToAddToCollection = table.id to SearchResultType.TABLE },
+            onChangeImage = {
+                tableToPickImageFor = table.id
+                tableImageLauncher.launch("image/*")
+            },
+            onDelete = { /* TODO: Implement table deletion if needed */ }
+        )
+    }
+
+    var tableToPickImageFor by remember { mutableStateOf<Long?>(null) }
+    val tableImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let { tableToPickImageFor?.let { id -> viewModel.updateTableImage(id, it.toString()) } }
+        tableToPickImageFor = null
+    }
+
+    var collectionImageId by remember { mutableStateOf<Long?>(null) }
+    var currentCollectionImageUri by remember { mutableStateOf<String?>(null) }
+    val collectionImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let { 
+            currentCollectionImageUri = it.toString()
+            collectionImageId?.let { id -> viewModel.updateCollectionImage(id, it.toString()) }
+        }
+    }
 
     if (showBulkDeleteConfirmation) {
         AlertDialog(
@@ -141,10 +177,18 @@ fun LibraryScreen(
 
     if (showCreateCollectionDialog) {
         CollectionDialog(
-            onDismiss = { showCreateCollectionDialog = false },
-            onConfirm = { name, color, icon ->
-                viewModel.createCollection(name, color, icon)
+            currentImageUri = currentCollectionImageUri,
+            onDismiss = { 
                 showCreateCollectionDialog = false
+                currentCollectionImageUri = null
+            },
+            onPickImage = {
+                collectionImageLauncher.launch("image/*")
+            },
+            onConfirm = { name, color, icon ->
+                viewModel.createCollection(name, color, icon, currentCollectionImageUri)
+                showCreateCollectionDialog = false
+                currentCollectionImageUri = null
             }
         )
     }
@@ -154,12 +198,24 @@ fun LibraryScreen(
             initialName = collection.name,
             initialIcon = collection.icon,
             initialColor = collection.color,
+            initialImageUrl = collection.imageUrl,
+            currentImageUri = if (collectionImageId == collection.id) currentCollectionImageUri else null,
             title = "Editar Colección",
             confirmLabel = "Guardar",
-            onDismiss = { collectionToEdit = null },
-            onConfirm = { name, color, icon ->
-                viewModel.updateCollection(collection.id, name, color, icon)
+            onDismiss = { 
                 collectionToEdit = null
+                collectionImageId = null
+                currentCollectionImageUri = null
+            },
+            onPickImage = {
+                collectionImageId = collection.id
+                collectionImageLauncher.launch("image/*")
+            },
+            onConfirm = { name, color, icon ->
+                viewModel.updateCollection(collection.id, name, color, icon, currentCollectionImageUri)
+                collectionToEdit = null
+                collectionImageId = null
+                currentCollectionImageUri = null
             }
         )
     }
@@ -624,29 +680,18 @@ fun LibraryScreen(
                                     ReorderableItem(tableReorderState, key = table.id) { isDragging ->
                                         val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp)
                                         
-                                        Card(
-                                            elevation = CardDefaults.cardElevation(defaultElevation = elevation),
+                                        TableGridItem(
+                                            table = table,
+                                            isSelected = false,
+                                            onClick = { /* Navegar a tabla o Tirar */ },
+                                            onLongClick = { tableToEdit = table },
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .height(100.dp)
                                                 .draggableHandle(
                                                     onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
                                                     enabled = uiState.isReorderMode
                                                 )
-                                                .then(
-                                                    if (!uiState.isReorderMode) {
-                                                        Modifier.combinedClickable(
-                                                            onClick = { /* Navegar a tabla */ },
-                                                            onLongClick = { resourceToAddToCollection = table.id to SearchResultType.TABLE }
-                                                        )
-                                                    } else Modifier
-                                                )
-                                        ) {
-                                            Column(Modifier.padding(12.dp)) {
-                                                Text(table.name, style = MaterialTheme.typography.titleSmall)
-                                                Text(table.rollFormula, style = MaterialTheme.typography.labelSmall)
-                                            }
-                                        }
+                                        )
                                     }
                                 }
                             }
@@ -692,9 +737,12 @@ fun CollectionDialog(
     initialName: String = "",
     initialColor: Int = 0xFF6200EE.toInt(),
     initialIcon: CollectionIcon = CollectionIcon.CHEST,
+    initialImageUrl: String? = null,
+    currentImageUri: String? = null,
     title: String = "Nueva Colección",
     confirmLabel: String = "Crear",
     onDismiss: () -> Unit,
+    onPickImage: () -> Unit = {},
     onConfirm: (String, Int, CollectionIcon) -> Unit
 ) {
     var name by remember { mutableStateOf(initialName) }
@@ -714,6 +762,39 @@ fun CollectionDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
                 
+                Text("Imagen de Portada (Opcional)", style = MaterialTheme.typography.labelLarge)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable { onPickImage() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (initialImageUrl != null || currentImageUri != null) {
+                        AsyncImage(
+                            model = currentImageUri ?: initialImageUrl,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                        Surface(
+                            color = Color.Black.copy(alpha = 0.5f),
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(Icons.Default.Edit, null, tint = Color.White)
+                            }
+                        }
+                    } else {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(Icons.Default.Image, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("Elegir Imagen", style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
+
                 Text("Icono", style = MaterialTheme.typography.labelLarge)
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     CollectionIcon.values().forEach { icon ->

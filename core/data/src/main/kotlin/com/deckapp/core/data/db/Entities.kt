@@ -179,6 +179,7 @@ data class TableBundleEntity(
     val name: String,
     val description: String = "",
     val sourceUri: String? = null,
+    val imageUrl: String? = null,
     val createdAt: Long = System.currentTimeMillis()
 )
 
@@ -212,7 +213,8 @@ data class RandomTableEntity(
     @ColumnInfo(defaultValue = "0")
     val sortOrder: Int = 0,
     val createdAt: Long = System.currentTimeMillis(),
-    val sourcePack: String? = null
+    val sourcePack: String? = null,
+    val imageUrl: String? = null
 )
 @Entity(
     tableName = "table_entries",

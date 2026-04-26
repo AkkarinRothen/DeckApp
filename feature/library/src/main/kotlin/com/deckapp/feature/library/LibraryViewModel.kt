@@ -322,10 +322,11 @@ class LibraryViewModel @Inject constructor(
 
     // --- Gestión de Colecciones ---
 
-    fun createCollection(name: String, color: Int, icon: CollectionIcon) {
+    fun createCollection(name: String, color: Int, icon: CollectionIcon, pendingImageUri: String? = null) {
         viewModelScope.launch {
             val newCollection = DeckCollection(name = name, color = color, icon = icon)
-            collectionRepository.saveCollection(newCollection)
+            val id = collectionRepository.saveCollection(newCollection)
+            pendingImageUri?.let { updateCollectionImage(id, it) }
             _uiState.update { it.copy(snackbarMessage = "Colección \"$name\" creada") }
         }
     }
@@ -340,10 +341,11 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
-    fun updateCollection(id: Long, name: String, color: Int, icon: CollectionIcon) {
+    fun updateCollection(id: Long, name: String, color: Int, icon: CollectionIcon, pendingImageUri: String? = null) {
         viewModelScope.launch {
             val updated = DeckCollection(id = id, name = name, color = color, icon = icon)
             collectionRepository.saveCollection(updated)
+            pendingImageUri?.let { updateCollectionImage(id, it) }
             _uiState.update { it.copy(snackbarMessage = "Colección \"$name\" actualizada") }
         }
     }
@@ -385,6 +387,44 @@ class LibraryViewModel @Inject constructor(
             val orderedIds = _uiState.value.allTables.map { it.id }
             tableRepository.updateTablesSortOrder(orderedIds)
             _uiState.update { it.copy(isReorderMode = false, snackbarMessage = "Orden de tablas guardado") }
+        }
+    }
+
+    fun updateTablePinnedState(tableId: Long, isPinned: Boolean) {
+        viewModelScope.launch {
+            tableRepository.updatePinnedState(tableId, isPinned)
+        }
+    }
+
+    fun updateTableImage(tableId: Long, uri: String) {
+        viewModelScope.launch {
+            try {
+                val internalPath = fileRepository.copyImageToInternalByCategory(
+                    sourceUri = android.net.Uri.parse(uri),
+                    category = "tables",
+                    fileName = "table_$tableId.jpg"
+                )
+                tableRepository.updateTableImage(tableId, internalPath)
+                _uiState.update { it.copy(snackbarMessage = "Imagen de tabla actualizada") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(snackbarMessage = "Error al guardar imagen") }
+            }
+        }
+    }
+
+    fun updateCollectionImage(collectionId: Long, uri: String) {
+        viewModelScope.launch {
+            try {
+                val internalPath = fileRepository.copyImageToInternalByCategory(
+                    sourceUri = android.net.Uri.parse(uri),
+                    category = "collections",
+                    fileName = "col_$collectionId.jpg"
+                )
+                collectionRepository.updateCollectionImage(collectionId, internalPath)
+                _uiState.update { it.copy(snackbarMessage = "Imagen de baúl actualizada") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(snackbarMessage = "Error al guardar imagen") }
+            }
         }
     }
 }

@@ -10,6 +10,7 @@ data class DeckCollection(
     val color: Int,               // Color ARGB
     val icon: CollectionIcon = CollectionIcon.CHEST,
     val resourceCount: Int = 0,
+    val imageUrl: String? = null,
     val createdAt: Long = System.currentTimeMillis()
 )
 

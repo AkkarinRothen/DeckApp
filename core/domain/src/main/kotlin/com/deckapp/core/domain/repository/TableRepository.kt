@@ -23,12 +23,14 @@ interface TableRepository {
 
     suspend fun saveRollResult(result: TableRollResult): Long
     suspend fun updatePinnedState(tableId: Long, isPinned: Boolean)
+    suspend fun updateTableImage(tableId: Long, imageUrl: String?)
 
     // --- Bundles ---
     fun getAllBundles(): Flow<List<TableBundle>>
     fun getBundleWithTables(bundleId: Long): Flow<TableBundle?>
     suspend fun saveBundle(bundle: TableBundle): Long
     suspend fun deleteBundle(bundleId: Long)
+    suspend fun updateBundleImage(bundleId: Long, imageUrl: String?)
 
     // --- Tags ---
     suspend fun addTagToTable(tableId: Long, tagId: Long)

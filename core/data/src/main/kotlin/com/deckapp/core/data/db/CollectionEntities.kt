@@ -12,6 +12,7 @@ data class CollectionEntity(
     val description: String = "",
     val color: Int,               // Color ARGB para personalización visual
     val iconName: String = "",    // Referencia al nombre del icono (Chest, Map, Skull, etc.)
+    val imageUrl: String? = null,
     @ColumnInfo(name = "created_at") val createdAt: Long = System.currentTimeMillis()
 )
 

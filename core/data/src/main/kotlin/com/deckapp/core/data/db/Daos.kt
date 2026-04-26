@@ -295,6 +295,9 @@ interface RandomTableDao {
     @Query("DELETE FROM random_tables WHERE id IN (:ids)")
     suspend fun bulkDeleteTables(ids: List<Long>)
 
+    @Query("UPDATE random_tables SET imageUrl = :imageUrl WHERE id = :tableId")
+    suspend fun updateTableImage(tableId: Long, imageUrl: String?)
+
     @Query("DELETE FROM table_entries WHERE tableId = :tableId")
     suspend fun deleteEntriesForTable(tableId: Long)
 
@@ -333,6 +336,9 @@ interface TableBundleDao {
 
     @Query("DELETE FROM table_bundles WHERE id = :id")
     suspend fun deleteBundle(id: Long)
+
+    @Query("UPDATE table_bundles SET imageUrl = :imageUrl WHERE id = :bundleId")
+    suspend fun updateBundleImage(bundleId: Long, imageUrl: String?)
 
     @Query("SELECT * FROM random_tables WHERE bundleId = :bundleId ORDER BY name ASC")
     fun getTablesForBundle(bundleId: Long): Flow<List<RandomTableEntity>>
