@@ -26,11 +26,13 @@ class AnalyzeTableImageUseCase @Inject constructor() {
     data class AnalysisResult(
         val entries: List<TableEntry>,
         val suggestedName: String = "",
-        val lowConfidenceIndices: Set<Int> = emptySet()
+        val lowConfidenceIndices: Set<Int> = emptySet(),
+        val entryBlocks: Map<Int, List<OcrBlock>> = emptyMap()
     )
 
     companion object {
         const val CONFIDENCE_THRESHOLD = 0.6f
+        private val SUB_TABLE_REGEX = Regex("""\[\[@(Tabla|Mazo):(.+?)\]\]""")
     }
 
     operator fun invoke(blocks: List<OcrBlock>, expectedTableCount: Int = 0): List<AnalysisResult> {
@@ -55,12 +57,15 @@ class AnalyzeTableImageUseCase @Inject constructor() {
             clusterBlocks(segmentedBlocks)
         }
 
-        // Si el usuario espera más de 1 tabla, aplicamos splitLinesIntoTables dentro de cada
-        // cluster para separar tablas que están espacialmente cercanas pero son lógicamente distintas.
-        // Esto garantiza que el conteo declarado se respete incluso cuando las tablas
-        // no tienen un espacio visual amplio entre ellas.
+        // Dividir clusters que contienen tablas paralelas (lado a lado)
+        val finalClusters = if (expectedTableCount != 1) {
+            clusters.flatMap { splitParallelTables(it) }
+        } else {
+            clusters
+        }
+
         if (expectedTableCount > 1) {
-            return clusters.flatMap { cluster ->
+            return finalClusters.flatMap { cluster ->
                 val sortedBlocks = cluster.sortedBy { it.boundingBox.centerY }
                 val lines = groupIntoLines(sortedBlocks)
                 val tableGroups = splitLinesIntoTables(lines, expectedTableCount)
@@ -71,7 +76,7 @@ class AnalyzeTableImageUseCase @Inject constructor() {
             }
         }
 
-        return clusters.map { cluster ->
+        return finalClusters.map { cluster ->
             val sortedBlocks = cluster.sortedBy { it.boundingBox.centerY }
             val lines = groupIntoLines(sortedBlocks)
             cluster to detectColumns(lines)
@@ -172,6 +177,51 @@ class AnalyzeTableImageUseCase @Inject constructor() {
         }
 
         return clusters
+    }
+
+    /**
+     * Identifica si un cluster contiene dos o más tablas dispuestas horizontalmente
+     * (paralelas) y lo divide si es necesario.
+     */
+    private fun splitParallelTables(cluster: List<OcrBlock>): List<List<OcrBlock>> {
+        val lines = groupIntoLines(cluster.sortedBy { it.boundingBox.top })
+        if (lines.isEmpty()) return listOf(cluster)
+
+        // Contar cuántos rangos hay por línea
+        val rangeCounts = lines.map { line ->
+            line.count { RangeParser.parse(it.text) != null }
+        }
+
+        val maxRangesPerLine = rangeCounts.maxOrNull() ?: 0
+        if (maxRangesPerLine <= 1) return listOf(cluster)
+
+        // Si más del 20% de las líneas tienen múltiples rangos, es probable que sean paralelas
+        val parallelLinesCount = rangeCounts.count { it > 1 }
+        if (parallelLinesCount < lines.size * 0.2) return listOf(cluster)
+
+        // Encontrar el punto de división (gutter vertical)
+        // Buscamos el espacio en blanco más grande entre el primer grupo de rangos y el segundo
+        val firstRangesX = mutableListOf<Float>()
+        val secondRangesX = mutableListOf<Float>()
+
+        lines.forEach { line ->
+            val ranges = line.filter { RangeParser.parse(it.text) != null }
+                .sortedBy { it.boundingBox.left }
+            if (ranges.size >= 2) {
+                firstRangesX.add(ranges[0].boundingBox.right)
+                secondRangesX.add(ranges[1].boundingBox.left)
+            }
+        }
+
+        if (firstRangesX.isEmpty() || secondRangesX.isEmpty()) return listOf(cluster)
+
+        val splitX = (firstRangesX.average() + secondRangesX.average()).toFloat() / 2f
+
+        val leftCluster = cluster.filter { it.boundingBox.centerX < splitX }
+        val rightCluster = cluster.filter { it.boundingBox.centerX >= splitX }
+
+        // Recursividad por si hay 3 o más tablas paralelas
+        return splitParallelTables(leftCluster) + splitParallelTables(rightCluster)
     }
 
     private fun analyzeCluster(cluster: List<OcrBlock>, expectedTableCount: Int): List<AnalysisResult> {
@@ -283,7 +333,8 @@ class AnalyzeTableImageUseCase @Inject constructor() {
         return AnalysisResult(
             entries = result.entries,
             suggestedName = titleCandidate ?: "",
-            lowConfidenceIndices = result.lowConfidenceIndices
+            lowConfidenceIndices = result.lowConfidenceIndices,
+            entryBlocks = result.entryBlocks
         )
     }
 
@@ -442,33 +493,44 @@ class AnalyzeTableImageUseCase @Inject constructor() {
         // Confianza mínima de la fila: el bloque menos seguro marca la calidad de la entrada
         val minConfidence = line.minOf { it.confidence }
 
-        return RawRow(structuredText, range, columnContents.mapValues { it.value.joinToString(" ") }, minConfidence)
+        return RawRow(structuredText, range, columnContents.mapValues { it.value.joinToString(" ") }, minConfidence, line)
     }
 
     private fun buildEntries(rawRows: List<RawRow>): EntriesWithConfidence {
         val entries = mutableListOf<TableEntry>()
         val lowConfidence = mutableSetOf<Int>()
+        val entryBlocks = mutableMapOf<Int, MutableList<OcrBlock>>()
         var sortOrder = 0
 
         for (row in rawRows) {
             if (row.range != null) {
                 val idx = sortOrder
+                val subRef = SUB_TABLE_REGEX.find(row.text)?.groupValues?.get(2)
                 entries.add(TableEntry(
                     minRoll = row.range.min,
                     maxRoll = row.range.max,
                     text = row.text,
+                    subTableRef = subRef,
                     sortOrder = sortOrder++
                 ))
                 if (row.minConfidence < CONFIDENCE_THRESHOLD) lowConfidence.add(idx)
+                entryBlocks[idx] = row.blocks.toMutableList()
             } else if (entries.isNotEmpty() && row.text.isNotBlank()) {
                 val last = entries.last()
                 val mergedText = mergeMultiline(last.text, row)
-                entries[entries.size - 1] = last.copy(text = mergedText)
+                val subRef = SUB_TABLE_REGEX.find(mergedText)?.groupValues?.get(2)
+                
+                entries[entries.size - 1] = last.copy(
+                    text = mergedText,
+                    subTableRef = subRef
+                )
+                
                 // Si la continuación es de baja confianza, marcar la entrada padre
                 if (row.minConfidence < CONFIDENCE_THRESHOLD) lowConfidence.add(last.sortOrder)
+                entryBlocks[last.sortOrder]?.addAll(row.blocks)
             }
         }
-        return EntriesWithConfidence(entries, lowConfidence)
+        return EntriesWithConfidence(entries, lowConfidence, entryBlocks)
     }
 
     /** Une el texto de una fila de continuación respetando los delimitadores. */
@@ -495,13 +557,15 @@ class AnalyzeTableImageUseCase @Inject constructor() {
 
     data class EntriesWithConfidence(
         val entries: List<TableEntry>,
-        val lowConfidenceIndices: Set<Int>
+        val lowConfidenceIndices: Set<Int>,
+        val entryBlocks: Map<Int, List<OcrBlock>>
     )
 
     data class RawRow(
         val text: String,
         val range: RangeParser.ParsedRange?,
         val columns: Map<Int, String> = emptyMap(),
-        val minConfidence: Float = 1.0f
+        val minConfidence: Float = 1.0f,
+        val blocks: List<OcrBlock> = emptyList()
     )
 }

@@ -24,10 +24,14 @@ import com.deckapp.core.domain.usecase.CsvTableParser
 import com.deckapp.core.domain.usecase.RangeParser
 import com.deckapp.core.domain.usecase.TranscribeTableWithAiUseCase
 import com.deckapp.core.domain.usecase.RecognizeTableStreamingUseCase
+import com.deckapp.core.domain.usecase.GenerateTableWithAiUseCase
 import com.deckapp.core.domain.usecase.GetOrCreateTagUseCase
 import com.deckapp.core.model.OcrBlock
 import com.deckapp.core.model.TableEntry
 import com.deckapp.core.model.RandomTable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.decodeFromString
 import com.deckapp.core.model.Tag
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -50,6 +54,7 @@ class TableImportViewModel(
     private val sessionRepository: SessionRepository,
     private val transcribeTableWithAiUseCase: TranscribeTableWithAiUseCase,
     private val recognizeTableStreamingUseCase: RecognizeTableStreamingUseCase,
+    private val generateTableWithAiUseCase: GenerateTableWithAiUseCase,
     private val recentFileRepository: RecentFileRepository,
     private val fileRepository: FileRepository,
     private val settingsRepository: SettingsRepository,
@@ -58,6 +63,20 @@ class TableImportViewModel(
 
     private val analyzeTableImageUseCase = AnalyzeTableImageUseCase()
     private val getOrCreateTagUseCase = GetOrCreateTagUseCase(cardRepository)
+
+    init {
+        loadRecents()
+        loadAllTags()
+        loadBundles()
+    }
+
+    private fun loadBundles() {
+        viewModelScope.launch {
+            tableRepository.getAllBundles().collect { bundles ->
+                _uiState.update { it.copy(allBundles = bundles) }
+            }
+        }
+    }
 
     private val AUTO_VISION_THRESHOLD = 0.80f
 
@@ -99,6 +118,7 @@ class TableImportViewModel(
             TableImportSource.JSON_TEXT -> ImportMode.JSON
             TableImportSource.PLAIN_TEXT -> ImportMode.PLAIN_TEXT
             TableImportSource.MARKDOWN_TABLE -> ImportMode.MARKDOWN
+            TableImportSource.AI_GENERATE -> ImportMode.AI_GENERATE
         }
         _uiState.update { it.copy(mode = mode) }
     }
@@ -409,20 +429,62 @@ class TableImportViewModel(
     }
 
     private fun loadResultToDraft(result: ImportResult) {
-        val threshold = _uiState.value.confidenceThreshold
-        val entries = result.entries
-        val lowConf = entries.mapIndexedNotNull { idx, entry ->
+        val state = _uiState.value
+        val threshold = state.confidenceThreshold
+        
+        val (finalEntries, finalBlocks) = if (state.isStitchingMode && state.editableEntries.isNotEmpty()) {
+            val maxSortOrder = state.editableEntries.maxOfOrNull { it.sortOrder } ?: -1
+            val offset = state.editableEntries.size
+            
+            val appendedEntries = state.editableEntries + result.entries.mapIndexed { idx, entry ->
+                entry.copy(sortOrder = maxSortOrder + 1 + idx)
+            }
+            
+            val shiftedBlocks = result.entryBlocks.mapKeys { it.key + offset }
+            val mergedBlocks = state.entryBlocks + shiftedBlocks
+            
+            appendedEntries to mergedBlocks
+        } else {
+            result.entries to result.entryBlocks
+        }
+
+        val lowConf = finalEntries.mapIndexedNotNull { idx, entry ->
             if (entry.confidence < threshold) idx else null
         }.toSet()
 
         _uiState.update { it.copy(
-            editableEntries = entries,
-            tableNameDraft = result.suggestedName,
-            tableTagsDraft = result.tags,
-            tableFormulaDraft = result.suggestedFormula.ifBlank { "1d6" },
-            validationResult = RangeParser.validateIntegrity(entries.map { it.minRoll to it.maxRoll }),
-            lowConfidenceIndices = lowConf
+            editableEntries = finalEntries,
+            tableNameDraft = if (state.tableNameDraft.isBlank()) result.suggestedName else state.tableNameDraft,
+            tableTagsDraft = if (state.tableTagsDraft.isEmpty()) result.tags else state.tableTagsDraft,
+            tableFormulaDraft = if (state.tableFormulaDraft == "1d6") result.suggestedFormula.ifBlank { "1d6" } else state.tableFormulaDraft,
+            validationResult = RangeParser.validateIntegrity(finalEntries.map { it.minRoll to it.maxRoll }),
+            lowConfidenceIndices = lowConf,
+            entryBlocks = finalBlocks
         ) }
+
+        // Resolución asíncrona de enlaces (@Tabla)
+        resolveSubTableLinks()
+    }
+
+    private fun resolveSubTableLinks() {
+        viewModelScope.launch {
+            val state = _uiState.value
+            val entriesToResolve = state.editableEntries.filter { it.subTableRef != null && it.subTableId == null }
+            if (entriesToResolve.isEmpty()) return@launch
+
+            val allTables = tableRepository.getAllTables().first()
+            val updatedEntries = state.editableEntries.map { entry ->
+                if (entry.subTableRef != null && entry.subTableId == null) {
+                    val match = allTables.find { table -> table.name.equals(entry.subTableRef, ignoreCase = true) }
+                    entry.copy(subTableId = match?.id)
+                } else entry
+            }
+            _uiState.update { it.copy(editableEntries = updatedEntries) }
+        }
+    }
+
+    fun continueStitching() {
+        _uiState.update { it.copy(step = ImportStep.FILE_PREVIEW) }
     }
 
     fun setConfidenceThreshold(threshold: Float) {
@@ -444,6 +506,73 @@ class TableImportViewModel(
             _uiState.update { it.copy(
                 editableEntries = newList,
                 validationResult = RangeParser.validateIntegrity(newList.map { it.minRoll to it.maxRoll })
+            ) }
+        }
+    }
+
+    fun healRanges() {
+        val currentEntries = _uiState.value.editableEntries
+        val healed = RangeParser.healSequence(currentEntries)
+        _uiState.update { it.copy(
+            editableEntries = healed,
+            validationResult = RangeParser.validateIntegrity(healed.map { it.minRoll to it.maxRoll })
+        ) }
+    }
+
+    fun mergeEntryWithPrevious(index: Int) {
+        val currentEntries = _uiState.value.editableEntries.toMutableList()
+        if (index > 0 && index in currentEntries.indices) {
+            val current = currentEntries[index]
+            val previous = currentEntries[index - 1]
+            
+            val merged = previous.copy(
+                text = "${previous.text}\n${current.text}".trim(),
+                maxRoll = maxOf(previous.maxRoll, current.maxRoll)
+            )
+            
+            currentEntries[index - 1] = merged
+            currentEntries.removeAt(index)
+            
+            _uiState.update { it.copy(
+                editableEntries = currentEntries,
+                validationResult = RangeParser.validateIntegrity(currentEntries.map { it.minRoll to it.maxRoll })
+            ) }
+        }
+    }
+
+    fun cleanNoise() {
+        val noiseRegex = Regex("""(\.{3,}|_{3,}|-{3,}|—{2,}|–{2,})""")
+        val newList = _uiState.value.editableEntries.map { entry ->
+            val cleaned = entry.text
+                .replace(noiseRegex, " ")
+                .replace(Regex("""\s+"""), " ")
+                .trim()
+            entry.copy(text = cleaned)
+        }
+        _uiState.update { it.copy(editableEntries = newList) }
+    }
+
+    fun insertEntryAfter(index: Int) {
+        val currentEntries = _uiState.value.editableEntries.toMutableList()
+        if (index in currentEntries.indices) {
+            val prev = currentEntries[index]
+            val nextMin = prev.maxRoll + 1
+            val newEntry = com.deckapp.core.model.TableEntry(
+                minRoll = nextMin,
+                maxRoll = nextMin,
+                text = "",
+                sortOrder = prev.sortOrder + 1
+            )
+            
+            // Incrementar sortOrder de los siguientes
+            for (i in (index + 1) until currentEntries.size) {
+                currentEntries[i] = currentEntries[i].copy(sortOrder = currentEntries[i].sortOrder + 1)
+            }
+            
+            currentEntries.add(index + 1, newEntry)
+            _uiState.update { it.copy(
+                editableEntries = currentEntries,
+                validationResult = RangeParser.validateIntegrity(currentEntries.map { it.minRoll to it.maxRoll })
             ) }
         }
     }
@@ -470,6 +599,140 @@ class TableImportViewModel(
     }
 
     fun setDraftFormula(formula: String) = _uiState.update { it.copy(tableFormulaDraft = formula) }
+    fun togglePreviewMode() = _uiState.update { it.copy(isPreviewMode = !it.isPreviewMode) }
+
+    fun getTableJson(): String {
+        val state = _uiState.value
+        val table = RandomTable(
+            name = state.tableNameDraft,
+            rollFormula = state.tableFormulaDraft,
+            entries = state.editableEntries
+        )
+        return Json.encodeToString(table)
+    }
+
+@kotlinx.serialization.Serializable
+private data class FoundryTableDto(
+    val name: String,
+    val formula: String = "1d6",
+    val results: List<FoundryResultDto> = emptyList()
+)
+
+@kotlinx.serialization.Serializable
+private data class FoundryResultDto(
+    val text: String,
+    val range: List<Int> = emptyList(),
+    val type: Int = 0
+)
+
+    fun importFromJson(json: String) {
+        if (json.isBlank()) return
+        val jsonParser = Json { ignoreUnknownKeys = true; coerceInputValues = true }
+        try {
+            // Intento 1: Formato nativo de DeckApp
+            val table = try {
+                jsonParser.decodeFromString<RandomTable>(json)
+            } catch (e: Exception) {
+                // Intento 2: Formato Foundry VTT (Import Table module)
+                try {
+                    val foundryTable = jsonParser.decodeFromString<FoundryTableDto>(json)
+                    RandomTable(
+                        name = foundryTable.name,
+                        rollFormula = foundryTable.formula,
+                        entries = foundryTable.results.mapIndexed { idx, res ->
+                            TableEntry(
+                                text = res.text,
+                                minRoll = res.range.getOrNull(0) ?: (idx + 1),
+                                maxRoll = res.range.getOrNull(1) ?: res.range.getOrNull(0) ?: (idx + 1),
+                                sortOrder = idx
+                            )
+                        }
+                    )
+                } catch (e2: Exception) {
+                    throw Exception("Formato JSON no reconocido")
+                }
+            }
+
+            _uiState.update { 
+                it.copy(
+                    step = ImportStep.MAPPING,
+                    tableNameDraft = table.name,
+                    tableFormulaDraft = table.rollFormula,
+                    editableEntries = table.entries,
+                    tableTagsDraft = table.tags.toMutableList(),
+                    detectedTables = listOf(
+                        ImportResult(
+                            suggestedName = table.name,
+                            sourceType = TableImportSource.JSON_TEXT.name,
+                            entries = table.entries,
+                            suggestedFormula = table.rollFormula,
+                            tags = table.tags
+                        )
+                    ),
+                    currentTableIndex = 0
+                )
+            }
+        } catch (e: Exception) {
+            _uiState.update { it.copy(errorMessage = "Error al importar JSON: ${e.message}") }
+        }
+    }
+
+    fun generateWithAi(prompt: String) {
+        if (prompt.isBlank()) return
+        
+        viewModelScope.launch {
+            _uiState.update { it.copy(
+                isGenerating = true,
+                isProcessing = true,
+                mode = ImportMode.AI_GENERATE,
+                editableEntries = emptyList(),
+                tableNameDraft = "Generando...",
+                step = ImportStep.REVIEW
+            ) }
+
+            try {
+                generateTableWithAiUseCase(prompt).collect { event ->
+                    when (event) {
+                        is AiStreamEvent.Metadata -> {
+                            _uiState.update { it.copy(
+                                tableNameDraft = event.name,
+                                tableFormulaDraft = event.formula
+                            ) }
+                        }
+                        is AiStreamEvent.Entry -> {
+                            _uiState.update { it.copy(
+                                editableEntries = it.editableEntries + event.entry
+                            ) }
+                        }
+                    }
+                }
+                
+                val state = _uiState.value
+                val result = ImportResult(
+                    sourceType = "AI_GENERATE",
+                    entries = state.editableEntries,
+                    suggestedName = state.tableNameDraft,
+                    suggestedFormula = state.tableFormulaDraft
+                )
+                _uiState.update { it.copy(
+                    detectedTables = listOf(result),
+                    currentTableIndex = 0,
+                    isGenerating = false,
+                    isProcessing = false
+                ) }
+                
+            } catch (e: Exception) {
+                _uiState.update { it.copy(
+                    errorMessage = "Error al generar: ${e.message}",
+                    isGenerating = false,
+                    isProcessing = false
+                ) }
+            }
+        }
+    }
+    
+    fun setBundle(bundleId: Long?) = _uiState.update { it.copy(selectedBundleId = bundleId, bundleNameDraft = "") }
+    fun setBundleName(name: String) = _uiState.update { it.copy(bundleNameDraft = name, selectedBundleId = null) }
     fun clearError() = _uiState.update { it.copy(errorMessage = null) }
     fun clearAutoVisionMessage() = _uiState.update { it.copy(autoVisionMessage = null) }
 
@@ -498,13 +761,37 @@ class TableImportViewModel(
         }
     }
 
+    fun previousTable() {
+        val state = _uiState.value
+        val currentIndex = state.currentTableIndex
+        if (currentIndex > 0) {
+            val prevIndex = currentIndex - 1
+            _uiState.update { it.copy(currentTableIndex = prevIndex) }
+            loadResultToDraft(state.detectedTables[prevIndex])
+        } else {
+            _uiState.update { it.copy(step = ImportStep.RECOGNITION) }
+        }
+    }
+
     fun saveAll() {
         val state = _uiState.value
         viewModelScope.launch {
             _uiState.update { it.copy(isProcessing = true) }
             try {
+                // Resolver o crear bundle
+                var finalBundleId = state.selectedBundleId
+                if (finalBundleId == null && state.bundleNameDraft.isNotBlank()) {
+                    val existing = state.allBundles.find { it.name.equals(state.bundleNameDraft, ignoreCase = true) }
+                    finalBundleId = if (existing != null) {
+                        existing.id
+                    } else {
+                        tableRepository.saveBundle(com.deckapp.core.model.TableBundle(name = state.bundleNameDraft))
+                    }
+                }
+
                 state.detectedTables.forEach { result ->
                     val table = RandomTable(
+                        bundleId = finalBundleId,
                         name = result.suggestedName.ifBlank { "Tabla importada" },
                         description = result.suggestedDescription,
                         rollFormula = result.suggestedFormula,
@@ -543,6 +830,7 @@ class TableImportViewModel(
         private val sessionRepository: SessionRepository,
         private val transcribeTableWithAiUseCase: TranscribeTableWithAiUseCase,
         private val recognizeTableStreamingUseCase: RecognizeTableStreamingUseCase,
+        private val generateTableWithAiUseCase: GenerateTableWithAiUseCase,
         private val recentFileRepository: RecentFileRepository,
         private val fileRepository: FileRepository,
         private val settingsRepository: SettingsRepository,
@@ -559,6 +847,7 @@ class TableImportViewModel(
                 sessionRepository,
                 transcribeTableWithAiUseCase,
                 recognizeTableStreamingUseCase,
+                generateTableWithAiUseCase,
                 recentFileRepository,
                 fileRepository,
                 settingsRepository,

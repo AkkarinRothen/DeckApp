@@ -30,11 +30,13 @@ import androidx.compose.ui.unit.toSize
 import kotlin.math.max
 import kotlin.math.min
 
+import android.graphics.Matrix
+import android.graphics.Paint
+import android.graphics.Path as AndroidPath
+
 enum class HandleType {
-    TOP_LEFT, TOP_CENTER, TOP_RIGHT,
-    CENTER_LEFT, CENTER_RIGHT,
-    BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT,
-    MOVE
+    TOP_LEFT, TOP_RIGHT, BOTTOM_RIGHT, BOTTOM_LEFT,
+    MOVE, NONE
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,8 +49,17 @@ fun TableCropView(
     onToggleStitching: (Boolean) -> Unit,
     onCropConfirmed: (Bitmap) -> Unit
 ) {
-    // Estado del rectángulo de recorte (en coordenadas normalizadas 0.0 - 1.0)
-    var cropRect by remember { mutableStateOf(Rect(0.1f, 0.1f, 0.9f, 0.5f)) }
+    // Estado del cuadrilátero (en coordenadas normalizadas 0.0 - 1.0 relativo a la imagen)
+    var quadPoints by remember { 
+        mutableStateOf(
+            listOf(
+                Offset(0.1f, 0.1f), // TL
+                Offset(0.9f, 0.1f), // TR
+                Offset(0.9f, 0.5f), // BR
+                Offset(0.1f, 0.5f)  // BL
+            )
+        )
+    }
     
     // Tamaño del contenedor de la imagen para convertir coordenadas
     var containerSize by remember { mutableStateOf(IntSize.Zero) }
@@ -56,7 +67,8 @@ fun TableCropView(
     // Feedback táctil: posición actual del dedo para la lupa
     var magnifierPosition by remember { mutableStateOf(Offset.Unspecified) }
     
-    // Draft del bitmap recortado (para previsualización si quisiéramos, pero aquí lo procesamos al final)
+    var activeHandle by remember { mutableStateOf(HandleType.NONE) }
+    
     val colorScheme = MaterialTheme.colorScheme
 
     Column(
@@ -68,10 +80,10 @@ fun TableCropView(
         Text(
             text = if (isStitching) "Recortar siguiente sección" else "Enmarca la tabla claramente",
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+            fontWeight = FontWeight.Bold
         )
         Text(
-            text = "Usa los tiradores para ajustar el área de reconocimiento",
+            text = "Ajusta las esquinas para corregir la perspectiva",
             style = MaterialTheme.typography.bodySmall,
             color = colorScheme.onSurfaceVariant
         )
@@ -89,7 +101,6 @@ fun TableCropView(
                 .magnifier(
                     sourceCenter = { magnifierPosition },
                     magnifierCenter = {
-                        // Posicionar la lupa un poco arriba del dedo
                         if (magnifierPosition.isSpecified) {
                             magnifierPosition.copy(y = magnifierPosition.y - 120f)
                         } else Offset.Unspecified
@@ -105,23 +116,27 @@ fun TableCropView(
                     val imageBounds = calculateImageBounds(containerSize.toSize(), bitmapSize)
                     
                     detectDragGestures(
-                        onDragStart = { offset -> magnifierPosition = offset },
-                        onDragEnd = { magnifierPosition = Offset.Unspecified },
-                        onDragCancel = { magnifierPosition = Offset.Unspecified },
+                        onDragStart = { offset -> 
+                            magnifierPosition = offset
+                            activeHandle = getHandleAtQuad(offset, quadPoints, imageBounds)
+                        },
+                        onDragEnd = { 
+                            magnifierPosition = Offset.Unspecified
+                            activeHandle = HandleType.NONE
+                        },
+                        onDragCancel = { 
+                            magnifierPosition = Offset.Unspecified
+                            activeHandle = HandleType.NONE
+                        },
                         onDrag = { change, dragAmount ->
                             change.consume()
                             magnifierPosition = change.position
-                            
-                            val currentRect = cropRect
-                            val handle = getHandleAt(change.position, currentRect, imageBounds)
-                            
-                            cropRect = updateRect(currentRect, handle, dragAmount, imageBounds)
+                            quadPoints = updateQuad(quadPoints, activeHandle, dragAmount, imageBounds)
                         }
                     )
                 },
             contentAlignment = Alignment.Center
         ) {
-            // Imagen de fondo
             Image(
                 bitmap = bitmap.asImageBitmap(),
                 contentDescription = null,
@@ -129,71 +144,56 @@ fun TableCropView(
                 contentScale = ContentScale.Fit
             )
             
-            // Canvas para el Scrim y el Recuadro
             Canvas(modifier = Modifier.fillMaxSize()) {
                 val bitmapSize = Size(bitmap.width.toFloat(), bitmap.height.toFloat())
                 val imageBounds = calculateImageBounds(size, bitmapSize)
                 
-                // rect en pixeles relativos a la imagen
-                val rect = Rect(
-                    imageBounds.left + cropRect.left * imageBounds.width,
-                    imageBounds.top + cropRect.top * imageBounds.height,
-                    imageBounds.left + cropRect.right * imageBounds.width,
-                    imageBounds.top + cropRect.bottom * imageBounds.height
-                )
-
-                // 1. Scrim (solo oscurecemos lo que está dentro de imageBounds pero fuera de rect)
-                val path = Path().apply {
-                    addRect(imageBounds)
-                    addRect(rect)
-                    fillType = PathFillType.EvenOdd
+                // Convertir puntos normalizados a pixeles de pantalla
+                val points = quadPoints.map { 
+                    Offset(
+                        imageBounds.left + it.x * imageBounds.width,
+                        imageBounds.top + it.y * imageBounds.height
+                    )
                 }
-                drawPath(path, Color.Black.copy(alpha = 0.6f))
+
+                // 1. Scrim (oscurecemos fuera del cuadrilátero)
+                val quadPath = Path().apply {
+                    moveTo(points[0].x, points[0].y)
+                    lineTo(points[1].x, points[1].y)
+                    lineTo(points[2].x, points[2].y)
+                    lineTo(points[3].x, points[3].y)
+                    close()
+                }
                 
-                // Fondo oscurecido fuera de imageBounds (opcional, para limpieza visual)
-                val fullPath = Path().apply {
-                    addRect(Rect(0f, 0f, size.width, size.height))
+                val scrimPath = Path().apply {
                     addRect(imageBounds)
+                    addPath(quadPath)
                     fillType = PathFillType.EvenOdd
                 }
-                drawPath(fullPath, Color.Black.copy(alpha = 0.2f))
-
-                // 2. Bordes del recuadro
-                drawRect(
+                drawPath(scrimPath, Color.Black.copy(alpha = 0.6f))
+                
+                // 2. Bordes del cuadrilátero
+                drawPath(
+                    path = quadPath,
                     color = colorScheme.primary,
-                    topLeft = rect.topLeft,
-                    size = rect.size,
-                    style = Stroke(width = 3.dp.toPx())
+                    style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
                 )
 
-                // 3. Guías internas
-                val thirdW = rect.width / 3
-                val thirdH = rect.height / 3
-                for (i in 1..2) {
-                    drawLine(
-                        color = Color.White.copy(alpha = 0.4f),
-                        start = Offset(rect.left + thirdW * i, rect.top),
-                        end = Offset(rect.left + thirdW * i, rect.bottom),
-                        strokeWidth = 1.dp.toPx()
+                // 3. Manejadores
+                val handleRadius = 12.dp.toPx()
+                points.forEachIndexed { index, center ->
+                    val isSelected = activeHandle.ordinal == index
+                    drawCircle(
+                        color = Color.White, 
+                        radius = if (isSelected) handleRadius * 1.2f else handleRadius, 
+                        center = center
                     )
-                    drawLine(
-                        color = Color.White.copy(alpha = 0.4f),
-                        start = Offset(rect.left, rect.top + thirdH * i),
-                        end = Offset(rect.right, rect.top + thirdH * i),
-                        strokeWidth = 1.dp.toPx()
+                    drawCircle(
+                        color = colorScheme.primary, 
+                        radius = if (isSelected) handleRadius * 1.2f else handleRadius, 
+                        center = center, 
+                        style = Stroke(2.dp.toPx())
                     )
-                }
-                
-                // 4. Manejadores
-                val handleRadius = 8.dp.toPx()
-                val handles = listOf(
-                    rect.topLeft, rect.topCenter, rect.topRight,
-                    rect.centerLeft, rect.centerRight,
-                    rect.bottomLeft, rect.bottomCenter, rect.bottomRight
-                )
-                handles.forEach { center ->
-                    drawCircle(color = Color.White, radius = handleRadius, center = center)
-                    drawCircle(color = colorScheme.primary, radius = handleRadius, center = center, style = Stroke(2.dp.toPx()))
                 }
             }
         }
@@ -269,7 +269,7 @@ fun TableCropView(
 
         Button(
             onClick = {
-                val cropped = performCrop(bitmap, cropRect)
+                val cropped = performPerspectiveCrop(bitmap, quadPoints)
                 onCropConfirmed(cropped)
             },
             modifier = Modifier.fillMaxWidth().height(60.dp),
@@ -291,10 +291,8 @@ private fun calculateImageBounds(containerSize: Size, bitmapSize: Size): Rect {
     val bitmapRatio = bitmapSize.width / bitmapSize.height
     
     val (drawWidth, drawHeight) = if (bitmapRatio > containerRatio) {
-        // La imagen es más ancha que el contenedor (relativamente)
         containerSize.width to (containerSize.width / bitmapRatio)
     } else {
-        // La imagen es más alta que el contenedor
         (containerSize.height * bitmapRatio) to containerSize.height
     }
     
@@ -304,72 +302,91 @@ private fun calculateImageBounds(containerSize: Size, bitmapSize: Size): Rect {
     return Rect(left, top, left + drawWidth, top + drawHeight)
 }
 
-private fun getHandleAt(pos: Offset, rect: Rect, imageBounds: Rect): HandleType {
-    // rect es normalizado 0..1 relativo a imageBounds
-    val r = Rect(
-        imageBounds.left + rect.left * imageBounds.width,
-        imageBounds.top + rect.top * imageBounds.height,
-        imageBounds.left + rect.right * imageBounds.width,
-        imageBounds.top + rect.bottom * imageBounds.height
-    )
+private fun getHandleAtQuad(pos: Offset, points: List<Offset>, imageBounds: Rect): HandleType {
     val threshold = 40f
     
-    return when {
-        (pos - r.topLeft).getDistance() < threshold -> HandleType.TOP_LEFT
-        (pos - r.topRight).getDistance() < threshold -> HandleType.TOP_RIGHT
-        (pos - r.bottomLeft).getDistance() < threshold -> HandleType.BOTTOM_LEFT
-        (pos - r.bottomRight).getDistance() < threshold -> HandleType.BOTTOM_RIGHT
-        (pos - r.topCenter).getDistance() < threshold -> HandleType.TOP_CENTER
-        (pos - r.bottomCenter).getDistance() < threshold -> HandleType.BOTTOM_CENTER
-        (pos - r.centerLeft).getDistance() < threshold -> HandleType.CENTER_LEFT
-        (pos - r.centerRight).getDistance() < threshold -> HandleType.CENTER_RIGHT
-        r.contains(pos) -> HandleType.MOVE
-        else -> HandleType.MOVE
-    }
-}
-
-private fun updateRect(rect: Rect, handle: HandleType, delta: Offset, imageBounds: Rect): Rect {
-    // Normalizar delta basado en el tamaño real de la imagen
-    val dx = delta.x / imageBounds.width
-    val dy = delta.y / imageBounds.height
-    val minSize = 0.05f
-    
-    return when (handle) {
-        HandleType.TOP_LEFT -> rect.copy(
-            left = min(rect.right - minSize, max(0f, rect.left + dx)),
-            top = min(rect.bottom - minSize, max(0f, rect.top + dy))
+    points.forEachIndexed { index, p ->
+        val screenPos = Offset(
+            imageBounds.left + p.x * imageBounds.width,
+            imageBounds.top + p.y * imageBounds.height
         )
-        HandleType.TOP_RIGHT -> rect.copy(
-            right = max(rect.left + minSize, min(1f, rect.right + dx)),
-            top = min(rect.bottom - minSize, max(0f, rect.top + dy))
-        )
-        HandleType.BOTTOM_LEFT -> rect.copy(
-            left = min(rect.right - minSize, max(0f, rect.left + dx)),
-            bottom = max(rect.top + minSize, min(1f, rect.bottom + dy))
-        )
-        HandleType.BOTTOM_RIGHT -> rect.copy(
-            right = max(rect.left + minSize, min(1f, rect.right + dx)),
-            bottom = max(rect.top + minSize, min(1f, rect.bottom + dy))
-        )
-        HandleType.TOP_CENTER -> rect.copy(top = min(rect.bottom - minSize, max(0f, rect.top + dy)))
-        HandleType.BOTTOM_CENTER -> rect.copy(bottom = max(rect.top + minSize, min(1f, rect.bottom + dy)))
-        HandleType.CENTER_LEFT -> rect.copy(left = min(rect.right - minSize, max(0f, rect.left + dx)))
-        HandleType.CENTER_RIGHT -> rect.updateRight(max(rect.left + minSize, min(1f, rect.right + dx)))
-        HandleType.MOVE -> {
-            val newLeft = max(0f, min(1f - rect.width, rect.left + dx))
-            val newTop = max(0f, min(1f - rect.height, rect.top + dy))
-            Rect(newLeft, newTop, newLeft + rect.width, newTop + rect.height)
+        if ((pos - screenPos).getDistance() < threshold) {
+            return HandleType.entries[index]
         }
     }
+    
+    // Si está dentro del polígono, permitir mover
+    // (Simplificado: usar el bounding box para el MOVE)
+    val minX = points.minOf { it.x } * imageBounds.width + imageBounds.left
+    val maxX = points.maxOf { it.x } * imageBounds.width + imageBounds.left
+    val minY = points.minOf { it.y } * imageBounds.height + imageBounds.top
+    val maxY = points.maxOf { it.y } * imageBounds.height + imageBounds.top
+    
+    if (pos.x in minX..maxX && pos.y in minY..maxY) return HandleType.MOVE
+    
+    return HandleType.NONE
 }
 
-private fun Rect.updateRight(newRight: Float) = Rect(left, top, newRight, bottom)
-
-private fun performCrop(bitmap: Bitmap, normalizedRect: Rect): Bitmap {
-    val left = (normalizedRect.left * bitmap.width).toInt().coerceIn(0, bitmap.width - 1)
-    val top = (normalizedRect.top * bitmap.height).toInt().coerceIn(0, bitmap.height - 1)
-    val width = (normalizedRect.width * bitmap.width).toInt().coerceIn(1, bitmap.width - left)
-    val height = (normalizedRect.height * bitmap.height).toInt().coerceIn(1, bitmap.height - top)
+private fun updateQuad(points: List<Offset>, handle: HandleType, delta: Offset, imageBounds: Rect): List<Offset> {
+    val dx = delta.x / imageBounds.width
+    val dy = delta.y / imageBounds.height
     
-    return Bitmap.createBitmap(bitmap, left, top, width, height)
+    val newList = points.toMutableList()
+    
+    when (handle) {
+        HandleType.TOP_LEFT -> newList[0] = Offset((newList[0].x + dx).coerceIn(0f, 1f), (newList[0].y + dy).coerceIn(0f, 1f))
+        HandleType.TOP_RIGHT -> newList[1] = Offset((newList[1].x + dx).coerceIn(0f, 1f), (newList[1].y + dy).coerceIn(0f, 1f))
+        HandleType.BOTTOM_RIGHT -> newList[2] = Offset((newList[2].x + dx).coerceIn(0f, 1f), (newList[2].y + dy).coerceIn(0f, 1f))
+        HandleType.BOTTOM_LEFT -> newList[3] = Offset((newList[3].x + dx).coerceIn(0f, 1f), (newList[3].y + dy).coerceIn(0f, 1f))
+        HandleType.MOVE -> {
+            return points.map { 
+                Offset((it.x + dx).coerceIn(0f, 1f), (it.y + dy).coerceIn(0f, 1f))
+            }
+        }
+        HandleType.NONE -> {}
+    }
+    return newList
+}
+
+private fun performPerspectiveCrop(bitmap: Bitmap, points: List<Offset>): Bitmap {
+    val w = bitmap.width.toFloat()
+    val h = bitmap.height.toFloat()
+    
+    // Coordenadas de origen (en el bitmap real)
+    val src = floatArrayOf(
+        points[0].x * w, points[0].y * h, // TL
+        points[1].x * w, points[1].y * h, // TR
+        points[2].x * w, points[2].y * h, // BR
+        points[3].x * w, points[3].y * h  // BL
+    )
+    
+    // Calcular dimensiones del destino
+    val widthTop = Offset(src[0] - src[2], src[1] - src[3]).getDistance()
+    val widthBottom = Offset(src[4] - src[6], src[5] - src[7]).getDistance()
+    val targetWidth = max(widthTop, widthBottom).toInt().coerceAtLeast(100)
+    
+    val heightLeft = Offset(src[0] - src[6], src[1] - src[7]).getDistance()
+    val heightRight = Offset(src[2] - src[4], src[3] - src[5]).getDistance()
+    val targetHeight = max(heightLeft, heightRight).toInt().coerceAtLeast(100)
+    
+    // Coordenadas de destino (rectángulo perfecto)
+    val dst = floatArrayOf(
+        0f, 0f,                         // TL
+        targetWidth.toFloat(), 0f,      // TR
+        targetWidth.toFloat(), targetHeight.toFloat(), // BR
+        0f, targetHeight.toFloat()      // BL
+    )
+    
+    val matrix = Matrix()
+    matrix.setPolyToPoly(src, 0, dst, 0, 4)
+    
+    val resultBitmap = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888)
+    val canvas = android.graphics.Canvas(resultBitmap)
+    val paint = Paint()
+    paint.isAntiAlias = true
+    paint.isFilterBitmap = true
+    
+    canvas.drawBitmap(bitmap, matrix, paint)
+    
+    return resultBitmap
 }

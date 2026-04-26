@@ -6,7 +6,7 @@ import com.deckapp.core.model.TableEntry
 import com.deckapp.core.domain.usecase.ImportResult
 import com.deckapp.core.domain.usecase.RangeParser
 
-enum class ImportMode { NONE, OCR, CSV, JSON, PLAIN_TEXT, MARKDOWN }
+enum class ImportMode { NONE, OCR, CSV, JSON, PLAIN_TEXT, MARKDOWN, AI_GENERATE }
 enum class ImportStep { SOURCE_SELECTION, FILE_PREVIEW, CROP, RECOGNITION, MAPPING, REVIEW }
 enum class StitchingMode { CONTINUE_RANGES, APPEND }
 
@@ -53,8 +53,20 @@ data class TableImportUiState(
     val stitchingMode: StitchingMode = StitchingMode.CONTINUE_RANGES,
     val expectedTableCount: Int = 0, // 0 = Auto
     val suggestedPoints: List<Pair<Float, Float>>? = null,
+    val cropQuad: List<Pair<Float, Float>>? = null,
     val croppedBitmap: Bitmap? = null,
     val ocrBlocks: List<OcrBlock> = emptyList(),
     val detectedAnchors: List<Float> = emptyList(),
-    val currentCluster: List<OcrBlock> = emptyList()
+    val currentCluster: List<OcrBlock> = emptyList(),
+    val entryBlocks: Map<Int, List<OcrBlock>> = emptyMap(),
+    
+    // AI Generation
+    val aiPrompt: String = "",
+    val isGenerating: Boolean = false,
+    val isPreviewMode: Boolean = false,
+    
+    // Bundles
+    val allBundles: List<com.deckapp.core.model.TableBundle> = emptyList(),
+    val selectedBundleId: Long? = null,
+    val bundleNameDraft: String = ""
 )

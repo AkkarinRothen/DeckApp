@@ -10,6 +10,9 @@ import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.QrCode
+import androidx.compose.material.icons.filled.Terminal
 import android.graphics.Bitmap
 import androidx.compose.material3.*
 import androidx.compose.ui.graphics.asImageBitmap
@@ -78,6 +81,26 @@ fun SourceSelectionView(
                 icon = Icons.Default.TableChart,
                 modifier = Modifier.weight(1f),
                 onClick = { onSelect(TableImportSource.MARKDOWN_TABLE) }
+            )
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            SourceCard(
+                title = "Generar con IA (Beta)",
+                icon = Icons.Default.AutoAwesome,
+                modifier = Modifier.weight(1f),
+                onClick = { onSelect(TableImportSource.AI_GENERATE) }
+            )
+            SourceCard(
+                title = "JSON / QR",
+                icon = Icons.Default.QrCode,
+                modifier = Modifier.weight(1f),
+                onClick = { onSelect(TableImportSource.JSON_TEXT) }
             )
         }
         

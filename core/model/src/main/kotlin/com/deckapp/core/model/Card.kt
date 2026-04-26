@@ -86,6 +86,7 @@ data class CardStack(
 )
 
 /** Tag/etiqueta para organizar mazos y cartas */
+@Serializable
 data class Tag(
     val id: Long = 0,
     val name: String,

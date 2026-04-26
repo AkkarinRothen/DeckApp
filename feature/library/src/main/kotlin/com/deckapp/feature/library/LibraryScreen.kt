@@ -110,6 +110,8 @@ fun LibraryScreen(
     var selectedTab by remember { mutableIntStateOf(0) } // 0: Mazos, 1: Tablas, 2: Colecciones
     
     var showCreateCollectionDialog by remember { mutableStateOf(false) }
+    var collectionToEdit by remember { mutableStateOf<com.deckapp.core.model.DeckCollection?>(null) }
+    var collectionToDelete by remember { mutableStateOf<com.deckapp.core.model.DeckCollection?>(null) }
     var resourceToAddToCollection by remember { mutableStateOf<Pair<Long, SearchResultType>?>(null) }
     var tagPickerTargetIds by remember { mutableStateOf<List<Long>?>(null) }
 
@@ -138,11 +140,46 @@ fun LibraryScreen(
     }
 
     if (showCreateCollectionDialog) {
-        CreateCollectionDialog(
+        CollectionDialog(
             onDismiss = { showCreateCollectionDialog = false },
             onConfirm = { name, color, icon ->
                 viewModel.createCollection(name, color, icon)
                 showCreateCollectionDialog = false
+            }
+        )
+    }
+
+    collectionToEdit?.let { collection ->
+        CollectionDialog(
+            initialName = collection.name,
+            initialIcon = collection.icon,
+            initialColor = collection.color,
+            title = "Editar Colección",
+            confirmLabel = "Guardar",
+            onDismiss = { collectionToEdit = null },
+            onConfirm = { name, color, icon ->
+                viewModel.updateCollection(collection.id, name, color, icon)
+                collectionToEdit = null
+            }
+        )
+    }
+
+    collectionToDelete?.let { collection ->
+        AlertDialog(
+            onDismissRequest = { collectionToDelete = null },
+            title = { Text("¿Eliminar colección?") },
+            text = { Text("Se eliminará la colección \"${collection.name}\". Los mazos y tablas dentro de ella NO se borrarán de tu biblioteca global.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.deleteCollection(collection.id)
+                        collectionToDelete = null
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) { Text("Eliminar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { collectionToDelete = null }) { Text("Cancelar") }
             }
         )
     }
@@ -621,7 +658,8 @@ fun LibraryScreen(
                                             viewModel.setActiveCollection(collection.id)
                                             selectedTab = 0 // Auto-cambiar a Mazos para ver contenido
                                         },
-                                        onLongClick = { /* Opciones de colección */ }
+                                        onLongClick = { collectionToDelete = collection },
+                                        onEdit = { collectionToEdit = collection }
                                     )
                                 }
                                 
@@ -650,17 +688,22 @@ fun LibraryScreen(
 }
 
 @Composable
-fun CreateCollectionDialog(
+fun CollectionDialog(
+    initialName: String = "",
+    initialColor: Int = 0xFF6200EE.toInt(),
+    initialIcon: CollectionIcon = CollectionIcon.CHEST,
+    title: String = "Nueva Colección",
+    confirmLabel: String = "Crear",
     onDismiss: () -> Unit,
     onConfirm: (String, Int, CollectionIcon) -> Unit
 ) {
-    var name by remember { mutableStateOf("") }
-    var selectedIcon by remember { mutableStateOf(CollectionIcon.CHEST) }
-    var selectedColor by remember { mutableStateOf(0xFF6200EE.toInt()) } // Violeta por defecto
+    var name by remember { mutableStateOf(initialName) }
+    var selectedIcon by remember { mutableStateOf(initialIcon) }
+    var selectedColor by remember { mutableStateOf(initialColor) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Nueva Colección") },
+        title = { Text(title) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 OutlinedTextField(
@@ -689,7 +732,7 @@ fun CreateCollectionDialog(
             Button(
                 onClick = { if (name.isNotBlank()) onConfirm(name, selectedColor, selectedIcon) },
                 enabled = name.isNotBlank()
-            ) { Text("Crear") }
+            ) { Text(confirmLabel) }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text("Cancelar") }

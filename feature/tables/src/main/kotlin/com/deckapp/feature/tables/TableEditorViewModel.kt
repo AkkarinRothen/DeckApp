@@ -163,16 +163,25 @@ class TableEditorViewModel @Inject constructor(
 
     fun addEntry() {
         val state = _uiState.value
-        val lastMax = state.entries.maxOfOrNull { it.maxRoll } ?: 0
-        val range = DiceEvaluator.getRange(state.rollFormula)
-        val maxPossible = range.second
-        val newMin = (lastMax + 1).coerceAtMost(maxPossible)
-        val newEntry = TableEntry(
-            minRoll = newMin,
-            maxRoll = newMin,
-            text = "",
-            sortOrder = state.entries.size
-        )
+        val newEntry = if (state.rollMode == TableRollMode.MACRO) {
+            TableEntry(
+                minRoll = 0,
+                maxRoll = 0,
+                text = "",
+                sortOrder = state.entries.size
+            )
+        } else {
+            val lastMax = state.entries.maxOfOrNull { it.maxRoll } ?: 0
+            val range = DiceEvaluator.getRange(state.rollFormula)
+            val maxPossible = range.second
+            val newMin = (lastMax + 1).coerceAtMost(maxPossible)
+            TableEntry(
+                minRoll = newMin,
+                maxRoll = newMin,
+                text = "",
+                sortOrder = state.entries.size
+            )
+        }
         _uiState.update { it.copy(entries = it.entries + newEntry, isDirty = true) }
         validate()
     }
@@ -251,11 +260,15 @@ class TableEditorViewModel @Inject constructor(
         }
         _uiState.update { it.copy(isSaving = true) }
         viewModelScope.launch {
-            val newId = tableRepository.saveTable(buildTableFromState(tableId.coerceAtLeast(0)))
-            if (state.isNewTable && sessionId != null) {
-                sessionRepository.addTableToSession(sessionId, newId)
+            try {
+                val newId = tableRepository.saveTable(buildTableFromState(tableId.coerceAtLeast(0)))
+                if (state.isNewTable && sessionId != null) {
+                    sessionRepository.addTableToSession(sessionId, newId)
+                }
+                _uiState.update { it.copy(isSaving = false, isDirty = false, successMessage = "Tabla guardada") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isSaving = false, errorMessage = "Error al guardar: ${e.localizedMessage}") }
             }
-            _uiState.update { it.copy(isSaving = false, isDirty = false, successMessage = "Tabla guardada") }
         }
     }
 

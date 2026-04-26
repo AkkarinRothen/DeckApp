@@ -1,5 +1,8 @@
 package com.deckapp.core.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class RandomTable(
     val id: Long = 0,
     val bundleId: Long? = null,
@@ -19,6 +22,7 @@ data class RandomTable(
     val createdAt: Long = System.currentTimeMillis()
 )
 
+@Serializable
 data class TableEntry(
     val id: Long = 0,
     val tableId: Long = 0,
@@ -42,7 +46,8 @@ data class TableRollResult(
     val timestamp: Long = System.currentTimeMillis()
 )
 
-enum class TableRollMode { RANGE, WEIGHTED, SEQUENTIAL }
+@Serializable
+enum class TableRollMode { RANGE, WEIGHTED, SEQUENTIAL, MACRO }
 
 data class TableBundle(
     val id: Long = 0,

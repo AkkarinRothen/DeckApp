@@ -23,7 +23,7 @@ import kotlinx.serialization.Serializable
 // Tablas aleatorias
 @Serializable object TablesListRoute
 @Serializable data class TableEditorRoute(val tableId: Long = -1L, val sessionId: Long? = null)
-@Serializable data class TableImportRoute(val sessionId: Long? = null)
+@Serializable data class TableImportRoute(val sessionId: Long? = null, val importData: String? = null)
 
 // Encuentros y Combate
 @Serializable object EncounterListRoute

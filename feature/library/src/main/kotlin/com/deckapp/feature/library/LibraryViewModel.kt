@@ -333,7 +333,18 @@ class LibraryViewModel @Inject constructor(
     fun deleteCollection(id: Long) {
         viewModelScope.launch {
             collectionRepository.deleteCollection(id)
+            if (_uiState.value.activeCollectionId == id) {
+                _uiState.update { it.copy(activeCollectionId = null) }
+            }
             _uiState.update { it.copy(snackbarMessage = "Colección eliminada") }
+        }
+    }
+
+    fun updateCollection(id: Long, name: String, color: Int, icon: CollectionIcon) {
+        viewModelScope.launch {
+            val updated = DeckCollection(id = id, name = name, color = color, icon = icon)
+            collectionRepository.saveCollection(updated)
+            _uiState.update { it.copy(snackbarMessage = "Colección \"$name\" actualizada") }
         }
     }
 

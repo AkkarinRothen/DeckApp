@@ -27,7 +27,8 @@ data class ImportResult(
     val entries: List<TableEntry>,
     val tags: List<com.deckapp.core.model.Tag> = emptyList(),
     /** Índices de [entries] con confianza OCR baja. Vacío para fuentes no-OCR. */
-    val lowConfidenceIndices: Set<Int> = emptySet()
+    val lowConfidenceIndices: Set<Int> = emptySet(),
+    val entryBlocks: Map<Int, List<com.deckapp.core.model.OcrBlock>> = emptyMap()
 )
 
 /**
@@ -50,7 +51,8 @@ class ImportTableUseCase @Inject constructor(
                 suggestedName = analysis.suggestedName,
                 entries = analysis.entries,
                 suggestedFormula = inferFormula(analysis.entries),
-                lowConfidenceIndices = analysis.lowConfidenceIndices
+                lowConfidenceIndices = analysis.lowConfidenceIndices,
+                entryBlocks = analysis.entryBlocks
             )
         }
     }

@@ -18,6 +18,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 
 import com.deckapp.feature.deck.*
@@ -263,10 +264,15 @@ fun DeckAppNavHost(
                 )
             }
 
-            composable<TableImportRoute> {
+            composable<TableImportRoute>(
+                deepLinks = listOf(
+                    navDeepLink { uriPattern = "deckapp://import/table?data={importData}" }
+                )
+            ) {
                 val args = it.toRoute<TableImportRoute>()
                 com.deckapp.feature.importdeck.table.TableImportScreen(
                     sessionId = args.sessionId,
+                    importData = args.importData,
                     onBack = { navController.popBackStack() },
                     onNavigateToTable = { id -> navController.navigate(TableEditorRoute(tableId = id)) }
                 )

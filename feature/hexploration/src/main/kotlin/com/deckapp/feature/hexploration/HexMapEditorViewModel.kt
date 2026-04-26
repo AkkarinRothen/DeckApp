@@ -70,6 +70,8 @@ data class HexMapEditorUiState(
     val terrainTableConfig: String = "{}",
     val showWeatherTablePicker: Boolean = false,
     val showTravelTablePicker: Boolean = false,
+    val newPoiTableId: Long? = null,
+    val showPoiTablePicker: Boolean = false,
     val canUndo: Boolean = false,
     val canRedo: Boolean = false
 )
@@ -250,11 +252,20 @@ class HexMapEditorViewModel @Inject constructor(
 
     fun showAddPoiDialog() = _uiState.update { it.copy(showAddPoiDialog = true) }
     fun dismissAddPoiDialog() = _uiState.update {
-        it.copy(showAddPoiDialog = false, newPoiName = "", newPoiDescription = "", newPoiType = PoiType.LANDMARK)
+        it.copy(
+            showAddPoiDialog = false, 
+            newPoiName = "", 
+            newPoiDescription = "", 
+            newPoiType = PoiType.LANDMARK,
+            newPoiTableId = null
+        )
     }
     fun onPoiNameChange(v: String) = _uiState.update { it.copy(newPoiName = v) }
     fun onPoiTypeChange(v: PoiType) = _uiState.update { it.copy(newPoiType = v) }
     fun onPoiDescChange(v: String) = _uiState.update { it.copy(newPoiDescription = v) }
+    fun onPoiTableChange(v: Long?) = _uiState.update { it.copy(newPoiTableId = v, showPoiTablePicker = false) }
+    fun showPoiTablePicker() = _uiState.update { it.copy(showPoiTablePicker = true) }
+    fun dismissPoiTablePicker() = _uiState.update { it.copy(showPoiTablePicker = false) }
 
     fun savePoi() {
         val state = _uiState.value
@@ -267,7 +278,8 @@ class HexMapEditorViewModel @Inject constructor(
                 tileR = tile.r,
                 name = state.newPoiName.trim(),
                 type = state.newPoiType,
-                description = state.newPoiDescription.trim()
+                description = state.newPoiDescription.trim(),
+                tableId = state.newPoiTableId
             )
             val newId = addHexPoiUseCase(poi)
             pushAction(HexAction.PoiAdded(poi.copy(id = newId)))

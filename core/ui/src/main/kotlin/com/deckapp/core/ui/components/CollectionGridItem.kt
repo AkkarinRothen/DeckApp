@@ -27,6 +27,7 @@ fun CollectionGridItem(
     collection: DeckCollection,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
+    onEdit: () -> Unit,
     isSelected: Boolean = false,
     modifier: Modifier = Modifier
 ) {
@@ -77,6 +78,22 @@ fun CollectionGridItem(
                     .offset(y = (-12).dp),
                 tint = Color.White
             )
+
+            // Botón de edición discreto
+            IconButton(
+                onClick = onEdit,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(4.dp)
+                    .size(32.dp)
+            ) {
+                Icon(
+                    Icons.Default.Edit,
+                    contentDescription = "Editar",
+                    modifier = Modifier.size(16.dp),
+                    tint = Color.White.copy(alpha = 0.5f)
+                )
+            }
 
             // Info en la base con efecto de "vidrio" (Glassmorphism)
             Surface(

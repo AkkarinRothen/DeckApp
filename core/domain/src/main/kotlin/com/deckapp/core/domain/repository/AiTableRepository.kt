@@ -23,6 +23,12 @@ interface AiTableRepository {
         apiKey: String,
         onRetryWait: (suspend (Long) -> Unit)? = null
     ): Flow<AiStreamEvent>
+
+    fun generateTable(
+        prompt: String,
+        apiKey: String,
+        onRetryWait: (suspend (Long) -> Unit)? = null
+    ): Flow<AiStreamEvent>
 }
 
 class AiApiException(message: String, val causeException: Throwable? = null) : Exception(message, causeException)

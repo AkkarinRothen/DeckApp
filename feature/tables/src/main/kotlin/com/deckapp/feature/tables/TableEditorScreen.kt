@@ -265,7 +265,7 @@ fun TableEditorScreen(
                             label = { Text("Fórmula") },
                             placeholder = { Text("1d6") },
                             singleLine = true,
-                            enabled = uiState.rollMode == TableRollMode.RANGE,
+                            enabled = uiState.rollMode != TableRollMode.WEIGHTED && uiState.rollMode != TableRollMode.MACRO,
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                             modifier = Modifier.weight(1f)
                         )
@@ -287,12 +287,26 @@ fun TableEditorScreen(
                                     onClick = { viewModel.setRollMode(TableRollMode.WEIGHTED) }
                                 )
                                 Text("Peso", style = MaterialTheme.typography.bodySmall)
+                                Spacer(Modifier.width(8.dp))
+                                RadioButton(
+                                    selected = uiState.rollMode == TableRollMode.MACRO,
+                                    onClick = { viewModel.setRollMode(TableRollMode.MACRO) }
+                                )
+                                Text("Macro", style = MaterialTheme.typography.bodySmall)
                             }
                         }
                     }
                     if (uiState.rollMode == TableRollMode.WEIGHTED) {
                         Text(
                             "Modo Peso: la fórmula se ignora. El resultado se elige por probabilidad relativa.",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+                    if (uiState.rollMode == TableRollMode.MACRO) {
+                        Text(
+                            "Modo Macro: se ejecutan todas las entradas secuencialmente.",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = 4.dp)
@@ -405,33 +419,50 @@ private fun EntryRow(
                 verticalAlignment = Alignment.CenterVertically
             ) {
             // Rango o peso
-            if (rollMode == TableRollMode.RANGE) {
-                OutlinedTextField(
-                    value = entry.minRoll.toString(),
-                    onValueChange = { onUpdate(entry.copy(minRoll = it.toIntOrNull() ?: entry.minRoll)) },
-                    label = { Text("Min") },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.width(64.dp)
-                )
-                Text("–", style = MaterialTheme.typography.bodyMedium)
-                OutlinedTextField(
-                    value = entry.maxRoll.toString(),
-                    onValueChange = { onUpdate(entry.copy(maxRoll = it.toIntOrNull() ?: entry.maxRoll)) },
-                    label = { Text("Max") },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.width(64.dp)
-                )
-            } else {
-                OutlinedTextField(
-                    value = entry.weight.toString(),
-                    onValueChange = { onUpdate(entry.copy(weight = it.toIntOrNull() ?: entry.weight)) },
-                    label = { Text("Peso") },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.width(72.dp)
-                )
+            when (rollMode) {
+                TableRollMode.RANGE -> {
+                    OutlinedTextField(
+                        value = entry.minRoll.toString(),
+                        onValueChange = { onUpdate(entry.copy(minRoll = it.toIntOrNull() ?: entry.minRoll)) },
+                        label = { Text("Min") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.width(64.dp)
+                    )
+                    Text("–", style = MaterialTheme.typography.bodyMedium)
+                    OutlinedTextField(
+                        value = entry.maxRoll.toString(),
+                        onValueChange = { onUpdate(entry.copy(maxRoll = it.toIntOrNull() ?: entry.maxRoll)) },
+                        label = { Text("Max") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.width(64.dp)
+                    )
+                }
+                TableRollMode.WEIGHTED -> {
+                    OutlinedTextField(
+                        value = entry.weight.toString(),
+                        onValueChange = { onUpdate(entry.copy(weight = it.toIntOrNull() ?: entry.weight)) },
+                        label = { Text("Peso") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.width(72.dp)
+                    )
+                }
+                TableRollMode.MACRO -> {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = MaterialTheme.shapes.small
+                    ) {
+                        Text(
+                            text = "Paso ${index + 1}",
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
+                else -> {}
             }
 
             // Texto

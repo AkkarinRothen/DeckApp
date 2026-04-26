@@ -124,4 +124,29 @@ object RangeParser {
 
     /** Sobrecarga de compatibilidad cuando solo se conoce el máximo (asume min=1). */
     fun inferRollFormula(maxValue: Int): String = inferRollFormula(1, maxValue)
+
+    /**
+     * Toma una lista de entradas y devuelve una copia con los rangos normalizados.
+     * Garantiza que current.minRoll = prev.maxRoll + 1.
+     * Si el maxRoll actual es menor al nuevo minRoll, se ajusta al minRoll.
+     */
+    fun healSequence(entries: List<com.deckapp.core.model.TableEntry>): List<com.deckapp.core.model.TableEntry> {
+        if (entries.isEmpty()) return entries
+        
+        val healed = mutableListOf<com.deckapp.core.model.TableEntry>()
+        var currentMin = entries[0].minRoll
+        
+        entries.forEachIndexed { index, entry ->
+            val newMin = if (index == 0) currentMin else currentMin
+            val newMax = if (entry.maxRoll < newMin) newMin else entry.maxRoll
+            
+            healed.add(entry.copy(
+                minRoll = newMin,
+                maxRoll = newMax
+            ))
+            currentMin = newMax + 1
+        }
+        
+        return healed
+    }
 }

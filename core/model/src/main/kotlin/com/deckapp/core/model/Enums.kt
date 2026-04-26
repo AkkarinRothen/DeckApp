@@ -66,7 +66,8 @@ enum class TableImportSource {
     CSV_TEXT,       // Texto en formato CSV / TSV / DSV
     JSON_TEXT,      // JSON (Foundry VTT, DeckApp Export, o array simple)
     PLAIN_TEXT,     // Texto plano (portapapeles, listas)
-    MARKDOWN_TABLE  // Tablas estándar Markdown (|---|)
+    MARKDOWN_TABLE, // Tablas estándar Markdown (|---|)
+    AI_GENERATE     // Generación desde cero con IA
 }
 
 /** Modos de distribución de cartas dentro de un PDF */

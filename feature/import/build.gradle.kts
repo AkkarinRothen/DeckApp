@@ -33,5 +33,6 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.android.compiler)
     implementation(libs.coil.compose)
+    implementation(libs.kotlinx.serialization.json)
     // PDF rendering — android.graphics.pdf.PdfRenderer (framework, API 21+, sin dependencias externas)
 }

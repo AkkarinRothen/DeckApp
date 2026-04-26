@@ -64,6 +64,33 @@ class RollTableUseCase @Inject constructor(
             )
         }
 
+        if (table.rollMode == TableRollMode.MACRO) {
+            // Lógica MACRO: tirar en TODAS las entradas (que deben ser sub-tablas)
+            val results = table.entries.sortedBy { it.sortOrder }.map { entry ->
+                val subTableId = entry.subTableId
+                val entryText = if (subTableId != null) {
+                    val subRes = invoke(subTableId, sessionId, depth + 1, persistResult = false)
+                    subRes.resolvedText
+                } else {
+                    resolveText(entry.text, sessionId, depth)
+                }
+                "- $entryText"
+            }
+            
+            val result = TableRollResult(
+                tableId = table.id,
+                tableName = table.name,
+                sessionId = sessionId,
+                rollValue = 0,
+                resolvedText = results.joinToString("\n")
+            )
+            
+            if (persistResult && table.id > 0) {
+                tableRepository.saveRollResult(result)
+            }
+            return result
+        }
+
         val entry = pickEntry(table, sessionId)
         val rollValue = if (table.rollMode == TableRollMode.RANGE) {
             entry?.minRoll ?: 1
@@ -149,6 +176,7 @@ class RollTableUseCase @Inject constructor(
                     }
                 }
             }
+            TableRollMode.MACRO -> null // No se usa en pickEntry para macros
         }
     }
 

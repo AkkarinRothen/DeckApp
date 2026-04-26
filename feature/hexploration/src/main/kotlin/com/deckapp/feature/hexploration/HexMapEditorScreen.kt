@@ -47,14 +47,26 @@ fun HexMapEditorScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    if (uiState.showPoiTablePicker) {
+        HexTablePickerDialog(
+            tables = uiState.allTables,
+            onDismiss = viewModel::dismissPoiTablePicker,
+            onTableSelected = viewModel::onPoiTableChange,
+            onClear = { viewModel.onPoiTableChange(null) }
+        )
+    }
+
     if (uiState.showAddPoiDialog) {
         AddPoiDialog(
             name = uiState.newPoiName,
             type = uiState.newPoiType,
             description = uiState.newPoiDescription,
+            tableId = uiState.newPoiTableId,
+            allTables = uiState.allTables,
             onNameChange = viewModel::onPoiNameChange,
             onTypeChange = viewModel::onPoiTypeChange,
             onDescChange = viewModel::onPoiDescChange,
+            onPickTable = viewModel::showPoiTablePicker,
             onConfirm = viewModel::savePoi,
             onDismiss = viewModel::dismissAddPoiDialog
         )
@@ -875,13 +887,17 @@ private fun AddPoiDialog(
     name: String,
     type: PoiType,
     description: String,
+    tableId: Long?,
+    allTables: List<RandomTable>,
     onNameChange: (String) -> Unit,
     onTypeChange: (PoiType) -> Unit,
     onDescChange: (String) -> Unit,
+    onPickTable: () -> Unit,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
     var typeMenuExpanded by remember { mutableStateOf(false) }
+    val tableName = allTables.find { it.id == tableId }?.name
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -901,7 +917,8 @@ private fun AddPoiDialog(
                         onValueChange = {},
                         label = { Text("Tipo") },
                         readOnly = true,
-                        modifier = Modifier.fillMaxWidth().clickable { typeMenuExpanded = true }
+                        modifier = Modifier.fillMaxWidth().clickable { typeMenuExpanded = true },
+                        trailingIcon = { Icon(Icons.Default.ArrowDropDown, null) }
                     )
                     DropdownMenu(expanded = typeMenuExpanded, onDismissRequest = { typeMenuExpanded = false }) {
                         PoiType.entries.forEach { poiType ->
@@ -912,6 +929,41 @@ private fun AddPoiDialog(
                         }
                     }
                 }
+                
+                OutlinedCard(
+                    onClick = onPickTable,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.outlinedCardColors(
+                        containerColor = if (tableId != null) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
+                                        else Color.Transparent
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Casino, 
+                            contentDescription = null,
+                            tint = if (tableId != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                if (tableId != null) "Tabla vinculada" else "Vincular tabla (opcional)",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                tableName ?: "Ninguna tabla seleccionada",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = if (tableId != null) FontWeight.Bold else FontWeight.Normal,
+                                color = if (tableId != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+
                 OutlinedTextField(
                     value = description,
                     onValueChange = onDescChange,

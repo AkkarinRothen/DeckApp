@@ -285,6 +285,18 @@ class TablesViewModel @Inject constructor(
 
     fun clearSelection() = _uiState.update { it.copy(selectedTableIds = emptySet()) }
     fun openTable(table: RandomTable) = _uiState.update { it.copy(activeTable = table) }
+    
+    fun openTableByName(name: String) {
+        viewModelScope.launch {
+            val table = tableRepository.getTableByName(name)
+            if (table != null) {
+                _uiState.update { it.copy(activeTable = table, showAllTables = true) }
+            } else {
+                _uiState.update { it.copy(snackbarMessage = "Tabla \"$name\" no encontrada") }
+            }
+        }
+    }
+
     fun closeTable() = _uiState.update { it.copy(activeTable = null) }
 
     fun togglePin(table: RandomTable) {

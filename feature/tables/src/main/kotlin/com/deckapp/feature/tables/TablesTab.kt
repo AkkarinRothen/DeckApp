@@ -3,6 +3,7 @@ package com.deckapp.feature.tables
 import android.content.ClipData
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -28,8 +29,11 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.draganddrop.DragAndDropTransferData
@@ -40,6 +44,7 @@ import com.deckapp.core.model.TableRollResult
 import com.deckapp.core.ui.components.SelectionActionBar
 import com.deckapp.feature.tables.library.TablePackDialog
 import com.deckapp.feature.tables.library.components.TableGridItem
+import sh.calvin.reorderable.*
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -56,6 +61,16 @@ fun TablesTab(
     val context = LocalContext.current
     
     var showExportDialog by remember { mutableStateOf(false) }
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+    
+    val lazyColumnState = androidx.compose.foundation.lazy.rememberLazyListState()
+    val reorderableState = sh.calvin.reorderable.rememberReorderableLazyListState(lazyColumnState) { from, to ->
+        val newList = uiState.tables.toMutableList().apply {
+            add(to.index, removeAt(from.index))
+        }
+        viewModel.updateTableOrder(newList)
+        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+    }
     
     // Sincronizar ID de sesión con el ViewModel para filtrado reactivo
     LaunchedEffect(sessionId) {
@@ -179,6 +194,14 @@ fun TablesTab(
                         contentDescription = "Cambiar vista"
                     )
                 }
+
+                IconButton(onClick = { viewModel.toggleReorderMode() }) {
+                    Icon(
+                        if (uiState.isReorderMode) Icons.Default.Check else Icons.Default.Sort,
+                        contentDescription = "Ordenar tablas",
+                        tint = if (uiState.isReorderMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
 
             if (uiState.allTags.isNotEmpty()) {
@@ -215,6 +238,7 @@ fun TablesTab(
                     expanded = uiState.rollLogExpanded,
                     onToggleExpanded = { viewModel.toggleRollLogExpanded() },
                     onClear = { viewModel.clearSessionRollLog(sessionId) },
+                    onTableLinkClick = { viewModel.openTableByName(it) },
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
                 )
             }
@@ -248,6 +272,7 @@ fun TablesTab(
                 }
             } else {
                 LazyColumn(
+                    state = lazyColumnState,
                     contentPadding = PaddingValues(bottom = 80.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
@@ -284,32 +309,41 @@ fun TablesTab(
                         
                         items(tables, key = { it.id }) { table ->
                             val isSelected = table.id in uiState.selectedTableIds
-                            TableListItem(
-                                table = table,
-                                isSelected = isSelected,
-                                isSelectionMode = uiState.selectedTableIds.isNotEmpty(),
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                                onLongClick = { 
-                                    if (uiState.selectedTableIds.isEmpty() && uiState.isSimplifiedMode) {
-                                        viewModel.openTable(table)
-                                    } else {
-                                        viewModel.toggleTableSelection(table.id)
-                                    }
-                                },
-                                onClick = {
-                                    if (uiState.selectedTableIds.isNotEmpty()) {
-                                        viewModel.toggleTableSelection(table.id)
-                                    } else if (uiState.isSimplifiedMode) {
-                                        viewModel.rollTable(table.id, sessionId)
-                                    } else {
-                                        viewModel.openTable(table)
-                                    }
-                                },
-                                onQuickRoll = { viewModel.rollTable(table.id, sessionId) },
-                                onTogglePin = { viewModel.togglePin(table) },
-                                quickRollResult = uiState.quickRollResults[table.id],
-                                onDismissResult = { viewModel.clearQuickRoll(table.id) }
-                            )
+                            ReorderableItem(reorderableState, key = table.id) { isDragging ->
+                                val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp)
+                                TableListItem(
+                                    table = table,
+                                    isSelected = isSelected,
+                                    isSelectionMode = uiState.selectedTableIds.isNotEmpty(),
+                                    modifier = Modifier
+                                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                                        .draggableHandle(
+                                            onDragStarted = { haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress) },
+                                            enabled = uiState.isReorderMode
+                                        ),
+                                    elevation = elevation,
+                                    onLongClick = { 
+                                        if (uiState.selectedTableIds.isEmpty() && uiState.isSimplifiedMode) {
+                                            viewModel.openTable(table)
+                                        } else {
+                                            viewModel.toggleTableSelection(table.id)
+                                        }
+                                    },
+                                    onClick = {
+                                        if (uiState.selectedTableIds.isNotEmpty()) {
+                                            viewModel.toggleTableSelection(table.id)
+                                        } else if (uiState.isSimplifiedMode) {
+                                            viewModel.rollTable(table.id, sessionId)
+                                        } else {
+                                            viewModel.openTable(table)
+                                        }
+                                    },
+                                    onQuickRoll = { viewModel.rollTable(table.id, sessionId) },
+                                    onTogglePin = { viewModel.togglePin(table) },
+                                    quickRollResult = uiState.quickRollResults[table.id],
+                                    onDismissResult = { viewModel.clearQuickRoll(table.id) }
+                                )
+                            }
                         }
                     }
                 }
@@ -462,6 +496,7 @@ private fun RollLogPanel(
     expanded: Boolean,
     onToggleExpanded: () -> Unit,
     onClear: () -> Unit,
+    onTableLinkClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -533,12 +568,45 @@ private fun RollLogPanel(
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.weight(0.4f)
                             )
-                            Text(
-                                text = result.resolvedText,
-                                style = MaterialTheme.typography.bodySmall,
-                                maxLines = 1,
+                            val annotatedText = remember(result.resolvedText) {
+                                buildAnnotatedString {
+                                    val text = result.resolvedText
+                                    append(text)
+                                    val regex = Regex("""@([\w\s\u00C0-\u024F]+)""")
+                                    regex.findAll(text).forEach { match ->
+                                        val start = match.range.first
+                                        val end = match.range.last + 1
+                                        addStyle(
+                                            style = SpanStyle(
+                                                color = Color(0xFF64B5F6),
+                                                textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline,
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            start = start,
+                                            end = end
+                                        )
+                                        addStringAnnotation(
+                                            tag = "TABLE_LINK",
+                                            annotation = match.groupValues[1].trim(),
+                                            start = start,
+                                            end = end
+                                        )
+                                    }
+                                }
+                            }
+
+                            androidx.compose.foundation.text.ClickableText(
+                                text = annotatedText,
+                                style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
+                                maxLines = 6,
                                 overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(0.6f)
+                                modifier = Modifier.weight(0.6f),
+                                onClick = { offset ->
+                                    annotatedText.getStringAnnotations(tag = "TABLE_LINK", start = offset, end = offset)
+                                        .firstOrNull()?.let { annotation ->
+                                            onTableLinkClick(annotation.item)
+                                        }
+                                }
                             )
                         }
                     }
@@ -555,6 +623,7 @@ private fun TableListItem(
     isSelected: Boolean,
     isSelectionMode: Boolean,
     modifier: Modifier = Modifier,
+    elevation: androidx.compose.ui.unit.Dp = 0.dp,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     onQuickRoll: () -> Unit,
@@ -574,6 +643,7 @@ private fun TableListItem(
             table.isPinned -> CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
             else -> CardDefaults.cardColors()
         },
+        elevation = CardDefaults.cardElevation(defaultElevation = elevation),
         border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
     ) {
         Row(

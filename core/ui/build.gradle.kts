@@ -24,5 +24,6 @@ dependencies {
     implementation(libs.bundles.compose.ui)
     implementation(libs.coil.compose)
     implementation(libs.markwon.core)
+    implementation(libs.zxing.core)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

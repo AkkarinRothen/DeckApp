@@ -161,8 +161,9 @@ class GeminiAiRepository @Inject constructor() : AiTableRepository, AiReferenceR
             3. Infiere rangos faltantes basándote en la secuencia de la tabla.
             4. Si hay varias columnas, mézclalas de forma legible en el campo 'text'.
             5. Sugiere un nombre descriptivo para la tabla, la fórmula de dado (ej: "1d20", "2d6") y la categoría (ej: "Encuentros", "Tesoros", "Clima").
-            6. Responde ÚNICAMENTE con JSON: {"name":"...","formula":"1d6","category":"...","entries":[{"min":1,"max":1,"text":"..."}]}.
-            7. Sin explicaciones ni Markdown adicional fuera del JSON.
+            6. IMPORTANTE: El título de la tabla DEBE estar en el campo 'name' del JSON principal. NO incluyas el título como si fuera una entrada de la tabla (fila de datos).
+            7. Responde ÚNICAMENTE con JSON: {"name":"...","formula":"1d6","category":"...","entries":[{"min":1,"max":1,"text":"..."}]}.
+            8. Sin explicaciones ni Markdown adicional fuera del JSON.
 
             TEXTO A PROCESAR:
             $rawText
@@ -188,11 +189,48 @@ class GeminiAiRepository @Inject constructor() : AiTableRepository, AiReferenceR
             - RESTO: una entrada por línea: {"min":1,"max":1,"text":"descripción"}
 
             Reglas:
-            - Ignora encabezados, títulos y líneas decorativas.
+            - El título de la tabla DEBE ir ÚNICAMENTE en la línea 'meta'.
+            - NO incluyas el título como una entrada en las líneas de datos.
+            - Ignora encabezados decorativos.
             - Si hay varias columnas, mézclalas de forma legible en 'text'.
             - Sin explicaciones ni texto fuera de las líneas JSON.
         """.trimIndent()
 
+        streamWithModel(model, prompt, scaledBitmap, onRetryWait).collect { emit(it) }
+    }
+
+    override fun generateTable(
+        prompt: String,
+        apiKey: String,
+        onRetryWait: (suspend (Long) -> Unit)?
+    ): Flow<AiStreamEvent> = flow {
+        requireApiKey(apiKey)
+        val model = getTextModel(apiKey)
+
+        val systemPrompt = """
+            Eres un creador de contenido experto en TTRPG. Genera una tabla aleatoria basada en el siguiente pedido: $prompt
+
+            Responde en formato NDJSON (una línea JSON por línea, sin arrays externos):
+            - PRIMERA línea: metadatos: {"meta":true,"name":"nombre de la tabla","formula":"1d20","category":"tipo"}
+            - RESTO: una entrada por línea: {"min":1,"max":1,"text":"descripción"}
+
+            Reglas:
+            - El título de la tabla DEBE ir ÚNICAMENTE en la línea 'meta'.
+            - NO incluyas el título como una entrada en las líneas de datos.
+            - Genera al menos 10 entradas si no se especifica lo contrario.
+            - Asegúrate de que los rangos sean correlativos y no tengan huecos.
+            - Sin explicaciones ni texto fuera de las líneas JSON.
+        """.trimIndent()
+
+        streamWithModel(model, systemPrompt, null, onRetryWait).collect { emit(it) }
+    }
+
+    private fun streamWithModel(
+        model: GenerativeModel,
+        prompt: String,
+        image: Bitmap? = null,
+        onRetryWait: (suspend (Long) -> Unit)?
+    ): Flow<AiStreamEvent> = flow {
         var lastEx: Exception? = null
         repeat(MAX_RETRY_ATTEMPTS) { attempt ->
             try {
@@ -200,7 +238,7 @@ class GeminiAiRepository @Inject constructor() : AiTableRepository, AiReferenceR
                 var sortOrder = 0
 
                 model.generateContentStream(content {
-                    image(scaledBitmap)
+                    if (image != null) image(image)
                     text(prompt)
                 }).collect { response ->
                     buffer += response.text ?: ""

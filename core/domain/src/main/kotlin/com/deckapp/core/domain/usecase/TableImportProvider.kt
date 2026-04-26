@@ -39,6 +39,7 @@ class TableImportProvider @Inject constructor() {
             TableImportSource.CSV_TEXT -> csvParser
             TableImportSource.PLAIN_TEXT -> plainTextParser
             TableImportSource.OCR_IMAGE -> throw IllegalArgumentException("OCR no es un parser de texto plano.")
+            TableImportSource.AI_GENERATE -> throw IllegalArgumentException("AI Generate no utiliza un parser de texto estático.")
         }
     }
 }

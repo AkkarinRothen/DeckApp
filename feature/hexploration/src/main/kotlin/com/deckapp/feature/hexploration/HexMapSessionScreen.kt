@@ -541,19 +541,50 @@ private fun TileSessionDetails(
 
         if (pois.isNotEmpty()) {
             Spacer(Modifier.height(16.dp))
-            Text("Puntos de Interés", style = MaterialTheme.typography.titleSmall)
+            Text("Puntos de Interés", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
             pois.forEach { poi ->
-                ListItem(
-                    headlineContent = { Text(poi.name) },
-                    supportingContent = { Text(poi.type.name) },
-                    trailingContent = {
-                        poi.tableId?.let { tableId ->
-                            IconButton(onClick = { onRollTable(tableId) }) {
-                                Icon(Icons.Default.Casino, null)
+                ElevatedCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    ListItem(
+                        headlineContent = { Text(poi.name, fontWeight = FontWeight.SemiBold) },
+                        supportingContent = {
+                            Column {
+                                Text(poi.type.name.lowercase().replaceFirstChar { it.uppercase() }, style = MaterialTheme.typography.labelSmall)
+                                if (poi.description.isNotBlank()) {
+                                    Text(
+                                        poi.description,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
                             }
-                        }
-                    }
-                )
+                        },
+                        trailingContent = {
+                            val tid = poi.tableId
+                            if (tid != null) {
+                                Button(
+                                    onClick = { onRollTable(tid) },
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+                                    modifier = Modifier.height(32.dp)
+                                ) {
+                                    Icon(Icons.Default.Casino, null, modifier = Modifier.size(16.dp))
+                                    Spacer(Modifier.width(4.dp))
+                                    Text("Tirar", style = MaterialTheme.typography.labelMedium)
+                                }
+                            } else {
+                                IconButton(onClick = { /* TODO: Quick IA Generation */ }, enabled = false) {
+                                    Icon(Icons.Default.AutoAwesome, null, tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f))
+                                }
+                            }
+                        },
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                    )
+                }
             }
         }
     }

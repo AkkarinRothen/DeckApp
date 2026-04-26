@@ -10,9 +10,11 @@ import com.deckapp.core.model.RandomTable
 import com.deckapp.core.model.TableBundle
 import com.deckapp.core.model.TableRollResult
 import kotlinx.coroutines.flow.*
+import androidx.room.withTransaction
 import javax.inject.Inject
 
 class TableRepositoryImpl @Inject constructor(
+    private val db: DeckAppDatabase,
     private val randomTableDao: RandomTableDao,
     private val tableBundleDao: TableBundleDao,
     private val tableRollResultDao: TableRollResultDao,
@@ -67,8 +69,15 @@ class TableRepositoryImpl @Inject constructor(
         return getTableWithEntries(entity.id)
     }
 
-    override suspend fun saveTable(table: RandomTable): Long {
-        val tableId = randomTableDao.insertTable(table.toEntity())
+    override suspend fun saveTable(table: RandomTable): Long = db.withTransaction {
+        val entity = table.toEntity()
+        var tableId = randomTableDao.insertTable(entity)
+        
+        if (tableId == -1L) {
+            randomTableDao.updateTable(entity)
+            tableId = entity.id
+        }
+
         randomTableDao.deleteEntriesForTable(tableId)
         randomTableDao.insertEntries(table.entries.map { it.toEntity(tableId) })
         
@@ -78,7 +87,7 @@ class TableRepositoryImpl @Inject constructor(
             val tagId = tagDao.insertTag(tag.toEntity())
             tagDao.insertTableTagRef(com.deckapp.core.data.db.RandomTableTagCrossRef(tableId, tagId))
         }
-        return tableId
+        tableId
     }
 
     override suspend fun deleteTable(tableId: Long) {

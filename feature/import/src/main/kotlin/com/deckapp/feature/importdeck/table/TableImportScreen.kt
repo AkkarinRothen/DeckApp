@@ -21,6 +21,7 @@ import com.deckapp.feature.importdeck.table.components.PdfPreviewView
 import com.deckapp.feature.importdeck.table.components.TableCropView
 import com.deckapp.feature.importdeck.table.components.TableMappingView
 import com.deckapp.feature.importdeck.table.components.TableReviewView
+import com.deckapp.core.ui.components.QrShareDialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.graphics.StrokeCap
 import dagger.hilt.EntryPoint
@@ -37,6 +38,7 @@ import com.deckapp.core.domain.usecase.ImportTableUseCase
 import com.deckapp.core.domain.usecase.ReadTextFromUriUseCase
 import com.deckapp.core.domain.usecase.TranscribeTableWithAiUseCase
 import com.deckapp.core.domain.usecase.RecognizeTableStreamingUseCase
+import com.deckapp.core.domain.usecase.GenerateTableWithAiUseCase
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
@@ -46,6 +48,7 @@ interface TableImportEntryPoint {
     fun readTextFromUriUseCase(): ReadTextFromUriUseCase
     fun transcribeTableWithAiUseCase(): TranscribeTableWithAiUseCase
     fun recognizeTableStreamingUseCase(): RecognizeTableStreamingUseCase
+    fun generateTableWithAiUseCase(): GenerateTableWithAiUseCase
     fun tableRepository(): TableRepository
     fun sessionRepository(): com.deckapp.core.domain.repository.SessionRepository
     fun cardRepository(): com.deckapp.core.domain.repository.CardRepository
@@ -58,6 +61,7 @@ interface TableImportEntryPoint {
 @Composable
 fun TableImportScreen(
     sessionId: Long? = null,
+    importData: String? = null,
     onBack: () -> Unit,
     onNavigateToTable: (Long) -> Unit
 ) {
@@ -74,15 +78,55 @@ fun TableImportScreen(
             entryPoint.sessionRepository(),
             entryPoint.transcribeTableWithAiUseCase(),
             entryPoint.recognizeTableStreamingUseCase(),
+            entryPoint.generateTableWithAiUseCase(),
             entryPoint.recentFileRepository(),
             entryPoint.fileRepository(),
             entryPoint.settingsRepository(),
             entryPoint.cardRepository()
         )
     )
+
+    LaunchedEffect(importData) {
+        importData?.let { viewModel.importFromJson(it) }
+    }
     
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    
+    var showPasteJsonDialog by remember { mutableStateOf(false) }
+    var jsonText by remember { mutableStateOf("") }
+
+    if (showPasteJsonDialog) {
+        AlertDialog(
+            onDismissRequest = { showPasteJsonDialog = false },
+            title = { Text("Importar JSON") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Pega aquí el JSON exportado de una tabla o escanea un QR.", style = MaterialTheme.typography.bodySmall)
+                    OutlinedTextField(
+                        value = jsonText,
+                        onValueChange = { jsonText = it },
+                        label = { Text("Contenido JSON") },
+                        modifier = Modifier.fillMaxWidth().height(200.dp),
+                        textStyle = MaterialTheme.typography.bodySmall
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.importFromJson(jsonText)
+                        showPasteJsonDialog = false
+                        jsonText = ""
+                    },
+                    enabled = jsonText.isNotBlank()
+                ) { Text("Importar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPasteJsonDialog = false }) { Text("Cancelar") }
+            }
+        )
+    }
 
     LaunchedEffect(uiState.savedSuccessfully) {
         if (uiState.savedSuccessfully) {
@@ -97,6 +141,11 @@ fun TableImportScreen(
         viewModel.clearAutoVisionMessage()
     }
 
+    var showSourceOptions by remember { mutableStateOf(false) }
+    var showAiPromptDialog by remember { mutableStateOf(false) }
+    var aiPromptText by remember { mutableStateOf("") }
+    var showQrDialog by remember { mutableStateOf(false) }
+    
     val browsedLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocumentTree()
     ) { uri ->
@@ -114,8 +163,6 @@ fun TableImportScreen(
     ) { uri ->
         uri?.let { viewModel.importTextFile(it) }
     }
-
-    var showSourceOptions by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -166,7 +213,19 @@ fun TableImportScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            Crossfade(targetState = uiState.step, label = "TableImportStep") { currentStep ->
+            AnimatedContent(
+                targetState = uiState.step,
+                transitionSpec = {
+                    if (targetState.ordinal > initialState.ordinal) {
+                        (slideInHorizontally { width -> width } + fadeIn()).togetherWith(slideOutHorizontally { width -> -width } + fadeOut())
+                    } else {
+                        (slideInHorizontally { width -> -width } + fadeIn()).togetherWith(slideOutHorizontally { width -> width } + fadeOut())
+                    }.using(
+                        SizeTransform(clip = false)
+                    )
+                },
+                label = "TableImportStep"
+            ) { currentStep ->
                 when (currentStep) {
                     ImportStep.SOURCE_SELECTION -> {
                         SourceSelectionView(
@@ -176,10 +235,12 @@ fun TableImportScreen(
                                 } else {
                                     viewModel.setSource(source)
                                     when (source) {
+                                        TableImportSource.OCR_IMAGE -> {} // handled by bottom sheet
                                         TableImportSource.CSV_TEXT -> textFilePickerLauncher.launch(arrayOf("text/comma-separated-values", "text/csv"))
-                                        TableImportSource.JSON_TEXT -> textFilePickerLauncher.launch(arrayOf("application/json"))
+                                        TableImportSource.JSON_TEXT -> showPasteJsonDialog = true
                                         TableImportSource.PLAIN_TEXT -> textFilePickerLauncher.launch(arrayOf("text/plain", "text/markdown"))
                                         TableImportSource.MARKDOWN_TABLE -> textFilePickerLauncher.launch(arrayOf("text/markdown", "text/x-markdown"))
+                                        TableImportSource.AI_GENERATE -> showAiPromptDialog = true
                                         else -> {}
                                     }
                                 }
@@ -235,6 +296,7 @@ fun TableImportScreen(
                             onCreateTag = { viewModel.createAndAddTag(it) },
                             onFormulaChange = { viewModel.setDraftFormula(it) },
                             onConfirm = { viewModel.nextTable() },
+                            onPrevious = { viewModel.previousTable() },
                             validationResult = uiState.validationResult,
                             lowConfidenceIndices = uiState.lowConfidenceIndices,
                             confidenceThreshold = uiState.confidenceThreshold,
@@ -243,6 +305,21 @@ fun TableImportScreen(
                             isAiProcessing = uiState.isAiProcessing,
                             isVisionProcessing = uiState.isVisionProcessing,
                             onAiOptimize = { viewModel.optimizeWithAi() },
+                            onHealRanges = { viewModel.healRanges() },
+                            onMergePrevious = { viewModel.mergeEntryWithPrevious(it) },
+                            onInsertAfter = { viewModel.insertEntryAfter(it) },
+                            onCleanNoise = { viewModel.cleanNoise() },
+                            entryBlocks = uiState.entryBlocks,
+                            isStitchingMode = uiState.isStitchingMode,
+                            onContinueStitching = { viewModel.continueStitching() },
+                            allBundles = uiState.allBundles,
+                            selectedBundleId = uiState.selectedBundleId,
+                            bundleNameDraft = uiState.bundleNameDraft,
+                            onBundleSelect = { viewModel.setBundle(it) },
+                            onBundleNameChange = { viewModel.setBundleName(it) },
+                            isPreviewMode = uiState.isPreviewMode,
+                            onTogglePreview = { viewModel.togglePreviewMode() },
+                            onShareQr = { showQrDialog = true },
                             croppedBitmap = uiState.croppedBitmap,
                             ocrBlocks = uiState.ocrBlocks,
                             detectedAnchors = uiState.detectedAnchors
@@ -258,13 +335,32 @@ fun TableImportScreen(
                 }
             }
 
-            if (uiState.isProcessing) {
+            if (uiState.isProcessing || uiState.isAiProcessing || uiState.isVisionProcessing) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator(
+                            strokeCap = StrokeCap.Round,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            text = when {
+                                uiState.isAiProcessing -> "Invocando oráculo de IA..."
+                                uiState.isVisionProcessing -> "Analizando estructura visual..."
+                                uiState.step == ImportStep.FILE_PREVIEW -> "Cargando grimorio digital..."
+                                else -> "Preparando componentes mágicos..."
+                            },
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
                 }
             }
@@ -358,6 +454,42 @@ fun TableImportScreen(
                 )
             }
         }
+    }
+
+    if (showAiPromptDialog) {
+        AlertDialog(
+            onDismissRequest = { showAiPromptDialog = false },
+            title = { Text("Generar con IA") },
+            text = {
+                OutlinedTextField(
+                    value = aiPromptText,
+                    onValueChange = { aiPromptText = it },
+                    label = { Text("Describe la tabla que quieres") },
+                    placeholder = { Text("Ej: 20 encuentros en un pantano sombrío...") },
+                    modifier = Modifier.fillMaxWidth().height(120.dp)
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.generateWithAi(aiPromptText)
+                        showAiPromptDialog = false
+                    },
+                    enabled = aiPromptText.isNotBlank()
+                ) { Text("Generar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showAiPromptDialog = false }) { Text("Cancelar") }
+            }
+        )
+    }
+
+    if (showQrDialog) {
+        QrShareDialog(
+            tableName = uiState.tableNameDraft,
+            data = viewModel.getTableJson(),
+            onDismiss = { showQrDialog = false }
+        )
     }
 }
 
