@@ -98,3 +98,7 @@ lint/tmp/
 
 # macOS
 .DS_Store
+
+# Local offline Git safety backups
+.backups/
+*.bundle
