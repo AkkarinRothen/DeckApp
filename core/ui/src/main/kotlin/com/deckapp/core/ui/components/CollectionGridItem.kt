@@ -33,7 +33,7 @@ fun CollectionGridItem(
     isSelected: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    DeckCard(
         modifier = modifier
             .fillMaxWidth()
             .height(180.dp)
@@ -41,118 +41,18 @@ fun CollectionGridItem(
                 onClick = onClick,
                 onLongClick = onLongClick
             ),
-        shape = RoundedCornerShape(24.dp),
+        shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 8.dp else 4.dp),
         border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            if (collection.imageUrl != null) {
-                AsyncImage(
-                    model = collection.imageUrl,
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-                // Overlay
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(
-                                    Color.Black.copy(alpha = 0.2f),
-                                    Color.Black.copy(alpha = 0.8f)
-                                )
-                            )
-                        )
-                )
-            } else {
-                // Fondo con el color de la colección y un gradiente suave
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .background(
-                            Brush.linearGradient(
-                                colors = listOf(
-                                    Color(collection.color).copy(alpha = 0.6f),
-                                    Color(collection.color).copy(alpha = 0.9f)
-                                )
-                            )
-                        )
-                )
-            }
-
-            // Decoración: Círculo sutil de fondo
-            Surface(
-                modifier = Modifier
-                    .size(120.dp)
-                    .align(Alignment.Center)
-                    .offset(x = 40.dp, y = (-30).dp),
-                color = Color.White.copy(alpha = 0.1f),
-                shape = RoundedCornerShape(60.dp)
-            ) {}
-
-            // Icono central grande con sombra
-            Icon(
-                imageVector = collection.icon.toIcon(),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(72.dp)
-                    .align(Alignment.Center)
-                    .offset(y = (-12).dp),
-                tint = Color.White
-            )
-
-            // Botón de edición discreto
-            IconButton(
-                onClick = onEdit,
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(4.dp)
-                    .size(32.dp)
-            ) {
-                Icon(
-                    Icons.Default.Edit,
-                    contentDescription = "Editar",
-                    modifier = Modifier.size(16.dp),
-                    tint = Color.White.copy(alpha = 0.5f)
-                )
-            }
-
-            // Info en la base con efecto de "vidrio" (Glassmorphism)
-            Surface(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .fillMaxWidth(),
-                color = Color.Black.copy(alpha = 0.3f)
-            ) {
-                Column(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
-                ) {
-                    Text(
-                        text = collection.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Color.White,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Layers,
-                            contentDescription = null,
-                            modifier = Modifier.size(12.dp),
-                            tint = Color.White.copy(alpha = 0.7f)
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text(
-                            text = "${collection.resourceCount} recursos",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.White.copy(alpha = 0.7f)
-                        )
-                    }
+            CollectionCover(collection)
+            Surface(Modifier.align(Alignment.TopEnd).padding(4.dp), shape = MaterialTheme.shapes.small,
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f)) {
+                IconButton(onClick = onEdit, modifier = Modifier.size(48.dp)) {
+                    Icon(Icons.Default.Edit, "Editar colección ${collection.name}", tint = MaterialTheme.colorScheme.onSurface)
                 }
             }
-            
             // Indicador de selección
             if (isSelected) {
                 Box(
@@ -160,7 +60,7 @@ fun CollectionGridItem(
                         .matchParentSize()
                         .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
                         .padding(12.dp),
-                    contentAlignment = Alignment.TopEnd
+                    contentAlignment = Alignment.TopStart
                 ) {
                     Icon(
                         Icons.Default.CheckCircle,
@@ -180,8 +80,10 @@ fun CollectionIcon.toIcon(): ImageVector = when (this) {
     CollectionIcon.MAP -> Icons.Default.Map
     CollectionIcon.SKULL -> Icons.Default.Dangerous
     CollectionIcon.BAG -> Icons.Default.ShoppingBag
-    CollectionIcon.SWORDS -> Icons.Default.Hardware
+    CollectionIcon.SWORDS -> Icons.Default.Shield
     CollectionIcon.MOUNTAIN -> Icons.Default.Terrain
     CollectionIcon.PEOPLE -> Icons.Default.Groups
     CollectionIcon.FOLDER -> Icons.Default.Folder
+    CollectionIcon.ARCANE -> Icons.Default.AutoAwesome
+    CollectionIcon.COMPASS -> Icons.Default.Explore
 }

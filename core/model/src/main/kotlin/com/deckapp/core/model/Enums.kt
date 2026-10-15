@@ -81,3 +81,12 @@ enum class PdfLayoutMode {
     /** Primera mitad = frentes, segunda mitad = dorsos */
     FIRST_HALF_FRONTS
 }
+
+/** Tema visual de la aplicación */
+enum class AppTheme {
+    DARK,      // Oscuro OLED (True Black)
+    LIGHT,     // Claro estándar Material 3
+    PARCHMENT, // Pergamino TTRPG (fantasía cálida)
+    PARCHMENT_NIGHT
+}
+

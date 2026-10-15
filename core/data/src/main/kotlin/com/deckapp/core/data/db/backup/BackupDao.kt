@@ -6,6 +6,8 @@ import com.deckapp.core.data.db.*
 
 @Dao
 interface BackupDao {
+    @Query("SELECT * FROM collections") suspend fun getAllCollections(): List<CollectionEntity>
+    @Query("SELECT * FROM collection_resource_refs") suspend fun getAllCollectionResources(): List<CollectionResourceCrossRef>
     @Query("SELECT * FROM tags") suspend fun getAllTags(): List<TagEntity>
     @Query("SELECT * FROM card_stacks") suspend fun getAllDecks(): List<CardStackEntity>
     @Query("SELECT * FROM cards") suspend fun getAllCards(): List<CardEntity>

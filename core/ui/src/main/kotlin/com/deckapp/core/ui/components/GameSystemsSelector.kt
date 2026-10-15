@@ -68,7 +68,7 @@ fun GameSystemsSelector(
                 )
             },
             confirmButton = {
-                TextButton(
+                DeckTextButton(
                     onClick = {
                         if (customSystemName.isNotBlank()) {
                             onSystemsChanged((selectedSystems + customSystemName.trim()).distinct())
@@ -82,7 +82,7 @@ fun GameSystemsSelector(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showAddDialog = false }) {
+                DeckTextButton(onClick = { showAddDialog = false }) {
                     Text("Cancelar")
                 }
             }

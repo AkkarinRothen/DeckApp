@@ -413,9 +413,7 @@ val MIGRATION_24_25 = object : Migration(24, 25) {
             database.execSQL("ALTER TABLE `encounter_creatures` ADD COLUMN `imagePath` TEXT DEFAULT NULL")
         } catch (e: Exception) { /* Ignorar si ya existe */ }
 
-        // 3. Recreación de NPCs y npc_tags (para sanear estados corruptos columns={})
-        database.execSQL("DROP TABLE IF EXISTS `npc_tags`")
-        database.execSQL("DROP TABLE IF EXISTS `npcs`")
+        // Existing NPCs and their tag links must survive an application upgrade.
         
         database.execSQL("""
             CREATE TABLE IF NOT EXISTS `npcs` (
@@ -820,7 +818,90 @@ val MIGRATION_40_41 = object : Migration(40, 41) {
         database.execSQL("ALTER TABLE `random_tables` ADD COLUMN `imageUrl` TEXT")
         database.execSQL("ALTER TABLE `table_bundles` ADD COLUMN `imageUrl` TEXT")
         database.execSQL("ALTER TABLE `collections` ADD COLUMN `imageUrl` TEXT")
+        // Older exported schemas lacked this field even though later entity versions use it.
+        val hasPinned = database.query("PRAGMA table_info(`wiki_entries`)").use { columns ->
+            var found = false
+            while (columns.moveToNext()) if (columns.getString(1) == "isPinned") found = true
+            found
+        }
+        if (!hasPinned) database.execSQL("ALTER TABLE `wiki_entries` ADD COLUMN `isPinned` INTEGER NOT NULL DEFAULT 0")
     }
 }
+
+val MIGRATION_41_42 = object : Migration(41, 42) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `tactical_maps` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `name` TEXT NOT NULL,
+                `imageUri` TEXT NOT NULL,
+                `gridType` TEXT NOT NULL DEFAULT 'SQUARE',
+                `cellSizePx` REAL NOT NULL DEFAULT 70.0,
+                `gridOffsetX` REAL NOT NULL DEFAULT 0.0,
+                `gridOffsetY` REAL NOT NULL DEFAULT 0.0,
+                `gridColorHex` INTEGER NOT NULL DEFAULT 1090519039,
+                `gridOpacity` REAL NOT NULL DEFAULT 0.5,
+                `scaleFtPerCell` INTEGER NOT NULL DEFAULT 5,
+                `diagonalRule` TEXT NOT NULL DEFAULT 'ALTERNATING_5_10_5',
+                `sessionId` INTEGER DEFAULT NULL,
+                `sceneId` INTEGER DEFAULT NULL,
+                `fogOfWarMaskJson` TEXT NOT NULL DEFAULT '',
+                `terrainMaskJson` TEXT NOT NULL DEFAULT '',
+                `areasJson` TEXT NOT NULL DEFAULT '[]',
+                `createdAt` INTEGER NOT NULL
+            )
+        """.trimIndent())
+        database.execSQL("CREATE INDEX IF NOT EXISTS `index_tactical_maps_sessionId` ON `tactical_maps` (`sessionId`)")
+        database.execSQL("CREATE INDEX IF NOT EXISTS `index_tactical_maps_sceneId` ON `tactical_maps` (`sceneId`)")
+
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `tactical_tokens` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `mapId` INTEGER NOT NULL,
+                `name` TEXT NOT NULL,
+                `avatarUri` TEXT DEFAULT NULL,
+                `faction` TEXT NOT NULL DEFAULT 'ENEMY',
+                `sizeInCells` REAL NOT NULL DEFAULT 1.0,
+                `cellX` REAL NOT NULL DEFAULT 0.0,
+                `cellY` REAL NOT NULL DEFAULT 0.0,
+                `currentHp` INTEGER NOT NULL DEFAULT 10,
+                `maxHp` INTEGER NOT NULL DEFAULT 10,
+                `armorClass` INTEGER NOT NULL DEFAULT 10,
+                `speedFt` INTEGER NOT NULL DEFAULT 30,
+                `conditionsJson` TEXT NOT NULL DEFAULT '[]',
+                `isHidden` INTEGER NOT NULL DEFAULT 0,
+                `encounterCreatureId` INTEGER DEFAULT NULL,
+                `npcId` INTEGER DEFAULT NULL,
+                `notes` TEXT NOT NULL DEFAULT '',
+                FOREIGN KEY(`mapId`) REFERENCES `tactical_maps`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+            )
+        """.trimIndent())
+        database.execSQL("CREATE INDEX IF NOT EXISTS `index_tactical_tokens_mapId` ON `tactical_tokens` (`mapId`)")
+        database.execSQL("CREATE INDEX IF NOT EXISTS `index_tactical_tokens_encounterCreatureId` ON `tactical_tokens` (`encounterCreatureId`)")
+        database.execSQL("CREATE INDEX IF NOT EXISTS `index_tactical_tokens_npcId` ON `tactical_tokens` (`npcId`)")
+
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `tactical_map_pins` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `mapId` INTEGER NOT NULL,
+                `cellX` REAL NOT NULL,
+                `cellY` REAL NOT NULL,
+                `title` TEXT NOT NULL,
+                `description` TEXT NOT NULL DEFAULT '',
+                `iconName` TEXT NOT NULL DEFAULT 'info',
+                `colorHex` INTEGER NOT NULL DEFAULT 4294942720,
+                `isSecret` INTEGER NOT NULL DEFAULT 1,
+                `explorationState` TEXT NOT NULL DEFAULT 'UNKNOWN',
+                `targetTableId` INTEGER DEFAULT NULL,
+                `targetEncounterId` INTEGER DEFAULT NULL,
+                `targetWikiEntryId` INTEGER DEFAULT NULL,
+                `discoveriesJson` TEXT NOT NULL DEFAULT '[]',
+                FOREIGN KEY(`mapId`) REFERENCES `tactical_maps`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+            )
+        """.trimIndent())
+        database.execSQL("CREATE INDEX IF NOT EXISTS `index_tactical_map_pins_mapId` ON `tactical_map_pins` (`mapId`)")
+    }
+}
+
 
 

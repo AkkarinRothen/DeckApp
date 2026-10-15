@@ -30,7 +30,9 @@ data class FullBackupDto(
     val referenceRows: List<ReferenceRowBackupDto> = emptyList(),
     val referenceTableTags: List<ReferenceTableTagBackupDto> = emptyList(),
     val systemRules: List<SystemRuleBackupDto> = emptyList(),
-    val systemRuleTags: List<SystemRuleTagBackupDto> = emptyList()
+    val systemRuleTags: List<SystemRuleTagBackupDto> = emptyList(),
+    val collections: List<CollectionBackupDto> = emptyList(),
+    val collectionResourceRefs: List<CollectionResourceBackupDto> = emptyList()
 )
 
 @Serializable data class TagBackupDto(val id: Long = 0L, val name: String = "", val color: Int = 0)
@@ -66,3 +68,8 @@ data class FullBackupDto(
 @Serializable data class ReferenceTableTagBackupDto(val tableId: Long = 0L, val tagId: Long = 0L)
 @Serializable data class SystemRuleBackupDto(val id: Long = 0L, val title: String = "", val content: String = "", val gameSystem: String = "General", val category: String = "General", val isPinned: Boolean = false, val sortOrder: Int = 0, val lastUpdated: Long = 0L, val sourcePack: String? = null)
 @Serializable data class SystemRuleTagBackupDto(val ruleId: Long = 0L, val tagId: Long = 0L)
+
+@Serializable data class CollectionBackupDto(val id: Long = 0L, val name: String = "", val description: String = "",
+    val color: Int = 0, val iconName: String = "CHEST", val imageUrl: String? = null, val createdAt: Long = 0L)
+@Serializable data class CollectionResourceBackupDto(val collectionId: Long = 0L, val resourceId: Long = 0L,
+    val resourceType: String = "DECK")

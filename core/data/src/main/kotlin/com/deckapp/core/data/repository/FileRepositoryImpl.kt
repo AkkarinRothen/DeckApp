@@ -325,7 +325,7 @@ class FileRepositoryImpl @Inject constructor(
                     // 3. Empaquetar imágenes (decks, npcs, tables, etc.)
                     val imagesRoot = context.filesDir
                     // Solo tomamos directorios clave para no empaquetar basura
-                    val targetDirs = listOf("decks", "npcs", "tables")
+                    val targetDirs = context.filesDir.listFiles().orEmpty().filter { it.isDirectory }.map { it.name }
                     
                     targetDirs.forEach { dirName ->
                         val dir = File(imagesRoot, dirName)
@@ -378,7 +378,7 @@ class FileRepositoryImpl @Inject constructor(
         if (!tempImagesDir.exists()) return@withContext
 
         // Limpiar imágenes actuales
-        val targetDirs = listOf("decks", "npcs", "tables")
+        val targetDirs = listOf("decks", "npcs", "tables", "collections", "wiki", "manuals")
         targetDirs.forEach { dirName ->
             val dir = File(context.filesDir, dirName)
             dir.deleteRecursively()

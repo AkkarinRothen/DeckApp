@@ -84,7 +84,7 @@ fun DeckCoverCard(
         ) {}
 
         // Carta principal (frente)
-        Card(
+        DeckCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .combinedClickable(

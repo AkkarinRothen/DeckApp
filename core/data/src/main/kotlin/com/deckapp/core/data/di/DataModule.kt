@@ -68,40 +68,7 @@ object DatabaseModule {
     @Singleton
     fun provideDeckAppDatabase(@ApplicationContext context: Context): DeckAppDatabase =
         Room.databaseBuilder(context, DeckAppDatabase::class.java, DeckAppDatabase.DATABASE_NAME)
-            .addMigrations(
-                MIGRATION_6_7, 
-                MIGRATION_7_8, 
-                MIGRATION_8_9, 
-                MIGRATION_9_10, 
-                MIGRATION_10_11,
-                MIGRATION_11_12,
-                MIGRATION_12_13,
-                MIGRATION_13_14,
-                MIGRATION_14_15,
-                MIGRATION_15_16,
-                MIGRATION_16_17,
-                MIGRATION_17_18,
-                MIGRATION_18_19,
-                MIGRATION_19_20,
-                MIGRATION_20_21,
-                MIGRATION_21_22,
-                MIGRATION_22_23,
-                MIGRATION_23_24,
-                MIGRATION_24_25,
-                MIGRATION_25_26,
-                MIGRATION_26_27,
-                MIGRATION_27_28,
-                MIGRATION_28_29,
-                MIGRATION_29_30,
-                MIGRATION_30_31,
-                MIGRATION_31_32,
-                MIGRATION_32_33,
-                MIGRATION_33_34,
-                MIGRATION_34_35,
-                MIGRATION_35_36,
-                MIGRATION_36_37
-            )
-            .fallbackToDestructiveMigration()
+            .addMigrations(*ALL_MIGRATIONS)
             .build()
 
     @Provides fun provideCardStackDao(db: DeckAppDatabase) = db.cardStackDao()
@@ -127,6 +94,7 @@ object DatabaseModule {
     @Provides fun provideMythicDao(db: DeckAppDatabase) = db.mythicDao()
     @Provides fun provideManualDao(db: DeckAppDatabase) = db.manualDao()
     @Provides fun provideSceneDao(db: DeckAppDatabase) = db.sceneDao()
+    @Provides fun provideTacticalMapDao(db: DeckAppDatabase) = db.tacticalMapDao()
 }
 
 @Module
@@ -200,4 +168,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindManualRepository(impl: ManualRepositoryImpl): com.deckapp.core.domain.repository.ManualRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTacticalMapRepository(impl: TacticalMapRepositoryImpl): com.deckapp.core.domain.repository.TacticalMapRepository
 }

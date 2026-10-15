@@ -37,6 +37,7 @@ data class TableEntry(
     val confidence: Float = 1.0f
 )
 
+@Serializable
 data class TableRollResult(
     val id: Long = 0,
     val tableId: Long,

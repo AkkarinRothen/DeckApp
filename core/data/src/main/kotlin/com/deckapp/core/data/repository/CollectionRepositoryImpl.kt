@@ -24,6 +24,10 @@ class CollectionRepositoryImpl @Inject constructor(
         collectionDao.getCollectionById(id).map { it?.toDomain() }
 
     override suspend fun saveCollection(collection: DeckCollection): Long {
+        if (collection.id > 0) {
+            collectionDao.updateCollection(collection.toEntity())
+            return collection.id
+        }
         return collectionDao.insertCollection(collection.toEntity())
     }
 

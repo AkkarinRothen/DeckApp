@@ -3,6 +3,7 @@ package com.deckapp.core.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Casino
@@ -31,7 +32,7 @@ fun TableGridItem(
     modifier: Modifier = Modifier,
     isSelected: Boolean = false
 ) {
-    Card(
+    DeckCard(
         modifier = modifier
             .fillMaxWidth()
             .height(160.dp)
@@ -66,14 +67,7 @@ fun TableGridItem(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(
-                            Brush.linearGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.surfaceVariant,
-                                    MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
-                                )
-                            )
-                        )
+                        .paperBackground()
                 )
             }
 
@@ -94,7 +88,7 @@ fun TableGridItem(
                         modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Casino,
+                            imageVector = categoryEmblem(table.category),
                             contentDescription = null,
                             modifier = Modifier.padding(6.dp).size(20.dp),
                             tint = if (table.imageUrl != null) Color.White else MaterialTheme.colorScheme.onPrimaryContainer

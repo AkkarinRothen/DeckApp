@@ -74,7 +74,7 @@ fun PdfThumbnailBrowser(
                 fontWeight = FontWeight.Bold
             )
             
-            TextButton(
+            DeckTextButton(
                 onClick = onOpenFolder,
                 contentPadding = PaddingValues(horizontal = 8.dp)
             ) {

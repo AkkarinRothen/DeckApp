@@ -52,9 +52,12 @@ import androidx.room.RoomDatabase
         MythicRollEntity::class,
         ManualEntity::class,
         ManualBookmarkEntity::class,
-        SceneEntity::class
+        SceneEntity::class,
+        TacticalMapEntity::class,
+        TacticalTokenEntity::class,
+        TacticalMapPinEntity::class
     ],
-    version = 41,
+    version = 42,
     exportSchema = true
 )
 abstract class DeckAppDatabase : RoomDatabase() {
@@ -80,6 +83,7 @@ abstract class DeckAppDatabase : RoomDatabase() {
     abstract fun mythicDao(): MythicDao
     abstract fun manualDao(): ManualDao
     abstract fun sceneDao(): SceneDao
+    abstract fun tacticalMapDao(): TacticalMapDao
     abstract fun backupDao(): com.deckapp.core.data.db.backup.BackupDao
 
     companion object {
@@ -104,7 +108,7 @@ abstract class DeckAppDatabase : RoomDatabase() {
         val MIGRATION_26_27 = com.deckapp.core.data.db.MIGRATION_26_27
         val MIGRATION_27_28 = com.deckapp.core.data.db.MIGRATION_27_28
         val MIGRATION_28_29 = com.deckapp.core.data.db.MIGRATION_28_29
-        val MIGRATION_29_30 = com.deckapp.core.data.db.MIGRATION_30_31
+        val MIGRATION_29_30 = com.deckapp.core.data.db.MIGRATION_29_30
         val MIGRATION_30_31 = com.deckapp.core.data.db.MIGRATION_30_31
         val MIGRATION_31_32 = com.deckapp.core.data.db.MIGRATION_31_32
         val MIGRATION_32_33 = com.deckapp.core.data.db.MIGRATION_32_33
@@ -116,5 +120,6 @@ abstract class DeckAppDatabase : RoomDatabase() {
         val MIGRATION_38_39 = com.deckapp.core.data.db.MIGRATION_38_39
         val MIGRATION_39_40 = com.deckapp.core.data.db.MIGRATION_39_40
         val MIGRATION_40_41 = com.deckapp.core.data.db.MIGRATION_40_41
+        val MIGRATION_41_42 = com.deckapp.core.data.db.MIGRATION_41_42
     }
 }

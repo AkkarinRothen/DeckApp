@@ -21,7 +21,7 @@ fun QrShareDialog(
     val qrBitmap = remember(data) { QrCodeGenerator.generateQrCode("deckapp://import/table?data=$data") }
 
     Dialog(onDismissRequest = onDismiss) {
-        Card(
+        DeckCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
@@ -67,7 +67,7 @@ fun QrShareDialog(
                 
                 Spacer(Modifier.height(16.dp))
                 
-                TextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
+                DeckTextButton(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
                     Text("Cerrar")
                 }
             }

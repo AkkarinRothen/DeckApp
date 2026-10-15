@@ -23,5 +23,7 @@ enum class CollectionIcon {
     SWORDS,       // Combate
     MOUNTAIN,     // Mundo / Localizaciones
     PEOPLE,       // NPCs / Personajes
-    FOLDER        // Carpeta genérica
+    FOLDER,       // Carpeta genérica
+    ARCANE,
+    COMPASS
 }

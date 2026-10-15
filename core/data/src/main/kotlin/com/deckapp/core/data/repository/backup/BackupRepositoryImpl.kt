@@ -19,6 +19,12 @@ class BackupRepositoryImpl @Inject constructor(
     override suspend fun createFullBackupDto(): FullBackupDto = withContext(Dispatchers.IO) {
         FullBackupDto(
             schemaVersion = 1,
+            collections = backupDao.getAllCollections().map {
+                CollectionBackupDto(it.id, it.name, it.description, it.color, it.iconName, it.imageUrl, it.createdAt)
+            },
+            collectionResourceRefs = backupDao.getAllCollectionResources().map {
+                CollectionResourceBackupDto(it.collectionId, it.resourceId, it.resourceType)
+            },
             tags = backupDao.getAllTags().map { TagBackupDto(it.id, it.name, it.color) },
             decks = backupDao.getAllDecks().map { it.toBackupDto() },
             cards = backupDao.getAllCards().map { it.toBackupDto() },
@@ -66,15 +72,15 @@ class BackupRepositoryImpl @Inject constructor(
 
             backup.cardStackTags.forEach { db.tagDao().insertStackTagRef(CardStackTagCrossRef(it.stackId, it.tagId)) }
             backup.cardTags.forEach { db.tagDao().insertCardTagRef(CardTagCrossRef(it.cardId, it.tagId)) }
-            backup.randomTableTags.forEach { db.tagDao().insertTableTagRef(RandomTableTagCrossRef(it.tableId, it.tagId)) }
 
-            db.tableBundleDao().insertBundles(backup.tableBundles.map { TableBundleEntity(it.id, it.name, it.description, it.sourceUri, it.createdAt) })
+            db.tableBundleDao().insertBundles(backup.tableBundles.map { TableBundleEntity(id = it.id, name = it.name, description = it.description, sourceUri = it.sourceUri, createdAt = it.createdAt) })
             db.randomTableDao().insertTables(backup.randomTables.map { 
                 RandomTableEntity(id = it.id, bundleId = it.bundleId, name = it.name, category = it.category, description = it.description, rollFormula = it.rollFormula, rollMode = it.rollMode, isNoRepeat = it.isNoRepeat, isPinned = it.isPinned, sourceType = it.sourceType, sourceName = it.sourceName, isBuiltIn = it.isBuiltIn, sortOrder = it.sortOrder, sourcePack = it.sourcePack, createdAt = it.createdAt) 
             })
             db.randomTableDao().insertEntries(backup.tableEntries.map { 
                 TableEntryEntity(id = it.id, tableId = it.tableId, minRoll = it.minRoll, maxRoll = it.maxRoll, weight = it.weight, text = it.text, subTableRef = it.subTableRef, subTableId = it.subTableId, sortOrder = it.sortOrder) 
             })
+            backup.randomTableTags.forEach { db.tagDao().insertTableTagRef(RandomTableTagCrossRef(it.tableId, it.tagId)) }
 
             db.sessionDao().insertSessions(backup.sessions.map { 
                 SessionEntity(id = it.id, name = it.name, status = it.status, scheduledDate = it.scheduledDate, summary = it.summary, createdAt = it.createdAt, endedAt = it.endedAt, showCardTitles = it.showCardTitles, dmNotes = it.dmNotes, gameSystemsJson = it.gameSystemsJson) 
@@ -98,9 +104,17 @@ class BackupRepositoryImpl @Inject constructor(
             })
             backup.npcTags.forEach { db.npcDao().insertCrossRef(NpcTagCrossRef(it.npcId, it.tagId)) }
 
+            backup.collections.forEach {
+                db.collectionDao().insertCollection(CollectionEntity(id = it.id, name = it.name, description = it.description,
+                    color = it.color, iconName = it.iconName, imageUrl = it.imageUrl, createdAt = it.createdAt))
+            }
+            backup.collectionResourceRefs.forEach {
+                db.collectionDao().insertResourceRef(CollectionResourceCrossRef(it.collectionId, it.resourceId, it.resourceType))
+            }
+
             db.wikiDao().insertCategories(backup.wikiCategories.map { WikiCategoryEntity(it.id, it.name, it.iconName) })
             db.wikiDao().insertEntries(backup.wikiEntries.map { 
-                WikiEntryEntity(id = it.id, title = it.title, content = it.content, categoryId = it.categoryId, imagePath = it.imagePath, lastUpdated = it.lastUpdated) 
+                WikiEntryEntity(id = it.id, title = it.title, content = it.content, categoryId = it.categoryId, imagePath = it.imagePath, isPinned = it.isPinned, lastUpdated = it.lastUpdated)
             })
 
             db.referenceTableDao().insertTables(backup.referenceTables.map {

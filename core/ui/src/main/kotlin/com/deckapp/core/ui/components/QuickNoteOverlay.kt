@@ -131,11 +131,11 @@ fun QuickNoteOverlay(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End
                     ) {
-                        TextButton(onClick = onDismiss) {
+                        DeckTextButton(onClick = onDismiss) {
                             Text("Cancelar")
                         }
                         Spacer(Modifier.width(8.dp))
-                        Button(
+                        DeckButton(
                             onClick = {
                                 if (text.isNotBlank()) {
                                     onSave(text)

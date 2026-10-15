@@ -28,7 +28,7 @@ fun ErrorCard(
     val scope = rememberCoroutineScope()
     var copied by remember { mutableStateOf(false) }
 
-    Card(
+    DeckCard(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.errorContainer
@@ -47,7 +47,7 @@ fun ErrorCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Botón copiar
-                TextButton(
+                DeckTextButton(
                     onClick = {
                         clipboard.setText(AnnotatedString(message))
                         copied = true
@@ -66,7 +66,7 @@ fun ErrorCard(
                     Text(if (copied) "Copiado" else "Copiar")
                 }
                 // Botón descartar
-                TextButton(onClick = onDismiss) {
+                DeckTextButton(onClick = onDismiss) {
                     Text("OK")
                 }
             }
