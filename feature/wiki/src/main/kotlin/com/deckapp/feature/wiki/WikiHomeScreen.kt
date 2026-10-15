@@ -1,5 +1,8 @@
 package com.deckapp.feature.wiki
 
+import com.deckapp.core.ui.components.DeckCard
+import com.deckapp.core.ui.components.DeckTextButton
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -168,7 +171,7 @@ private fun SectionHeader(title: String, icon: ImageVector) {
 
 @Composable
 private fun PinnedEntryCard(entry: WikiEntry, onClick: () -> Unit) {
-    Card(
+    DeckCard(
         onClick = onClick,
         modifier = Modifier.width(160.dp).height(100.dp),
         shape = RoundedCornerShape(16.dp),
@@ -266,7 +269,7 @@ private fun CategoryGrid(
 
 @Composable
 private fun CategoryCard(category: WikiCategory, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Card(
+    DeckCard(
         onClick = onClick,
         modifier = modifier.height(110.dp),
         shape = RoundedCornerShape(20.dp),
@@ -361,10 +364,10 @@ private fun AddCategoryDialog(onConfirm: (String, String) -> Unit, onDismiss: ()
             }
         },
         confirmButton = {
-            TextButton(onClick = { if (name.isNotBlank()) onConfirm(name, selectedIcon) }) { Text("Crear") }
+            DeckTextButton(onClick = { if (name.isNotBlank()) onConfirm(name, selectedIcon) }) { Text("Crear") }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
+            DeckTextButton(onClick = onDismiss) { Text("Cancelar") }
         }
     )
 }

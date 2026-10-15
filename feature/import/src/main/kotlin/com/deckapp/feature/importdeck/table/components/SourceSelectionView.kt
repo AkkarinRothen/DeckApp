@@ -1,5 +1,8 @@
 package com.deckapp.feature.importdeck.table.components
 
+import com.deckapp.core.ui.components.DeckCard
+import com.deckapp.core.ui.components.DeckButton
+
 import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -120,7 +123,7 @@ fun SourceSelectionView(
                         leadingContent = { Icon(Icons.Default.Description, null) },
                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                         trailingContent = {
-                            Button(onClick = { onFileSelect(uri) }) {
+                            DeckButton(onClick = { onFileSelect(uri) }) {
                                 Text("Abrir")
                             }
                         }
@@ -161,7 +164,7 @@ fun SourceSelectionView(
                         },
                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                         trailingContent = {
-                            Button(onClick = { onFileSelect(uri) }) {
+                            DeckButton(onClick = { onFileSelect(uri) }) {
                                 Text("Importar")
                             }
                         }
@@ -172,7 +175,7 @@ fun SourceSelectionView(
         
         Spacer(Modifier.height(16.dp))
         
-        Button(
+        DeckButton(
             onClick = onSearchExternal,
             modifier = Modifier.fillMaxWidth(),
             enabled = !isSearching
@@ -196,7 +199,7 @@ private fun SourceCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    Card(
+    DeckCard(
         onClick = onClick,
         modifier = modifier.height(100.dp),
         colors = CardDefaults.cardColors(

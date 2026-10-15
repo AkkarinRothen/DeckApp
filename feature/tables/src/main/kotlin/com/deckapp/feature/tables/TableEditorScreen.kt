@@ -1,5 +1,9 @@
 package com.deckapp.feature.tables
 
+import com.deckapp.core.ui.components.DeckCard
+import com.deckapp.core.ui.components.DeckOutlinedButton
+import com.deckapp.core.ui.components.DeckTextButton
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -71,10 +75,10 @@ fun TableEditorScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { viewModel.clearPreview() }) { Text("Cerrar") }
+                DeckTextButton(onClick = { viewModel.clearPreview() }) { Text("Cerrar") }
             },
             dismissButton = {
-                TextButton(onClick = { viewModel.clearPreview(); viewModel.previewRoll() }) {
+                DeckTextButton(onClick = { viewModel.clearPreview(); viewModel.previewRoll() }) {
                     Text("Tirar de nuevo")
                 }
             }
@@ -234,7 +238,7 @@ fun TableEditorScreen(
                                     }
                                 },
                                 confirmButton = {
-                                    TextButton(onClick = { 
+                                    DeckTextButton(onClick = {
                                         showTagDialog = false
                                         tagSearchQuery = ""
                                     }) { Text("Cerrar") }
@@ -388,7 +392,7 @@ fun TableEditorScreen(
                 }
 
                 item {
-                    OutlinedButton(
+                    DeckOutlinedButton(
                         onClick = { viewModel.addEntry() },
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -412,7 +416,7 @@ private fun EntryRow(
     onLinkSubTable: () -> Unit,
     onUnlinkSubTable: () -> Unit
 ) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+    DeckCard(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -569,7 +573,7 @@ fun TablePickerDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
+            DeckTextButton(onClick = onDismiss) { Text("Cancelar") }
         }
     )
 }

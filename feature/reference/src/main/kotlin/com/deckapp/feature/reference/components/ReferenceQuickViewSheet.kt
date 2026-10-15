@@ -1,5 +1,8 @@
 package com.deckapp.feature.reference.components
 
+import com.deckapp.core.ui.components.DeckButton
+import com.deckapp.core.ui.components.DeckOutlinedButton
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -76,13 +79,13 @@ fun ReferenceQuickViewSheet(
                     .padding(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                OutlinedButton(
+                DeckOutlinedButton(
                     onClick = onDismiss,
                     modifier = Modifier.weight(1f)
                 ) {
                     Text("Cerrar")
                 }
-                Button(
+                DeckButton(
                     onClick = { onEditClick(table.id) },
                     modifier = Modifier.weight(1f)
                 ) {

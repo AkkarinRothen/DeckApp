@@ -1,5 +1,7 @@
 package com.deckapp.feature.importdeck.table.components
 
+import com.deckapp.core.ui.components.DeckButton
+
 import android.graphics.Bitmap
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -267,7 +269,7 @@ fun TableCropView(
 
         Spacer(Modifier.height(20.dp))
 
-        Button(
+        DeckButton(
             onClick = {
                 val cropped = performPerspectiveCrop(bitmap, quadPoints)
                 onCropConfirmed(cropped)

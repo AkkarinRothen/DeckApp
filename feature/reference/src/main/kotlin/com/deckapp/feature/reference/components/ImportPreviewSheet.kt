@@ -1,5 +1,8 @@
 package com.deckapp.feature.reference.components
 
+import com.deckapp.core.ui.components.DeckButton
+import com.deckapp.core.ui.components.DeckOutlinedButton
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -61,7 +64,7 @@ fun ImportPreviewSheet(
                     Spacer(Modifier.height(16.dp))
                     Text(text = error, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.error)
                     Spacer(Modifier.height(24.dp))
-                    Button(onClick = onDismiss) { Text("Cerrar") }
+                    DeckButton(onClick = onDismiss) { Text("Cerrar") }
                 }
             } else if (importData != null) {
                 Column(modifier = Modifier.weight(1f)) {
@@ -133,10 +136,10 @@ fun ImportPreviewSheet(
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    OutlinedButton(onClick = onDismiss, modifier = Modifier.weight(1f)) {
+                    DeckOutlinedButton(onClick = onDismiss, modifier = Modifier.weight(1f)) {
                         Text("Cancelar")
                     }
-                    Button(
+                    DeckButton(
                         onClick = { onConfirm(headers, replaceExisting) },
                         modifier = Modifier.weight(1f)
                     ) {

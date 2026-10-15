@@ -1,5 +1,8 @@
 package com.deckapp.feature.importdeck.table
 
+import com.deckapp.core.ui.components.DeckButton
+import com.deckapp.core.ui.components.DeckTextButton
+
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.animation.*
 import androidx.compose.foundation.clickable
@@ -113,7 +116,7 @@ fun TableImportScreen(
                 }
             },
             confirmButton = {
-                TextButton(
+                DeckTextButton(
                     onClick = {
                         viewModel.importFromJson(jsonText)
                         showPasteJsonDialog = false
@@ -123,7 +126,7 @@ fun TableImportScreen(
                 ) { Text("Importar") }
             },
             dismissButton = {
-                TextButton(onClick = { showPasteJsonDialog = false }) { Text("Cancelar") }
+                DeckTextButton(onClick = { showPasteJsonDialog = false }) { Text("Cancelar") }
             }
         )
     }
@@ -187,7 +190,7 @@ fun TableImportScreen(
                     },
                     actions = {
                         if (uiState.step == ImportStep.MAPPING) {
-                            TextButton(onClick = { viewModel.reset() }) {
+                            DeckTextButton(onClick = { viewModel.reset() }) {
                                 Text("Reiniciar")
                             }
                         }
@@ -447,7 +450,7 @@ fun TableImportScreen(
                     title = { Text(if (isQuotaError) "Límite de API alcanzado" else "Error de IA") },
                     text = { Text(errorMessage) },
                     confirmButton = {
-                        TextButton(onClick = { viewModel.clearError() }) {
+                        DeckTextButton(onClick = { viewModel.clearError() }) {
                             Text("Aceptar")
                         }
                     }
@@ -470,7 +473,7 @@ fun TableImportScreen(
                 )
             },
             confirmButton = {
-                Button(
+                DeckButton(
                     onClick = {
                         viewModel.generateWithAi(aiPromptText)
                         showAiPromptDialog = false
@@ -479,7 +482,7 @@ fun TableImportScreen(
                 ) { Text("Generar") }
             },
             dismissButton = {
-                TextButton(onClick = { showAiPromptDialog = false }) { Text("Cancelar") }
+                DeckTextButton(onClick = { showAiPromptDialog = false }) { Text("Cancelar") }
             }
         )
     }

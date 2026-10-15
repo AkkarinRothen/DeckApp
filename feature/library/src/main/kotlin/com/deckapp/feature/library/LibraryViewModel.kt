@@ -341,11 +341,13 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
-    fun updateCollection(id: Long, name: String, color: Int, icon: CollectionIcon, pendingImageUri: String? = null) {
+    fun updateCollection(id: Long, name: String, color: Int, icon: CollectionIcon, pendingImageUri: String? = null, automaticCover: Boolean = false) {
         viewModelScope.launch {
-            val updated = DeckCollection(id = id, name = name, color = color, icon = icon)
+            val existing = collectionRepository.getCollectionById(id).first() ?: return@launch
+            val updated = existing.copy(name = name, color = color, icon = icon,
+                imageUrl = if (automaticCover) null else existing.imageUrl)
             collectionRepository.saveCollection(updated)
-            pendingImageUri?.let { updateCollectionImage(id, it) }
+            if (!automaticCover) pendingImageUri?.let { updateCollectionImage(id, it) }
             _uiState.update { it.copy(snackbarMessage = "Colección \"$name\" actualizada") }
         }
     }

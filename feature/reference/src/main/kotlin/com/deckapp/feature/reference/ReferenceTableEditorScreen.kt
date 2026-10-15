@@ -1,5 +1,7 @@
 package com.deckapp.feature.reference
 
+import com.deckapp.core.ui.components.DeckTextButton
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -113,7 +115,7 @@ fun ReferenceTableEditorScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text("COLUMNAS", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
-                        TextButton(onClick = viewModel::addColumn) {
+                        DeckTextButton(onClick = viewModel::addColumn) {
                             Icon(Icons.Default.Add, contentDescription = null)
                             Text("Añadir columna")
                         }
@@ -153,11 +155,11 @@ fun ReferenceTableEditorScreen(
                     ) {
                         Text("FILAS", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
                         Row {
-                            TextButton(onClick = { showImportSource = true }) {
+                            DeckTextButton(onClick = { showImportSource = true }) {
                                 Icon(Icons.Default.Upload, contentDescription = null)
                                 Text("Importar")
                             }
-                            TextButton(onClick = viewModel::addRow) {
+                            DeckTextButton(onClick = viewModel::addRow) {
                                 Icon(Icons.Default.Add, contentDescription = null)
                                 Text("Añadir fila")
                             }

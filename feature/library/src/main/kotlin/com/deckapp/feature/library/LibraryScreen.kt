@@ -1,5 +1,11 @@
 package com.deckapp.feature.library
 
+import com.deckapp.feature.library.components.CollectionDialog
+
+import com.deckapp.core.ui.components.DeckCard
+import com.deckapp.core.ui.components.DeckButton
+import com.deckapp.core.ui.components.DeckTextButton
+
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.BorderStroke
@@ -21,8 +27,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
@@ -118,6 +129,14 @@ fun LibraryScreen(
     var tagPickerTargetIds by remember { mutableStateOf<List<Long>?>(null) }
     var tableToEdit by remember { mutableStateOf<com.deckapp.core.model.RandomTable?>(null) }
 
+    var tableToPickImageFor by remember { mutableStateOf<Long?>(null) }
+    val tableImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let { tableToPickImageFor?.let { id -> viewModel.updateTableImage(id, it.toString()) } }
+        tableToPickImageFor = null
+    }
+
     tableToEdit?.let { table ->
         TableActionSheet(
             table = table,
@@ -132,14 +151,6 @@ fun LibraryScreen(
         )
     }
 
-    var tableToPickImageFor by remember { mutableStateOf<Long?>(null) }
-    val tableImageLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri ->
-        uri?.let { tableToPickImageFor?.let { id -> viewModel.updateTableImage(id, it.toString()) } }
-        tableToPickImageFor = null
-    }
-
     var collectionImageId by remember { mutableStateOf<Long?>(null) }
     var currentCollectionImageUri by remember { mutableStateOf<String?>(null) }
     val collectionImageLauncher = rememberLauncherForActivityResult(
@@ -147,7 +158,7 @@ fun LibraryScreen(
     ) { uri ->
         uri?.let { 
             currentCollectionImageUri = it.toString()
-            collectionImageId?.let { id -> viewModel.updateCollectionImage(id, it.toString()) }
+
         }
     }
 
@@ -157,7 +168,7 @@ fun LibraryScreen(
             title = { Text("¿Borrar seleccionados?") },
             text = { Text("Se eliminarán permanentemente ${uiState.selectedDeckIds.size} mazos y todas sus cartas. Esta acción no se puede deshacer.") },
             confirmButton = {
-                Button(
+                DeckButton(
                     onClick = {
                         viewModel.bulkDelete()
                         showBulkDeleteConfirmation = false
@@ -168,7 +179,7 @@ fun LibraryScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showBulkDeleteConfirmation = false }) {
+                DeckTextButton(onClick = { showBulkDeleteConfirmation = false }) {
                     Text("Cancelar")
                 }
             }
@@ -185,8 +196,8 @@ fun LibraryScreen(
             onPickImage = {
                 collectionImageLauncher.launch("image/*")
             },
-            onConfirm = { name, color, icon ->
-                viewModel.createCollection(name, color, icon, currentCollectionImageUri)
+            onConfirm = { name, color, icon, automatic ->
+                viewModel.createCollection(name, color, icon, if (automatic) null else currentCollectionImageUri)
                 showCreateCollectionDialog = false
                 currentCollectionImageUri = null
             }
@@ -211,8 +222,8 @@ fun LibraryScreen(
                 collectionImageId = collection.id
                 collectionImageLauncher.launch("image/*")
             },
-            onConfirm = { name, color, icon ->
-                viewModel.updateCollection(collection.id, name, color, icon, currentCollectionImageUri)
+            onConfirm = { name, color, icon, automatic ->
+                viewModel.updateCollection(collection.id, name, color, icon, currentCollectionImageUri, automatic)
                 collectionToEdit = null
                 collectionImageId = null
                 currentCollectionImageUri = null
@@ -226,7 +237,7 @@ fun LibraryScreen(
             title = { Text("¿Eliminar colección?") },
             text = { Text("Se eliminará la colección \"${collection.name}\". Los mazos y tablas dentro de ella NO se borrarán de tu biblioteca global.") },
             confirmButton = {
-                Button(
+                DeckButton(
                     onClick = {
                         viewModel.deleteCollection(collection.id)
                         collectionToDelete = null
@@ -235,7 +246,7 @@ fun LibraryScreen(
                 ) { Text("Eliminar") }
             },
             dismissButton = {
-                TextButton(onClick = { collectionToDelete = null }) { Text("Cancelar") }
+                DeckTextButton(onClick = { collectionToDelete = null }) { Text("Cancelar") }
             }
         )
     }
@@ -425,6 +436,52 @@ fun LibraryScreen(
                 enabled = !uiState.isReorderMode
             )
 
+            // ── Acceso rápido a herramientas de biblioteca ───────────
+            if (!uiState.isReorderMode) {
+                androidx.compose.foundation.lazy.LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 2.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    item {
+                        AssistChip(
+                            onClick = onNpcLibrary,
+                            label = { Text("NPCs", style = MaterialTheme.typography.labelSmall) },
+                            leadingIcon = { Icon(Icons.Default.Group, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                        )
+                    }
+                    item {
+                        AssistChip(
+                            onClick = onEncounterLibrary,
+                            label = { Text("Encuentros", style = MaterialTheme.typography.labelSmall) },
+                            leadingIcon = { Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                        )
+                    }
+                    item {
+                        AssistChip(
+                            onClick = onHexplorationClick,
+                            label = { Text("Mapas Hex", style = MaterialTheme.typography.labelSmall) },
+                            leadingIcon = { Icon(Icons.Default.Layers, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                        )
+                    }
+                    item {
+                        AssistChip(
+                            onClick = onReferenceClick,
+                            label = { Text("Referencias", style = MaterialTheme.typography.labelSmall) },
+                            leadingIcon = { Icon(Icons.Default.Description, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                        )
+                    }
+                    item {
+                        AssistChip(
+                            onClick = onWikiClick,
+                            label = { Text("Wiki", style = MaterialTheme.typography.labelSmall) },
+                            leadingIcon = { Icon(Icons.Default.MenuBook, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                        )
+                    }
+                }
+            }
+
             // ── Indicador de Colección Activa ─────────────────────────
             if (uiState.activeCollectionId != null) {
                 val activeCol = uiState.allCollections.find { it.id == uiState.activeCollectionId }
@@ -441,7 +498,7 @@ fun LibraryScreen(
                             icon = { Icon(col.icon.toIcon(), null, tint = Color(col.color), modifier = Modifier.size(18.dp)) }
                         )
                         Spacer(Modifier.width(8.dp))
-                        TextButton(onClick = { viewModel.setActiveCollection(null) }) {
+                        DeckTextButton(onClick = { viewModel.setActiveCollection(null) }) {
                             Text("Limpiar", style = MaterialTheme.typography.labelSmall)
                         }
                     }
@@ -463,7 +520,7 @@ fun LibraryScreen(
                 ) {
                     items(uiState.searchResults.size) { index ->
                         val result = uiState.searchResults[index]
-                        Card(
+                        DeckCard(
                             onClick = {
                                 when (result.type) {
                                     SearchResultType.CARD -> {
@@ -732,95 +789,6 @@ fun LibraryScreen(
     }
 }
 
-@Composable
-fun CollectionDialog(
-    initialName: String = "",
-    initialColor: Int = 0xFF6200EE.toInt(),
-    initialIcon: CollectionIcon = CollectionIcon.CHEST,
-    initialImageUrl: String? = null,
-    currentImageUri: String? = null,
-    title: String = "Nueva Colección",
-    confirmLabel: String = "Crear",
-    onDismiss: () -> Unit,
-    onPickImage: () -> Unit = {},
-    onConfirm: (String, Int, CollectionIcon) -> Unit
-) {
-    var name by remember { mutableStateOf(initialName) }
-    var selectedIcon by remember { mutableStateOf(initialIcon) }
-    var selectedColor by remember { mutableStateOf(initialColor) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("Nombre") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                
-                Text("Imagen de Portada (Opcional)", style = MaterialTheme.typography.labelLarge)
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(120.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .clickable { onPickImage() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (initialImageUrl != null || currentImageUri != null) {
-                        AsyncImage(
-                            model = currentImageUri ?: initialImageUrl,
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                        Surface(
-                            color = Color.Black.copy(alpha = 0.5f),
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(Icons.Default.Edit, null, tint = Color.White)
-                            }
-                        }
-                    } else {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(Icons.Default.Image, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text("Elegir Imagen", style = MaterialTheme.typography.labelSmall)
-                        }
-                    }
-                }
-
-                Text("Icono", style = MaterialTheme.typography.labelLarge)
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    CollectionIcon.values().forEach { icon ->
-                        item {
-                            FilterChip(
-                                selected = selectedIcon == icon,
-                                onClick = { selectedIcon = icon },
-                                label = { Icon(icon.toIcon(), null, modifier = Modifier.size(20.dp)) }
-                            )
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = { if (name.isNotBlank()) onConfirm(name, selectedColor, selectedIcon) },
-                enabled = name.isNotBlank()
-            ) { Text(confirmLabel) }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
-        }
-    )
-}
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AddToCollectionDialog(
@@ -850,10 +818,10 @@ fun AddToCollectionDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onCreateNewCollection) { Text("Nueva Colección") }
+            DeckTextButton(onClick = onCreateNewCollection) { Text("Nueva Colección") }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cerrar") }
+            DeckTextButton(onClick = onDismiss) { Text("Cerrar") }
         }
     )
 }
@@ -889,7 +857,7 @@ fun TagSelectionDialog(
                 )
 
                 if (filteredTags.isEmpty() && searchQuery.isNotBlank() && !exactMatch) {
-                    TextButton(
+                    DeckTextButton(
                         onClick = { onCreateNew(searchQuery) },
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -917,7 +885,7 @@ fun TagSelectionDialog(
                     
                     if (searchQuery.isNotBlank() && !exactMatch) {
                         HorizontalDivider(Modifier.padding(vertical = 4.dp))
-                        TextButton(
+                        DeckTextButton(
                             onClick = { onCreateNew(searchQuery) },
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -931,7 +899,7 @@ fun TagSelectionDialog(
         },
         confirmButton = {},
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
+            DeckTextButton(onClick = onDismiss) { Text("Cancelar") }
         }
     )
 }
@@ -960,7 +928,7 @@ private fun MergeTargetDialog(
                 ) {
                     candidates.forEach { deck ->
                         item(key = deck.id) {
-                            TextButton(
+                            DeckTextButton(
                                 onClick = { onSelect(deck.id) },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
@@ -977,7 +945,7 @@ private fun MergeTargetDialog(
         },
         confirmButton = {},
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
+            DeckTextButton(onClick = onDismiss) { Text("Cancelar") }
         }
     )
 }
@@ -997,7 +965,7 @@ private fun EmptyLibraryState(onImportClick: () -> Unit) {
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(Modifier.height(24.dp))
-        Button(onClick = onImportClick) {
+        DeckButton(onClick = onImportClick) {
             Icon(Icons.Default.Add, contentDescription = null)
             Spacer(Modifier.width(8.dp))
             Text("Importar mazo")

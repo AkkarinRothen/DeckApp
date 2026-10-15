@@ -1,5 +1,7 @@
 package com.deckapp.feature.importdeck.table.components
 
+import com.deckapp.core.ui.components.DeckButton
+
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -70,7 +72,7 @@ fun PdfPreviewView(
         
         Spacer(Modifier.height(16.dp))
         
-        Button(
+        DeckButton(
             onClick = onConfirm,
             modifier = Modifier.fillMaxWidth(),
             enabled = bitmap != null

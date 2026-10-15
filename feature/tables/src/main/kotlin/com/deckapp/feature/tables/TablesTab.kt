@@ -1,5 +1,8 @@
 package com.deckapp.feature.tables
 
+import com.deckapp.core.ui.components.DeckButton
+import com.deckapp.core.ui.components.DeckTextButton
+
 import android.content.ClipData
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -24,6 +27,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
@@ -42,6 +46,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.deckapp.core.model.RandomTable
 import com.deckapp.core.model.TableRollResult
 import com.deckapp.core.ui.components.SelectionActionBar
+import com.deckapp.core.ui.components.PaperCard
+import com.deckapp.core.ui.components.paperBackground
+import com.deckapp.core.model.TableDensity
+import com.deckapp.core.ui.theme.LocalTableAppearance
 import com.deckapp.feature.tables.library.TablePackDialog
 import com.deckapp.feature.tables.library.components.TableGridItem
 import sh.calvin.reorderable.*
@@ -146,13 +154,13 @@ fun TablesTab(
             title = { Text("Exportar Tabla") },
             text = { Text("Elige el formato de exportación:") },
             confirmButton = {
-                TextButton(onClick = { 
+                DeckTextButton(onClick = {
                     viewModel.exportTable(ExportFormat.CSV)
                     showExportDialog = false 
                 }) { Text("CSV (Excel/VTT)") }
             },
             dismissButton = {
-                TextButton(onClick = { 
+                DeckTextButton(onClick = {
                     viewModel.exportTable(ExportFormat.MARKDOWN)
                     showExportDialog = false 
                 }) { Text("Markdown (Notas)") }
@@ -160,7 +168,7 @@ fun TablesTab(
         )
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().paperBackground(tintColor = MaterialTheme.colorScheme.background)) {
         Column(modifier = Modifier.fillMaxSize()) {
             Row(
                 modifier = Modifier
@@ -263,7 +271,7 @@ fun TablesTab(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(Modifier.height(24.dp))
-                        Button(onClick = { onCreateTable(sessionId) }) {
+                        DeckButton(onClick = { onCreateTable(sessionId) }) {
                             Icon(Icons.Default.Add, contentDescription = null)
                             Spacer(Modifier.width(8.dp))
                             Text("Crear tabla")
@@ -444,12 +452,10 @@ private fun FeaturedTableCard(
     onClick: (RandomTable) -> Unit,
     onQuickRoll: (Long) -> Unit
 ) {
-    ElevatedCard(
+    PaperCard(
         onClick = { onClick(table) },
         modifier = Modifier.width(160.dp),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        )
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -499,9 +505,9 @@ private fun RollLogPanel(
     onTableLinkClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    PaperCard(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        containerColor = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Column {
             Row(
@@ -631,25 +637,30 @@ private fun TableListItem(
     quickRollResult: TableRollResult? = null,
     onDismissResult: () -> Unit = {}
 ) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick
-            ),
-        colors = when {
-            isSelected -> CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-            table.isPinned -> CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
-            else -> CardDefaults.cardColors()
-        },
-        elevation = CardDefaults.cardElevation(defaultElevation = elevation),
-        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
+    val containerColor = when {
+        isSelected -> MaterialTheme.colorScheme.primaryContainer
+        else -> MaterialTheme.colorScheme.surface
+    }
+    val accentColor = table.tags.firstOrNull()?.let { Color(it.color) }
+        ?: MaterialTheme.colorScheme.primary
+    val compact = LocalTableAppearance.current.density == TableDensity.COMPACT
+
+    PaperCard(
+        modifier = modifier.fillMaxWidth(),
+        onClick = onClick,
+        onLongClick = onLongClick,
+        containerColor = containerColor,
+        elevation = elevation,
+        border = BorderStroke(if (isSelected) 2.dp else 1.dp,
+            if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .drawBehind {
+                    drawRect(accentColor, size = androidx.compose.ui.geometry.Size(3.dp.toPx(), size.height))
+                }
+                .padding(horizontal = 16.dp, vertical = if (compact) 8.dp else 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
@@ -714,7 +725,7 @@ private fun TableListItem(
                                 Text(
                                     text = tag.name,
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = Color(tag.color),
+                                    color = MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
                                 )
                             }

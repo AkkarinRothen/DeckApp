@@ -1,5 +1,7 @@
 package com.deckapp.feature.reference
 
+import com.deckapp.core.ui.components.DeckCard
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -123,7 +125,7 @@ fun RuleEditorScreen(
 
             item {
                 if (uiState.isPreviewMode) {
-                    Card(
+                    DeckCard(
                         modifier = Modifier.fillMaxWidth().heightIn(min = 200.dp),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                     ) {

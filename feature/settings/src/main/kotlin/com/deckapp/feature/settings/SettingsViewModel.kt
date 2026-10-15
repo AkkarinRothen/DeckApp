@@ -9,6 +9,12 @@ import com.deckapp.core.domain.repository.FileRepository
 import com.deckapp.core.domain.repository.SettingsRepository
 import com.deckapp.core.domain.usecase.backup.CreateBackupUseCase
 import com.deckapp.core.domain.usecase.backup.RestoreBackupUseCase
+import com.deckapp.core.model.AppTheme
+import com.deckapp.core.model.TableAppearance
+import com.deckapp.core.model.TableDensity
+import com.deckapp.core.model.TextureIntensity
+import com.deckapp.core.model.ThemeAccent
+import com.deckapp.core.model.AppearancePreset
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +36,9 @@ data class SettingsUiState(
     val isLoading: Boolean = true,
     val isClearingCache: Boolean = false,
     val cacheClearedMessage: String? = null,
+    val appTheme: AppTheme = AppTheme.DARK,
+    val tableAppearance: TableAppearance = TableAppearance(),
+    val appearancePresets: List<AppearancePreset> = emptyList(),
     val jpegQuality: Int = 90,
     val geminiApiKey: String = "",
     val autoVisionEnabled: Boolean = true,
@@ -62,16 +71,58 @@ class SettingsViewModel @Inject constructor(
         val apiKey = settingsRepository.getGeminiApiKey()
         val autoVision = settingsRepository.getAutoVisionEnabled()
         val simplified = settingsRepository.getSimplifiedModeEnabled()
+        val theme = settingsRepository.getAppTheme()
         _uiState.update { 
             it.copy(
                 appVersion = version, 
                 jpegQuality = quality, 
                 geminiApiKey = apiKey, 
                 autoVisionEnabled = autoVision,
-                simplifiedModeEnabled = simplified
+                simplifiedModeEnabled = simplified,
+                appTheme = theme,
+                tableAppearance = settingsRepository.getTableAppearance(),
+                appearancePresets = settingsRepository.getAppearancePresets()
             ) 
         }
         loadStorageInfo()
+    }
+
+    fun setAppTheme(theme: AppTheme) {
+        settingsRepository.setAppTheme(theme)
+        _uiState.update { it.copy(appTheme = theme) }
+    }
+
+    fun setTextureIntensity(texture: TextureIntensity) {
+        val appearance = settingsRepository.getTableAppearance().copy(texture = texture)
+        settingsRepository.setTableAppearance(appearance)
+        _uiState.update { it.copy(tableAppearance = appearance) }
+    }
+
+    fun setTableDensity(density: TableDensity) {
+        val appearance = settingsRepository.getTableAppearance().copy(density = density)
+        settingsRepository.setTableAppearance(appearance)
+        _uiState.update { it.copy(tableAppearance = appearance) }
+    }
+
+    fun setThemeAccent(accent: ThemeAccent) {
+        val appearance = settingsRepository.getTableAppearance().copy(accent = accent)
+        settingsRepository.setTableAppearance(appearance)
+        _uiState.update { it.copy(tableAppearance = appearance) }
+    }
+
+    fun saveAppearancePreset(name: String) {
+        settingsRepository.saveAppearancePreset(name)
+        _uiState.update { it.copy(appearancePresets = settingsRepository.getAppearancePresets()) }
+    }
+
+    fun applyAppearancePreset(id: String) {
+        settingsRepository.applyAppearancePreset(id)
+        _uiState.update { it.copy(appTheme = settingsRepository.getAppTheme(), tableAppearance = settingsRepository.getTableAppearance()) }
+    }
+
+    fun deleteAppearancePreset(id: String) {
+        settingsRepository.deleteAppearancePreset(id)
+        _uiState.update { it.copy(appearancePresets = settingsRepository.getAppearancePresets()) }
     }
 
     fun loadStorageInfo() {

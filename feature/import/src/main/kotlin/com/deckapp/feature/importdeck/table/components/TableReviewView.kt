@@ -1,5 +1,9 @@
 package com.deckapp.feature.importdeck.table.components
 
+import com.deckapp.core.ui.components.DeckCard
+import com.deckapp.core.ui.components.DeckButton
+import com.deckapp.core.ui.components.DeckTextButton
+
 import android.graphics.Bitmap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -255,7 +259,7 @@ fun TableReviewView(
                         }
                     },
                     confirmButton = {
-                        TextButton(onClick = { showBundleDialog = false }) { Text("Cerrar") }
+                        DeckTextButton(onClick = { showBundleDialog = false }) { Text("Cerrar") }
                     }
                 )
             }
@@ -361,7 +365,7 @@ fun TableReviewView(
                                     }
                                 },
                                 confirmButton = {
-                                    TextButton(onClick = { 
+                                    DeckTextButton(onClick = {
                                         showTagDialog = false
                                         tagSearchQuery = ""
                                     }) { Text("Cerrar") }
@@ -441,7 +445,7 @@ fun TableReviewView(
         
         Spacer(Modifier.height(16.dp))
         
-        Button(
+        DeckButton(
             onClick = onConfirm,
             modifier = Modifier.fillMaxWidth(),
             enabled = validationResult?.isValid == true || showOverlay
@@ -467,7 +471,7 @@ private fun EntryRow(
             MagnifierOverlay(bitmap = originalBitmap, blocks = blocks)
         }
 
-        Card(
+        DeckCard(
             colors = CardDefaults.cardColors(
                 containerColor = if (isLowConfidence) 
                     MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)

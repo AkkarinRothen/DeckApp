@@ -1,5 +1,9 @@
 package com.deckapp.feature.deck
 
+import com.deckapp.core.ui.components.DeckCard
+import com.deckapp.core.ui.components.DeckOutlinedButton
+import com.deckapp.core.ui.components.DeckTextButton
+
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -78,7 +82,7 @@ fun CardEditorScreen(
                             strokeWidth = 2.dp
                         )
                     } else {
-                        TextButton(
+                        DeckTextButton(
                             onClick = { viewModel.save() },
                             enabled = uiState.title.isNotBlank()
                         ) {
@@ -322,7 +326,7 @@ private fun FaceImagePicker(
             }
         }
     } else {
-        OutlinedButton(
+        DeckOutlinedButton(
             onClick = onPickImage,
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -392,7 +396,7 @@ private fun TableLinkSection(
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text("Acción vinculada", style = MaterialTheme.typography.titleMedium)
-        Card(
+        DeckCard(
             onClick = { showDialog = true },
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
@@ -468,7 +472,7 @@ private fun TableLinkSection(
             },
             confirmButton = {},
             dismissButton = {
-                TextButton(onClick = { showDialog = false }) { Text("Cancelar") }
+                DeckTextButton(onClick = { showDialog = false }) { Text("Cancelar") }
             }
         )
     }

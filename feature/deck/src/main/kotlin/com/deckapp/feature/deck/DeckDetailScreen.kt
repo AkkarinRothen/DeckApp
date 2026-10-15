@@ -1,5 +1,10 @@
 package com.deckapp.feature.deck
 
+import com.deckapp.core.ui.components.DeckCard
+import com.deckapp.core.ui.components.DeckButton
+import com.deckapp.core.ui.components.DeckOutlinedButton
+import com.deckapp.core.ui.components.DeckTextButton
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -144,7 +149,7 @@ fun DeckDetailScreen(
             title = { Text("Eliminar carta") },
             text = { Text("¿Eliminar \"${card.title}\"? Esta acción no se puede deshacer.") },
             confirmButton = {
-                TextButton(
+                DeckTextButton(
                     onClick = {
                         viewModel.deleteCard(card.id)
                         confirmDeleteCard = null
@@ -154,7 +159,7 @@ fun DeckDetailScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { confirmDeleteCard = null }) {
+                DeckTextButton(onClick = { confirmDeleteCard = null }) {
                     Text("Cancelar")
                 }
             }
@@ -425,7 +430,7 @@ fun DeckDetailScreen(
                                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                                     )
                                 }
-                                Button(
+                                DeckButton(
                                     onClick = { viewModel.saveReorder(localCards.map { it.id }) },
                                     contentPadding = PaddingValues(horizontal = 16.dp),
                                     modifier = Modifier.height(32.dp)
@@ -686,7 +691,7 @@ private fun DeckConfigSheet(
                 supportingContent = { Text("Se muestra en la cabecera y biblioteca") },
                 leadingContent = { Icon(Icons.Default.Image, null) },
                 trailingContent = {
-                    TextButton(onClick = onPickCoverImage) {
+                    DeckTextButton(onClick = onPickCoverImage) {
                         Text(if (deck.coverImagePath != null) "Cambiar" else "Elegir")
                     }
                 }
@@ -697,7 +702,7 @@ private fun DeckConfigSheet(
                 supportingContent = { Text("Para cartas boca abajo y animaciones") },
                 leadingContent = { Icon(Icons.Default.Collections, null) },
                 trailingContent = {
-                    TextButton(onClick = onPickBackImage) {
+                    DeckTextButton(onClick = onPickBackImage) {
                         Text(if (deck.backImagePath != null) "Cambiar" else "Elegir")
                     }
                 }
@@ -759,7 +764,7 @@ private fun DeckConfigSheet(
 
             // --- Tags ---
             Text("Organización", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
-            Card(
+            DeckCard(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
             ) {
@@ -803,7 +808,7 @@ private fun DeckConfigSheet(
             Text("Gestión Avanzada", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.error)
             Spacer(Modifier.height(12.dp))
             
-            OutlinedButton(
+            DeckOutlinedButton(
                 onClick = onToggleArchived,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
@@ -814,7 +819,7 @@ private fun DeckConfigSheet(
                 Text(if (deck.isArchived) "Desarchivar Mazo" else "Archivar Mazo")
             }
             
-            TextButton(
+            DeckTextButton(
                 onClick = { showDeleteConfirm = true },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
@@ -832,12 +837,12 @@ private fun DeckConfigSheet(
             title = { Text("¿Eliminar mazo?") },
             text = { Text("Esto borrará el mazo \"${deck.name}\" y todas sus cartas. Esta acción es irreversible.") },
             confirmButton = {
-                TextButton(onClick = onDeleteDeck) {
+                DeckTextButton(onClick = onDeleteDeck) {
                     Text("Eliminar todo", color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) {
+                DeckTextButton(onClick = { showDeleteConfirm = false }) {
                     Text("Cancelar")
                 }
             }
@@ -866,7 +871,7 @@ private fun MergeDeckDialog(
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         items(decks) { deck ->
-                            Card(
+                            DeckCard(
                                 onClick = { onConfirm(deck.id) },
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -894,7 +899,7 @@ private fun MergeDeckDialog(
         },
         confirmButton = {},
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
+            DeckTextButton(onClick = onDismiss) { Text("Cancelar") }
         }
     )
 }
@@ -915,13 +920,13 @@ private fun AddTagDialog(onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
             )
         },
         confirmButton = {
-            TextButton(
+            DeckTextButton(
                 onClick = { if (text.isNotBlank()) onConfirm(text) },
                 enabled = text.isNotBlank()
             ) { Text("Añadir") }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
+            DeckTextButton(onClick = onDismiss) { Text("Cancelar") }
         }
     )
 }

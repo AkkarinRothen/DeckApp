@@ -1,5 +1,9 @@
 package com.deckapp.feature.reference
 
+import com.deckapp.core.ui.components.DeckCard
+import com.deckapp.core.ui.components.DeckButton
+import com.deckapp.core.ui.components.DeckTextButton
+
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.graphics.pdf.PdfRenderer
@@ -153,7 +157,7 @@ fun ManualViewerScreen(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    TextButton(
+                                    DeckTextButton(
                                         onClick = { 
                                             jumpPageInput = (pagerState.currentPage + 1).toString()
                                             showJumpDialog = true 
@@ -234,12 +238,12 @@ fun ManualViewerScreen(
                             }
                         },
                         confirmButton = {
-                            Button(onClick = viewModel::saveOcrToWiki) {
+                            DeckButton(onClick = viewModel::saveOcrToWiki) {
                                 Text("Guardar en Wiki")
                             }
                         },
                         dismissButton = {
-                            TextButton(onClick = viewModel::clearOcrResult) {
+                            DeckTextButton(onClick = viewModel::clearOcrResult) {
                                 Text("Cerrar")
                             }
                         }
@@ -260,7 +264,7 @@ fun ManualViewerScreen(
                             )
                         },
                         confirmButton = {
-                            Button(
+                            DeckButton(
                                 onClick = {
                                     val page = jumpPageInput.toIntOrNull()?.minus(1)
                                     if (page != null && page in 0 until uiState.pageCount) {
@@ -275,7 +279,7 @@ fun ManualViewerScreen(
                             }
                         },
                         dismissButton = {
-                            TextButton(onClick = { showJumpDialog = false }) {
+                            DeckTextButton(onClick = { showJumpDialog = false }) {
                                 Text("Cancelar")
                             }
                         }
@@ -376,7 +380,7 @@ fun PdfPageItem(
         }
     }
 
-    Card(
+    DeckCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         modifier = Modifier

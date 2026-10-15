@@ -1,5 +1,7 @@
 package com.deckapp.feature.reference.components
 
+import com.deckapp.core.ui.components.DeckTextButton
+
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -104,7 +106,7 @@ fun ImportSourceSheet(
                 )
             },
             confirmButton = {
-                TextButton(
+                DeckTextButton(
                     onClick = {
                         onMarkdownPaste(markdownText)
                         showMarkdownDialog = false
@@ -116,7 +118,7 @@ fun ImportSourceSheet(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showMarkdownDialog = false }) {
+                DeckTextButton(onClick = { showMarkdownDialog = false }) {
                     Text("Cancelar")
                 }
             }

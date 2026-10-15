@@ -1,5 +1,9 @@
 package com.deckapp.feature.importdeck
 
+import com.deckapp.core.ui.components.DeckCard
+import com.deckapp.core.ui.components.DeckButton
+import com.deckapp.core.ui.components.DeckOutlinedButton
+
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -521,7 +525,7 @@ private fun ConfigurePhase(
 
     if (uiState.source == DeckImportSource.PDF) {
         // PDF: primero previsualizar, luego confirmar
-        Button(
+        DeckButton(
             onClick = onPreview,
             modifier = Modifier.fillMaxWidth(),
             enabled = uiState.deckName.isNotBlank()
@@ -530,7 +534,7 @@ private fun ConfigurePhase(
         }
     } else {
         // Carpeta: importar directamente
-        Button(
+        DeckButton(
             onClick = onStartImport,
             modifier = Modifier.fillMaxWidth(),
             enabled = uiState.deckName.isNotBlank()
@@ -614,14 +618,14 @@ private fun PreviewPhase(
         }
 
         // Acciones
-        Button(
+        DeckButton(
             onClick = onConfirm,
             modifier = Modifier.fillMaxWidth(),
             enabled = !isLoading
         ) {
             Text("Importar ($estimatedTotal cartas aprox.)")
         }
-        OutlinedButton(
+        DeckOutlinedButton(
             onClick = onBack,
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -739,7 +743,7 @@ private fun SuccessPhase(cardCount: Int, deckName: String, failedFiles: List<Str
             color = MaterialTheme.colorScheme.primary
         )
         if (failedFiles.isNotEmpty()) {
-            Card(
+            DeckCard(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.errorContainer

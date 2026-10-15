@@ -1,5 +1,7 @@
 package com.deckapp.feature.reference.components
 
+import com.deckapp.core.ui.components.DeckTextButton
+
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -33,7 +35,7 @@ fun CellExpandDialog(
             )
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) {
+            DeckTextButton(onClick = onDismiss) {
                 Text("Cerrar")
             }
         },

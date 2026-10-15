@@ -1,5 +1,14 @@
 package com.deckapp.feature.settings
 
+import com.deckapp.core.ui.components.DeckCard
+import com.deckapp.core.ui.components.DeckButton
+import com.deckapp.core.ui.components.DeckOutlinedButton
+import com.deckapp.core.ui.components.DeckTextButton
+
+import com.deckapp.feature.settings.components.TableAppearanceCard
+import com.deckapp.feature.settings.components.ThemeComponentsPreview
+import com.deckapp.feature.settings.components.AppearancePresetsCard
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,6 +34,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.deckapp.core.model.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,7 +60,7 @@ fun SettingsScreen(
             title = { Text("Restaurar biblioteca") },
             text = { Text("Esta acción BORRARÁ todos tus mazos, tablas y notas actuales para reemplazarlos por los del backup. ¿Deseas continuar?") },
             confirmButton = {
-                TextButton(
+                DeckTextButton(
                     onClick = {
                         showRestoreConfirm = false
                         restoreBackupLauncher.launch("application/zip")
@@ -60,7 +70,7 @@ fun SettingsScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showRestoreConfirm = false }) {
+                DeckTextButton(onClick = { showRestoreConfirm = false }) {
                     Text("Cancelar")
                 }
             }
@@ -160,6 +170,38 @@ fun SettingsScreen(
                 }
             }
 
+            // ── Apariencia ──────────────────────────────────────────
+            item { HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp)) }
+
+            item {
+                Text(
+                    "Apariencia",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            item {
+                ThemeSelectorCard(
+                    currentTheme = uiState.appTheme,
+                    onThemeSelected = { viewModel.setAppTheme(it) }
+                )
+            }
+
+            item {
+                TableAppearanceCard(
+                    appearance = uiState.tableAppearance,
+                    onTextureSelected = viewModel::setTextureIntensity,
+                    onDensitySelected = viewModel::setTableDensity
+                )
+            }
+
+            item {
+                AppearancePresetsCard(uiState.tableAppearance.accent, uiState.appearancePresets,
+                    viewModel::setThemeAccent, viewModel::saveAppearancePreset,
+                    viewModel::applyAppearancePreset, viewModel::deleteAppearancePreset)
+            }
+
             // ── Calidad de imagen ───────────────────────────────────────
             item { HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp)) }
 
@@ -223,7 +265,7 @@ fun SettingsScreen(
             }
 
             item {
-                Card(modifier = Modifier.fillMaxWidth()) {
+                DeckCard(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text("• Jetpack Compose (UI Framework)", style = MaterialTheme.typography.bodySmall)
                         Text("• Hilt (Inyección de dependencias)", style = MaterialTheme.typography.bodySmall)
@@ -248,7 +290,7 @@ fun SettingsScreen(
             }
 
             item {
-                Card(modifier = Modifier.fillMaxWidth()) {
+                DeckCard(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         InfoRow(label = "Versión", value = uiState.appVersion)
                         InfoRow(label = "Licencia", value = "MIT / Personal")
@@ -272,7 +314,7 @@ private fun StorageSummaryCard(
     val usedByAppPercent = if (systemTotalBytes > 0) totalSizeBytes.toFloat() / systemTotalBytes else 0f
     val otherUsedPercent = if (systemTotalBytes > 0) (systemTotalBytes - systemFreeBytes - totalSizeBytes).toFloat() / systemTotalBytes else 0f
 
-    Card(
+    DeckCard(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
@@ -305,7 +347,7 @@ private fun StorageSummaryCard(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    OutlinedButton(
+                    DeckOutlinedButton(
                         onClick = onClearCache,
                         contentPadding = PaddingValues(horizontal = 8.dp),
                         colors = ButtonDefaults.outlinedButtonColors(
@@ -414,7 +456,7 @@ private fun InfoRow(label: String, value: String) {
 @Composable
 private fun JpegQualitySelector(currentQuality: Int, onQualitySelected: (Int) -> Unit) {
     val options = listOf("Alta" to 95, "Media" to 85, "Baja" to 70)
-    Card(modifier = Modifier.fillMaxWidth()) {
+    DeckCard(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
                 "Calidad de imagen al importar",
@@ -441,7 +483,7 @@ private fun JpegQualitySelector(currentQuality: Int, onQualitySelected: (Int) ->
 @Composable
 private fun GeminiApiKeyEditor(currentKey: String, onKeyChanged: (String) -> Unit) {
     var text by remember(currentKey) { mutableStateOf(currentKey) }
-    Card(modifier = Modifier.fillMaxWidth()) {
+    DeckCard(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
                 "Gemini AI (Google)",
@@ -476,7 +518,7 @@ private fun AutoVisionToggle(
     apiKeyConfigured: Boolean,
     onToggle: (Boolean) -> Unit
 ) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+    DeckCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -506,7 +548,7 @@ private fun SimplifiedModeToggle(
     enabled: Boolean,
     onToggle: (Boolean) -> Unit
 ) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+    DeckCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -542,7 +584,7 @@ private fun BackupCard(
     onCreateBackup: () -> Unit,
     onRestoreBackup: () -> Unit
 ) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+    DeckCard(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
                 "Gestión de Biblioteca",
@@ -567,13 +609,13 @@ private fun BackupCard(
                 }
             } else {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(
+                    DeckButton(
                         onClick = onCreateBackup,
                         modifier = Modifier.weight(1f)
                     ) {
                         Text("Crear Backup")
                     }
-                    OutlinedButton(
+                    DeckOutlinedButton(
                         onClick = onRestoreBackup,
                         modifier = Modifier.weight(1f)
                     ) {
@@ -581,6 +623,105 @@ private fun BackupCard(
                     }
                 }
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ThemeSelectorCard(
+    currentTheme: AppTheme,
+    onThemeSelected: (AppTheme) -> Unit
+) {
+    DeckCard(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                "Tema visual",
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                "Elige la atmósfera visual para tus partidas. El tema Pergamino viste la app con tonos cálidos y texturas de papel antiguo.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                ThemeOptionButton(
+                    title = "Oscuro",
+                    subtitle = "OLED",
+                    icon = "🌙",
+                    isSelected = currentTheme == AppTheme.DARK,
+                    onClick = { onThemeSelected(AppTheme.DARK) },
+                    modifier = Modifier.widthIn(min = 120.dp)
+                )
+
+                ThemeOptionButton(
+                    title = "Pergamino",
+                    subtitle = "TTRPG",
+                    icon = "📜",
+                    isSelected = currentTheme == AppTheme.PARCHMENT,
+                    onClick = { onThemeSelected(AppTheme.PARCHMENT) },
+                    modifier = Modifier.widthIn(min = 120.dp)
+                )
+
+                ThemeOptionButton(
+                    title = "Claro",
+                    subtitle = "Moderno",
+                    icon = "☀️",
+                    isSelected = currentTheme == AppTheme.LIGHT,
+                    onClick = { onThemeSelected(AppTheme.LIGHT) },
+                    modifier = Modifier.widthIn(min = 120.dp)
+                )
+                ThemeOptionButton(title = "Pergamino nocturno", subtitle = "Tinta marfil", icon = "🕯️",
+                    isSelected = currentTheme == AppTheme.PARCHMENT_NIGHT,
+                    onClick = { onThemeSelected(AppTheme.PARCHMENT_NIGHT) }, modifier = Modifier.widthIn(min = 120.dp))
+            }
+            ThemeComponentsPreview()
+        }
+    }
+}
+
+@Composable
+private fun ThemeOptionButton(
+    title: String,
+    subtitle: String,
+    icon: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = onClick,
+        shape = MaterialTheme.shapes.small,
+        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+        border = if (isSelected) androidx.compose.foundation.BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier.padding(vertical = 12.dp, horizontal = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(text = icon, style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.labelSmall,
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+            )
         }
     }
 }

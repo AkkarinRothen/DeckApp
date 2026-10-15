@@ -1,5 +1,7 @@
 package com.deckapp.feature.reference.components
 
+import com.deckapp.core.ui.components.DeckCard
+
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
@@ -21,7 +23,7 @@ fun ReferenceTableCard(
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    DeckCard(
         modifier = modifier
             .fillMaxWidth()
             .combinedClickable(

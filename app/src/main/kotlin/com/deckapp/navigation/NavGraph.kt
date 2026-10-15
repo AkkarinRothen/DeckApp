@@ -208,6 +208,7 @@ fun DeckAppNavHost(
                 SessionScreen(
                     onCardClick = { cardId, sessionId -> navController.navigate(CardViewRoute(cardId = cardId, sessionId = sessionId)) },
                     onSessionEnd = { navController.popBackStack() },
+                    onNavigateTo = { route -> navController.navigate(route) },
                     onBrowseDeck = { deckId -> navController.navigate(DeckDetailRoute(deckId = deckId)) },
                     onCreateTable = { sessionId -> navController.navigate(TableEditorRoute(sessionId = sessionId)) },
                     onImportTable = { sessionId -> navController.navigate(TableImportRoute(sessionId = sessionId)) },
@@ -217,7 +218,8 @@ fun DeckAppNavHost(
                     onNewReferenceTable = { sys -> navController.navigate(ReferenceTableEditorRoute(prefilledSystem = sys)) },
                     onNewSystemRule = { sys -> navController.navigate(RuleEditorRoute(prefilledSystem = sys)) },
                     onShowDiceRoller = { showDiceRoller = true },
-                    onShowMythicOracle = { showMythicOracle = true }
+                    onShowMythicOracle = { showMythicOracle = true },
+                    onHistoryClick = { id -> navController.navigate(SessionHistoryRoute(sessionId = id)) }
                 )
             }
             

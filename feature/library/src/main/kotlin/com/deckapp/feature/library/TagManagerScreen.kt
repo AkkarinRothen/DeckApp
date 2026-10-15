@@ -1,5 +1,9 @@
 package com.deckapp.feature.library
 
+import com.deckapp.core.ui.components.DeckCard
+import com.deckapp.core.ui.components.DeckButton
+import com.deckapp.core.ui.components.DeckTextButton
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -109,7 +113,7 @@ private fun TagItem(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
-    Card(
+    DeckCard(
         modifier = Modifier.fillMaxWidth(),
         onClick = onEdit
     ) {
@@ -192,7 +196,7 @@ private fun TagEditDialog(
             }
         },
         confirmButton = {
-            Button(
+            DeckButton(
                 onClick = onSave,
                 enabled = tag.name.isNotBlank()
             ) {
@@ -200,7 +204,7 @@ private fun TagEditDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            DeckTextButton(onClick = onDismiss) {
                 Text("Cancelar")
             }
         }

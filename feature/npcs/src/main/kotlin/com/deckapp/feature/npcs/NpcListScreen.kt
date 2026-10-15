@@ -1,5 +1,8 @@
 package com.deckapp.feature.npcs
 
+import com.deckapp.core.ui.components.DeckCard
+import com.deckapp.core.ui.components.DeckButton
+
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -157,7 +160,7 @@ fun NpcCard(
     onClick: () -> Unit,
     onLongClick: () -> Unit
 ) {
-    Card(
+    DeckCard(
         modifier = Modifier
             .fillMaxWidth()
             .combinedClickable(
@@ -251,7 +254,7 @@ fun NpcPeekContent(npc: Npc, onEdit: () -> Unit) {
                     Text(npc.description, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
-            Button(onClick = onEdit) {
+            DeckButton(onClick = onEdit) {
                 Text("Editar")
             }
         }

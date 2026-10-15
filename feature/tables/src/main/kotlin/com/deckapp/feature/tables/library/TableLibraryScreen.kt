@@ -1,5 +1,9 @@
 package com.deckapp.feature.tables.library
 
+import com.deckapp.core.ui.components.DeckButton
+import com.deckapp.core.ui.components.DeckOutlinedButton
+import com.deckapp.core.ui.components.DeckTextButton
+
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -82,7 +86,7 @@ fun TableLibraryScreen(
             title = { Text("¿Borrar seleccionadas?") },
             text = { Text("Se eliminarán permanentemente ${uiState.selectedTableIds.size} tablas.") },
             confirmButton = {
-                Button(
+                DeckButton(
                     onClick = {
                         viewModel.bulkDelete()
                         showBulkDeleteConfirmation = false
@@ -93,7 +97,7 @@ fun TableLibraryScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showBulkDeleteConfirmation = false }) { Text("Cancelar") }
+                DeckTextButton(onClick = { showBulkDeleteConfirmation = false }) { Text("Cancelar") }
             }
         )
     }
@@ -276,13 +280,13 @@ internal fun TablePackDialog(
                                     )
                                 }
                                 if (pack.isInstalled) {
-                                    TextButton(onClick = { onInstall(pack.assetName) }) { Text("Actualizar") }
-                                    TextButton(
+                                    DeckTextButton(onClick = { onInstall(pack.assetName) }) { Text("Actualizar") }
+                                    DeckTextButton(
                                         onClick = { onRemove(pack.assetName) },
                                         colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                                     ) { Text("Quitar") }
                                 } else {
-                                    TextButton(onClick = { onInstall(pack.assetName) }) { Text("Instalar") }
+                                    DeckTextButton(onClick = { onInstall(pack.assetName) }) { Text("Instalar") }
                                 }
                             }
                             HorizontalDivider()
@@ -292,7 +296,7 @@ internal fun TablePackDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Cerrar") }
+            DeckTextButton(onClick = onDismiss) { Text("Cerrar") }
         }
     )
 }
@@ -317,7 +321,7 @@ private fun EmptyLibraryState(hasFilters: Boolean, onClearFilters: () -> Unit, o
         )
         
         if (hasFilters) {
-            TextButton(onClick = onClearFilters) { Text("Limpiar filtros") }
+            DeckTextButton(onClick = onClearFilters) { Text("Limpiar filtros") }
         } else {
             Spacer(Modifier.height(8.dp))
             Text(
@@ -327,7 +331,7 @@ private fun EmptyLibraryState(hasFilters: Boolean, onClearFilters: () -> Unit, o
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.height(24.dp))
-            OutlinedButton(onClick = onExplorePacks) {
+            DeckOutlinedButton(onClick = onExplorePacks) {
                 Icon(Icons.Default.AutoAwesome, null)
                 Spacer(Modifier.width(8.dp))
                 Text("Explorar packs de tablas")

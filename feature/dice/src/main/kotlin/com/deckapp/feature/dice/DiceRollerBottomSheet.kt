@@ -1,5 +1,9 @@
 package com.deckapp.feature.dice
 
+import com.deckapp.core.ui.components.DeckButton
+import com.deckapp.core.ui.components.DeckOutlinedButton
+import com.deckapp.core.ui.components.DeckTextButton
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -79,7 +83,7 @@ fun DiceRollerBottomSheet(
         Spacer(Modifier.height(24.dp))
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(
+            DeckButton(
                 onClick = { 
                     viewModel.rollDice()
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -89,7 +93,7 @@ fun DiceRollerBottomSheet(
                 Text("Lanzar")
             }
             
-            OutlinedButton(
+            DeckOutlinedButton(
                 onClick = { viewModel.clearHistory() },
                 modifier = Modifier.height(56.dp)
             ) {
@@ -126,9 +130,9 @@ private fun DiceSelector(label: String, value: Int, min: Int, max: Int, onValueC
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(label, style = MaterialTheme.typography.labelSmall)
         Row(verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = { if (value > min) onValueChange(value - 1) }) { Text("-", fontSize = 20.sp) }
+            DeckTextButton(onClick = { if (value > min) onValueChange(value - 1) }) { Text("-", fontSize = 20.sp) }
             Text(value.toString(), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            TextButton(onClick = { if (value < max) onValueChange(value + 1) }) { Text("+", fontSize = 20.sp) }
+            DeckTextButton(onClick = { if (value < max) onValueChange(value + 1) }) { Text("+", fontSize = 20.sp) }
         }
     }
 }

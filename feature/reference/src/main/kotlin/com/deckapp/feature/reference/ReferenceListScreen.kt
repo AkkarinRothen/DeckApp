@@ -1,5 +1,7 @@
 package com.deckapp.feature.reference
 
+import com.deckapp.core.ui.components.DeckTextButton
+
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -232,7 +234,7 @@ fun StarterPackDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Cerrar") }
+            DeckTextButton(onClick = onDismiss) { Text("Cerrar") }
         }
     )
 }
@@ -254,9 +256,9 @@ fun PackItem(
                     IconButton(onClick = { onRemove(assetName) }) {
                         Icon(Icons.Default.Delete, contentDescription = "Quitar", tint = MaterialTheme.colorScheme.error)
                     }
-                    TextButton(onClick = { onInstall(assetName) }) { Text("Actualizar") }
+                    DeckTextButton(onClick = { onInstall(assetName) }) { Text("Actualizar") }
                 } else {
-                    TextButton(onClick = { onInstall(assetName) }) { Text("Instalar") }
+                    DeckTextButton(onClick = { onInstall(assetName) }) { Text("Instalar") }
                 }
             }
         }

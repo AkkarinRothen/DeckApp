@@ -18,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -25,6 +26,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.deckapp.core.model.RandomTable
 import com.deckapp.core.model.TableRollResult
+import com.deckapp.core.ui.components.PaperCard
+import com.deckapp.core.ui.components.categoryEmblem
+import com.deckapp.core.model.TableDensity
+import com.deckapp.core.ui.theme.LocalTableAppearance
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -43,28 +48,32 @@ fun TableGridItem(
     modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
+    val compact = LocalTableAppearance.current.density == TableDensity.COMPACT
+    val contentPadding = if (compact) 12.dp else 16.dp
 
     val containerColor = when {
         quickRollResult != null -> MaterialTheme.colorScheme.secondaryContainer
         isSelected -> MaterialTheme.colorScheme.primaryContainer
-        table.isPinned -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-        table.tags.isNotEmpty() -> Color(table.tags.first().color).copy(alpha = 0.15f)
-        else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+        else -> MaterialTheme.colorScheme.surface
     }
+    val accentColor = table.tags.firstOrNull()?.let { Color(it.color) }
+        ?: MaterialTheme.colorScheme.primary
 
-    Card(
+    PaperCard(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 140.dp)
-            .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick
-            ),
-        colors = CardDefaults.cardColors(containerColor = containerColor),
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 8.dp else 0.dp),
-        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
+            .heightIn(min = if (compact) 168.dp else 188.dp),
+        onClick = onClick,
+        onLongClick = onLongClick,
+        containerColor = containerColor,
+        shape = MaterialTheme.shapes.medium,
+        elevation = if (isSelected) 8.dp else 1.dp,
+        border = BorderStroke(if (isSelected) 2.dp else 1.dp,
+            if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant)
     ) {
+        Box(Modifier.matchParentSize().drawBehind {
+            drawRect(accentColor, size = androidx.compose.ui.geometry.Size(4.dp.toPx(), size.height))
+        })
         AnimatedContent(
             targetState = quickRollResult,
             transitionSpec = { fadeIn() togetherWith fadeOut() },
@@ -73,7 +82,7 @@ fun TableGridItem(
             if (result != null) {
                 // --- Vista de resultado inline ---
                 Column(
-                    modifier = Modifier.padding(16.dp).fillMaxSize(),
+                    modifier = Modifier.padding(contentPadding).fillMaxSize(),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row(
@@ -89,7 +98,7 @@ fun TableGridItem(
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f)
                         )
-                        IconButton(onClick = onDismissResult, modifier = Modifier.size(24.dp)) {
+                        IconButton(onClick = onDismissResult, modifier = Modifier.size(48.dp)) {
                             Icon(Icons.Default.Close, null, modifier = Modifier.size(18.dp))
                         }
                     }
@@ -126,8 +135,8 @@ fun TableGridItem(
                     Surface(
                         onClick = onQuickRoll,
                         color = MaterialTheme.colorScheme.secondary,
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.height(36.dp).fillMaxWidth()
+                        shape = MaterialTheme.shapes.small,
+                            modifier = Modifier.heightIn(min = 48.dp).fillMaxWidth()
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 12.dp),
@@ -143,7 +152,7 @@ fun TableGridItem(
             } else {
                 // --- Vista normal ---
                 Column(
-                    modifier = Modifier.padding(16.dp).fillMaxSize(),
+                    modifier = Modifier.padding(contentPadding).fillMaxSize(),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row(
@@ -152,6 +161,7 @@ fun TableGridItem(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Icon(categoryEmblem(table.category), null, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
                             table.tags.take(2).forEach { tag ->
                                 Surface(
                                     color = Color(tag.color).copy(alpha = 0.2f),
@@ -161,12 +171,12 @@ fun TableGridItem(
                                         text = tag.name,
                                         style = MaterialTheme.typography.labelSmall,
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                                        color = Color(tag.color)
+                                        color = MaterialTheme.colorScheme.onSurface
                                     )
                                 }
                             }
                         }
-                        IconButton(onClick = onTogglePin, modifier = Modifier.size(24.dp)) {
+                        IconButton(onClick = onTogglePin, modifier = Modifier.size(48.dp)) {
                             Icon(
                                 imageVector = if (table.isPinned) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                                 contentDescription = "Pin",
@@ -204,22 +214,22 @@ fun TableGridItem(
                         Surface(
                             onClick = onQuickRoll,
                             color = MaterialTheme.colorScheme.primary,
-                            shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.height(36.dp)
+                            shape = MaterialTheme.shapes.small,
+                            modifier = Modifier.heightIn(min = 48.dp)
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 12.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(Icons.Default.Casino, null, modifier = Modifier.size(16.dp), tint = Color.White)
+                                Icon(Icons.Default.Casino, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onPrimary)
                                 Spacer(Modifier.width(8.dp))
-                                Text("TIRAR", style = MaterialTheme.typography.labelLarge, color = Color.White, fontWeight = FontWeight.Bold)
+                                Text("TIRAR", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
                             }
                         }
 
                         Box {
-                            IconButton(onClick = { showMenu = true }, modifier = Modifier.size(24.dp)) {
-                                Icon(Icons.Default.MoreVert, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            IconButton(onClick = { showMenu = true }, modifier = Modifier.size(48.dp)) {
+                                Icon(Icons.Default.MoreVert, "Opciones de tabla", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                             DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
                                 DropdownMenuItem(

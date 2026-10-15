@@ -1,5 +1,138 @@
 ---
 
+### Sprint 52 — Pérdida de catálogo al actualizar: protección y recuperación (14 de octubre de 2026)
+
+**FIX — Migraciones registradas y actualización no destructiva**
+- Identificada la causa: versión de esquema 41 con migraciones registradas solo hasta 37 y `fallbackToDestructiveMigration()` habilitado. Una actualización sin ruta recreaba las tablas y perdía el catálogo.
+- Registro único `ALL_MIGRATIONS` incluye las rutas 37→38→39→40→41; eliminado el fallback destructivo. Una versión sin ruta debe fallar conservando la base.
+- Corregida la referencia del alias 29→30 y eliminado el borrado incondicional de PNJs en la migración 24→25.
+- APK identificado como 0.1.1 (versionCode 2).
+
+**FIX — Restauración y exportación de copias**
+- Colecciones y sus referencias incluidas en los DTO, exportación y restauración. Las etiquetas de tablas se insertan después de sus tablas para respetar las claves foráneas.
+- La copia de archivos incluye todos los directorios de recursos internos, incluidas portadas y wiki.
+
+**RECOVERY — Material preservado antes de intervenir**
+- App detenida sin borrar datos. Snapshot completo de bases, preferencias y archivos internos conservado con SHA-256 en `I:/TTRPG/Visuales/Decks/Deckapp-respaldo-2026-10-14/`.
+- Catálogo actual vacío; permanecen 112 imágenes (56 cartas frente/dorso). Preparado un ZIP importable independiente y conservadas las imágenes originales.
+- Localizado y copiado `Download/deckapp_backup_20260530.zip`: CRC correcto, 4 mazos, 143 cartas, 299 tablas, 4 PNJs, 3 sesiones, 2 colecciones y otros recursos. Las 112 imágenes actuales corresponden visualmente al mazo NPC Portraits de esa copia.
+- La copia antigua carece de dos imágenes referenciadas (una portada de colección y una imagen wiki). Los originales de ambos snapshots se conservan sin modificar.
+- Restauración de la copia de mayo pendiente de elegir la fuente de recuperación; no se ha reemplazado el catálogo del usuario.
+
+**INTEGRATION — Validación**
+- Preparadas pruebas Android aisladas de migración 37→41 y 40→41, reapertura de base actual, rechazo no destructivo de versión sin ruta, cobertura del registro y restauración de colecciones/etiquetas.
+- Compilación y pruebas en curso. Los tests usan un paquete separado y nunca la base de la app del usuario.
+
+---
+
+### Sprint 51 — Revisión en Motorola One Fusion (14 de octubre de 2026)
+
+**FIX — Barras del sistema y ventana de prueba**
+- Iconos de las barras de estado y navegación adaptados al tema de la app mediante WindowCompat. En Claro y Pergamino pasan a oscuros; en Oscuro y Pergamino nocturno permanecen claros.
+- Ventana de prueba de componentes con descripción más breve y mayor altura de lectura para evitar recortar innecesariamente el botón deshabilitado en el teléfono.
+
+**INTEGRATION — Dispositivo real**
+- APK instalado correctamente en Motorola One Fusion con Android 11 y pantalla de 720 × 1600.
+- Revisados selector de temas, diálogos Claro/Pergamino, vista previa nocturna, densidad cómoda/compacta y editor de portadas sin guardar datos de prueba.
+- `:app:assembleDebug` completado correctamente; APK corregido reinstalado y abierto en el teléfono.
+- Verificados visualmente los iconos oscuros sobre Claro/Pergamino y claros sobre Oscuro, y la ventana de ejemplo con todos sus botones visibles. Preferencias de prueba restauradas a Oscuro / Suave / Cómoda.
+
+---
+
+### Sprint 50 — Materiales, emblemas y estilos de campaña (13 de octubre de 2026)
+
+**FEATURE — Identidad de los temas**
+- Materiales procedurales cacheados por superficie: grano de carbón en Oscuro, fibras finas en Claro y fibras más largas con matices de envejecido en Pergamino. Se mantiene el control Apagada / Suave / Marcada y la intensidad reducida en áreas de lectura.
+- Pergamino nocturno: paleta marrón oscuro, tinta marfil, cobre y tipografía serif. Selector de cuatro temas adaptable al ancho.
+- Cabeceras de capítulo con símbolo y separadores propios del tema; iconografía común para tesoro, magia, encuentros, personajes y exploración en tablas y colecciones.
+- Acentos Del tema / Bosque / Cobre / Arcano. Estilos de campaña con nombre que guardan y restauran tema, acento, textura y densidad; guardar el mismo nombre actualiza la combinación existente.
+
+**FEATURE — Portadas de colecciones**
+- Portada automática temática con marco, emblema y color. Editor con vista previa, selección de seis colores y once emblemas, imagen opcional y opción para volver a la portada automática.
+- Fallback de imagen fallida a portada automática; edición accesible sobre fondos claros, oscuros e imágenes.
+
+**FIX — Guardado de colecciones**
+- Editar copia los datos existentes para preservar descripción, imagen y fecha de creación. La actualización usa UPDATE, evitando la eliminación en cascada de recursos que podía causar INSERT OR REPLACE.
+- Seleccionar una imagen en el editor ya no modifica la colección antes de confirmar.
+
+**INTEGRATION — Validación**
+- `:app:assembleDebug` y `:core:data:testDebugUnitTest` completados con éxito. Seis pruebas nuevas de persistencia/regresión aprobadas (cuatro de estilos y dos de colecciones).
+- Veinte pares de texto/fondo de Pergamino nocturno y acentos verificados: contraste mínimo 7:1 en colores sólidos base.
+- Revisión visual en Android pendiente: sin dispositivo conectado ni AVD configurado.
+
+---
+
+### Sprint 49 — Componentes y lenguaje visual compartidos (13 de octubre de 2026)
+
+**FEATURE — Temas integrados en los controles de la app**
+- Paletas Claro y Oscuro completadas con contenedores, colores de texto, superficies inversas, bordes, errores y tintes de elevación; Pergamino incorpora tinte y scrim propios.
+- Formas compartidas para campos, botones, tarjetas y diálogos. Pergamino usa esquinas más sobrias; Claro y Oscuro conservan formas redondeadas.
+- `DeckCard`, `DeckButton`, `DeckOutlinedButton` y `DeckTextButton` integrados en las pantallas de features y componentes compartidos. Mantienen las interacciones de Material, parámetros explícitos y áreas de acción mínimas de 48 dp; tarjetas con borde fino y elevación discreta según tema.
+- Jerarquía tipográfica completa con estilos de lectura comunes y títulos serif en Pergamino.
+- Ajustes → Apariencia incorpora una ventana de prueba del tema con tarjeta, campo editable, acción secundaria y estado deshabilitado. El ejemplo no se guarda en las campañas.
+
+**FIX — Consistencia entre temas**
+- Tablas y selector de tema usan las formas compartidas. Fondos de papel adoptan los mismos bordes de tarjeta.
+- Panel de PNJs de sesión sustituye texto/fondos blancos fijos por colores semánticos para Claro, Oscuro y Pergamino.
+
+**INTEGRATION — Validación**
+- Verificados 11 pares de texto/fondo por paleta: contraste mínimo 6.48:1 en Oscuro, 6.43:1 en Claro y 5.49:1 en Pergamino (colores sólidos base).
+- `:app:assembleDebug` completado con éxito y verificado nuevamente con los archivos finales; sin errores de formato en los archivos UI modificados. Revisión visual en Android pendiente: sin dispositivo conectado ni AVD configurado.
+
+---
+
+### Sprint 48 — Controles de textura y densidad (13 de octubre de 2026)
+
+**FEATURE — Apariencia configurable de tablas**
+- Ajustes → Apariencia incorpora textura Apagada / Suave / Marcada y densidad Cómoda / Compacta, con selección accesible y controles que se acomodan al ancho disponible.
+- Vista previa de encuentros con los mismos componentes de cabecera y filas usados en las tablas reales. Responde al tema, textura y densidad actuales.
+- Densidad aplicada a filas de consulta y espaciado de tarjetas/listas de tablas; los botones mantienen sus áreas táctiles.
+
+**ARCHITECTURE — Preferencias reactivas**
+- `TableAppearance` persiste ambas opciones en SharedPreferences y expone un StateFlow desde SettingsRepository. MainActivity propaga los cambios mediante el tema; valores ausentes o inválidos conservan los valores por defecto Suave / Cómoda.
+- La intensidad multiplica la textura según cada superficie, conservando el grano tenue en zonas de lectura. Apagada evita cargar y dibujar la textura.
+
+**INTEGRATION — Validación**
+- `:app:assembleDebug` completado con éxito y verificado nuevamente con los archivos finales. Revisión visual en Android pendiente: sin dispositivo conectado ni AVD configurado.
+
+---
+
+### Sprint 47 — Lectura de tablas y refinamiento de Pergamino (13 de octubre de 2026)
+
+**FEATURE — Tablas como páginas de referencia**
+- Vista desplegable de entradas en la hoja de tirada: cabecera, rangos monoespaciados, filas alternadas y marca de última tirada para tablas RANGE. WEIGHTED muestra pesos; SEQUENTIAL y MACRO muestran pasos en su orden de ejecución.
+- Resultado en panel de lectura con textura tenue, dado destacado y separador de cabecera. Hoja desplazable para consultar entradas, resultados largos e historial en pantallas pequeñas.
+- Tarjetas de tablas con papel base, borde fino y acento lateral según etiqueta; estados de selección y tirada conservan colores semánticos. Botones de las tarjetas de biblioteca ampliados a 48 dp y texto de acción adaptado al tema.
+
+**FIX — Consistencia del tema**
+- Intensidad de textura reducida por tema y configurable por superficie mediante `textureAlpha` en `PaperCard` / `PaperSurface`.
+- Completados los colores de contenedores, superficies inversas y errores de Pergamino; bronce más oscuro para mejorar contraste. Color de texto de respaldo para superficies personalizadas.
+
+**INTEGRATION — Validación**
+- `:app:assembleDebug` completado con éxito después de los ajustes finales. Validación visual en Android pendiente: sin dispositivo conectado ni AVD configurado.
+
+---
+
+### Sprint 46 — Tema Pergamino & Textura de Papel para Tablas (13 de octubre de 2026)
+
+**FEATURE — Tema Pergamino y Textura de Fondo TTRPG**
+- **Sistema de Temas Tri-Modal (`AppTheme`)**: Soporte en `core:model` para `DARK` (OLED), `LIGHT` y `PARCHMENT` (Pergamino de fantasía medieval).
+- **Paleta Pergamino (`DeckParchmentColorScheme`)**: Primario granate/cuero medieval (`#7B1E2B`), acento dorado/latón (`#B8860B`), fondos en papiro/pergamino envejecido (`#F4EEDD` y `#EBE1C8`), y texto en tinta sepia/carbón (`#2B2118`).
+- **Tipografía Medieval-Moderna (`DeckParchmentTypography`)**: Títulos y cabeceras en `FontFamily.Serif` evocador de libros de reglas clásicos, combinados con fuentes legibles sin serifas para fórmulas y números de tirada.
+- **Textura de Papel Tileable (`bg_paper_texture.webp`)**: Textura ultra-ligera y continua integrada en `core:ui/res/drawable/`.
+- **Componentes `PaperCard` y `Modifier.paperBackground()`**: Diseñados para aplicar la textura con modos de fusión adaptables (`BlendMode.Screen` en tema oscuro y `BlendMode.Modulate` en pergamino/claro) sin perder contraste ni legibilidad.
+- **Texturización de Tablas**: Aplicado `PaperCard` y fondo texturizado a `TableListItem`, `FeaturedTableCard`, `TableGridItem`, `TableDetailSheet` y al panel de historial de tiradas.
+- **Selector de Tema en Ajustes**: Tarjeta interactiva en `SettingsScreen` con vista previa de los 3 temas y persistencia reactiva en `SettingsRepository`.
+
+**FIX — Higiene y Compatibilidad de Compilación**
+- **`BackupRepositoryImpl`**: Corregida llamada al constructor de `TableBundleEntity` usando named parameters para solventar incompatibilidad con `imageUrl` y `createdAt`.
+- **`LibraryScreen` & `TableGridItem`**: Resueltos imports faltantes de `CircleShape`, `AsyncImage` y orden de launchers de picking de imágenes.
+
+**INTEGRATION — Build & Tests**
+- **BUILD SUCCESSFUL** `assembleDebug` y tests unitarios en `:core:domain:test` verificados con éxito (60 tests aprobados).
+
+---
+
 ### Sprint 45 — Estabilidad, Higiene Técnica y UX Pro (19 de abril de 2026)
 
 **ARCHITECTURE — Lógica de "Upsert" Inteligente y Estabilidad de Listas**

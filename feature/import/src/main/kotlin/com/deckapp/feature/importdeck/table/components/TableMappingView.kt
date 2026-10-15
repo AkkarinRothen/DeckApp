@@ -1,5 +1,8 @@
 package com.deckapp.feature.importdeck.table.components
 
+import com.deckapp.core.ui.components.DeckButton
+import com.deckapp.core.ui.components.DeckOutlinedButton
+
 import android.graphics.Bitmap
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -213,7 +216,7 @@ fun TableMappingView(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                OutlinedButton(
+                DeckOutlinedButton(
                     onClick = onConfirm,
                     modifier = Modifier.weight(1f).height(56.dp),
                     shape = RoundedCornerShape(18.dp),
@@ -223,7 +226,7 @@ fun TableMappingView(
                     Spacer(Modifier.width(8.dp))
                     Text("OCR")
                 }
-                Button(
+                DeckButton(
                     onClick = onVisionRecognize,
                     modifier = Modifier.weight(1f).height(56.dp),
                     shape = RoundedCornerShape(18.dp),
@@ -244,7 +247,7 @@ fun TableMappingView(
                 }
             }
         } else {
-            Button(
+            DeckButton(
                 onClick = onConfirm,
                 modifier = Modifier.fillMaxWidth().height(60.dp),
                 shape = RoundedCornerShape(18.dp),
