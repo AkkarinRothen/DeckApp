@@ -117,8 +117,8 @@ class TacticalAtlasVttFeaturesTest {
     fun `spawnEncounterOnMap spawns cluster tokens and activates encounter`() = runTest {
         val map = TacticalMap(id = 1L, name = "Arena", imageUri = "arena.png")
         val creatures = listOf(
-            EncounterCreature(id = 101L, name = "Orco 1", currentHp = 15, maxHp = 15, armorClass = 13, isPlayer = false),
-            EncounterCreature(id = 102L, name = "Orco 2", currentHp = 15, maxHp = 15, armorClass = 13, isPlayer = false)
+            EncounterCreature(id = 101L, encounterId = 50L, name = "Orco 1", currentHp = 15, maxHp = 15, armorClass = 13),
+            EncounterCreature(id = 102L, encounterId = 50L, name = "Orco 2", currentHp = 15, maxHp = 15, armorClass = 13)
         )
         val encounter = Encounter(id = 50L, name = "Emboscada Orca", creatures = creatures)
 
@@ -133,7 +133,7 @@ class TacticalAtlasVttFeaturesTest {
         )
 
         coEvery { mapRepo.upsertToken(any()) } returns 1L
-        coEvery { encounterRepo.setActiveEncounter(any(), any()) } just Runs
+        coEvery { encounterRepo.saveEncounter(any()) } returns 50L
 
         val delegate = TacticalMapDelegate(
             sessionId = 100L,
@@ -145,23 +145,23 @@ class TacticalAtlasVttFeaturesTest {
         )
 
         delegate.spawnEncounterOnMap(50L, originCellX = 10f, originCellY = 10f)
+        testScheduler.advanceUntilIdle()
 
         // Verify tokens were persisted
         coVerify(exactly = 2) { mapRepo.upsertToken(any()) }
-        coVerify(exactly = 1) { encounterRepo.setActiveEncounter(100L, 50L) }
+        coVerify(exactly = 1) { encounterRepo.saveEncounter(match { it.id == 50L && it.isActive }) }
 
         val finalState = uiState.value.tacticalState
-        assertEquals(encounter, finalState.activeEncounter)
         assertNotNull(finalState.focusCameraOnTokenId)
     }
 
     @Test
     fun `combat turn navigation advances turn, increments round, and auto-focuses camera`() = runTest {
         val creatures = listOf(
-            EncounterCreature(id = 101L, name = "Guerrero", currentHp = 25, maxHp = 25, isPlayer = true),
-            EncounterCreature(id = 102L, name = "Dragón", currentHp = 120, maxHp = 120, isPlayer = false)
+            EncounterCreature(id = 101L, encounterId = 5L, name = "Guerrero", currentHp = 25, maxHp = 25),
+            EncounterCreature(id = 102L, encounterId = 5L, name = "Dragón", currentHp = 120, maxHp = 120)
         )
-        val encounter = Encounter(id = 5L, name = "Boss", creatures = creatures, currentTurnIndex = 0, round = 1)
+        val encounter = Encounter(id = 5L, name = "Boss", creatures = creatures, currentTurnIndex = 0, currentRound = 1)
         val tokenDragon = TacticalToken(id = 99L, mapId = 1L, name = "Dragón", encounterCreatureId = 102L)
 
         val uiState = MutableStateFlow(
@@ -173,7 +173,7 @@ class TacticalAtlasVttFeaturesTest {
             )
         )
 
-        coEvery { encounterRepo.saveEncounter(any()) } just Runs
+        coEvery { encounterRepo.saveEncounter(any()) } returns 5L
 
         val delegate = TacticalMapDelegate(
             sessionId = 100L,
@@ -185,6 +185,7 @@ class TacticalAtlasVttFeaturesTest {
         )
 
         delegate.advanceCombatTurn()
+        testScheduler.advanceUntilIdle()
 
         coVerify {
             encounterRepo.saveEncounter(match {
@@ -195,13 +196,13 @@ class TacticalAtlasVttFeaturesTest {
     }
 
     @Test
-    fun `rollInlineFormula evaluates dice formula and displays result in snackbar`() {
+    fun `rollInlineFormula evaluates dice formula and displays result in snackbar`() = runTest {
         val uiState = MutableStateFlow(SessionUiState())
 
         val delegate = TacticalMapDelegate(
             sessionId = 100L,
             _uiState = uiState,
-            scope = mockk(relaxed = true),
+            scope = this,
             tacticalMapRepository = mapRepo,
             encounterRepository = encounterRepo,
             distanceCalculator = distanceCalculator

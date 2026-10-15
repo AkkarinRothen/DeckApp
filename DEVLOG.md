@@ -1,5 +1,39 @@
 ---
 
+### Sprint 58 — Mapa Táctico: Mapas Anidados (Map-in-Map), Mini-Panel Flotante, Turn Tracker con Auto-Foco y Spawneo Masivo (15 de octubre de 2026)
+
+**FEATURE — Mapas Anidados (Map-in-Map) y Breadcrumbs Jerárquicos**
+- Soporte para sub-mapas tácticos enlazados a pines (`targetMapId` en `TacticalMapPin` y `TacticalMapPinEntity`) con migración Room v43 -> v44 (`MIGRATION_43_44`).
+- Barra de migas de pan interactiva superior (`TacticalBreadcrumbBar`): visualiza la jerarquía de exploración (ej. *Mundo > Región > Mazmorra*) con botón para retroceder al mapa superior y badge del mapa actual.
+- Selector de mapa de destino en `TacticalPinDialog` con nuevos iconos dedicados para transiciones de mapa (`stairs` y `portal`).
+- Navegación bidireccional suave: al hacer click en *"Entrar al mapa"* en un pin enlazado o en una miga de pan superior, la vista conmuta al sub-mapa preservando el historial de navegación en la sesión activa.
+
+**FEATURE — Mini-Panel Flotante In-Situ en Pines (Estilo Atlas VTT)**
+- Inspector flotante no invasivo (`TacticalFloatingPinPanel`) con ancho compacto (~340dp) y fondo glassmorphism oscuro posicionado sobre el canvas táctico.
+- Renderizado de notas del pin con soporte Markdown y detección de fórmulas de dados en línea (ej. `2d6+3`, `1d20+5`) convertidas a chips de tirada interactiva con un toque.
+- Barra de acciones rápidas contextuadas:
+  - `[Entrar al Mapa]`: Transición inmediata al sub-mapa táctico enlazado.
+  - `[Desplegar Encuentro]`: Spawneo masivo de las criaturas del encuentro en celdas adyacentes no bloqueadas.
+  - `[Tirar Tabla]`: Ejecución directa de la tabla aleatoria vinculada.
+  - `[Alternar Secreto/Público]`: Modificación rápida de la visibilidad para ocultar o revelar notas y descubrimientos del DM.
+  - `[Editar]`: Apertura del diálogo completo para modificar color, icono y metadatos.
+
+**FEATURE — Turn Tracker & Iniciativa en Canvas con Auto-Foco de Cámara**
+- Barra de iniciativa táctica superior (`TacticalInitiativeBar`): expone el número de ronda actual, avatares de las criaturas en orden de iniciativa con barras de vida, badges de daño/vida crítica y controles de turno siguiente (`SkipNext`) y anterior (`SkipPrevious`).
+- Centrado y auto-foco de cámara fluido: al avanzar o retroceder el turno, o al pulsar directamente sobre el avatar de una criatura en la barra de iniciativa, la cámara del mapa táctico se desplaza automáticamente para enfocar y centrar la celda del token activo (`focusCameraOnTokenId`).
+
+**FEATURE — Spawneo Masivo de Encuentros (Cluster Placement)**
+- Algoritmo de colocación en racimo (`spawnEncounterOnMap`): genera y sitúa a todas las criaturas del encuentro en celdas transitables libres alrededor del pin o celda de origen, evitando automáticamente celdas con terreno bloqueante (`WALL`) y tokens preexistentes.
+- Vinculación automática al combate activo y refresco en tiempo real del mapa táctico.
+
+**VALIDACIÓN Y PARIDAD**
+- 6 pruebas unitarias creadas en `TacticalAtlasVttFeaturesTest` cubriendo navegación jerárquica de mapas, spawneo masivo en cluster, evaluación de fórmulas de dados en línea y turn tracker con auto-foco; todas aprobadas.
+- Compilación y suite de pruebas de `:feature:draw:testDebugUnitTest` aprobadas al 100%.
+- Ensamblado total verificado con `./gradlew :app:assembleDebug` (BUILD SUCCESSFUL en 1m 39s).
+- *Feature Parity Mandate:* Registrado para sincronizar en `TDAPP-desktop`: migración Room v44 (`targetMapId`), barra de breadcrumbs de mapa táctico, mini-panel flotante in-situ, algoritmo de cluster placement para encuentros y auto-foco de cámara con el tracker de iniciativa.
+
+---
+
 ### Sprint 57 — Mapa Táctico: Condiciones, Elevación 3D y Ventaja Inteligente (15 de octubre de 2026)
 
 **FEATURE — Estados y Condiciones en Tokens**

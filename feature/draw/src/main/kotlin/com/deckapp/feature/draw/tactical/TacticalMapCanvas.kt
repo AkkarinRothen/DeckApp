@@ -77,8 +77,6 @@ fun TacticalMapCanvas(
     var aoeLocalOrigin by remember { mutableStateOf(Offset.Zero) }
     var aoeLocalAngle by remember { mutableFloatStateOf(0f) }
 
-    val map = uiState.map ?: return
-
     val transformState = rememberTransformableState { zoomChange, offsetChange, _ ->
         zoom = (zoom * zoomChange).coerceIn(0.25f, 4.0f)
         panOffset += offsetChange

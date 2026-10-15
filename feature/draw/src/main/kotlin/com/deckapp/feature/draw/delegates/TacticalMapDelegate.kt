@@ -1432,11 +1432,11 @@ class TacticalMapDelegate(
                     }
                 }
 
-                val faction = if (creature.isPlayer) TokenFaction.PLAYER else TokenFaction.ENEMY
+                val faction = TokenFaction.ENEMY
                 val newToken = TacticalToken(
                     mapId = map.id,
                     name = creature.name,
-                    avatarUri = creature.imageUri,
+                    avatarUri = creature.imagePath,
                     faction = faction,
                     sizeInCells = 1f,
                     cellX = placeX,
@@ -1451,7 +1451,8 @@ class TacticalMapDelegate(
                 if (firstSpawnedTokenId == null) firstSpawnedTokenId = id
             }
 
-            encounterRepository.setActiveEncounter(sessionId, encounter.id)
+            val activatedEncounter = encounter.copy(isActive = true, linkedSessionId = sessionId)
+            encounterRepository.saveEncounter(activatedEncounter)
 
             _uiState.update { state ->
                 state.copy(
