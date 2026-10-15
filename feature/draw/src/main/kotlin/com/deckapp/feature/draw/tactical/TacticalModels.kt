@@ -82,6 +82,8 @@ data class TacticalUiState(
     val showMapSettingsDialog: Boolean = false,
     // Gestión Multimapa de la Sesión y Vínculo con Escenas
     val availableMaps: List<TacticalMap> = emptyList(),
+    val mapBreadcrumbs: List<Pair<Long, String>> = emptyList(),
+    val focusCameraOnTokenId: Long? = null,
     val showMapSelectorSheet: Boolean = false,
     val showCreateMapDialog: Boolean = false,
     val mapToRename: TacticalMap? = null,
@@ -154,5 +156,7 @@ data class TacticalAttackResolution(
     val damageFormula: String,
     val damageRoll: Int,
     val distanceFt: Int,
+    val elevationDiffFt: Int = 0,
+    val advantageLabel: String? = null,
     val isDamageApplied: Boolean = false
 )

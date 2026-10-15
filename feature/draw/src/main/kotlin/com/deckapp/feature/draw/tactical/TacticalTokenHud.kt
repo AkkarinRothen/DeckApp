@@ -29,6 +29,7 @@ fun TacticalTokenHud(
     onHpChanged: (newHp: Int) -> Unit,
     onConditionToggled: (Condition) -> Unit,
     onSizeChanged: (newSize: Float) -> Unit,
+    onElevationChanged: (newElevationFt: Int) -> Unit = {},
     onVisibilityToggled: () -> Unit,
     onStartAttackTargeting: () -> Unit = {},
     onOpenNpc: ((Long) -> Unit)? = null,
@@ -273,6 +274,61 @@ fun TacticalTokenHud(
                     modifier = Modifier.height(34.dp)
                 ) {
                     Text("+5", fontWeight = FontWeight.Bold)
+                }
+            }
+
+            // Fila de Elevación y Vuelo
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Flight,
+                    contentDescription = "Elevación",
+                    modifier = Modifier.size(16.dp),
+                    tint = if (token.elevationFt != 0) Color(0xFF00E5FF) else MaterialTheme.colorScheme.outline
+                )
+                Text(
+                    text = "Altura:",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.outline
+                )
+
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = if (token.elevationFt != 0) Color(0xFF00E5FF).copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    Text(
+                        text = if (token.elevationFt > 0) "+${token.elevationFt} ft" else "${token.elevationFt} ft",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = if (token.elevationFt != 0) Color(0xFF00E5FF) else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                    )
+                }
+
+                if (token.elevationFt != 0) {
+                    FilledTonalButton(
+                        onClick = { onElevationChanged(0) },
+                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
+                        modifier = Modifier.height(26.dp)
+                    ) {
+                        Text("Tierra", fontSize = 10.sp)
+                    }
+                }
+
+                listOf(-5, 5, 10, 20).forEach { delta ->
+                    val sign = if (delta > 0) "+$delta" else "$delta"
+                    FilledTonalButton(
+                        onClick = { onElevationChanged((token.elevationFt + delta).coerceIn(-100, 500)) },
+                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
+                        modifier = Modifier.height(26.dp)
+                    ) {
+                        Text("${sign}ft", fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+                    }
                 }
             }
 

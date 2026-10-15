@@ -91,13 +91,36 @@ internal fun BoardBlockContent(
     notesContent: String = "",
     onUpdateNotes: (String) -> Unit = {},
     onSendToNotes: ((tableName: String, resultText: String) -> Unit)? = null,
-    onRecordCombatNote: ((String) -> Unit)? = null
+    onRecordCombatNote: ((String) -> Unit)? = null,
+    tableFormula: String? = null,
+    tableRecentRolls: List<TableRollResult> = emptyList(),
+    randomTable: RandomTable? = null,
+    pinnedTableRoll: TableRollResult? = null,
+    onPinTableRoll: ((TableRollResult) -> Unit)? = null,
+    onUnpinTableRoll: (() -> Unit)? = null,
+    boardMythicChaos: Int = 5,
+    boardMythicProbability: ProbabilityLevel = ProbabilityLevel.FIFTY_FIFTY,
+    boardMythicLastResult: BoardMythicFateResult? = null,
+    boardMythicHistory: List<BoardMythicFateResult> = emptyList(),
+    boardMythicLastEvent: String? = null,
+    onSetBoardMythicProbability: (ProbabilityLevel) -> Unit = {},
+    onUpdateBoardMythicChaos: (Int) -> Unit = {},
+    onRollBoardMythicFate: (ProbabilityLevel) -> Unit = {},
+    onAskBoardMythicQuestion: (ProbabilityLevel, String) -> Unit = { _, _ -> },
+    onRollBoardMythicEvent: () -> Unit = {},
+    onAppendToNotes: (String) -> Unit = {}
 ) {
     when (item.type) {
         SessionBoardItemType.TABLE -> TableBlockContent(
             item = item,
             meta = meta,
             latestTableRoll = latestTableRoll,
+            tableFormula = tableFormula,
+            recentRolls = tableRecentRolls,
+            randomTable = randomTable,
+            pinnedTableRoll = pinnedTableRoll,
+            onPinTableRoll = onPinTableRoll,
+            onUnpinTableRoll = onUnpinTableRoll,
             compactInFolder = compactInFolder,
             npcNames = npcNames,
             tableNames = tableNames,
@@ -117,7 +140,14 @@ internal fun BoardBlockContent(
             npcNames = npcNames,
             tableNames = tableNames,
             onTagClicked = onTagClicked,
-            onDiceClicked = { formula -> onDiceClicked(formula, false, false, null) }
+            onDiceClicked = { formula -> onDiceClicked(formula, false, false, null) },
+            lastMythicResult = boardMythicLastResult,
+            lastDiceResult = recentDiceRolls.firstOrNull(),
+            onGenerateSpark = {
+                val a = com.deckapp.core.domain.usecase.mythic.MythicReferenceData.actionKeywords.random()
+                val s = com.deckapp.core.domain.usecase.mythic.MythicReferenceData.subjectKeywords.random()
+                "$a · $s"
+            }
         )
         SessionBoardItemType.CLOCK -> ClockBlockContent(
             clock = linkedClock,
@@ -163,6 +193,17 @@ internal fun BoardBlockContent(
             session = linkedMythicSession,
             mythicState = mythicState,
             compactInFolder = compactInFolder,
+            boardChaos = boardMythicChaos,
+            boardOdds = boardMythicProbability,
+            lastResult = boardMythicLastResult,
+            recentHistory = boardMythicHistory,
+            lastRandomEvent = boardMythicLastEvent,
+            onOddsChanged = onSetBoardMythicProbability,
+            onChaosChanged = onUpdateBoardMythicChaos,
+            onRollFateCheck = onRollBoardMythicFate,
+            onAskQuestion = onAskBoardMythicQuestion,
+            onRollRandomEvent = onRollBoardMythicEvent,
+            onSendToNotes = onAppendToNotes,
             onOpen = onOpen
         )
         SessionBoardItemType.REFERENCE -> ReferenceBlockContent(

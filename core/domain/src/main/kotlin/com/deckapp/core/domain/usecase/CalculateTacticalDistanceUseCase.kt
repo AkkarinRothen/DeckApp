@@ -18,12 +18,15 @@ data class TacticalDistanceResult(
     val diagonalCells: Int = 0,
     val difficultCellsCount: Int = 0,
     val isBlockedByWall: Boolean = false,
-    val hazardCellsCount: Int = 0
+    val hazardCellsCount: Int = 0,
+    val elevationDiffFt: Int = 0,
+    val distance3dFt: Int = distanceFt
 )
 
 /**
  * Calcula la distancia táctica entre celdas según el tipo de grilla, la regla de diagonales
  * y los obstáculos / terreno difícil presentes en la trayectoria.
+ * Soporta cálculo 3D euclidiano cuando existen diferencias de elevación.
  * Inspirado en la implementación de gridDistance de Atlas VTT.
  */
 class CalculateTacticalDistanceUseCase @Inject constructor() {
@@ -36,7 +39,9 @@ class CalculateTacticalDistanceUseCase @Inject constructor() {
         gridType: GridType = GridType.SQUARE,
         diagonalRule: DiagonalRule = DiagonalRule.ALTERNATING_5_10_5,
         scaleFtPerCell: Int = 5,
-        terrainMap: Map<String, TacticalTerrainType> = emptyMap()
+        terrainMap: Map<String, TacticalTerrainType> = emptyMap(),
+        fromElevationFt: Int = 0,
+        toElevationFt: Int = 0
     ): TacticalDistanceResult {
         val baseResult = when (gridType) {
             GridType.HEX_FLAT, GridType.HEX_POINTY -> {
@@ -88,8 +93,15 @@ class CalculateTacticalDistanceUseCase @Inject constructor() {
             }
         }
 
+        val elevationDiff = abs(toElevationFt - fromElevationFt)
+        val baseDistance3d = if (elevationDiff > 0) hypot(baseResult.distanceFt.toFloat(), elevationDiff.toFloat()).roundToInt() else baseResult.distanceFt
+        val baseWithElevation = baseResult.copy(
+            elevationDiffFt = elevationDiff,
+            distance3dFt = baseDistance3d
+        )
+
         if (terrainMap.isEmpty()) {
-            return baseResult
+            return baseWithElevation
         }
 
         val pathCells = getPathCells(fromX, fromY, toX, toY)
@@ -109,13 +121,17 @@ class CalculateTacticalDistanceUseCase @Inject constructor() {
 
         val extraCells = difficultCount.toFloat()
         val extraFt = difficultCount * scaleFtPerCell
+        val finalHorizDistance = baseResult.distanceFt + extraFt
+        val finalDistance3d = if (elevationDiff > 0) hypot(finalHorizDistance.toFloat(), elevationDiff.toFloat()).roundToInt() else finalHorizDistance
 
-        return baseResult.copy(
+        return baseWithElevation.copy(
             cells = baseResult.cells + extraCells,
-            distanceFt = baseResult.distanceFt + extraFt,
+            distanceFt = finalHorizDistance,
             difficultCellsCount = difficultCount,
             isBlockedByWall = isBlocked,
-            hazardCellsCount = hazardCount
+            hazardCellsCount = hazardCount,
+            elevationDiffFt = elevationDiff,
+            distance3dFt = finalDistance3d
         )
     }
 

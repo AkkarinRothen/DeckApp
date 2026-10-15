@@ -506,6 +506,22 @@ interface ManualDao {
 
 @Dao
 interface SceneDao {
+    @Query("SELECT * FROM scenes WHERE id = :id")
+    suspend fun getSceneForClosure(id: Long): SceneEntity?
+
+    @Query("UPDATE sessions SET dm_notes = CASE WHEN COALESCE(dm_notes, '') = '' THEN :entry ELSE dm_notes || char(10) || char(10) || :entry END WHERE id = :sessionId")
+    suspend fun appendSceneJournal(sessionId: Long, entry: String)
+
+    @Transaction
+    suspend fun closeWithJournal(sceneId: Long, sessionId: Long, entry: String, nextScene: SceneEntity?): Long? {
+        val scene = checkNotNull(getSceneForClosure(sceneId)) { "La escena ya no existe." }
+        check(scene.sessionId == sessionId && !scene.isCompleted) { "La escena ya está cerrada." }
+        check(nextScene == null || nextScene.sessionId == sessionId)
+        appendSceneJournal(sessionId, entry)
+        updateCompletion(sceneId, true)
+        return nextScene?.let { insertScene(it) }
+    }
+
     @Query("SELECT * FROM scenes WHERE sessionId = :sessionId ORDER BY sortOrder ASC")
     fun getScenesForSession(sessionId: Long): Flow<List<SceneEntity>>
 

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
@@ -43,11 +44,24 @@ fun TacticalMapCanvas(
     onTerrainCellInteracted: ((col: Int, row: Int) -> Unit)? = null,
     onFogCellInteracted: ((col: Int, row: Int) -> Unit)? = null,
     onAddRouteWaypoint: ((cellX: Float, cellY: Float) -> Unit)? = null,
+    onClearCameraFocus: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val textMeasurer = rememberTextMeasurer()
     var zoom by remember { mutableFloatStateOf(1f) }
     var panOffset by remember { mutableStateOf(Offset.Zero) }
+
+    val map = uiState.map ?: return
+
+    // Auto-foco suave de cámara en el token seleccionado o con turno activo (Atlas VTT)
+    LaunchedEffect(uiState.focusCameraOnTokenId) {
+        val tokenId = uiState.focusCameraOnTokenId ?: return@LaunchedEffect
+        val token = uiState.tokens.find { it.id == tokenId } ?: return@LaunchedEffect
+        val tokenWorldX = (token.cellX * map.cellSizePx) + map.gridOffsetX
+        val tokenWorldY = (token.cellY * map.cellSizePx) + map.gridOffsetY
+        panOffset = Offset(-tokenWorldX * zoom + 400f, -tokenWorldY * zoom + 300f)
+        onClearCameraFocus()
+    }
 
     // Estado local de dragging interactivo
     var draggingToken by remember { mutableStateOf<TacticalToken?>(null) }
@@ -572,12 +586,28 @@ fun TacticalMapCanvas(
                         pathEffect = PathEffect.dashPathEffect(floatArrayOf(15f / zoom, 10f / zoom), 0f)
                     )
 
-                    val distFt = (hypot(targetToken.cellX - attackerToken.cellX, targetToken.cellY - attackerToken.cellY) * map.scaleFtPerCell).toInt()
+                    val distResult = distanceCalculator(
+                        fromX = attackerToken.cellX,
+                        fromY = attackerToken.cellY,
+                        toX = targetToken.cellX,
+                        toY = targetToken.cellY,
+                        scaleFtPerCell = map.scaleFtPerCell,
+                        gridType = map.gridType,
+                        terrainMap = uiState.terrainMap,
+                        fromElevationFt = attackerToken.elevationFt,
+                        toElevationFt = targetToken.elevationFt
+                    )
+                    val elevDiff = distResult.elevationDiffFt
+                    val targetText = if (elevDiff > 0) {
+                        "Objetivo: ${distResult.distance3dFt} ft (Δh: ${elevDiff}ft)"
+                    } else {
+                        "Objetivo: ${distResult.distanceFt} ft"
+                    }
                     val midPoint = Offset((attackerCenter.x + targetCenter.x) / 2f, (attackerCenter.y + targetCenter.y) / 2f)
 
                     drawMeasureBadge(
                         textMeasurer = textMeasurer,
-                        text = "Objetivo: $distFt ft",
+                        text = targetText,
                         center = midPoint,
                         zoom = zoom
                     )
@@ -749,6 +779,16 @@ private fun DrawScope.drawTacticalToken(
         TokenFaction.NEUTRAL -> Color(0xFFFFC107)
     }
 
+    // Sombra de Vuelo en el Suelo (si elevationFt > 0)
+    if (token.elevationFt > 0) {
+        val shadowOffset = (token.elevationFt.toFloat() / 5f * 2f / zoom).coerceIn(4f / zoom, 24f / zoom)
+        drawCircle(
+            color = Color(0x55000000),
+            radius = radius * 0.95f,
+            center = Offset(center.x + shadowOffset, center.y + shadowOffset)
+        )
+    }
+
     if (isActiveTurn) {
         // Halo dorado de iniciativa (Turno activo)
         drawCircle(
@@ -793,6 +833,22 @@ private fun DrawScope.drawTacticalToken(
         )
     }
 
+    // Halo azul cian de vuelo si el token está elevado
+    if (token.elevationFt > 0) {
+        drawCircle(
+            color = Color(0x3300E5FF),
+            radius = radius + (5f / zoom),
+            center = center
+        )
+        drawCircle(
+            color = Color(0xFF00E5FF),
+            radius = radius + (2f / zoom),
+            center = center,
+            style = Stroke(width = 1.5f / zoom, pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f / zoom, 4f / zoom)))
+        )
+    }
+
+    // Cuerpo base del Token
     drawCircle(
         color = Color(0xFF1E1E24),
         radius = radius,
@@ -821,6 +877,29 @@ private fun DrawScope.drawTacticalToken(
         topLeft = Offset(center.x - textLayout.size.width / 2f, center.y - textLayout.size.height / 2f)
     )
 
+    // Overlay de 0 HP / Derribado o Muerto
+    if (token.currentHp <= 0) {
+        drawCircle(
+            color = Color(0x99212121),
+            radius = radius,
+            center = center
+        )
+        val crossSize = radius * 0.55f
+        drawLine(
+            color = Color(0xFFFF1744),
+            start = Offset(center.x - crossSize, center.y - crossSize),
+            end = Offset(center.x + crossSize, center.y + crossSize),
+            strokeWidth = 3f / zoom
+        )
+        drawLine(
+            color = Color(0xFFFF1744),
+            start = Offset(center.x + crossSize, center.y - crossSize),
+            end = Offset(center.x - crossSize, center.y + crossSize),
+            strokeWidth = 3f / zoom
+        )
+    }
+
+    // Barra de Vida HP
     val barWidth = radius * 1.6f
     val barHeight = (4.5f / zoom).coerceAtLeast(3f)
     val barTopLeft = Offset(center.x - barWidth / 2f, center.y + radius + (3f / zoom))
@@ -843,6 +922,132 @@ private fun DrawScope.drawTacticalToken(
         topLeft = barTopLeft,
         size = Size(barWidth * hpFraction, barHeight)
     )
+
+    // Badge Flotante de Elevación (esquina superior derecha)
+    if (token.elevationFt != 0) {
+        val elevText = if (token.elevationFt > 0) "+${token.elevationFt}ft" else "${token.elevationFt}ft"
+        val elevFontSize = (9f / zoom).coerceIn(7f, 13f).sp
+        val elevLayout = textMeasurer.measure(
+            text = elevText,
+            style = TextStyle(
+                color = Color.White,
+                fontSize = elevFontSize,
+                fontWeight = FontWeight.ExtraBold
+            )
+        )
+        val badgeW = elevLayout.size.width + (8f / zoom)
+        val badgeH = elevLayout.size.height + (4f / zoom)
+        val badgeCenter = Offset(center.x + radius * 0.75f, center.y - radius * 0.75f)
+        val badgeTopLeft = Offset(badgeCenter.x - badgeW / 2f, badgeCenter.y - badgeH / 2f)
+
+        drawRoundRect(
+            color = Color(0xEE006064),
+            topLeft = badgeTopLeft,
+            size = Size(badgeW, badgeH),
+            cornerRadius = CornerRadius(4f / zoom, 4f / zoom)
+        )
+        drawRoundRect(
+            color = Color(0xFF00E5FF),
+            topLeft = badgeTopLeft,
+            size = Size(badgeW, badgeH),
+            cornerRadius = CornerRadius(4f / zoom, 4f / zoom),
+            style = Stroke(width = 1.2f / zoom)
+        )
+        drawText(
+            textLayoutResult = elevLayout,
+            topLeft = Offset(badgeTopLeft.x + (4f / zoom), badgeTopLeft.y + (2f / zoom))
+        )
+    }
+
+    // Micro-badges de Condiciones en el Arco Superior
+    if (token.conditions.isNotEmpty()) {
+        val condList = token.conditions.toList()
+        val maxBadgesToShow = 3
+        val displayedConditions = condList.take(maxBadgesToShow)
+        val hasExtra = condList.size > maxBadgesToShow
+        val totalBadges = displayedConditions.size + (if (hasExtra) 1 else 0)
+
+        val badgeRadius = (6f / zoom).coerceIn(4f, 11f)
+        val arcRadius = radius + badgeRadius + (2f / zoom)
+        val startAngle = -140f
+        val sweepAngle = 100f
+        val stepAngle = if (totalBadges > 1) sweepAngle / (totalBadges - 1) else 0f
+
+        displayedConditions.forEachIndexed { index, cond ->
+            val angleDeg = if (totalBadges == 1) -90f else startAngle + (stepAngle * index)
+            val angleRad = Math.toRadians(angleDeg.toDouble())
+            val badgeX = (center.x + arcRadius * kotlin.math.cos(angleRad)).toFloat()
+            val badgeY = (center.y + arcRadius * kotlin.math.sin(angleRad)).toFloat()
+
+            val (condColor, condChar) = when (cond) {
+                Condition.PRONE -> Color(0xFFFF9800) to "⬇"
+                Condition.POISONED -> Color(0xFF4CAF50) to "V"
+                Condition.BLINDED -> Color(0xFF9E9E9E) to "C"
+                Condition.PARALYZED -> Color(0xFFE91E63) to "P"
+                Condition.STUNNED -> Color(0xFFFFEB3B) to "A"
+                Condition.UNCONSCIOUS -> Color(0xFFD32F2F) to "💀"
+                Condition.INVISIBLE -> Color(0xFF00BCD4) to "I"
+                Condition.FRIGHTENED -> Color(0xFF9C27B0) to "!"
+                Condition.GRAPPLED -> Color(0xFFFF5722) to "G"
+                Condition.RESTRAINED -> Color(0xFF795548) to "R"
+                Condition.CHARMED -> Color(0xFFE040FB) to "♥"
+                Condition.DEAFENED -> Color(0xFF607D8B) to "S"
+                Condition.EXHAUSTED -> Color(0xFFFF6D00) to "E"
+                Condition.INCAPACITATED -> Color(0xFFB71C1C) to "X"
+                Condition.PETRIFIED -> Color(0xFF546E7A) to "石"
+            }
+
+            drawCircle(
+                color = Color(0xEE1A1A1A),
+                radius = badgeRadius,
+                center = Offset(badgeX, badgeY)
+            )
+            drawCircle(
+                color = condColor,
+                radius = badgeRadius,
+                center = Offset(badgeX, badgeY),
+                style = Stroke(width = 1.2f / zoom)
+            )
+            val condTextLayout = textMeasurer.measure(
+                text = condChar,
+                style = TextStyle(
+                    color = condColor,
+                    fontSize = (badgeRadius * 1.3f).sp,
+                    fontWeight = FontWeight.Bold
+                )
+            )
+            drawText(
+                textLayoutResult = condTextLayout,
+                topLeft = Offset(badgeX - condTextLayout.size.width / 2f, badgeY - condTextLayout.size.height / 2f)
+            )
+        }
+
+        if (hasExtra) {
+            val angleDeg = startAngle + sweepAngle
+            val angleRad = Math.toRadians(angleDeg.toDouble())
+            val badgeX = (center.x + arcRadius * kotlin.math.cos(angleRad)).toFloat()
+            val badgeY = (center.y + arcRadius * kotlin.math.sin(angleRad)).toFloat()
+            val extraText = "+${condList.size - maxBadgesToShow}"
+
+            drawCircle(
+                color = Color(0xEE2A2A2A),
+                radius = badgeRadius,
+                center = Offset(badgeX, badgeY)
+            )
+            val extraLayout = textMeasurer.measure(
+                text = extraText,
+                style = TextStyle(
+                    color = Color.White,
+                    fontSize = (badgeRadius * 1.1f).sp,
+                    fontWeight = FontWeight.Bold
+                )
+            )
+            drawText(
+                textLayoutResult = extraLayout,
+                topLeft = Offset(badgeX - extraLayout.size.width / 2f, badgeY - extraLayout.size.height / 2f)
+            )
+        }
+    }
 }
 
 private fun DrawScope.drawMeasureBadge(

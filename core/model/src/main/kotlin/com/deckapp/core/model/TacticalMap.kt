@@ -91,6 +91,7 @@ data class TacticalToken(
     val speedFt: Int = 30,
     val conditions: Set<Condition> = emptySet(),
     val isHidden: Boolean = false,
+    val elevationFt: Int = 0,
     val encounterCreatureId: Long? = null,
     val npcId: Long? = null,
     val notes: String = ""
@@ -125,6 +126,7 @@ data class TacticalMapPin(
     val targetTableId: Long? = null,
     val targetEncounterId: Long? = null,
     val targetWikiEntryId: Long? = null,
+    val targetMapId: Long? = null,
     val discoveries: List<TableRollResult> = emptyList()
 )
 

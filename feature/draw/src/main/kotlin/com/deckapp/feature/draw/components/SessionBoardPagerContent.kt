@@ -24,8 +24,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
+import com.deckapp.core.model.BoardMythicFateResult
 import com.deckapp.core.model.Card
 import com.deckapp.core.model.CardAspectRatio
 import com.deckapp.core.model.DiceRollResult
@@ -35,6 +35,7 @@ import com.deckapp.core.model.HexTile
 import com.deckapp.core.model.MythicSession
 import com.deckapp.core.model.Npc
 import com.deckapp.core.model.PlayerInitiativeParticipant
+import com.deckapp.core.model.ProbabilityLevel
 import com.deckapp.core.model.RandomTable
 import com.deckapp.core.model.SessionBoardGroup
 import com.deckapp.core.model.SessionBoardItem
@@ -151,7 +152,25 @@ internal fun SessionBoardPagerContent(
     onUpdateClockDescriptionAndProgress: (Long, String, Int) -> Unit,
     onAssignToGroup: (Long, Long?) -> Unit,
     onToggleEditing: () -> Unit,
-    onUpdateBoardViewLabel: (SessionBoardView, String) -> Unit
+    onUpdateBoardViewLabel: (SessionBoardView, String) -> Unit,
+    pinnedTableRolls: Map<Long, TableRollResult> = emptyMap(),
+    onPinTableRoll: (Long, TableRollResult) -> Unit = { _, _ -> },
+    onUnpinTableRoll: (Long) -> Unit = {},
+    boardMythicChaos: Int = 5,
+    boardMythicProbability: ProbabilityLevel = ProbabilityLevel.FIFTY_FIFTY,
+    boardMythicLastResult: BoardMythicFateResult? = null,
+    boardMythicHistory: List<BoardMythicFateResult> = emptyList(),
+    boardMythicLastEvent: String? = null,
+    onSetBoardMythicProbability: (ProbabilityLevel) -> Unit = {},
+    onUpdateBoardMythicChaos: (Int) -> Unit = {},
+    onRollBoardMythicFate: (ProbabilityLevel) -> Unit = {},
+    onAskBoardMythicQuestion: (ProbabilityLevel, String) -> Unit = { _, _ -> },
+    onRollBoardMythicEvent: () -> Unit = {},
+    workspaceMemory: com.deckapp.core.model.BoardSessionMemory = com.deckapp.core.model.BoardSessionMemory(),
+    onWorkspaceLayoutChanged: (SessionBoardView, com.deckapp.core.model.BoardViewMemory) -> Unit = { _, _ -> },
+    workspaceActions: @Composable () -> Unit = {},
+    soloSceneHeader: @Composable () -> Unit = {},
+    onAppendToNotes: (String) -> Unit = {}
 ) {
     val boardBounds = remember { mutableStateMapOf<Long, Rect>() }
     val groupBounds = remember { mutableStateMapOf<Long, Rect>() }
@@ -166,6 +185,9 @@ internal fun SessionBoardPagerContent(
         tablesInSession,
         allTables,
         recentTableRolls,
+        pinnedTableRolls,
+        onPinTableRoll,
+        onUnpinTableRoll,
         recentDiceRolls,
         notesPreview,
         notesContent,
@@ -199,7 +221,13 @@ internal fun SessionBoardPagerContent(
         handByDeck,
         deckCardCounts,
         deckAspectRatios,
-        deckBackImages
+        deckBackImages,
+        boardMythicChaos,
+        boardMythicProbability,
+        onAskBoardMythicQuestion,
+        boardMythicLastResult,
+        boardMythicHistory,
+        boardMythicLastEvent
     ) {
         BoardItemUiContext(
             sessionId = sessionId,
@@ -208,6 +236,9 @@ internal fun SessionBoardPagerContent(
             tablesInSession = tablesInSession,
             allTables = allTables,
             recentTableRolls = recentTableRolls,
+            pinnedTableRolls = pinnedTableRolls,
+            onPinTableRoll = onPinTableRoll,
+            onUnpinTableRoll = onUnpinTableRoll,
             recentDiceRolls = recentDiceRolls,
             notesPreview = notesPreview,
             notesContent = notesContent,
@@ -269,7 +300,18 @@ internal fun SessionBoardPagerContent(
             onNpcClick = onNpcClick,
             onWikiClick = onWikiClick,
             onTickClock = onTickClock,
-            onUpdateClockDescriptionAndProgress = onUpdateClockDescriptionAndProgress
+            onUpdateClockDescriptionAndProgress = onUpdateClockDescriptionAndProgress,
+            boardMythicChaos = boardMythicChaos,
+            boardMythicProbability = boardMythicProbability,
+            boardMythicLastResult = boardMythicLastResult,
+            boardMythicHistory = boardMythicHistory,
+            boardMythicLastEvent = boardMythicLastEvent,
+            onSetBoardMythicProbability = onSetBoardMythicProbability,
+            onUpdateBoardMythicChaos = onUpdateBoardMythicChaos,
+            onRollBoardMythicFate = onRollBoardMythicFate,
+            onAskBoardMythicQuestion = onAskBoardMythicQuestion,
+            onRollBoardMythicEvent = onRollBoardMythicEvent,
+            onAppendToNotes = onAppendToNotes
         )
     }
 
@@ -302,7 +344,19 @@ internal fun SessionBoardPagerContent(
             val viewGroups = boardGroups.filter { it.boardView == pageView }.sortedBy { it.position }
 
             if (pageItems.isEmpty() && viewGroups.isEmpty()) {
-                Box(
+                BoardWorkspaceLayout(
+                    sessionId = sessionId,
+                    view = pageView,
+                    rootItems = emptyList(),
+                    isEditing = isEditing,
+                    isFolderOpen = focusedGroupId != null,
+                    itemTitle = { "" },
+                    workspaceMemory = workspaceMemory,
+                    onLayoutChanged = onWorkspaceLayoutChanged,
+                    workspaceActions = workspaceActions,
+                    soloSceneHeader = soloSceneHeader,
+                    renderBlock = { _, _ -> }
+                ) { _, _ -> Box(
                     modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
                     contentAlignment = Alignment.Center
                 ) {
@@ -314,20 +368,74 @@ internal fun SessionBoardPagerContent(
                         onToggleEditing = onToggleEditing,
                         onOpenPicker = { onOpenPickerRequested(null) }
                     )
-                }
+                } }
             } else {
-                val configuration = LocalConfiguration.current
-                val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
-                val screenWidth = configuration.screenWidthDp
-                val columnsCount = remember(isLandscape, isSidebarOpen, screenWidth) {
-                    if (isLandscape) {
-                        if (isSidebarOpen) 2 else 4
-                    } else {
-                        if (screenWidth >= 600) 3 else 2
-                    }
+                val renderWorkspaceBlock: @Composable (SessionBoardItem, Modifier) -> Unit = { item, blockModifier ->
+                    BoardItemRenderer(
+                        item = item,
+                        uiContext = uiContext,
+                        compactInFolder = false,
+                        activeDragTargetId = activeDragTargetId,
+                        activeMergeTargetId = null,
+                        onMergeTargetChange = { },
+                        onMergeItems = onMergeItems,
+                        orderedItems = orderedItems,
+                        boardBounds = boardBounds,
+                        onOpenBlock = onOpenBlock,
+                        onRemoveBlock = onRemoveBlock,
+                        onMoveUp = onMoveUp,
+                        onMoveDown = onMoveDown,
+                        onMoveTo = onMoveTo,
+                        onDragStart = { isDraggingAnyItem = true },
+                        onDragEnd = {
+                            isDraggingAnyItem = false
+                            activeDragTargetId = null
+                            activeDragTargetGroupId = null
+                        },
+                        onDragTargetChange = { activeDragTargetId = it },
+                        activeDragTargetGroupId = activeDragTargetGroupId,
+                        onDragTargetGroupChange = { activeDragTargetGroupId = it },
+                        groupBounds = groupBounds,
+                        onTogglePin = { onTogglePinBlock(item.id) },
+                        onToggleCollapseBlock = { onToggleCollapseBlock(item.id) },
+                        onUpdateDicePresets = { itemId, presets ->
+                            onSetDisplayMode(itemId, Json.encodeToString(presets))
+                        },
+                        onBoundsChanged = { bounds -> boardBounds[item.id] = bounds },
+                        onAssignToGroupId = { onAssignToGroup(item.id, it) },
+                        onConfigClick = { onConfigClick(item) },
+                        onQuickAction = { onQuickAction(item) },
+                        index = 0,
+                        modifier = blockModifier
+                    )
                 }
-
-                Box(modifier = Modifier.fillMaxSize()) {
+                BoardWorkspaceLayout(
+                    sessionId = sessionId,
+                    view = pageView,
+                    rootItems = rootItems,
+                    isEditing = isEditing,
+                    isFolderOpen = focusedGroupId != null,
+                    itemTitle = { item ->
+                        item.titleOverride?.takeIf { it.isNotBlank() } ?: when (item.type) {
+                            SessionBoardItemType.TABLE -> (tablesInSession + allTables).firstOrNull { it.id == item.resourceId }?.name ?: "Tabla"
+                            SessionBoardItemType.NOTES -> "Notas / Diario"
+                            SessionBoardItemType.COMBAT -> "Combate"
+                            SessionBoardItemType.MYTHIC -> "Oráculo Mythic"
+                            SessionBoardItemType.DICE -> "Dados"
+                            SessionBoardItemType.CLOCK -> tensionClocks.firstOrNull { it.id == item.resourceId }?.name ?: "Reloj"
+                            SessionBoardItemType.NPCS -> "PNJs"
+                            SessionBoardItemType.DECK -> deckNames[item.resourceId] ?: "Mazo"
+                            SessionBoardItemType.WIKI_MAP -> wikiEntries.firstOrNull { it.id == item.resourceId }?.title ?: "Lugar"
+                            SessionBoardItemType.MAP -> linkedMapName ?: "Mapa"
+                            SessionBoardItemType.REFERENCE -> "Referencias"
+                        }
+                    },
+                    workspaceMemory = workspaceMemory,
+                    onLayoutChanged = onWorkspaceLayoutChanged,
+                    workspaceActions = workspaceActions,
+                    soloSceneHeader = soloSceneHeader,
+                    renderBlock = renderWorkspaceBlock
+                ) { columnsCount, workspaceRootItems ->
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(columnsCount),
                         modifier = Modifier.fillMaxSize(),
@@ -337,54 +445,18 @@ internal fun SessionBoardPagerContent(
                     ) {
                         if (focusedGroupId == null) {
                             gridItemsIndexed(
-                                items = rootItems,
+                                items = workspaceRootItems,
                                 key = { index, item -> if (item.id != 0L) "item_${item.id}" else "item_${item.type}_${item.resourceId}_$index" },
                                 span = { _, item ->
                                     val itemSpan = when (item.size) {
                                         SessionBoardItemSize.L -> columnsCount
-                                        SessionBoardItemSize.M -> if (columnsCount <= 2) columnsCount else (columnsCount - 1).coerceAtLeast(1)
+                                        SessionBoardItemSize.M -> minOf(2, columnsCount)
                                         SessionBoardItemSize.S -> 1
                                     }
                                     GridItemSpan(itemSpan)
                                 }
                             ) { index, item ->
-                                BoardItemRenderer(
-                                    item = item,
-                                    uiContext = uiContext,
-                                    compactInFolder = false,
-                                    activeDragTargetId = activeDragTargetId,
-                                    activeMergeTargetId = null,
-                                    onMergeTargetChange = { },
-                                    onMergeItems = onMergeItems,
-                                    orderedItems = orderedItems,
-                                    boardBounds = boardBounds,
-                                    onOpenBlock = onOpenBlock,
-                                    onRemoveBlock = onRemoveBlock,
-                                    onMoveUp = onMoveUp,
-                                    onMoveDown = onMoveDown,
-                                    onMoveTo = onMoveTo,
-                                    onDragStart = { isDraggingAnyItem = true },
-                                    onDragEnd = {
-                                        isDraggingAnyItem = false
-                                        activeDragTargetId = null
-                                        activeDragTargetGroupId = null
-                                    },
-                                    onDragTargetChange = { activeDragTargetId = it },
-                                    activeDragTargetGroupId = activeDragTargetGroupId,
-                                    onDragTargetGroupChange = { activeDragTargetGroupId = it },
-                                    groupBounds = groupBounds,
-                                    onTogglePin = { onTogglePinBlock(item.id) },
-                                    onToggleCollapseBlock = { onToggleCollapseBlock(item.id) },
-                                    onUpdateDicePresets = { itemId, presets ->
-                                        onSetDisplayMode(itemId, Json.encodeToString(presets))
-                                    },
-                                    onBoundsChanged = { bounds -> boardBounds[item.id] = bounds },
-                                    onAssignToGroupId = { onAssignToGroup(item.id, it) },
-                                    onConfigClick = { onConfigClick(item) },
-                                    onQuickAction = { onQuickAction(item) },
-                                    index = index,
-                                    modifier = Modifier.animateItem()
-                                )
+                                renderWorkspaceBlock(item, Modifier.animateItem())
                             }
 
                             gridItemsIndexed(
@@ -483,7 +555,7 @@ internal fun SessionBoardPagerContent(
                                     val itemSpan = when {
                                         !isEditing && isFocusedGroupListMode -> columnsCount
                                         item.size == SessionBoardItemSize.L -> columnsCount
-                                        item.size == SessionBoardItemSize.M -> if (columnsCount <= 2) columnsCount else (columnsCount - 1).coerceAtLeast(1)
+                                        item.size == SessionBoardItemSize.M -> minOf(2, columnsCount)
                                         else -> 1
                                     }
                                     GridItemSpan(itemSpan)

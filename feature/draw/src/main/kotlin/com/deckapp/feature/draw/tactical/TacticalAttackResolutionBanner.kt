@@ -74,8 +74,13 @@ fun TacticalAttackResolutionBanner(
                         maxLines = 1
                     )
 
+                    val distLabel = if (resolution.elevationDiffFt != 0) {
+                        "(${resolution.distanceFt}ft 3D, Δh: ${resolution.elevationDiffFt}ft)"
+                    } else {
+                        "(${resolution.distanceFt} ft)"
+                    }
                     Text(
-                        text = "(${resolution.distanceFt} ft)",
+                        text = distLabel,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.outline
                     )
@@ -100,11 +105,30 @@ fun TacticalAttackResolutionBanner(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
-                    Text(
-                        text = "Ataque: ${resolution.attackName}",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Medium
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = "Ataque: ${resolution.attackName}",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Medium
+                        )
+                        if (resolution.advantageLabel != null) {
+                            Surface(
+                                shape = RoundedCornerShape(4.dp),
+                                color = if (resolution.advantageLabel.contains("Ventaja")) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.errorContainer
+                            ) {
+                                Text(
+                                    text = resolution.advantageLabel,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (resolution.advantageLabel.contains("Ventaja")) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onErrorContainer,
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                                )
+                            }
+                        }
+                    }
                     Text(
                         text = "d20(${resolution.d20Roll}) + ${resolution.attackBonus} = ${resolution.totalAttackRoll} vs CA ${resolution.targetAc}",
                         style = MaterialTheme.typography.bodySmall,

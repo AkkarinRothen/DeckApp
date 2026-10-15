@@ -40,6 +40,7 @@ fun TacticalMapView(
     onTokenHpChanged: (tokenId: Long, newHp: Int) -> Unit,
     onTokenConditionToggled: (tokenId: Long, condition: Condition) -> Unit,
     onTokenSizeChanged: (tokenId: Long, newSize: Float) -> Unit,
+    onTokenElevationChanged: (tokenId: Long, elevationFt: Int) -> Unit = { _, _ -> },
     onTokenVisibilityToggled: (tokenId: Long) -> Unit,
     onOpenNpc: ((Long) -> Unit)? = null,
     onDeleteToken: (tokenId: Long) -> Unit,
@@ -73,11 +74,22 @@ fun TacticalMapView(
     onResetTokenTurnMovement: (tokenId: Long) -> Unit = { _ -> },
     onStartAttackTargeting: (tokenId: Long) -> Unit = { _ -> },
     onCancelTargeting: () -> Unit = {},
-    onExecuteAttack: (attackerId: Long, targetId: Long, attackName: String, attackBonus: Int, damageFormula: String) -> Unit = { _, _, _, _, _ -> },
+    onExecuteAttack: (attackerId: Long, targetId: Long, attackName: String, attackBonus: Int, damageFormula: String, advantageMode: Int) -> Unit = { _, _, _, _, _, _ -> },
     onApplyAttackDamage: (TacticalAttackResolution) -> Unit = { _ -> },
     onDismissAttackResolution: () -> Unit = {},
     onDismissCustomAttackDialog: () -> Unit = {},
     onAdvanceCombatTurn: () -> Unit = {},
+    onPreviousCombatTurn: () -> Unit = {},
+    onFocusOnCombatCreature: (Long) -> Unit = {},
+    onClearCameraFocus: () -> Unit = {},
+    onNavigateBackToBreadcrumb: (Long) -> Unit = {},
+    onNavigateToSubMap: (Long) -> Unit = {},
+    onSpawnEncounter: (encounterId: Long, cellX: Float, cellY: Float) -> Unit = { _, _, _ -> },
+    onRollPinTable: (Long) -> Unit = {},
+    onTogglePinSecret: (Long) -> Unit = {},
+    onEditPin: (TacticalMapPin) -> Unit = {},
+    onRollInlineFormula: (formula: String, label: String) -> Unit = { _, _ -> },
+    onDismissPin: () -> Unit = {},
     dmNotes: String = "",
     onNotesChanged: (String) -> Unit = {},
     onToggleSidePanel: () -> Unit = {},
@@ -163,6 +175,7 @@ fun TacticalMapView(
             onTerrainCellInteracted = onTerrainCellInteracted,
             onFogCellInteracted = onFogCellInteracted,
             onAddRouteWaypoint = onAddRouteWaypoint,
+            onClearCameraFocus = onClearCameraFocus,
             modifier = Modifier.fillMaxSize()
         )
 
@@ -374,6 +387,7 @@ fun TacticalMapView(
                     onHpChanged = { newHp -> onTokenHpChanged(token.id, newHp) },
                     onConditionToggled = { cond -> onTokenConditionToggled(token.id, cond) },
                     onSizeChanged = { newSize -> onTokenSizeChanged(token.id, newSize) },
+                    onElevationChanged = { elev -> onTokenElevationChanged(token.id, elev) },
                     onVisibilityToggled = { onTokenVisibilityToggled(token.id) },
                     onStartAttackTargeting = { onStartAttackTargeting(token.id) },
                     onOpenNpc = onOpenNpc,
@@ -383,18 +397,58 @@ fun TacticalMapView(
             }
         }
 
-        // Barra de Iniciativa y Turnos de Combate
+        // Barra de Navegación de Mapas Anidados (Breadcrumbs estilo Atlas VTT)
+        if (uiState.mapBreadcrumbs.isNotEmpty()) {
+            TacticalBreadcrumbBar(
+                breadcrumbs = uiState.mapBreadcrumbs,
+                currentMap = uiState.map,
+                onNavigateBack = {
+                    val lastCrumb = uiState.mapBreadcrumbs.lastOrNull()
+                    if (lastCrumb != null) onNavigateBackToBreadcrumb(lastCrumb.first)
+                },
+                onNavigateToCrumb = onNavigateBackToBreadcrumb,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 10.dp)
+            )
+        }
+
+        // Barra de Iniciativa y Turnos de Combate con Auto-Foco
         uiState.activeEncounter?.let { encounter ->
+            val topPad = if (uiState.mapBreadcrumbs.isNotEmpty()) 56.dp else 16.dp
             TacticalInitiativeBar(
                 encounter = encounter,
                 onNextTurn = onAdvanceCombatTurn,
+                onPreviousTurn = onPreviousCombatTurn,
                 onSelectCreatureToken = { creatureId ->
-                    val token = uiState.tokens.find { it.encounterCreatureId == creatureId }
-                    token?.let { onTokenSelected(it.id) }
+                    onFocusOnCombatCreature(creatureId)
                 },
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .padding(top = 68.dp)
+                    .padding(top = topPad)
+            )
+        }
+
+        // Mini-panel flotante in-situ de Pin (Atlas VTT)
+        val selectedPin = uiState.selectedPin
+        if (selectedPin != null && uiState.showPinDetailDialog) {
+            val panelTopPad = if (uiState.mapBreadcrumbs.isNotEmpty()) 60.dp else 20.dp
+            TacticalFloatingPinPanel(
+                pin = selectedPin,
+                availableMaps = uiState.availableMaps,
+                availableTables = uiState.availableTables,
+                availableEncounters = uiState.availableEncounters,
+                availableWikiEntries = uiState.availableWikiEntries,
+                onDismiss = onDismissPin,
+                onEnterSubMap = onNavigateToSubMap,
+                onSpawnEncounter = onSpawnEncounter,
+                onRollPinTable = onRollPinTable,
+                onToggleSecret = onTogglePinSecret,
+                onEditPin = onEditPin,
+                onRollInlineFormula = onRollInlineFormula,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = 16.dp, top = panelTopPad)
             )
         }
 
@@ -452,15 +506,26 @@ fun TacticalMapView(
         if (uiState.showCustomAttackDialog && uiState.targetingAttackerToken != null && uiState.pendingAttackTargetToken != null) {
             val attacker = uiState.targetingAttackerToken!!
             val target = uiState.pendingAttackTargetToken!!
-            val dist = (kotlin.math.hypot(target.cellX - attacker.cellX, target.cellY - attacker.cellY) * (uiState.map.scaleFtPerCell)).toInt()
+            val distResult = distanceCalculator(
+                fromX = attacker.cellX,
+                fromY = attacker.cellY,
+                toX = target.cellX,
+                toY = target.cellY,
+                scaleFtPerCell = uiState.map?.scaleFtPerCell ?: 5,
+                gridType = uiState.map?.gridType ?: com.deckapp.core.model.GridType.SQUARE,
+                terrainMap = uiState.terrainMap,
+                fromElevationFt = attacker.elevationFt,
+                toElevationFt = target.elevationFt
+            )
+            val dist = distResult.distance3dFt
 
             TacticalAttackDialog(
                 attacker = attacker,
                 target = target,
                 distanceFt = dist,
                 onDismiss = onDismissCustomAttackDialog,
-                onExecuteAttack = { name, bonus, formula ->
-                    onExecuteAttack(attacker.id, target.id, name, bonus, formula)
+                onExecuteAttack = { name, bonus, formula, advMode ->
+                    onExecuteAttack(attacker.id, target.id, name, bonus, formula, advMode)
                 }
             )
         }

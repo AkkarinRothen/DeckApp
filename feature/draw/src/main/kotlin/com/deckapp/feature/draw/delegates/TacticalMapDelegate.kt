@@ -457,6 +457,13 @@ class TacticalMapDelegate(
         }
     }
 
+    fun updateTokenElevation(tokenId: Long, elevationFt: Int) {
+        val token = _uiState.value.tacticalState.tokens.find { it.id == tokenId } ?: return
+        scope.launch {
+            tacticalMapRepository.upsertToken(token.copy(elevationFt = elevationFt))
+        }
+    }
+
     fun toggleTokenVisibility(tokenId: Long) {
         val token = _uiState.value.tacticalState.tokens.find { it.id == tokenId } ?: return
         scope.launch {
@@ -994,6 +1001,42 @@ class TacticalMapDelegate(
         observeTokensAndPins(targetMap.id)
     }
 
+    fun navigateToSubMap(targetMapId: Long) {
+        val currentMap = _uiState.value.tacticalState.map
+        val currentCrumbs = _uiState.value.tacticalState.mapBreadcrumbs
+        val newCrumbs = if (currentMap != null && currentCrumbs.none { it.first == currentMap.id }) {
+            currentCrumbs + (currentMap.id to currentMap.name)
+        } else {
+            currentCrumbs
+        }
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(
+                    mapBreadcrumbs = newCrumbs,
+                    selectedPinId = null,
+                    selectedTokenId = null
+                )
+            )
+        }
+        switchMap(targetMapId)
+    }
+
+    fun navigateBackToBreadcrumb(targetMapId: Long) {
+        val currentCrumbs = _uiState.value.tacticalState.mapBreadcrumbs
+        val index = currentCrumbs.indexOfFirst { it.first == targetMapId }
+        val newCrumbs = if (index >= 0) currentCrumbs.take(index) else emptyList()
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(
+                    mapBreadcrumbs = newCrumbs,
+                    selectedPinId = null,
+                    selectedTokenId = null
+                )
+            )
+        }
+        switchMap(targetMapId)
+    }
+
     fun createNewMap(
         name: String,
         imageUri: String,
@@ -1142,6 +1185,7 @@ class TacticalMapDelegate(
         attackName: String,
         attackBonus: Int,
         damageFormula: String,
+        advantageMode: Int = 0,
         forcedD20: Int? = null,
         forcedDamage: Int? = null
     ) {
@@ -1156,11 +1200,28 @@ class TacticalMapDelegate(
             toY = target.cellY,
             scaleFtPerCell = tactical.map?.scaleFtPerCell ?: 5,
             gridType = tactical.map?.gridType ?: GridType.SQUARE,
-            terrainMap = tactical.terrainMap
+            terrainMap = tactical.terrainMap,
+            fromElevationFt = attacker.elevationFt,
+            toElevationFt = target.elevationFt
         )
-        val distance = distResult.distanceFt
+        val distance = distResult.distance3dFt
 
-        val d20 = forcedD20 ?: kotlin.random.Random.nextInt(1, 21)
+        val (d20, advLabel) = if (forcedD20 != null) {
+            forcedD20 to null
+        } else when (advantageMode) {
+            1 -> {
+                val r1 = kotlin.random.Random.nextInt(1, 21)
+                val r2 = kotlin.random.Random.nextInt(1, 21)
+                maxOf(r1, r2) to "Ventaja ($r1, $r2)"
+            }
+            -1 -> {
+                val r1 = kotlin.random.Random.nextInt(1, 21)
+                val r2 = kotlin.random.Random.nextInt(1, 21)
+                minOf(r1, r2) to "Desventaja ($r1, $r2)"
+            }
+            else -> kotlin.random.Random.nextInt(1, 21) to null
+        }
+
         val isCritHit = d20 == 20
         val isCritMiss = d20 == 1
         val totalAttack = d20 + attackBonus
@@ -1191,6 +1252,8 @@ class TacticalMapDelegate(
             damageFormula = damageFormula,
             damageRoll = damageRoll,
             distanceFt = distance,
+            elevationDiffFt = distResult.elevationDiffFt,
+            advantageLabel = advLabel,
             isDamageApplied = false
         )
 
@@ -1258,8 +1321,165 @@ class TacticalMapDelegate(
                 }
                 matchingToken?.let { token ->
                     resetTokenTurnMovement(token.id)
+                    _uiState.update { state ->
+                        state.copy(
+                            tacticalState = state.tacticalState.copy(
+                                selectedTokenId = token.id,
+                                focusCameraOnTokenId = token.id
+                            )
+                        )
+                    }
                 }
             }
+        }
+    }
+
+    fun previousCombatTurn() {
+        val encounter = _uiState.value.tacticalState.activeEncounter ?: return
+        if (encounter.creatures.isEmpty()) return
+
+        scope.launch {
+            var prevIndex = encounter.currentTurnIndex - 1
+            var prevRound = encounter.currentRound
+
+            if (prevIndex < 0) {
+                prevIndex = encounter.creatures.size - 1
+                if (prevRound > 1) prevRound--
+            }
+
+            encounterRepository.saveEncounter(
+                encounter.copy(
+                    currentTurnIndex = prevIndex,
+                    currentRound = prevRound
+                )
+            )
+
+            val newActiveCreature = encounter.creatures.getOrNull(prevIndex)
+            if (newActiveCreature != null) {
+                val matchingToken = _uiState.value.tacticalState.tokens.find {
+                    it.encounterCreatureId == newActiveCreature.id || (it.npcId != null && it.npcId == newActiveCreature.npcId)
+                }
+                matchingToken?.let { token ->
+                    _uiState.update { state ->
+                        state.copy(
+                            tacticalState = state.tacticalState.copy(
+                                selectedTokenId = token.id,
+                                focusCameraOnTokenId = token.id
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun focusOnCombatCreature(creatureId: Long) {
+        val token = _uiState.value.tacticalState.tokens.find { it.encounterCreatureId == creatureId } ?: return
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(
+                    selectedTokenId = token.id,
+                    focusCameraOnTokenId = token.id
+                )
+            )
+        }
+    }
+
+    fun clearCameraFocus() {
+        _uiState.update { state ->
+            state.copy(tacticalState = state.tacticalState.copy(focusCameraOnTokenId = null))
+        }
+    }
+
+    fun spawnEncounterOnMap(encounterId: Long, originCellX: Float, originCellY: Float) {
+        val map = _uiState.value.tacticalState.map ?: return
+        val encounter = _uiState.value.tacticalState.availableEncounters.find { it.id == encounterId } ?: return
+        if (encounter.creatures.isEmpty()) return
+
+        val existingTokens = _uiState.value.tacticalState.tokens
+        val existingCreatureIds = existingTokens.mapNotNull { it.encounterCreatureId }.toSet()
+        val creaturesToSpawn = encounter.creatures.filter { it.id !in existingCreatureIds }
+
+        if (creaturesToSpawn.isEmpty()) {
+            _uiState.update { it.copy(snackbarMessage = "Todas las criaturas de '${encounter.name}' ya están en el mapa") }
+            return
+        }
+
+        val terrainMap = _uiState.value.tacticalState.terrainMap
+        val candidateOffsets = listOf(
+            0 to 0, 1 to 0, 0 to 1, -1 to 0, 0 to -1,
+            1 to 1, -1 to 1, 1 to -1, -1 to -1,
+            2 to 0, 0 to 2, -2 to 0, 0 to -2,
+            2 to 1, 1 to 2, -2 to 1, 1 to -2
+        )
+
+        scope.launch {
+            var offsetIdx = 0
+            var firstSpawnedTokenId: Long? = null
+
+            for (creature in creaturesToSpawn) {
+                var placeX = originCellX
+                var placeY = originCellY
+                while (offsetIdx < candidateOffsets.size) {
+                    val (dx, dy) = candidateOffsets[offsetIdx++]
+                    val cx = (originCellX + dx).coerceAtLeast(0f)
+                    val cy = (originCellY + dy).coerceAtLeast(0f)
+                    val key = "${cx.toInt()},${cy.toInt()}"
+                    if (terrainMap[key] != TacticalTerrainType.WALL) {
+                        placeX = cx
+                        placeY = cy
+                        break
+                    }
+                }
+
+                val faction = if (creature.isPlayer) TokenFaction.PLAYER else TokenFaction.ENEMY
+                val newToken = TacticalToken(
+                    mapId = map.id,
+                    name = creature.name,
+                    avatarUri = creature.imageUri,
+                    faction = faction,
+                    sizeInCells = 1f,
+                    cellX = placeX,
+                    cellY = placeY,
+                    currentHp = creature.currentHp.coerceAtLeast(1),
+                    maxHp = creature.maxHp.coerceAtLeast(1),
+                    armorClass = creature.armorClass.coerceAtLeast(1),
+                    encounterCreatureId = creature.id,
+                    npcId = creature.npcId
+                )
+                val id = tacticalMapRepository.upsertToken(newToken)
+                if (firstSpawnedTokenId == null) firstSpawnedTokenId = id
+            }
+
+            encounterRepository.setActiveEncounter(sessionId, encounter.id)
+
+            _uiState.update { state ->
+                state.copy(
+                    tacticalState = state.tacticalState.copy(
+                        activeEncounter = encounter,
+                        selectedTokenId = firstSpawnedTokenId,
+                        focusCameraOnTokenId = firstSpawnedTokenId
+                    ),
+                    snackbarMessage = "Desplegadas ${creaturesToSpawn.size} criaturas de '${encounter.name}'"
+                )
+            }
+        }
+    }
+
+    fun rollInlineFormula(formula: String, label: String) {
+        try {
+            val total = com.deckapp.core.domain.usecase.DiceEvaluator.evaluate(formula)
+            _uiState.update { it.copy(snackbarMessage = "$label ($formula): $total") }
+        } catch (e: Exception) {
+            _uiState.update { it.copy(snackbarMessage = "Fórmula '$formula' no válida") }
+        }
+    }
+
+    fun togglePinSecret(pinId: Long) {
+        val mapId = _uiState.value.tacticalState.map?.id ?: return
+        mapEdit {
+            val pin = tacticalMapRepository.getPinsByMapId(mapId).first().find { it.id == pinId } ?: return@mapEdit
+            tacticalMapRepository.upsertPin(pin.copy(isSecret = !pin.isSecret))
         }
     }
 

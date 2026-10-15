@@ -1,4 +1,4 @@
-﻿package com.deckapp.feature.draw.components
+package com.deckapp.feature.draw.components
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
@@ -140,7 +140,20 @@ fun BoardBlockCard(
     onDrawSpread: ((CardSpread) -> Unit)? = null,
     onClearSpread: (() -> Unit)? = null,
     onSaveSpreadToNotes: ((CardSpreadResult) -> Unit)? = null,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    randomTable: RandomTable? = null,
+    // Sprint 56 — Bento Solo Journaling & Interactive Mythic Oracle
+    boardMythicChaos: Int = 5,
+    boardMythicProbability: ProbabilityLevel = ProbabilityLevel.FIFTY_FIFTY,
+    boardMythicLastResult: BoardMythicFateResult? = null,
+    boardMythicHistory: List<BoardMythicFateResult> = emptyList(),
+    boardMythicLastEvent: String? = null,
+    onSetBoardMythicProbability: (ProbabilityLevel) -> Unit = {},
+    onUpdateBoardMythicChaos: (Int) -> Unit = {},
+    onRollBoardMythicFate: (ProbabilityLevel) -> Unit = {},
+    onAskBoardMythicQuestion: (ProbabilityLevel, String) -> Unit = { _, _ -> },
+    onRollBoardMythicEvent: () -> Unit = {},
+    onAppendToNotes: (String) -> Unit = {}
 ) {
     val linkedClock = if (item.type == SessionBoardItemType.CLOCK) {
         tensionClocks.find { it.id == item.resourceId }
@@ -194,7 +207,6 @@ fun BoardBlockCard(
     var showExpanded by remember(item.id) { mutableStateOf(false) }
     LaunchedEffect(isEditing) { if (isEditing) showExpanded = false }
     var contentHeightPx by remember(item.id) { mutableIntStateOf(0) }
-    var showPlayMenu by remember(item.id) { mutableStateOf(false) }
     val density = LocalDensity.current
 
     val blockContent: @Composable () -> Unit = {
@@ -203,6 +215,12 @@ fun BoardBlockCard(
             meta = meta,
             latestTableRoll = latestTableRoll,
             linkedClock = linkedClock,
+            tableFormula = tableFormula,
+            tableRecentRolls = tableRecentRolls,
+            randomTable = randomTable,
+            pinnedTableRoll = pinnedTableRoll,
+            onPinTableRoll = onPinTableRoll,
+            onUnpinTableRoll = onUnpinTableRoll,
             linkedMythicSession = linkedMythicSession,
             mythicState = mythicState,
             linkedHexMapId = linkedHexMapId,
@@ -271,7 +289,18 @@ fun BoardBlockCard(
             notesContent = notesContent,
             onUpdateNotes = onUpdateNotes,
             onSendToNotes = onSendToNotes,
-            onRecordCombatNote = onRecordCombatNote
+            onRecordCombatNote = onRecordCombatNote,
+            boardMythicChaos = boardMythicChaos,
+            boardMythicProbability = boardMythicProbability,
+            boardMythicLastResult = boardMythicLastResult,
+            boardMythicHistory = boardMythicHistory,
+            boardMythicLastEvent = boardMythicLastEvent,
+            onSetBoardMythicProbability = onSetBoardMythicProbability,
+            onUpdateBoardMythicChaos = onUpdateBoardMythicChaos,
+            onRollBoardMythicFate = onRollBoardMythicFate,
+            onAskBoardMythicQuestion = onAskBoardMythicQuestion,
+            onRollBoardMythicEvent = onRollBoardMythicEvent,
+            onAppendToNotes = onAppendToNotes
         )
     }
 
@@ -329,100 +358,27 @@ fun BoardBlockCard(
     ) {
         Box(modifier = Modifier.padding(16.dp)) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                // Header
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Surface(
-                            color = (customAccentColor ?: meta.color).copy(alpha = 0.15f),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Icon(
-                                imageVector = meta.icon,
-                                contentDescription = null,
-                                tint = customAccentColor ?: meta.color,
-                                modifier = Modifier
-                                    .padding(8.dp)
-                                    .size(20.dp)
-                            )
-                        }
-                        Column {
-                            Text(
-                                text = meta.title,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            if (meta.subtitle.isNotBlank() && item.size != SessionBoardItemSize.S) {
-                                Text(
-                                    text = meta.subtitle,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                                )
-                            }
-                        }
-                    }
-
-                    if (isEditing) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.DragHandle,
-                                contentDescription = "Arrastrar para reordenar",
-                                modifier = Modifier
-                                    .padding(start = 4.dp)
-                                    .size(20.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                            )
-                            IconButton(onClick = onConfigClick) {
-                                Icon(Icons.Default.Settings, null, modifier = Modifier.size(20.dp))
-                            }
-                            IconButton(onClick = onRemove) {
-                                Icon(Icons.Default.Close, null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.error)
-                            }
-                        }
-                    } else {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (item.type == SessionBoardItemType.NOTES && isSavingNotes) {
-                                Icon(
-                                    Icons.Default.CloudSync,
-                                    contentDescription = "Guardando...",
-                                    modifier = Modifier.size(16.dp),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(Modifier.width(8.dp))
-                            }
-                            if (item.isPinned) {
-                                Icon(
-                                    Icons.Outlined.PushPin,
-                                    null,
-                                    modifier = Modifier.size(16.dp),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(Modifier.width(4.dp))
-                            }
-                            IconButton(onClick = onToggleCollapse) {
-                                Icon(
-                                    imageVector = if (item.isCollapsed) Icons.Default.ExpandMore else Icons.Default.ExpandLess,
-                                    contentDescription = if (item.isCollapsed) "Expandir bloque" else "Contraer bloque",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
-                }
+                BoardBlockHeader(
+                    meta = meta,
+                    accent = customAccentColor ?: meta.color,
+                    isEditing = isEditing,
+                    isPinned = item.isPinned,
+                    isCollapsed = item.isCollapsed,
+                    isSaving = item.type == SessionBoardItemType.NOTES && isSavingNotes,
+                    showSubtitle = item.size != SessionBoardItemSize.S,
+                    onExpand = { showExpanded = true },
+                    onTogglePin = onTogglePin,
+                    onToggleCollapse = onToggleCollapse,
+                    onConfigure = onConfigClick,
+                    onRemove = onRemove
+                )
 
                 // Summary
                 if (item.isCollapsed || isEditing) {
                     Text(
-                        text = boardBlockSummary(item.type, meta, latestTableRoll, linkedClock, activeEncounter),
+                        text = if (item.type == SessionBoardItemType.TABLE && pinnedTableRoll != null)
+                            "Fijado: ${pinnedTableRoll.resolvedText}"
+                        else boardBlockSummary(item.type, meta, latestTableRoll, linkedClock, activeEncounter),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 2,

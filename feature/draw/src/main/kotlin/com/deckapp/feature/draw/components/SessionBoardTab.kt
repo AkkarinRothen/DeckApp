@@ -135,6 +135,21 @@ fun SessionBoardTab(
     onClearSubTableRoll: (Long, Long) -> Unit = { _, _ -> },
     sessionId: Long = 0L,
     isSidebarOpen: Boolean = false,
+    boardMythicChaos: Int = 5,
+    boardMythicProbability: ProbabilityLevel = ProbabilityLevel.FIFTY_FIFTY,
+    boardMythicLastResult: BoardMythicFateResult? = null,
+    boardMythicHistory: List<BoardMythicFateResult> = emptyList(),
+    boardMythicLastEvent: String? = null,
+    onSetBoardMythicProbability: (ProbabilityLevel) -> Unit = {},
+    onUpdateBoardMythicChaos: (Int) -> Unit = {},
+    onRollBoardMythicFate: (ProbabilityLevel) -> Unit = {},
+    onAskBoardMythicQuestion: (ProbabilityLevel, String) -> Unit = { _, _ -> },
+    onRollBoardMythicEvent: () -> Unit = {},
+    workspaceMemory: com.deckapp.core.model.BoardSessionMemory = com.deckapp.core.model.BoardSessionMemory(),
+    onWorkspaceLayoutChanged: (SessionBoardView, com.deckapp.core.model.BoardViewMemory) -> Unit = { _, _ -> },
+    workspaceActions: @Composable () -> Unit = {},
+    soloSceneHeader: @Composable () -> Unit = {},
+    onAppendToNotes: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val orderedItems = remember(boardItems) {
@@ -269,6 +284,9 @@ fun SessionBoardTab(
                 tablesInSession = tablesInSession,
                 allTables = allTables,
                 recentTableRolls = recentTableRolls,
+                pinnedTableRolls = pinnedTableRolls,
+                onPinTableRoll = onPinTableRoll,
+                onUnpinTableRoll = onUnpinTableRoll,
                 recentDiceRolls = recentDiceRolls,
                 notesPreview = notesPreview,
                 notesContent = notesContent,
@@ -371,7 +389,22 @@ fun SessionBoardTab(
                 onUpdateClockDescriptionAndProgress = onUpdateClockDescriptionAndProgress,
                 onAssignToGroup = onAssignToGroup,
                 onToggleEditing = onToggleEditing,
-                onUpdateBoardViewLabel = onUpdateBoardViewLabel
+                onUpdateBoardViewLabel = onUpdateBoardViewLabel,
+                boardMythicChaos = boardMythicChaos,
+                boardMythicProbability = boardMythicProbability,
+                boardMythicLastResult = boardMythicLastResult,
+                boardMythicHistory = boardMythicHistory,
+                boardMythicLastEvent = boardMythicLastEvent,
+                onSetBoardMythicProbability = onSetBoardMythicProbability,
+                onUpdateBoardMythicChaos = onUpdateBoardMythicChaos,
+                onRollBoardMythicFate = onRollBoardMythicFate,
+                onAskBoardMythicQuestion = onAskBoardMythicQuestion,
+                onRollBoardMythicEvent = onRollBoardMythicEvent,
+                workspaceMemory = workspaceMemory,
+                onWorkspaceLayoutChanged = onWorkspaceLayoutChanged,
+                workspaceActions = workspaceActions,
+                soloSceneHeader = soloSceneHeader,
+                onAppendToNotes = onAppendToNotes
             )
         }
 

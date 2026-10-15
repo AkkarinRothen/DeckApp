@@ -25,6 +25,13 @@ class SettingsRepositoryImpl @Inject constructor(
 
     private val prefs = context.getSharedPreferences("deckapp_settings", Context.MODE_PRIVATE)
 
+    override fun getBoardSessionMemory(sessionId: Long) =
+        BoardMemoryCodec.decode(prefs.getString("board_session_$sessionId", null))
+
+    override fun setBoardSessionMemory(sessionId: Long, memory: com.deckapp.core.model.BoardSessionMemory) {
+        prefs.edit().putString("board_session_$sessionId", BoardMemoryCodec.encode(memory)).apply()
+    }
+
     private val _appThemeFlow = MutableStateFlow(loadInitialTheme())
     private val tableAppearanceFlow = MutableStateFlow(
         TableAppearance(

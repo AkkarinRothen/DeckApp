@@ -92,5 +92,18 @@ data class BoardItemUiContext(
     val onTickClock: (Long, Int) -> Unit = { _, _ -> },
     val onUpdateClockDescriptionAndProgress: (Long, String, Int) -> Unit = { _, _, _ -> },
     val onSendToNotes: (tableName: String, resultText: String) -> Unit = { _, _ -> },
-    val onRecordCombatNote: (String) -> Unit = {}
+    val onRecordCombatNote: (String) -> Unit = {},
+
+    // Sprint 56 — Bento Solo Journaling & Interactive Mythic Oracle
+    val boardMythicChaos: Int = 5,
+    val boardMythicProbability: ProbabilityLevel = ProbabilityLevel.FIFTY_FIFTY,
+    val boardMythicLastResult: BoardMythicFateResult? = null,
+    val boardMythicHistory: List<BoardMythicFateResult> = emptyList(),
+    val boardMythicLastEvent: String? = null,
+    val onSetBoardMythicProbability: (ProbabilityLevel) -> Unit = {},
+    val onUpdateBoardMythicChaos: (Int) -> Unit = {},
+    val onRollBoardMythicFate: (ProbabilityLevel) -> Unit = {},
+    val onAskBoardMythicQuestion: (ProbabilityLevel, String) -> Unit = { _, _ -> },
+    val onRollBoardMythicEvent: () -> Unit = {},
+    val onAppendToNotes: (String) -> Unit = {}
 )

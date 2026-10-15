@@ -17,6 +17,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 data class SessionUiState(
@@ -97,7 +99,16 @@ data class SessionUiState(
     val permanentPlayers: List<Npc> = emptyList(),
     val pinnedTableRolls: Map<Long, TableRollResult> = emptyMap(),
     val spreadResultsByDeck: Map<Long, CardSpreadResult> = emptyMap(),
-    val showQuickSearch: Boolean = false
+    val showQuickSearch: Boolean = false,
+    // Sprint 56 — Bento Solo Journaling & Interactive Mythic Oracle
+    val boardMythicChaos: Int = 5,
+    val boardMythicProbability: ProbabilityLevel = ProbabilityLevel.FIFTY_FIFTY,
+    val boardMythicLastResult: BoardMythicFateResult? = null,
+    val boardMythicHistory: List<BoardMythicFateResult> = emptyList(),
+    val boardMythicLastEvent: String? = null,
+    val isSoloSceneBusy: Boolean = false,
+    val boardMemory: BoardSessionMemory = BoardSessionMemory(),
+    val isSendingInspiration: Boolean = false
 )
 
 enum class SidebarTool {
@@ -154,11 +165,17 @@ class SessionViewModel @Inject constructor(
     private val voicePlayer by lazy { com.deckapp.feature.npcs.AudioPlayer(context) }
 
     private val sessionId: Long = checkNotNull(savedStateHandle["sessionId"])
+    private val notesMutex = Mutex()
     private var peekCardId: Long?
         get() = savedStateHandle.get<Long>("peekCardId")
         set(value) { savedStateHandle["peekCardId"] = value }
 
-    private val _uiState = MutableStateFlow(SessionUiState(sessionId = sessionId))
+    private val initialBoardMemory = settingsRepository.getBoardSessionMemory(sessionId)
+    private val _uiState = MutableStateFlow(SessionUiState(
+        sessionId = sessionId, boardMemory = initialBoardMemory,
+        focusedSceneId = initialBoardMemory.focusedSceneId,
+        pinnedTableRolls = initialBoardMemory.pinnedTableResults
+    ))
     val uiState: StateFlow<SessionUiState> = _uiState.asStateFlow()
 
     val tacticalMapDelegate = com.deckapp.feature.draw.delegates.TacticalMapDelegate(
@@ -209,7 +226,7 @@ class SessionViewModel @Inject constructor(
                     val elapsed = (now - session.createdAt) / (1000 * 60)
                     _uiState.update { it.copy(
                         session = session,
-                        dmNotes = session.dmNotes ?: "",
+                        dmNotes = if (it.isSoloSceneBusy || it.isSavingNotes) it.dmNotes else session.dmNotes.orEmpty(),
                         sessionElapsedMinutes = elapsed
                     ) }
                 }
@@ -491,6 +508,159 @@ class SessionViewModel @Inject constructor(
         }
     }
 
+    fun setBoardMythicProbability(prob: ProbabilityLevel) {
+        _uiState.update { it.copy(boardMythicProbability = prob) }
+    }
+
+    fun updateBoardMythicChaos(delta: Int) {
+        val currentChaos = _uiState.value.linkedMythicSession?.chaosFactor ?: _uiState.value.boardMythicChaos
+        val next = (currentChaos + delta).coerceIn(1, 9)
+        _uiState.update { it.copy(boardMythicChaos = next) }
+        _uiState.value.linkedMythicSession?.let { session ->
+            viewModelScope.launch {
+                mythicRepository.updateChaosFactor(session.id, next)
+            }
+        }
+    }
+
+    fun rollBoardMythicFate(
+        probability: ProbabilityLevel = _uiState.value.boardMythicProbability,
+        forcedRoll: Int? = null,
+        question: String = ""
+    ) {
+        val chaos = _uiState.value.linkedMythicSession?.chaosFactor ?: _uiState.value.boardMythicChaos
+        val rollValue = forcedRoll ?: kotlin.random.Random.nextInt(1, 101)
+        val fateCheckUseCase = com.deckapp.core.domain.usecase.mythic.FateCheckUseCase()
+        val (result, isRandomEvent) = fateCheckUseCase(probability, chaos, rollValue)
+
+        val fateChart = arrayOf(
+            intArrayOf(95, 97, 99, 99, 99, 99, 99, 99, 99),
+            intArrayOf(75, 83, 90, 95, 97, 99, 99, 99, 99),
+            intArrayOf(55, 65, 75, 83, 90, 95, 97, 99, 99),
+            intArrayOf(35, 45, 55, 65, 75, 83, 90, 95, 97),
+            intArrayOf(25, 35, 45, 55, 65, 75, 83, 90, 95),
+            intArrayOf(15, 25, 35, 45, 55, 65, 75, 83, 90),
+            intArrayOf(10, 15, 25, 35, 45, 55, 65, 75, 83),
+            intArrayOf(5, 10, 15, 25, 35, 45, 55, 65, 75),
+            intArrayOf(3, 5, 10, 15, 25, 35, 45, 55, 65)
+        )
+        val targetThreshold = fateChart[probability.ordinal][chaos - 1]
+
+        val randomEventDesc = if (isRandomEvent) {
+            val action = com.deckapp.core.domain.usecase.mythic.MythicReferenceData.actionKeywords.random()
+            val subject = com.deckapp.core.domain.usecase.mythic.MythicReferenceData.subjectKeywords.random()
+            "$action · $subject"
+        } else null
+
+        val fateItem = BoardMythicFateResult(
+            odds = probability,
+            chaos = chaos,
+            roll = rollValue,
+            targetThreshold = targetThreshold,
+            fateResult = result,
+            isRandomEvent = isRandomEvent,
+            randomEventDescription = randomEventDesc,
+            question = question.trim(),
+            sceneTitle = activeSoloScene()?.title.orEmpty(),
+            sceneId = activeSoloScene()?.id
+        )
+
+        _uiState.update { state ->
+            state.copy(
+                boardMythicProbability = probability,
+                boardMythicChaos = chaos,
+                boardMythicLastResult = fateItem,
+                boardMythicHistory = (listOf(fateItem) + state.boardMythicHistory).take(10)
+            )
+        }
+
+        _uiState.value.linkedMythicSession?.let { session ->
+            viewModelScope.launch {
+                mythicRepository.saveRoll(
+                    MythicRoll(
+                        sessionId = session.id,
+                        question = question.trim().ifBlank { "Consulta Bento" },
+                        probability = probability,
+                        chaosFactor = chaos,
+                        roll = rollValue,
+                        result = result,
+                        isRandomEvent = isRandomEvent,
+                        eventAction = randomEventDesc ?: "",
+                        sceneNumber = session.sceneNumber
+                    )
+                )
+            }
+        }
+    }
+
+    fun rollBoardMythicRandomEvent(): String {
+        val action = com.deckapp.core.domain.usecase.mythic.MythicReferenceData.actionKeywords.random()
+        val subject = com.deckapp.core.domain.usecase.mythic.MythicReferenceData.subjectKeywords.random()
+        val eventText = "$action · $subject"
+        _uiState.update { it.copy(boardMythicLastEvent = eventText) }
+        return eventText
+    }
+
+    fun appendToNotes(textToAppend: String) {
+        val current = _uiState.value.dmNotes
+        val updated = if (current.isBlank()) textToAppend else "$current\n\n$textToAppend"
+        updateNotes(updated)
+    }
+
+    fun activeSoloScene(): Scene? = _uiState.value.let { state ->
+        state.scenes.firstOrNull { it.id == state.focusedSceneId && !it.isCompleted }
+            ?: state.scenes.firstOrNull { !it.isCompleted }
+    }
+
+    fun saveSoloScene(scene: Scene, onSuccess: () -> Unit) {
+        if (_uiState.value.isSoloSceneBusy || scene.title.isBlank() || scene.sessionId != sessionId) return
+        _uiState.update { it.copy(isSoloSceneBusy = true) }
+        viewModelScope.launch {
+            try {
+                val id = sessionRepository.upsertScene(scene)
+                focusScene(id)
+                onSuccess()
+            } catch (error: Exception) {
+                if (error is kotlinx.coroutines.CancellationException) throw error
+                _uiState.update { it.copy(snackbarMessage = "No se pudo guardar la escena: ${error.message}") }
+            } finally {
+                _uiState.update { it.copy(isSoloSceneBusy = false) }
+            }
+        }
+    }
+
+    fun closeSoloScene(scene: Scene, closure: SoloSceneClosure, onSuccess: () -> Unit) {
+        if (_uiState.value.isSoloSceneBusy || scene.sessionId != sessionId) return
+        _uiState.update { it.copy(isSoloSceneBusy = true) }
+        viewModelScope.launch {
+            try {
+                notesMutex.withLock {
+                    sessionRepository.updateDmNotes(sessionId, _uiState.value.dmNotes)
+                    val closed = CloseSoloSceneUseCase(sessionRepository)(scene, closure)
+                    _uiState.update { state ->
+                        state.copy(
+                            dmNotes = listOf(state.dmNotes, closed.journalEntry).filter { it.isNotBlank() }.joinToString("\n\n"),
+                            focusedSceneId = closed.nextSceneId
+                        )
+                    }
+                    // Persist edits made while the close transaction was running as well.
+                    val savedNotes = _uiState.value.dmNotes
+                    sessionRepository.updateDmNotes(sessionId, savedNotes)
+                    _uiState.update { state -> if (state.dmNotes == savedNotes) state.copy(isSavingNotes = false) else state }
+                }
+                updateBoardMemory { it.copy(focusedSceneId = _uiState.value.focusedSceneId) }
+                if (closure.chaosDelta != 0) updateBoardMythicChaos(closure.chaosDelta)
+                onSuccess()
+                _uiState.update { it.copy(snackbarMessage = "Escena cerrada y guardada en el diario") }
+            } catch (error: Exception) {
+                if (error is kotlinx.coroutines.CancellationException) throw error
+                _uiState.update { it.copy(snackbarMessage = "No se pudo cerrar la escena: ${error.message}") }
+            } finally {
+                _uiState.update { it.copy(isSoloSceneBusy = false) }
+            }
+        }
+    }
+
     fun addMythicCharacter(name: String) {
         val mythicId = _uiState.value.linkedMythicSession?.id ?: return
         if (name.isBlank()) return
@@ -516,7 +686,9 @@ class SessionViewModel @Inject constructor(
             val addition = "\n\n[Personaje Mítico: ${character.name}]\n${character.notes}".trim()
             val newNotes = (_uiState.value.dmNotes + "\n\n" + addition).trim()
             _uiState.update { it.copy(dmNotes = newNotes) }
-            sessionRepository.updateDmNotes(sessionId, newNotes)
+            notesMutex.withLock {
+                if (_uiState.value.dmNotes == newNotes) sessionRepository.updateDmNotes(sessionId, newNotes)
+            }
         }
     }
 
@@ -549,12 +721,63 @@ class SessionViewModel @Inject constructor(
             val addition = "\n\n[Hilo Mítico: ${thread.description}]"
             val newNotes = (_uiState.value.dmNotes + "\n\n" + addition).trim()
             _uiState.update { it.copy(dmNotes = newNotes) }
-            sessionRepository.updateDmNotes(sessionId, newNotes)
+            notesMutex.withLock {
+                if (_uiState.value.dmNotes == newNotes) sessionRepository.updateDmNotes(sessionId, newNotes)
+            }
         }
     }
 
     fun focusScene(sceneId: Long?) {
-        _uiState.update { it.copy(focusedSceneId = sceneId) }
+        updateBoardMemory { it.copy(focusedSceneId = sceneId) }
+    }
+
+    private fun updateBoardMemory(transform: (BoardSessionMemory) -> BoardSessionMemory) {
+        val memory = transform(_uiState.value.boardMemory)
+        settingsRepository.setBoardSessionMemory(sessionId, memory)
+        _uiState.update { it.copy(boardMemory = memory, focusedSceneId = memory.focusedSceneId,
+            pinnedTableRolls = memory.pinnedTableResults) }
+    }
+
+    fun setWorkspaceLayout(view: SessionBoardView, layout: BoardViewMemory) {
+        updateBoardMemory { it.copy(views = it.views + (view.name to layout)) }
+    }
+
+    fun captureBoardInspiration(item: BoardInspiration) {
+        updateBoardMemory { it.captureInspiration(item) }
+    }
+
+    fun setBoardInspirationStatus(id: String, status: InspirationStatus) {
+        updateBoardMemory { it.setInspirationStatus(id, status) }
+    }
+
+    fun sendBoardInspirationToDiary(id: String) {
+        if (_uiState.value.isSendingInspiration || _uiState.value.isSoloSceneBusy) return
+        val item = _uiState.value.boardMemory.inspiration.firstOrNull { it.id == id } ?: return
+        if (item.status == InspirationStatus.USED) return
+        _uiState.update { it.copy(isSendingInspiration = true, isSavingNotes = true) }
+        viewModelScope.launch {
+            var savedNotes: String? = null
+            try {
+                notesMutex.withLock {
+                    val entry = item.toDiaryEntry()
+                    _uiState.update { state ->
+                        val notes = if (entry in state.dmNotes) state.dmNotes
+                            else listOf(state.dmNotes, entry).filter { it.isNotBlank() }.joinToString("\n\n")
+                        state.copy(dmNotes = notes)
+                    }
+                    savedNotes = _uiState.value.dmNotes
+                    sessionRepository.updateDmNotes(sessionId, savedNotes.orEmpty())
+                }
+                setBoardInspirationStatus(id, InspirationStatus.USED)
+                _uiState.update { it.copy(snackbarMessage = "Inspiración guardada en el diario") }
+            } catch (error: Exception) {
+                if (error is kotlinx.coroutines.CancellationException) throw error
+                _uiState.update { it.copy(snackbarMessage = "No se pudo guardar: ${error.message}") }
+            } finally {
+                _uiState.update { it.copy(isSendingInspiration = false,
+                    isSavingNotes = if (it.dmNotes == savedNotes || savedNotes == null) false else it.isSavingNotes) }
+            }
+        }
     }
 
     fun prepareSceneForBoard(scene: Scene) {
@@ -632,6 +855,16 @@ class SessionViewModel @Inject constructor(
         _uiState.update { it.copy(selectedDeckId = stackId) }
     }
 
+    /** Conserva un resultado visible al retomar la mesa sin alterar el historial de tiradas. */
+    fun pinTableRoll(tableId: Long, result: TableRollResult) {
+        if (result.tableId != tableId || result.sessionId != sessionId) return
+        updateBoardMemory { it.copy(pinnedTableResults = it.pinnedTableResults + (tableId to result)) }
+    }
+
+    fun unpinTableRoll(tableId: Long) {
+        updateBoardMemory { it.copy(pinnedTableResults = it.pinnedTableResults - tableId) }
+    }
+
     /** Tira una tabla aleatoria vinculada a un recurso (ej: carta) y muestra el resultado. */
     fun rollActiveTable(tableId: Long) {
         viewModelScope.launch {
@@ -666,7 +899,9 @@ class SessionViewModel @Inject constructor(
         val updated = if (current.isBlank()) entry else "$current\n$entry"
         _uiState.update { it.copy(dmNotes = updated, showQuickNoteDialog = false, activeTab = 4) }
         viewModelScope.launch {
-            sessionRepository.updateDmNotes(sessionId, updated)
+            notesMutex.withLock {
+                if (_uiState.value.dmNotes == updated) sessionRepository.updateDmNotes(sessionId, updated)
+            }
         }
     }
 
@@ -676,10 +911,12 @@ class SessionViewModel @Inject constructor(
         
         _uiState.update { it.copy(dmNotes = notes, isSavingNotes = true) }
         viewModelScope.launch {
-            sessionRepository.updateDmNotes(sessionId, notes)
+            notesMutex.withLock {
+                if (_uiState.value.dmNotes == notes) sessionRepository.updateDmNotes(sessionId, notes)
+            }
             // Pequeña pausa para que el indicador sea perceptible si la DB es muy rápida
             delay(400)
-            _uiState.update { it.copy(isSavingNotes = false) }
+            _uiState.update { if (it.dmNotes == notes) it.copy(isSavingNotes = false) else it }
         }
     }
 
@@ -1323,7 +1560,9 @@ class SessionViewModel @Inject constructor(
             val addition = "\n\n[$tableName]: $resultText"
             val newNotes = (currentNotes + addition).trim()
             _uiState.update { it.copy(dmNotes = newNotes) }
-            sessionRepository.updateDmNotes(sessionId, newNotes)
+            notesMutex.withLock {
+                if (_uiState.value.dmNotes == newNotes) sessionRepository.updateDmNotes(sessionId, newNotes)
+            }
         }
     }
 

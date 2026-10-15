@@ -2,9 +2,13 @@ package com.deckapp.feature.draw.components.blocks
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,9 +19,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.deckapp.core.model.BoardMythicFateResult
+import com.deckapp.core.model.DiceRollResult
 import com.deckapp.core.model.SessionBoardItem
 import com.deckapp.core.ui.components.SmartText
 import com.deckapp.feature.draw.components.BoardBlockMeta
+import com.deckapp.core.domain.usecase.oracleJournalEntry
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -32,7 +40,10 @@ fun NoteBlockContent(
     npcNames: List<String>,
     tableNames: List<String>,
     onTagClicked: (String) -> Unit,
-    onDiceClicked: (String) -> Unit
+    onDiceClicked: (String) -> Unit,
+    lastMythicResult: BoardMythicFateResult? = null,
+    lastDiceResult: DiceRollResult? = null,
+    onGenerateSpark: (() -> String)? = null
 ) {
     var isEditingInline by remember { mutableStateOf(false) }
     var textValue by remember(notesContent) { mutableStateOf(TextFieldValue(notesContent)) }
@@ -61,8 +72,12 @@ fun NoteBlockContent(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Formato rápido
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                // Formato rápido y Solo Journaling (con scroll horizontal)
+                Row(
+                    modifier = Modifier.weight(1f).horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     // Negrita
                     TextButton(
                         onClick = {
@@ -74,7 +89,7 @@ fun NoteBlockContent(
                             textValue = TextFieldValue(newText, TextRange(newSelectionStart, newSelectionEnd))
                             onUpdateNotes(newText)
                         },
-                        contentPadding = PaddingValues(horizontal = 8.dp)
+                        contentPadding = PaddingValues(horizontal = 6.dp)
                     ) {
                         Text("B", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium)
                     }
@@ -90,7 +105,7 @@ fun NoteBlockContent(
                             textValue = TextFieldValue(newText, TextRange(newSelectionStart, newSelectionEnd))
                             onUpdateNotes(newText)
                         },
-                        contentPadding = PaddingValues(horizontal = 8.dp)
+                        contentPadding = PaddingValues(horizontal = 6.dp)
                     ) {
                         Text("I", style = MaterialTheme.typography.bodyMedium.copy(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic))
                     }
@@ -107,11 +122,74 @@ fun NoteBlockContent(
                             textValue = TextFieldValue(newText, TextRange(newCursor))
                             onUpdateNotes(newText)
                         },
-                        contentPadding = PaddingValues(horizontal = 8.dp)
+                        contentPadding = PaddingValues(horizontal = 6.dp)
                     ) {
                         Text("⏰", style = MaterialTheme.typography.bodyMedium)
                     }
+
+                    // Solo Journal: Insertar Oráculo
+                    TextButton(
+                        onClick = {
+                            val snippet = if (lastMythicResult != null) {
+                                "\n${oracleJournalEntry(lastMythicResult)}\n"
+                            } else {
+                                "\n> **Pregunta:** \n> **Respuesta:** pendiente\n"
+                            }
+                            val text = textValue.text
+                            val sel = textValue.selection
+                            val newText = text.substring(0, sel.start) + snippet + text.substring(sel.start)
+                            val newCursor = sel.start + snippet.length
+                            textValue = TextFieldValue(newText, TextRange(newCursor))
+                            onUpdateNotes(newText)
+                        },
+                        contentPadding = PaddingValues(horizontal = 6.dp)
+                    ) {
+                        Text("🔮 Oráculo", style = MaterialTheme.typography.labelSmall)
+                    }
+
+                    // Solo Journal: Insertar Dado
+                    TextButton(
+                        onClick = {
+                            val snippet = if (lastDiceResult != null) {
+                                "\n> 🎲 **Tirada** (${lastDiceResult.expression}): **${lastDiceResult.total}**\n"
+                            } else {
+                                "\n> 🎲 **Tirada**: d20\n"
+                            }
+                            val text = textValue.text
+                            val sel = textValue.selection
+                            val newText = text.substring(0, sel.start) + snippet + text.substring(sel.start)
+                            val newCursor = sel.start + snippet.length
+                            textValue = TextFieldValue(newText, TextRange(newCursor))
+                            onUpdateNotes(newText)
+                        },
+                        contentPadding = PaddingValues(horizontal = 6.dp)
+                    ) {
+                        Text("🎲 Dado", style = MaterialTheme.typography.labelSmall)
+                    }
+
+                    // Solo Journal: Insertar Chispa
+                    TextButton(
+                        onClick = {
+                            val spark = onGenerateSpark?.invoke() ?: run {
+                                val a = com.deckapp.core.domain.usecase.mythic.MythicReferenceData.actionKeywords.random()
+                                val s = com.deckapp.core.domain.usecase.mythic.MythicReferenceData.subjectKeywords.random()
+                                "$a · $s"
+                            }
+                            val snippet = "\n> ⚡ **Chispa**: $spark\n"
+                            val text = textValue.text
+                            val sel = textValue.selection
+                            val newText = text.substring(0, sel.start) + snippet + text.substring(sel.start)
+                            val newCursor = sel.start + snippet.length
+                            textValue = TextFieldValue(newText, TextRange(newCursor))
+                            onUpdateNotes(newText)
+                        },
+                        contentPadding = PaddingValues(horizontal = 6.dp)
+                    ) {
+                        Text("⚡ Chispa", style = MaterialTheme.typography.labelSmall)
+                    }
                 }
+
+                Spacer(Modifier.width(4.dp))
 
                 // Confirmar / Salir
                 FilledIconButton(
@@ -128,6 +206,63 @@ fun NoteBlockContent(
                 }
             }
         } else {
+            // Tira de estampas rápidas de Solo Journaling (Modo Lectura)
+            if (!compactInFolder) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    AssistChip(
+                        onClick = { isEditingInline = true },
+                        label = { Text("Escribir", fontSize = 11.sp) },
+                        leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(12.dp)) },
+                        modifier = Modifier.height(28.dp)
+                    )
+
+                    if (lastMythicResult != null) {
+                        SuggestionChip(
+                            onClick = {
+                                val snippet = oracleJournalEntry(lastMythicResult)
+                                val updated = if (notesContent.isBlank()) snippet else "$notesContent\n\n$snippet"
+                                onUpdateNotes(updated)
+                            },
+                            label = { Text("+ 🔮 ${lastMythicResult.answerLabel}", fontSize = 11.sp) },
+                            modifier = Modifier.height(28.dp)
+                        )
+                    }
+
+                    if (lastDiceResult != null) {
+                        SuggestionChip(
+                            onClick = {
+                                val snippet = "> 🎲 **Tirada** (${lastDiceResult.expression}): **${lastDiceResult.total}**"
+                                val updated = if (notesContent.isBlank()) snippet else "$notesContent\n\n$snippet"
+                                onUpdateNotes(updated)
+                            },
+                            label = { Text("+ 🎲 ${lastDiceResult.total}", fontSize = 11.sp) },
+                            modifier = Modifier.height(28.dp)
+                        )
+                    }
+
+                    SuggestionChip(
+                        onClick = {
+                            val spark = onGenerateSpark?.invoke() ?: run {
+                                val a = com.deckapp.core.domain.usecase.mythic.MythicReferenceData.actionKeywords.random()
+                                val s = com.deckapp.core.domain.usecase.mythic.MythicReferenceData.subjectKeywords.random()
+                                "$a · $s"
+                            }
+                            val snippet = "> ⚡ **Chispa**: $spark"
+                            val updated = if (notesContent.isBlank()) snippet else "$notesContent\n\n$snippet"
+                            onUpdateNotes(updated)
+                        },
+                        label = { Text("+ ⚡ Chispa", fontSize = 11.sp) },
+                        modifier = Modifier.height(28.dp)
+                    )
+                }
+            }
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()

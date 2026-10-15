@@ -59,3 +59,26 @@ enum class ProbabilityLevel {
 }
 
 enum class FateResult { EXCEPTIONAL_YES, YES, NO, EXCEPTIONAL_NO, NONE }
+
+data class BoardMythicFateResult(
+    val odds: ProbabilityLevel,
+    val chaos: Int,
+    val roll: Int,
+    val targetThreshold: Int,
+    val fateResult: FateResult,
+    val isRandomEvent: Boolean,
+    val randomEventDescription: String? = null,
+    val timestamp: Long = System.currentTimeMillis(),
+    val question: String = "",
+    val sceneTitle: String = "",
+    val sceneId: Long? = null
+) {
+    val answerLabel: String
+        get() = when (fateResult) {
+            FateResult.EXCEPTIONAL_YES -> "¡SÍ EXCEPCIONAL!"
+            FateResult.YES -> "SÍ"
+            FateResult.EXCEPTIONAL_NO -> "¡NO EXCEPCIONAL!"
+            FateResult.NO -> "NO"
+            FateResult.NONE -> "—"
+        }
+}

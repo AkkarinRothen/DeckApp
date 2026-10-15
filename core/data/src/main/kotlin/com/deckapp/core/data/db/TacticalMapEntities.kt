@@ -63,6 +63,7 @@ data class TacticalTokenEntity(
     val speedFt: Int = 30,
     val conditionsJson: String = "[]",
     val isHidden: Int = 0,
+    val elevationFt: Int = 0,
     val encounterCreatureId: Long? = null,
     val npcId: Long? = null,
     val notes: String = ""
@@ -96,5 +97,6 @@ data class TacticalMapPinEntity(
     val targetTableId: Long? = null,
     val targetEncounterId: Long? = null,
     val targetWikiEntryId: Long? = null,
+    val targetMapId: Long? = null,
     val discoveriesJson: String = "[]"
 )

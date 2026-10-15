@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,6 +32,7 @@ import com.deckapp.core.model.EncounterCreature
 fun TacticalInitiativeBar(
     encounter: Encounter,
     onNextTurn: () -> Unit,
+    onPreviousTurn: (() -> Unit)? = null,
     onSelectCreatureToken: ((creatureId: Long) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
@@ -185,6 +187,21 @@ fun TacticalInitiativeBar(
             }
 
             VerticalDivider(modifier = Modifier.height(30.dp))
+
+            // Botón Turno Anterior
+            if (onPreviousTurn != null) {
+                IconButton(
+                    onClick = onPreviousTurn,
+                    modifier = Modifier.size(34.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.SkipPrevious,
+                        contentDescription = "Turno Anterior",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
 
             // Botón Siguiente Turno
             FilledTonalButton(

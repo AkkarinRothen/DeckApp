@@ -6,6 +6,8 @@ import com.deckapp.core.model.AppearancePreset
 import kotlinx.coroutines.flow.Flow
 
 interface SettingsRepository {
+    fun getBoardSessionMemory(sessionId: Long): com.deckapp.core.model.BoardSessionMemory
+    fun setBoardSessionMemory(sessionId: Long, memory: com.deckapp.core.model.BoardSessionMemory)
     fun getGeminiApiKey(): String
     fun setGeminiApiKey(key: String)
     fun getJpegQuality(): Int

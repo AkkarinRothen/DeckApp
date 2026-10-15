@@ -14,6 +14,9 @@ import com.deckapp.core.ui.session.SessionCentralConnector
 import com.deckapp.feature.draw.SessionViewModel
 import com.deckapp.feature.draw.SidebarTool
 import com.deckapp.feature.draw.SessionViewMode
+import com.deckapp.core.domain.usecase.boardInspirationCandidates
+import com.deckapp.feature.draw.components.BoardInspirationTray
+import com.deckapp.feature.draw.components.SoloScenePanel
 import com.deckapp.feature.draw.components.SessionBoardTab
 
 val BoardCentralTool = SessionCentralConnector(
@@ -35,6 +38,9 @@ val BoardCentralTool = SessionCentralConnector(
             tablesInSession = uiState.tablesInSession,
             allTables = uiState.allTables,
             recentTableRolls = uiState.recentTableRolls,
+            pinnedTableRolls = uiState.pinnedTableRolls,
+            onPinTableRoll = viewModel::pinTableRoll,
+            onUnpinTableRoll = viewModel::unpinTableRoll,
             recentDiceRolls = uiState.recentDiceRolls,
             notesPreview = uiState.dmNotes.take(300),
             notesContent = uiState.dmNotes,
@@ -152,6 +158,49 @@ val BoardCentralTool = SessionCentralConnector(
             onRevealCard = { cardId -> viewModel.revealCard(cardId) },
             sessionId = uiState.session?.id ?: 0L,
             isSidebarOpen = context.isSidebarOpen,
+            boardMythicChaos = uiState.boardMythicChaos,
+            boardMythicProbability = uiState.boardMythicProbability,
+            boardMythicLastResult = uiState.boardMythicLastResult,
+            boardMythicHistory = uiState.boardMythicHistory,
+            boardMythicLastEvent = uiState.boardMythicLastEvent,
+            onSetBoardMythicProbability = viewModel::setBoardMythicProbability,
+            onUpdateBoardMythicChaos = viewModel::updateBoardMythicChaos,
+            onRollBoardMythicFate = viewModel::rollBoardMythicFate,
+            onRollBoardMythicEvent = { viewModel.rollBoardMythicRandomEvent() },
+            onAskBoardMythicQuestion = { probability, question -> viewModel.rollBoardMythicFate(probability, question = question) },
+            workspaceMemory = uiState.boardMemory,
+            onWorkspaceLayoutChanged = viewModel::setWorkspaceLayout,
+            workspaceActions = {
+                val candidates = remember(uiState.recentTableRolls, uiState.boardMythicHistory, uiState.handByDeck, uiState.deckNames, uiState.scenes, uiState.focusedSceneId) {
+                    boardInspirationCandidates(uiState.recentTableRolls, uiState.boardMythicHistory,
+                        uiState.handByDeck.values.flatten(), uiState.deckNames, viewModel.activeSoloScene()?.title.orEmpty())
+                }
+                BoardInspirationTray(
+                    entries = uiState.boardMemory.inspiration,
+                    candidates = candidates,
+                    busy = uiState.isSendingInspiration || uiState.isSoloSceneBusy,
+                    onCapture = viewModel::captureBoardInspiration,
+                    onStatus = viewModel::setBoardInspirationStatus,
+                    onSendToDiary = viewModel::sendBoardInspirationToDiary
+                )
+            },
+            soloSceneHeader = {
+                SoloScenePanel(
+                    sessionId = uiState.sessionId,
+                    scenes = uiState.scenes,
+                    selectedScene = viewModel.activeSoloScene(),
+                    busy = uiState.isSoloSceneBusy,
+                    probability = uiState.boardMythicProbability,
+                    chaos = uiState.linkedMythicSession?.chaosFactor ?: uiState.boardMythicChaos,
+                    lastOracleResult = uiState.boardMythicLastResult,
+                    onSelect = viewModel::focusScene,
+                    onSave = viewModel::saveSoloScene,
+                    onClose = viewModel::closeSoloScene,
+                    onAsk = { question -> viewModel.rollBoardMythicFate(question = question) },
+                    onAppendToDiary = viewModel::appendToNotes
+                )
+            },
+            onAppendToNotes = viewModel::appendToNotes,
             modifier = Modifier.fillMaxSize()
         )
     }

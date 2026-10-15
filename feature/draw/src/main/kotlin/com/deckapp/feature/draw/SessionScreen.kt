@@ -454,6 +454,7 @@ fun SessionScreen(
                                     onTokenHpChanged = viewModel.tacticalMapDelegate::updateTokenHp,
                                     onTokenConditionToggled = viewModel.tacticalMapDelegate::toggleCondition,
                                     onTokenSizeChanged = viewModel.tacticalMapDelegate::updateTokenSize,
+                                    onTokenElevationChanged = viewModel.tacticalMapDelegate::updateTokenElevation,
                                     onTokenVisibilityToggled = viewModel.tacticalMapDelegate::toggleTokenVisibility,
                                     onOpenNpc = { npcId ->
                                         npcHistory.clear()
@@ -495,6 +496,17 @@ fun SessionScreen(
                                     onDismissAttackResolution = viewModel.tacticalMapDelegate::dismissAttackResolution,
                                     onDismissCustomAttackDialog = viewModel.tacticalMapDelegate::dismissCustomAttackDialog,
                                     onAdvanceCombatTurn = viewModel.tacticalMapDelegate::advanceCombatTurn,
+                                    onPreviousCombatTurn = viewModel.tacticalMapDelegate::previousCombatTurn,
+                                    onFocusOnCombatCreature = viewModel.tacticalMapDelegate::focusOnCombatCreature,
+                                    onClearCameraFocus = viewModel.tacticalMapDelegate::clearCameraFocus,
+                                    onNavigateBackToBreadcrumb = viewModel.tacticalMapDelegate::navigateBackToBreadcrumb,
+                                    onNavigateToSubMap = viewModel.tacticalMapDelegate::navigateToSubMap,
+                                    onSpawnEncounter = viewModel.tacticalMapDelegate::spawnEncounterOnMap,
+                                    onRollPinTable = viewModel.tacticalMapDelegate::rollPinTable,
+                                    onTogglePinSecret = viewModel.tacticalMapDelegate::togglePinSecret,
+                                    onEditPin = viewModel.tacticalMapDelegate::openEditPin,
+                                    onRollInlineFormula = viewModel.tacticalMapDelegate::rollInlineFormula,
+                                    onDismissPin = { viewModel.tacticalMapDelegate.selectPin(null) },
                                     dmNotes = uiState.dmNotes,
                                     onNotesChanged = viewModel::updateNotes,
                                     onToggleSidePanel = viewModel.tacticalMapDelegate::toggleSidePanel,
@@ -817,6 +829,7 @@ fun SessionScreen(
             availableTables = uiState.tacticalState.availableTables,
             availableEncounters = uiState.tacticalState.availableEncounters,
             availableWikiEntries = uiState.tacticalState.availableWikiEntries,
+            availableMaps = uiState.tacticalState.availableMaps,
             onDismiss = viewModel.tacticalMapDelegate::dismissPinDialogs,
             onSavePin = viewModel.tacticalMapDelegate::savePin
         )

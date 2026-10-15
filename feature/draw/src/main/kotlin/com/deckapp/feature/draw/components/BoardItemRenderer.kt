@@ -54,7 +54,7 @@ fun BoardItemRenderer(
         }
     }
 
-    val latestTableRoll = remember(item.id, item.type, uiContext.recentTableRolls) {
+    val latestTableRoll = remember(item.id, item.type, item.resourceId, uiContext.recentTableRolls) {
         if (item.type == SessionBoardItemType.TABLE) {
             uiContext.recentTableRolls.firstOrNull { it.tableId == item.resourceId }
         } else {
@@ -62,7 +62,7 @@ fun BoardItemRenderer(
         }
     }
 
-    val tableRecentRolls = remember(item.id, item.type, uiContext.recentTableRolls) {
+    val tableRecentRolls = remember(item.id, item.type, item.resourceId, uiContext.recentTableRolls) {
         if (item.type == SessionBoardItemType.TABLE) {
             uiContext.recentTableRolls.filter { it.tableId == item.resourceId }
         } else {
@@ -70,7 +70,7 @@ fun BoardItemRenderer(
         }
     }
 
-    val table = remember(item.id, item.type, uiContext.tablesInSession, uiContext.allTables) {
+    val table = remember(item.id, item.type, item.resourceId, uiContext.tablesInSession, uiContext.allTables) {
         if (item.type == SessionBoardItemType.TABLE) {
             (uiContext.tablesInSession + uiContext.allTables)
                 .distinctBy { it.id }
@@ -188,6 +188,7 @@ private fun RenderBlockCardContent(
             tableName = table?.name,
             tableCategory = table?.category,
             tableFormula = table?.rollFormula,
+            randomTable = table,
             latestTableRoll = latestTableRoll,
             tableRecentRolls = tableRecentRolls,
             recentDiceRolls = uiContext.recentDiceRolls,
@@ -269,8 +270,18 @@ private fun RenderBlockCardContent(
             onUpdateNpcHp = uiContext.onUpdateNpcHp,
             onToggleCondition = uiContext.onToggleCondition,
             onNpcClick = uiContext.onNpcClick,
-            onWikiClick = uiContext.onWikiClick,
             onUpdateDicePresets = onUpdateDicePresets,
+            boardMythicChaos = uiContext.boardMythicChaos,
+            boardMythicProbability = uiContext.boardMythicProbability,
+            boardMythicLastResult = uiContext.boardMythicLastResult,
+            boardMythicHistory = uiContext.boardMythicHistory,
+            boardMythicLastEvent = uiContext.boardMythicLastEvent,
+            onSetBoardMythicProbability = uiContext.onSetBoardMythicProbability,
+            onUpdateBoardMythicChaos = uiContext.onUpdateBoardMythicChaos,
+            onRollBoardMythicFate = uiContext.onRollBoardMythicFate,
+            onAskBoardMythicQuestion = uiContext.onAskBoardMythicQuestion,
+            onRollBoardMythicEvent = uiContext.onRollBoardMythicEvent,
+            onAppendToNotes = uiContext.onAppendToNotes,
             onMoveUp = { onMoveUp(item.id) },
             onMoveDown = { onMoveDown(item.id) },
             onDragStart = onDragStart,

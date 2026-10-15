@@ -1,5 +1,141 @@
 ---
 
+### Sprint 57 — Mapa Táctico: Condiciones, Elevación 3D y Ventaja Inteligente (15 de octubre de 2026)
+
+**FEATURE — Estados y Condiciones en Tokens**
+- Micro-badges circulares de condiciones en el arco superior del token en el mapa táctico (`TacticalMapCanvas`), con simbología semántica (⬇ Prone, V Poisoned, C Blinded, 💀 Unconscious, ❄ Stunned, ⚓ Restrained, 🕯 Invisible, etc.). Soporta visualización de hasta 3 badges directos y badge de desbordamiento `+N`.
+- Overlay táctico de incapacitación: cruz roja semitransparente con reborde oscuro en el centro del token cuando sus puntos de golpe caen a 0 (`currentHp <= 0`).
+
+**FEATURE — Elevación y Vuelo 3D**
+- Campo `elevationFt` integrado en `TacticalToken` y `TacticalTokenEntity` con migración Room 42 -> 43 (`MIGRATION_42_43`).
+- Renderizado táctico de altura:
+  - Sombra de vuelo elíptica proyectada en el suelo debajo del token, escalada y desenfocada según la altura (`token.elevationFt > 0`).
+  - Halo de vuelo cian punteado alrededor del token.
+  - Badge flotante en la esquina superior derecha del token con la altura actual (ej. `+10ft`, `+30ft`).
+- Control de elevación en `TacticalTokenHud`: selector rápido con accesos directos para *Tierra (0ft)*, `+5ft`, `+10ft`, `+20ft` y botones de microajuste incremental.
+
+**FEATURE — Distancia Euclidiana 3D y Ventaja/Desventaja Inteligente**
+- Cálculo de distancia 3D en `CalculateTacticalDistanceUseCase`: hipotenusa euclidiana tridimensional $\sqrt{D_{horiz}^2 + \Delta h^2}$ considerando la diferencia de altura vertical $\Delta h$ entre atacante y defensor.
+- Línea de puntería en canvas con etiqueta de distancia 3D y desglose de delta de altura (ej. `36 ft (Δh: 20ft)`).
+- Diálogo de ataque táctico (`TacticalAttackDialog`) con sugerencia contextual automática de Ventaja/Desventaja según las condiciones del atacante y defensor (blanco derribado cuerpo a cuerpo vs a distancia, ceguera, invisibilidad, parálisis, etc.).
+- Selector de modo de ataque (`Normal`, `Ventaja`, `Desventaja`) que realiza tirada doble de d20 tomando el valor máximo o mínimo según corresponda.
+- Banner de resolución (`TacticalAttackResolutionBanner`) enriquecido con etiqueta de ventaja/desventaja y diferencial de elevación 3D.
+
+**VALIDACIÓN Y PARIDAD**
+- 5 pruebas unitarias creadas en `TacticalElevationConditionsTest` cubriendo cálculo de distancia 3D euclidiana, distancia en plano, modelo de elevación, y resolución de ataques con ventaja y desventaja; todas aprobadas.
+- Compilación y empaquetado total verificado con `./gradlew :app:assembleDebug` (BUILD SUCCESSFUL en 1m 3s).
+- *Feature Parity Mandate:* Registrado para sincronizar el cálculo 3D, elevación y badges de condiciones en `TDAPP-desktop`.
+
+---
+
+### Solo roleo — Contexto de escena, preguntas y cierre (15 de octubre de 2026)
+
+**FEATURE — Cabecera de escena en distribución Solo**
+- Crear, elegir y editar escenas desde la mesa, con título, lugar, objetivo, situación y pregunta pendiente. La situación se despliega para conservar espacio de lectura.
+- Reutiliza las escenas persistentes del planificador. El contexto se guarda como Markdown legible en `Scene.content`; las escenas de texto libre conservan todo su contenido como situación al editarlas.
+- Permite preguntar al oráculo desde la cabecera y guardar la consulta completa en el diario de la sesión. Disponible también en una mesa sin bloques.
+
+**FEATURE — Consultas con contexto**
+- Campo de pregunta en el bloque Mythic; cada resultado captura pregunta, escena, probabilidad, caos y tirada. El registro Mythic vinculado recibe la pregunta real.
+- El envío al diario desde cabecera, bloque, historial y herramientas del editor usa los valores de la tirada original, sin reinterpretarlos con los controles actuales.
+- La plantilla del editor sin una consulta previa muestra una respuesta pendiente, evitando insertar un «sí» inventado.
+
+**FEATURE — Cierre y continuidad**
+- Cierre con resumen obligatorio, consecuencias y pendientes opcionales, creación opcional de la siguiente escena y ajuste opcional de caos (−1 / igual / +1).
+- Guardado del cierre en `Session.dmNotes`, marcado de la escena como completada y creación de su sucesora en una transacción Room. Una escena ya completada rechaza un segundo cierre.
+- La siguiente escena recibe los pendientes como pregunta inicial. Los campos existentes y vínculos del planificador se conservan; no se modifica el esquema de la base.
+- Serializadas las escrituras del diario durante el cierre para proteger cambios recientes de notas y evitar que una escritura anterior reemplace el cierre.
+
+**VALIDACIÓN**
+- 7 pruebas nuevas de contexto multilinea, conservación de escenas libres, captura de la consulta, cierre con/sin sucesora, validaciones y propagación de errores; todas aprobadas.
+- 30 pruebas de `:feature:draw:testDebugUnitTest` aprobadas y empaquetado debug correcto.
+- Cabecera con altura máxima del 40 % del área disponible y scroll propio para conservar espacio de escritura con teclado u orientación horizontal.
+- Verificación visual pendiente: no hay dispositivos ni emuladores conectados.
+
+---
+
+### Mesa de juego — Distribuciones DM / Solo y ancho adaptable (15 de octubre de 2026)
+
+**FEATURE — Protagonista y herramientas ancladas**
+- Selector de distribución «Grilla / DM / Solo» por sesión y vista, con selección manual de bloque protagonista. Solo prioriza notas/diario; DM prioriza combate, lugar o notas según los bloques existentes.
+- El protagonista se presenta con ancho L al comienzo del área principal. Las herramientas usan una columna lateral de 320 dp cuando el espacio disponible alcanza 900 dp, con scroll independiente; en pantallas más angostas se muestran accesos en una franja inferior que abren el bloque completo.
+- Los bloques fijados personalizan las herramientas; si no hay fijados se sugieren hasta tres herramientas según el modo. Cada bloque aparece en una única zona de la mesa.
+- Modo edición y carpetas conservan la grilla y sus operaciones de organización. Las preferencias de distribución se mantienen mediante estado guardable de Compose, sin cambios de base de datos ni persistencia garantizada entre aperturas de la app.
+
+**FIX — Columnas según el área real**
+- Sustituido el cálculo basado en orientación y ancho total de pantalla por el ancho medido del contenedor, después de descontar paneles laterales y la columna de herramientas.
+- Entre una y cuatro columnas, con ancho mínimo objetivo de 240 dp y separación de 10 dp; bloques M ocupan hasta dos columnas, L todo el ancho de su zona.
+- Al pasar de franja inferior a columna lateral o entrar en edición, se cierra la herramienta abierta para evitar vistas duplicadas.
+
+**VALIDACIÓN**
+- `:feature:draw:testDebugUnitTest :app:assembleDebug --max-workers=1`: BUILD SUCCESSFUL.
+- 30 pruebas aprobadas, incluidas 7 nuevas sobre ancho útil, prioridades DM/Solo, selección manual, borrado del protagonista, herramientas fijadas y vistas vacías.
+- Revisión visual pendiente: no hay dispositivos ni emuladores conectados.
+
+---
+
+### Sprint 56 — Bento Solo Roleplay: Oráculo Mythic Interactivo y Journaling Rápido (15 de octubre de 2026)
+
+**FEATURE — Bento Mythic Todo-en-Uno (Interactividad Completa)**
+- Transformación completa de `MythicBlockContent` en un widget interactivo autónomo de cero fricción sin obligar a cambiar de pantalla o abrir el panel lateral:
+  - **Selector de Probabilidades:** Menú contextual desplegable con las 9 probabilidades de Mythic GME 2e (desde *Imposible* hasta *Seguro*).
+  - **Factor de Caos Dinámico:** Botones rápidos `+` y `-` para ajustar el factor de caos (rango 1..9) con feedback táctil.
+  - **Fate Check d100 en 1 Tap:** Botón principal «Preguntar» que calcula instantáneamente el resultado según la tabla de destino de Mythic (SÍ EXCEPCIONAL, SÍ, NO, NO EXCEPCIONAL), comparando la tirada contra el umbral numérico objetivo.
+  - **Detección Automática de Eventos Aleatorios:** Si los dígitos coinciden y son menores o iguales al factor de caos, genera un evento de dos palabras («Acción · Sujeto») de las listas de Mythic.
+  - **Generador de Chispas / Eventos:** Botón con icono de rayo (`Icons.Default.Bolt`) para inspirar giros narrativos instantáneos con un solo toque.
+  - **Historial Desplegable y Enviar a Notas:** Tarjeta de resultado coloreada semánticamente con botón directo para estampar la respuesta en las notas del DM / Journaling.
+  - **Modo Standalone con Auto-Sincronización:** Funciona inmediatamente con valores predeterminados (Caos 5, 50/50) si no hay sesión Mythic vinculada, y sincroniza automáticamente las tiradas con el log oficial de la sesión cuando existe vinculación.
+
+**FEATURE — Bento de Notas: Herramientas de Solo Journaling**
+- Barra de herramientas rápidas `[🔮 Oráculo]`, `[🎲 Dado]`, `[⚡ Chispa]` y `[⏰ Hora]` integradas tanto en modo edición (inyección en la posición exacta del cursor) como en modo lectura (chips flotantes inferiores de inserción al final con un solo toque).
+- Inserción estructurada con formato Markdown optimizado para lectura y relectura de aventuras en solitario.
+- Función de soporte `appendToNotes` en `SessionViewModel` para estampar tiradas y chispas desde cualquier bento sin sobrescribir el texto existente.
+
+**VALIDACIÓN Y PARIDAD**
+- Suite unitaria `SessionBoardSoloJournalTest` creada y validada en `:feature:draw:testDebugUnitTest` (BUILD SUCCESSFUL).
+- Compilación y empaquetado total verificado con `./gradlew :app:assembleDebug` (BUILD SUCCESSFUL).
+- *Feature Parity Mandate:* Registrado para mantener paridad de experiencia en el bento grid de `TDAPP-desktop`.
+
+---
+
+### Bento de tablas — Recuperación de resultados y búsqueda (15 de octubre de 2026)
+
+**FEATURE — Fijar resultados durante la sesión**
+- El menú de cada resultado permite fijarlo, también al consultar una tirada anterior. El bloque conserva ese resultado al realizar nuevas tiradas, con acceso a la nueva tirada y opción de volver al resultado más reciente.
+- Estado compartido por tabla en el ViewModel de sesión; se conserva al cambiar de pestaña o tamaño mientras vive el ViewModel. No persiste tras cerrar la sesión o reiniciar la app.
+- Conectado el estado existente `pinnedTableRolls` y sus callbacks a través de todos los componentes del tablero. Los resúmenes de bloques colapsados reflejan el resultado fijado.
+
+**FEATURE — Consulta y feedback**
+- Búsqueda de entradas por varias palabras, ignorando mayúsculas y tildes; contador de coincidencias, limpieza de búsqueda y estado vacío. Se conservan rangos, pesos y dados interactivos.
+- Confirmación temporal con icono de verificación al copiar un resultado.
+
+**FIX — Actualización de recursos y compilación**
+- Cambiar la tabla vinculada invalida las vistas memorizadas de fórmula, resultado e historial, y cierra las consultas de la tabla anterior.
+- Reparaciones mínimas de compilación en el bloque Mythic existente: imports al comienzo del archivo, lectura segura del texto opcional y uso de `saveRoll(MythicRoll)` según la interfaz real del repositorio.
+
+**VALIDACIÓN**
+- `:feature:draw:testDebugUnitTest :app:assembleDebug --max-workers=1`: BUILD SUCCESSFUL.
+- Ejecución independiente de `TableEntriesSearchTest`: 4 pruebas, 0 fallos, 0 errores. Cobertura de tildes/mayúsculas, varias palabras, búsqueda vacía y fórmulas literales.
+- Verificación visual pendiente: ningún dispositivo ni emulador conectado.
+
+---
+
+### Bento de tablas — Lectura y acciones por tamaño (15 de octubre de 2026)
+
+**FEATURE — Resultados legibles durante la sesión**
+- S muestra un resumen de dos líneas y tirada rápida; M incluye historial plegado; L ofrece lectura con scroll, hasta cinco tiradas anteriores y consulta de las entradas de la tabla con rangos o pesos según el modo.
+- Área de resultado de altura estable, transición entre tiradas y resaltado breve del nuevo resultado. «Ver completo» abre una copia del resultado seleccionado, también desde el historial, con lectura y acciones propias.
+- Controles de 48 dp, copia visible y menú contextual para enviar a notas o al combate activo; se conservan los dados interactivos del texto.
+
+**FIX — Datos del bloque conectados**
+- La fórmula y el historial ya disponibles en `BoardBlockCard` se transmiten ahora a `TableBlockContent`; antes se perdían en el componente intermedio.
+- Se transmite la tabla al bloque para consultar sus entradas sin salir del tablero.
+
+**VALIDACIÓN**
+- `./gradlew :app:assembleDebug`: BUILD SUCCESSFUL. Revisión visual en dispositivo pendiente: no había dispositivos ni emuladores conectados.
+
+---
+
 ### Sprint 55 — Modo Mesa Híbrida: Panel Lateral Rápido Multitool VTT (15 de octubre de 2026)
 
 **FEATURE — Panel Lateral Rápido Multitool y Adaptabilidad Responsiva**

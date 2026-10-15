@@ -113,4 +113,7 @@ class SessionRepositoryImpl @Inject constructor(
 
     override suspend fun updateSceneCompletion(sceneId: Long, completed: Boolean) =
         sceneDao.updateCompletion(sceneId, completed)
+
+    override suspend fun closeSceneAndAppendJournal(sceneId: Long, sessionId: Long, entry: String, nextScene: Scene?): Long? =
+        sceneDao.closeWithJournal(sceneId, sessionId, entry, nextScene?.toEntity())
 }

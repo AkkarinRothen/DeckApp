@@ -32,7 +32,9 @@ private val PIN_ICONS = listOf(
     PinIconOption("trap", "Trampa", Icons.Default.Warning),
     PinIconOption("chest", "Tesoro", Icons.Default.Inventory2),
     PinIconOption("skull", "Peligro", Icons.Default.Dangerous),
-    PinIconOption("secret", "Secreto", Icons.Default.Key)
+    PinIconOption("secret", "Secreto", Icons.Default.Key),
+    PinIconOption("stairs", "Escalera", Icons.Default.MeetingRoom),
+    PinIconOption("portal", "Mapa", Icons.Default.Map)
 )
 
 private val PIN_COLORS = listOf(
@@ -54,6 +56,7 @@ fun TacticalPinDialog(
     availableTables: List<RandomTable> = emptyList(),
     availableEncounters: List<Encounter> = emptyList(),
     availableWikiEntries: List<WikiEntry> = emptyList(),
+    availableMaps: List<TacticalMap> = emptyList(),
     onDismiss: () -> Unit,
     onSavePin: (TacticalMapPin) -> Unit
 ) {
@@ -66,10 +69,12 @@ fun TacticalPinDialog(
     var targetTableId by remember { mutableStateOf(initialPin?.targetTableId) }
     var targetEncounterId by remember { mutableStateOf(initialPin?.targetEncounterId) }
     var targetWikiEntryId by remember { mutableStateOf(initialPin?.targetWikiEntryId) }
+    var targetMapId by remember { mutableStateOf(initialPin?.targetMapId) }
 
     var showTablePicker by remember { mutableStateOf(false) }
     var showEncounterPicker by remember { mutableStateOf(false) }
     var showWikiPicker by remember { mutableStateOf(false) }
+    var showMapPicker by remember { mutableStateOf(false) }
 
     val linkedTableName = remember(targetTableId, availableTables) {
         availableTables.find { it.id == targetTableId }?.name
@@ -79,6 +84,9 @@ fun TacticalPinDialog(
     }
     val linkedWikiTitle = remember(targetWikiEntryId, availableWikiEntries) {
         availableWikiEntries.find { it.id == targetWikiEntryId }?.title
+    }
+    val linkedMapName = remember(targetMapId, availableMaps) {
+        availableMaps.find { it.id == targetMapId }?.name
     }
 
     AlertDialog(
@@ -252,6 +260,39 @@ fun TacticalPinDialog(
                             }
                         }
                     }
+
+                    // Fila de Mapa Anidado (Map-in-Map estilo Atlas VTT)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(Icons.Default.Map, contentDescription = null, tint = Color(0xFF43A047), modifier = Modifier.size(18.dp))
+                            Text(
+                                text = linkedMapName?.let { "Mapa: $it" } ?: "Sin sub-mapa",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = if (linkedMapName != null) FontWeight.Medium else FontWeight.Normal
+                            )
+                        }
+                        if (targetMapId != null) {
+                            IconButton(onClick = { targetMapId = null }, modifier = Modifier.size(28.dp)) {
+                                Icon(Icons.Default.Close, contentDescription = "Quitar", modifier = Modifier.size(16.dp))
+                            }
+                        } else {
+                            TextButton(onClick = { showMapPicker = true }) {
+                                Text("+ Vincular", fontSize = 11.sp)
+                            }
+                        }
+                    }
                 }
 
                 // Selector de Iconos
@@ -367,6 +408,7 @@ fun TacticalPinDialog(
                         targetTableId = targetTableId,
                         targetEncounterId = targetEncounterId,
                         targetWikiEntryId = targetWikiEntryId,
+                        targetMapId = targetMapId,
                         discoveries = initialPin?.discoveries ?: emptyList()
                     )
                     onSavePin(finalPin)
@@ -419,6 +461,19 @@ fun TacticalPinDialog(
                 showWikiPicker = false
             },
             onDismiss = { showWikiPicker = false }
+        )
+    }
+
+    // Picker modal de Sub-mapas (Map-in-Map)
+    if (showMapPicker) {
+        ResourcePickerModal(
+            title = "Vincular Sub-Mapa (Map-in-Map)",
+            items = availableMaps.filter { it.id != mapId }.map { ResourceItem(it.id, it.name, "Mapa Táctico") },
+            onSelect = {
+                targetMapId = it
+                showMapPicker = false
+            },
+            onDismiss = { showMapPicker = false }
         )
     }
 }

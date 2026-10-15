@@ -903,5 +903,43 @@ val MIGRATION_41_42 = object : Migration(41, 42) {
     }
 }
 
+val MIGRATION_42_43 = object : Migration(42, 43) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        val hasElevation = database.query("PRAGMA table_info(`tactical_tokens`)").use { cursor ->
+            val nameIndex = cursor.getColumnIndex("name")
+            var found = false
+            while (cursor.moveToNext()) {
+                if (cursor.getString(nameIndex) == "elevationFt") {
+                    found = true
+                    break
+                }
+            }
+            found
+        }
+        if (!hasElevation) {
+            database.execSQL("ALTER TABLE `tactical_tokens` ADD COLUMN `elevationFt` INTEGER NOT NULL DEFAULT 0")
+        }
+    }
+}
+
+val MIGRATION_43_44 = object : Migration(43, 44) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        val hasTargetMapId = database.query("PRAGMA table_info(`tactical_map_pins`)").use { cursor ->
+            val nameIndex = cursor.getColumnIndex("name")
+            var found = false
+            while (cursor.moveToNext()) {
+                if (cursor.getString(nameIndex) == "targetMapId") {
+                    found = true
+                    break
+                }
+            }
+            found
+        }
+        if (!hasTargetMapId) {
+            database.execSQL("ALTER TABLE `tactical_map_pins` ADD COLUMN `targetMapId` INTEGER DEFAULT NULL")
+        }
+    }
+}
+
 
 

@@ -66,6 +66,7 @@ fun TacticalTokenEntity.toDomain(): TacticalToken {
         speedFt = speedFt,
         conditions = decodedConditions,
         isHidden = isHidden == 1,
+        elevationFt = elevationFt,
         encounterCreatureId = encounterCreatureId,
         npcId = npcId,
         notes = notes
@@ -92,6 +93,7 @@ fun TacticalToken.toEntity(): TacticalTokenEntity {
         speedFt = speedFt,
         conditionsJson = conditionsEncoded,
         isHidden = if (isHidden) 1 else 0,
+        elevationFt = elevationFt,
         encounterCreatureId = encounterCreatureId,
         npcId = npcId,
         notes = notes
@@ -117,6 +119,7 @@ fun TacticalMapPinEntity.toDomain(): TacticalMapPin {
         targetTableId = targetTableId,
         targetEncounterId = targetEncounterId,
         targetWikiEntryId = targetWikiEntryId,
+        targetMapId = targetMapId,
         discoveries = decodedDiscoveries
     )
 }
@@ -140,6 +143,7 @@ fun TacticalMapPin.toEntity(): TacticalMapPinEntity {
         targetTableId = targetTableId,
         targetEncounterId = targetEncounterId,
         targetWikiEntryId = targetWikiEntryId,
+        targetMapId = targetMapId,
         discoveriesJson = encodedDiscoveries
     )
 }

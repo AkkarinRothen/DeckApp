@@ -47,4 +47,6 @@ interface SessionRepository {
     suspend fun deleteScene(sceneId: Long)
     suspend fun updateSceneOrder(sceneId: Long, order: Int)
     suspend fun updateSceneCompletion(sceneId: Long, completed: Boolean)
+    /** Atomically append the journal entry, close the scene and optionally create its successor. */
+    suspend fun closeSceneAndAppendJournal(sceneId: Long, sessionId: Long, entry: String, nextScene: Scene?): Long?
 }
