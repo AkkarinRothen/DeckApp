@@ -1,5 +1,9 @@
 package com.deckapp.feature.encounters
 
+import com.deckapp.core.ui.components.DeckCard
+import com.deckapp.core.ui.components.DeckButton
+import com.deckapp.core.ui.components.DeckTextButton
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -107,17 +111,17 @@ private fun EncounterItem(
             title = { Text("Borrar encuentro") },
             text = { Text("¿Seguro que quieres borrar \"${encounter.name}\"?") },
             confirmButton = {
-                TextButton(onClick = { onDelete(); showDeleteConfirm = false }) {
+                DeckTextButton(onClick = { onDelete(); showDeleteConfirm = false }) {
                     Text("Borrar", color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancelar") }
+                DeckTextButton(onClick = { showDeleteConfirm = false }) { Text("Cancelar") }
             }
         )
     }
 
-    Card(
+    DeckCard(
         onClick = onEdit,
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -165,7 +169,7 @@ private fun EncounterItem(
             
             Spacer(Modifier.height(16.dp))
             
-            Button(
+            DeckButton(
                 onClick = onStart,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(

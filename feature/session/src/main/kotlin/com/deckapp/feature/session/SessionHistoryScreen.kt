@@ -1,5 +1,7 @@
 package com.deckapp.feature.session
 
+import com.deckapp.core.ui.components.DeckCard
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -142,7 +144,7 @@ private fun SessionHeader(uiState: SessionHistoryUiState) {
     val dateFormat = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault())
     val dateText = dateFormat.format(Date(session.createdAt))
 
-    Card(
+    DeckCard(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
     ) {

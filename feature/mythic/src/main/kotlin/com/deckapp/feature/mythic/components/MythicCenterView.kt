@@ -1,5 +1,8 @@
 package com.deckapp.feature.mythic.components
 
+import com.deckapp.core.ui.components.DeckButton
+import com.deckapp.core.ui.components.DeckOutlinedButton
+
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -59,7 +62,7 @@ fun MythicCenterView(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Button(
+            DeckButton(
                 onClick = onFateCheck,
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(containerColor = chaosColor)
@@ -69,7 +72,7 @@ fun MythicCenterView(
                 Text("Preguntar")
             }
 
-            OutlinedButton(
+            DeckOutlinedButton(
                 onClick = onQuickCheck,
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = chaosColor)
             ) {

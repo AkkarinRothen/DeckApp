@@ -1,5 +1,7 @@
 package com.deckapp.feature.mythic
 
+import com.deckapp.core.ui.components.DeckTextButton
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -132,12 +134,12 @@ private fun CreateMythicSessionDialog(
             )
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(name) }, enabled = name.isNotBlank()) {
+            DeckTextButton(onClick = { onConfirm(name) }, enabled = name.isNotBlank()) {
                 Text("Crear")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
+            DeckTextButton(onClick = onDismiss) { Text("Cancelar") }
         }
     )
 }

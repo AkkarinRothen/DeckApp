@@ -1,5 +1,8 @@
 package com.deckapp.feature.mythic.components
 
+import com.deckapp.core.ui.components.DeckCard
+import com.deckapp.core.ui.components.DeckButton
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -62,7 +65,7 @@ fun FateCheckSheet(
             }
         }
 
-        Button(
+        DeckButton(
             onClick = {
                 onPerformRoll(question, selectedProbability)
                 onDismiss()
@@ -122,7 +125,7 @@ fun FateResultCard(result: FateResult, roll: Int, isRandomEvent: Boolean, eventF
 
             if (isRandomEvent) {
                 Spacer(Modifier.height(12.dp))
-                Card(
+                DeckCard(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {

@@ -1,5 +1,7 @@
 package com.deckapp.feature.draw.components
 
+import com.deckapp.core.ui.components.DeckCard
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -32,7 +34,7 @@ fun CardItem(
     onReveal: () -> Unit,
     onRollTable: (Long) -> Unit
 ) {
-    Card(
+    DeckCard(
         modifier = Modifier
             .width(100.dp)
             .aspectRatio(aspectRatio.ratio)

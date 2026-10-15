@@ -36,7 +36,16 @@ fun PlanTab(
     onDrawCard: (Long) -> Unit,
     onNpcClick: (Long) -> Unit,
     onWikiClick: (Long) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    focusedSceneId: Long? = null,
+    onFocusedSceneChange: ((Long?) -> Unit)? = null,
+    allDecks: List<com.deckapp.core.model.CardStack> = emptyList(),
+    allTables: List<com.deckapp.core.model.RandomTable> = emptyList(),
+    activeEncounter: com.deckapp.core.model.Encounter? = null,
+    onUpdateHp: ((com.deckapp.core.model.EncounterCreature, Int) -> Unit)? = null,
+    onStartEncounter: ((Long) -> Unit)? = null,
+    onPrepareSceneForBoard: ((Scene) -> Unit)? = null,
+    onRollDiceClicked: ((String) -> Unit)? = null
 ) {
     if (scenes.isEmpty()) {
         // ... (Empty State)
@@ -67,7 +76,7 @@ fun PlanTab(
                 )
             }
 
-            itemsIndexed(scenes, key = { _, s -> s.id }) { index, scene ->
+            itemsIndexed(scenes, key = { index, s -> if (s.id != 0L) s.id else "scene_$index" }) { index, scene ->
                 SceneLiveItem(
                     scene = scene,
                     npcs = npcs,

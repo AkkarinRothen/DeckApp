@@ -1,5 +1,9 @@
 package com.deckapp.feature.mythic
 
+import com.deckapp.core.ui.components.DeckButton
+import com.deckapp.core.ui.components.DeckOutlinedButton
+import com.deckapp.core.ui.components.DeckTextButton
+
 import androidx.compose.animation.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -186,7 +190,7 @@ fun MythicSessionScreen(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Button(
+                    DeckButton(
                         onClick = { showFateSheet = true },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp),
@@ -197,7 +201,7 @@ fun MythicSessionScreen(
                         Text("Preguntar")
                     }
 
-                    OutlinedButton(
+                    DeckOutlinedButton(
                         onClick = { viewModel.quickFateCheck() },
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = chaosColor)
@@ -266,7 +270,7 @@ fun MythicSessionScreen(
 }
 
 @Composable
-internal fun MythicHeader(
+fun MythicHeader(
     sceneNumber: Int,
     chaosFactor: Int,
     chaosColor: Color,
@@ -296,10 +300,10 @@ internal fun MythicHeader(
                     }
                 }
                 Row {
-                    TextButton(onClick = onFinishScene) {
+                    DeckTextButton(onClick = onFinishScene) {
                         Text("Finalizar")
                     }
-                    TextButton(onClick = onCheckScene) {
+                    DeckTextButton(onClick = onCheckScene) {
                         Text("Chequear")
                     }
                 }
@@ -417,7 +421,7 @@ private fun ThreadList(
 }
 
 @Composable
-internal fun RollHistoryList(rolls: List<MythicRoll>) {
+fun RollHistoryList(rolls: List<MythicRoll>) {
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         items(rolls, key = { it.id }) { roll ->
             if (roll.probability == ProbabilityLevel.NARRATIVE) {
@@ -492,10 +496,10 @@ private fun FinishSceneDialog(
             }
         },
         confirmButton = {
-            Button(onClick = { onConfirm(notes, inControl) }) { Text("Finalizar y Seguir") }
+            DeckButton(onClick = { onConfirm(notes, inControl) }) { Text("Finalizar y Seguir") }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
+            DeckTextButton(onClick = onDismiss) { Text("Cancelar") }
         }
     )
 }

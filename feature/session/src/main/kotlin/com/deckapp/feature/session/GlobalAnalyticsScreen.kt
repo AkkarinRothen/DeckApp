@@ -1,5 +1,7 @@
 package com.deckapp.feature.session
 
+import com.deckapp.core.ui.components.DeckCard
+
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -126,7 +128,7 @@ private fun SummaryItem(label: String, value: String) {
 
 @Composable
 private fun LuckMeterCard(luckFactor: Float) {
-    Card(
+    DeckCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp)
     ) {

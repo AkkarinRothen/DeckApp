@@ -1,0 +1,158 @@
+package com.deckapp.feature.draw.session
+
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.deckapp.core.model.SessionBoardItemType
+import com.deckapp.core.model.SessionBoardViewLabels
+import com.deckapp.core.ui.session.SessionCentralConnector
+import com.deckapp.feature.draw.SessionViewModel
+import com.deckapp.feature.draw.SidebarTool
+import com.deckapp.feature.draw.SessionViewMode
+import com.deckapp.feature.draw.components.SessionBoardTab
+
+val BoardCentralTool = SessionCentralConnector(
+    id = "board",
+    label = "Mesa de Juego",
+    icon = Icons.Default.Dashboard,
+    content = { context ->
+        val viewModel: SessionViewModel = hiltViewModel()
+        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+        var isBoardEditMode by rememberSaveable { mutableStateOf(false) }
+        
+        SessionBoardTab(
+            boardItems = uiState.sessionBoardItems,
+            fullBoardItems = uiState.fullBoardItems,
+            boardGroups = uiState.boardGroups,
+            activeBoardView = uiState.activeBoardView,
+            viewLabels = uiState.session?.boardViewLabels ?: SessionBoardViewLabels(),
+            tablesInSession = uiState.tablesInSession,
+            allTables = uiState.allTables,
+            recentTableRolls = uiState.recentTableRolls,
+            recentDiceRolls = uiState.recentDiceRolls,
+            notesPreview = uiState.dmNotes.take(300),
+            notesContent = uiState.dmNotes,
+            isSavingNotes = uiState.isSavingNotes,
+            onUpdateNotes = viewModel::updateNotes,
+            npcCount = uiState.npcCount,
+            npcs = uiState.npcs,
+            activeEncounter = uiState.activeEncounter,
+            playerParticipants = uiState.playerParticipants,
+            permanentPlayers = uiState.permanentPlayers,
+            onApplyDamage = viewModel::applyDamage,
+            onNextTurn = viewModel::nextTurn,
+            onEndEncounter = viewModel::endEncounter,
+            onAddPlayer = viewModel::addPlayerParticipant,
+            onRemovePlayer = viewModel::removePlayerParticipant,
+            onSavePermanentPlayer = viewModel::savePermanentPlayer,
+            onDeletePermanentPlayer = viewModel::deletePermanentPlayer,
+            onToggleCondition = viewModel::toggleCondition,
+            wikiEntryCount = uiState.wikiEntries.size,
+            wikiEntries = uiState.wikiEntries,
+            referenceFocusTitle = null,
+            referencePreview = null,
+            referencePinnedCount = 0,
+            referenceSearchQuery = "",
+            referenceSearchCount = 0,
+            referenceSearchPreview = null,
+            linkedMapName = uiState.hplState?.mapName,
+            linkedMapTileCount = uiState.hplState?.tiles?.size ?: 0,
+            linkedMapPoiCount = uiState.hplState?.pois?.size ?: 0,
+            linkedMapDayNumber = uiState.hplState?.currentDay?.dayNumber,
+            linkedMapPartyLocation = uiState.hplState?.partyLocation?.let { (q, r) -> "hex $q,$r" },
+            hexTiles = uiState.hplState?.tiles ?: emptyList(),
+            hexPois = uiState.hplState?.pois ?: emptyList(),
+            partyLocation = uiState.hplState?.partyLocation,
+            onMoveParty = viewModel::moveParty,
+            onExploreTile = viewModel::toggleTileExplored,
+            onReconnoiterTile = viewModel::toggleTileReconnoitered,
+            onMapTile = viewModel::toggleTileMapped,
+            linkedHexMapId = uiState.linkedHexMapId,
+            linkedMythicSession = uiState.linkedMythicSession,
+            mythicState = uiState.mythicState,
+            tensionClocks = uiState.tensionClocks,
+            allHexMaps = uiState.allHexMaps,
+            onLinkHexMap = viewModel::linkHexMap,
+            onLinkResourceId = viewModel::setBoardBlockResourceId,
+            onUpdateNpcHp = viewModel::updateNpcHp,
+            onNpcClick = context.onNpcClick,
+            onWikiClick = context.onWikiClick,
+            onUpdateWikiEntry = viewModel::updateWikiEntry,
+            isEditing = isBoardEditMode,
+            onToggleEditing = { isBoardEditMode = !isBoardEditMode },
+            onAddBlock = { type, resourceId, targetGroupId ->
+                viewModel.addBoardBlock(type = type, resourceId = resourceId)
+            },
+            onCreateClock = viewModel::createClockAndAddToBoard,
+            onTickClock = viewModel::tickClock,
+            onUpdateClockDescriptionAndProgress = viewModel::updateClockDescriptionAndProgress,
+            onOpenBlock = { item ->
+                when (item.type) {
+                    SessionBoardItemType.TABLE -> viewModel.toggleLeftSidebar(SidebarTool.TABLES)
+                    SessionBoardItemType.COMBAT -> viewModel.toggleLeftSidebar(SidebarTool.COMBAT)
+                    SessionBoardItemType.NOTES -> viewModel.toggleRightSidebar(SidebarTool.NOTES)
+                    SessionBoardItemType.NPCS -> viewModel.toggleRightSidebar(SidebarTool.NPCS)
+                    SessionBoardItemType.REFERENCE -> viewModel.toggleRightSidebar(SidebarTool.PLAN)
+                    SessionBoardItemType.MYTHIC -> viewModel.toggleRightSidebar(SidebarTool.MYTHIC_CONTEXT)
+                    SessionBoardItemType.MAP -> viewModel.setMainViewMode(SessionViewMode.MAP)
+                    SessionBoardItemType.WIKI_MAP -> viewModel.toggleRightSidebar(SidebarTool.PLAN)
+                    SessionBoardItemType.DECK -> viewModel.toggleLeftSidebar(SidebarTool.DECKS)
+                    else -> {}
+                }
+            },
+            onQuickAction = { item ->
+                when (item.type) {
+                    SessionBoardItemType.TABLE -> item.resourceId?.let { viewModel.rollActiveTable(it) }
+                    SessionBoardItemType.COMBAT -> viewModel.toggleLeftSidebar(SidebarTool.COMBAT)
+                    SessionBoardItemType.NOTES -> viewModel.showQuickNote()
+                    else -> {}
+                }
+            },
+            onRemoveBlock = viewModel::removeBoardBlock,
+            onMoveUp = { viewModel.moveBoardBlock(it, -1) },
+            onMoveDown = { viewModel.moveBoardBlock(it, 1) },
+            onMoveTo = { fromId, toId -> viewModel.moveBoardBlockTo(fromId, toId) },
+            onSetSize = viewModel::setBoardBlockSize,
+            onSetDisplayMode = viewModel::setBoardBlockDisplayMode,
+            onSetTitleOverride = viewModel::setBoardBlockTitleOverride,
+            onSetActiveBoardView = viewModel::setActiveBoardView,
+            onDuplicateBoardView = { targetView -> viewModel.duplicateBoardView(targetView) },
+            onUpdateBoardViewLabel = viewModel::updateBoardViewLabel,
+            onClearBoardView = viewModel::clearBoardView,
+            onUpdateBoardViewLabels = viewModel::updateBoardViewLabels,
+            onApplyBoardTemplate = viewModel::applyBoardTemplate,
+            onRollTable = viewModel::rollActiveTable,
+            onTogglePinBlock = viewModel::togglePinBlock,
+            onToggleCollapseBlock = viewModel::toggleCollapseBlock,
+            onSetAllBlocksCollapsedInView = { _, collapsed -> viewModel.setAllBlocksCollapsedInView(collapsed) },
+            onTagClicked = viewModel::handleSmartTag,
+            onDiceClicked = { formula, adv, dis, extra -> viewModel.rollSmartDice(formula, adv, dis, extra) },
+            onCreateGroup = { name, color, _, _ -> viewModel.createBoardGroup(name, color) },
+            onRenameGroup = { groupId, name, _, _, _ -> viewModel.renameBoardGroup(groupId, name) },
+            onDeleteGroup = viewModel::deleteBoardGroup,
+            onToggleGroupCollapsed = { groupId, _ -> viewModel.toggleBoardGroupCollapsed(groupId) },
+            onAssignToGroup = viewModel::assignItemToGroup,
+            onMergeItems = viewModel::mergeBoardItems,
+            deckRefs = uiState.deckRefs,
+            deckNames = uiState.deckNames,
+            handByDeck = uiState.handByDeck,
+            deckCardCounts = uiState.deckCardCounts,
+            deckAspectRatios = uiState.deckAspectRatios,
+            deckBackImages = uiState.deckBackImages,
+            onDrawCardFromDeck = viewModel::drawCardFromDeck,
+            onShuffleDeck = viewModel::shuffleSingleDeck,
+            onResetDeck = { deckId -> viewModel.resetSingleDeck(deckId) },
+            onDiscardCard = { cardId -> viewModel.discardCard(cardId) },
+            onRevealCard = { cardId -> viewModel.revealCard(cardId) },
+            sessionId = uiState.session?.id ?: 0L,
+            isSidebarOpen = context.isSidebarOpen,
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+)

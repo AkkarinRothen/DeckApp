@@ -1,5 +1,9 @@
 package com.deckapp.feature.session
 
+import com.deckapp.core.ui.components.DeckCard
+import com.deckapp.core.ui.components.DeckButton
+import com.deckapp.core.ui.components.DeckTextButton
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -40,7 +44,7 @@ fun SessionListScreen(
             title = { Text("Eliminar sesión") },
             text = { Text("¿Eliminar \"${session.name}\"? Se perderá el historial de eventos. Esta acción no se puede deshacer.") },
             confirmButton = {
-                TextButton(
+                DeckTextButton(
                     onClick = {
                         viewModel.deleteSession(session.id)
                         sessionToDelete = null
@@ -50,7 +54,7 @@ fun SessionListScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { sessionToDelete = null }) { Text("Cancelar") }
+                DeckTextButton(onClick = { sessionToDelete = null }) { Text("Cancelar") }
             }
         )
     }
@@ -118,7 +122,7 @@ fun SessionListScreen(
                             onClone = { viewModel.cloneSession(session.id) },
                             onDelete = { sessionToDelete = session },
                             trailingContent = {
-                                Button(
+                                DeckButton(
                                     onClick = { viewModel.startSession(session.id) },
                                     contentPadding = PaddingValues(horizontal = 12.dp),
                                     modifier = Modifier.height(32.dp)
@@ -200,7 +204,7 @@ private fun SessionCard(
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
-    Card(
+    DeckCard(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -283,13 +287,13 @@ private fun RenameSessionDialog(
             )
         },
         confirmButton = {
-            TextButton(
+            DeckTextButton(
                 onClick = { if (text.isNotBlank()) onConfirm(text) },
                 enabled = text.isNotBlank()
             ) { Text("Guardar") }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
+            DeckTextButton(onClick = onDismiss) { Text("Cancelar") }
         }
     )
 }
@@ -311,7 +315,7 @@ private fun EmptySessionsState(onNewSession: () -> Unit) {
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(Modifier.height(24.dp))
-        Button(onClick = onNewSession) {
+        DeckButton(onClick = onNewSession) {
             Icon(Icons.Default.Add, contentDescription = null)
             Spacer(Modifier.width(8.dp))
             Text("Nueva sesión")

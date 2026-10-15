@@ -1,5 +1,8 @@
 package com.deckapp.feature.mythic.components
 
+import com.deckapp.core.ui.components.DeckButton
+import com.deckapp.core.ui.components.DeckTextButton
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -75,7 +78,7 @@ fun MythicConfigSheet(
             )
         }
 
-        Button(
+        DeckButton(
             onClick = {
                 onSaveTables(selectedActionId, selectedSubjectId)
                 onDismiss()
@@ -87,7 +90,7 @@ fun MythicConfigSheet(
 
         HorizontalDivider()
 
-        TextButton(
+        DeckTextButton(
             onClick = onDeleteSession,
             colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
             modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -140,6 +143,6 @@ private fun TablePickerDialog(
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Cerrar") } }
+        confirmButton = { DeckTextButton(onClick = onDismiss) { Text("Cerrar") } }
     )
 }

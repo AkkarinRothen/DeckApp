@@ -22,6 +22,7 @@ fun NotesTab(
     notes: String,
     isSaving: Boolean,
     onNotesChange: (String) -> Unit,
+    onAddQuickNote: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var textFieldValue by remember { mutableStateOf(TextFieldValue(notes)) }

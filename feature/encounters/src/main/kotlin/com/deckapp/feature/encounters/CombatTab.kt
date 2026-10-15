@@ -2,6 +2,8 @@ package com.deckapp.feature.encounters
 
 
 
+
+
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -29,6 +31,7 @@ import com.deckapp.core.model.Condition
 import com.deckapp.core.model.Encounter
 import com.deckapp.core.model.EncounterCreature
 import com.deckapp.core.model.PlayerInitiativeParticipant
+import com.deckapp.core.model.UnifiedParticipant
 import coil.compose.AsyncImage
 import java.util.Locale
 
@@ -609,21 +612,5 @@ private fun AddPlayerDialog(
     )
 }
 
-// --- Unified Participant Helper ---
-
-sealed class UnifiedParticipant {
-    abstract val initiative: Int
-    abstract val stableId: String
-
-    data class Creature(val data: EncounterCreature) : UnifiedParticipant() {
-        override val initiative: Int = data.initiativeTotal ?: 0
-        override val stableId: String = "creature_${data.id}"
-    }
-
-    data class Player(val data: PlayerInitiativeParticipant) : UnifiedParticipant() {
-        override val initiative: Int = data.initiativeTotal
-        override val stableId: String = "player_${data.id}"
-    }
-}
 
 

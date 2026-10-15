@@ -1,5 +1,9 @@
 package com.deckapp.feature.session
 
+import com.deckapp.core.ui.components.DeckCard
+import com.deckapp.core.ui.components.DeckButton
+import com.deckapp.core.ui.components.DeckTextButton
+
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -98,7 +102,7 @@ fun SessionPlannerScreen(
 
 @Composable
 private fun SessionPrepHeader(uiState: PlannerUiState) {
-    Card(
+    DeckCard(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
     ) {
@@ -141,7 +145,7 @@ private fun ScenePlannerCard(
         mutableStateOf(TextFieldValue(scene.content)) 
     }
 
-    Card(
+    DeckCard(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
@@ -233,7 +237,7 @@ private fun ScenePlannerCard(
                         
                         Spacer(Modifier.weight(1f))
                         
-                        TextButton(onClick = { isEditMode = !isEditMode }) {
+                        DeckTextButton(onClick = { isEditMode = !isEditMode }) {
                             Icon(if (isEditMode) Icons.Default.Visibility else Icons.Default.Edit, contentDescription = null)
                             Spacer(Modifier.width(8.dp))
                             Text(if (isEditMode) "Ver" else "Editar")
@@ -347,7 +351,7 @@ private fun EmptyScenesState(onAdd: () -> Unit) {
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(Modifier.height(24.dp))
-        Button(onClick = onAdd) {
+        DeckButton(onClick = onAdd) {
             Icon(Icons.Default.Add, contentDescription = null)
             Spacer(Modifier.width(8.dp))
             Text("Comenzar preparación")
@@ -379,7 +383,7 @@ private fun ResourcePickerDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
+            DeckTextButton(onClick = onDismiss) { Text("Cancelar") }
         }
     )
 }

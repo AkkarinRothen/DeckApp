@@ -1,5 +1,8 @@
 package com.deckapp.feature.session
 
+import com.deckapp.core.ui.components.DeckCard
+import com.deckapp.core.ui.components.DeckButton
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -44,7 +47,7 @@ fun SessionSetupScreen(
         },
         bottomBar = {
             Surface(shadowElevation = 8.dp) {
-                Button(
+                DeckButton(
                     onClick = { viewModel.createSession() },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -128,7 +131,7 @@ private fun DeckSelectionCard(
     onToggle: () -> Unit,
     onDrawModeChange: (DrawMode) -> Unit
 ) {
-    Card(
+    DeckCard(
         onClick = onToggle,
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(

@@ -29,11 +29,12 @@ import com.deckapp.core.model.Npc
 fun NpcsTab(
     npcs: List<Npc>,
     playingPath: String?,
-    onPlayVoice: (String) -> Unit
+    onPlayVoice: (String) -> Unit,
+    onNpcClick: ((Long) -> Unit)? = null
 ) {
     if (npcs.isEmpty()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("No hay NPCs en la biblioteca", color = Color.White.copy(alpha = 0.4f))
+            Text("No hay NPCs en la biblioteca", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     } else {
         LazyColumn(
@@ -45,7 +46,8 @@ fun NpcsTab(
                 NpcListItem(
                     npc = npc,
                     isPlaying = playingPath == npc.voiceSamplePath,
-                    onPlayVoice = { npc.voiceSamplePath?.let(onPlayVoice) }
+                    onPlayVoice = { npc.voiceSamplePath?.let(onPlayVoice) },
+                    onClick = { onNpcClick?.invoke(npc.id) }
                 )
             }
         }
@@ -56,13 +58,15 @@ fun NpcsTab(
 private fun NpcListItem(
     npc: Npc,
     isPlaying: Boolean,
-    onPlayVoice: () -> Unit
+    onPlayVoice: () -> Unit,
+    onClick: () -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = Color.White.copy(alpha = 0.05f),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        onClick = onClick
     ) {
         Row(
             modifier = Modifier
@@ -75,7 +79,7 @@ private fun NpcListItem(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.1f)),
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh),
                 contentAlignment = Alignment.Center
             ) {
                 if (npc.imagePath != null) {
@@ -86,7 +90,7 @@ private fun NpcListItem(
                         modifier = Modifier.fillMaxSize()
                     )
                 } else {
-                    Icon(Icons.Default.Mic, contentDescription = null, tint = Color.White.copy(alpha = 0.3f))
+                    Icon(Icons.Default.Mic, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
@@ -98,7 +102,7 @@ private fun NpcListItem(
                     npc.name,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -106,7 +110,7 @@ private fun NpcListItem(
                     Text(
                         npc.description,
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color.White.copy(alpha = 0.5f),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -124,7 +128,7 @@ private fun NpcListItem(
                     Icon(
                         imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                         contentDescription = if (isPlaying) "Pausar" else "Reproducir",
-                        tint = if (isPlaying) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.6f)
+                        tint = if (isPlaying) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

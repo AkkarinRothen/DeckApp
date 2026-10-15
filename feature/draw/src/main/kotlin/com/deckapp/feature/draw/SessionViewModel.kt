@@ -80,7 +80,24 @@ data class SessionUiState(
     val playingNpcVoicePath: String? = null,
     // Session Planner
     val scenes: List<Scene> = emptyList(),
-    val wikiEntries: List<WikiEntry> = emptyList()
+    val focusedSceneId: Long? = null,
+    val wikiEntries: List<WikiEntry> = emptyList(),
+    val tacticalState: com.deckapp.feature.draw.tactical.TacticalUiState = com.deckapp.feature.draw.tactical.TacticalUiState(),
+    // Bento Grid Workspace & Board
+    val activeBoardView: SessionBoardView = SessionBoardView.MAIN,
+    val viewLabels: SessionBoardViewLabels = SessionBoardViewLabels(),
+    val sessionBoardItems: List<SessionBoardItem> = emptyList(),
+    val fullBoardItems: List<SessionBoardItem> = emptyList(),
+    val boardGroups: List<SessionBoardGroup> = emptyList(),
+    val tensionClocks: List<TensionClock> = emptyList(),
+    val allHexMaps: List<HexMap> = emptyList(),
+    val recentDiceRolls: List<DiceRollResult> = emptyList(),
+    val recentTableRolls: List<TableRollResult> = emptyList(),
+    val npcCount: Int = 0,
+    val permanentPlayers: List<Npc> = emptyList(),
+    val pinnedTableRolls: Map<Long, TableRollResult> = emptyMap(),
+    val spreadResultsByDeck: Map<Long, CardSpreadResult> = emptyMap(),
+    val showQuickSearch: Boolean = false
 )
 
 enum class SidebarTool {
@@ -88,7 +105,11 @@ enum class SidebarTool {
 }
 
 enum class SessionViewMode {
-    MAP, MYTHIC_LOG
+    BOARD, MAP, MYTHIC_LOG
+}
+
+enum class SessionBoardTemplatePreset {
+    EXPLORATION, NARRATIVE, COMBAT
 }
 
 
@@ -124,6 +145,8 @@ class SessionViewModel @Inject constructor(
     private val rollMythicFateUseCase: com.deckapp.core.domain.usecase.mythic.RollMythicFateUseCase,
     private val sceneCheckUseCase: com.deckapp.core.domain.usecase.mythic.SceneCheckUseCase,
     private val hexRepository: com.deckapp.core.domain.repository.HexRepository,
+    private val tacticalMapRepository: com.deckapp.core.domain.repository.TacticalMapRepository,
+    private val calculateTacticalDistanceUseCase: com.deckapp.core.domain.usecase.CalculateTacticalDistanceUseCase,
     @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -137,6 +160,26 @@ class SessionViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(SessionUiState(sessionId = sessionId))
     val uiState: StateFlow<SessionUiState> = _uiState.asStateFlow()
+
+    val tacticalMapDelegate = com.deckapp.feature.draw.delegates.TacticalMapDelegate(
+        sessionId = sessionId,
+        _uiState = _uiState,
+        scope = viewModelScope,
+        tacticalMapRepository = tacticalMapRepository,
+        encounterRepository = encounterRepository,
+        distanceCalculator = calculateTacticalDistanceUseCase,
+        tableRepository = tableRepository,
+        rollTableUseCase = rollTableUseCase,
+        wikiRepository = wikiRepository,
+        context = context
+    )
+
+    val boardDelegate = com.deckapp.feature.draw.delegates.BoardDelegate(
+        sessionId = sessionId,
+        _uiState = _uiState,
+        scope = viewModelScope,
+        sessionRepository = sessionRepository
+    )
 
     // Un flujo que emite la hora actual cada minuto para cálculos reactivos
     private val minuteTicker = flow {
@@ -366,9 +409,17 @@ class SessionViewModel @Inject constructor(
         }
 
         // Recuperar NPCs de la biblioteca
+        // Recuperar todos los hex maps disponibles
+        viewModelScope.launch {
+            hexRepository.getHexMaps().collect { maps ->
+                _uiState.update { it.copy(allHexMaps = maps) }
+            }
+        }
+
+        // Recuperar NPCs de la biblioteca
         viewModelScope.launch {
             npcRepository.getAllNpcs().collect { npcs ->
-                _uiState.update { it.copy(npcs = npcs) }
+                _uiState.update { it.copy(npcs = npcs, npcCount = npcs.size) }
             }
         }
 
@@ -437,6 +488,88 @@ class SessionViewModel @Inject constructor(
         val next = (session.chaosFactor + delta).coerceIn(1, 9)
         viewModelScope.launch {
             mythicRepository.updateChaosFactor(session.id, next)
+        }
+    }
+
+    fun addMythicCharacter(name: String) {
+        val mythicId = _uiState.value.linkedMythicSession?.id ?: return
+        if (name.isBlank()) return
+        viewModelScope.launch {
+            mythicRepository.addCharacter(MythicCharacter(sessionId = mythicId, name = name))
+        }
+    }
+
+    fun deleteMythicCharacter(id: Long) {
+        viewModelScope.launch {
+            mythicRepository.deleteCharacter(id)
+        }
+    }
+
+    fun updateMythicCharacterNotes(id: Long, notes: String) {
+        viewModelScope.launch {
+            mythicRepository.updateCharacterNotes(id, notes)
+        }
+    }
+
+    fun sendMythicCharacterToNotes(character: MythicCharacter) {
+        viewModelScope.launch {
+            val addition = "\n\n[Personaje Mítico: ${character.name}]\n${character.notes}".trim()
+            val newNotes = (_uiState.value.dmNotes + "\n\n" + addition).trim()
+            _uiState.update { it.copy(dmNotes = newNotes) }
+            sessionRepository.updateDmNotes(sessionId, newNotes)
+        }
+    }
+
+    fun addMythicThread(description: String) {
+        val mythicId = _uiState.value.linkedMythicSession?.id ?: return
+        if (description.isBlank()) return
+        viewModelScope.launch {
+            mythicRepository.addThread(MythicThread(sessionId = mythicId, description = description))
+        }
+    }
+
+    fun updateMythicThreadDescription(id: Long, description: String) {
+        // Optional thread note update
+    }
+
+    fun toggleMythicThreadStatus(id: Long, isResolved: Boolean) {
+        viewModelScope.launch {
+            mythicRepository.updateThreadStatus(id, isResolved)
+        }
+    }
+
+    fun deleteMythicThread(id: Long) {
+        viewModelScope.launch {
+            mythicRepository.deleteThread(id)
+        }
+    }
+
+    fun sendMythicThreadToNotes(thread: MythicThread) {
+        viewModelScope.launch {
+            val addition = "\n\n[Hilo Mítico: ${thread.description}]"
+            val newNotes = (_uiState.value.dmNotes + "\n\n" + addition).trim()
+            _uiState.update { it.copy(dmNotes = newNotes) }
+            sessionRepository.updateDmNotes(sessionId, newNotes)
+        }
+    }
+
+    fun focusScene(sceneId: Long?) {
+        _uiState.update { it.copy(focusedSceneId = sceneId) }
+    }
+
+    fun prepareSceneForBoard(scene: Scene) {
+        boardDelegate.prepareSceneResources(scene)
+    }
+
+    fun prepareSceneForBoard(sceneId: Long) {
+        val scene = _uiState.value.scenes.find { it.id == sceneId }
+        if (scene != null) {
+            boardDelegate.prepareSceneResources(scene)
+        } else {
+            boardDelegate.addBoardBlock(
+                type = SessionBoardItemType.NOTES,
+                resourceIdOverride = sceneId
+            )
         }
     }
 
@@ -826,8 +959,29 @@ class SessionViewModel @Inject constructor(
         _uiState.update { it.copy(snackbarMessage = null) }
     }
 
+    fun clearSnackbarMessage() = clearSnackbar()
+
     fun clearError() {
         _uiState.update { it.copy(errorMessage = null) }
+    }
+
+    fun clearErrorMessage() = clearError()
+
+    fun saveCheckpointOnPause() {
+        // Estado reactivo y persistido en Room
+    }
+
+    fun undoLastDraw() {
+        viewModelScope.launch {
+            val success = undoLastActionUseCase(sessionId)
+            if (success) {
+                _uiState.update { it.copy(canUndo = false, snackbarMessage = "Acción deshecha") }
+            }
+        }
+    }
+
+    fun openGlobalSearch() {
+        _uiState.update { it.copy(showQuickSearch = true) }
     }
 
     // --- NPCs & Voice ---
@@ -1034,4 +1188,289 @@ class SessionViewModel @Inject constructor(
     fun drawSceneCard(deckId: Long) {
         drawCardFromDeck(deckId)
     }
+
+    // --- Permanent Players ---
+
+    fun savePermanentPlayer(player: Npc) {
+        viewModelScope.launch {
+            npcRepository.saveNpc(player)
+            _uiState.update { state ->
+                val updated = state.permanentPlayers.filter { it.id != player.id } + player
+                state.copy(permanentPlayers = updated)
+            }
+        }
+    }
+
+    fun deletePermanentPlayer(player: Npc) {
+        viewModelScope.launch {
+            npcRepository.deleteNpc(player.id)
+            _uiState.update { state ->
+                state.copy(permanentPlayers = state.permanentPlayers.filter { it.id != player.id })
+            }
+        }
+    }
+
+    // --- Hex Map Exploration Actions ---
+
+    fun linkHexMap(mapId: Long?) {
+        _uiState.update { it.copy(linkedHexMapId = mapId) }
+    }
+
+    fun moveParty(q: Int, r: Int) {
+        val mapId = _uiState.value.linkedHexMapId ?: return
+        viewModelScope.launch {
+            hexRepository.updatePartyLocation(mapId, q, r)
+        }
+    }
+
+    fun toggleTileExplored(tile: HexTile) {
+        viewModelScope.launch {
+            hexRepository.upsertHexTile(tile.copy(isExplored = !tile.isExplored))
+        }
+    }
+
+    fun toggleTileReconnoitered(tile: HexTile) {
+        viewModelScope.launch {
+            hexRepository.upsertHexTile(tile.copy(isReconnoitered = !tile.isReconnoitered))
+        }
+    }
+
+    fun toggleTileMapped(tile: HexTile) {
+        viewModelScope.launch {
+            hexRepository.upsertHexTile(tile.copy(isMapped = !tile.isMapped))
+        }
+    }
+
+    // --- Tension Clocks ---
+
+    fun tickClock(clockId: Long, amount: Int) {
+        _uiState.update { state ->
+            state.copy(
+                tensionClocks = state.tensionClocks.map { clock ->
+                    if (clock.id == clockId) {
+                        val newProgress = (clock.progress + amount).coerceIn(0, clock.segments)
+                        clock.copy(progress = newProgress)
+                    } else clock
+                }
+            )
+        }
+    }
+
+    fun updateClockDescriptionAndProgress(clockId: Long, newDescription: String, newProgress: Int) {
+        _uiState.update { state ->
+            state.copy(
+                tensionClocks = state.tensionClocks.map { clock ->
+                    if (clock.id == clockId) {
+                        clock.copy(
+                            triggerDescription = newDescription,
+                            progress = newProgress.coerceIn(0, clock.segments)
+                        )
+                    } else clock
+                }
+            )
+        }
+    }
+
+    fun createClockAndAddToBoard(
+        name: String,
+        segments: Int,
+        colorHex: String?,
+        triggerDescription: String,
+        targetGroupId: Long? = null
+    ) {
+        val clockId = System.currentTimeMillis()
+        val newClock = TensionClock(
+            id = clockId,
+            sessionId = sessionId,
+            name = name,
+            segments = segments,
+            progress = 0,
+            colorHex = colorHex,
+            triggerDescription = triggerDescription
+        )
+        _uiState.update { it.copy(tensionClocks = it.tensionClocks + newClock) }
+        addBoardBlock(
+            type = SessionBoardItemType.CLOCK,
+            size = SessionBoardItemSize.S,
+            titleOverride = name,
+            resourceId = clockId
+        )
+    }
+
+    fun renameSession(name: String) {
+        viewModelScope.launch {
+            _uiState.value.session?.let { current ->
+                sessionRepository.renameSession(current.id, name)
+            }
+        }
+    }
+
+    fun createAndLinkMythicSession() {
+        viewModelScope.launch {
+            val sessionName = "Mítico - ${_uiState.value.session?.name ?: "Sesión"}"
+            val newSessionId = mythicRepository.saveSession(MythicSession(name = sessionName))
+            linkMythicSession(newSessionId)
+        }
+    }
+
+    fun resetFloatingPanels() {
+        _uiState.update { it.copy(activeLeftSidebar = SidebarTool.NONE, activeRightSidebar = SidebarTool.NONE) }
+    }
+
+    fun sendResultToQuickNotes(tableName: String, resultText: String) {
+        viewModelScope.launch {
+            val currentNotes = _uiState.value.dmNotes
+            val addition = "\n\n[$tableName]: $resultText"
+            val newNotes = (currentNotes + addition).trim()
+            _uiState.update { it.copy(dmNotes = newNotes) }
+            sessionRepository.updateDmNotes(sessionId, newNotes)
+        }
+    }
+
+    fun startEncounterFromScene(encounterId: Long) {
+        viewModelScope.launch {
+            encounterRepository.getEncounterById(encounterId).firstOrNull()?.let { encounter ->
+                encounterRepository.saveEncounter(encounter.copy(linkedSessionId = sessionId, isActive = true))
+                setActiveBoardView(SessionBoardView.COMBAT)
+            }
+        }
+    }
+
+    // --- NPCs & Wiki Updates ---
+
+    fun updateNpcHp(npcId: Long, hp: Int) {
+        viewModelScope.launch {
+            val npc = npcRepository.getNpcById(npcId) ?: return@launch
+            npcRepository.saveNpc(npc.copy(currentHp = hp))
+        }
+    }
+
+    fun updateWikiEntry(entry: WikiEntry) {
+        viewModelScope.launch {
+            wikiRepository.saveEntry(entry)
+        }
+    }
+
+    // --- Smart Dice & Tags ---
+
+    fun rollSmartDice(
+        formula: String,
+        advantage: Boolean = false,
+        disadvantage: Boolean = false,
+        extraDice: String? = null
+    ) {
+        viewModelScope.launch {
+            try {
+                val cleaned = formula.trim()
+                var (actualFormula, description) = if (cleaned.contains(":")) {
+                    val parts = cleaned.split(":")
+                    val dicePart = parts.last().trim()
+                    val descPart = parts.dropLast(1).joinToString(":").trim()
+                    dicePart to descPart
+                } else {
+                    cleaned to ""
+                }
+
+                var modDesc = ""
+                if (advantage && (actualFormula.contains("1d20") || actualFormula.contains("d20"))) {
+                    actualFormula = actualFormula.replace("1d20", "2d20kh1").replace("d20", "2d20kh1")
+                    modDesc = " con Ventaja"
+                } else if (disadvantage && (actualFormula.contains("1d20") || actualFormula.contains("d20"))) {
+                    actualFormula = actualFormula.replace("1d20", "2d20kl1").replace("d20", "2d20kl1")
+                    modDesc = " con Desventaja"
+                }
+
+                var total = DiceEvaluator.evaluate(actualFormula)
+                var extraDetail = ""
+                if (!extraDice.isNullOrBlank()) {
+                    val extraRoll = DiceEvaluator.evaluate(extraDice)
+                    total += extraRoll
+                    extraDetail = " + $extraDice ($extraRoll)"
+                }
+
+                val fullDesc = if (description.isNotBlank()) description + modDesc else "Tirada$modDesc"
+                val displayFormula = if (extraDetail.isNotBlank()) "$actualFormula$extraDetail" else actualFormula
+                val newRoll = DiceRollResult(
+                    expression = if (description.isNotBlank()) "$description ($displayFormula)" else displayFormula,
+                    total = total
+                )
+
+                _uiState.update { state ->
+                    val updatedRolls = (listOf(newRoll) + state.recentDiceRolls).take(10)
+                    state.copy(
+                        snackbarMessage = "$fullDesc ($displayFormula): $total",
+                        recentDiceRolls = updatedRolls
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(snackbarMessage = "Fórmula incorrecta: $formula") }
+            }
+        }
+    }
+
+    fun rollSmartDiceWithDescription(formula: String, description: String) {
+        viewModelScope.launch {
+            try {
+                val total = DiceEvaluator.evaluate(formula)
+                val displayFormula = if (description.isNotBlank()) "$description ($formula)" else formula
+                val newRoll = DiceRollResult(expression = displayFormula, total = total)
+                _uiState.update { state ->
+                    val updatedRolls = (listOf(newRoll) + state.recentDiceRolls).take(10)
+                    state.copy(
+                        snackbarMessage = "$description ($formula): $total",
+                        recentDiceRolls = updatedRolls
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(snackbarMessage = "Fórmula incorrecta: $formula") }
+            }
+        }
+    }
+
+    fun handleSmartTag(tag: String) {
+        _uiState.update { it.copy(snackbarMessage = "Etiqueta: $tag") }
+    }
+
+    // --- Decks Actions ---
+
+    fun shuffleSingleDeck(stackId: Long) {
+        shufflePileBack(stackId)
+    }
+
+    // --- Board Bento Actions (Delegated to BoardDelegate) ---
+
+    fun addBoardBlock(
+        type: SessionBoardItemType,
+        size: SessionBoardItemSize = SessionBoardItemSize.M,
+        displayMode: String? = null,
+        titleOverride: String? = null,
+        resourceId: Long? = null
+    ) = boardDelegate.addBoardBlock(type, resourceId)
+
+    fun removeBoardBlock(itemId: Long) = boardDelegate.removeBoardBlock(itemId)
+    fun moveBoardBlock(itemId: Long, direction: Int) = boardDelegate.moveBoardBlock(itemId, direction)
+    fun moveBoardBlockTo(fromId: Long, toId: Long) = boardDelegate.moveBoardBlockTo(fromId, toId)
+    fun setBoardBlockSize(itemId: Long, size: SessionBoardItemSize) = boardDelegate.setBoardBlockSize(itemId, size)
+    fun setBoardBlockDisplayMode(itemId: Long, displayMode: String?) = boardDelegate.setBoardBlockDisplayMode(itemId, displayMode)
+    fun setBoardBlockTitleOverride(itemId: Long, title: String?) = boardDelegate.setBoardBlockTitleOverride(itemId, title)
+    fun setBoardBlockResourceId(itemId: Long, resourceId: Long?) = boardDelegate.setBoardBlockResourceId(itemId, resourceId)
+    fun setActiveBoardView(view: SessionBoardView) = boardDelegate.setActiveBoardView(view)
+    fun duplicateBoardView(target: SessionBoardView) = boardDelegate.duplicateBoardView(target)
+    fun updateBoardViewLabel(view: SessionBoardView, label: String) = boardDelegate.updateBoardViewLabel(view, label)
+    fun clearBoardView(view: SessionBoardView) = boardDelegate.clearBoardView(view)
+    fun updateBoardViewLabels(labels: SessionBoardViewLabels) = boardDelegate.updateBoardViewLabels(labels)
+    fun applyBoardTemplate(template: SessionBoardTemplatePreset) = boardDelegate.applyBoardTemplate(template)
+    fun togglePinBlock(itemId: Long) = boardDelegate.togglePinBlock(itemId)
+    fun toggleCollapseBlock(itemId: Long) = boardDelegate.toggleCollapseBlock(itemId)
+    fun setAllBlocksCollapsedInView(collapsed: Boolean) = boardDelegate.setAllBlocksCollapsedInView(_uiState.value.activeBoardView, collapsed)
+    fun createBoardGroup(name: String, colorHex: String? = null) = boardDelegate.createBoardGroup(name, colorHex, null, null)
+    fun renameBoardGroup(groupId: Long, newName: String) = boardDelegate.renameBoardGroup(groupId, newName, null, null, null)
+    fun deleteBoardGroup(groupId: Long) = boardDelegate.deleteBoardGroup(groupId)
+    fun toggleBoardGroupCollapsed(groupId: Long) {
+        val group = _uiState.value.boardGroups.find { it.id == groupId } ?: return
+        boardDelegate.toggleBoardGroupCollapsed(groupId, !group.isCollapsed)
+    }
+    fun assignItemToGroup(itemId: Long, groupId: Long?) = boardDelegate.assignItemToGroup(itemId, groupId)
+    fun mergeBoardItems(sourceId: Long, targetId: Long, onGroupCreated: (SessionBoardGroup) -> Unit = {}) =
+        boardDelegate.mergeBoardItems(sourceId, targetId, onGroupCreated)
 }

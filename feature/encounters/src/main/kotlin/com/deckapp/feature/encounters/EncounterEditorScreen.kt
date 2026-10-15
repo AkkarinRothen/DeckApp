@@ -1,5 +1,8 @@
 package com.deckapp.feature.encounters
 
+import com.deckapp.core.ui.components.DeckCard
+import com.deckapp.core.ui.components.DeckTextButton
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -96,12 +99,12 @@ fun EncounterEditorScreen(
                     ) {
                         Text("Criaturas", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
                         Row {
-                            TextButton(onClick = { showNpcSelector = true }) {
+                            DeckTextButton(onClick = { showNpcSelector = true }) {
                                 Icon(Icons.Default.Add, contentDescription = null)
                                 Spacer(Modifier.width(8.dp))
                                 Text("Desde NPCs")
                             }
-                            TextButton(onClick = { viewModel.addCreature() }) {
+                            DeckTextButton(onClick = { viewModel.addCreature() }) {
                                 Icon(Icons.Default.Add, contentDescription = null)
                                 Spacer(Modifier.width(8.dp))
                                 Text("Añadir Vacía")
@@ -185,7 +188,7 @@ fun NpcSelectorDialog(
         },
         confirmButton = {},
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
+            DeckTextButton(onClick = onDismiss) { Text("Cancelar") }
         }
     )
 }
@@ -221,7 +224,7 @@ private fun CreatureEditorItem(
     onUpdate: (EncounterCreature) -> Unit,
     onRemove: () -> Unit
 ) {
-    Card(
+    DeckCard(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
     ) {

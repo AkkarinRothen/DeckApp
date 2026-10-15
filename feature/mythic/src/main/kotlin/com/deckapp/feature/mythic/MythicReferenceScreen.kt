@@ -1,5 +1,7 @@
 package com.deckapp.feature.mythic
 
+import com.deckapp.core.ui.components.DeckCard
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -73,7 +75,7 @@ private fun SectionHeader(title: String) {
 
 @Composable
 private fun FateInterpretationCard() {
-    Card(
+    DeckCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
