@@ -32,7 +32,10 @@ data class FullBackupDto(
     val systemRules: List<SystemRuleBackupDto> = emptyList(),
     val systemRuleTags: List<SystemRuleTagBackupDto> = emptyList(),
     val collections: List<CollectionBackupDto> = emptyList(),
-    val collectionResourceRefs: List<CollectionResourceBackupDto> = emptyList()
+    val collectionResourceRefs: List<CollectionResourceBackupDto> = emptyList(),
+    val tacticalMaps: List<TacticalMapBackupDto> = emptyList(),
+    val tacticalTokens: List<TacticalTokenBackupDto> = emptyList(),
+    val tacticalMapPins: List<TacticalMapPinBackupDto> = emptyList()
 )
 
 @Serializable data class TagBackupDto(val id: Long = 0L, val name: String = "", val color: Int = 0)
@@ -73,3 +76,62 @@ data class FullBackupDto(
     val color: Int = 0, val iconName: String = "CHEST", val imageUrl: String? = null, val createdAt: Long = 0L)
 @Serializable data class CollectionResourceBackupDto(val collectionId: Long = 0L, val resourceId: Long = 0L,
     val resourceType: String = "DECK")
+
+@Serializable data class TacticalMapBackupDto(
+    val id: Long = 0L,
+    val name: String = "",
+    val imageUri: String = "",
+    val gridType: String = "SQUARE",
+    val cellSizePx: Float = 70f,
+    val gridOffsetX: Float = 0f,
+    val gridOffsetY: Float = 0f,
+    val gridColorHex: Long = 0x40FFFFFFL,
+    val gridOpacity: Float = 0.5f,
+    val scaleFtPerCell: Int = 5,
+    val diagonalRule: String = "ALTERNATING_5_10_5",
+    val sessionId: Long? = null,
+    val sceneId: Long? = null,
+    val fogOfWarMaskJson: String = "",
+    val terrainMaskJson: String = "",
+    val areasJson: String = "[]",
+    val createdAt: Long = 0L
+)
+
+@Serializable data class TacticalTokenBackupDto(
+    val id: Long = 0L,
+    val mapId: Long = 0L,
+    val name: String = "",
+    val avatarUri: String? = null,
+    val faction: String = "ENEMY",
+    val sizeInCells: Float = 1f,
+    val cellX: Float = 0f,
+    val cellY: Float = 0f,
+    val currentHp: Int = 10,
+    val maxHp: Int = 10,
+    val armorClass: Int = 10,
+    val speedFt: Int = 30,
+    val conditionsJson: String = "[]",
+    val isHidden: Int = 0,
+    val elevationFt: Int = 0,
+    val encounterCreatureId: Long? = null,
+    val npcId: Long? = null,
+    val notes: String = ""
+)
+
+@Serializable data class TacticalMapPinBackupDto(
+    val id: Long = 0L,
+    val mapId: Long = 0L,
+    val cellX: Float = 0f,
+    val cellY: Float = 0f,
+    val title: String = "",
+    val description: String = "",
+    val iconName: String = "info",
+    val colorHex: Long = 0xFFFFA000L,
+    val isSecret: Int = 1,
+    val explorationState: String = "UNKNOWN",
+    val targetTableId: Long? = null,
+    val targetEncounterId: Long? = null,
+    val targetWikiEntryId: Long? = null,
+    val targetMapId: Long? = null,
+    val discoveriesJson: String = "[]"
+)

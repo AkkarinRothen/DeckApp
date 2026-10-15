@@ -50,7 +50,69 @@ class BackupRepositoryImpl @Inject constructor(
             referenceRows = db.referenceTableDao().getAllRowsSync().map { it.toBackupDto() },
             referenceTableTags = db.referenceTableDao().getAllTagRefsSync().map { ReferenceTableTagBackupDto(it.tableId, it.tagId) },
             systemRules = db.systemRuleDao().getAllRulesSync().map { it.toBackupDto() },
-            systemRuleTags = db.systemRuleDao().getAllTagRefsSync().map { SystemRuleTagBackupDto(it.ruleId, it.tagId) }
+            systemRuleTags = db.systemRuleDao().getAllTagRefsSync().map { SystemRuleTagBackupDto(it.ruleId, it.tagId) },
+            tacticalMaps = db.tacticalMapDao().getAllMapsSync().map {
+                TacticalMapBackupDto(
+                    id = it.id,
+                    name = it.name,
+                    imageUri = it.imageUri,
+                    gridType = it.gridType,
+                    cellSizePx = it.cellSizePx,
+                    gridOffsetX = it.gridOffsetX,
+                    gridOffsetY = it.gridOffsetY,
+                    gridColorHex = it.gridColorHex,
+                    gridOpacity = it.gridOpacity,
+                    scaleFtPerCell = it.scaleFtPerCell,
+                    diagonalRule = it.diagonalRule,
+                    sessionId = it.sessionId,
+                    sceneId = it.sceneId,
+                    fogOfWarMaskJson = it.fogOfWarMaskJson,
+                    terrainMaskJson = it.terrainMaskJson,
+                    areasJson = it.areasJson,
+                    createdAt = it.createdAt
+                )
+            },
+            tacticalTokens = db.tacticalMapDao().getAllTokensSync().map {
+                TacticalTokenBackupDto(
+                    id = it.id,
+                    mapId = it.mapId,
+                    name = it.name,
+                    avatarUri = it.avatarUri,
+                    faction = it.faction,
+                    sizeInCells = it.sizeInCells,
+                    cellX = it.cellX,
+                    cellY = it.cellY,
+                    currentHp = it.currentHp,
+                    maxHp = it.maxHp,
+                    armorClass = it.armorClass,
+                    speedFt = it.speedFt,
+                    conditionsJson = it.conditionsJson,
+                    isHidden = it.isHidden,
+                    elevationFt = it.elevationFt,
+                    encounterCreatureId = it.encounterCreatureId,
+                    npcId = it.npcId,
+                    notes = it.notes
+                )
+            },
+            tacticalMapPins = db.tacticalMapDao().getAllPinsSync().map {
+                TacticalMapPinBackupDto(
+                    id = it.id,
+                    mapId = it.mapId,
+                    cellX = it.cellX,
+                    cellY = it.cellY,
+                    title = it.title,
+                    description = it.description,
+                    iconName = it.iconName,
+                    colorHex = it.colorHex,
+                    isSecret = it.isSecret,
+                    explorationState = it.explorationState,
+                    targetTableId = it.targetTableId,
+                    targetEncounterId = it.targetEncounterId,
+                    targetWikiEntryId = it.targetWikiEntryId,
+                    targetMapId = it.targetMapId,
+                    discoveriesJson = it.discoveriesJson
+                )
+            }
         )
     }
 
@@ -131,6 +193,75 @@ class BackupRepositoryImpl @Inject constructor(
             })
             backup.systemRuleTags.forEach { 
                 db.systemRuleDao().addTagToRule(SystemRuleTagCrossRef(it.ruleId, it.tagId)) 
+            }
+
+            if (backup.tacticalMaps.isNotEmpty()) {
+                db.tacticalMapDao().insertMaps(backup.tacticalMaps.map {
+                    TacticalMapEntity(
+                        id = it.id,
+                        name = it.name,
+                        imageUri = it.imageUri,
+                        gridType = it.gridType,
+                        cellSizePx = it.cellSizePx,
+                        gridOffsetX = it.gridOffsetX,
+                        gridOffsetY = it.gridOffsetY,
+                        gridColorHex = it.gridColorHex,
+                        gridOpacity = it.gridOpacity,
+                        scaleFtPerCell = it.scaleFtPerCell,
+                        diagonalRule = it.diagonalRule,
+                        sessionId = it.sessionId,
+                        sceneId = it.sceneId,
+                        fogOfWarMaskJson = it.fogOfWarMaskJson,
+                        terrainMaskJson = it.terrainMaskJson,
+                        areasJson = it.areasJson,
+                        createdAt = it.createdAt
+                    )
+                })
+            }
+            if (backup.tacticalTokens.isNotEmpty()) {
+                db.tacticalMapDao().insertTokens(backup.tacticalTokens.map {
+                    TacticalTokenEntity(
+                        id = it.id,
+                        mapId = it.mapId,
+                        name = it.name,
+                        avatarUri = it.avatarUri,
+                        faction = it.faction,
+                        sizeInCells = it.sizeInCells,
+                        cellX = it.cellX,
+                        cellY = it.cellY,
+                        currentHp = it.currentHp,
+                        maxHp = it.maxHp,
+                        armorClass = it.armorClass,
+                        speedFt = it.speedFt,
+                        conditionsJson = it.conditionsJson,
+                        isHidden = it.isHidden,
+                        elevationFt = it.elevationFt,
+                        encounterCreatureId = it.encounterCreatureId,
+                        npcId = it.npcId,
+                        notes = it.notes
+                    )
+                })
+            }
+            if (backup.tacticalMapPins.isNotEmpty()) {
+                db.tacticalMapDao().insertPins(backup.tacticalMapPins.map {
+                    TacticalMapPinEntity(
+                        id = it.id,
+                        mapId = it.mapId,
+                        cellX = it.cellX,
+                        cellY = it.cellY,
+                        title = it.title,
+                        description = it.description,
+                        iconName = it.iconName,
+                        colorHex = it.colorHex,
+                        isSecret = it.isSecret,
+                        explorationState = it.explorationState,
+                        targetTableId = it.targetTableId,
+                        targetEncounterId = it.targetEncounterId,
+                        targetWikiEntryId = it.targetWikiEntryId,
+                        targetMapId = it.targetMapId,
+                        discoveriesJson = it.discoveriesJson
+                    )
+                })
             }
         }
     }

@@ -20,5 +20,6 @@ data class BackupCounts(
     val randomTables: Int,
     val npcs: Int,
     val wikiEntries: Int,
-    val sessions: Int
+    val sessions: Int,
+    val tacticalMaps: Int = 0
 )

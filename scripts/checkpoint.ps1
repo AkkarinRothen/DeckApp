@@ -3,6 +3,7 @@ param(
     [string]$Message,
     [switch]$SyncRelease,
     [switch]$PushRemote,
+    [switch]$BuildApk,
     [switch]$NonInteractive
 )
 
@@ -119,9 +120,56 @@ if ($PushRemote) {
     Write-Host "    -> Sincronizacion con GitHub completada." -ForegroundColor DarkGreen
 }
 
+# 7. Compilar y archivar APK en Boveda (Opcional)
+if (-not $BuildApk -and -not $NonInteractive) {
+    $resp = Read-Host "Deseas compilar y archivar el APK de esta version en .backups/apks/? (s/n)"
+    if ($resp -match "^[sS]") { $BuildApk = $true }
+}
+
+$archivedApkPath = $null
+if ($BuildApk) {
+    Write-Host "[*] Compilando APK de desarrollo (:app:assembleDebug)..." -ForegroundColor Green
+    $projectRoot = (Resolve-Path "$PSScriptRoot\..").Path
+    $gradlew = Join-Path $projectRoot "gradlew.bat"
+    
+    & $gradlew :app:assembleDebug
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "[!] Error durante la compilacion del APK." -ForegroundColor Red
+    } else {
+        $apkSource = Join-Path $projectRoot "app\build\outputs\apk\debug\app-debug.apk"
+        if (Test-Path $apkSource) {
+            $apkVaultDir = Join-Path $backupDir "apks"
+            if (-not (Test-Path $apkVaultDir)) {
+                New-Item -ItemType Directory -Path $apkVaultDir -Force | Out-Null
+            }
+            $targetApkName = "DeckApp_Dev_${safeTag}_${dateStr}.apk"
+            $archivedApkPath = Join-Path $apkVaultDir $targetApkName
+            Copy-Item -Path $apkSource -Destination $archivedApkPath -Force
+            
+            $apkItem = Get-Item $archivedApkPath
+            $apkSizeMB = [math]::Round($apkItem.Length / 1MB, 2)
+            $headSha = (git rev-parse --short HEAD).Trim()
+
+            # Actualizar catalogo Markdown
+            $catalogPath = Join-Path $apkVaultDir "CATALOG.md"
+            $entry = "| $Tag | $dateStr | $headSha | $apkSizeMB MB | [$targetApkName](./$targetApkName) | $Message |`n"
+            if (-not (Test-Path $catalogPath)) {
+                $header = "# Catalogo de APKs Historicos - DeckApp Vault`n`n| Version | Fecha | Commit | Tamano | Archivo | Descripcion |`n| :--- | :--- | :--- | :--- | :--- | :--- |`n"
+                Set-Content -Path $catalogPath -Value ($header + $entry) -Encoding UTF8
+            } else {
+                Add-Content -Path $catalogPath -Value $entry -Encoding UTF8
+            }
+            Write-Host "    -> APK archivado exitosamente en: $archivedApkPath ($apkSizeMB MB)" -ForegroundColor DarkGreen
+        }
+    }
+}
+
 Write-Host ""
 Write-Host "=====================================================" -ForegroundColor Green
 Write-Host " [OK] CHECKPOINT '$Tag' CREADO CON EXITO!" -ForegroundColor Green
 Write-Host "  - Tag Git: $Tag" -ForegroundColor White
 Write-Host "  - Respaldo local offline: $bundlePath" -ForegroundColor White
+if ($archivedApkPath) {
+    Write-Host "  - APK Vault: $archivedApkPath" -ForegroundColor White
+}
 Write-Host "=====================================================" -ForegroundColor Green

@@ -81,7 +81,38 @@ Para regresar en cualquier momento a la última versión de desarrollo:
 
 ---
 
-### C. Recuperación ante Desastres de GitHub
+### C. Instalar Cualquier Versión en tu Dispositivo Android
+Para instalar el último build o cualquier APK archivado en tu teléfono/tablet:
+```powershell
+.\scripts\install-version.ps1
+```
+- **Conexión ADB automática:** Si tienes el teléfono conectado por USB con depuración activada (o un emulador abierto), el script instala el APK de inmediato sin perder datos (`adb install -r -d`).
+- **Transferencia manual asistida:** Si no hay dispositivo conectado, abre automáticamente la carpeta del archivo APK en el Explorador de Windows para transferirlo vía USB, Google Drive o mensajería.
+
+---
+
+### D. Bóveda Histórica de APKs (`.backups/apks/`)
+Al ejecutar `.\scripts\checkpoint.ps1`, puedes activar `-BuildApk` para compilar y archivar el APK listo para jugar:
+- Guarda copias fechadas: `DeckApp_Dev_sprint-XX_YYYYMMDD_HHMMSS.apk`.
+- Mantiene un catálogo automático en `.backups/apks/CATALOG.md` con el commit SHA, tamaño y notas de la versión.
+
+---
+
+### E. Migración de Campañas y Mapas Tácticos entre Versiones
+DeckApp incluye un motor de respaldo completo e independiente de la versión de base de datos Room:
+1. En **`DeckApp`** o **`DeckApp (Dev)`**, ve a **Ajustes > Crear Backup**.
+2. Guarda el archivo `.zip` de respaldo generado.
+3. Ahora puedes abrir la otra versión de la app (o una versión previa) e ir a **Ajustes > Restaurar Backup**.
+4. Se migrarán íntegramente:
+   - Mazos, cartas, caras y rotaciones.
+   - Tablas aleatorias y tablas de referencia del sistema.
+   - Sesiones, notas del DM y eventos de juego.
+   - Encuentros y bitácora de combate.
+   - **Mapas tácticos, niebla de guerra, terrenos, pines (sub-mapas) y tokens con elevación.**
+
+---
+
+### F. Recuperación ante Desastres de GitHub
 Si en algún momento GitHub sufre un desastre, una sincronización incorrecta o una sobrescritura accidental:
 ```powershell
 .\scripts\restore-from-backup.ps1
@@ -95,3 +126,4 @@ Este script analiza la carpeta `.backups/`, verifica el bundle seleccionado y re
 1. **Nunca usar `git push --force` a ciegas:** Si GitHub rechaza un push, investiga con `git log origin/master..master` antes de forzar nada.
 2. **Crear siempre un Checkpoint al cerrar un sprint:** Ejecutar `.\scripts\checkpoint.ps1` garantiza que el trabajo queda sellado con un tag y guardado en un `.bundle` offline.
 3. **Probar primero en `debug`:** Compila `./gradlew :app:assembleDebug` y verifica la app en tu dispositivo antes de fusionar en `release`.
+

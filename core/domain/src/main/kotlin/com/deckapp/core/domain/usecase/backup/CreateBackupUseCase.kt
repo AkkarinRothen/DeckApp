@@ -32,14 +32,15 @@ class CreateBackupUseCase @Inject constructor(
                 version = 1,
                 appVersion = "1.0.0", // TODO: Podría extraerse dinámicamente
                 deviceModel = android.os.Build.MODEL,
-                dbVersion = 26, // Match con DeckAppDatabase.version
+                dbVersion = 44, // Match con DeckAppDatabase.version
                 counts = BackupCounts(
                     decks = fullBackup.decks.size,
                     cards = fullBackup.cards.size,
                     randomTables = fullBackup.randomTables.size,
                     npcs = fullBackup.npcs.size,
                     wikiEntries = fullBackup.wikiEntries.size,
-                    sessions = fullBackup.sessions.size
+                    sessions = fullBackup.sessions.size,
+                    tacticalMaps = fullBackup.tacticalMaps.size
                 )
             )
             // Serializar el manifiesto bonito para que sea legible

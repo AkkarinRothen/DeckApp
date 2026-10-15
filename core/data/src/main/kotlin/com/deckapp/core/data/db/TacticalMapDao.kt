@@ -61,4 +61,23 @@ interface TacticalMapDao {
 
     @Query("DELETE FROM tactical_map_pins WHERE id = :id")
     suspend fun deletePin(id: Long)
+
+    // Bulk Backup & Restore
+    @Query("SELECT * FROM tactical_maps")
+    suspend fun getAllMapsSync(): List<TacticalMapEntity>
+
+    @Query("SELECT * FROM tactical_tokens")
+    suspend fun getAllTokensSync(): List<TacticalTokenEntity>
+
+    @Query("SELECT * FROM tactical_map_pins")
+    suspend fun getAllPinsSync(): List<TacticalMapPinEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMaps(maps: List<TacticalMapEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTokens(tokens: List<TacticalTokenEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPins(pins: List<TacticalMapPinEntity>)
 }
