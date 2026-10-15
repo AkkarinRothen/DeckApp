@@ -1,5 +1,10 @@
 package com.deckapp.feature.hexploration
 
+import com.deckapp.core.ui.components.DeckCard
+import com.deckapp.core.ui.components.DeckButton
+import com.deckapp.core.ui.components.DeckOutlinedButton
+import com.deckapp.core.ui.components.DeckTextButton
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -285,7 +290,7 @@ fun HexMapSessionScreen(
                         }
                     },
                     confirmButton = {
-                        TextButton(onClick = viewModel::dismissRollDialog) { Text("OK") }
+                        DeckTextButton(onClick = viewModel::dismissRollDialog) { Text("OK") }
                     }
                 )
             }
@@ -385,13 +390,13 @@ fun HexMapSessionScreen(
                 )
             },
             confirmButton = {
-                TextButton(onClick = {
+                DeckTextButton(onClick = {
                     clipboard.setText(AnnotatedString(uiState.exportText))
                     viewModel.dismissExportDialog()
                 }) { Text("Copiar") }
             },
             dismissButton = {
-                TextButton(onClick = viewModel::dismissExportDialog) { Text("Cerrar") }
+                DeckTextButton(onClick = viewModel::dismissExportDialog) { Text("Cerrar") }
             }
         )
     }
@@ -459,7 +464,7 @@ private fun MythicLinkSection(
                     }
                 }
             },
-            confirmButton = { TextButton(onClick = { showPicker = false }) { Text("Cerrar") } }
+            confirmButton = { DeckTextButton(onClick = { showPicker = false }) { Text("Cerrar") } }
         )
     }
 }
@@ -487,7 +492,7 @@ private fun SessionBottomBar(
                     color = if (activitiesUsed >= maxActivities) MaterialTheme.colorScheme.error else Color.Unspecified
                 )
             }
-            Button(onClick = onStartDay) {
+            DeckButton(onClick = onStartDay) {
                 Text("Siguiente Día")
             }
         }
@@ -513,12 +518,12 @@ private fun TileSessionDetails(
         
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (!isPartyHere) {
-                Button(onClick = onMoveParty, modifier = Modifier.weight(1f)) {
+                DeckButton(onClick = onMoveParty, modifier = Modifier.weight(1f)) {
                     Text("Mover aquí")
                 }
             }
             if (!tile.isExplored) {
-                OutlinedButton(onClick = onExplore, modifier = Modifier.weight(1f)) {
+                DeckOutlinedButton(onClick = onExplore, modifier = Modifier.weight(1f)) {
                     Text("Explorar")
                 }
             }
@@ -528,12 +533,12 @@ private fun TileSessionDetails(
         
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (!tile.isReconnoitered) {
-                OutlinedButton(onClick = onReconnoiter, modifier = Modifier.weight(1f)) {
+                DeckOutlinedButton(onClick = onReconnoiter, modifier = Modifier.weight(1f)) {
                     Text("Reconocer")
                 }
             }
             if (tile.isReconnoitered && !tile.isMapped) {
-                OutlinedButton(onClick = onMap, modifier = Modifier.weight(1f)) {
+                DeckOutlinedButton(onClick = onMap, modifier = Modifier.weight(1f)) {
                     Text("Mapear")
                 }
             }
@@ -567,7 +572,7 @@ private fun TileSessionDetails(
                         trailingContent = {
                             val tid = poi.tableId
                             if (tid != null) {
-                                Button(
+                                DeckButton(
                                     onClick = { onRollTable(tid) },
                                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
                                     modifier = Modifier.height(32.dp)
@@ -636,7 +641,7 @@ private fun JournalPanel(
         }
         LazyColumn(modifier = Modifier.weight(1f)) {
             items(days) { day ->
-                Card(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                DeckCard(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                     Column(modifier = Modifier.padding(12.dp)) {
                         Text("Día ${day.dayNumber}", fontWeight = FontWeight.Bold)
                         day.activitiesLog.forEach { activity ->

@@ -1,5 +1,8 @@
 package com.deckapp.feature.hexploration
 
+import com.deckapp.core.ui.components.DeckCard
+import com.deckapp.core.ui.components.DeckTextButton
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -513,7 +516,7 @@ private fun <T> ResourceGrid(
                 }
                 val isSelected = id in selectedIds
                 
-                Card(
+                DeckCard(
                     onClick = { onToggle(id) },
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(
@@ -719,12 +722,12 @@ private fun AddBrushDialog(
             }
         },
         confirmButton = {
-            TextButton(
+            DeckTextButton(
                 onClick = { onConfirm(label, cost, paletteColors[selectedColorIndex]) },
                 enabled = label.isNotBlank()
             ) { Text("Agregar") }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
+        dismissButton = { DeckTextButton(onClick = onDismiss) { Text("Cancelar") } }
     )
 }
 
@@ -771,7 +774,7 @@ private fun NotesSection(
             minLines = 3,
             maxLines = 8
         )
-        TextButton(onClick = { onNotesChange(notesState) }) { Text("Guardar notas") }
+        DeckTextButton(onClick = { onNotesChange(notesState) }) { Text("Guardar notas") }
     }
 }
 
@@ -828,7 +831,7 @@ private fun TableLinkRow(
                         else MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        TextButton(onClick = onPick) { Text("Cambiar") }
+        DeckTextButton(onClick = onPick) { Text("Cambiar") }
         if (currentTableName != null) {
             IconButton(onClick = onClear) {
                 Icon(Icons.Default.Close, contentDescription = "Quitar tabla",
@@ -878,7 +881,7 @@ private fun HexTablePickerDialog(
             }
         },
         confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
+        dismissButton = { DeckTextButton(onClick = onDismiss) { Text("Cancelar") } }
     )
 }
 
@@ -975,10 +978,10 @@ private fun AddPoiDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onConfirm, enabled = name.isNotBlank()) { Text("Agregar") }
+            DeckTextButton(onClick = onConfirm, enabled = name.isNotBlank()) { Text("Agregar") }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
+            DeckTextButton(onClick = onDismiss) { Text("Cancelar") }
         }
     )
 }

@@ -1,5 +1,7 @@
 package com.deckapp.feature.hexploration.components
 
+import com.deckapp.core.ui.components.DeckTextButton
+
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -279,7 +281,7 @@ private fun ExpandableRuleCard(rule: SystemRule) {
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
-                TextButton(onClick = { expanded = !expanded }) {
+                DeckTextButton(onClick = { expanded = !expanded }) {
                     Text(if (expanded) "Menos" else "Ver")
                 }
             }

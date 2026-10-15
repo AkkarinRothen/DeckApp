@@ -1,5 +1,8 @@
 package com.deckapp.feature.hexploration
 
+import com.deckapp.core.ui.components.DeckCard
+import com.deckapp.core.ui.components.DeckTextButton
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -141,17 +144,17 @@ private fun HexMapCard(map: HexMap, onEdit: () -> Unit, onDelete: () -> Unit) {
             title = { Text("Borrar mapa") },
             text = { Text("¿Borrar \"${map.name}\"? Se eliminarán todos sus tiles y POIs.") },
             confirmButton = {
-                TextButton(onClick = { onDelete(); showDeleteConfirm = false }) {
+                DeckTextButton(onClick = { onDelete(); showDeleteConfirm = false }) {
                     Text("Borrar", color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancelar") }
+                DeckTextButton(onClick = { showDeleteConfirm = false }) { Text("Cancelar") }
             }
         )
     }
 
-    Card(onClick = onEdit, modifier = Modifier.fillMaxWidth()) {
+    DeckCard(onClick = onEdit, modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.padding(16.dp).fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -268,12 +271,12 @@ private fun CreateHexMapDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onConfirm, enabled = name.isNotBlank()) {
+            DeckTextButton(onClick = onConfirm, enabled = name.isNotBlank()) {
                 Text("Crear")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
+            DeckTextButton(onClick = onDismiss) { Text("Cancelar") }
         }
     )
 }

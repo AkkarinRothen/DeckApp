@@ -1,5 +1,7 @@
 package com.deckapp.feature.hexploration.components
 
+import com.deckapp.core.ui.components.DeckButton
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -65,7 +67,7 @@ fun HexcrawlView(
                             color = if (uiState.activitiesUsedToday >= uiState.maxActivitiesPerDay) MaterialTheme.colorScheme.error else Color.Unspecified
                         )
                     }
-                    Button(
+                    DeckButton(
                         onClick = onStartNewDay,
                         shape = MaterialTheme.shapes.medium,
                         contentPadding = PaddingValues(horizontal = 16.dp)
