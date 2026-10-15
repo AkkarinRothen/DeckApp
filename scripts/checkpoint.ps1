@@ -1,16 +1,3 @@
-<#
-.SYNOPSIS
-    Crea un punto de control (Checkpoint) inmutable en Git con respaldo local .bundle
-    y sincronización opcional con GitHub y la rama release.
-.DESCRIPTION
-    1. Verifica que el árbol de trabajo esté limpio.
-    2. Crea un Tag anotado de Git (ej. sprint-58, v0.1.2).
-    3. Genera un archivo .bundle independiente en .backups/ que contiene TODO el historial.
-    4. Verifica criptográficamente el bundle.
-    5. Opcionalmente actualiza la rama 'release' y sube los cambios a GitHub.
-.EXAMPLE
-    .\scripts\checkpoint.ps1 -Tag "sprint-58" -Message "Mejoras de Atlas VTT completas"
-#>
 param(
     [string]$Tag,
     [string]$Message,
@@ -31,7 +18,7 @@ if ($gitStatus) {
     Write-Host "[!] Tienes cambios sin commitear en el repositorio:" -ForegroundColor Yellow
     git status -s
     if ($NonInteractive) {
-        throw "El árbol de trabajo no está limpio. Realiza commit antes de crear el checkpoint."
+        throw "El arbol de trabajo no esta limpio. Realiza commit antes de crear el checkpoint."
     }
     $commitResp = Read-Host "Deseas commitear estos cambios ahora? (s/n)"
     if ($commitResp -match "^[sS]") {
@@ -40,7 +27,7 @@ if ($gitStatus) {
         git add -A
         git commit -m "$cMsg"
     } else {
-        Write-Host "Operación cancelada. El árbol de trabajo debe estar limpio." -ForegroundColor Red
+        Write-Host "Operacion cancelada. El arbol de trabajo debe estar limpio." -ForegroundColor Red
         exit 1
     }
 }
@@ -48,10 +35,10 @@ if ($gitStatus) {
 # 2. Obtener Nombre de Tag y Mensaje
 if (-not $Tag) {
     if ($NonInteractive) { throw "Debes especificar -Tag en modo no interactivo." }
-    $Tag = Read-Host "Nombre del Tag/Versión (ej. sprint-58 o v0.1.2)"
+    $Tag = Read-Host "Nombre del Tag/Version (ej. sprint-58 o v0.1.2)"
 }
 if (-not $Tag) {
-    Write-Host "Error: El nombre del tag no puede estar vacío." -ForegroundColor Red
+    Write-Host "Error: El nombre del tag no puede estar vacio." -ForegroundColor Red
     exit 1
 }
 
@@ -65,7 +52,7 @@ if ($tagExists) {
 if (-not $Message) {
     if ($NonInteractive) { $Message = "Punto de control $Tag" }
     else {
-        $Message = Read-Host "Descripción del Checkpoint (ej. Sincronización Sprint 58 Atlas VTT)"
+        $Message = Read-Host "Descripcion del Checkpoint (ej. Sincronizacion Sprint 58 Atlas VTT)"
         if (-not $Message) { $Message = "Punto de control $Tag" }
     }
 }
@@ -81,7 +68,8 @@ if (-not (Test-Path $backupDir)) {
 }
 
 $dateStr = Get-Date -Format "yyyyMMdd_HHmmss"
-$safeTag = $Tag -replace '[\\/:\*\?"<>\|]', '_'
+$invalidChars = [System.IO.Path]::GetInvalidFileNameChars()
+$safeTag = -join ($Tag.ToCharArray() | ForEach-Object { if ($invalidChars -contains $_) { '_' } else { $_ } })
 $bundlePath = Join-Path $backupDir "bundle_${safeTag}_${dateStr}.bundle"
 
 Write-Host "[*] Generando copia de seguridad local (bundle completo)..." -ForegroundColor Green
@@ -89,10 +77,10 @@ git bundle create "$bundlePath" --all
 
 # Verificar el bundle
 Write-Host "[*] Verificando integridad del bundle local..." -ForegroundColor Green
-$verifyOutput = git bundle verify "$bundlePath"
+git bundle verify "$bundlePath"
 Write-Host "    -> Bundle validado exitosamente en: $bundlePath" -ForegroundColor DarkGreen
 
-# 5. Sincronizar rama 'release' (Opcional)
+# 5. Sincronizar rama release (Opcional)
 if (-not $SyncRelease -and -not $NonInteractive) {
     $resp = Read-Host "Deseas promover este checkpoint a la rama estable 'release'? (s/n)"
     if ($resp -match "^[sS]") { $SyncRelease = $true }
@@ -111,7 +99,7 @@ if ($SyncRelease) {
     git checkout release
     git merge "$Tag" --ff-only
     git checkout $currentBranch
-    Write-Host "    -> Rama 'release' actualizada con éxito." -ForegroundColor DarkGreen
+    Write-Host "    -> Rama 'release' actualizada con exito." -ForegroundColor DarkGreen
 }
 
 # 6. Sincronizar con GitHub (Opcional)
@@ -128,11 +116,12 @@ if ($PushRemote) {
     if ($releaseExists) {
         git push origin release
     }
-    Write-Host "    -> Sincronización con GitHub completada." -ForegroundColor DarkGreen
+    Write-Host "    -> Sincronizacion con GitHub completada." -ForegroundColor DarkGreen
 }
 
-Write-Host "`n=====================================================" -ForegroundColor Green
-Write-Host " [✓] CHECKPOINT '$Tag' CREADO CON ÉXITO!" -ForegroundColor Green
+Write-Host ""
+Write-Host "=====================================================" -ForegroundColor Green
+Write-Host " [OK] CHECKPOINT '$Tag' CREADO CON EXITO!" -ForegroundColor Green
 Write-Host "  - Tag Git: $Tag" -ForegroundColor White
 Write-Host "  - Respaldo local offline: $bundlePath" -ForegroundColor White
 Write-Host "=====================================================" -ForegroundColor Green

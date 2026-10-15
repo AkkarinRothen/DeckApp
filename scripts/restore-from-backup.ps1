@@ -1,13 +1,3 @@
-<#
-.SYNOPSIS
-    Script de recuperación ante desastres: restaura el repositorio a partir de
-    un archivo .bundle de seguridad local en .backups/
-.DESCRIPTION
-    Permite verificar o restaurar ramas y tags desde un backup offline si GitHub
-    ha sobrescrito o eliminado commits.
-.EXAMPLE
-    .\scripts\restore-from-backup.ps1
-#>
 param(
     [string]$BundleFile
 )
@@ -15,12 +5,12 @@ param(
 $ErrorActionPreference = "Stop"
 
 Write-Host "=====================================================" -ForegroundColor Cyan
-Write-Host "     DECKAPP - RESTAURACIÓN ANTE DESASTRES GIT       " -ForegroundColor Cyan
+Write-Host "     DECKAPP - RESTAURACION ANTE DESASTRES GIT       " -ForegroundColor Cyan
 Write-Host "=====================================================" -ForegroundColor Cyan
 
 $backupDir = Join-Path $PSScriptRoot "..\.backups"
 if (-not (Test-Path $backupDir)) {
-    Write-Host "No se encontró el directorio de respaldos (.backups)." -ForegroundColor Yellow
+    Write-Host "No se encontro el directorio de respaldos (.backups)." -ForegroundColor Yellow
     exit 0
 }
 
@@ -38,27 +28,31 @@ if (-not $BundleFile) {
         Write-Host "  [$($i+1)] $($b.Name) ($sizeMB MB - $($b.LastWriteTime))" -ForegroundColor White
     }
     
-    $selection = Read-Host "`nSelecciona el número del respaldo a inspeccionar/restaurar"
+    Write-Host ""
+    $selection = Read-Host "Selecciona el numero del respaldo a inspeccionar/restaurar"
     $idx = [int]$selection - 1
     if ($idx -ge 0 -and $idx -lt $bundles.Count) {
         $BundleFile = $bundles[$idx].FullName
     } else {
-        Write-Host "Selección inválida." -ForegroundColor Red
+        Write-Host "Seleccion invalida." -ForegroundColor Red
         exit 1
     }
 }
 
-Write-Host "`n[*] Verificando integridad del bundle: $BundleFile..." -ForegroundColor Green
+Write-Host ""
+Write-Host "[*] Verificando integridad del bundle: $BundleFile..." -ForegroundColor Green
 git bundle verify "$BundleFile"
 
-Write-Host "`nContenido del bundle (ramas y tags preservados):" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "Contenido del bundle (ramas y tags preservados):" -ForegroundColor Cyan
 git bundle list-heads "$BundleFile"
 
-$action = Read-Host "`nDeseas restaurar/actualizar las referencias locales con este bundle? (s/n)"
+Write-Host ""
+$action = Read-Host "Deseas restaurar/actualizar las referencias locales con este bundle? (s/n)"
 if ($action -match "^[sS]") {
     Write-Host "[*] Extrayendo ramas y tags desde el bundle..." -ForegroundColor Green
     git fetch "$BundleFile" "*:*"
-    Write-Host " [✓] Restauración completada exitosamente desde el respaldo local." -ForegroundColor Green
+    Write-Host " [OK] Restauracion completada exitosamente desde el respaldo local." -ForegroundColor Green
 } else {
-    Write-Host "Operación finalizada sin modificaciones." -ForegroundColor Gray
+    Write-Host "Operacion finalizada sin modificaciones." -ForegroundColor Gray
 }

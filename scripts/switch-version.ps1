@@ -1,15 +1,3 @@
-<#
-.SYNOPSIS
-    Permite cambiar de forma segura entre diferentes versiones y checkpoints del proyecto,
-    o regresar a la versión más reciente en 'master'.
-.DESCRIPTION
-    1. Verifica que el árbol de trabajo no tenga cambios sin guardar.
-    2. Lista los checkpoints disponibles si no se pasa -Version.
-    3. Permite volver a 'master' con el parámetro -BackToMaster o seleccionar un tag.
-.EXAMPLE
-    .\scripts\switch-version.ps1 -Version "sprint-58"
-    .\scripts\switch-version.ps1 -BackToMaster
-#>
 param(
     [string]$Version,
     [switch]$BackToMaster,
@@ -25,23 +13,24 @@ Write-Host "=====================================================" -ForegroundCo
 # 1. Comprobar que no haya cambios sin guardar
 $gitStatus = git status --porcelain
 if ($gitStatus) {
-    Write-Host "[!] ADVERTENCIA: Tienes cambios sin commitear en tu árbol de trabajo:" -ForegroundColor Red
+    Write-Host "[!] ADVERTENCIA: Tienes cambios sin commitear en tu arbol de trabajo:" -ForegroundColor Red
     git status -s
-    Write-Host "`nPor seguridad, commitea o haz 'git stash' de tus cambios antes de cambiar de versión." -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "Por seguridad, commitea o haz 'git stash' de tus cambios antes de cambiar de version." -ForegroundColor Yellow
     exit 1
 }
 
 $currentBranch = (git branch --show-current).Trim()
 
-# 2. Si se solicitó volver a master
+# 2. Si se solicito volver a master
 if ($BackToMaster) {
     Write-Host "[*] Regresando a la rama de desarrollo principal 'master'..." -ForegroundColor Green
     git checkout master
-    Write-Host " [✓] Ahora estás en 'master' (último estado de desarrollo)." -ForegroundColor Green
+    Write-Host " [OK] Ahora estas en 'master' (ultimo estado de desarrollo)." -ForegroundColor Green
     exit 0
 }
 
-# 3. Listar tags disponibles si no se especificó $Version
+# 3. Listar tags disponibles si no se especifico $Version
 if (-not $Version) {
     $tags = git tag -l --sort=-creatordate
     if (-not $tags) {
@@ -57,12 +46,13 @@ if (-not $Version) {
         $msg = git tag -l --format="%(contents:subject) (creado %(creatordate:short))" $t
         Write-Host "  [$($i+1)] $t - $msg" -ForegroundColor White
     }
-    Write-Host "  [0] Regresar a la última versión en 'master'" -ForegroundColor Cyan
+    Write-Host "  [0] Regresar a la ultima version en 'master'" -ForegroundColor Cyan
 
-    $selection = Read-Host "`nIngresa el número de la versión deseada (o 0 para master)"
+    Write-Host ""
+    $selection = Read-Host "Ingresa el numero de la version deseada (o 0 para master)"
     if ($selection -eq "0") {
         git checkout master
-        Write-Host " [✓] Regresaste a 'master'." -ForegroundColor Green
+        Write-Host " [OK] Regresaste a 'master'." -ForegroundColor Green
         exit 0
     }
     
@@ -70,16 +60,16 @@ if (-not $Version) {
     if ($idx -ge 0 -and $idx -lt $tagList.Count) {
         $Version = $tagList[$idx]
     } else {
-        Write-Host "Selección inválida." -ForegroundColor Red
+        Write-Host "Seleccion invalida." -ForegroundColor Red
         exit 1
     }
 }
 
-# 4. Cambiar a la versión elegida
+# 4. Cambiar a la version elegida
 Write-Host "[*] Verificando tag '$Version'..." -ForegroundColor Green
 $tagCheck = git tag -l $Version
 if (-not $tagCheck) {
-    Write-Host "Error: No existe el tag o versión '$Version'." -ForegroundColor Red
+    Write-Host "Error: No existe el tag o version '$Version'." -ForegroundColor Red
     exit 1
 }
 
@@ -88,13 +78,14 @@ if ($CreateBranch) {
     Write-Host "[*] Creando y cambiando a rama temporal '$branchName'..." -ForegroundColor Green
     git checkout -B "$branchName" "$Version"
 } else {
-    Write-Host "[*] Cambiando a '$Version' en modo inspección segura (detached HEAD)..." -ForegroundColor Green
+    Write-Host "[*] Cambiando a '$Version' en modo inspeccion segura (detached HEAD)..." -ForegroundColor Green
     git checkout "$Version"
 }
 
-Write-Host "`n=====================================================" -ForegroundColor Green
-Write-Host " [✓] CAMBIO DE VERSIÓN COMPLETADO: $Version" -ForegroundColor Green
-Write-Host "  - Estás visualizando el estado exacto de: $Version" -ForegroundColor White
+Write-Host ""
+Write-Host "=====================================================" -ForegroundColor Green
+Write-Host " [OK] CAMBIO DE VERSION COMPLETADO: $Version" -ForegroundColor Green
+Write-Host "  - Estas visualizando el estado exacto de: $Version" -ForegroundColor White
 Write-Host "  - Para volver al trabajo normal, ejecuta:" -ForegroundColor Gray
 Write-Host "      .\scripts\switch-version.ps1 -BackToMaster" -ForegroundColor Cyan
 Write-Host "=====================================================" -ForegroundColor Green
