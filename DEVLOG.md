@@ -26,11 +26,23 @@
 - Algoritmo de colocación en racimo (`spawnEncounterOnMap`): genera y sitúa a todas las criaturas del encuentro en celdas transitables libres alrededor del pin o celda de origen, evitando automáticamente celdas con terreno bloqueante (`WALL`) y tokens preexistentes.
 - Vinculación automática al combate activo y refresco en tiempo real del mapa táctico.
 
+**FEATURE — Control de Versiones, Resguardo ante Desastres y Coexistencia de APKs (Estable vs Dev)**
+- Coexistencia de variantes en Android: `buildTypes.debug` configurado con `applicationIdSuffix = ".debug"`, `versionNameSuffix = "-DEV"` y nombre visible "DeckApp (Dev)" mediante `app/src/debug/res/values/strings.xml`. Permite instalar y ejecutar ambas apps simultáneamente en el mismo dispositivo sin pisar la base de datos de producción.
+- Respaldo local offline inmutable: Integración de `git bundle` en el script automatizado `scripts/checkpoint.ps1` con directorio `.backups/` excluido de git. Genera snapshots binarios del 100% del árbol de Git con verificación criptográfica para recuperación instantánea ante accidentes en GitHub.
+- Bóveda de APKs históricas (`.backups/apks/`): Opción `-BuildApk` en `checkpoint.ps1` que compila y archiva ejecutables fechados junto con el catálogo automatizado `CATALOG.md`.
+- Instalador híbrido inteligente (`scripts/install-version.ps1`): Detecta dispositivos Android por ADB e instala el APK seleccionado en 1 clic manteniendo partidas (`adb install -r -d`), o abre la carpeta en Windows Explorer si no hay dispositivo conectado.
+- Selector interactivo de versiones (`scripts/switch-version.ps1`) y restaurador ante desastres (`scripts/restore-from-backup.ps1`).
+
+**FEATURE — Respaldo Total de Campañas y Mapas Tácticos**
+- Motor de backup de la app (`FullBackupDto` y `BackupRepositoryImpl`) ampliado para respaldar e importar de forma íntegra mapas tácticos (`TacticalMapBackupDto`), fichas con elevación y condiciones (`TacticalTokenBackupDto`) y pines con sub-mapas enlazados (`TacticalMapPinBackupDto`).
+- Compatibilidad retroactiva garantizada con valores por defecto `= emptyList()` para backups de versiones previas.
+- Conteo de mapas en el manifiesto (`BackupCounts.tacticalMaps`) y sincronización con Room DB v44 en `CreateBackupUseCase`.
+
 **VALIDACIÓN Y PARIDAD**
-- 6 pruebas unitarias creadas en `TacticalAtlasVttFeaturesTest` cubriendo navegación jerárquica de mapas, spawneo masivo en cluster, evaluación de fórmulas de dados en línea y turn tracker con auto-foco; todas aprobadas.
-- Compilación y suite de pruebas de `:feature:draw:testDebugUnitTest` aprobadas al 100%.
-- Ensamblado total verificado con `./gradlew :app:assembleDebug` (BUILD SUCCESSFUL en 1m 39s).
-- *Feature Parity Mandate:* Registrado para sincronizar en `TDAPP-desktop`: migración Room v44 (`targetMapId`), barra de breadcrumbs de mapa táctico, mini-panel flotante in-situ, algoritmo de cluster placement para encuentros y auto-foco de cámara con el tracker de iniciativa.
+- 6 pruebas unitarias de mapas tácticos en `TacticalAtlasVttFeaturesTest` y 2 pruebas de serialización/compatibilidad en `TacticalMapBackupDtoTest`; todas aprobadas.
+- Compilación y suite de pruebas de `:core:data:testDebugUnitTest` y `:feature:draw:testDebugUnitTest` aprobadas al 100%.
+- Ensamblado total verificado con `./gradlew :app:assembleDebug` (BUILD SUCCESSFUL en 1m 27s).
+- *Feature Parity Mandate:* Registrado para sincronizar en `TDAPP-desktop`: migración Room v44 (`targetMapId`), barra de breadcrumbs de mapa táctico, mini-panel flotante in-situ, algoritmo de cluster placement para encuentros, auto-foco de cámara con el tracker de iniciativa, y exportación/importación de entidades tácticas en `FullBackupDto`.
 
 ---
 
