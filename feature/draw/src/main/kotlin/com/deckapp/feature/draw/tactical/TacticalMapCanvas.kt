@@ -542,9 +542,46 @@ fun TacticalMapCanvas(
                     center = center,
                     cellSize = map.cellSizePx,
                     isSelected = token.id == uiState.selectedTokenId,
+                    isActiveTurn = token.id == uiState.activeCombatTurnTokenId,
+                    isTargeted = token.id == uiState.pendingAttackTargetTokenId,
                     zoom = zoom,
                     textMeasurer = textMeasurer
                 )
+            }
+
+            // Línea de Puntería Táctica (Targeting Line)
+            val attackerToken = uiState.targetingAttackerToken
+            if (attackerToken != null) {
+                val attackerCenter = Offset(
+                    (attackerToken.cellX * map.cellSizePx) + map.gridOffsetX,
+                    (attackerToken.cellY * map.cellSizePx) + map.gridOffsetY
+                )
+
+                val targetToken = uiState.pendingAttackTargetToken ?: uiState.selectedToken.takeIf { it?.id != attackerToken.id }
+                if (targetToken != null) {
+                    val targetCenter = Offset(
+                        (targetToken.cellX * map.cellSizePx) + map.gridOffsetX,
+                        (targetToken.cellY * map.cellSizePx) + map.gridOffsetY
+                    )
+
+                    drawLine(
+                        color = Color(0xFFFF5252),
+                        start = attackerCenter,
+                        end = targetCenter,
+                        strokeWidth = 3f / zoom,
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(15f / zoom, 10f / zoom), 0f)
+                    )
+
+                    val distFt = (hypot(targetToken.cellX - attackerToken.cellX, targetToken.cellY - attackerToken.cellY) * map.scaleFtPerCell).toInt()
+                    val midPoint = Offset((attackerCenter.x + targetCenter.x) / 2f, (attackerCenter.y + targetCenter.y) / 2f)
+
+                    drawMeasureBadge(
+                        textMeasurer = textMeasurer,
+                        text = "Objetivo: $distFt ft",
+                        center = midPoint,
+                        zoom = zoom
+                    )
+                }
             }
 
             drawContext.canvas.restore()
@@ -698,6 +735,8 @@ private fun DrawScope.drawTacticalToken(
     center: Offset,
     cellSize: Float,
     isSelected: Boolean,
+    isActiveTurn: Boolean = false,
+    isTargeted: Boolean = false,
     zoom: Float,
     textMeasurer: TextMeasurer
 ) {
@@ -708,6 +747,36 @@ private fun DrawScope.drawTacticalToken(
         TokenFaction.ALLY -> Color(0xFF4CAF50)
         TokenFaction.ENEMY -> Color(0xFFF44336)
         TokenFaction.NEUTRAL -> Color(0xFFFFC107)
+    }
+
+    if (isActiveTurn) {
+        // Halo dorado de iniciativa (Turno activo)
+        drawCircle(
+            color = Color(0xFFFFD700).copy(alpha = 0.35f),
+            radius = radius + (11f / zoom),
+            center = center
+        )
+        drawCircle(
+            color = Color(0xFFFFD700),
+            radius = radius + (5f / zoom),
+            center = center,
+            style = Stroke(width = 3f / zoom)
+        )
+    }
+
+    if (isTargeted) {
+        // Mira roja de objetivo
+        drawCircle(
+            color = Color(0xFFFF1744).copy(alpha = 0.35f),
+            radius = radius + (9f / zoom),
+            center = center
+        )
+        drawCircle(
+            color = Color(0xFFFF1744),
+            radius = radius + (4f / zoom),
+            center = center,
+            style = Stroke(width = 2.5f / zoom, pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f / zoom, 6f / zoom), 0f))
+        )
     }
 
     if (isSelected) {

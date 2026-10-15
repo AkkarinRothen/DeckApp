@@ -90,8 +90,69 @@ data class TacticalUiState(
     val availableTables: List<RandomTable> = emptyList(),
     val availableEncounters: List<Encounter> = emptyList(),
     val availableWikiEntries: List<WikiEntry> = emptyList(),
-    val previewWikiEntry: WikiEntry? = null
+    val previewWikiEntry: WikiEntry? = null,
+    // Sincronización Táctica de Combate, Iniciativa y Ataques
+    val activeEncounter: Encounter? = null,
+    val targetingAttackerTokenId: Long? = null,
+    val pendingAttackTargetTokenId: Long? = null,
+    val attackResolution: TacticalAttackResolution? = null,
+    val showCustomAttackDialog: Boolean = false,
+    // Panel Lateral Rápido Multitool (Mesa Híbrida)
+    val isSidePanelOpen: Boolean = false,
+    val activeSidePanelTab: TacticalSidePanelTab = TacticalSidePanelTab.NOTES_WIKI,
+    val sidePanelDiceCount: Int = 1,
+    val sidePanelDiceSides: Int = 20,
+    val sidePanelDiceModifier: Int = 0,
+    val sidePanelLastDiceResult: DiceRollResult? = null,
+    val sidePanelRecentRolls: List<DiceRollResult> = emptyList(),
+    val sidePanelMythicChaos: Int = 5,
+    val sidePanelMythicOdds: ProbabilityLevel = ProbabilityLevel.FIFTY_FIFTY,
+    val sidePanelLastFateResult: Pair<FateResult, Boolean>? = null,
+    val sidePanelLastEventResult: String? = null,
+    val wikiSearchQuery: String = ""
 ) {
     val selectedToken: TacticalToken? get() = tokens.find { it.id == selectedTokenId }
     val selectedPin: TacticalMapPin? get() = pins.find { it.id == selectedPinId }
+    val targetingAttackerToken: TacticalToken? get() = tokens.find { it.id == targetingAttackerTokenId }
+    val pendingAttackTargetToken: TacticalToken? get() = tokens.find { it.id == pendingAttackTargetTokenId }
+
+    val activeCombatTurnTokenId: Long?
+        get() {
+            val encounter = activeEncounter ?: return null
+            if (encounter.creatures.isEmpty()) return null
+            val activeCreature = encounter.creatures.getOrNull(encounter.currentTurnIndex.coerceIn(0, encounter.creatures.size - 1)) ?: return null
+            return tokens.find { it.encounterCreatureId == activeCreature.id || (it.npcId != null && it.npcId == activeCreature.npcId) }?.id
+        }
 }
+
+enum class TacticalSidePanelTab {
+    NOTES_WIKI,
+    DICE,
+    MYTHIC,
+    COMBAT
+}
+
+data class TacticalAttackOption(
+    val name: String,
+    val bonus: Int,
+    val damageFormula: String
+)
+
+data class TacticalAttackResolution(
+    val attackerTokenId: Long,
+    val attackerName: String,
+    val targetTokenId: Long,
+    val targetName: String,
+    val targetAc: Int,
+    val attackName: String,
+    val attackBonus: Int,
+    val d20Roll: Int,
+    val totalAttackRoll: Int,
+    val isCriticalHit: Boolean,
+    val isCriticalMiss: Boolean,
+    val isHit: Boolean,
+    val damageFormula: String,
+    val damageRoll: Int,
+    val distanceFt: Int,
+    val isDamageApplied: Boolean = false
+)

@@ -30,6 +30,7 @@ fun TacticalTokenHud(
     onConditionToggled: (Condition) -> Unit,
     onSizeChanged: (newSize: Float) -> Unit,
     onVisibilityToggled: () -> Unit,
+    onStartAttackTargeting: () -> Unit = {},
     onOpenNpc: ((Long) -> Unit)? = null,
     onDeleteToken: () -> Unit,
     onClose: () -> Unit,
@@ -159,6 +160,18 @@ fun TacticalTokenHud(
                             Spacer(Modifier.width(4.dp))
                             Text("Ficha", fontSize = 11.sp)
                         }
+                    }
+
+                    // Botón Atacar / Selección de Objetivo
+                    Button(
+                        onClick = onStartAttackTargeting,
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                        modifier = Modifier.height(32.dp)
+                    ) {
+                        Icon(Icons.Default.AdsClick, contentDescription = null, modifier = Modifier.size(14.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text("Atacar", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
 
                     // Botón de visibilidad / oculto

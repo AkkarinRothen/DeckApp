@@ -1,5 +1,49 @@
 ---
 
+### Sprint 55 — Modo Mesa Híbrida: Panel Lateral Rápido Multitool VTT (15 de octubre de 2026)
+
+**FEATURE — Panel Lateral Rápido Multitool y Adaptabilidad Responsiva**
+- Integración del panel multitool `TacticalSidePanel` en el mapa táctico para juego presencial híbrido y gestión integral del DM/Master sin abandonar la pantalla táctica.
+- Solapa flotante táctil (`Icons.Default.DashboardCustomize`) en el margen derecho para alternar el panel con un solo toque.
+- Comportamiento responsivo inteligente: en pantallas anchas, tablets y orientación horizontal (`maxWidth >= 720.dp`), opera como **pantalla dividida (Side-by-Side)** ajustando el lienzo del mapa táctico; en pantallas móviles verticales opera como **cajón flotante deslizante (Overlay Drawer)** con telón de fondo translúcido.
+
+**FEATURE — 4 Pestañas Multitool Integradas**
+- **Notas & Wiki (`NOTES_WIKI`)**: Editor de notas rápidas de sesión con guardado automático y barra de búsqueda en tiempo real que filtra entradas y tarjetas de la Wiki de campaña.
+- **Lanzador de Dados (`DICE`)**: Selector interactivo de dados polifacéticos (d4 a d100), contador de dados, modificador numérico rápido (+ / -), evaluación instantánea con `DiceEvaluator` e historial de tiradas recientes con marca de tiempo.
+- **Oráculo Mythic GME 2e (`MYTHIC`)**: Fate Check d100 contra tabla de probabilidades (desde *Imposible* hasta *Seguro*), factor de caos ajustable (1..9), respuestas de oráculo contextuales y generador de eventos aleatorios de dos palabras (Acción · Sujeto) basado en las palabras clave oficiales de Mythic.
+- **Control de Combate (`COMBAT`)**: Resumen del encuentro activo con combatientes ordenados, barras de salud relativas, CA, selección rápida del token asociado en el mapa y avance directo de rondas y turnos.
+
+**INTEGRATION & TESTING**
+- Suite unitaria `TacticalSidePanelTest` implementada en `:feature:draw:testDebugUnitTest`: cobertura de alternancia y estado del panel, cambio entre las 4 pestañas, cálculo y registro de dados, tirada de destino y eventos de Mythic, filtrado de Wiki y avance de turnos de combate.
+- Ejecución limpia de `./gradlew :feature:draw:testDebugUnitTest` (13 tests pasando con éxito).
+- Verificación completa de compilación y empaquetado del APK debug con `./gradlew :app:assembleDebug` (BUILD SUCCESSFUL).
+- *Feature Parity Mandate*: Especificación de arquitectura y componentes preparada para incorporar el panel lateral multitool en `TDAPP-desktop`.
+
+---
+
+### Sprint 54 — Sincronización Táctica Total: Iniciativa, Combate y Ataques (15 de octubre de 2026)
+
+**FEATURE — Tira Flotante de Iniciativa y Halo Luminoso de Turno**
+- Tira horizontal flotante `TacticalInitiativeBar` anclada en la parte superior del mapa táctico cuando hay un encuentro activo (`Encounter`): muestra ronda, combatientes ordenados por iniciativa, estado de salud / CA y botón de un toque para avanzar al siguiente turno (`Siguiente Turno`).
+- El token en turno activo exhibe en tiempo real un **halo dorado pulsante** en el mapa (`Color(0xFFFFD700)`).
+- Al avanzar el turno, se reinicia automáticamente el presupuesto de movimiento (`tokenMovedThisTurnFt`) del combatiente que entra en acción.
+
+**FEATURE — HUD de Token con Acción de Ataque y Puntería Táctica**
+- Botón **"Atacar"** (`Icons.Default.AdsClick`) integrado en el HUD flotante del token.
+- Al activarse, entra en modo puntería táctica con indicador superior contextual: al tocar un token enemigo en el mapa se dibuja una **línea punteada dinámica de alcance** con badge de distancia en pies y una mira roja sobre el objetivo.
+
+**FEATURE — Resolución Táctica de Ataques y Aplicación de Daño Instantánea**
+- Diálogo de ataque táctico `TacticalAttackDialog`: muestra enfrentamiento Atacante vs Defensor, distancia, CA del objetivo, opciones rápidas de armas y campos configurables de bono y dados de daño.
+- Banner de resolución `TacticalAttackResolutionBanner`: calcula tirada de d20 + bono vs CA del objetivo, detecta impactos críticos (20) y pifias (1), evalúa dados de daño mediante `DiceEvaluator` y ofrece el botón instantáneo **"Aplicar Daño"** que descuenta automáticamente los PG del token y se sincroniza bidireccionalmente con `EncounterCreature`.
+
+**INTEGRATION & TESTING**
+- Suite de pruebas unitarias `TacticalCombatSyncTest` creada con 4 casos de prueba en `:feature:draw:testDebugUnitTest`: resolución de ataque con d20 vs CA, detección de críticos y pifias, aplicación de daño con reducción de PG y sincronización de repositorio, y avance de turno con reinicio de presupuesto de movimiento.
+- Todas las pruebas de `:feature:draw:testDebugUnitTest` (7 tests) aprobadas con éxito.
+- Empaquetado y compilación verificados con `./gradlew :app:assembleDebug` (BUILD SUCCESSFUL).
+- *Feature Parity Mandate*: Especificación lista para trasladar la tira de iniciativa, puntería táctica con línea de alcance y banner de resolución a `TDAPP-desktop`.
+
+---
+
 ### Sprint 53 — Restauración y Espacio Dedicado para el Mapa Táctico VTT (15 de octubre de 2026)
 
 **FEATURE — Espacio Dedicado para el Mapa Táctico en la Mesa de Juego**

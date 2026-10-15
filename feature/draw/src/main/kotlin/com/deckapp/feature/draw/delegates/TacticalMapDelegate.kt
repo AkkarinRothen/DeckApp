@@ -9,9 +9,7 @@ import com.deckapp.core.domain.usecase.CalculateTacticalDistanceUseCase
 import com.deckapp.core.domain.usecase.RollTableUseCase
 import com.deckapp.core.model.*
 import com.deckapp.feature.draw.SessionUiState
-import com.deckapp.feature.draw.tactical.FogBrushMode
-import com.deckapp.feature.draw.tactical.PersistentAoE
-import com.deckapp.feature.draw.tactical.TacticalTool
+import com.deckapp.feature.draw.tactical.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -163,6 +161,13 @@ class TacticalMapDelegate(
      */
     private fun observeActiveCombatSync() {
         encounterRepository.getActiveEncounter(sessionId).onEach { encounter ->
+            _uiState.update { state ->
+                state.copy(
+                    tacticalState = state.tacticalState.copy(
+                        activeEncounter = encounter
+                    )
+                )
+            }
             if (encounter != null) {
                 val currentTokens = _uiState.value.tacticalState.tokens
                 val creatureMap = encounter.creatures.associateBy { it.id }
@@ -261,6 +266,12 @@ class TacticalMapDelegate(
     }
 
     fun selectToken(tokenId: Long?) {
+        val currentTactical = _uiState.value.tacticalState
+        if (currentTactical.targetingAttackerTokenId != null && tokenId != null && tokenId != currentTactical.targetingAttackerTokenId) {
+            onTokenTargeted(tokenId)
+            return
+        }
+
         _uiState.update { state ->
             val tactical = state.tacticalState
             val selected = tactical.tokens.find { it.id == tokenId }
@@ -1067,6 +1078,285 @@ class TacticalMapDelegate(
                     mapToRename = null,
                     mapToLinkScene = null
                 )
+            )
+        }
+    }
+
+    // --- Sincronización Táctica de Combate, Selección de Objetivos y Ataques ---
+
+    fun startAttackTargeting(attackerTokenId: Long) {
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(
+                    targetingAttackerTokenId = attackerTokenId,
+                    pendingAttackTargetTokenId = null,
+                    attackResolution = null,
+                    showCustomAttackDialog = false
+                )
+            )
+        }
+    }
+
+    fun cancelTargeting() {
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(
+                    targetingAttackerTokenId = null,
+                    pendingAttackTargetTokenId = null,
+                    showCustomAttackDialog = false
+                )
+            )
+        }
+    }
+
+    fun onTokenTargeted(targetTokenId: Long) {
+        val tactical = _uiState.value.tacticalState
+        val attackerId = tactical.targetingAttackerTokenId ?: return
+        if (targetTokenId == attackerId) return
+
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(
+                    pendingAttackTargetTokenId = targetTokenId,
+                    showCustomAttackDialog = true
+                )
+            )
+        }
+    }
+
+    fun dismissCustomAttackDialog() {
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(
+                    showCustomAttackDialog = false,
+                    pendingAttackTargetTokenId = null,
+                    targetingAttackerTokenId = null
+                )
+            )
+        }
+    }
+
+    fun executeAttack(
+        attackerTokenId: Long,
+        targetTokenId: Long,
+        attackName: String,
+        attackBonus: Int,
+        damageFormula: String,
+        forcedD20: Int? = null,
+        forcedDamage: Int? = null
+    ) {
+        val tactical = _uiState.value.tacticalState
+        val attacker = tactical.tokens.find { it.id == attackerTokenId } ?: return
+        val target = tactical.tokens.find { it.id == targetTokenId } ?: return
+
+        val distResult = distanceCalculator(
+            fromX = attacker.cellX,
+            fromY = attacker.cellY,
+            toX = target.cellX,
+            toY = target.cellY,
+            scaleFtPerCell = tactical.map?.scaleFtPerCell ?: 5,
+            gridType = tactical.map?.gridType ?: GridType.SQUARE,
+            terrainMap = tactical.terrainMap
+        )
+        val distance = distResult.distanceFt
+
+        val d20 = forcedD20 ?: kotlin.random.Random.nextInt(1, 21)
+        val isCritHit = d20 == 20
+        val isCritMiss = d20 == 1
+        val totalAttack = d20 + attackBonus
+        val isHit = isCritHit || (!isCritMiss && totalAttack >= target.armorClass)
+
+        val damageRoll = if (isHit) {
+            forcedDamage ?: if (isCritHit) {
+                val base = com.deckapp.core.domain.usecase.DiceEvaluator.evaluate(damageFormula)
+                base + com.deckapp.core.domain.usecase.DiceEvaluator.evaluate(damageFormula)
+            } else {
+                com.deckapp.core.domain.usecase.DiceEvaluator.evaluate(damageFormula)
+            }
+        } else 0
+
+        val resolution = TacticalAttackResolution(
+            attackerTokenId = attacker.id,
+            attackerName = attacker.name,
+            targetTokenId = target.id,
+            targetName = target.name,
+            targetAc = target.armorClass,
+            attackName = attackName,
+            attackBonus = attackBonus,
+            d20Roll = d20,
+            totalAttackRoll = totalAttack,
+            isCriticalHit = isCritHit,
+            isCriticalMiss = isCritMiss,
+            isHit = isHit,
+            damageFormula = damageFormula,
+            damageRoll = damageRoll,
+            distanceFt = distance,
+            isDamageApplied = false
+        )
+
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(
+                    attackResolution = resolution,
+                    showCustomAttackDialog = false,
+                    targetingAttackerTokenId = null,
+                    pendingAttackTargetTokenId = null
+                )
+            )
+        }
+    }
+
+    fun applyAttackDamage(resolution: TacticalAttackResolution) {
+        if (resolution.isDamageApplied || resolution.damageRoll <= 0) return
+        val targetToken = _uiState.value.tacticalState.tokens.find { it.id == resolution.targetTokenId } ?: return
+        val newHp = (targetToken.currentHp - resolution.damageRoll).coerceAtLeast(0)
+        updateTokenHp(targetToken.id, newHp)
+
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(
+                    attackResolution = resolution.copy(isDamageApplied = true)
+                )
+            )
+        }
+    }
+
+    fun dismissAttackResolution() {
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(
+                    attackResolution = null
+                )
+            )
+        }
+    }
+
+    fun advanceCombatTurn() {
+        val encounter = _uiState.value.tacticalState.activeEncounter ?: return
+        if (encounter.creatures.isEmpty()) return
+
+        scope.launch {
+            var nextIndex = encounter.currentTurnIndex + 1
+            var nextRound = encounter.currentRound
+
+            if (nextIndex >= encounter.creatures.size) {
+                nextIndex = 0
+                nextRound++
+            }
+
+            encounterRepository.saveEncounter(
+                encounter.copy(
+                    currentTurnIndex = nextIndex,
+                    currentRound = nextRound
+                )
+            )
+
+            val newActiveCreature = encounter.creatures.getOrNull(nextIndex)
+            if (newActiveCreature != null) {
+                val matchingToken = _uiState.value.tacticalState.tokens.find {
+                    it.encounterCreatureId == newActiveCreature.id || (it.npcId != null && it.npcId == newActiveCreature.npcId)
+                }
+                matchingToken?.let { token ->
+                    resetTokenTurnMovement(token.id)
+                }
+            }
+        }
+    }
+
+    // --- Panel Lateral Rápido Multitool (Mesa Híbrida) ---
+
+    fun toggleSidePanel() {
+        _uiState.update { state ->
+            val isOpen = state.tacticalState.isSidePanelOpen
+            state.copy(
+                tacticalState = state.tacticalState.copy(isSidePanelOpen = !isOpen)
+            )
+        }
+    }
+
+    fun setSidePanelOpen(open: Boolean) {
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(isSidePanelOpen = open)
+            )
+        }
+    }
+
+    fun setSidePanelTab(tab: TacticalSidePanelTab) {
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(activeSidePanelTab = tab)
+            )
+        }
+    }
+
+    fun setSidePanelDice(count: Int, sides: Int, modifier: Int) {
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(
+                    sidePanelDiceCount = count.coerceIn(1, 20),
+                    sidePanelDiceSides = sides.coerceIn(2, 100),
+                    sidePanelDiceModifier = modifier
+                )
+            )
+        }
+    }
+
+    fun rollSidePanelDice() {
+        val tactical = _uiState.value.tacticalState
+        val formula = "${tactical.sidePanelDiceCount}d${tactical.sidePanelDiceSides}" +
+            (if (tactical.sidePanelDiceModifier > 0) "+${tactical.sidePanelDiceModifier}"
+             else if (tactical.sidePanelDiceModifier < 0) "${tactical.sidePanelDiceModifier}"
+             else "")
+
+        val total = com.deckapp.core.domain.usecase.DiceEvaluator.evaluate(formula)
+        val rollResult = DiceRollResult(formula, total)
+
+        _uiState.update { state ->
+            state.copy(
+                recentDiceRolls = (listOf(rollResult) + state.recentDiceRolls).take(20),
+                tacticalState = state.tacticalState.copy(
+                    sidePanelLastDiceResult = rollResult,
+                    sidePanelRecentRolls = (listOf(rollResult) + state.tacticalState.sidePanelRecentRolls).take(15)
+                )
+            )
+        }
+    }
+
+    fun rollSidePanelFateCheck(probability: ProbabilityLevel, chaos: Int, forcedRoll: Int? = null) {
+        val rollValue = forcedRoll ?: kotlin.random.Random.nextInt(1, 101)
+        val fateCheckUseCase = com.deckapp.core.domain.usecase.mythic.FateCheckUseCase()
+        val fateResult = fateCheckUseCase(probability, chaos, rollValue)
+
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(
+                    sidePanelMythicOdds = probability,
+                    sidePanelMythicChaos = chaos,
+                    sidePanelLastFateResult = fateResult
+                )
+            )
+        }
+    }
+
+    fun rollSidePanelRandomEvent() {
+        val action = com.deckapp.core.domain.usecase.mythic.MythicReferenceData.actionKeywords.random()
+        val subject = com.deckapp.core.domain.usecase.mythic.MythicReferenceData.subjectKeywords.random()
+        val eventText = "$action · $subject"
+
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(
+                    sidePanelLastEventResult = eventText
+                )
+            )
+        }
+    }
+
+    fun setWikiSearchQuery(query: String) {
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(wikiSearchQuery = query)
             )
         }
     }

@@ -488,6 +488,23 @@ fun SessionScreen(
                                     onCommitRouteMovement = viewModel.tacticalMapDelegate::commitRouteMovement,
                                     onClearRoute = viewModel.tacticalMapDelegate::clearRoute,
                                     onResetTokenTurnMovement = viewModel.tacticalMapDelegate::resetTokenTurnMovement,
+                                    onStartAttackTargeting = viewModel.tacticalMapDelegate::startAttackTargeting,
+                                    onCancelTargeting = viewModel.tacticalMapDelegate::cancelTargeting,
+                                    onExecuteAttack = viewModel.tacticalMapDelegate::executeAttack,
+                                    onApplyAttackDamage = viewModel.tacticalMapDelegate::applyAttackDamage,
+                                    onDismissAttackResolution = viewModel.tacticalMapDelegate::dismissAttackResolution,
+                                    onDismissCustomAttackDialog = viewModel.tacticalMapDelegate::dismissCustomAttackDialog,
+                                    onAdvanceCombatTurn = viewModel.tacticalMapDelegate::advanceCombatTurn,
+                                    dmNotes = uiState.dmNotes,
+                                    onNotesChanged = viewModel::updateNotes,
+                                    onToggleSidePanel = viewModel.tacticalMapDelegate::toggleSidePanel,
+                                    onSetSidePanelOpen = viewModel.tacticalMapDelegate::setSidePanelOpen,
+                                    onSetSidePanelTab = viewModel.tacticalMapDelegate::setSidePanelTab,
+                                    onSetSidePanelDice = viewModel.tacticalMapDelegate::setSidePanelDice,
+                                    onRollSidePanelDice = viewModel.tacticalMapDelegate::rollSidePanelDice,
+                                    onRollSidePanelFateCheck = viewModel.tacticalMapDelegate::rollSidePanelFateCheck,
+                                    onRollSidePanelRandomEvent = viewModel.tacticalMapDelegate::rollSidePanelRandomEvent,
+                                    onWikiSearchQueryChanged = viewModel.tacticalMapDelegate::setWikiSearchQuery,
                                     modifier = Modifier.fillMaxSize()
                                 )
                             }

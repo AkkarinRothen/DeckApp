@@ -3,11 +3,13 @@ package com.deckapp.feature.draw.tactical
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Color
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -69,6 +71,23 @@ fun TacticalMapView(
     onCommitRouteMovement: () -> Unit = {},
     onClearRoute: () -> Unit = {},
     onResetTokenTurnMovement: (tokenId: Long) -> Unit = { _ -> },
+    onStartAttackTargeting: (tokenId: Long) -> Unit = { _ -> },
+    onCancelTargeting: () -> Unit = {},
+    onExecuteAttack: (attackerId: Long, targetId: Long, attackName: String, attackBonus: Int, damageFormula: String) -> Unit = { _, _, _, _, _ -> },
+    onApplyAttackDamage: (TacticalAttackResolution) -> Unit = { _ -> },
+    onDismissAttackResolution: () -> Unit = {},
+    onDismissCustomAttackDialog: () -> Unit = {},
+    onAdvanceCombatTurn: () -> Unit = {},
+    dmNotes: String = "",
+    onNotesChanged: (String) -> Unit = {},
+    onToggleSidePanel: () -> Unit = {},
+    onSetSidePanelOpen: (Boolean) -> Unit = {},
+    onSetSidePanelTab: (TacticalSidePanelTab) -> Unit = {},
+    onSetSidePanelDice: (count: Int, sides: Int, modifier: Int) -> Unit = { _, _, _ -> },
+    onRollSidePanelDice: () -> Unit = {},
+    onRollSidePanelFateCheck: (ProbabilityLevel, Int) -> Unit = { _, _ -> },
+    onRollSidePanelRandomEvent: () -> Unit = {},
+    onWikiSearchQueryChanged: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var showAddTokenDialog by remember { mutableStateOf(false) }
@@ -123,7 +142,14 @@ fun TacticalMapView(
         return
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        val isLandscapeOrTablet = maxWidth >= 720.dp
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(end = if (isLandscapeOrTablet && uiState.isSidePanelOpen) 340.dp else 0.dp)
+        ) {
         // Canvas interactivo
         TacticalMapCanvas(
             uiState = uiState,
@@ -349,11 +375,94 @@ fun TacticalMapView(
                     onConditionToggled = { cond -> onTokenConditionToggled(token.id, cond) },
                     onSizeChanged = { newSize -> onTokenSizeChanged(token.id, newSize) },
                     onVisibilityToggled = { onTokenVisibilityToggled(token.id) },
+                    onStartAttackTargeting = { onStartAttackTargeting(token.id) },
                     onOpenNpc = onOpenNpc,
                     onDeleteToken = { onDeleteToken(token.id) },
                     onClose = { onTokenSelected(null) }
                 )
             }
+        }
+
+        // Barra de Iniciativa y Turnos de Combate
+        uiState.activeEncounter?.let { encounter ->
+            TacticalInitiativeBar(
+                encounter = encounter,
+                onNextTurn = onAdvanceCombatTurn,
+                onSelectCreatureToken = { creatureId ->
+                    val token = uiState.tokens.find { it.encounterCreatureId == creatureId }
+                    token?.let { onTokenSelected(it.id) }
+                },
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 68.dp)
+            )
+        }
+
+        // Indicador de modo Selección de Objetivo (Puntería)
+        if (uiState.targetingAttackerTokenId != null) {
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.errorContainer,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AdsClick,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Text(
+                        text = "Toca un objetivo en el mapa para ${uiState.targetingAttackerToken?.name ?: "atacar"}",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    TextButton(
+                        onClick = onCancelTargeting,
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                        modifier = Modifier.height(28.dp)
+                    ) {
+                        Text("Cancelar", fontSize = 11.sp, color = MaterialTheme.colorScheme.onErrorContainer)
+                    }
+                }
+            }
+        }
+
+        // Banner flotante de resolución de ataque
+        uiState.attackResolution?.let { resolution ->
+            TacticalAttackResolutionBanner(
+                resolution = resolution,
+                onApplyDamage = onApplyAttackDamage,
+                onDismiss = onDismissAttackResolution,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 75.dp)
+            )
+        }
+
+        // Diálogo de confirmación y lanzamiento de ataque
+        if (uiState.showCustomAttackDialog && uiState.targetingAttackerToken != null && uiState.pendingAttackTargetToken != null) {
+            val attacker = uiState.targetingAttackerToken!!
+            val target = uiState.pendingAttackTargetToken!!
+            val dist = (kotlin.math.hypot(target.cellX - attacker.cellX, target.cellY - attacker.cellY) * (uiState.map.scaleFtPerCell)).toInt()
+
+            TacticalAttackDialog(
+                attacker = attacker,
+                target = target,
+                distanceFt = dist,
+                onDismiss = onDismissCustomAttackDialog,
+                onExecuteAttack = { name, bonus, formula ->
+                    onExecuteAttack(attacker.id, target.id, name, bonus, formula)
+                }
+            )
         }
 
         // Barra de herramientas flotante inferior
@@ -387,6 +496,98 @@ fun TacticalMapView(
             onOpenMapSettingsClicked = { showMapSettingsDialog = true },
             modifier = Modifier.align(Alignment.BottomCenter)
         )
+    }
+
+    // Solapa flotante activadora del panel lateral cuando está cerrado
+    if (!uiState.isSidePanelOpen) {
+        Surface(
+            shape = RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp),
+            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.95f),
+            tonalElevation = 6.dp,
+            shadowElevation = 8.dp,
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .clickable { onSetSidePanelOpen(true) }
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ChevronLeft,
+                    contentDescription = "Abrir panel lateral",
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(18.dp)
+                )
+                Icon(
+                    imageVector = Icons.Default.DashboardCustomize,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+    }
+
+    // Panel Lateral en modo Pantalla Dividida (Landscape / Tablet / Desktop)
+    if (isLandscapeOrTablet) {
+        AnimatedVisibility(
+            visible = uiState.isSidePanelOpen,
+            enter = expandHorizontally() + fadeIn(),
+            exit = shrinkHorizontally() + fadeOut(),
+            modifier = Modifier.align(Alignment.CenterEnd)
+        ) {
+            TacticalSidePanel(
+                uiState = uiState,
+                dmNotes = dmNotes,
+                onNotesChanged = onNotesChanged,
+                onTabSelected = onSetSidePanelTab,
+                onSetDice = onSetSidePanelDice,
+                onRollDice = onRollSidePanelDice,
+                onRollFateCheck = onRollSidePanelFateCheck,
+                onRollRandomEvent = onRollSidePanelRandomEvent,
+                onWikiSearchQueryChanged = onWikiSearchQueryChanged,
+                onAdvanceCombatTurn = onAdvanceCombatTurn,
+                onSelectToken = onTokenSelected,
+                onClose = { onSetSidePanelOpen(false) },
+                modifier = Modifier.width(340.dp).fillMaxHeight()
+            )
+        }
+    }
+
+        // Panel Lateral en modo Móvil Vertical (Overlay Drawer)
+        if (!isLandscapeOrTablet && uiState.isSidePanelOpen) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.45f))
+                    .clickable { onSetSidePanelOpen(false) }
+            )
+
+            AnimatedVisibility(
+                visible = uiState.isSidePanelOpen,
+                enter = slideInHorizontally { it } + fadeIn(),
+                exit = slideOutHorizontally { it } + fadeOut(),
+                modifier = Modifier.align(Alignment.CenterEnd)
+            ) {
+                TacticalSidePanel(
+                    uiState = uiState,
+                    dmNotes = dmNotes,
+                    onNotesChanged = onNotesChanged,
+                    onTabSelected = onSetSidePanelTab,
+                    onSetDice = onSetSidePanelDice,
+                    onRollDice = onRollSidePanelDice,
+                    onRollFateCheck = onRollSidePanelFateCheck,
+                    onRollRandomEvent = onRollSidePanelRandomEvent,
+                    onWikiSearchQueryChanged = onWikiSearchQueryChanged,
+                    onAdvanceCombatTurn = onAdvanceCombatTurn,
+                    onSelectToken = onTokenSelected,
+                    onClose = { onSetSidePanelOpen(false) },
+                    modifier = Modifier.widthIn(max = 340.dp).fillMaxHeight()
+                )
+            }
+        }
     }
 
     // Diálogo de configuración del mapa y fondo
