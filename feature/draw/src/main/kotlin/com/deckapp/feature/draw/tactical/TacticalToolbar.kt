@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -14,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.deckapp.core.model.TacticalMeasureShape
+import com.deckapp.core.model.TacticalTerrainType
 
 @Composable
 fun TacticalToolbar(
@@ -23,6 +25,10 @@ fun TacticalToolbar(
     isFogEnabled: Boolean = false,
     fogBrushMode: FogBrushMode = FogBrushMode.REVEAL,
     isFogDmView: Boolean = true,
+    activeTerrainBrush: TacticalTerrainType = TacticalTerrainType.DIFFICULT,
+    routeWaypointsCount: Int = 0,
+    currentRouteDistanceFt: Int = 0,
+    selectedTokenSpeedFt: Int? = null,
     onToolSelected: (TacticalTool) -> Unit,
     onAoeShapeSelected: (TacticalMeasureShape) -> Unit,
     onAoeRadiusSelected: (Int) -> Unit,
@@ -32,6 +38,11 @@ fun TacticalToolbar(
     onRevealAllFog: () -> Unit = {},
     onResetFog: () -> Unit = {},
     onToggleFogDmView: () -> Unit = {},
+    onTerrainBrushSelected: (TacticalTerrainType) -> Unit = {},
+    onClearAllTerrain: () -> Unit = {},
+    onRemoveLastRouteWaypoint: () -> Unit = {},
+    onCommitRouteMovement: () -> Unit = {},
+    onClearRoute: () -> Unit = {},
     onAddTokenClicked: () -> Unit,
     onCalibrateGridClicked: () -> Unit,
     onOpenMapSettingsClicked: () -> Unit,
@@ -194,6 +205,129 @@ fun TacticalToolbar(
             }
         }
 
+        // Sub-barra contextual de Terreno Dificultoso y Obstáculos
+        AnimatedVisibility(
+            visible = activeTool == TacticalTool.TERRAIN,
+            enter = slideInVertically { it } + fadeIn(),
+            exit = slideOutVertically { it } + fadeOut()
+        ) {
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.94f),
+                tonalElevation = 6.dp,
+                shadowElevation = 8.dp
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .horizontalScroll(rememberScrollState()),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    FilterChip(
+                        selected = activeTerrainBrush == TacticalTerrainType.DIFFICULT,
+                        onClick = { onTerrainBrushSelected(TacticalTerrainType.DIFFICULT) },
+                        label = { Text("Difícil (x2 coste)", fontSize = 11.sp) },
+                        leadingIcon = { Icon(Icons.Default.Terrain, contentDescription = null, modifier = Modifier.size(12.dp)) }
+                    )
+                    FilterChip(
+                        selected = activeTerrainBrush == TacticalTerrainType.WALL,
+                        onClick = { onTerrainBrushSelected(TacticalTerrainType.WALL) },
+                        label = { Text("Muro", fontSize = 11.sp) },
+                        leadingIcon = { Icon(Icons.Default.Block, contentDescription = null, modifier = Modifier.size(12.dp)) }
+                    )
+                    FilterChip(
+                        selected = activeTerrainBrush == TacticalTerrainType.HAZARD,
+                        onClick = { onTerrainBrushSelected(TacticalTerrainType.HAZARD) },
+                        label = { Text("Peligro", fontSize = 11.sp) },
+                        leadingIcon = { Icon(Icons.Default.Warning, contentDescription = null, modifier = Modifier.size(12.dp)) }
+                    )
+                    FilterChip(
+                        selected = activeTerrainBrush == TacticalTerrainType.NORMAL,
+                        onClick = { onTerrainBrushSelected(TacticalTerrainType.NORMAL) },
+                        label = { Text("Borrar", fontSize = 11.sp) },
+                        leadingIcon = { Icon(Icons.Default.Clear, contentDescription = null, modifier = Modifier.size(12.dp)) }
+                    )
+
+                    VerticalDivider(modifier = Modifier.height(20.dp).padding(horizontal = 2.dp))
+
+                    OutlinedButton(
+                        onClick = onClearAllTerrain,
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                        modifier = Modifier.height(30.dp)
+                    ) {
+                        Text("Limpiar Terreno", fontSize = 11.sp)
+                    }
+                }
+            }
+        }
+
+        // Sub-barra contextual de Planificación de Ruta
+        AnimatedVisibility(
+            visible = activeTool == TacticalTool.ROUTE,
+            enter = slideInVertically { it } + fadeIn(),
+            exit = slideOutVertically { it } + fadeOut()
+        ) {
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.94f),
+                tonalElevation = 6.dp,
+                shadowElevation = 8.dp
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .horizontalScroll(rememberScrollState()),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val speedText = if (selectedTokenSpeedFt != null) " / ${selectedTokenSpeedFt}ft" else ""
+                    val isOverBudget = selectedTokenSpeedFt != null && currentRouteDistanceFt > selectedTokenSpeedFt
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = if (isOverBudget) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
+                    ) {
+                        Text(
+                            text = "Ruta: ${currentRouteDistanceFt}ft$speedText",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = if (isOverBudget) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+
+                    OutlinedButton(
+                        onClick = onRemoveLastRouteWaypoint,
+                        enabled = routeWaypointsCount > 1,
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                        modifier = Modifier.height(30.dp)
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = null, modifier = Modifier.size(12.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text("Deshacer", fontSize = 11.sp)
+                    }
+
+                    FilledTonalButton(
+                        onClick = onCommitRouteMovement,
+                        enabled = routeWaypointsCount > 1,
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
+                        modifier = Modifier.height(30.dp)
+                    ) {
+                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(13.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text("Mover Token", fontSize = 11.sp)
+                    }
+
+                    TextButton(
+                        onClick = onClearRoute,
+                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
+                        modifier = Modifier.height(30.dp)
+                    ) {
+                        Text("Cancelar", fontSize = 11.sp)
+                    }
+                }
+            }
+        }
+
         // Barra de herramientas principal
         Surface(
             shape = RoundedCornerShape(24.dp),
@@ -266,6 +400,26 @@ fun TacticalToolbar(
                     } else IconButtonDefaults.iconButtonColors()
                 ) {
                     Icon(Icons.Default.Cloud, contentDescription = "Niebla de Guerra")
+                }
+
+                // Terreno Dificultoso y Obstáculos
+                IconButton(
+                    onClick = { onToolSelected(TacticalTool.TERRAIN) },
+                    colors = if (activeTool == TacticalTool.TERRAIN) {
+                        IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    } else IconButtonDefaults.iconButtonColors()
+                ) {
+                    Icon(Icons.Default.Terrain, contentDescription = "Pincel de Terreno")
+                }
+
+                // Planificar Ruta de Movimiento
+                IconButton(
+                    onClick = { onToolSelected(TacticalTool.ROUTE) },
+                    colors = if (activeTool == TacticalTool.ROUTE) {
+                        IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    } else IconButtonDefaults.iconButtonColors()
+                ) {
+                    Icon(Icons.Default.AltRoute, contentDescription = "Planificar Ruta")
                 }
 
                 VerticalDivider(modifier = Modifier.height(28.dp).padding(horizontal = 2.dp))

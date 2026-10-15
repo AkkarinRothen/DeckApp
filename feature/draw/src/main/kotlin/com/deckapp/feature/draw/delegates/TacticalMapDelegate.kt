@@ -189,11 +189,21 @@ class TacticalMapDelegate(
 
     fun setTacticalTool(tool: TacticalTool) {
         _uiState.update { state ->
+            val tactical = state.tacticalState
+            val initialWaypoints = if (tool == TacticalTool.ROUTE) {
+                tactical.selectedToken?.let { token ->
+                    listOf(Pair(token.cellX, token.cellY))
+                } ?: emptyList()
+            } else {
+                tactical.routeWaypoints
+            }
             state.copy(
-                tacticalState = state.tacticalState.copy(
+                tacticalState = tactical.copy(
                     activeTool = tool,
                     isGuidedCalibrationActive = false,
-                    guidedCalibrationFirstPoint = null
+                    guidedCalibrationFirstPoint = null,
+                    routeWaypoints = initialWaypoints,
+                    currentRouteDistanceFt = if (tool == TacticalTool.ROUTE) 0 else tactical.currentRouteDistanceFt
                 )
             )
         }
@@ -252,7 +262,138 @@ class TacticalMapDelegate(
 
     fun selectToken(tokenId: Long?) {
         _uiState.update { state ->
-            state.copy(tacticalState = state.tacticalState.copy(selectedTokenId = tokenId))
+            val tactical = state.tacticalState
+            val selected = tactical.tokens.find { it.id == tokenId }
+            val waypoints = if (tactical.activeTool == TacticalTool.ROUTE && selected != null) {
+                listOf(Pair(selected.cellX, selected.cellY))
+            } else if (tactical.activeTool == TacticalTool.ROUTE) {
+                emptyList()
+            } else {
+                tactical.routeWaypoints
+            }
+            state.copy(
+                tacticalState = tactical.copy(
+                    selectedTokenId = tokenId,
+                    routeWaypoints = waypoints,
+                    currentRouteDistanceFt = if (tactical.activeTool == TacticalTool.ROUTE) 0 else tactical.currentRouteDistanceFt
+                )
+            )
+        }
+    }
+
+    private fun calculateRouteDistance(
+        waypoints: List<Pair<Float, Float>>,
+        map: TacticalMap?,
+        terrainMap: Map<String, TacticalTerrainType>
+    ): Int {
+        if (waypoints.size < 2) return 0
+        val gridType = map?.gridType ?: GridType.SQUARE
+        val diagonalRule = map?.diagonalRule ?: DiagonalRule.ALTERNATING_5_10_5
+        val scaleFtPerCell = map?.scaleFtPerCell ?: 5
+
+        var total = 0
+        for (i in 0 until waypoints.size - 1) {
+            val from = waypoints[i]
+            val to = waypoints[i + 1]
+            val res = distanceCalculator(
+                fromX = from.first,
+                fromY = from.second,
+                toX = to.first,
+                toY = to.second,
+                gridType = gridType,
+                diagonalRule = diagonalRule,
+                scaleFtPerCell = scaleFtPerCell,
+                terrainMap = terrainMap
+            )
+            total += res.distanceFt
+        }
+        return total
+    }
+
+    fun addRouteWaypoint(cellX: Float, cellY: Float) {
+        _uiState.update { state ->
+            val tactical = state.tacticalState
+            val newWaypoints = tactical.routeWaypoints + Pair(cellX, cellY)
+            val distance = calculateRouteDistance(newWaypoints, tactical.map, tactical.terrainMap)
+            state.copy(
+                tacticalState = tactical.copy(
+                    routeWaypoints = newWaypoints,
+                    currentRouteDistanceFt = distance
+                )
+            )
+        }
+    }
+
+    fun removeLastRouteWaypoint() {
+        _uiState.update { state ->
+            val tactical = state.tacticalState
+            if (tactical.routeWaypoints.size <= 1) {
+                state.copy(
+                    tacticalState = tactical.copy(
+                        currentRouteDistanceFt = 0
+                    )
+                )
+            } else {
+                val newWaypoints = tactical.routeWaypoints.dropLast(1)
+                val distance = calculateRouteDistance(newWaypoints, tactical.map, tactical.terrainMap)
+                state.copy(
+                    tacticalState = tactical.copy(
+                        routeWaypoints = newWaypoints,
+                        currentRouteDistanceFt = distance
+                    )
+                )
+            }
+        }
+    }
+
+    fun clearRoute() {
+        _uiState.update { state ->
+            val tactical = state.tacticalState
+            val initial = tactical.selectedToken?.let { token ->
+                listOf(Pair(token.cellX, token.cellY))
+            } ?: emptyList()
+            state.copy(
+                tacticalState = tactical.copy(
+                    routeWaypoints = initial,
+                    currentRouteDistanceFt = 0
+                )
+            )
+        }
+    }
+
+    fun commitRouteMovement() {
+        val tactical = _uiState.value.tacticalState
+        val token = tactical.selectedToken ?: return
+        val lastWaypoint = tactical.routeWaypoints.lastOrNull() ?: return
+        if (tactical.routeWaypoints.size < 2) return
+
+        val snappedX = kotlin.math.floor(lastWaypoint.first) + (token.sizeInCells / 2f)
+        val snappedY = kotlin.math.floor(lastWaypoint.second) + (token.sizeInCells / 2f)
+
+        moveToken(token.id, snappedX, snappedY)
+
+        val previousMoved = tactical.tokenMovedThisTurnFt[token.id] ?: 0
+        val totalMoved = previousMoved + tactical.currentRouteDistanceFt
+
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(
+                    tokenMovedThisTurnFt = state.tacticalState.tokenMovedThisTurnFt + (token.id to totalMoved),
+                    routeWaypoints = emptyList(),
+                    currentRouteDistanceFt = 0,
+                    activeTool = TacticalTool.SELECT
+                )
+            )
+        }
+    }
+
+    fun resetTokenTurnMovement(tokenId: Long) {
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(
+                    tokenMovedThisTurnFt = state.tacticalState.tokenMovedThisTurnFt - tokenId
+                )
+            )
         }
     }
 

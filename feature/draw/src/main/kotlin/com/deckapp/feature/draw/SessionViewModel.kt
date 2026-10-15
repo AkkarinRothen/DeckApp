@@ -105,7 +105,7 @@ enum class SidebarTool {
 }
 
 enum class SessionViewMode {
-    BOARD, MAP, MYTHIC_LOG
+    BOARD, MAP, TACTICAL, MYTHIC_LOG
 }
 
 enum class SessionBoardTemplatePreset {

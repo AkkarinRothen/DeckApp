@@ -51,6 +51,24 @@ fun TacticalMapView(
     onStartGuidedCalibration: () -> Unit,
     onGuidedCalibrationPoint: (Offset) -> Unit,
     onCreateDefaultMap: () -> Unit,
+    onSwitchMap: (Long) -> Unit = { _ -> },
+    onOpenCreateMapDialog: () -> Unit = {},
+    onOpenRenameMap: (TacticalMap) -> Unit = { _ -> },
+    onDeleteMap: (Long) -> Unit = { _ -> },
+    onTerrainBrushSelected: (TacticalTerrainType) -> Unit = { _ -> },
+    onTerrainCellInteracted: (col: Int, row: Int) -> Unit = { _, _ -> },
+    onClearAllTerrain: () -> Unit = {},
+    onToggleFog: () -> Unit = {},
+    onFogBrushModeSelected: (FogBrushMode) -> Unit = { _ -> },
+    onRevealAllFog: () -> Unit = {},
+    onResetFog: () -> Unit = {},
+    onToggleFogDmView: () -> Unit = {},
+    onFogCellInteracted: (col: Int, row: Int) -> Unit = { _, _ -> },
+    onAddRouteWaypoint: (cellX: Float, cellY: Float) -> Unit = { _, _ -> },
+    onRemoveLastRouteWaypoint: () -> Unit = {},
+    onCommitRouteMovement: () -> Unit = {},
+    onClearRoute: () -> Unit = {},
+    onResetTokenTurnMovement: (tokenId: Long) -> Unit = { _ -> },
     modifier: Modifier = Modifier
 ) {
     var showAddTokenDialog by remember { mutableStateOf(false) }
@@ -88,10 +106,17 @@ fun TacticalMapView(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.outline
                 )
-                Button(onClick = onCreateDefaultMap) {
-                    Icon(Icons.Default.Add, contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text("Crear Mapa de Batalla Rápido")
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Button(onClick = onCreateDefaultMap) {
+                        Icon(Icons.Default.Add, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Crear Mapa Rápido")
+                    }
+                    OutlinedButton(onClick = { imagePickerLauncher.launch("image/*") }) {
+                        Icon(Icons.Default.PhotoLibrary, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Subir Imagen")
+                    }
                 }
             }
         }
@@ -109,8 +134,178 @@ fun TacticalMapView(
             onMapClicked = onMapClicked,
             onAoEPositionChanged = onAoEPositionChanged,
             onGuidedCalibrationPoint = onGuidedCalibrationPoint,
+            onTerrainCellInteracted = onTerrainCellInteracted,
+            onFogCellInteracted = onFogCellInteracted,
+            onAddRouteWaypoint = onAddRouteWaypoint,
             modifier = Modifier.fillMaxSize()
         )
+
+        // Cabecera superior del mapa táctico con selector multimapa y presupuesto de movimiento
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.92f),
+            tonalElevation = 4.dp,
+            shadowElevation = 6.dp,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(start = 16.dp, top = 16.dp)
+        ) {
+            var showMapDropdown by remember { mutableStateOf(false) }
+
+            Row(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Map,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(18.dp)
+                )
+
+                // Nombre del mapa con dropdown
+                Box {
+                    TextButton(
+                        onClick = { showMapDropdown = true },
+                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = uiState.map.name.ifBlank { "Mapa de Batalla" },
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Icon(
+                            imageVector = Icons.Default.ArrowDropDown,
+                            contentDescription = "Cambiar mapa",
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = showMapDropdown,
+                        onDismissRequest = { showMapDropdown = false }
+                    ) {
+                        if (uiState.availableMaps.isNotEmpty()) {
+                            Text(
+                                text = "MAPAS DE LA SESIÓN",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                            )
+                            uiState.availableMaps.forEach { m ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = m.name,
+                                            fontWeight = if (m.id == uiState.map.id) FontWeight.Bold else FontWeight.Normal
+                                        )
+                                    },
+                                    leadingIcon = {
+                                        if (m.id == uiState.map.id) {
+                                            Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        } else {
+                                            Icon(Icons.Default.Map, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        }
+                                    },
+                                    onClick = {
+                                        onSwitchMap(m.id)
+                                        showMapDropdown = false
+                                    }
+                                )
+                            }
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                        }
+
+                        DropdownMenuItem(
+                            text = { Text("Crear Nuevo Mapa de Batalla") },
+                            leadingIcon = { Icon(Icons.Default.Add, contentDescription = null) },
+                            onClick = {
+                                showMapDropdown = false
+                                onOpenCreateMapDialog()
+                            }
+                        )
+
+                        DropdownMenuItem(
+                            text = { Text("Elegir Imagen de Fondo") },
+                            leadingIcon = { Icon(Icons.Default.PhotoLibrary, contentDescription = null) },
+                            onClick = {
+                                showMapDropdown = false
+                                imagePickerLauncher.launch("image/*")
+                            }
+                        )
+
+                        DropdownMenuItem(
+                            text = { Text("Renombrar Mapa") },
+                            leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) },
+                            onClick = {
+                                showMapDropdown = false
+                                onOpenRenameMap(uiState.map)
+                            }
+                        )
+
+                        DropdownMenuItem(
+                            text = { Text("Calibrar Grilla") },
+                            leadingIcon = { Icon(Icons.Default.GridOn, contentDescription = null) },
+                            onClick = {
+                                showMapDropdown = false
+                                showCalibrationDialog = true
+                            }
+                        )
+
+                        if (uiState.availableMaps.size > 1) {
+                            DropdownMenuItem(
+                                text = { Text("Eliminar Mapa", color = MaterialTheme.colorScheme.error) },
+                                leadingIcon = { Icon(Icons.Default.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
+                                onClick = {
+                                    showMapDropdown = false
+                                    onDeleteMap(uiState.map.id)
+                                }
+                            )
+                        }
+                    }
+                }
+
+                // Presupuesto de movimiento del token seleccionado
+                uiState.selectedToken?.let { tok ->
+                    val movedFt = uiState.tokenMovedThisTurnFt[tok.id] ?: 0
+                    val speed = tok.speedFt
+                    val isExceeded = movedFt > speed
+                    VerticalDivider(modifier = Modifier.height(20.dp).padding(horizontal = 2.dp))
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = if (isExceeded) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.secondaryContainer
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = "Mov: $movedFt / ${speed}ft",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (isExceeded) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                            if (movedFt > 0) {
+                                IconButton(
+                                    onClick = { onResetTokenTurnMovement(tok.id) },
+                                    modifier = Modifier.size(16.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Refresh,
+                                        contentDescription = "Reiniciar movimiento de turno",
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         // Banner informativo de calibración guiada
         if (uiState.isGuidedCalibrationActive) {
@@ -166,10 +361,27 @@ fun TacticalMapView(
             activeTool = uiState.activeTool,
             activeAoeShape = uiState.activeAoeShape,
             aoeRadiusFt = uiState.aoeRadiusFt,
+            isFogEnabled = uiState.isFogEnabled,
+            fogBrushMode = uiState.fogBrushMode,
+            isFogDmView = uiState.isFogDmView,
+            activeTerrainBrush = uiState.activeTerrainBrush,
+            routeWaypointsCount = uiState.routeWaypoints.size,
+            currentRouteDistanceFt = uiState.currentRouteDistanceFt,
+            selectedTokenSpeedFt = uiState.selectedToken?.speedFt,
             onToolSelected = onToolSelected,
             onAoeShapeSelected = onAoeShapeSelected,
             onAoeRadiusSelected = onAoeRadiusSelected,
             onPersistAoE = onPersistAoE,
+            onToggleFog = onToggleFog,
+            onFogBrushModeSelected = onFogBrushModeSelected,
+            onRevealAllFog = onRevealAllFog,
+            onResetFog = onResetFog,
+            onToggleFogDmView = onToggleFogDmView,
+            onTerrainBrushSelected = onTerrainBrushSelected,
+            onClearAllTerrain = onClearAllTerrain,
+            onRemoveLastRouteWaypoint = onRemoveLastRouteWaypoint,
+            onCommitRouteMovement = onCommitRouteMovement,
+            onClearRoute = onClearRoute,
             onAddTokenClicked = { showAddTokenDialog = true },
             onCalibrateGridClicked = { showCalibrationDialog = true },
             onOpenMapSettingsClicked = { showMapSettingsDialog = true },

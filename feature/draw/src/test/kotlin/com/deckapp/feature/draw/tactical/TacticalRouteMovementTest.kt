@@ -21,7 +21,6 @@ class TacticalRouteMovementTest {
         val state = MutableStateFlow(SessionUiState(sessionId = 10))
         val repo = mockk<TacticalMapRepository>(relaxed = true)
         val combat = mockk<EncounterRepository>(relaxed = true)
-        val fileRepo = mockk<FileRepository>(relaxed = true)
         val distanceCalculator = CalculateTacticalDistanceUseCase()
         val delegate: TacticalMapDelegate
 
@@ -39,7 +38,7 @@ class TacticalRouteMovementTest {
             every { repo.getPinsByMapId(any()) } returns flowOf(emptyList())
             every { combat.getActiveEncounter(10) } returns flowOf(null)
             coEvery { repo.updateTokenPosition(any(), any(), any()) } answers {
-                val id = firstArg<Long>(); val x = secondArg<Float>(); val y = thirdArg<Float>()
+                val id = firstArg<Long>(); val x = secondArg<Float>(); val y = arg<Float>(2)
                 tokens.value = tokens.value.map { if (it.id == id) it.copy(cellX = x, cellY = y) else it }
             }
 
@@ -49,15 +48,14 @@ class TacticalRouteMovementTest {
                 scope = scope,
                 tacticalMapRepository = repo,
                 encounterRepository = combat,
-                distanceCalculator = distanceCalculator,
-                fileRepository = fileRepo
+                distanceCalculator = distanceCalculator
             )
         }
     }
 
     @Test
     fun `selecting ROUTE tool with selected token initializes start waypoint`() = runTest {
-        val f = Fixture(this)
+        val f = Fixture(backgroundScope)
         runCurrent()
 
         f.delegate.selectToken(2L)
@@ -73,7 +71,7 @@ class TacticalRouteMovementTest {
 
     @Test
     fun `adding and removing route waypoints updates total distance reactively`() = runTest {
-        val f = Fixture(this)
+        val f = Fixture(backgroundScope)
         runCurrent()
 
         f.delegate.selectToken(2L)
@@ -107,7 +105,7 @@ class TacticalRouteMovementTest {
 
     @Test
     fun `committing route movement updates token position and accumulates turn budget`() = runTest {
-        val f = Fixture(this)
+        val f = Fixture(backgroundScope)
         runCurrent()
 
         f.delegate.selectToken(2L)

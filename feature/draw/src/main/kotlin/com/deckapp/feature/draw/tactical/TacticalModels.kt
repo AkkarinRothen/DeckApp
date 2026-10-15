@@ -10,7 +10,8 @@ enum class TacticalTool {
     AOE,
     PIN,
     FOG,
-    TERRAIN
+    TERRAIN,
+    ROUTE
 }
 
 enum class FogBrushMode {
@@ -52,6 +53,10 @@ data class TacticalUiState(
     val dragStartCell: Pair<Float, Float>? = null,
     val dragCurrentCell: Pair<Float, Float>? = null,
     val dragDistanceFt: Int = 0,
+    // Estado de Ruta planificada por waypoints
+    val routeWaypoints: List<Pair<Float, Float>> = emptyList(),
+    val currentRouteDistanceFt: Int = 0,
+    val tokenMovedThisTurnFt: Map<Long, Int> = emptyMap(),
     // Estado de medición libre
     val measureStartOffset: Offset? = null,
     val measureCurrentOffset: Offset? = null,

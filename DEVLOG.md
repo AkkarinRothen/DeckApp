@@ -1,5 +1,27 @@
 ---
 
+### Sprint 53 — Restauración y Espacio Dedicado para el Mapa Táctico VTT (15 de octubre de 2026)
+
+**FEATURE — Espacio Dedicado para el Mapa Táctico en la Mesa de Juego**
+- Integración en `SessionViewMode.TACTICAL` con botón dedicado en la barra superior de acciones (`Icons.Default.GridOn`), otorgándole su propio espacio de pantalla completa y evitando que el bento del mapa desplace verticalmente o sobrecargue los demás bloques de la mesa.
+- Selector multimapa directo en la cabecera del mapa táctico con menú contextual desplegable: cambio rápido de mapa activo, creación de nuevos mapas con calibración de grilla, hoja modal de mapas (`TacticalMapSelectorSheet`), renombrado y eliminación.
+
+**FEATURE — Terreno Dificultoso y Reglas de Movimiento**
+- Sub-barra de herramientas para terreno táctico con pinceles para terreno difícil (`DIFFICULT` a +5 ft por celda), muros bloqueantes (`WALL`), zonas de peligro (`HAZARD`) y borrado (`NORMAL`).
+- Cálculo reactivo de distancia en tiempo real que integra la rugosidad y coste del terreno tanto en medición libre como al arrastrar tokens y trazar rutas.
+
+**FEATURE — Herramienta de Planificación de Rutas y Presupuesto de Turno**
+- Nueva herramienta de ruta paso a paso (`TacticalTool.ROUTE`): trazado de waypoints intermedios al tocar el mapa con indicador visual de trayectoria (nodos numerados, trazos de conexión y badges con distancia acumulada).
+- Barra de control de ruta con badge de distancia recorrida, botón para deshacer último waypoint (`Icons.AutoMirrored.Filled.Undo`), botón de confirmación de movimiento con ajuste al centro de celda y cancelación.
+- Seguimiento de presupuesto de movimiento por turno (`Mov: X / Y ft`) para tokens, con badge visual y botón de reinicio al iniciar un nuevo turno de combate.
+
+**INTEGRATION & TESTING**
+- Suite de pruebas unitarias `TacticalRouteMovementTest` creada y verificada con 3 casos de prueba en `:feature:draw:testDebugUnitTest`: inicialización de ruta al seleccionar token, cálculo reactivo de distancia al añadir/quitar waypoints y confirmación de movimiento con consumo de presupuesto de turno.
+- Verificación completa de compilación y empaquetado mediante `./gradlew :app:assembleDebug` (BUILD SUCCESSFUL).
+- *Feature Parity Mandate*: Especificación de arquitectura sincronizada para replicar el selector de vista `TACTICAL`, la herramienta `ROUTE` y el cálculo de terreno dificultoso en la versión Desktop (`TDAPP-desktop`).
+
+---
+
 ### Sprint 52 — Pérdida de catálogo al actualizar: protección y recuperación (14 de octubre de 2026)
 
 **FIX — Migraciones registradas y actualización no destructiva**

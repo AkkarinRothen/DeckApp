@@ -201,7 +201,7 @@ fun SessionScreen(
                         }
                     }
 
-                    // Switcher de Modo Central (Mesa vs Mapa vs Oráculo)
+                    // Switcher de Modo Central (Mesa vs Mapa Táctico vs Hexploración vs Oráculo)
                     Row(
                         modifier = Modifier
                             .padding(end = 8.dp)
@@ -215,11 +215,18 @@ fun SessionScreen(
                         ) { Icon(Icons.Default.Dashboard, contentDescription = "Mesa de Juego") }
 
                         IconButton(
+                            onClick = { viewModel.setMainViewMode(SessionViewMode.TACTICAL) },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                contentColor = if (uiState.mainViewMode == SessionViewMode.TACTICAL) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        ) { Icon(Icons.Default.GridOn, contentDescription = "Mapa Táctico de Batalla") }
+
+                        IconButton(
                             onClick = { viewModel.setMainViewMode(SessionViewMode.MAP) },
                             colors = IconButtonDefaults.iconButtonColors(
                                 contentColor = if (uiState.mainViewMode == SessionViewMode.MAP) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                        ) { Icon(Icons.Default.Map, contentDescription = "Mapa de Exploración") }
+                        ) { Icon(Icons.Default.Explore, contentDescription = "Mapa de Exploración HPL") }
                         
                         IconButton(
                             onClick = { viewModel.setMainViewMode(SessionViewMode.MYTHIC_LOG) },
@@ -403,6 +410,7 @@ fun SessionScreen(
                 Crossfade(targetState = uiState.mainViewMode, label = "MainViewTransition") { mode ->
                     val toolId = when (mode) {
                         SessionViewMode.MAP -> "map"
+                        SessionViewMode.TACTICAL -> "tactical"
                         SessionViewMode.BOARD -> "board"
                         SessionViewMode.MYTHIC_LOG -> "mythic_log"
                     }
@@ -429,6 +437,60 @@ fun SessionScreen(
                         centralTool.content(context)
                     } else {
                         when (mode) {
+                            SessionViewMode.TACTICAL -> {
+                                com.deckapp.feature.draw.tactical.TacticalMapView(
+                                    uiState = uiState.tacticalState,
+                                    npcs = uiState.npcs,
+                                    activeEncounter = uiState.activeEncounter,
+                                    distanceCalculator = viewModel.tacticalMapDelegate.distanceCalculator,
+                                    onToolSelected = viewModel.tacticalMapDelegate::setTacticalTool,
+                                    onAoeShapeSelected = viewModel.tacticalMapDelegate::setAoeShape,
+                                    onAoeRadiusSelected = viewModel.tacticalMapDelegate::setAoeRadius,
+                                    onPersistAoE = viewModel.tacticalMapDelegate::persistCurrentAoE,
+                                    onClearPersistentAoEs = viewModel.tacticalMapDelegate::clearPersistentAoEs,
+                                    onAoEPositionChanged = viewModel.tacticalMapDelegate::updateAoEPosition,
+                                    onTokenSelected = viewModel.tacticalMapDelegate::selectToken,
+                                    onTokenMoved = viewModel.tacticalMapDelegate::moveToken,
+                                    onTokenHpChanged = viewModel.tacticalMapDelegate::updateTokenHp,
+                                    onTokenConditionToggled = viewModel.tacticalMapDelegate::toggleCondition,
+                                    onTokenSizeChanged = viewModel.tacticalMapDelegate::updateTokenSize,
+                                    onTokenVisibilityToggled = viewModel.tacticalMapDelegate::toggleTokenVisibility,
+                                    onOpenNpc = { npcId ->
+                                        npcHistory.clear()
+                                        uiState.npcs.find { it.id == npcId }?.let { npcHistory.add(it) }
+                                    },
+                                    onDeleteToken = viewModel.tacticalMapDelegate::deleteToken,
+                                    onPinClicked = viewModel.tacticalMapDelegate::selectPin,
+                                    onMapClicked = viewModel.tacticalMapDelegate::openCreatePin,
+                                    onAddToken = viewModel.tacticalMapDelegate::addToken,
+                                    onAddTokenFromNpc = viewModel.tacticalMapDelegate::addTokenFromNpc,
+                                    onSyncEncounter = viewModel.tacticalMapDelegate::syncTokensFromEncounter,
+                                    onUpdateGridCalibration = viewModel.tacticalMapDelegate::updateGridCalibration,
+                                    onUpdateMapImage = viewModel.tacticalMapDelegate::updateMapImage,
+                                    onStartGuidedCalibration = viewModel.tacticalMapDelegate::startGuidedCalibration,
+                                    onGuidedCalibrationPoint = viewModel.tacticalMapDelegate::handleGuidedCalibrationPoint,
+                                    onCreateDefaultMap = viewModel.tacticalMapDelegate::createDefaultMap,
+                                    onSwitchMap = viewModel.tacticalMapDelegate::switchMap,
+                                    onOpenCreateMapDialog = viewModel.tacticalMapDelegate::openCreateMapDialog,
+                                    onOpenRenameMap = viewModel.tacticalMapDelegate::openRenameMapDialog,
+                                    onDeleteMap = viewModel.tacticalMapDelegate::deleteMap,
+                                    onTerrainBrushSelected = viewModel.tacticalMapDelegate::setTerrainBrush,
+                                    onTerrainCellInteracted = viewModel.tacticalMapDelegate::interactTerrainCell,
+                                    onClearAllTerrain = viewModel.tacticalMapDelegate::clearAllTerrain,
+                                    onToggleFog = viewModel.tacticalMapDelegate::toggleFog,
+                                    onFogBrushModeSelected = viewModel.tacticalMapDelegate::setFogBrushMode,
+                                    onRevealAllFog = viewModel.tacticalMapDelegate::revealAllFog,
+                                    onResetFog = viewModel.tacticalMapDelegate::resetFog,
+                                    onToggleFogDmView = viewModel.tacticalMapDelegate::toggleFogDmView,
+                                    onFogCellInteracted = viewModel.tacticalMapDelegate::interactFogCell,
+                                    onAddRouteWaypoint = viewModel.tacticalMapDelegate::addRouteWaypoint,
+                                    onRemoveLastRouteWaypoint = viewModel.tacticalMapDelegate::removeLastRouteWaypoint,
+                                    onCommitRouteMovement = viewModel.tacticalMapDelegate::commitRouteMovement,
+                                    onClearRoute = viewModel.tacticalMapDelegate::clearRoute,
+                                    onResetTokenTurnMovement = viewModel.tacticalMapDelegate::resetTokenTurnMovement,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
                             SessionViewMode.MAP -> {
                                 uiState.hplState?.let { hpl ->
                                     HexcrawlView(
@@ -461,7 +523,7 @@ fun SessionScreen(
                                     Text("VINCULA UNA SESIÓN MYTHIC", style = MaterialTheme.typography.labelLarge)
                                 }
                             }
-                                                        SessionViewMode.BOARD -> {
+                            SessionViewMode.BOARD -> {
                                 val ctx = SessionToolContext(
                                     sessionId = uiState.sessionId,
                                     onNavigateTo = { /* navegar */ },
@@ -758,6 +820,64 @@ fun SessionScreen(
             onDeleteDiscovery = { viewModel.tacticalMapDelegate.removePinDiscovery(selectedPinForSheet.id, it) },
             onStartEncounter = { encounterId -> viewModel.startEncounterFromScene(encounterId) },
             onPreviewWiki = { wiki -> viewModel.tacticalMapDelegate.setPreviewWikiEntry(wiki) }
+        )
+    }
+
+    if (uiState.tacticalState.showCreateMapDialog) {
+        com.deckapp.feature.draw.tactical.TacticalCreateMapDialog(
+            scenes = uiState.scenes,
+            activeSceneId = uiState.focusedSceneId,
+            onDismiss = viewModel.tacticalMapDelegate::dismissMultimapDialogs,
+            onCreateMap = { name, uri, gridType, cellSize, scaleFt, sceneId ->
+                viewModel.tacticalMapDelegate.createNewMap(name, uri, gridType, cellSize, scaleFt, sceneId)
+            }
+        )
+    }
+
+    if (uiState.tacticalState.showMapSelectorSheet) {
+        com.deckapp.feature.draw.tactical.TacticalMapSelectorSheet(
+            availableMaps = uiState.tacticalState.availableMaps,
+            currentMapId = uiState.tacticalState.map?.id,
+            scenes = uiState.scenes,
+            onSelectMap = viewModel.tacticalMapDelegate::switchMap,
+            onCreateNewMap = viewModel.tacticalMapDelegate::openCreateMapDialog,
+            onRenameMap = viewModel.tacticalMapDelegate::openRenameMapDialog,
+            onLinkScene = viewModel.tacticalMapDelegate::openLinkSceneDialog,
+            onDeleteMap = viewModel.tacticalMapDelegate::deleteMap,
+            onDismiss = viewModel.tacticalMapDelegate::dismissMapSelector
+        )
+    }
+
+    uiState.tacticalState.mapToRename?.let { map ->
+        var newMapName by remember(map.id) { mutableStateOf(map.name) }
+        AlertDialog(
+            onDismissRequest = viewModel.tacticalMapDelegate::dismissMultimapDialogs,
+            title = { Text("Renombrar Mapa") },
+            text = {
+                OutlinedTextField(
+                    value = newMapName,
+                    onValueChange = { newMapName = it },
+                    label = { Text("Nombre del mapa") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (newMapName.isNotBlank()) {
+                            viewModel.tacticalMapDelegate.renameMap(map.id, newMapName)
+                        }
+                    }
+                ) {
+                    Text("Guardar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel.tacticalMapDelegate::dismissMultimapDialogs) {
+                    Text("Cancelar")
+                }
+            }
         )
     }
 

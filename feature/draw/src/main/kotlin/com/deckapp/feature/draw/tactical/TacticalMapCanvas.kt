@@ -40,6 +40,9 @@ fun TacticalMapCanvas(
     onMapClicked: (cellX: Float, cellY: Float) -> Unit,
     onAoEPositionChanged: ((origin: Offset, angle: Float) -> Unit)? = null,
     onGuidedCalibrationPoint: ((Offset) -> Unit)? = null,
+    onTerrainCellInteracted: ((col: Int, row: Int) -> Unit)? = null,
+    onFogCellInteracted: ((col: Int, row: Int) -> Unit)? = null,
+    onAddRouteWaypoint: ((cellX: Float, cellY: Float) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val textMeasurer = rememberTextMeasurer()
@@ -110,6 +113,37 @@ fun TacticalMapCanvas(
                             val cellX = (worldX - map.gridOffsetX) / map.cellSizePx
                             val cellY = (worldY - map.gridOffsetY) / map.cellSizePx
 
+                            if (uiState.activeTool == TacticalTool.TERRAIN) {
+                                val col = floor(cellX).toInt()
+                                val row = floor(cellY).toInt()
+                                onTerrainCellInteracted?.invoke(col, row)
+                                return@detectTapGestures
+                            }
+
+                            if (uiState.activeTool == TacticalTool.FOG) {
+                                val col = floor(cellX).toInt()
+                                val row = floor(cellY).toInt()
+                                onFogCellInteracted?.invoke(col, row)
+                                return@detectTapGestures
+                            }
+
+                            if (uiState.activeTool == TacticalTool.ROUTE) {
+                                val clickedToken = uiState.tokens.find { token ->
+                                    val tokenPxX = (token.cellX * map.cellSizePx) + map.gridOffsetX
+                                    val tokenPxY = (token.cellY * map.cellSizePx) + map.gridOffsetY
+                                    val radius = (token.sizeInCells * map.cellSizePx * 0.5f)
+                                    hypot(worldX - tokenPxX, worldY - tokenPxY) <= radius
+                                }
+                                if (clickedToken != null && clickedToken.id != uiState.selectedTokenId) {
+                                    onTokenSelected(clickedToken.id)
+                                } else {
+                                    val targetCellX = floor(cellX) + 0.5f
+                                    val targetCellY = floor(cellY) + 0.5f
+                                    onAddRouteWaypoint?.invoke(targetCellX, targetCellY)
+                                }
+                                return@detectTapGestures
+                            }
+
                             // Comprobar pines
                             val clickedPin = uiState.pins.find { pin ->
                                 val pinPxX = (pin.cellX * map.cellSizePx) + map.gridOffsetX
@@ -144,7 +178,43 @@ fun TacticalMapCanvas(
                     )
                 }
                 .pointerInput(uiState.activeTool, uiState.tokens, zoom, panOffset) {
-                    if (uiState.activeTool == TacticalTool.MEASURE) {
+                    if (uiState.activeTool == TacticalTool.TERRAIN) {
+                        detectDragGestures(
+                            onDragStart = { start ->
+                                val worldX = (start.x - panOffset.x) / zoom
+                                val worldY = (start.y - panOffset.y) / zoom
+                                val col = floor((worldX - map.gridOffsetX) / map.cellSizePx).toInt()
+                                val row = floor((worldY - map.gridOffsetY) / map.cellSizePx).toInt()
+                                onTerrainCellInteracted?.invoke(col, row)
+                            },
+                            onDrag = { change, _ ->
+                                change.consume()
+                                val worldX = (change.position.x - panOffset.x) / zoom
+                                val worldY = (change.position.y - panOffset.y) / zoom
+                                val col = floor((worldX - map.gridOffsetX) / map.cellSizePx).toInt()
+                                val row = floor((worldY - map.gridOffsetY) / map.cellSizePx).toInt()
+                                onTerrainCellInteracted?.invoke(col, row)
+                            }
+                        )
+                    } else if (uiState.activeTool == TacticalTool.FOG) {
+                        detectDragGestures(
+                            onDragStart = { start ->
+                                val worldX = (start.x - panOffset.x) / zoom
+                                val worldY = (start.y - panOffset.y) / zoom
+                                val col = floor((worldX - map.gridOffsetX) / map.cellSizePx).toInt()
+                                val row = floor((worldY - map.gridOffsetY) / map.cellSizePx).toInt()
+                                onFogCellInteracted?.invoke(col, row)
+                            },
+                            onDrag = { change, _ ->
+                                change.consume()
+                                val worldX = (change.position.x - panOffset.x) / zoom
+                                val worldY = (change.position.y - panOffset.y) / zoom
+                                val col = floor((worldX - map.gridOffsetX) / map.cellSizePx).toInt()
+                                val row = floor((worldY - map.gridOffsetY) / map.cellSizePx).toInt()
+                                onFogCellInteracted?.invoke(col, row)
+                            }
+                        )
+                    } else if (uiState.activeTool == TacticalTool.MEASURE) {
                         detectDragGestures(
                             onDragStart = { start ->
                                 val worldX = (start.x - panOffset.x) / zoom
@@ -184,7 +254,7 @@ fun TacticalMapCanvas(
                                 onAoEPositionChanged?.invoke(aoeLocalOrigin, aoeLocalAngle)
                             }
                         )
-                    } else if (uiState.activeTool != TacticalTool.NAVIGATE) {
+                    } else if (uiState.activeTool != TacticalTool.NAVIGATE && uiState.activeTool != TacticalTool.ROUTE) {
                         detectDragGestures(
                             onDragStart = { startOffset ->
                                 val worldX = (startOffset.x - panOffset.x) / zoom
@@ -220,7 +290,8 @@ fun TacticalMapCanvas(
                                             toY = targetCellY,
                                             gridType = map.gridType,
                                             diagonalRule = map.diagonalRule,
-                                            scaleFtPerCell = map.scaleFtPerCell
+                                            scaleFtPerCell = map.scaleFtPerCell,
+                                            terrainMap = uiState.terrainMap
                                         )
                                         currentDragDistanceFt = dist.distanceFt
                                     }
@@ -259,10 +330,29 @@ fun TacticalMapCanvas(
                 )
             }
 
+            // Terreno táctico (Difícil, Muros, Peligros)
+            drawTacticalTerrain(
+                map = map,
+                terrainMap = uiState.terrainMap,
+                zoom = zoom
+            )
+
             // Grilla táctica
             if (map.gridType != GridType.NONE) {
                 drawTacticalGrid(
                     map = map,
+                    viewSize = size,
+                    zoom = zoom,
+                    panOffset = panOffset
+                )
+            }
+
+            // Niebla de Guerra (Fog of War)
+            if (uiState.isFogEnabled) {
+                drawTacticalFog(
+                    map = map,
+                    revealedCells = uiState.revealedCells,
+                    isFogDmView = uiState.isFogDmView,
                     viewSize = size,
                     zoom = zoom,
                     panOffset = panOffset
@@ -326,7 +416,8 @@ fun TacticalMapCanvas(
                     toY = toCellY,
                     gridType = map.gridType,
                     diagonalRule = map.diagonalRule,
-                    scaleFtPerCell = map.scaleFtPerCell
+                    scaleFtPerCell = map.scaleFtPerCell,
+                    terrainMap = uiState.terrainMap
                 )
 
                 drawLine(
@@ -356,6 +447,16 @@ fun TacticalMapCanvas(
                     center = p1
                 )
             }
+
+            // Ruta táctica planificada (Tool.ROUTE)
+            drawRoutePath(
+                map = map,
+                waypoints = uiState.routeWaypoints,
+                currentDistanceFt = uiState.currentRouteDistanceFt,
+                selectedToken = uiState.selectedToken,
+                zoom = zoom,
+                textMeasurer = textMeasurer
+            )
 
             // Drag Ruler al mover un token
             if (draggingToken != null && dragStartCell != null) {
@@ -707,5 +808,151 @@ private fun DrawScope.drawMeasureBadge(
     drawText(
         textLayoutResult = textLayout,
         topLeft = Offset(rectTopLeft.x + padX, rectTopLeft.y + padY)
+    )
+}
+
+private fun DrawScope.drawTacticalTerrain(
+    map: TacticalMap,
+    terrainMap: Map<String, TacticalTerrainType>,
+    zoom: Float
+) {
+    if (terrainMap.isEmpty()) return
+    val cellSize = map.cellSizePx
+    val strokeWidth = 1.5f / zoom
+
+    terrainMap.forEach { (coordKey, terrainType) ->
+        val parts = coordKey.split(",")
+        if (parts.size == 2) {
+            val col = parts[0].toIntOrNull() ?: return@forEach
+            val row = parts[1].toIntOrNull() ?: return@forEach
+            val pxX = (col * cellSize) + map.gridOffsetX
+            val pxY = (row * cellSize) + map.gridOffsetY
+
+            when (terrainType) {
+                TacticalTerrainType.DIFFICULT -> {
+                    drawRect(
+                        color = Color(0x55FFA000),
+                        topLeft = Offset(pxX, pxY),
+                        size = Size(cellSize, cellSize)
+                    )
+                    drawLine(
+                        color = Color(0x99FFA000),
+                        start = Offset(pxX, pxY + cellSize),
+                        end = Offset(pxX + cellSize, pxY),
+                        strokeWidth = strokeWidth
+                    )
+                }
+                TacticalTerrainType.WALL -> {
+                    drawRect(
+                        color = Color(0xD0263238),
+                        topLeft = Offset(pxX, pxY),
+                        size = Size(cellSize, cellSize)
+                    )
+                    drawRect(
+                        color = Color(0xFF37474F),
+                        topLeft = Offset(pxX, pxY),
+                        size = Size(cellSize, cellSize),
+                        style = Stroke(width = strokeWidth * 2f)
+                    )
+                }
+                TacticalTerrainType.HAZARD -> {
+                    drawRect(
+                        color = Color(0x55E53935),
+                        topLeft = Offset(pxX, pxY),
+                        size = Size(cellSize, cellSize)
+                    )
+                    drawRect(
+                        color = Color(0xAAE53935),
+                        topLeft = Offset(pxX, pxY),
+                        size = Size(cellSize, cellSize),
+                        style = Stroke(width = strokeWidth)
+                    )
+                }
+                TacticalTerrainType.NORMAL -> Unit
+            }
+        }
+    }
+}
+
+private fun DrawScope.drawTacticalFog(
+    map: TacticalMap,
+    revealedCells: Set<String>,
+    isFogDmView: Boolean,
+    viewSize: Size,
+    zoom: Float,
+    panOffset: Offset
+) {
+    val cellSize = map.cellSizePx
+    val startCol = kotlin.math.floor((-panOffset.x / zoom - map.gridOffsetX) / cellSize).toInt() - 1
+    val endCol = kotlin.math.ceil((-panOffset.x + viewSize.width / zoom - map.gridOffsetX) / cellSize).toInt() + 1
+    val startRow = kotlin.math.floor((-panOffset.y / zoom - map.gridOffsetY) / cellSize).toInt() - 1
+    val endRow = kotlin.math.ceil((-panOffset.y + viewSize.height / zoom - map.gridOffsetY) / cellSize).toInt() + 1
+
+    val fogColor = if (isFogDmView) Color(0xB3101014) else Color(0xFF000000)
+
+    for (c in startCol..endCol) {
+        for (r in startRow..endRow) {
+            val key = "$c,$r"
+            if (!revealedCells.contains(key)) {
+                val pxX = (c * cellSize) + map.gridOffsetX
+                val pxY = (r * cellSize) + map.gridOffsetY
+                drawRect(
+                    color = fogColor,
+                    topLeft = Offset(pxX, pxY),
+                    size = Size(cellSize, cellSize)
+                )
+            }
+        }
+    }
+}
+
+private fun DrawScope.drawRoutePath(
+    map: TacticalMap,
+    waypoints: List<Pair<Float, Float>>,
+    currentDistanceFt: Int,
+    selectedToken: TacticalToken?,
+    zoom: Float,
+    textMeasurer: TextMeasurer
+) {
+    if (waypoints.size < 2) return
+    val cellSize = map.cellSizePx
+
+    for (i in 0 until waypoints.size - 1) {
+        val p1 = waypoints[i]
+        val p2 = waypoints[i + 1]
+        val startPx = Offset((p1.first * cellSize) + map.gridOffsetX, (p1.second * cellSize) + map.gridOffsetY)
+        val endPx = Offset((p2.first * cellSize) + map.gridOffsetX, (p2.second * cellSize) + map.gridOffsetY)
+
+        drawLine(
+            color = Color(0xFF7C4DFF),
+            start = startPx,
+            end = endPx,
+            strokeWidth = 3.5f / zoom,
+            pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f / zoom, 6f / zoom))
+        )
+
+        drawCircle(
+            color = Color(0xFF7C4DFF),
+            radius = 6f / zoom,
+            center = startPx
+        )
+    }
+
+    val last = waypoints.last()
+    val lastPx = Offset((last.first * cellSize) + map.gridOffsetX, (last.second * cellSize) + map.gridOffsetY)
+    drawCircle(
+        color = Color(0xFF00E5FF),
+        radius = 8f / zoom,
+        center = lastPx
+    )
+
+    val speed = selectedToken?.speedFt ?: 30
+    val isOver = currentDistanceFt > speed
+    val badgeText = if (isOver) "$currentDistanceFt ft (> $speed ft)" else "$currentDistanceFt ft"
+    drawMeasureBadge(
+        textMeasurer = textMeasurer,
+        text = badgeText,
+        center = Offset(lastPx.x, lastPx.y - 18f / zoom),
+        zoom = zoom
     )
 }
