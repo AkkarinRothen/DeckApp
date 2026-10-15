@@ -5,16 +5,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Comandos esenciales
 
 ```bash
-# Build completo (ejecutar al final de cada sprint)
+# Build de desarrollo (DeckApp Dev - applicationId com.deckapp.ttrpg.debug)
 ./gradlew :app:assembleDebug
+
+# Build de producción/estable (DeckApp - applicationId com.deckapp.ttrpg)
+./gradlew :app:assembleRelease
+
+# Checkpoint y respaldo offline (.bundle) al finalizar cada sprint
+powershell.exe -File .\scripts\checkpoint.ps1 -Tag "sprint-XX" -Message "Descripcion" -SyncRelease
+
+# Cambiar entre versiones o volver a master
+powershell.exe -File .\scripts\switch-version.ps1
+powershell.exe -File .\scripts\switch-version.ps1 -BackToMaster
 
 # Compilar solo un módulo afectado
 ./gradlew :core:data:compileDebugKotlin
 ./gradlew :feature:import:compileDebugKotlin
 
-# Tests unitarios (solo existen en :core:domain por ahora)
+# Tests unitarios
 ./gradlew :core:domain:test
-./gradlew :core:domain:test --tests "com.deckapp.core.domain.usecase.MergeDecksUseCaseTest"
+./gradlew :feature:draw:testDebugUnitTest
 ```
 
 ## Mandato antes de tocar código
