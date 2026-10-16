@@ -52,9 +52,9 @@ fun SessionSetupScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    enabled = uiState.sessionName.isNotBlank() && selectedCount > 0
+                    enabled = uiState.canCreate
                 ) {
-                    Text("Crear sesión con $selectedCount mazo${if (selectedCount != 1) "s" else ""}")
+                    Text(if (selectedCount == 0) "Crear sesión" else "Crear sesión con $selectedCount mazo${if (selectedCount != 1) "s" else ""}")
                 }
             }
         }
@@ -106,7 +106,7 @@ fun SessionSetupScreen(
                 if (uiState.availableDecks.isEmpty()) {
                     item {
                         Text(
-                            "No hay mazos en la biblioteca. Importá uno primero.",
+                            "No hay mazos en la biblioteca. Podés elegir un sistema y jugar con sus tablas y reglas.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

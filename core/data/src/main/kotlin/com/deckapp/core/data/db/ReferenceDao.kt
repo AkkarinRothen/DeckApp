@@ -9,8 +9,16 @@ interface ReferenceTableDao {
     @Query("SELECT * FROM reference_tables ORDER BY isPinned DESC, sortOrder ASC, createdAt DESC")
     fun getAllTables(): Flow<List<ReferenceTableEntity>>
 
+    @Transaction
+    @Query("SELECT * FROM reference_tables ORDER BY isPinned DESC, sortOrder ASC, createdAt DESC")
+    fun getAllTablesWithRows(): Flow<List<ReferenceTableWithRows>>
+
     @Query("SELECT * FROM reference_tables WHERE gameSystem = :system ORDER BY isPinned DESC, sortOrder ASC")
     fun getTablesBySystem(system: String): Flow<List<ReferenceTableEntity>>
+
+    @Transaction
+    @Query("SELECT * FROM reference_tables WHERE gameSystem = :system ORDER BY isPinned DESC, sortOrder ASC")
+    fun getTablesWithRowsBySystem(system: String): Flow<List<ReferenceTableWithRows>>
 
     @Transaction
     @Query("SELECT * FROM reference_tables WHERE id = :id")
@@ -23,6 +31,15 @@ interface ReferenceTableDao {
         ORDER BY t.isPinned DESC, t.sortOrder ASC
     """)
     fun searchTables(query: String): Flow<List<ReferenceTableEntity>>
+
+    @Transaction
+    @Query("""
+        SELECT t.* FROM reference_tables t
+        INNER JOIN reference_tables_fts fts ON t.id = fts.rowid
+        WHERE reference_tables_fts MATCH :query
+        ORDER BY t.isPinned DESC, t.sortOrder ASC
+    """)
+    fun searchTablesWithRows(query: String): Flow<List<ReferenceTableWithRows>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertTable(table: ReferenceTableEntity): Long

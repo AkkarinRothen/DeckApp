@@ -21,6 +21,10 @@ fun MarkdownText(
     maxLines: Int? = null,
     onWikiLinkClicked: ((String) -> Unit)? = null
 ) {
+    if (markdownImagePattern.containsMatchIn(markdown)) {
+        MarkdownWithImages(markdown, modifier, color, style, maxLines, onWikiLinkClicked)
+        return
+    }
     val context = LocalContext.current
     val colorInt = color.toArgb()
     val fontSizeSp = style.fontSize.value * com.deckapp.core.ui.theme.LocalGeneralPreferences.current.textScale

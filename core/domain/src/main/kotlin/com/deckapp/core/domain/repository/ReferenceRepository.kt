@@ -29,6 +29,8 @@ interface ReferenceRepository {
     suspend fun removeTagFromSystemRule(ruleId: Long, tagId: Long)
 
     suspend fun importStarterPack(backup: com.deckapp.core.model.backup.FullBackupDto, packName: String)
+    /** Backfills packaged artwork and missing tables without changing user-edited content. */
+    suspend fun updateStarterPackArtwork(artwork: com.deckapp.core.model.backup.FullBackupDto, packName: String)
     suspend fun removeStarterPack(packName: String)
     fun getInstalledPackNames(): Flow<Set<String>>
 }

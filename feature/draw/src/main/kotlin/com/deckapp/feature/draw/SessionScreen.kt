@@ -543,6 +543,7 @@ fun SessionScreen(
                                     onStartGuidedCalibration = viewModel.tacticalMapDelegate::startGuidedCalibration,
                                     onGuidedCalibrationPoint = viewModel.tacticalMapDelegate::handleGuidedCalibrationPoint,
                                     onCreateDefaultMap = viewModel.tacticalMapDelegate::createDefaultMap,
+                                    onOpenMapSelector = viewModel.tacticalMapDelegate::openMapSelector,
                                     onSwitchMap = viewModel.tacticalMapDelegate::switchMap,
                                     onOpenCreateMapDialog = viewModel.tacticalMapDelegate::openCreateMapDialog,
                                     onOpenRenameMap = viewModel.tacticalMapDelegate::openRenameMapDialog,
@@ -1101,6 +1102,7 @@ fun SessionScreen(
             scenes = uiState.scenes,
             onSelectMap = viewModel.tacticalMapDelegate::switchMap,
             onCreateNewMap = viewModel.tacticalMapDelegate::openCreateMapDialog,
+            onChangeMapImage = { mapId, uri -> viewModel.tacticalMapDelegate.updateMapImage(uri, mapId) },
             onRenameMap = viewModel.tacticalMapDelegate::openRenameMapDialog,
             onLinkScene = viewModel.tacticalMapDelegate::openLinkSceneDialog,
             onDeleteMap = viewModel.tacticalMapDelegate::deleteMap,
@@ -1138,6 +1140,78 @@ fun SessionScreen(
                     Text("Cancelar")
                 }
             }
+        )
+    }
+
+    uiState.tacticalState.mapToLinkScene?.let { map ->
+        AlertDialog(
+            onDismissRequest = viewModel.tacticalMapDelegate::dismissMultimapDialogs,
+            title = { Text("Vincular Mapa a Escena") },
+            text = {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 280.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    item {
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = if (map.sceneId == null) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.tacticalMapDelegate.linkMapToScene(map.id, null)
+                                }
+                        ) {
+                            Text(
+                                "Sin escena vinculada",
+                                modifier = Modifier.padding(12.dp),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                    items(uiState.scenes, key = { it.id }) { sc ->
+                        val isSelected = map.sceneId == sc.id
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.tacticalMapDelegate.linkMapToScene(map.id, sc.id)
+                                }
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(Icons.Default.Movie, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Text(
+                                    sc.title,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = viewModel.tacticalMapDelegate::dismissMultimapDialogs) {
+                    Text("Cerrar")
+                }
+            }
+        )
+    }
+
+    uiState.tacticalState.mapToDelete?.let { map ->
+        com.deckapp.feature.draw.tactical.TacticalDeleteMapConfirmDialog(
+            map = map,
+            onConfirm = { viewModel.tacticalMapDelegate.confirmDeleteMap(map.id) },
+            onDismiss = viewModel.tacticalMapDelegate::dismissDeleteMapDialog
         )
     }
 

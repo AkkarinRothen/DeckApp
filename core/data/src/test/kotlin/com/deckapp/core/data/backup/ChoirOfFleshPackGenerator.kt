@@ -556,14 +556,20 @@ Gestión del refugio humano:
             NpcBackupDto(id = -2324, name = "Trono", isMonster = true, maxHp = 32, armorClass = 18, initiativeBonus = -2, description = "Ruedas concéntricas de bronce viviente repletas de ojos de zafiro que todo lo ven.", notes = "### Estadísticas de Choir of Flesh\n- **Rol**: Fortaleza Viviente\n- **Precisión**: 3 | **Ataque**: Difícil (NO 16)\n- **Constitución**: Casi Imposible (NO 20) | **CD**: Casi Imposible (18)\n- **Destreza**: Fácil (NO 10) | **Iniciativa**: 5\n- **Movimiento**: 2 casillas | **Número**: 1\n- **XP**: 8 XP | **Botín**: Ojo de Zafiro Celestial\n\n### Táctica\nSu mirada fulminante anula las ventajas de terreno y quema con daño radiante.")
         )
 
+        val artworkFile = File("src/main/assets/starter_packs/choir_of_flesh/artwork.json")
+            .takeIf { it.exists() }
+            ?: File("core/data/src/main/assets/starter_packs/choir_of_flesh/artwork.json")
+        val artwork = json.decodeFromString<FullBackupDto>(artworkFile.readText(Charsets.UTF_8))
+        val portraits = artwork.npcs.associate { it.name to it.imagePath }
+
         val fullBackup = FullBackupDto(
             schemaVersion = 1,
-            systemRules = rules,
+            systemRules = rules + artwork.systemRules,
             referenceTables = refTables,
             referenceRows = refRows,
             randomTables = randTables,
             tableEntries = tableEntries,
-            npcs = npcs
+            npcs = npcs.map { it.copy(imagePath = portraits[it.name]) }
         )
 
         val packFile = File("src/main/assets/starter_packs/choir_of_flesh.json")

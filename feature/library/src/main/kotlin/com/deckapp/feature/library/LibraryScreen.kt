@@ -636,7 +636,7 @@ fun LibraryScreen(
                             }
                         )
                     }
-                    uiState.allTags.forEach { tag ->
+                    uiState.availableTags.forEach { tag ->
                         item(key = tag.id) {
                             FilterChip(
                                 selected = tag.id in uiState.selectedTagIds,

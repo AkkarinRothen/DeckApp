@@ -1,5 +1,74 @@
 ---
 
+### Sprint 67 — Ergonomía Visual Bento para Mapas Tácticos y Gestión Segura de Escenarios (16 de octubre de 2026)
+
+**FEATURE — Selector de Mapas Tácticos Estilo Bento (`TacticalMapSelectorSheet`)**
+- Rediseño completo del modal de mapas con tarjetas horizontales Bento y miniaturas WebP (`AsyncImage` de Coil con fallback temático de grilla táctica de 80x80dp).
+- Badges visuales de estado: indicador `ACTIVO` en verde tonal, subtítulo con dimensiones y escala (`square • 5ft/celda`), y vínculo visible con escenas de la sesión.
+- Barra de acciones rápida en cada tarjeta:
+  - Cambiar imagen de fondo (`onChangeMapImage` con launcher SAF integrado y pipeline automático a WebP).
+  - Renombrar mapa (`onRenameMap`).
+  - Vincular con escena de sesión (`onLinkScene`).
+  - Eliminar mapa táctico (`onDeleteMap`).
+- Botón de cabecera en el Sheet: `+ Nuevo Mapa` para creación rápida.
+
+**FEATURE — Ergonomía de Cabecera y Bloqueo de Eventos en Canvas**
+- Reemplazo del menú contextual anticuado por un chip flotante táctico en `TacticalMapView.kt`:
+  - Contenedor `Surface` con icono de capas (`Icons.Default.Layers`), nombre del mapa activo y chevron desplegable.
+  - Botón de calibración rápida de grilla (`Icons.Default.GridOn`) accesible directamente.
+  - Aislamiento de punteros táctiles mediante `Modifier.clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {}` en el Surface padre, evitando que toques en la cabecera caigan accidentalmente en `TacticalMapCanvas` y abran pines de dungeon.
+- Estado vacío (`uiState.map == null`): Botón tonal `Elegir Mapa (${uiState.availableMaps.size})` para acceder al selector si ya existen mapas cargados en la sesión.
+
+**FEATURE — Eliminación Segura y Limpieza Física de Huérfanos (`TacticalDeleteMapConfirmDialog`)**
+- Diálogo modal de confirmación destructiva con advertencia de Material3: informa la eliminación del mapa, sus tokens y pines vinculados, y la liberación de almacenamiento en disco.
+- En `TacticalMapDelegate.kt`:
+  - `confirmDeleteMap`: borra la entidad en la base de datos Room (`tacticalMapDao.deleteMap(mapId)` que aplica `CASCADE` a tokens y pines).
+  - Limpieza física de disco: verifica si la ruta del mapa eliminado reside en el directorio interno `tactical_maps` y la elimina vía `fileRepository.deleteFile(path)`, evitando la acumulación de archivos WebP huérfanos.
+  - Conmutación automática: si el mapa eliminado era el actualmente activo, conmuta de forma transparente al primer mapa restante de `availableMaps` o deja el estado limpio (`null`).
+  - `updateMapImage`: al reemplazar el fondo de un mapa, limpia el archivo `.webp` anterior si era interno antes de guardar el nuevo.
+
+**VALIDACIÓN EN HARDWARE FÍSICO (Motorola One Fusion)**
+- Compilado e instalado vía `./gradlew installDebug --gradle-user-home I:\.gradle_home`.
+- Apertura fluida del `TacticalMapSelectorSheet` desde el chip de cabecera sin falsos toques en el canvas.
+- Despliegue del diálogo de confirmación `TacticalDeleteMapConfirmDialog`.
+- Eliminación interactiva con feedback por Snackbar (`Mapa '...' eliminado`), transición al estado vacío y recreación instantánea con `+ Crear Mapa Rápido`.
+
+**FEATURE PARITY MANDATE (TDAPP-desktop)**
+- [ ] Implementar `TacticalMapSelector` en TDAPP-desktop con tarjetas Bento, miniaturas de mapas y acciones rápidas (cambiar imagen, renombrar, vincular escena, eliminar).
+- [ ] Implementar diálogo de confirmación de borrado con limpieza física de archivos de imagen en el directorio de mapas tácticos del escritorio.
+- [ ] Añadir chip ergonómico en la cabecera superior del VTT para conmutación rápida entre mapas tácticos.
+
+---
+
+### Choir of Flesh — Ilustraciones WebP y carga de tablas en sesiones (16 de octubre de 2026)
+
+**FEATURE — Arte original integrado**
+- 116 ilustraciones originales del directorio `Choir_of_Flesh_clean`, convertidas a WebP (calidad 90, resolución máxima 1600 px), con 24 retratos de criaturas y 13 galerías de referencia por capítulo.
+- Correspondencia de retratos verificada con los encabezados del capítulo V del manual y hashes SHA-256 de los originales. Los archivos del Vault se leen sin modificarlos.
+- Activos en `core/data/src/main/assets/starter_packs/choir_of_flesh/art/`; manifiesto reproducible en `artwork.json` y pipeline en `scripts/integrate-choir-artwork.py` (requiere Pillow y el capítulo V del Vault junto al directorio de origen).
+- Las galerías aparecen en Referencias, categoría `Ilustraciones del manual`, y se abren en vista previa. Markdown muestra imágenes locales mediante Coil, con proporción conservada.
+- El generador del starter pack conserva los retratos y galerías al regenerar el JSON.
+
+**FIX — Recursos de sistema en sesiones existentes y nuevas**
+- `SyncSessionSystemTablesUseCase` conecta los nombres de sistemas con sus identificadores de paquete y añade las tablas correspondientes a la sesión, incluyendo instalaciones del paquete mientras la sesión está abierta.
+- Se preservan las tablas añadidas manualmente y se evita duplicar vínculos. Las sesiones `General` no reciben indiscriminadamente todos los paquetes.
+- Se permite crear sesiones con un sistema seleccionado sin exigir un mazo de cartas.
+- Se cancelan observadores de tablas al cambiar de sesión y se conserva la selección del usuario entre todas las tablas y las tablas de sesión.
+
+**FIX — Actualización e identidad de los datos instalados**
+- Al iniciar la app, el paquete instalado recibe retratos, galerías y tablas ausentes sin reemplazar estadísticas, notas, imágenes personalizadas ni contenidos existentes.
+- La actualización automática utiliza búsquedas por propiedad exacta del paquete para conservar tablas personalizadas de igual nombre.
+- Reinstalar un starter pack actualiza sus entidades conservando IDs y vínculos de sesión; evita el retorno `-1` de `INSERT IGNORE` sobre IDs existentes.
+- Editar reglas conserva `sourcePack`. No se requiere migración de esquema.
+
+**VALIDACIÓN**
+- 33 pruebas de dominio aprobadas, incluidas 7 nuevas para carga de recursos, idempotencia y cambios de sistema; prueba existente del paquete Choir of Flesh aprobada.
+- 116 WebP decodificados y verificados, 24 retratos distintos y 116 enlaces de galería válidos; consultas SQL de propiedad verificadas con tablas de nombres coincidentes.
+- Pendiente de cerrar el ensamblado final y verificar los activos incluidos en el APK.
+- Paridad Desktop: pendiente de trasladar activos y sincronización de tablas de sistema.
+
+---
+
 ### Sprint 66 — Optimización de Mapas Tácticos a WebP y Ergonomía del VTT en Pantalla (16 de octubre de 2026)
 
 **FEATURE — Pipeline de Procesamiento y Conversión Automática a WebP**

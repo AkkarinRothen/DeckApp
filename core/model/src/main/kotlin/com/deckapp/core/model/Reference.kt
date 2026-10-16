@@ -19,8 +19,8 @@ data class ReferenceTable(
 
 @Serializable
 data class ReferenceColumn(
-    val index: Int,
-    val header: String,
+    val index: Int = 0,
+    val header: String = "",
     val widthWeight: Float = 1f
 )
 

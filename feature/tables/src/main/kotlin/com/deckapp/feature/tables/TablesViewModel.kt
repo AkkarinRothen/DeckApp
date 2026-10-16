@@ -68,6 +68,7 @@ data class TablesUiState(
 
 @HiltViewModel
 class TablesViewModel @Inject constructor(
+    private val syncSessionSystemTables: com.deckapp.core.domain.usecase.SyncSessionSystemTablesUseCase,
     private val tableRepository: TableRepository,
     private val sessionRepository: SessionRepository,
     private val cardRepository: CardRepository,
@@ -138,28 +139,22 @@ class TablesViewModel @Inject constructor(
         }
     }
 
+    private var sessionTablesJob: kotlinx.coroutines.Job? = null
+    private var sessionSystemTablesJob: kotlinx.coroutines.Job? = null
+
     fun setSessionId(id: Long?) {
         if (_sessionId.value == id) return
         _sessionId.value = id
-        
-        // Cargar tablas de la sesión y log de resultados si hay sesión
-        id?.let { sid ->
-            viewModelScope.launch {
-                sessionRepository.getTablesForSession(sid).collect { tables ->
-                    _uiState.update { it.copy(
-                        sessionTableIds = tables.map { t -> t.id }.toSet(),
-                        showAllTables = false // Por defecto mostrar solo las de la sesión si estamos en una
-                    ) }
-                }
-            }
-            
-            viewModelScope.launch {
-                sessionRepository.getEventsForSession(sid).collect { events ->
-                    // Filtrar eventos de tablas y convertirlos a resultados
-                    // (Lógica simplificada para el log de la sesión)
-                }
-            }
-        }
+        sessionTablesJob?.cancel()
+        sessionSystemTablesJob?.cancel()
+        _uiState.update { it.copy(sessionTableIds = emptySet(), showAllTables = id == null) }
+        if (id == null) return
+        sessionTablesJob = sessionRepository.getTablesForSession(id).onEach { tables ->
+            _uiState.update { it.copy(sessionTableIds = tables.map { table -> table.id }.toSet()) }
+        }.launchIn(viewModelScope)
+        sessionSystemTablesJob = syncSessionSystemTables(id)
+            .catch { _uiState.update { it.copy(snackbarMessage = "No se pudieron cargar las tablas del sistema.") } }
+            .launchIn(viewModelScope)
     }
 
     private fun loadData() {

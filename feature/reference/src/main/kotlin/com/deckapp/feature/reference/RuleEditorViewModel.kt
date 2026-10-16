@@ -16,6 +16,7 @@ data class RuleEditorUiState(
     val content: String = "",
     val gameSystem: String = "General",
     val category: String = "General",
+    val sourcePack: String? = null,
     val isPinned: Boolean = false,
     val isPreviewMode: Boolean = false,
     val isSaving: Boolean = false,
@@ -55,6 +56,8 @@ class RuleEditorViewModel @Inject constructor(
                     content = rule.content,
                     gameSystem = rule.gameSystem,
                     category = rule.category,
+                    sourcePack = rule.sourcePack,
+                    isPreviewMode = rule.category == "Ilustraciones del manual",
                     isPinned = rule.isPinned,
                     tags = rule.tags
                 ) }
@@ -81,6 +84,7 @@ class RuleEditorViewModel @Inject constructor(
                 content = state.content,
                 gameSystem = state.gameSystem,
                 category = state.category,
+                sourcePack = state.sourcePack,
                 isPinned = state.isPinned,
                 tags = state.tags,
                 lastUpdated = System.currentTimeMillis()

@@ -55,6 +55,13 @@ data class LibraryUiState(
     val mergeCandidates: List<CardStack>
         get() = if (mergeSourceDeckId == null) emptyList()
                 else allDecks.filter { it.id != mergeSourceDeckId }
+
+    /** Tags asociados a los mazos visibles. Evita mostrar tags huérfanos o de otros tipos de recursos (e.g. NPCs, tablas) en los filtros de mazos. */
+    val availableTags: List<Tag>
+        get() {
+            val deckTagIds = displayedDecks.flatMap { it.tags }.map { it.id }.toSet()
+            return allTags.filter { it.id in deckTagIds }
+        }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)

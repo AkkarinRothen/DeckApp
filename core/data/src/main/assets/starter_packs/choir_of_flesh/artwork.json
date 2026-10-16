@@ -1,0 +1,1498 @@
+{
+  "schemaVersion": 1,
+  "npcs": [
+    {
+      "name": "Amalgama",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_175_Picture_1.webp"
+    },
+    {
+      "name": "Apóstata",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_176_Picture_1.webp"
+    },
+    {
+      "name": "Tejedor de Huesos",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_177_Picture_1.webp"
+    },
+    {
+      "name": "Bandada de Carroña",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_179_Picture_1.webp"
+    },
+    {
+      "name": "Croador",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_183_Picture_1.webp"
+    },
+    {
+      "name": "Gusano de Carne",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_185_Picture_1.webp"
+    },
+    {
+      "name": "Rechinador",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_186_Picture_1.webp"
+    },
+    {
+      "name": "Fauces del Suelo",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_187_Picture_1.webp"
+    },
+    {
+      "name": "Licuador",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_192_Picture_1.webp"
+    },
+    {
+      "name": "Madre de Tumores",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_194_Picture_1.webp"
+    },
+    {
+      "name": "Acechador Silencioso",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_200_Picture_1.webp"
+    },
+    {
+      "name": "Sabueso Desollado",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_201_Picture_1.webp"
+    },
+    {
+      "name": "Cantor",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_178_Picture_1.webp"
+    },
+    {
+      "name": "Portador del Incensario",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_180_Picture_1.webp"
+    },
+    {
+      "name": "Querubín",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_181_Picture_1.webp"
+    },
+    {
+      "name": "Confesor",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_182_Picture_1.webp"
+    },
+    {
+      "name": "Flagelante",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_184_Picture_1.webp"
+    },
+    {
+      "name": "Heraldo",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_188_Picture_1.webp"
+    },
+    {
+      "name": "Cruzado Cáscara",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_191_Picture_1.webp"
+    },
+    {
+      "name": "Mater Dolorosa",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_193_Picture_1.webp"
+    },
+    {
+      "name": "Pilar de Fe",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_196_Picture_1.webp"
+    },
+    {
+      "name": "Escriba de la Penitencia",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_198_Picture_1.webp"
+    },
+    {
+      "name": "Serafín",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_199_Picture_1.webp"
+    },
+    {
+      "name": "Trono",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_204_Picture_1.webp"
+    }
+  ],
+  "systemRules": [
+    {
+      "id": -4000,
+      "title": "Galería · Portada y mundo · 1",
+      "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Ilustración del manual · página 1\n\n![Ilustración del manual, página 1](file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_0_Picture_0.webp)\n\n### Ilustración del manual · página 2\n\n![Ilustración del manual, página 2](file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_1_Picture_0.webp)\n\n### Ilustración del manual · página 3\n\n![Ilustración del manual, página 3](file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_2_Picture_0.webp)\n\n### Ilustración del manual · página 3\n\n![Ilustración del manual, página 3](file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_2_Picture_1.webp)\n\n### Ilustración del manual · página 4\n\n![Ilustración del manual, página 4](file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_3_Picture_11.webp)\n\n### Ilustración del manual · página 5\n\n![Ilustración del manual, página 5](file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_4_Picture_3.webp)\n\n### Ilustración del manual · página 6\n\n![Ilustración del manual, página 6](file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_5_Picture_0.webp)",
+      "gameSystem": "Choir of Flesh",
+      "category": "Ilustraciones del manual",
+      "sortOrder": 1000,
+      "sourcePack": "Choir of Flesh"
+    },
+    {
+      "id": -4001,
+      "title": "Galería · Creación de personajes · 1",
+      "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Ilustración del manual · página 10\n\n![Ilustración del manual, página 10](file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_9_Picture_0.webp)\n\n### Ilustración del manual · página 11\n\n![Ilustración del manual, página 11](file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_10_Picture_0.webp)\n\n### Ilustración del manual · página 12\n\n![Ilustración del manual, página 12](file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_11_Picture_13.webp)\n\n### Ilustración del manual · página 20\n\n![Ilustración del manual, página 20](file:///android_asset/starter_packs/choir_of_flesh/art/b001__page_19_Picture_4.webp)\n\n### Ilustración del manual · página 22\n\n![Ilustración del manual, página 22](file:///android_asset/starter_packs/choir_of_flesh/art/b001__page_21_Picture_4.webp)\n\n### Ilustración del manual · página 25\n\n![Ilustración del manual, página 25](file:///android_asset/starter_packs/choir_of_flesh/art/b001__page_24_Picture_2.webp)\n\n### Ilustración del manual · página 28\n\n![Ilustración del manual, página 28](file:///android_asset/starter_packs/choir_of_flesh/art/b001__page_27_Picture_4.webp)\n\n### Ilustración del manual · página 37\n\n![Ilustración del manual, página 37](file:///android_asset/starter_packs/choir_of_flesh/art/b002__page_36_Picture_4.webp)",
+      "gameSystem": "Choir of Flesh",
+      "category": "Ilustraciones del manual",
+      "sortOrder": 1001,
+      "sourcePack": "Choir of Flesh"
+    },
+    {
+      "id": -4002,
+      "title": "Galería · Viajes y exploración · 1",
+      "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Ilustración del manual · página 40\n\n![Ilustración del manual, página 40](file:///android_asset/starter_packs/choir_of_flesh/art/b002__page_39_Picture_0.webp)\n\n### Ilustración del manual · página 41\n\n![Ilustración del manual, página 41](file:///android_asset/starter_packs/choir_of_flesh/art/b002__page_40_Picture_0.webp)\n\n### Ilustración del manual · página 44\n\n![Ilustración del manual, página 44](file:///android_asset/starter_packs/choir_of_flesh/art/b002__page_43_Picture_10.webp)\n\n### Ilustración del manual · página 45\n\n![Ilustración del manual, página 45](file:///android_asset/starter_packs/choir_of_flesh/art/b002__page_44_Picture_6.webp)\n\n### Ilustración del manual · página 48\n\n![Ilustración del manual, página 48](file:///android_asset/starter_packs/choir_of_flesh/art/b003__page_47_Picture_16.webp)\n\n### Ilustración del manual · página 50\n\n![Ilustración del manual, página 50](file:///android_asset/starter_packs/choir_of_flesh/art/b003__page_49_Picture_15.webp)\n\n### Ilustración del manual · página 53\n\n![Ilustración del manual, página 53](file:///android_asset/starter_packs/choir_of_flesh/art/b003__page_52_Picture_1.webp)\n\n### Ilustración del manual · página 53\n\n![Ilustración del manual, página 53](file:///android_asset/starter_packs/choir_of_flesh/art/b003__page_52_Picture_3.webp)\n\n### Ilustración del manual · página 53\n\n![Ilustración del manual, página 53](file:///android_asset/starter_packs/choir_of_flesh/art/b003__page_52_Picture_6.webp)\n\n### Ilustración del manual · página 56\n\n![Ilustración del manual, página 56](file:///android_asset/starter_packs/choir_of_flesh/art/b003__page_55_Figure_17.webp)",
+      "gameSystem": "Choir of Flesh",
+      "category": "Ilustraciones del manual",
+      "sortOrder": 1002,
+      "sourcePack": "Choir of Flesh"
+    },
+    {
+      "id": -4003,
+      "title": "Galería · Viajes y exploración · 2",
+      "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Ilustración del manual · página 63\n\n![Ilustración del manual, página 63](file:///android_asset/starter_packs/choir_of_flesh/art/b004__page_62_Picture_16.webp)\n\n### Ilustración del manual · página 64\n\n![Ilustración del manual, página 64](file:///android_asset/starter_packs/choir_of_flesh/art/b004__page_63_Picture_14.webp)\n\n### Ilustración del manual · página 66\n\n![Ilustración del manual, página 66](file:///android_asset/starter_packs/choir_of_flesh/art/b004__page_65_Picture_2.webp)\n\n### Ilustración del manual · página 69\n\n![Ilustración del manual, página 69](file:///android_asset/starter_packs/choir_of_flesh/art/b004__page_68_Picture_5.webp)\n\n### Ilustración del manual · página 73\n\n![Ilustración del manual, página 73](file:///android_asset/starter_packs/choir_of_flesh/art/b004__page_72_Picture_2.webp)\n\n### Ilustración del manual · página 86\n\n![Ilustración del manual, página 86](file:///android_asset/starter_packs/choir_of_flesh/art/b005__page_85_Picture_6.webp)",
+      "gameSystem": "Choir of Flesh",
+      "category": "Ilustraciones del manual",
+      "sortOrder": 1003,
+      "sourcePack": "Choir of Flesh"
+    },
+    {
+      "id": -4004,
+      "title": "Galería · Incursiones · 1",
+      "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Ilustración del manual · página 94\n\n![Ilustración del manual, página 94](file:///android_asset/starter_packs/choir_of_flesh/art/b006__page_93_Picture_0.webp)\n\n### Ilustración del manual · página 95\n\n![Ilustración del manual, página 95](file:///android_asset/starter_packs/choir_of_flesh/art/b006__page_94_Picture_0.webp)\n\n### Ilustración del manual · página 98\n\n![Ilustración del manual, página 98](file:///android_asset/starter_packs/choir_of_flesh/art/b006__page_97_Picture_5.webp)\n\n### Ilustración del manual · página 104\n\n![Ilustración del manual, página 104](file:///android_asset/starter_packs/choir_of_flesh/art/b006__page_103_Picture_2.webp)\n\n### Ilustración del manual · página 105\n\n![Ilustración del manual, página 105](file:///android_asset/starter_packs/choir_of_flesh/art/b006__page_104_Picture_2.webp)\n\n### Ilustración del manual · página 110\n\n![Ilustración del manual, página 110](file:///android_asset/starter_packs/choir_of_flesh/art/b007__page_109_Picture_10.webp)\n\n### Ilustración del manual · página 114\n\n![Ilustración del manual, página 114](file:///android_asset/starter_packs/choir_of_flesh/art/b007__page_113_Picture_17.webp)\n\n### Ilustración del manual · página 116\n\n![Ilustración del manual, página 116](file:///android_asset/starter_packs/choir_of_flesh/art/b007__page_115_Picture_10.webp)\n\n### Ilustración del manual · página 119\n\n![Ilustración del manual, página 119](file:///android_asset/starter_packs/choir_of_flesh/art/b007__page_118_Picture_10.webp)\n\n### Ilustración del manual · página 120\n\n![Ilustración del manual, página 120](file:///android_asset/starter_packs/choir_of_flesh/art/b007__page_119_Picture_11.webp)",
+      "gameSystem": "Choir of Flesh",
+      "category": "Ilustraciones del manual",
+      "sortOrder": 1004,
+      "sourcePack": "Choir of Flesh"
+    },
+    {
+      "id": -4005,
+      "title": "Galería · Incursiones · 2",
+      "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Ilustración del manual · página 122\n\n![Ilustración del manual, página 122](file:///android_asset/starter_packs/choir_of_flesh/art/b008__page_121_Picture_10.webp)\n\n### Ilustración del manual · página 125\n\n![Ilustración del manual, página 125](file:///android_asset/starter_packs/choir_of_flesh/art/b008__page_124_Picture_4.webp)\n\n### Ilustración del manual · página 127\n\n![Ilustración del manual, página 127](file:///android_asset/starter_packs/choir_of_flesh/art/b008__page_126_Picture_12.webp)\n\n### Ilustración del manual · página 129\n\n![Ilustración del manual, página 129](file:///android_asset/starter_packs/choir_of_flesh/art/b008__page_128_Picture_3.webp)\n\n### Ilustración del manual · página 130\n\n![Ilustración del manual, página 130](file:///android_asset/starter_packs/choir_of_flesh/art/b008__page_129_Picture_1.webp)\n\n### Ilustración del manual · página 132\n\n![Ilustración del manual, página 132](file:///android_asset/starter_packs/choir_of_flesh/art/b008__page_131_Picture_10.webp)\n\n### Ilustración del manual · página 137\n\n![Ilustración del manual, página 137](file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_136_Picture_12.webp)\n\n### Ilustración del manual · página 139\n\n![Ilustración del manual, página 139](file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_138_Picture_6.webp)\n\n### Ilustración del manual · página 140\n\n![Ilustración del manual, página 140](file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_139_Picture_13.webp)\n\n### Ilustración del manual · página 141\n\n![Ilustración del manual, página 141](file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_140_Picture_1.webp)",
+      "gameSystem": "Choir of Flesh",
+      "category": "Ilustraciones del manual",
+      "sortOrder": 1005,
+      "sourcePack": "Choir of Flesh"
+    },
+    {
+      "id": -4006,
+      "title": "Galería · Incursiones · 3",
+      "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Ilustración del manual · página 141\n\n![Ilustración del manual, página 141](file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_140_Picture_10.webp)\n\n### Ilustración del manual · página 143\n\n![Ilustración del manual, página 143](file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_142_Picture_11.webp)\n\n### Ilustración del manual · página 143\n\n![Ilustración del manual, página 143](file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_142_Picture_3.webp)\n\n### Ilustración del manual · página 148\n\n![Ilustración del manual, página 148](file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_147_Picture_13.webp)\n\n### Ilustración del manual · página 149\n\n![Ilustración del manual, página 149](file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_148_Picture_1.webp)\n\n### Ilustración del manual · página 149\n\n![Ilustración del manual, página 149](file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_148_Picture_11.webp)\n\n### Ilustración del manual · página 149\n\n![Ilustración del manual, página 149](file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_148_Picture_20.webp)\n\n### Ilustración del manual · página 152\n\n![Ilustración del manual, página 152](file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_151_Picture_12.webp)\n\n### Ilustración del manual · página 152\n\n![Ilustración del manual, página 152](file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_151_Picture_13.webp)\n\n### Ilustración del manual · página 153\n\n![Ilustración del manual, página 153](file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_152_Picture_1.webp)",
+      "gameSystem": "Choir of Flesh",
+      "category": "Ilustraciones del manual",
+      "sortOrder": 1006,
+      "sourcePack": "Choir of Flesh"
+    },
+    {
+      "id": -4007,
+      "title": "Galería · Incursiones · 4",
+      "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Ilustración del manual · página 156\n\n![Ilustración del manual, página 156](file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_155_Picture_1.webp)\n\n### Ilustración del manual · página 157\n\n![Ilustración del manual, página 157](file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_156_Picture_13.webp)\n\n### Ilustración del manual · página 159\n\n![Ilustración del manual, página 159](file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_158_Picture_10.webp)\n\n### Ilustración del manual · página 161\n\n![Ilustración del manual, página 161](file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_160_Picture_13.webp)\n\n### Ilustración del manual · página 163\n\n![Ilustración del manual, página 163](file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_162_Picture_1.webp)\n\n### Ilustración del manual · página 163\n\n![Ilustración del manual, página 163](file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_162_Picture_11.webp)\n\n### Ilustración del manual · página 165\n\n![Ilustración del manual, página 165](file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_164_Picture_13.webp)\n\n### Ilustración del manual · página 167\n\n![Ilustración del manual, página 167](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_166_Picture_1.webp)\n\n### Ilustración del manual · página 167\n\n![Ilustración del manual, página 167](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_166_Picture_8.webp)\n\n### Ilustración del manual · página 168\n\n![Ilustración del manual, página 168](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_167_Picture_1.webp)",
+      "gameSystem": "Choir of Flesh",
+      "category": "Ilustraciones del manual",
+      "sortOrder": 1007,
+      "sourcePack": "Choir of Flesh"
+    },
+    {
+      "id": -4008,
+      "title": "Galería · Bestiario · 1",
+      "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Ilustración del manual · página 169\n\n![Ilustración del manual, página 169](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_168_Picture_0.webp)\n\n### Ilustración del manual · página 170\n\n![Ilustración del manual, página 170](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_169_Picture_0.webp)\n\n### Ilustración del manual · página 171\n\n![Ilustración del manual, página 171](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_170_Picture_0.webp)\n\n### Ilustración del manual · página 172\n\n![Ilustración del manual, página 172](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_171_Picture_17.webp)\n\n### Ilustración del manual · página 173\n\n![Ilustración del manual, página 173](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_172_Picture_4.webp)\n\n### Ilustración del manual · página 175\n\n![Ilustración del manual, página 175](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_174_Picture_0.webp)\n\n### Amalgama · página 176\n\n![Amalgama, página 176](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_175_Picture_1.webp)\n\n### Apóstata · página 177\n\n![Apóstata, página 177](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_176_Picture_1.webp)\n\n### Tejedor de Huesos · página 178\n\n![Tejedor de Huesos, página 178](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_177_Picture_1.webp)\n\n### Cantor · página 179\n\n![Cantor, página 179](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_178_Picture_1.webp)",
+      "gameSystem": "Choir of Flesh",
+      "category": "Ilustraciones del manual",
+      "sortOrder": 1008,
+      "sourcePack": "Choir of Flesh"
+    },
+    {
+      "id": -4009,
+      "title": "Galería · Bestiario · 2",
+      "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Bandada de Carroña · página 180\n\n![Bandada de Carroña, página 180](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_179_Picture_1.webp)\n\n### Portador del Incensario · página 181\n\n![Portador del Incensario, página 181](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_180_Picture_1.webp)\n\n### Querubín · página 182\n\n![Querubín, página 182](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_181_Picture_1.webp)\n\n### Confesor · página 183\n\n![Confesor, página 183](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_182_Picture_1.webp)\n\n### Graznador · página 184\n\n![Graznador, página 184](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_183_Picture_1.webp)\n\n### Flagelante · página 185\n\n![Flagelante, página 185](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_184_Picture_1.webp)\n\n### Gusano de Carne · página 186\n\n![Gusano de Carne, página 186](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_185_Picture_1.webp)\n\n### Rechinador · página 187\n\n![Rechinador, página 187](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_186_Picture_1.webp)\n\n### Fauces del Suelo · página 188\n\n![Fauces del Suelo, página 188](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_187_Picture_1.webp)\n\n### Heraldo · página 189\n\n![Heraldo, página 189](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_188_Picture_1.webp)",
+      "gameSystem": "Choir of Flesh",
+      "category": "Ilustraciones del manual",
+      "sortOrder": 1009,
+      "sourcePack": "Choir of Flesh"
+    },
+    {
+      "id": -4010,
+      "title": "Galería · Bestiario · 3",
+      "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Caballo · página 190\n\n![Caballo, página 190](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_189_Picture_1.webp)\n\n### Sabueso · página 191\n\n![Sabueso, página 191](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_190_Picture_1.webp)\n\n### Cruzado Cáscara · página 192\n\n![Cruzado Cáscara, página 192](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_191_Picture_1.webp)\n\n### Licuador · página 193\n\n![Licuador, página 193](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_192_Picture_1.webp)\n\n### Mater Dolorosa · página 194\n\n![Mater Dolorosa, página 194](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_193_Picture_1.webp)\n\n### Madre de Tumores · página 195\n\n![Madre de Tumores, página 195](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_194_Picture_1.webp)\n\n### Penitente · página 196\n\n![Penitente, página 196](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_195_Picture_1.webp)\n\n### Pilar de Fe · página 197\n\n![Pilar de Fe, página 197](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_196_Picture_1.webp)\n\n### Purificador · página 198\n\n![Purificador, página 198](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_197_Picture_1.webp)\n\n### Escriba de Penitencia · página 199\n\n![Escriba de Penitencia, página 199](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_198_Picture_1.webp)",
+      "gameSystem": "Choir of Flesh",
+      "category": "Ilustraciones del manual",
+      "sortOrder": 1010,
+      "sourcePack": "Choir of Flesh"
+    },
+    {
+      "id": -4011,
+      "title": "Galería · Bestiario · 4",
+      "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Serafín · página 200\n\n![Serafín, página 200](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_199_Picture_1.webp)\n\n### Acechador Silencioso · página 201\n\n![Acechador Silencioso, página 201](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_200_Picture_1.webp)\n\n### Sabueso Desollado · página 202\n\n![Sabueso Desollado, página 202](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_201_Picture_1.webp)\n\n### Soldado · página 203\n\n![Soldado, página 203](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_202_Picture_1.webp)\n\n### Superviviente · página 204\n\n![Superviviente, página 204](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_203_Picture_1.webp)\n\n### Trono · página 205\n\n![Trono, página 205](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_204_Picture_1.webp)",
+      "gameSystem": "Choir of Flesh",
+      "category": "Ilustraciones del manual",
+      "sortOrder": 1011,
+      "sourcePack": "Choir of Flesh"
+    },
+    {
+      "id": -4012,
+      "title": "Galería · Equipo y reliquias · 1",
+      "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Ilustración del manual · página 206\n\n![Ilustración del manual, página 206](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_205_Picture_0.webp)\n\n### Ilustración del manual · página 207\n\n![Ilustración del manual, página 207](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_206_Picture_0.webp)\n\n### Ilustración del manual · página 209\n\n![Ilustración del manual, página 209](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_208_Picture_5.webp)\n\n### Ilustración del manual · página 210\n\n![Ilustración del manual, página 210](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_209_Picture_2.webp)\n\n### Ilustración del manual · página 211\n\n![Ilustración del manual, página 211](file:///android_asset/starter_packs/choir_of_flesh/art/b014__page_210_Picture_17.webp)\n\n### Ilustración del manual · página 213\n\n![Ilustración del manual, página 213](file:///android_asset/starter_packs/choir_of_flesh/art/b014__page_212_Picture_23.webp)\n\n### Ilustración del manual · página 219\n\n![Ilustración del manual, página 219](file:///android_asset/starter_packs/choir_of_flesh/art/b014__page_218_Picture_7.webp)\n\n### Ilustración del manual · página 223\n\n![Ilustración del manual, página 223](file:///android_asset/starter_packs/choir_of_flesh/art/b014__page_222_Picture_9.webp)\n\n### Ilustración del manual · página 236\n\n![Ilustración del manual, página 236](file:///android_asset/starter_packs/choir_of_flesh/art/b015__page_235_Figure_0.webp)",
+      "gameSystem": "Choir of Flesh",
+      "category": "Ilustraciones del manual",
+      "sortOrder": 1012,
+      "sourcePack": "Choir of Flesh"
+    }
+  ],
+  "illustrations": [
+    {
+      "source": "b000__page_0_Picture_0.jpeg",
+      "bookPage": 1,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_0_Picture_0.webp",
+      "sha256": "c807792d388d26b62cd4b86083a1214a83029ca5fb6ee96bc94a44400fd39aad",
+      "dimensions": [
+        1067,
+        1600
+      ],
+      "bytes": 631126
+    },
+    {
+      "source": "b000__page_1_Picture_0.jpeg",
+      "bookPage": 2,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_1_Picture_0.webp",
+      "sha256": "227545e876b2731bfccd67c84a94a34bbd9fa6643f477ea0755150c38cd9b5b0",
+      "dimensions": [
+        1067,
+        1600
+      ],
+      "bytes": 13592
+    },
+    {
+      "source": "b000__page_2_Picture_0.jpeg",
+      "bookPage": 3,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_2_Picture_0.webp",
+      "sha256": "cdf15039f89431463f6176c939074ac6455be37a4df2f3a7dcafddc48137f498",
+      "dimensions": [
+        804,
+        435
+      ],
+      "bytes": 33102
+    },
+    {
+      "source": "b000__page_2_Picture_1.jpeg",
+      "bookPage": 3,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_2_Picture_1.webp",
+      "sha256": "127644a6f950c777b9257758c6d2ae83436b7e5779dae3889d2e04e3b02ebc79",
+      "dimensions": [
+        315,
+        225
+      ],
+      "bytes": 17546
+    },
+    {
+      "source": "b000__page_3_Picture_11.jpeg",
+      "bookPage": 4,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_3_Picture_11.webp",
+      "sha256": "ea0bd8f03ae026f8c95733733126df94892e9ffdf987effd490edb9324498a96",
+      "dimensions": [
+        532,
+        180
+      ],
+      "bytes": 11592
+    },
+    {
+      "source": "b000__page_4_Picture_3.jpeg",
+      "bookPage": 5,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_4_Picture_3.webp",
+      "sha256": "d1704ad378b7c2c538cd2a790b84c45371d1327924e674d16b21712ea2d89588",
+      "dimensions": [
+        479,
+        913
+      ],
+      "bytes": 84192
+    },
+    {
+      "source": "b000__page_5_Picture_0.jpeg",
+      "bookPage": 6,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_5_Picture_0.webp",
+      "sha256": "7528b774caa3bc478b1fc6557868622c8ee47776ce2a2854f675a9ac760ffeeb",
+      "dimensions": [
+        1067,
+        1600
+      ],
+      "bytes": 813500
+    },
+    {
+      "source": "b000__page_9_Picture_0.jpeg",
+      "bookPage": 10,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_9_Picture_0.webp",
+      "sha256": "c13af9c76ef3190143bca95370457f5bd3358f81da8a02f24d9dd23c5db1986c",
+      "dimensions": [
+        1067,
+        1600
+      ],
+      "bytes": 732494
+    },
+    {
+      "source": "b000__page_10_Picture_0.jpeg",
+      "bookPage": 11,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_10_Picture_0.webp",
+      "sha256": "3064d9e80e1dec05e705b3d7174f8bb8fcf25431b7e89ffd90be3ef029e62764",
+      "dimensions": [
+        1067,
+        1600
+      ],
+      "bytes": 667054
+    },
+    {
+      "source": "b000__page_11_Picture_13.jpeg",
+      "bookPage": 12,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_11_Picture_13.webp",
+      "sha256": "9197a37b7495b57916b57424f444c21e576e832695e354c8b4adf5a185159a8d",
+      "dimensions": [
+        1152,
+        650
+      ],
+      "bytes": 327042
+    },
+    {
+      "source": "b001__page_19_Picture_4.jpeg",
+      "bookPage": 20,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b001__page_19_Picture_4.webp",
+      "sha256": "425d3ba6da4f3ac8ec68e3cbd92312b5ce1715a059d9c764b7c184549aaf5c61",
+      "dimensions": [
+        1146,
+        1372
+      ],
+      "bytes": 682386
+    },
+    {
+      "source": "b001__page_21_Picture_4.jpeg",
+      "bookPage": 22,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b001__page_21_Picture_4.webp",
+      "sha256": "063500a544e76137ece92ab6cce61ec416be7c3fb023a752b145333983f99a8b",
+      "dimensions": [
+        1152,
+        1408
+      ],
+      "bytes": 728382
+    },
+    {
+      "source": "b001__page_24_Picture_2.jpeg",
+      "bookPage": 25,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b001__page_24_Picture_2.webp",
+      "sha256": "0f03158a5e05de0d86e2cee7749e9246449cccd081618e79cb9974fc82481a24",
+      "dimensions": [
+        1152,
+        858
+      ],
+      "bytes": 385718
+    },
+    {
+      "source": "b001__page_27_Picture_4.jpeg",
+      "bookPage": 28,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b001__page_27_Picture_4.webp",
+      "sha256": "bd87f299ab87dfd4480ea97ce2368107ffd84ee7aaf1b3334b8100cee4aed728",
+      "dimensions": [
+        1152,
+        1196
+      ],
+      "bytes": 448560
+    },
+    {
+      "source": "b002__page_36_Picture_4.jpeg",
+      "bookPage": 37,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b002__page_36_Picture_4.webp",
+      "sha256": "427fd9dc302ddfb645e96216a9c80f538a732ea0e65f94e3a3117310efe9fcbd",
+      "dimensions": [
+        475,
+        883
+      ],
+      "bytes": 135284
+    },
+    {
+      "source": "b002__page_39_Picture_0.jpeg",
+      "bookPage": 40,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b002__page_39_Picture_0.webp",
+      "sha256": "02d27f225cd4cf6e6c1a49c0e28f9df04d0d8d3ff8329eca465b1d80f1347c5c",
+      "dimensions": [
+        1067,
+        1600
+      ],
+      "bytes": 718194
+    },
+    {
+      "source": "b002__page_40_Picture_0.jpeg",
+      "bookPage": 41,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b002__page_40_Picture_0.webp",
+      "sha256": "1333602b2b9883cae6fe63d681df9ca0778614732f9ed079600bde4962885f0d",
+      "dimensions": [
+        1067,
+        1600
+      ],
+      "bytes": 629242
+    },
+    {
+      "source": "b002__page_43_Picture_10.jpeg",
+      "bookPage": 44,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b002__page_43_Picture_10.webp",
+      "sha256": "d9a143ff8be40e9a4ea96b33bc57dbd06dd7d7fad710d66ebb28925eff277fc6",
+      "dimensions": [
+        1152,
+        812
+      ],
+      "bytes": 337996
+    },
+    {
+      "source": "b002__page_44_Picture_6.jpeg",
+      "bookPage": 45,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b002__page_44_Picture_6.webp",
+      "sha256": "3d6d8a0add1b875e8a8411ffff8fa113c42b989cc5582524060dab3b2f342e11",
+      "dimensions": [
+        1152,
+        789
+      ],
+      "bytes": 336622
+    },
+    {
+      "source": "b003__page_47_Picture_16.jpeg",
+      "bookPage": 48,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b003__page_47_Picture_16.webp",
+      "sha256": "862fe723fb9b0e852f929dfdb4c56054fc41c89ddaa7cefb621652349b1f7085",
+      "dimensions": [
+        480,
+        852
+      ],
+      "bytes": 149088
+    },
+    {
+      "source": "b003__page_49_Picture_15.jpeg",
+      "bookPage": 50,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b003__page_49_Picture_15.webp",
+      "sha256": "bf2d659b8403c686f675f0e66d22928f47a4f1f5ceeb4d8f5763fd2382d5dd2a",
+      "dimensions": [
+        452,
+        436
+      ],
+      "bytes": 2994
+    },
+    {
+      "source": "b003__page_52_Picture_1.jpeg",
+      "bookPage": 53,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b003__page_52_Picture_1.webp",
+      "sha256": "d9ee491958982f94630e98483e8d3d77a50db5c9ac49c7966a5e3014bf7974e3",
+      "dimensions": [
+        457,
+        469
+      ],
+      "bytes": 7528
+    },
+    {
+      "source": "b003__page_52_Picture_3.jpeg",
+      "bookPage": 53,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b003__page_52_Picture_3.webp",
+      "sha256": "f53f6cd35cfd7950b4f9d732d4c36a5bfe1cf9b73ddf39035b4d25b2fa094cd5",
+      "dimensions": [
+        459,
+        456
+      ],
+      "bytes": 6750
+    },
+    {
+      "source": "b003__page_52_Picture_6.jpeg",
+      "bookPage": 53,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b003__page_52_Picture_6.webp",
+      "sha256": "ddfefa32591dc3ca49607897aa6f9aba729d0f57d430c6d4ade83fc129434d12",
+      "dimensions": [
+        444,
+        466
+      ],
+      "bytes": 5876
+    },
+    {
+      "source": "b003__page_55_Figure_17.jpeg",
+      "bookPage": 56,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b003__page_55_Figure_17.webp",
+      "sha256": "90253a2aacf1eca0eab1086f9e94636b8f59fed3ae0cb07e1836021f9ae0fc85",
+      "dimensions": [
+        916,
+        187
+      ],
+      "bytes": 13576
+    },
+    {
+      "source": "b004__page_62_Picture_16.jpeg",
+      "bookPage": 63,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b004__page_62_Picture_16.webp",
+      "sha256": "c77b0a0cc8ce7bd12be920ccd98477a0b83d758e16d6cd09d445c94b5de6bc30",
+      "dimensions": [
+        485,
+        1529
+      ],
+      "bytes": 231640
+    },
+    {
+      "source": "b004__page_63_Picture_14.jpeg",
+      "bookPage": 64,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b004__page_63_Picture_14.webp",
+      "sha256": "f7a902fcb7de396624314dc80bffd4ca03cb0c7c6bf4d44b90d94c8c248b09a2",
+      "dimensions": [
+        1152,
+        563
+      ],
+      "bytes": 285676
+    },
+    {
+      "source": "b004__page_65_Picture_2.jpeg",
+      "bookPage": 66,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b004__page_65_Picture_2.webp",
+      "sha256": "711db2235a182472d8685a1290a2610472e7ea7f14d4a6e4bfe8635a04e3cc43",
+      "dimensions": [
+        1152,
+        737
+      ],
+      "bytes": 228932
+    },
+    {
+      "source": "b004__page_68_Picture_5.jpeg",
+      "bookPage": 69,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b004__page_68_Picture_5.webp",
+      "sha256": "91c05f849c1d5cb12edf88ae97b3aa3e0b511ed7aa3460654fe6d4ecf588403f",
+      "dimensions": [
+        1152,
+        1216
+      ],
+      "bytes": 494496
+    },
+    {
+      "source": "b004__page_72_Picture_2.jpeg",
+      "bookPage": 73,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b004__page_72_Picture_2.webp",
+      "sha256": "91a0156ffbad9fbb2b22ffeda12f68d5a3344e25186fded48371e40bbd2518fb",
+      "dimensions": [
+        1094,
+        649
+      ],
+      "bytes": 275552
+    },
+    {
+      "source": "b005__page_85_Picture_6.jpeg",
+      "bookPage": 86,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b005__page_85_Picture_6.webp",
+      "sha256": "6fae3f54914771b62fcf1b0c105d29d04ade3a8faa75518d17beca9b54373d29",
+      "dimensions": [
+        1152,
+        757
+      ],
+      "bytes": 255180
+    },
+    {
+      "source": "b006__page_93_Picture_0.jpeg",
+      "bookPage": 94,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b006__page_93_Picture_0.webp",
+      "sha256": "646335b5d8e66b862574e937f28021a5c808832e06cbad1ccd958e79825e9f7f",
+      "dimensions": [
+        1067,
+        1600
+      ],
+      "bytes": 656184
+    },
+    {
+      "source": "b006__page_94_Picture_0.jpeg",
+      "bookPage": 95,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b006__page_94_Picture_0.webp",
+      "sha256": "cbe397a03771043996612344df239a113d0127b9db88d51e6b3e5b579c545933",
+      "dimensions": [
+        1067,
+        1600
+      ],
+      "bytes": 714164
+    },
+    {
+      "source": "b006__page_97_Picture_5.jpeg",
+      "bookPage": 98,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b006__page_97_Picture_5.webp",
+      "sha256": "a8e2204053df4ad843e01c9648d0bee5a6b57d1e389173e6333158f73772dbac",
+      "dimensions": [
+        1152,
+        876
+      ],
+      "bytes": 343728
+    },
+    {
+      "source": "b006__page_103_Picture_2.jpeg",
+      "bookPage": 104,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b006__page_103_Picture_2.webp",
+      "sha256": "e6573edfd8b04e792800d8e45fb8eaa200293168c81855d78408e2c01e7b05d7",
+      "dimensions": [
+        1152,
+        615
+      ],
+      "bytes": 238358
+    },
+    {
+      "source": "b006__page_104_Picture_2.jpeg",
+      "bookPage": 105,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b006__page_104_Picture_2.webp",
+      "sha256": "1d4e0409fa0d8053fcd804f3772ac410b6ac3d682de3f351e1494e500b6f523b",
+      "dimensions": [
+        1152,
+        611
+      ],
+      "bytes": 252822
+    },
+    {
+      "source": "b007__page_109_Picture_10.jpeg",
+      "bookPage": 110,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b007__page_109_Picture_10.webp",
+      "sha256": "fcfae869e8149121beaf1379c363659d8a4ac9270f2adb7de866b15306a23587",
+      "dimensions": [
+        963,
+        696
+      ],
+      "bytes": 12732
+    },
+    {
+      "source": "b007__page_113_Picture_17.jpeg",
+      "bookPage": 114,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b007__page_113_Picture_17.webp",
+      "sha256": "d2369b25398f97eaf45acbcc19425c90f736603dda455c2c85d83ba6cd632ca2",
+      "dimensions": [
+        942,
+        406
+      ],
+      "bytes": 134590
+    },
+    {
+      "source": "b007__page_115_Picture_10.jpeg",
+      "bookPage": 116,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b007__page_115_Picture_10.webp",
+      "sha256": "bc68212852a69ece5514e1cb243a85b55f3347f8defaf7a26842fbe5e8fa3cd0",
+      "dimensions": [
+        943,
+        731
+      ],
+      "bytes": 221154
+    },
+    {
+      "source": "b007__page_118_Picture_10.jpeg",
+      "bookPage": 119,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b007__page_118_Picture_10.webp",
+      "sha256": "fc4324853d188f994d79152d370f4088215613039cee98257eb1f58d128baa50",
+      "dimensions": [
+        964,
+        653
+      ],
+      "bytes": 223656
+    },
+    {
+      "source": "b007__page_119_Picture_11.jpeg",
+      "bookPage": 120,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b007__page_119_Picture_11.webp",
+      "sha256": "d9e59bf476f2393883d1312d8a38518105fe58f3ebd217e0603e381ee575907d",
+      "dimensions": [
+        967,
+        518
+      ],
+      "bytes": 152268
+    },
+    {
+      "source": "b008__page_121_Picture_10.jpeg",
+      "bookPage": 122,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b008__page_121_Picture_10.webp",
+      "sha256": "b7ff7175a49b49a7ae37aac9854640858c1d22eef591725b6623eef595668318",
+      "dimensions": [
+        983,
+        573
+      ],
+      "bytes": 165750
+    },
+    {
+      "source": "b008__page_124_Picture_4.jpeg",
+      "bookPage": 125,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b008__page_124_Picture_4.webp",
+      "sha256": "ec0ee2668ca916189be6c8bb8734afe9c9a34fae29547c48581d9ddf88b5d909",
+      "dimensions": [
+        114,
+        136
+      ],
+      "bytes": 2134
+    },
+    {
+      "source": "b008__page_126_Picture_12.jpeg",
+      "bookPage": 127,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b008__page_126_Picture_12.webp",
+      "sha256": "80b3c7e28784b7f24ede92bc152e29bc042bb570777391cd854c7ea0444bcc6c",
+      "dimensions": [
+        969,
+        598
+      ],
+      "bytes": 207322
+    },
+    {
+      "source": "b008__page_128_Picture_3.jpeg",
+      "bookPage": 129,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b008__page_128_Picture_3.webp",
+      "sha256": "d7428ddb7187e077b2bc477aa88201dccf342e57b6fe6f9058de1635d7c73242",
+      "dimensions": [
+        988,
+        394
+      ],
+      "bytes": 113648
+    },
+    {
+      "source": "b008__page_129_Picture_1.jpeg",
+      "bookPage": 130,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b008__page_129_Picture_1.webp",
+      "sha256": "ac19473456ac5b005ce91fee39389dbba8af75ab7605d5efa6bf0331df2cc1f7",
+      "dimensions": [
+        961,
+        661
+      ],
+      "bytes": 256516
+    },
+    {
+      "source": "b008__page_131_Picture_10.jpeg",
+      "bookPage": 132,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b008__page_131_Picture_10.webp",
+      "sha256": "f7ac0b6e0e402f1341cd1daa90b9b5f5580c6e7de58afe32ea2897b42ab06e0e",
+      "dimensions": [
+        957,
+        843
+      ],
+      "bytes": 226700
+    },
+    {
+      "source": "b009__page_136_Picture_12.jpeg",
+      "bookPage": 137,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_136_Picture_12.webp",
+      "sha256": "af80a0876ca21289970e93427815cd841c7c67d1453369c9f16c49ea19133cc1",
+      "dimensions": [
+        955,
+        451
+      ],
+      "bytes": 135854
+    },
+    {
+      "source": "b009__page_138_Picture_6.jpeg",
+      "bookPage": 139,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_138_Picture_6.webp",
+      "sha256": "a194ee5d82b8e4f6c064402048c74528b4b2876fae2a484758e88f285c9f5885",
+      "dimensions": [
+        139,
+        136
+      ],
+      "bytes": 2836
+    },
+    {
+      "source": "b009__page_139_Picture_13.jpeg",
+      "bookPage": 140,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_139_Picture_13.webp",
+      "sha256": "d4c3a269b0ee07e347ed68f3f65ffa1b4089971f1c401291fc57ecddb95ad7c9",
+      "dimensions": [
+        957,
+        488
+      ],
+      "bytes": 149788
+    },
+    {
+      "source": "b009__page_140_Picture_1.jpeg",
+      "bookPage": 141,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_140_Picture_1.webp",
+      "sha256": "3ae0afe796622f014a14f62624b95426df28f9d2392e2f51b957409c09ed48a8",
+      "dimensions": [
+        149,
+        125
+      ],
+      "bytes": 2778
+    },
+    {
+      "source": "b009__page_140_Picture_10.jpeg",
+      "bookPage": 141,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_140_Picture_10.webp",
+      "sha256": "ca8296875354ed94b3041ba56be026316f44651500fa049fea3ab1af49baa823",
+      "dimensions": [
+        144,
+        141
+      ],
+      "bytes": 2930
+    },
+    {
+      "source": "b009__page_142_Picture_11.jpeg",
+      "bookPage": 143,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_142_Picture_11.webp",
+      "sha256": "a609ed343b56dcb5d3ac5536f3952387c2ce492681b62500575f952c7206519b",
+      "dimensions": [
+        137,
+        126
+      ],
+      "bytes": 2818
+    },
+    {
+      "source": "b009__page_142_Picture_3.jpeg",
+      "bookPage": 143,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_142_Picture_3.webp",
+      "sha256": "8a122c5ba3695dd752762838890527a8b65dada2dda4d0dd54f9aff9d53edfb9",
+      "dimensions": [
+        143,
+        141
+      ],
+      "bytes": 3096
+    },
+    {
+      "source": "b009__page_147_Picture_13.jpeg",
+      "bookPage": 148,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_147_Picture_13.webp",
+      "sha256": "34ff60d02093a0264cb5804c7a8b4bd02ea4c32d88a60e2d15c3ae6d09a5df4f",
+      "dimensions": [
+        133,
+        134
+      ],
+      "bytes": 3152
+    },
+    {
+      "source": "b009__page_148_Picture_1.jpeg",
+      "bookPage": 149,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_148_Picture_1.webp",
+      "sha256": "e0a27ad9773e05b2d27f236965212a01c3f102195c53ff6f3ff5d5f54d45db27",
+      "dimensions": [
+        149,
+        119
+      ],
+      "bytes": 3198
+    },
+    {
+      "source": "b009__page_148_Picture_11.jpeg",
+      "bookPage": 149,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_148_Picture_11.webp",
+      "sha256": "ed0753b766dfc88c5a439fcaf0e5a7d3d4931d27b13f8e0540ff1d0d99ec5a30",
+      "dimensions": [
+        101,
+        128
+      ],
+      "bytes": 2124
+    },
+    {
+      "source": "b009__page_148_Picture_20.jpeg",
+      "bookPage": 149,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_148_Picture_20.webp",
+      "sha256": "bdd670d1601d5c18eb7bfeae17080a0a5b73abbe7bce0712cf4feb1e71d2f5ad",
+      "dimensions": [
+        132,
+        119
+      ],
+      "bytes": 3042
+    },
+    {
+      "source": "b010__page_151_Picture_12.jpeg",
+      "bookPage": 152,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_151_Picture_12.webp",
+      "sha256": "8da26afc34df580ae1f2d7d1ab75a44d515c5d91e633ada3f78206947fbb2d74",
+      "dimensions": [
+        999,
+        435
+      ],
+      "bytes": 151160
+    },
+    {
+      "source": "b010__page_151_Picture_13.jpeg",
+      "bookPage": 152,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_151_Picture_13.webp",
+      "sha256": "e73bd05238f1ed854e6d48be0287ff3c2a7173e0e453127a33f1374f03c14552",
+      "dimensions": [
+        127,
+        120
+      ],
+      "bytes": 3492
+    },
+    {
+      "source": "b010__page_152_Picture_1.jpeg",
+      "bookPage": 153,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_152_Picture_1.webp",
+      "sha256": "33050fe29ba3297f1742c9638bdaf5671bbbf94aaef84f873068c8cf8f3511fc",
+      "dimensions": [
+        336,
+        34
+      ],
+      "bytes": 4420
+    },
+    {
+      "source": "b010__page_155_Picture_1.jpeg",
+      "bookPage": 156,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_155_Picture_1.webp",
+      "sha256": "ed33801fd258df11e0d0b53edd7edb122d734ff1c076055d8f446c9b3c915d8f",
+      "dimensions": [
+        125,
+        139
+      ],
+      "bytes": 2760
+    },
+    {
+      "source": "b010__page_156_Picture_13.jpeg",
+      "bookPage": 157,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_156_Picture_13.webp",
+      "sha256": "dc845a3020fb310b75cc93d69001a6782087b8c02da0339c4878620f5baa69fe",
+      "dimensions": [
+        119,
+        125
+      ],
+      "bytes": 3074
+    },
+    {
+      "source": "b010__page_158_Picture_10.jpeg",
+      "bookPage": 159,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_158_Picture_10.webp",
+      "sha256": "340a0cad2c6a4d858aa539c06e63969b173bf962088f3f48f7a4088f9fbb3db6",
+      "dimensions": [
+        961,
+        812
+      ],
+      "bytes": 233880
+    },
+    {
+      "source": "b010__page_160_Picture_13.jpeg",
+      "bookPage": 161,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_160_Picture_13.webp",
+      "sha256": "c634746aa4d3aa855a41d452f49ab5b474433673a872fa3c6c10cb4d22ac4718",
+      "dimensions": [
+        142,
+        130
+      ],
+      "bytes": 3522
+    },
+    {
+      "source": "b010__page_162_Picture_1.jpeg",
+      "bookPage": 163,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_162_Picture_1.webp",
+      "sha256": "cf38f9d9cfa20201baff17e7238ef28757f07dae67483fceea44c4d32a888539",
+      "dimensions": [
+        137,
+        132
+      ],
+      "bytes": 3318
+    },
+    {
+      "source": "b010__page_162_Picture_11.jpeg",
+      "bookPage": 163,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_162_Picture_11.webp",
+      "sha256": "c78076e2630a570d0967e1fdbad8285cb9132fa7638fe995bf4b068d83e5f2ae",
+      "dimensions": [
+        967,
+        337
+      ],
+      "bytes": 86958
+    },
+    {
+      "source": "b010__page_164_Picture_13.jpeg",
+      "bookPage": 165,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_164_Picture_13.webp",
+      "sha256": "bfd59066d961cdbff1268b863ed6d7268e3708df3c31c796a80e02989a293f87",
+      "dimensions": [
+        140,
+        135
+      ],
+      "bytes": 2766
+    },
+    {
+      "source": "b011__page_166_Picture_1.jpeg",
+      "bookPage": 167,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_166_Picture_1.webp",
+      "sha256": "28307e7829a9e8ae855afb5e44f2bc0aa228ba9742d4796b6573dc462ee439a4",
+      "dimensions": [
+        142,
+        124
+      ],
+      "bytes": 3324
+    },
+    {
+      "source": "b011__page_166_Picture_8.jpeg",
+      "bookPage": 167,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_166_Picture_8.webp",
+      "sha256": "d3692f01f02a163422f3894abf84a2617eea706f5acddaafb12549d6e588fb4f",
+      "dimensions": [
+        142,
+        147
+      ],
+      "bytes": 2804
+    },
+    {
+      "source": "b011__page_167_Picture_1.jpeg",
+      "bookPage": 168,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_167_Picture_1.webp",
+      "sha256": "d6c50e7338d9caa91d58e40af1cbcd2ca6a31b2a9fb5696b391494eeeefb6b40",
+      "dimensions": [
+        964,
+        952
+      ],
+      "bytes": 248618
+    },
+    {
+      "source": "b011__page_168_Picture_0.jpeg",
+      "bookPage": 169,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_168_Picture_0.webp",
+      "sha256": "304420f0b8b0972e36d41891d469f42ebdf9c9c66f34138bbb54f3e66053a69b",
+      "dimensions": [
+        1067,
+        1600
+      ],
+      "bytes": 618618
+    },
+    {
+      "source": "b011__page_169_Picture_0.jpeg",
+      "bookPage": 170,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_169_Picture_0.webp",
+      "sha256": "7a97d162c6377842646586d92e888804c5b51791894e9c75514e5dcb949f4f44",
+      "dimensions": [
+        1067,
+        1600
+      ],
+      "bytes": 594284
+    },
+    {
+      "source": "b011__page_170_Picture_0.jpeg",
+      "bookPage": 171,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_170_Picture_0.webp",
+      "sha256": "7bd63fceda1833b944487c9dfc1859ffafd37a4a038ab82f333e0483579ac031",
+      "dimensions": [
+        1067,
+        1600
+      ],
+      "bytes": 571910
+    },
+    {
+      "source": "b011__page_171_Picture_17.jpeg",
+      "bookPage": 172,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_171_Picture_17.webp",
+      "sha256": "91e50311ee2afa53714a16c554d7d3ccd7827dfe79e9aa0a11992f4727bd8306",
+      "dimensions": [
+        575,
+        554
+      ],
+      "bytes": 107246
+    },
+    {
+      "source": "b011__page_172_Picture_4.jpeg",
+      "bookPage": 173,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_172_Picture_4.webp",
+      "sha256": "a3cf105f2f133b388ec657399a81aef97721ca259e1afb5197b6b249be4aed27",
+      "dimensions": [
+        1151,
+        568
+      ],
+      "bytes": 227822
+    },
+    {
+      "source": "b011__page_174_Picture_0.jpeg",
+      "bookPage": 175,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_174_Picture_0.webp",
+      "sha256": "3163bdeeae7bf995d9487cddc7066e4ccfe9276f0a4d0763d8f215bbfea277cc",
+      "dimensions": [
+        1152,
+        555
+      ],
+      "bytes": 157190
+    },
+    {
+      "source": "b011__page_175_Picture_1.jpeg",
+      "bookPage": 176,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_175_Picture_1.webp",
+      "sha256": "0807f0d417b39533ffea4b8c05e0ac6527fd5eb987dc53baf549068c65cb208a",
+      "dimensions": [
+        865,
+        549
+      ],
+      "bytes": 102266
+    },
+    {
+      "source": "b011__page_176_Picture_1.jpeg",
+      "bookPage": 177,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_176_Picture_1.webp",
+      "sha256": "b86f0ddfc3dd01f226ac4e0b9a71e1d179afb8090ca303b92c249feebe953c93",
+      "dimensions": [
+        880,
+        584
+      ],
+      "bytes": 73858
+    },
+    {
+      "source": "b011__page_177_Picture_1.jpeg",
+      "bookPage": 178,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_177_Picture_1.webp",
+      "sha256": "f39801338cc2405fe08f16ee410046cb8e0037b108a2b94118c76c89c958d117",
+      "dimensions": [
+        868,
+        566
+      ],
+      "bytes": 89464
+    },
+    {
+      "source": "b011__page_178_Picture_1.jpeg",
+      "bookPage": 179,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_178_Picture_1.webp",
+      "sha256": "1e6b6b650e899cca6f682d7d388fba4c8f2aac7a65d39a0e9224e1cd4ee545c5",
+      "dimensions": [
+        646,
+        611
+      ],
+      "bytes": 64324
+    },
+    {
+      "source": "b011__page_179_Picture_1.jpeg",
+      "bookPage": 180,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_179_Picture_1.webp",
+      "sha256": "78a39b76e40d68660db8b576ffcd89980f70586f26453e53e31685f5402f5725",
+      "dimensions": [
+        886,
+        555
+      ],
+      "bytes": 52344
+    },
+    {
+      "source": "b012__page_180_Picture_1.jpeg",
+      "bookPage": 181,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_180_Picture_1.webp",
+      "sha256": "d54dc68350d31262be060a167ae00b8a7fb2a22fdaa0fd874ae2e3f6255921f5",
+      "dimensions": [
+        943,
+        586
+      ],
+      "bytes": 63268
+    },
+    {
+      "source": "b012__page_181_Picture_1.jpeg",
+      "bookPage": 182,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_181_Picture_1.webp",
+      "sha256": "4680a1b52c2e0ae1e523a19ab3c63a06d6eda137e399d2b538920b7dd28679d1",
+      "dimensions": [
+        1009,
+        652
+      ],
+      "bytes": 111524
+    },
+    {
+      "source": "b012__page_182_Picture_1.jpeg",
+      "bookPage": 183,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_182_Picture_1.webp",
+      "sha256": "1245a79ce750a727140731532c7fbd3f57dff7902846be718288465ffe028c92",
+      "dimensions": [
+        873,
+        613
+      ],
+      "bytes": 78644
+    },
+    {
+      "source": "b012__page_183_Picture_1.jpeg",
+      "bookPage": 184,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_183_Picture_1.webp",
+      "sha256": "1f01f10652aadba0a5d6ca64ed8727869fd842d146839cec2b85af725ea95745",
+      "dimensions": [
+        822,
+        633
+      ],
+      "bytes": 78362
+    },
+    {
+      "source": "b012__page_184_Picture_1.jpeg",
+      "bookPage": 185,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_184_Picture_1.webp",
+      "sha256": "793c63f4cdc8cb1e06d9449486b15639734ee27a1b2fa8a558dd890de356ffa4",
+      "dimensions": [
+        715,
+        608
+      ],
+      "bytes": 60310
+    },
+    {
+      "source": "b012__page_185_Picture_1.jpeg",
+      "bookPage": 186,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_185_Picture_1.webp",
+      "sha256": "3a607d7b31d037c2def485b7b284fdb120eaafd91d9cf2c4d56adbc6ee845db2",
+      "dimensions": [
+        923,
+        548
+      ],
+      "bytes": 105244
+    },
+    {
+      "source": "b012__page_186_Picture_1.jpeg",
+      "bookPage": 187,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_186_Picture_1.webp",
+      "sha256": "c25d676329706596e17e0029da465fe0829ca2c406fbe5b138eec3b6f08ae290",
+      "dimensions": [
+        905,
+        575
+      ],
+      "bytes": 74688
+    },
+    {
+      "source": "b012__page_187_Picture_1.jpeg",
+      "bookPage": 188,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_187_Picture_1.webp",
+      "sha256": "f9c0197f7328b101e99da437039d6df40e1ae4dfd11c8b667af7e6fc08d97fc4",
+      "dimensions": [
+        985,
+        482
+      ],
+      "bytes": 93174
+    },
+    {
+      "source": "b012__page_188_Picture_1.jpeg",
+      "bookPage": 189,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_188_Picture_1.webp",
+      "sha256": "68bc8c1b94f714902f3d689cde05473f4587c3533cb2dad342fc3777c139da24",
+      "dimensions": [
+        893,
+        628
+      ],
+      "bytes": 92222
+    },
+    {
+      "source": "b012__page_189_Picture_1.jpeg",
+      "bookPage": 190,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_189_Picture_1.webp",
+      "sha256": "f3f0212200370140ec2a92e91c1b69f0ff6f8bc21e6c7ea0e1b05e53c769cea2",
+      "dimensions": [
+        780,
+        622
+      ],
+      "bytes": 93190
+    },
+    {
+      "source": "b012__page_190_Picture_1.jpeg",
+      "bookPage": 191,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_190_Picture_1.webp",
+      "sha256": "20f09301edc69bcbb6051126d82f849edaa79b8d47f86aedb752327202e606c8",
+      "dimensions": [
+        937,
+        508
+      ],
+      "bytes": 71504
+    },
+    {
+      "source": "b012__page_191_Picture_1.jpeg",
+      "bookPage": 192,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_191_Picture_1.webp",
+      "sha256": "5ea9424a41c9c947381d8e2997b851f3651a4061c6eef3ef7e0481d7817bbddc",
+      "dimensions": [
+        898,
+        525
+      ],
+      "bytes": 80980
+    },
+    {
+      "source": "b012__page_192_Picture_1.jpeg",
+      "bookPage": 193,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_192_Picture_1.webp",
+      "sha256": "ad56a920785495d5bb5d06c0d1bee153bf7c52d52bc000b789324d30527f46e8",
+      "dimensions": [
+        940,
+        455
+      ],
+      "bytes": 56732
+    },
+    {
+      "source": "b012__page_193_Picture_1.jpeg",
+      "bookPage": 194,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_193_Picture_1.webp",
+      "sha256": "c625cd31527d27151735cd12f61b8dd6f277db86021a87e9d14e5f34b0035b1f",
+      "dimensions": [
+        902,
+        586
+      ],
+      "bytes": 77438
+    },
+    {
+      "source": "b012__page_194_Picture_1.jpeg",
+      "bookPage": 195,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_194_Picture_1.webp",
+      "sha256": "3ca9d5ee16a21bd194e2936e4667c0fe0ea0e8c7465c8011f02660a1f0441162",
+      "dimensions": [
+        976,
+        456
+      ],
+      "bytes": 73284
+    },
+    {
+      "source": "b013__page_195_Picture_1.jpeg",
+      "bookPage": 196,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_195_Picture_1.webp",
+      "sha256": "77bbc9326ffba704876530c19024cf86d789ae8f0c1c0b191a28eb5f28fe0df6",
+      "dimensions": [
+        1016,
+        652
+      ],
+      "bytes": 81350
+    },
+    {
+      "source": "b013__page_196_Picture_1.jpeg",
+      "bookPage": 197,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_196_Picture_1.webp",
+      "sha256": "b678697909a9cb60151f573bbd9fbe51622e39f834db5fe659376e8378b7c885",
+      "dimensions": [
+        892,
+        636
+      ],
+      "bytes": 133800
+    },
+    {
+      "source": "b013__page_197_Picture_1.jpeg",
+      "bookPage": 198,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_197_Picture_1.webp",
+      "sha256": "8b0005fb85ad65aeffae23ffd2515c23fcd4bfd211dd850b63598e1cbfa2e5a7",
+      "dimensions": [
+        934,
+        618
+      ],
+      "bytes": 81494
+    },
+    {
+      "source": "b013__page_198_Picture_1.jpeg",
+      "bookPage": 199,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_198_Picture_1.webp",
+      "sha256": "87b958af66b8b229caa4c2bb3910807bad05998d75ead20e7ac9e570bc63b394",
+      "dimensions": [
+        677,
+        592
+      ],
+      "bytes": 66834
+    },
+    {
+      "source": "b013__page_199_Picture_1.jpeg",
+      "bookPage": 200,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_199_Picture_1.webp",
+      "sha256": "fd52b7619c1cd7aa94a5d25d9508520bcd4b11be79b2cc8c5609c65ff674b0db",
+      "dimensions": [
+        932,
+        572
+      ],
+      "bytes": 93714
+    },
+    {
+      "source": "b013__page_200_Picture_1.jpeg",
+      "bookPage": 201,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_200_Picture_1.webp",
+      "sha256": "f5facb05dacfc7a0e1f160fa0623917074cd6b804bfa3f10b86cbf5978319f2f",
+      "dimensions": [
+        959,
+        566
+      ],
+      "bytes": 77966
+    },
+    {
+      "source": "b013__page_201_Picture_1.jpeg",
+      "bookPage": 202,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_201_Picture_1.webp",
+      "sha256": "68d5daa768a17541b773d24e18baef7ca882ce837cc4e244ea19bd8faf4acf28",
+      "dimensions": [
+        975,
+        596
+      ],
+      "bytes": 97230
+    },
+    {
+      "source": "b013__page_202_Picture_1.jpeg",
+      "bookPage": 203,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_202_Picture_1.webp",
+      "sha256": "4f256f487147786d0230f849a30f4ab572760c9794bc3c126755e79ab84f580e",
+      "dimensions": [
+        982,
+        620
+      ],
+      "bytes": 89978
+    },
+    {
+      "source": "b013__page_203_Picture_1.jpeg",
+      "bookPage": 204,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_203_Picture_1.webp",
+      "sha256": "821d69257a634fe81f2b78aca0979b666eddfcee4ed3c2878ada388b31199e35",
+      "dimensions": [
+        960,
+        611
+      ],
+      "bytes": 77640
+    },
+    {
+      "source": "b013__page_204_Picture_1.jpeg",
+      "bookPage": 205,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_204_Picture_1.webp",
+      "sha256": "40aed7bff3a19dbde01835e0ad0cbff0477bf7ba789e26697bf62e1adddebce9",
+      "dimensions": [
+        910,
+        587
+      ],
+      "bytes": 92974
+    },
+    {
+      "source": "b013__page_205_Picture_0.jpeg",
+      "bookPage": 206,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_205_Picture_0.webp",
+      "sha256": "8158ce5ed922a9b5752c44c19494fddca6a520f95f45b7403f31ee212b9106c0",
+      "dimensions": [
+        1067,
+        1600
+      ],
+      "bytes": 680292
+    },
+    {
+      "source": "b013__page_206_Picture_0.jpeg",
+      "bookPage": 207,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_206_Picture_0.webp",
+      "sha256": "b0fc6aeae5d381a7dedb9f86a748656e614481bf9e26f9e8342dc73d8a894a43",
+      "dimensions": [
+        1067,
+        1600
+      ],
+      "bytes": 646762
+    },
+    {
+      "source": "b013__page_208_Picture_5.jpeg",
+      "bookPage": 209,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_208_Picture_5.webp",
+      "sha256": "44c369d81ac45183bb3467f14a53018b356aa35ae3b76bceb0a5534f33b3f111",
+      "dimensions": [
+        939,
+        583
+      ],
+      "bytes": 186586
+    },
+    {
+      "source": "b013__page_209_Picture_2.jpeg",
+      "bookPage": 210,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_209_Picture_2.webp",
+      "sha256": "ec26e3eed4a81e60de4a3bdb706f8ff78ee19b1eddaa90a924b9607833d158ce",
+      "dimensions": [
+        1152,
+        737
+      ],
+      "bytes": 257606
+    },
+    {
+      "source": "b014__page_210_Picture_17.jpeg",
+      "bookPage": 211,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b014__page_210_Picture_17.webp",
+      "sha256": "5a1a20b209398ee03f806816ac2d7444197bb56a79c2f5d5857b2595f3f7299d",
+      "dimensions": [
+        424,
+        858
+      ],
+      "bytes": 114504
+    },
+    {
+      "source": "b014__page_212_Picture_23.jpeg",
+      "bookPage": 213,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b014__page_212_Picture_23.webp",
+      "sha256": "87feb99fd32826e8553bf6c703fce1fa5061f3aedc40d7dfc63626072ece23c9",
+      "dimensions": [
+        1152,
+        736
+      ],
+      "bytes": 296966
+    },
+    {
+      "source": "b014__page_218_Picture_7.jpeg",
+      "bookPage": 219,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b014__page_218_Picture_7.webp",
+      "sha256": "5b5a8ccc43c283d0291940f3aed558fff3caf8d6674ec64050917a8287b8c75e",
+      "dimensions": [
+        471,
+        464
+      ],
+      "bytes": 69276
+    },
+    {
+      "source": "b014__page_222_Picture_9.jpeg",
+      "bookPage": 223,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b014__page_222_Picture_9.webp",
+      "sha256": "93b1a622858b5357dbddc40c5a8848d4f9bf46f8fe9ed95cead7c64745b9687c",
+      "dimensions": [
+        1152,
+        552
+      ],
+      "bytes": 118706
+    },
+    {
+      "source": "b015__page_235_Figure_0.jpeg",
+      "bookPage": 236,
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b015__page_235_Figure_0.webp",
+      "sha256": "21530303472f1b0a3b9dbeb4d01ce48570adba004e643712eb91cddf224297ae",
+      "dimensions": [
+        1086,
+        1448
+      ],
+      "bytes": 89108
+    }
+  ]
+}

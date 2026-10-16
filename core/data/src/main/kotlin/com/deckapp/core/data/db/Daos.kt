@@ -319,8 +319,11 @@ interface RandomTableDao {
     @Query("DELETE FROM random_tables WHERE sourcePack = :packName")
     suspend fun deleteByPack(packName: String)
 
-    @Query("SELECT * FROM random_tables WHERE name = :name AND (sourcePack = :packName OR sourcePack IS NULL) LIMIT 1")
+    @Query("SELECT * FROM random_tables WHERE name = :name AND (sourcePack = :packName OR sourcePack IS NULL) ORDER BY CASE WHEN sourcePack = :packName THEN 0 ELSE 1 END LIMIT 1")
     suspend fun getTableByPackAndName(packName: String, name: String): RandomTableEntity?
+
+    @Query("SELECT * FROM random_tables WHERE name = :name AND sourcePack = :packName LIMIT 1")
+    suspend fun getOwnedTableByPackAndName(packName: String, name: String): RandomTableEntity?
 
     @Query("SELECT DISTINCT sourcePack FROM random_tables WHERE sourcePack IS NOT NULL AND sourcePack != ''")
     fun getDistinctSourcePacks(): Flow<List<String>>

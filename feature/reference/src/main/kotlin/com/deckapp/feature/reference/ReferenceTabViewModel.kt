@@ -109,7 +109,7 @@ class ReferenceTabViewModel @Inject constructor(
     fun installPack(assetName: String) {
         viewModelScope.launch {
             try {
-                val jsonString = context.assets.open("starter_packs/$assetName").bufferedReader().use { it.readText() }
+                val jsonString = context.assets.open("starter_packs/$assetName").bufferedReader().use { it.readText() }.trimStart('\uFEFF')
                 val pack = json.decodeFromString<FullBackupDto>(jsonString)
                 installStarterPackUseCase(pack, assetName)
                 _showStarterPackDialog.value = false

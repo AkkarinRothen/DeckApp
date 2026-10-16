@@ -88,6 +88,7 @@ data class TacticalUiState(
     val showCreateMapDialog: Boolean = false,
     val mapToRename: TacticalMap? = null,
     val mapToLinkScene: TacticalMap? = null,
+    val mapToDelete: TacticalMap? = null,
     // Vínculos de Aventura en Pines
     val availableTables: List<RandomTable> = emptyList(),
     val availableEncounters: List<Encounter> = emptyList(),

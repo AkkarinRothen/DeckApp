@@ -552,7 +552,11 @@ fun ReferenceTableEntity.toDomain(
     description = description,
     gameSystem = gameSystem,
     category = category,
-    columns = runCatching { json.decodeFromString<List<ReferenceColumn>>(columnsJson) }.getOrDefault(emptyList()),
+    columns = runCatching {
+        json.decodeFromString<List<ReferenceColumn>>(columnsJson).mapIndexed { i, col ->
+            if (col.index == 0 && i > 0) col.copy(index = i) else col
+        }
+    }.getOrDefault(emptyList()),
     rows = rows.map { it.toDomain() },
     tags = tags,
     isPinned = isPinned,

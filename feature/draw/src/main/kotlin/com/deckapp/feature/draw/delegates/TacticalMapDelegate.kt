@@ -575,14 +575,20 @@ class TacticalMapDelegate(
         }
     }
 
-    fun updateMapImage(imageUri: String) {
-        val map = _uiState.value.tacticalState.map ?: return
+    fun updateMapImage(imageUri: String, targetMapId: Long? = null) {
+        val mapId = targetMapId ?: _uiState.value.tacticalState.map?.id ?: return
+        val map = _uiState.value.tacticalState.availableMaps.find { it.id == mapId }
+            ?: _uiState.value.tacticalState.map ?: return
         scope.launch {
             _uiState.update { it.copy(snackbarMessage = "Procesando imagen a WebP...") }
+            val oldImageUri = map.imageUri
             val processedImageUri = optimizeImageToWebP(imageUri)
             tacticalMapRepository.upsertTacticalMap(
                 map.copy(imageUri = processedImageUri)
             )
+            if (oldImageUri.isNotBlank() && oldImageUri != processedImageUri && oldImageUri.contains("tactical_maps")) {
+                fileRepository?.deleteFile(oldImageUri)
+            }
             _uiState.update { it.copy(snackbarMessage = "Imagen de mapa actualizada y optimizada (WebP)") }
         }
     }
@@ -1106,14 +1112,52 @@ class TacticalMapDelegate(
     }
 
     fun deleteMap(mapId: Long) {
+        val map = _uiState.value.tacticalState.availableMaps.find { it.id == mapId }
+        if (map != null) {
+            openDeleteMapDialog(map)
+        } else {
+            confirmDeleteMap(mapId)
+        }
+    }
+
+    fun openDeleteMapDialog(map: TacticalMap) {
+        _uiState.update { it.copy(tacticalState = it.tacticalState.copy(mapToDelete = map)) }
+    }
+
+    fun dismissDeleteMapDialog() {
+        _uiState.update { it.copy(tacticalState = it.tacticalState.copy(mapToDelete = null)) }
+    }
+
+    fun confirmDeleteMap(mapId: Long) {
         scope.launch {
-            tacticalMapRepository.deleteTacticalMap(mapId)
-            if (currentSelectedMapId == mapId) {
-                currentSelectedMapId = null
-                saveActiveMapPreference(null)
+            val map = _uiState.value.tacticalState.availableMaps.find { it.id == mapId }
+            val mapName = map?.name ?: "Mapa"
+
+            // 1. Borrar archivo físico si está en almacenamiento interno
+            map?.imageUri?.let { path ->
+                if (path.isNotBlank() && path.contains("tactical_maps")) {
+                    fileRepository?.deleteFile(path)
+                }
             }
+
+            // 2. Borrar de la base de datos Room (elimina en cascada tokens y pines)
+            tacticalMapRepository.deleteTacticalMap(mapId)
+
+            // 3. Si era el mapa activo, cambiar al primer mapa restante
+            val remainingMaps = _uiState.value.tacticalState.availableMaps.filter { it.id != mapId }
+            if (currentSelectedMapId == mapId) {
+                val nextMapId = remainingMaps.firstOrNull()?.id
+                currentSelectedMapId = nextMapId
+                saveActiveMapPreference(nextMapId)
+            }
+
             dismissMultimapDialogs()
-            _uiState.update { it.copy(snackbarMessage = "Mapa eliminado") }
+            _uiState.update {
+                it.copy(
+                    tacticalState = it.tacticalState.copy(mapToDelete = null),
+                    snackbarMessage = "Mapa '$mapName' eliminado"
+                )
+            }
         }
     }
 
@@ -1144,7 +1188,8 @@ class TacticalMapDelegate(
                     showMapSelectorSheet = false,
                     showCreateMapDialog = false,
                     mapToRename = null,
-                    mapToLinkScene = null
+                    mapToLinkScene = null,
+                    mapToDelete = null
                 )
             )
         }

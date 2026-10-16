@@ -21,13 +21,13 @@ class ReferenceRepositoryImpl @Inject constructor(
 ) : ReferenceRepository {
 
     override fun getAllReferenceTables(): Flow<List<ReferenceTable>> =
-        tableDao.getAllTables().map { entities ->
-            entities.map { it.toDomain() }
+        tableDao.getAllTablesWithRows().map { entities ->
+            entities.map { it.table.toDomain(rows = it.rows) }
         }
 
     override fun getTablesBySystem(system: String): Flow<List<ReferenceTable>> =
-        tableDao.getTablesBySystem(system).map { entities ->
-            entities.map { it.toDomain() }
+        tableDao.getTablesWithRowsBySystem(system).map { entities ->
+            entities.map { it.table.toDomain(rows = it.rows) }
         }
 
     override suspend fun getReferenceTableWithRows(id: Long): ReferenceTable? {
@@ -37,8 +37,8 @@ class ReferenceRepositoryImpl @Inject constructor(
     }
 
     override fun searchReferenceTables(query: String): Flow<List<ReferenceTable>> =
-        tableDao.searchTables(query).map { entities ->
-            entities.map { it.toDomain() }
+        tableDao.searchTablesWithRows(query).map { entities ->
+            entities.map { it.table.toDomain(rows = it.rows) }
         }
 
     override suspend fun saveReferenceTable(table: ReferenceTable): Long {
@@ -141,20 +141,24 @@ class ReferenceRepositoryImpl @Inject constructor(
 
             backup.referenceTables.forEach { dto ->
                 val existing = tableDao.getTableByPackAndName(packName, dto.name)
-                val tableId = tableDao.insertTable(
-                    ReferenceTableEntity(
-                        id = existing?.id ?: 0,
-                        name = dto.name,
-                        description = dto.description,
-                        gameSystem = dto.gameSystem,
-                        category = dto.category,
-                        columnsJson = dto.columnsJson,
-                        isPinned = dto.isPinned,
-                        sortOrder = dto.sortOrder,
-                        createdAt = existing?.createdAt ?: System.currentTimeMillis(),
-                        sourcePack = packName
-                    )
+                val entity = ReferenceTableEntity(
+                    id = existing?.id ?: 0,
+                    name = dto.name,
+                    description = dto.description,
+                    gameSystem = dto.gameSystem,
+                    category = dto.category,
+                    columnsJson = dto.columnsJson,
+                    isPinned = dto.isPinned,
+                    sortOrder = dto.sortOrder,
+                    createdAt = existing?.createdAt ?: System.currentTimeMillis(),
+                    sourcePack = packName
                 )
+                val tableId = if (existing == null) {
+                    tableDao.insertTable(entity)
+                } else {
+                    tableDao.updateTable(entity)
+                    existing.id
+                }
                 tableIdMap[dto.id] = tableId
                 tableDao.deleteRowsForTable(tableId)
             }
@@ -175,66 +179,22 @@ class ReferenceRepositoryImpl @Inject constructor(
 
             backup.systemRules.forEach { dto ->
                 val existing = ruleDao.getRuleByPackAndTitle(packName, dto.title)
-                ruleDao.insertRule(
-                    SystemRuleEntity(
-                        id = existing?.id ?: 0,
-                        title = dto.title,
-                        content = dto.content,
-                        gameSystem = dto.gameSystem,
-                        category = dto.category,
-                        isPinned = dto.isPinned,
-                        sortOrder = dto.sortOrder,
-                        lastUpdated = System.currentTimeMillis(),
-                        sourcePack = packName
-                    )
+                val entity = SystemRuleEntity(
+                    id = existing?.id ?: 0,
+                    title = dto.title,
+                    content = dto.content,
+                    gameSystem = dto.gameSystem,
+                    category = dto.category,
+                    isPinned = dto.isPinned,
+                    sortOrder = dto.sortOrder,
+                    lastUpdated = System.currentTimeMillis(),
+                    sourcePack = packName
                 )
+                if (existing == null) ruleDao.insertRule(entity) else ruleDao.updateRule(entity)
             }
 
-            // 3. Tablas Aleatorias
-            val randomTableIdMap = mutableMapOf<Long, Long>()
-            backup.randomTables.forEach { dto ->
-                val existing = randomTableDao.getTableByPackAndName(packName, dto.name)
-                val tableId = randomTableDao.insertTable(
-                    RandomTableEntity(
-                        id = existing?.id ?: 0,
-                        bundleId = null,
-                        name = dto.name,
-                        category = dto.category,
-                        description = dto.description,
-                        rollFormula = dto.rollFormula,
-                        rollMode = dto.rollMode,
-                        isNoRepeat = dto.isNoRepeat,
-                        isPinned = dto.isPinned,
-                        sourceType = "JSON",
-                        sourceName = packName,
-                        isBuiltIn = true,
-                        sortOrder = dto.sortOrder,
-                        createdAt = existing?.createdAt ?: System.currentTimeMillis(),
-                        sourcePack = packName
-                    )
-                )
-                randomTableIdMap[dto.id] = tableId
-                randomTableDao.deleteEntriesForTable(tableId)
-            }
-
-            backup.tableEntries.forEach { dto ->
-                val newTableId = randomTableIdMap[dto.tableId]
-                if (newTableId != null) {
-                    randomTableDao.insertEntries(listOf(
-                        TableEntryEntity(
-                            id = 0,
-                            tableId = newTableId,
-                            minRoll = dto.minRoll,
-                            maxRoll = dto.maxRoll,
-                            weight = dto.weight,
-                            text = dto.text,
-                            subTableRef = dto.subTableRef,
-                            subTableId = dto.subTableId?.let { randomTableIdMap[it] },
-                            sortOrder = dto.sortOrder
-                        )
-                    ))
-                }
-            }
+            // 3. Tablas Aleatorias: preserve database identities when reinstalling.
+            importRandomTables(backup, packName, replaceExisting = true)
 
             // 4. NPCs / Criaturas del paquete
             if (backup.npcs.isNotEmpty()) {
@@ -285,6 +245,96 @@ class ReferenceRepositoryImpl @Inject constructor(
                     npcDao.insertCrossRef(NpcTagCrossRef(npcId = npcId, tagId = tagId))
                 }
             }
+        }
+    }
+
+    private suspend fun importRandomTables(
+        backup: com.deckapp.core.model.backup.FullBackupDto,
+        packName: String,
+        replaceExisting: Boolean
+    ) {
+        val randomTableIdMap = mutableMapOf<Long, Long>()
+        val writtenTableIds = mutableSetOf<Long>()
+        backup.randomTables.forEach { dto ->
+            val existing = if (replaceExisting) randomTableDao.getTableByPackAndName(packName, dto.name)
+                else randomTableDao.getOwnedTableByPackAndName(packName, dto.name)
+            if (existing != null && !replaceExisting) {
+                randomTableIdMap[dto.id] = existing.id
+                return@forEach
+            }
+            val entity = RandomTableEntity(
+                id = existing?.id ?: 0,
+                bundleId = null,
+                name = dto.name,
+                category = dto.category,
+                description = dto.description,
+                rollFormula = dto.rollFormula,
+                rollMode = dto.rollMode,
+                isNoRepeat = dto.isNoRepeat,
+                isPinned = dto.isPinned,
+                sourceType = "JSON",
+                sourceName = packName,
+                isBuiltIn = true,
+                sortOrder = dto.sortOrder,
+                createdAt = existing?.createdAt ?: System.currentTimeMillis(),
+                sourcePack = packName
+            )
+            val tableId = if (existing == null) {
+                randomTableDao.insertTable(entity)
+            } else {
+                randomTableDao.updateTable(entity)
+                existing.id
+            }
+            randomTableIdMap[dto.id] = tableId
+            writtenTableIds += tableId
+            randomTableDao.deleteEntriesForTable(tableId)
+        }
+
+        backup.tableEntries.forEach { dto ->
+            val newTableId = randomTableIdMap[dto.tableId]
+            if (newTableId != null && newTableId in writtenTableIds) {
+                randomTableDao.insertEntries(listOf(
+                    TableEntryEntity(
+                        id = 0,
+                        tableId = newTableId,
+                        minRoll = dto.minRoll,
+                        maxRoll = dto.maxRoll,
+                        weight = dto.weight,
+                        text = dto.text,
+                        subTableRef = dto.subTableRef,
+                        subTableId = dto.subTableId?.let { randomTableIdMap[it] },
+                        sortOrder = dto.sortOrder
+                    )
+                ))
+            }
+        }
+    }
+
+    override suspend fun updateStarterPackArtwork(artwork: com.deckapp.core.model.backup.FullBackupDto, packName: String) {
+        db.withTransaction {
+            // Recheck ownership in the transaction so an uninstall cannot resurrect the pack.
+            val ownedNpcs = db.npcDao().getNpcsByTagName(packName).associateBy { it.name }
+            if (ownedNpcs.isEmpty() && ruleDao.getAllRulesSync().none { it.sourcePack == packName } &&
+                tableDao.getAllTablesSync().none { it.sourcePack == packName }) return@withTransaction
+            artwork.npcs.forEach { dto ->
+                val existing = ownedNpcs[dto.name] ?: return@forEach
+                val image = dto.imagePath ?: return@forEach
+                if (existing.imagePath.isNullOrBlank() ||
+                    existing.imagePath?.startsWith("file:///android_asset/starter_packs/choir_of_flesh/") == true) {
+                    if (existing.imagePath != image) db.npcDao().upsertNpc(existing.copy(imagePath = image))
+                }
+            }
+            artwork.systemRules.forEach { dto ->
+                if (ruleDao.getRuleByPackAndTitle(packName, dto.title) == null) {
+                    ruleDao.insertRule(SystemRuleEntity(
+                        title = dto.title, content = dto.content, gameSystem = dto.gameSystem,
+                        category = dto.category, sortOrder = dto.sortOrder, sourcePack = packName,
+                        lastUpdated = System.currentTimeMillis()
+                    ))
+                }
+            }
+            // Older installed versions can predate the pack's random tables.
+            importRandomTables(artwork, packName, replaceExisting = false)
         }
     }
 

@@ -29,7 +29,10 @@ data class SessionSetupUiState(
     val selectedGameSystems: List<String> = listOf("General"),
     val isLoading: Boolean = true,
     val createdSessionId: Long? = null
-)
+) {
+    val canCreate: Boolean get() = sessionName.isNotBlank() &&
+        (availableDecks.any { it.isSelected } || selectedGameSystems.any { it.isNotBlank() && it != "General" })
+}
 
 @HiltViewModel
 class SessionSetupViewModel @Inject constructor(
@@ -104,7 +107,7 @@ class SessionSetupViewModel @Inject constructor(
     fun createSession() {
         val state = _uiState.value
         val selectedDecks = state.availableDecks.filter { it.isSelected }
-        if (state.sessionName.isBlank() || selectedDecks.isEmpty()) return
+        if (!state.canCreate) return
 
         viewModelScope.launch {
             val session = Session(

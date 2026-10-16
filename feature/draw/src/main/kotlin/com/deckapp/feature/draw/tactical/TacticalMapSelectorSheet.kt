@@ -1,5 +1,7 @@
 package com.deckapp.feature.draw.tactical
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -10,14 +12,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.deckapp.core.model.Scene
 import com.deckapp.core.model.TacticalMap
 
@@ -29,12 +33,25 @@ fun TacticalMapSelectorSheet(
     scenes: List<Scene>,
     onSelectMap: (Long) -> Unit,
     onCreateNewMap: () -> Unit,
+    onChangeMapImage: (Long, String) -> Unit = { _, _ -> },
     onRenameMap: (TacticalMap) -> Unit,
     onLinkScene: (TacticalMap) -> Unit,
     onDeleteMap: (Long) -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var mapForImagePicker by remember { mutableStateOf<TacticalMap?>(null) }
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let { selectedUri ->
+            mapForImagePicker?.let { targetMap ->
+                onChangeMapImage(targetMap.id, selectedUri.toString())
+            }
+        }
+        mapForImagePicker = null
+    }
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
@@ -44,9 +61,9 @@ fun TacticalMapSelectorSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 10.dp)
+                .padding(horizontal = 20.dp, vertical = 8.dp)
         ) {
-            // Cabecera
+            // Cabecera del Bottom Sheet
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -58,7 +75,7 @@ fun TacticalMapSelectorSheet(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(42.dp)
                             .clip(CircleShape)
                             .background(MaterialTheme.colorScheme.primaryContainer),
                         contentAlignment = Alignment.Center
@@ -67,7 +84,7 @@ fun TacticalMapSelectorSheet(
                             Icons.Default.Layers,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.size(22.dp)
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                     Column {
@@ -77,7 +94,7 @@ fun TacticalMapSelectorSheet(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "${availableMaps.size} mapa(s) disponibles",
+                            text = "${availableMaps.size} mapa(s) cargados",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.outline
                         )
@@ -86,25 +103,25 @@ fun TacticalMapSelectorSheet(
 
                 FilledTonalButton(
                     onClick = onCreateNewMap,
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                    modifier = Modifier.height(34.dp)
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
+                    modifier = Modifier.height(36.dp)
                 ) {
                     Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(Modifier.width(4.dp))
-                    Text("Nuevo Mapa", fontSize = 12.sp)
+                    Spacer(Modifier.width(6.dp))
+                    Text("Nuevo Mapa", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
 
             Spacer(Modifier.height(14.dp))
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(12.dp))
 
             // Lista de Mapas
             if (availableMaps.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 32.dp),
+                        .padding(vertical = 36.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -117,23 +134,25 @@ fun TacticalMapSelectorSheet(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 380.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                        .heightIn(max = 440.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(availableMaps, key = { it.id }) { mapItem ->
                         val isCurrent = mapItem.id == currentMapId
                         val linkedScene = scenes.find { it.id == mapItem.sceneId }
 
                         Surface(
-                            shape = RoundedCornerShape(14.dp),
+                            shape = RoundedCornerShape(16.dp),
                             color = if (isCurrent) {
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.28f)
                             } else {
                                 MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
                             },
                             border = if (isCurrent) {
                                 androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
-                            } else null,
+                            } else {
+                                androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
@@ -143,121 +162,173 @@ fun TacticalMapSelectorSheet(
                                     onDismiss()
                                 }
                         ) {
-                            Column(modifier = Modifier.padding(14.dp)) {
+                            Column(modifier = Modifier.padding(12.dp)) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                        modifier = Modifier.weight(1f)
+                                    // Miniatura Bento de 80x80dp con WebP o fallback
+                                    Box(
+                                        modifier = Modifier
+                                            .size(80.dp)
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                                        contentAlignment = Alignment.Center
                                     ) {
-                                        Icon(
-                                            if (mapItem.imageUri.isNotBlank()) Icons.Default.Image else Icons.Default.GridOn,
-                                            contentDescription = null,
-                                            tint = if (isCurrent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.size(24.dp)
-                                        )
-
-                                        Column {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                            ) {
-                                                Text(
-                                                    text = mapItem.name,
-                                                    style = MaterialTheme.typography.bodyLarge,
-                                                    fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.SemiBold
-                                                )
-                                                if (isCurrent) {
-                                                    Surface(
-                                                        shape = RoundedCornerShape(6.dp),
-                                                        color = MaterialTheme.colorScheme.primary
-                                                    ) {
-                                                        Text(
-                                                            "ACTIVO",
-                                                            color = MaterialTheme.colorScheme.onPrimary,
-                                                            style = MaterialTheme.typography.labelSmall,
-                                                            fontSize = 10.sp,
-                                                            fontWeight = FontWeight.Bold,
-                                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                                        )
-                                                    }
-                                                }
-                                            }
-
-                                            Text(
-                                                text = "${mapItem.gridType.name.lowercase().replace('_', ' ')} • ${mapItem.scaleFtPerCell}ft/celda",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = MaterialTheme.colorScheme.outline
+                                        if (mapItem.imageUri.isNotBlank()) {
+                                            AsyncImage(
+                                                model = mapItem.imageUri,
+                                                contentDescription = mapItem.name,
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier.fillMaxSize()
+                                            )
+                                        } else {
+                                            Icon(
+                                                Icons.Default.GridOn,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.65f),
+                                                modifier = Modifier.size(34.dp)
                                             )
                                         }
                                     }
 
-                                    // Botón para renombrar
-                                    IconButton(
-                                        onClick = { onRenameMap(mapItem) },
-                                        modifier = Modifier.size(32.dp)
-                                    ) {
-                                        Icon(Icons.Default.Edit, contentDescription = "Renombrar", modifier = Modifier.size(16.dp))
-                                    }
+                                    Spacer(Modifier.width(12.dp))
 
-                                    // Botón para vincular a escena
-                                    IconButton(
-                                        onClick = { onLinkScene(mapItem) },
-                                        modifier = Modifier.size(32.dp)
+                                    // Metadatos y títulos
+                                    Column(
+                                        modifier = Modifier.weight(1f),
+                                        verticalArrangement = Arrangement.spacedBy(4.dp)
                                     ) {
-                                        Icon(
-                                            Icons.Default.Link,
-                                            contentDescription = "Vincular Escena",
-                                            tint = if (linkedScene != null) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline,
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                    }
-
-                                    // Botón eliminar (si hay más de 1 mapa)
-                                    if (availableMaps.size > 1) {
-                                        IconButton(
-                                            onClick = { onDeleteMap(mapItem.id) },
-                                            modifier = Modifier.size(32.dp)
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                                         ) {
-                                            Icon(
-                                                Icons.Default.DeleteOutline,
-                                                contentDescription = "Eliminar",
-                                                tint = MaterialTheme.colorScheme.error,
-                                                modifier = Modifier.size(16.dp)
+                                            Text(
+                                                text = mapItem.name,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.SemiBold,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                                modifier = Modifier.weight(1f, fill = false)
                                             )
+
+                                            if (isCurrent) {
+                                                Surface(
+                                                    shape = RoundedCornerShape(6.dp),
+                                                    color = MaterialTheme.colorScheme.primary
+                                                ) {
+                                                    Text(
+                                                        "ACTIVO",
+                                                        color = MaterialTheme.colorScheme.onPrimary,
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        fontSize = 10.sp,
+                                                        fontWeight = FontWeight.Bold,
+                                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                                    )
+                                                }
+                                            }
+                                        }
+
+                                        Text(
+                                            text = "${mapItem.gridType.name.lowercase().replace('_', ' ')} • ${mapItem.scaleFtPerCell}ft/celda",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+
+                                        if (linkedScene != null) {
+                                            Surface(
+                                                shape = RoundedCornerShape(6.dp),
+                                                color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.65f)
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                                ) {
+                                                    Icon(
+                                                        Icons.Default.Movie,
+                                                        contentDescription = null,
+                                                        tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                                                        modifier = Modifier.size(12.dp)
+                                                    )
+                                                    Text(
+                                                        text = "Escena: ${linkedScene.title}",
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                                        fontSize = 10.sp,
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis
+                                                    )
+                                                }
+                                            }
                                         }
                                     }
                                 }
 
-                                // Indicador de escena vinculada
-                                if (linkedScene != null) {
-                                    Spacer(Modifier.height(6.dp))
-                                    Surface(
-                                        shape = RoundedCornerShape(8.dp),
-                                        color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.6f)
+                                // Barra de acciones inferior
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+                                )
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.End,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // Cambiar imagen de fondo
+                                    IconButton(
+                                        onClick = {
+                                            mapForImagePicker = mapItem
+                                            imagePickerLauncher.launch("image/*")
+                                        },
+                                        modifier = Modifier.size(34.dp)
                                     ) {
-                                        Row(
-                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                        ) {
-                                            Icon(
-                                                Icons.Default.Movie,
-                                                contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.onTertiaryContainer,
-                                                modifier = Modifier.size(12.dp)
-                                            )
-                                            Text(
-                                                text = "Escena: ${linkedScene.title}",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = MaterialTheme.colorScheme.onTertiaryContainer,
-                                                fontSize = 11.sp
-                                            )
-                                        }
+                                        Icon(
+                                            Icons.Default.AddPhotoAlternate,
+                                            contentDescription = "Cambiar imagen",
+                                            modifier = Modifier.size(18.dp),
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+
+                                    // Renombrar
+                                    IconButton(
+                                        onClick = { onRenameMap(mapItem) },
+                                        modifier = Modifier.size(34.dp)
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Edit,
+                                            contentDescription = "Renombrar",
+                                            modifier = Modifier.size(18.dp),
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+
+                                    // Vincular a escena
+                                    IconButton(
+                                        onClick = { onLinkScene(mapItem) },
+                                        modifier = Modifier.size(34.dp)
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Link,
+                                            contentDescription = "Vincular escena",
+                                            tint = if (linkedScene != null) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+
+                                    // Eliminar mapa
+                                    IconButton(
+                                        onClick = { onDeleteMap(mapItem.id) },
+                                        modifier = Modifier.size(34.dp)
+                                    ) {
+                                        Icon(
+                                            Icons.Default.DeleteOutline,
+                                            contentDescription = "Eliminar",
+                                            tint = MaterialTheme.colorScheme.error,
+                                            modifier = Modifier.size(18.dp)
+                                        )
                                     }
                                 }
                             }
@@ -266,7 +337,67 @@ fun TacticalMapSelectorSheet(
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(18.dp))
         }
     }
+}
+
+/**
+ * Diálogo modal de confirmación destructiva para eliminar mapas tácticos.
+ * Advierte sobre la pérdida de tokens, pines y liberación del archivo WebP en disco.
+ */
+@Composable
+fun TacticalDeleteMapConfirmDialog(
+    map: TacticalMap,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                Icons.Default.WarningAmber,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.size(32.dp)
+            )
+        },
+        title = {
+            Text(
+                text = "Eliminar Mapa Táctico",
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "¿Deseas eliminar permanentemente \"${map.name}\"?",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = "Esta acción eliminará el mapa de la sesión, sus tokens y pines vinculados, y liberará el almacenamiento de la imagen en disco. Esta operación no se puede deshacer.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
+                )
+            ) {
+                Text("Eliminar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        }
+    )
 }

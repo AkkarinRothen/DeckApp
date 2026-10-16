@@ -76,7 +76,7 @@ data class SessionUiState(
     // Universal Hub - Sidebar State
     val activeLeftSidebar: SidebarTool = SidebarTool.NONE,
     val activeRightSidebar: SidebarTool = SidebarTool.NONE,
-    val mainViewMode: SessionViewMode = SessionViewMode.MAP,
+    val mainViewMode: SessionViewMode = SessionViewMode.BOARD,
     val linkedHexMapId: Long? = null,
     val sessionId: Long = 0,
     // Module Aggregate States
@@ -156,6 +156,7 @@ enum class SessionBoardTemplatePreset {
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class SessionViewModel @Inject constructor(
+    private val syncSessionSystemTables: com.deckapp.core.domain.usecase.SyncSessionSystemTablesUseCase,
     private val sessionRepository: SessionRepository,
     private val cardRepository: CardRepository,
     private val mythicRepository: com.deckapp.core.domain.repository.MythicRepository,
@@ -346,6 +347,10 @@ class SessionViewModel @Inject constructor(
                     ) }
                 }
         }
+
+        syncSessionSystemTables(sessionId)
+            .catch { _uiState.update { it.copy(snackbarMessage = "No se pudieron cargar las tablas del sistema.") } }
+            .launchIn(viewModelScope)
 
         // Tablas asignadas a la sesión
         viewModelScope.launch {

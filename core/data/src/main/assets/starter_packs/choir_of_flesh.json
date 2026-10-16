@@ -1487,7 +1487,8 @@
             "armorClass": 12,
             "initiativeBonus": -2,
             "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Melee Bruto\n- **Precisión**: 1 | **Ataque**: Promedio (NO 14)\n- **Constitución**: Muy Difícil (NO 18) | **CD**: Promedio (12)\n- **Destreza**: Fácil (NO 10) | **Iniciativa**: 5\n- **Movimiento**: 2 casillas | **Número**: 1\n- **XP**: 3 XP | **Botín**: Ninguno\n\n### Táctica\nArremete en línea recta hacia el enemigo más cercano. Sus golpes desgarran armaduras y causan Daño Contundente.",
-            "isMonster": true
+            "isMonster": true,
+            "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_175_Picture_1.webp"
         },
         {
             "id": -2302,
@@ -1497,7 +1498,8 @@
             "armorClass": 11,
             "initiativeBonus": 1,
             "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Melee Hostigador\n- **Precisión**: 2 | **Ataque**: Promedio (NO 14)\n- **Constitución**: Promedio (NO 14) | **CD**: Promedio (11)\n- **Destreza**: Promedio (NO 14) | **Iniciativa**: 12\n- **Movimiento**: 2 casillas | **Número**: 1-3\n- **XP**: 2 XP | **Botín**: Tirar en Saqueo\n\n### Táctica\nFlanquea a sus presas y tiende emboscadas con cuchillas de hueso.",
-            "isMonster": true
+            "isMonster": true,
+            "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_176_Picture_1.webp"
         },
         {
             "id": -2303,
@@ -1506,7 +1508,8 @@
             "maxHp": 14,
             "armorClass": 13,
             "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Distancia / Control\n- **Precisión**: 3 | **Ataque**: Difícil (NO 16)\n- **Constitución**: Promedio (NO 14) | **CD**: Difícil (13)\n- **Destreza**: Promedio (NO 14) | **Iniciativa**: 8\n- **Movimiento**: 3 casillas | **Número**: 1\n- **XP**: 3 XP | **Botín**: D6 Agujas de Hueso\n\n### Táctica\nDispara púas óseas desde salientes y trepa muros con agilidad pasmosa.",
-            "isMonster": true
+            "isMonster": true,
+            "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_177_Picture_1.webp"
         },
         {
             "id": -2304,
@@ -1515,7 +1518,8 @@
             "armorClass": 12,
             "initiativeBonus": 2,
             "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Enjambre Aéreo\n- **Precisión**: 2 | **Ataque**: Promedio (NO 14)\n- **Constitución**: Fácil (NO 10) | **CD**: Promedio (12)\n- **Destreza**: Difícil (NO 16) | **Iniciativa**: 14\n- **Movimiento**: 4 casillas (Vuelo) | **Número**: Enjambre\n- **XP**: 2 XP | **Botín**: Plumas y tendones\n\n### Táctica\nDesciende en picada sobre objetivos vulnerables, picoteando ojos y cuellos.",
-            "isMonster": true
+            "isMonster": true,
+            "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_179_Picture_1.webp"
         },
         {
             "id": -2305,
@@ -1524,7 +1528,8 @@
             "maxHp": 16,
             "initiativeBonus": -1,
             "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Melee / Toxina\n- **Precisión**: 2 | **Ataque**: Promedio (NO 14)\n- **Constitución**: Difícil (NO 16) | **CD**: Fácil (10)\n- **Destreza**: Fácil (NO 10) | **Iniciativa**: 6\n- **Movimiento**: 2 casillas | **Número**: 1-2\n- **XP**: 3 XP | **Botín**: Vesícula corrosiva\n\n### Táctica\nVomita ácido al ser herido. Su explosión póstuma salpica a casillas adyacentes.",
-            "isMonster": true
+            "isMonster": true,
+            "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_183_Picture_1.webp"
         },
         {
             "id": -2306,
@@ -1534,7 +1539,8 @@
             "armorClass": 13,
             "initiativeBonus": -3,
             "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Tanque Excavador\n- **Precisión**: 1 | **Ataque**: Difícil (NO 16)\n- **Constitución**: Muy Difícil (NO 18) | **CD**: Difícil (13)\n- **Destreza**: Fácil (NO 10) | **Iniciativa**: 4\n- **Movimiento**: 2 casillas (Excavar) | **Número**: 1\n- **XP**: 4 XP | **Botín**: Cuero resistente\n\n### Táctica\nEmerge bajo los pies del Inquebrantable para engullirlo y derribarlo.",
-            "isMonster": true
+            "isMonster": true,
+            "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_185_Picture_1.webp"
         },
         {
             "id": -2307,
@@ -1544,7 +1550,8 @@
             "armorClass": 14,
             "initiativeBonus": -1,
             "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Bruto Acorazado\n- **Precisión**: 2 | **Ataque**: Difícil (NO 16)\n- **Constitución**: Muy Difícil (NO 18) | **CD**: Difícil (14)\n- **Destreza**: Fácil (NO 10) | **Iniciativa**: 7\n- **Movimiento**: 2 casillas | **Número**: 1\n- **XP**: 5 XP | **Botín**: Diente de Rechinador (Reliquia)\n\n### Táctica\nSu mordisco tritura armaduras reduciendo la CD del defensor en 1 por impacto.",
-            "isMonster": true
+            "isMonster": true,
+            "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_186_Picture_1.webp"
         },
         {
             "id": -2308,
@@ -1554,7 +1561,8 @@
             "armorClass": 12,
             "initiativeBonus": -4,
             "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Emboscador Estático\n- **Precisión**: 3 | **Ataque**: Difícil (NO 16)\n- **Constitución**: Difícil (NO 16) | **CD**: Promedio (12)\n- **Destreza**: Muy Fácil (NO 5) | **Iniciativa**: 3\n- **Movimiento**: Inmóvil | **Número**: 1\n- **XP**: 4 XP | **Botín**: Restos digeridos de víctimas\n\n### Táctica\nAtrapa las piernas de quien pise su casilla, infligiendo Restringido automático.",
-            "isMonster": true
+            "isMonster": true,
+            "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_187_Picture_1.webp"
         },
         {
             "id": -2309,
@@ -1563,7 +1571,8 @@
             "maxHp": 12,
             "armorClass": 11,
             "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Disolución / Ácido\n- **Precisión**: 2 | **Ataque**: Promedio (NO 14)\n- **Constitución**: Fácil (NO 10) | **CD**: Promedio (11)\n- **Destreza**: Promedio (NO 14) | **Iniciativa**: 9\n- **Movimiento**: 3 casillas | **Número**: 1-2\n- **XP**: 2 XP | **Botín**: Frasco de ácido puro\n\n### Táctica\nDesliza su cuerpo sobre las armas del rival para desintegrar su filo.",
-            "isMonster": true
+            "isMonster": true,
+            "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_192_Picture_1.webp"
         },
         {
             "id": -2310,
@@ -1573,7 +1582,8 @@
             "armorClass": 12,
             "initiativeBonus": -3,
             "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Generador / Matrona\n- **Precisión**: 1 | **Ataque**: Fácil (NO 10)\n- **Constitución**: Muy Difícil (NO 18) | **CD**: Promedio (12)\n- **Destreza**: Muy Fácil (NO 5) | **Iniciativa**: 4\n- **Movimiento**: 1 casilla | **Número**: 1\n- **XP**: 5 XP | **Botín**: Semilla de Carne viva\n\n### Táctica\nExpulsa D4 larvas parasitarias cada dos rondas para abrumar por número.",
-            "isMonster": true
+            "isMonster": true,
+            "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_194_Picture_1.webp"
         },
         {
             "id": -2311,
@@ -1583,7 +1593,8 @@
             "armorClass": 15,
             "initiativeBonus": 3,
             "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Asesino Letal\n- **Precisión**: 4 | **Ataque**: Muy Difícil (NO 18)\n- **Constitución**: Difícil (NO 16) | **CD**: Difícil (15)\n- **Destreza**: Muy Difícil (NO 18) | **Iniciativa**: 16\n- **Movimiento**: 3 casillas | **Número**: 1\n- **XP**: 8 XP | **Botín**: Glándula de sigilo\n\n### Táctica\nAtaca desde la retaguardia con bonificador de emboscada (+3 Maestría).",
-            "isMonster": true
+            "isMonster": true,
+            "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_200_Picture_1.webp"
         },
         {
             "id": -2312,
@@ -1593,7 +1604,8 @@
             "armorClass": 11,
             "initiativeBonus": 2,
             "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Rastreador Rápido\n- **Precisión**: 2 | **Ataque**: Promedio (NO 14)\n- **Constitución**: Promedio (NO 14) | **CD**: Promedio (11)\n- **Destreza**: Difícil (NO 16) | **Iniciativa**: 13\n- **Movimiento**: 4 casillas | **Número**: 2-4\n- **XP**: 2 XP | **Botín**: Dientes afilados\n\n### Táctica\nCaza en jauría. Otorga +1 de Maestría a sus aliados al flanquear.",
-            "isMonster": true
+            "isMonster": true,
+            "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_201_Picture_1.webp"
         },
         {
             "id": -2313,
@@ -1603,7 +1615,8 @@
             "armorClass": 11,
             "initiativeBonus": 1,
             "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Soporte / Himno\n- **Precisión**: 2 | **Ataque**: Promedio (NO 14)\n- **Constitución**: Promedio (NO 14) | **CD**: Promedio (11)\n- **Destreza**: Promedio (NO 14) | **Iniciativa**: 10\n- **Movimiento**: 2 casillas | **Número**: 1-3\n- **XP**: 3 XP | **Botín**: Hábito sagrado\n\n### Táctica\nSu cántico obliga a un chequeo de VOL a todos los presentes para no ganar Angustia.",
-            "isMonster": true
+            "isMonster": true,
+            "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_178_Picture_1.webp"
         },
         {
             "id": -2314,
@@ -1612,7 +1625,8 @@
             "maxHp": 16,
             "armorClass": 13,
             "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Niebla / Tanque\n- **Precisión**: 2 | **Ataque**: Promedio (NO 14)\n- **Constitución**: Difícil (NO 16) | **CD**: Difícil (13)\n- **Destreza**: Promedio (NO 14) | **Iniciativa**: 8\n- **Movimiento**: 2 casillas | **Número**: 1\n- **XP**: 3 XP | **Botín**: Incensario de plata\n\n### Táctica\nCrea una nube de humo sagrado que bloquea la visión y quema los pulmones.",
-            "isMonster": true
+            "isMonster": true,
+            "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_180_Picture_1.webp"
         },
         {
             "id": -2315,
@@ -1621,7 +1635,8 @@
             "armorClass": 14,
             "initiativeBonus": 3,
             "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Hostigador Aéreo\n- **Precisión**: 3 | **Ataque**: Promedio (NO 14)\n- **Constitución**: Fácil (NO 10) | **CD**: Difícil (14)\n- **Destreza**: Muy Difícil (NO 18) | **Iniciativa**: 15\n- **Movimiento**: 4 casillas (Vuelo) | **Número**: 2-3\n- **XP**: 2 XP | **Botín**: Pluma de plata\n\n### Táctica\nCorta gargantas al pasar a toda velocidad y eleva la voz con risas celestiales.",
-            "isMonster": true
+            "isMonster": true,
+            "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_181_Picture_1.webp"
         },
         {
             "id": -2316,
@@ -1631,7 +1646,8 @@
             "armorClass": 12,
             "initiativeBonus": 1,
             "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Controlador Mental\n- **Precisión**: 3 | **Ataque**: Difícil (NO 16)\n- **Constitución**: Difícil (NO 16) | **CD**: Promedio (12)\n- **Destreza**: Promedio (NO 14) | **Iniciativa**: 11\n- **Movimiento**: 2 casillas | **Número**: 1\n- **XP**: 3 XP | **Botín**: El Cristal del Confesor (Reliquia)\n\n### Táctica\nExige penitencia verbal al rival, infligiendo Aturdido si el Inquebrantable falla VOL.",
-            "isMonster": true
+            "isMonster": true,
+            "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_182_Picture_1.webp"
         },
         {
             "id": -2317,
@@ -1640,7 +1656,8 @@
             "maxHp": 15,
             "initiativeBonus": 2,
             "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Furia Suicida\n- **Precisión**: 2 | **Ataque**: Promedio (NO 14)\n- **Constitución**: Promedio (NO 14) | **CD**: Fácil (10)\n- **Destreza**: Difícil (NO 16) | **Iniciativa**: 14\n- **Movimiento**: 3 casillas | **Número**: 2-4\n- **XP**: 3 XP | **Botín**: Azote de hierro\n\n### Táctica\nGana +1 de Maestría por cada herida que sufre, combatiendo hasta la muerte.",
-            "isMonster": true
+            "isMonster": true,
+            "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_184_Picture_1.webp"
         },
         {
             "id": -2318,
@@ -1650,7 +1667,8 @@
             "armorClass": 14,
             "initiativeBonus": 1,
             "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Comandante Sagrado\n- **Precisión**: 3 | **Ataque**: Difícil (NO 16)\n- **Constitución**: Difícil (NO 16) | **CD**: Difícil (14)\n- **Destreza**: Promedio (NO 14) | **Iniciativa**: 12\n- **Movimiento**: 3 casillas | **Número**: 1\n- **XP**: 4 XP | **Botín**: Trompeta del Heraldo\n\n### Táctica\nSu toque de clarín concede turno gratuito a todos los aliados del Coro.",
-            "isMonster": true
+            "isMonster": true,
+            "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_188_Picture_1.webp"
         },
         {
             "id": -2319,
@@ -1659,7 +1677,8 @@
             "maxHp": 18,
             "armorClass": 16,
             "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Soldado Pesado\n- **Precisión**: 3 | **Ataque**: Difícil (NO 16)\n- **Constitución**: Difícil (NO 16) | **CD**: Muy Difícil (16)\n- **Destreza**: Promedio (NO 14) | **Iniciativa**: 9\n- **Movimiento**: 2 casillas | **Número**: 1-2\n- **XP**: 3 XP | **Botín**: Espada de cruzado bendita\n\n### Táctica\nForma muro de escudos; reduce el daño de ataques frontales a la mitad.",
-            "isMonster": true
+            "isMonster": true,
+            "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_191_Picture_1.webp"
         },
         {
             "id": -2320,
@@ -1668,7 +1687,8 @@
             "maxHp": 22,
             "armorClass": 13,
             "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Aflicción Sagrada\n- **Precisión**: 2 | **Ataque**: Promedio (NO 14)\n- **Constitución**: Muy Difícil (NO 18) | **CD**: Difícil (13)\n- **Destreza**: Fácil (NO 10) | **Iniciativa**: 8\n- **Movimiento**: 2 casillas | **Número**: 1\n- **XP**: 4 XP | **Botín**: Lágrimas de plata bendita\n\n### Táctica\nSus lágrimas calcinan a los pecadores que se acerquen a menos de 2 casillas.",
-            "isMonster": true
+            "isMonster": true,
+            "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_193_Picture_1.webp"
         },
         {
             "id": -2321,
@@ -1678,7 +1698,8 @@
             "armorClass": 17,
             "initiativeBonus": -3,
             "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Coloso Defensivo\n- **Precisión**: 2 | **Ataque**: Difícil (NO 16)\n- **Constitución**: Casi Imposible (NO 20) | **CD**: Muy Difícil (17)\n- **Destreza**: Muy Fácil (NO 5) | **Iniciativa**: 3\n- **Movimiento**: 1 casilla | **Número**: 1\n- **XP**: 5 XP | **Botín**: Fragmento de altar sagrado\n\n### Táctica\nGolpea el suelo provocando una onda de choque que derriba a todos los enemigos.",
-            "isMonster": true
+            "isMonster": true,
+            "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_196_Picture_1.webp"
         },
         {
             "id": -2322,
@@ -1688,7 +1709,8 @@
             "armorClass": 12,
             "initiativeBonus": 1,
             "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Juicio y Sentencia\n- **Precisión**: 3 | **Ataque**: Promedio (NO 14)\n- **Constitución**: Promedio (NO 14) | **CD**: Promedio (12)\n- **Destreza**: Promedio (NO 14) | **Iniciativa**: 11\n- **Movimiento**: 2 casillas | **Número**: 1\n- **XP**: 3 XP | **Botín**: Libro de cuentas celestiales\n\n### Táctica\nLee en voz alta las culpas del Inquebrantable, duplicando la Angustia que reciba.",
-            "isMonster": true
+            "isMonster": true,
+            "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_198_Picture_1.webp"
         },
         {
             "id": -2323,
@@ -1698,7 +1720,8 @@
             "armorClass": 16,
             "initiativeBonus": 3,
             "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Jefe Supremo / Fuego Divino\n- **Precisión**: 4 | **Ataque**: Muy Difícil (NO 18)\n- **Constitución**: Muy Difícil (NO 18) | **CD**: Muy Difícil (16)\n- **Destreza**: Muy Difícil (NO 18) | **Iniciativa**: 16\n- **Movimiento**: 4 casillas (Vuelo) | **Número**: 1\n- **XP**: 8 XP | **Botín**: Brasa celestial pura\n\n### Táctica\nBarre el campo con ráfagas de fuego sagrado e ignora la armadura del pecador.",
-            "isMonster": true
+            "isMonster": true,
+            "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_199_Picture_1.webp"
         },
         {
             "id": -2324,
@@ -1708,7 +1731,8 @@
             "armorClass": 18,
             "initiativeBonus": -2,
             "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Fortaleza Viviente\n- **Precisión**: 3 | **Ataque**: Difícil (NO 16)\n- **Constitución**: Casi Imposible (NO 20) | **CD**: Casi Imposible (18)\n- **Destreza**: Fácil (NO 10) | **Iniciativa**: 5\n- **Movimiento**: 2 casillas | **Número**: 1\n- **XP**: 8 XP | **Botín**: Ojo de Zafiro Celestial\n\n### Táctica\nSu mirada fulminante anula las ventajas de terreno y quema con daño radiante.",
-            "isMonster": true
+            "isMonster": true,
+            "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_204_Picture_1.webp"
         }
     ],
     "referenceTables": [
@@ -1988,6 +2012,123 @@
             "category": "Supervivencia",
             "sortOrder": 9,
             "lastUpdated": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -4000,
+            "title": "Galería · Portada y mundo · 1",
+            "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Ilustración del manual · página 1\n\n![Ilustración del manual, página 1](file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_0_Picture_0.webp)\n\n### Ilustración del manual · página 2\n\n![Ilustración del manual, página 2](file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_1_Picture_0.webp)\n\n### Ilustración del manual · página 3\n\n![Ilustración del manual, página 3](file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_2_Picture_0.webp)\n\n### Ilustración del manual · página 3\n\n![Ilustración del manual, página 3](file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_2_Picture_1.webp)\n\n### Ilustración del manual · página 4\n\n![Ilustración del manual, página 4](file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_3_Picture_11.webp)\n\n### Ilustración del manual · página 5\n\n![Ilustración del manual, página 5](file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_4_Picture_3.webp)\n\n### Ilustración del manual · página 6\n\n![Ilustración del manual, página 6](file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_5_Picture_0.webp)",
+            "gameSystem": "Choir of Flesh",
+            "category": "Ilustraciones del manual",
+            "sortOrder": 1000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -4001,
+            "title": "Galería · Creación de personajes · 1",
+            "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Ilustración del manual · página 10\n\n![Ilustración del manual, página 10](file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_9_Picture_0.webp)\n\n### Ilustración del manual · página 11\n\n![Ilustración del manual, página 11](file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_10_Picture_0.webp)\n\n### Ilustración del manual · página 12\n\n![Ilustración del manual, página 12](file:///android_asset/starter_packs/choir_of_flesh/art/b000__page_11_Picture_13.webp)\n\n### Ilustración del manual · página 20\n\n![Ilustración del manual, página 20](file:///android_asset/starter_packs/choir_of_flesh/art/b001__page_19_Picture_4.webp)\n\n### Ilustración del manual · página 22\n\n![Ilustración del manual, página 22](file:///android_asset/starter_packs/choir_of_flesh/art/b001__page_21_Picture_4.webp)\n\n### Ilustración del manual · página 25\n\n![Ilustración del manual, página 25](file:///android_asset/starter_packs/choir_of_flesh/art/b001__page_24_Picture_2.webp)\n\n### Ilustración del manual · página 28\n\n![Ilustración del manual, página 28](file:///android_asset/starter_packs/choir_of_flesh/art/b001__page_27_Picture_4.webp)\n\n### Ilustración del manual · página 37\n\n![Ilustración del manual, página 37](file:///android_asset/starter_packs/choir_of_flesh/art/b002__page_36_Picture_4.webp)",
+            "gameSystem": "Choir of Flesh",
+            "category": "Ilustraciones del manual",
+            "sortOrder": 1001,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -4002,
+            "title": "Galería · Viajes y exploración · 1",
+            "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Ilustración del manual · página 40\n\n![Ilustración del manual, página 40](file:///android_asset/starter_packs/choir_of_flesh/art/b002__page_39_Picture_0.webp)\n\n### Ilustración del manual · página 41\n\n![Ilustración del manual, página 41](file:///android_asset/starter_packs/choir_of_flesh/art/b002__page_40_Picture_0.webp)\n\n### Ilustración del manual · página 44\n\n![Ilustración del manual, página 44](file:///android_asset/starter_packs/choir_of_flesh/art/b002__page_43_Picture_10.webp)\n\n### Ilustración del manual · página 45\n\n![Ilustración del manual, página 45](file:///android_asset/starter_packs/choir_of_flesh/art/b002__page_44_Picture_6.webp)\n\n### Ilustración del manual · página 48\n\n![Ilustración del manual, página 48](file:///android_asset/starter_packs/choir_of_flesh/art/b003__page_47_Picture_16.webp)\n\n### Ilustración del manual · página 50\n\n![Ilustración del manual, página 50](file:///android_asset/starter_packs/choir_of_flesh/art/b003__page_49_Picture_15.webp)\n\n### Ilustración del manual · página 53\n\n![Ilustración del manual, página 53](file:///android_asset/starter_packs/choir_of_flesh/art/b003__page_52_Picture_1.webp)\n\n### Ilustración del manual · página 53\n\n![Ilustración del manual, página 53](file:///android_asset/starter_packs/choir_of_flesh/art/b003__page_52_Picture_3.webp)\n\n### Ilustración del manual · página 53\n\n![Ilustración del manual, página 53](file:///android_asset/starter_packs/choir_of_flesh/art/b003__page_52_Picture_6.webp)\n\n### Ilustración del manual · página 56\n\n![Ilustración del manual, página 56](file:///android_asset/starter_packs/choir_of_flesh/art/b003__page_55_Figure_17.webp)",
+            "gameSystem": "Choir of Flesh",
+            "category": "Ilustraciones del manual",
+            "sortOrder": 1002,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -4003,
+            "title": "Galería · Viajes y exploración · 2",
+            "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Ilustración del manual · página 63\n\n![Ilustración del manual, página 63](file:///android_asset/starter_packs/choir_of_flesh/art/b004__page_62_Picture_16.webp)\n\n### Ilustración del manual · página 64\n\n![Ilustración del manual, página 64](file:///android_asset/starter_packs/choir_of_flesh/art/b004__page_63_Picture_14.webp)\n\n### Ilustración del manual · página 66\n\n![Ilustración del manual, página 66](file:///android_asset/starter_packs/choir_of_flesh/art/b004__page_65_Picture_2.webp)\n\n### Ilustración del manual · página 69\n\n![Ilustración del manual, página 69](file:///android_asset/starter_packs/choir_of_flesh/art/b004__page_68_Picture_5.webp)\n\n### Ilustración del manual · página 73\n\n![Ilustración del manual, página 73](file:///android_asset/starter_packs/choir_of_flesh/art/b004__page_72_Picture_2.webp)\n\n### Ilustración del manual · página 86\n\n![Ilustración del manual, página 86](file:///android_asset/starter_packs/choir_of_flesh/art/b005__page_85_Picture_6.webp)",
+            "gameSystem": "Choir of Flesh",
+            "category": "Ilustraciones del manual",
+            "sortOrder": 1003,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -4004,
+            "title": "Galería · Incursiones · 1",
+            "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Ilustración del manual · página 94\n\n![Ilustración del manual, página 94](file:///android_asset/starter_packs/choir_of_flesh/art/b006__page_93_Picture_0.webp)\n\n### Ilustración del manual · página 95\n\n![Ilustración del manual, página 95](file:///android_asset/starter_packs/choir_of_flesh/art/b006__page_94_Picture_0.webp)\n\n### Ilustración del manual · página 98\n\n![Ilustración del manual, página 98](file:///android_asset/starter_packs/choir_of_flesh/art/b006__page_97_Picture_5.webp)\n\n### Ilustración del manual · página 104\n\n![Ilustración del manual, página 104](file:///android_asset/starter_packs/choir_of_flesh/art/b006__page_103_Picture_2.webp)\n\n### Ilustración del manual · página 105\n\n![Ilustración del manual, página 105](file:///android_asset/starter_packs/choir_of_flesh/art/b006__page_104_Picture_2.webp)\n\n### Ilustración del manual · página 110\n\n![Ilustración del manual, página 110](file:///android_asset/starter_packs/choir_of_flesh/art/b007__page_109_Picture_10.webp)\n\n### Ilustración del manual · página 114\n\n![Ilustración del manual, página 114](file:///android_asset/starter_packs/choir_of_flesh/art/b007__page_113_Picture_17.webp)\n\n### Ilustración del manual · página 116\n\n![Ilustración del manual, página 116](file:///android_asset/starter_packs/choir_of_flesh/art/b007__page_115_Picture_10.webp)\n\n### Ilustración del manual · página 119\n\n![Ilustración del manual, página 119](file:///android_asset/starter_packs/choir_of_flesh/art/b007__page_118_Picture_10.webp)\n\n### Ilustración del manual · página 120\n\n![Ilustración del manual, página 120](file:///android_asset/starter_packs/choir_of_flesh/art/b007__page_119_Picture_11.webp)",
+            "gameSystem": "Choir of Flesh",
+            "category": "Ilustraciones del manual",
+            "sortOrder": 1004,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -4005,
+            "title": "Galería · Incursiones · 2",
+            "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Ilustración del manual · página 122\n\n![Ilustración del manual, página 122](file:///android_asset/starter_packs/choir_of_flesh/art/b008__page_121_Picture_10.webp)\n\n### Ilustración del manual · página 125\n\n![Ilustración del manual, página 125](file:///android_asset/starter_packs/choir_of_flesh/art/b008__page_124_Picture_4.webp)\n\n### Ilustración del manual · página 127\n\n![Ilustración del manual, página 127](file:///android_asset/starter_packs/choir_of_flesh/art/b008__page_126_Picture_12.webp)\n\n### Ilustración del manual · página 129\n\n![Ilustración del manual, página 129](file:///android_asset/starter_packs/choir_of_flesh/art/b008__page_128_Picture_3.webp)\n\n### Ilustración del manual · página 130\n\n![Ilustración del manual, página 130](file:///android_asset/starter_packs/choir_of_flesh/art/b008__page_129_Picture_1.webp)\n\n### Ilustración del manual · página 132\n\n![Ilustración del manual, página 132](file:///android_asset/starter_packs/choir_of_flesh/art/b008__page_131_Picture_10.webp)\n\n### Ilustración del manual · página 137\n\n![Ilustración del manual, página 137](file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_136_Picture_12.webp)\n\n### Ilustración del manual · página 139\n\n![Ilustración del manual, página 139](file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_138_Picture_6.webp)\n\n### Ilustración del manual · página 140\n\n![Ilustración del manual, página 140](file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_139_Picture_13.webp)\n\n### Ilustración del manual · página 141\n\n![Ilustración del manual, página 141](file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_140_Picture_1.webp)",
+            "gameSystem": "Choir of Flesh",
+            "category": "Ilustraciones del manual",
+            "sortOrder": 1005,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -4006,
+            "title": "Galería · Incursiones · 3",
+            "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Ilustración del manual · página 141\n\n![Ilustración del manual, página 141](file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_140_Picture_10.webp)\n\n### Ilustración del manual · página 143\n\n![Ilustración del manual, página 143](file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_142_Picture_11.webp)\n\n### Ilustración del manual · página 143\n\n![Ilustración del manual, página 143](file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_142_Picture_3.webp)\n\n### Ilustración del manual · página 148\n\n![Ilustración del manual, página 148](file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_147_Picture_13.webp)\n\n### Ilustración del manual · página 149\n\n![Ilustración del manual, página 149](file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_148_Picture_1.webp)\n\n### Ilustración del manual · página 149\n\n![Ilustración del manual, página 149](file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_148_Picture_11.webp)\n\n### Ilustración del manual · página 149\n\n![Ilustración del manual, página 149](file:///android_asset/starter_packs/choir_of_flesh/art/b009__page_148_Picture_20.webp)\n\n### Ilustración del manual · página 152\n\n![Ilustración del manual, página 152](file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_151_Picture_12.webp)\n\n### Ilustración del manual · página 152\n\n![Ilustración del manual, página 152](file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_151_Picture_13.webp)\n\n### Ilustración del manual · página 153\n\n![Ilustración del manual, página 153](file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_152_Picture_1.webp)",
+            "gameSystem": "Choir of Flesh",
+            "category": "Ilustraciones del manual",
+            "sortOrder": 1006,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -4007,
+            "title": "Galería · Incursiones · 4",
+            "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Ilustración del manual · página 156\n\n![Ilustración del manual, página 156](file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_155_Picture_1.webp)\n\n### Ilustración del manual · página 157\n\n![Ilustración del manual, página 157](file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_156_Picture_13.webp)\n\n### Ilustración del manual · página 159\n\n![Ilustración del manual, página 159](file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_158_Picture_10.webp)\n\n### Ilustración del manual · página 161\n\n![Ilustración del manual, página 161](file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_160_Picture_13.webp)\n\n### Ilustración del manual · página 163\n\n![Ilustración del manual, página 163](file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_162_Picture_1.webp)\n\n### Ilustración del manual · página 163\n\n![Ilustración del manual, página 163](file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_162_Picture_11.webp)\n\n### Ilustración del manual · página 165\n\n![Ilustración del manual, página 165](file:///android_asset/starter_packs/choir_of_flesh/art/b010__page_164_Picture_13.webp)\n\n### Ilustración del manual · página 167\n\n![Ilustración del manual, página 167](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_166_Picture_1.webp)\n\n### Ilustración del manual · página 167\n\n![Ilustración del manual, página 167](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_166_Picture_8.webp)\n\n### Ilustración del manual · página 168\n\n![Ilustración del manual, página 168](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_167_Picture_1.webp)",
+            "gameSystem": "Choir of Flesh",
+            "category": "Ilustraciones del manual",
+            "sortOrder": 1007,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -4008,
+            "title": "Galería · Bestiario · 1",
+            "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Ilustración del manual · página 169\n\n![Ilustración del manual, página 169](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_168_Picture_0.webp)\n\n### Ilustración del manual · página 170\n\n![Ilustración del manual, página 170](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_169_Picture_0.webp)\n\n### Ilustración del manual · página 171\n\n![Ilustración del manual, página 171](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_170_Picture_0.webp)\n\n### Ilustración del manual · página 172\n\n![Ilustración del manual, página 172](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_171_Picture_17.webp)\n\n### Ilustración del manual · página 173\n\n![Ilustración del manual, página 173](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_172_Picture_4.webp)\n\n### Ilustración del manual · página 175\n\n![Ilustración del manual, página 175](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_174_Picture_0.webp)\n\n### Amalgama · página 176\n\n![Amalgama, página 176](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_175_Picture_1.webp)\n\n### Apóstata · página 177\n\n![Apóstata, página 177](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_176_Picture_1.webp)\n\n### Tejedor de Huesos · página 178\n\n![Tejedor de Huesos, página 178](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_177_Picture_1.webp)\n\n### Cantor · página 179\n\n![Cantor, página 179](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_178_Picture_1.webp)",
+            "gameSystem": "Choir of Flesh",
+            "category": "Ilustraciones del manual",
+            "sortOrder": 1008,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -4009,
+            "title": "Galería · Bestiario · 2",
+            "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Bandada de Carroña · página 180\n\n![Bandada de Carroña, página 180](file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_179_Picture_1.webp)\n\n### Portador del Incensario · página 181\n\n![Portador del Incensario, página 181](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_180_Picture_1.webp)\n\n### Querubín · página 182\n\n![Querubín, página 182](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_181_Picture_1.webp)\n\n### Confesor · página 183\n\n![Confesor, página 183](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_182_Picture_1.webp)\n\n### Graznador · página 184\n\n![Graznador, página 184](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_183_Picture_1.webp)\n\n### Flagelante · página 185\n\n![Flagelante, página 185](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_184_Picture_1.webp)\n\n### Gusano de Carne · página 186\n\n![Gusano de Carne, página 186](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_185_Picture_1.webp)\n\n### Rechinador · página 187\n\n![Rechinador, página 187](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_186_Picture_1.webp)\n\n### Fauces del Suelo · página 188\n\n![Fauces del Suelo, página 188](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_187_Picture_1.webp)\n\n### Heraldo · página 189\n\n![Heraldo, página 189](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_188_Picture_1.webp)",
+            "gameSystem": "Choir of Flesh",
+            "category": "Ilustraciones del manual",
+            "sortOrder": 1009,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -4010,
+            "title": "Galería · Bestiario · 3",
+            "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Caballo · página 190\n\n![Caballo, página 190](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_189_Picture_1.webp)\n\n### Sabueso · página 191\n\n![Sabueso, página 191](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_190_Picture_1.webp)\n\n### Cruzado Cáscara · página 192\n\n![Cruzado Cáscara, página 192](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_191_Picture_1.webp)\n\n### Licuador · página 193\n\n![Licuador, página 193](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_192_Picture_1.webp)\n\n### Mater Dolorosa · página 194\n\n![Mater Dolorosa, página 194](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_193_Picture_1.webp)\n\n### Madre de Tumores · página 195\n\n![Madre de Tumores, página 195](file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_194_Picture_1.webp)\n\n### Penitente · página 196\n\n![Penitente, página 196](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_195_Picture_1.webp)\n\n### Pilar de Fe · página 197\n\n![Pilar de Fe, página 197](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_196_Picture_1.webp)\n\n### Purificador · página 198\n\n![Purificador, página 198](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_197_Picture_1.webp)\n\n### Escriba de Penitencia · página 199\n\n![Escriba de Penitencia, página 199](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_198_Picture_1.webp)",
+            "gameSystem": "Choir of Flesh",
+            "category": "Ilustraciones del manual",
+            "sortOrder": 1010,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -4011,
+            "title": "Galería · Bestiario · 4",
+            "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Serafín · página 200\n\n![Serafín, página 200](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_199_Picture_1.webp)\n\n### Acechador Silencioso · página 201\n\n![Acechador Silencioso, página 201](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_200_Picture_1.webp)\n\n### Sabueso Desollado · página 202\n\n![Sabueso Desollado, página 202](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_201_Picture_1.webp)\n\n### Soldado · página 203\n\n![Soldado, página 203](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_202_Picture_1.webp)\n\n### Superviviente · página 204\n\n![Superviviente, página 204](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_203_Picture_1.webp)\n\n### Trono · página 205\n\n![Trono, página 205](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_204_Picture_1.webp)",
+            "gameSystem": "Choir of Flesh",
+            "category": "Ilustraciones del manual",
+            "sortOrder": 1011,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -4012,
+            "title": "Galería · Equipo y reliquias · 1",
+            "content": "Ilustraciones originales del libro, en formato WebP.\n\n### Ilustración del manual · página 206\n\n![Ilustración del manual, página 206](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_205_Picture_0.webp)\n\n### Ilustración del manual · página 207\n\n![Ilustración del manual, página 207](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_206_Picture_0.webp)\n\n### Ilustración del manual · página 209\n\n![Ilustración del manual, página 209](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_208_Picture_5.webp)\n\n### Ilustración del manual · página 210\n\n![Ilustración del manual, página 210](file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_209_Picture_2.webp)\n\n### Ilustración del manual · página 211\n\n![Ilustración del manual, página 211](file:///android_asset/starter_packs/choir_of_flesh/art/b014__page_210_Picture_17.webp)\n\n### Ilustración del manual · página 213\n\n![Ilustración del manual, página 213](file:///android_asset/starter_packs/choir_of_flesh/art/b014__page_212_Picture_23.webp)\n\n### Ilustración del manual · página 219\n\n![Ilustración del manual, página 219](file:///android_asset/starter_packs/choir_of_flesh/art/b014__page_218_Picture_7.webp)\n\n### Ilustración del manual · página 223\n\n![Ilustración del manual, página 223](file:///android_asset/starter_packs/choir_of_flesh/art/b014__page_222_Picture_9.webp)\n\n### Ilustración del manual · página 236\n\n![Ilustración del manual, página 236](file:///android_asset/starter_packs/choir_of_flesh/art/b015__page_235_Figure_0.webp)",
+            "gameSystem": "Choir of Flesh",
+            "category": "Ilustraciones del manual",
+            "sortOrder": 1012,
             "sourcePack": "Choir of Flesh"
         }
     ]
