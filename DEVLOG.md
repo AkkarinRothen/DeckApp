@@ -1,5 +1,49 @@
 ---
 
+### Sprint 61 — Mesa de Juego: Relojes de Tensión y Progreso Flotantes (Progress Clocks Overlay) (15 de octubre de 2026)
+
+**FEATURE — Overlay Flotante Interactivo de Relojes (`SessionClocksOverlay`)**
+- Pastilla flotante compacta y colapsable en la esquina superior derecha (`Alignment.TopEnd`, debajo del app bar) con estética glassmorphism (`Color(0xEB161920)`), reborde sutil y sombra de elevación.
+- Pastilla cerrada: icono `Schedule`, insignia numérica de relojes activos e indicador de alerta si algún reloj está en estado crítico o completo.
+- Panel flotante desplegable (`AnimatedVisibility` suave):
+  - Cabecera con título, botón `+` para añadir nuevo reloj y botón para contraer.
+  - Lista scrollable de relojes activos en tarjetas temáticas según el color asignado.
+  - Reloj interactivo con toque directo para avanzar (+1 tick) con respuesta háptica.
+  - Controles de avance rápido: botón `-` (retroceder) y botón `+` (avanzar).
+  - Menú contextual desplegable con opciones: Editar, Reiniciar (0/N), Detonar Ahora (100%), Copiar al Diario y Eliminar/Archivar.
+  - Estado vacío descriptivo con sugerencias de uso (sigilo, alarmas, veneno, límites temporales).
+
+**FEATURE — Componente Gráfico Circular de Progreso (`CircularClockGraphic`)**
+- Renderizado Canvas vectorial que divide el arco circular de forma precisa en 4, 6, 8, 10 o 12 segmentos.
+- Animación de color suave (`animateColorAsState`), espaciado angular calibrado y separadores radiales limpios.
+- Contador numérico central `progress/segments` con escalado dinámico según el tamaño del componente (44dp, 52dp, 64dp, 76dp).
+
+**FEATURE — Diálogo de Creación y Edición Integral (`ClockEditDialog`)**
+- Modal para configurar nombre del reloj o amenaza, selector visual de segmentos discretos (chips de 4, 6, 8, 10, 12), paleta de colores temáticos (Alarma/Peligro `#E53935`, Tensión `#FB8C00`, Sigilo/Veneno `#43A047`, Arcano `#8E24AA`, Tiempo `#1E88E5`, Éter `#00ACC1`), slider de progreso inicial y caja multilínea para redactar la consecuencia al detonar.
+- Vista previa en tiempo real del reloj mientras se editan sus propiedades.
+
+**FEATURE — Alerta Dramática de Consecuencia e Impacto (`ClockImpactDialog`)**
+- Detonación automática cuando el reloj alcanza el 100% (`progress >= segments`).
+- Modal de alta visibilidad con pulso visual en tonos de error/alarma, descripción de la consecuencia del detonante y opciones inmediatas:
+  - *"Copiar al Diario"*: Inserta una entrada formateada en Markdown en el diario de la sesión (`dmNotes`) con encabezado formal, bloque de consecuencia y progreso alcanzado.
+  - *"Reiniciar (0/N)"*: Devuelve el reloj a 0 para amenazas cíclicas o recurrentes.
+  - *"Archivar / Eliminar"*: Remueve el reloj de la lista de amenazas activas.
+
+**DATA & PERSISTENCE — Migración Room v45 $\to$ v46 y Respaldo Global**
+- **Room v46:** Modificado `SessionEntity` agregando `@ColumnInfo(defaultValue = "[]") val tensionClocksJson: String = "[]"`.
+- Creada `MIGRATION_45_46` en `Migrations.kt` con validación `PRAGMA table_info` y registrada en `MigrationRegistry.kt` y `DeckAppDatabase.kt`.
+- `SessionDao`: Agregada consulta `@Query("UPDATE sessions SET tensionClocksJson = :clocksJson WHERE id = :sessionId") suspend fun updateTensionClocks(sessionId: Long, clocksJson: String)`.
+- `SessionRepository` y `SessionRepositoryImpl`: Método `suspend fun updateTensionClocks(sessionId: Long, clocks: List<TensionClock>)`.
+- `Mappers.kt`: Mapeo bidireccional entre `SessionEntity.tensionClocksJson` y `Session.tensionClocks`.
+- `BackupDto.kt` y `BackupRepositoryImpl`: Campo `val tensionClocksJson: String = "[]"` añadido a `SessionBackupDto` con persistencia total en el sistema de copia y restauración de seguridad de DeckApp.
+
+**VALIDACIÓN Y PARIDAD**
+- 6 pruebas unitarias en `SessionClocksTest` validando serialización/deserialización Room y Backup, avance y sujeción de progreso (`coerceIn`), restablecimiento, detonación instantánea, y parseo y alternancia de hitos en formato Markdown checklist (`- [ ]`); 100% aprobadas.
+- Compilación y suite completa de pruebas en `:feature:draw:testDebugUnitTest` y ensamble del binario global `:app:assembleDebug` 100% exitosos.
+- *Feature Parity Mandate:* Registrado para sincronizar en `TDAPP-desktop`: componentes Compose de `SessionClocksOverlay`, `CircularClockGraphic`, `ClockEditDialog`, `ClockImpactDialog`, migración Room v46 y respaldo JSON.
+
+---
+
 ### Sprint 60 — Mesa de Juego: Asistente de Encuadre de Escenas Solo RPG (Scene Framing Assistant) (15 de octubre de 2026)
 
 **FEATURE — Asistente de Encuadre Guiado de Escenas (`SceneFramingDialog`)**
