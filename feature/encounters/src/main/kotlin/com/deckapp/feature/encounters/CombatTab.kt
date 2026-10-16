@@ -47,17 +47,26 @@ fun CombatTab(
     onToggleCondition: (Long, Condition) -> Unit,
     onEndEncounter: () -> Unit,
     onAddPlayer: (String, Int) -> Unit,
-    onRemovePlayer: (String) -> Unit
+    onRemovePlayer: (String) -> Unit,
+    onChoirCombatAftermath: ((Long, com.deckapp.core.domain.usecase.ChoirAftermathRequest) -> Unit)? = null
 ) {
     // Unificar criaturas y jugadores en una sola lista para la iniciativa
     val unifiedList = remember(encounter.creatures, players) {
         com.deckapp.core.domain.usecase.OrderCombatParticipantsUseCase(encounter.creatures, players)
     }
 
-    
+    val choirParticipants = remember(encounter.creatures) {
+        encounter.creatures.mapNotNull { creature ->
+            com.deckapp.core.domain.usecase.ChoirCharacterCodec.read(creature.notes)?.let { sheet ->
+                creature to sheet
+            }
+        }
+    }
+
     var showLog by remember { mutableStateOf(false) }
     var showSummaryDialog by remember { mutableStateOf(false) }
     var showAddPlayerDialog by remember { mutableStateOf(false) }
+    var aftermathIndex by remember { mutableStateOf<Int?>(null) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         // --- Header de Combate ---
@@ -91,7 +100,13 @@ fun CombatTab(
                         Icon(Icons.Default.History, contentDescription = "Historial", tint = MaterialTheme.colorScheme.primary)
                     }
                     Spacer(Modifier.width(8.dp))
-                    TextButton(onClick = { showSummaryDialog = true }) {
+                    TextButton(onClick = {
+                        if (onChoirCombatAftermath != null && choirParticipants.isNotEmpty()) {
+                            aftermathIndex = 0
+                        } else {
+                            showSummaryDialog = true
+                        }
+                    }) {
                         Text("FINALIZAR", color = MaterialTheme.colorScheme.error)
                     }
                     Spacer(Modifier.width(8.dp))
@@ -159,6 +174,29 @@ fun CombatTab(
             CombatLogBottomSheet(
                 log = log,
                 onDismiss = { showLog = false }
+            )
+        }
+
+        val activeAftermath = aftermathIndex?.let { idx -> choirParticipants.getOrNull(idx) }
+        if (activeAftermath != null && onChoirCombatAftermath != null) {
+            val (creature, sheet) = activeAftermath
+            com.deckapp.core.ui.components.ChoirCombatAftermathDialog(
+                characterName = creature.name,
+                character = sheet,
+                onApplyAftermath = { request ->
+                    onChoirCombatAftermath(creature.id, request)
+                    val nextIdx = (aftermathIndex ?: 0) + 1
+                    if (nextIdx < choirParticipants.size) {
+                        aftermathIndex = nextIdx
+                    } else {
+                        aftermathIndex = null
+                        showSummaryDialog = true
+                    }
+                },
+                onDismiss = {
+                    aftermathIndex = null
+                    showSummaryDialog = true
+                }
             )
         }
 

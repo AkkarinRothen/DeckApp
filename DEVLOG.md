@@ -1,6 +1,43 @@
 ---
 
-### Choir of Flesh — Bestiario cotejado y controles de combate (16 de octubre de 2026)
+### Choir of Flesh — Asistente de Juego Guiado: Cierre de Combate, Incursión (8 Nodos) y Asentamiento (16 de octubre de 2026)
+
+**FEATURE — Cierre de Combate Asistido (Aftermath pp. 60-61)**
+- `ChoirCombatAftermathUseCase.kt` en `core/domain`:
+  - Lógica canónica según el manual: tiradas de salvación de Constitución (CD 10 + heridas menores) para evitar que las heridas menores supuran y se conviertan en heridas mayores.
+  - Asistencia médica con chequeo de Inteligencia: reduce la dificultad o evita la supuración según el éxito del médico.
+  - Cálculo de Trauma (+1 por cada herida mayor sostenida o supurada) e impacto en la psique del Inquebrantable.
+  - Limpieza de heridas temporales de combate y adjudicación atómica de botín, recursos y puntos de experiencia (XP).
+- `ChoirCombatAftermathDialog.kt` en `core/ui`:
+  - Modal interactivo con tiradas d20 integradas o asistidas.
+  - Vista reactiva del pronóstico de salud, desglose de supuración y adjudicación de recompensas.
+- Integración en `CombatTab.kt`:
+  - Botón "FINALIZAR" de la mesa táctica de combate ahora dispara el flujo guiado de Aftermath para todos los Inquebrantables participantes.
+  - Persistencia atómica de las actualizaciones a través de `UpdateChoirCharacterUseCase.applyAftermath` con registro detallado en `CombatLogEntry`.
+
+**FEATURE — Tablero de Incursión Persistente (8 Nodos) & Asentamiento**
+- `ChoirIncursion.kt` en `core/model`:
+  - Modelos de datos para el tablero de expedición: `ChoirIncursion`, `ChoirIncursionNode`, `ChoirNodeType` (Entrada, Pasaje, Cámara de Carne, Altar, Guarida del Corifeo, etc.), `ChoirNodeState` (Oculto, Revelado, Despejado, Huyendo).
+  - Modelo `ChoirSettlement` para la gestión del refugio: moral, defensas, raciones, suministros, instalaciones construidas y tiradas de rumores/eventos d10.
+- `ChoirIncursionCodec.kt` en `core/domain`:
+  - Serialización segura Base64 delimitada en las notas markdown de la sesión, garantizando persistencia multiplataforma completa sin requerir migraciones complejas de base de datos Room.
+- `ChoirIncursionRules.kt` en `core/domain`:
+  - Reglas de progresión de la expedición: avance entre nodos, cálculo reactivo de la Canción de la Carne (medidor de resonancia 0..10 que incrementa el peligro y las aberraciones), resolución de despeje o huida, extracción segura al asentamiento, descansos breves y descansos prolongados.
+- `ChoirIncursionDialog.kt` en `core/ui`:
+  - Diálogo modal con 2 pestañas temáticas:
+    1. *Tablero de Incursión*: visualización de los 8 nodos en ruta, estado de activación, medidor visual de la Canción de la Carne y botones de avance/descanso.
+    2. *Asentamiento & Refugio*: gestión de métricas del enclave humano (moral, defensas, víveres), registro de instalaciones y lanzador de rumores d10.
+- Integración en `SessionScreen.kt` y `SessionViewModel.kt`:
+  - Botón de cabecera "Incursión" con icono de brújula (`Icons.Default.Explore`) en sesiones con reglas de Choir of Flesh.
+  - Sincronización bidireccional y guardado automático en las notas de la sesión activa.
+
+**VALIDACIÓN Y PRUEBAS**
+- 100% de tests unitarios aprobados en `:core:domain:testDebugUnitTest`:
+  - `ChoirCombatAftermathUseCaseTest` (evaluación médica, salvaciones de CON, cálculo de trauma y limpieza de heridas).
+  - `ChoirIncursionRulesTest` (avance por el grafo de 8 nodos, cálculo de Canción de la Carne y descansos).
+- Compilación completa de `:app:assembleDebug` exitosa con Gradle `--gradle-user-home I:\.gradle_home`.
+- Instalación y validación en dispositivo físico Motorola One Fusion (`ZE222B5GXX`) vía ADB, con lanzamiento de `MainActivity` verificado mediante capturas de pantalla.
+
 
 - Se completan Caballo, Sabueso, Penitente, Purificador, Soldado y Superviviente: 30 fichas con retratos WebP existentes.
 - Las 30 descripciones, estadísticas, 90 acciones y rasgos se extraen del capítulo V completo del manual local. Se eliminan las conversiones inventadas a PG/CA de las fichas empaquetadas; se conservan los grados dinámicos, números de grupo ♟, alcances, tipos de daño y referencias de página.
@@ -44,11 +81,6 @@
 - Apertura fluida del `TacticalMapSelectorSheet` desde el chip de cabecera sin falsos toques en el canvas.
 - Despliegue del diálogo de confirmación `TacticalDeleteMapConfirmDialog`.
 - Eliminación interactiva con feedback por Snackbar (`Mapa '...' eliminado`), transición al estado vacío y recreación instantánea con `+ Crear Mapa Rápido`.
-
-**FEATURE PARITY MANDATE (TDAPP-desktop)**
-- [ ] Implementar `TacticalMapSelector` en TDAPP-desktop con tarjetas Bento, miniaturas de mapas y acciones rápidas (cambiar imagen, renombrar, vincular escena, eliminar).
-- [ ] Implementar diálogo de confirmación de borrado con limpieza física de archivos de imagen en el directorio de mapas tácticos del escritorio.
-- [ ] Añadir chip ergonómico en la cabecera superior del VTT para conmutación rápida entre mapas tácticos.
 
 ---
 

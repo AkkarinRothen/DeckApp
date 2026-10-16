@@ -45,4 +45,28 @@ class UpdateChoirCharacterUseCase @Inject constructor(
             message = "${creature.name}: ${changed.major}/4 heridas mayores, ${changed.minor}/8 menores; Vigor ${changed.vigor} (${command.name})",
             type = CombatLogType.META))
     }
+
+    suspend fun applyAftermath(creatureId: Long, request: ChoirAftermathRequest): ChoirAftermathResult? = mutex.withLock {
+        val creature = encounters.getCreatureById(creatureId) ?: return@withLock null
+        val npc = creature.npcId?.let { npcs.getNpcById(it) }
+        val sheet = npc?.let { ChoirCharacterCodec.read(it.notes) } ?: ChoirCharacterCodec.read(creature.notes) ?: return@withLock null
+        val result = ChoirCombatAftermathUseCase.resolve(request.copy(character = sheet))
+        val changed = result.updatedCharacter
+        if (npc != null) {
+            npcs.saveNpc(ChoirCharacterRules.toNpc(npc, changed))
+            syncUnlocked(npc.id)
+        } else {
+            encounters.updateCreature(creature.copy(
+                notes = ChoirCharacterCodec.write(creature.notes, changed),
+                currentHp = if (ChoirCharacterRules.isDead(changed)) 0 else 1,
+                maxHp = 1
+            ))
+        }
+        encounters.recordLog(CombatLogEntry(
+            encounterId = creature.encounterId,
+            message = "${creature.name} Aftermath: Trauma +${result.traumaGained} (Total: ${changed.trauma}), Heridas limpiadas. XP +${request.xpGained}.",
+            type = CombatLogType.META
+        ))
+        result
+    }
 }

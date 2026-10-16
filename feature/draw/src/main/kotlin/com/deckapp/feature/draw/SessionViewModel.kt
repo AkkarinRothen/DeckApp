@@ -1694,6 +1694,40 @@ class SessionViewModel @Inject constructor(
         viewModelScope.launch { updateChoirCharacterUseCase(creatureId, command) }
     }
 
+    fun applyChoirCombatAftermath(
+        creatureId: Long,
+        request: ChoirAftermathRequest,
+        onComplete: (ChoirAftermathResult?) -> Unit = {}
+    ) {
+        viewModelScope.launch {
+            val result = updateChoirCharacterUseCase.applyAftermath(creatureId, request)
+            if (result != null) {
+                val updatedNotes = "${_uiState.value.dmNotes}\n\n${result.summaryReport}"
+                updateNotes(updatedNotes)
+            }
+            onComplete(result)
+        }
+    }
+
+    fun getChoirIncursion(): ChoirIncursion {
+        return ChoirIncursionCodec.readIncursion(_uiState.value.dmNotes) ?: ChoirIncursion()
+    }
+
+    fun getChoirSettlement(): ChoirSettlement {
+        return ChoirIncursionCodec.readSettlement(_uiState.value.dmNotes) ?: ChoirSettlement()
+    }
+
+    fun saveChoirIncursion(
+        incursion: ChoirIncursion,
+        settlement: ChoirSettlement,
+        character: ChoirCharacter? = null
+    ) {
+        val currentNotes = _uiState.value.dmNotes
+        val withIncursion = ChoirIncursionCodec.writeIncursion(currentNotes, incursion)
+        val withBoth = ChoirIncursionCodec.writeSettlement(withIncursion, settlement)
+        updateNotes(withBoth)
+    }
+
     fun updateChoirCombatState(creatureId: Long, command: com.deckapp.core.model.ChoirCombatCommand) {
         viewModelScope.launch {
             updateChoirCombatStateUseCase(creatureId, command)

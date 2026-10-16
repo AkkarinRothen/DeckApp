@@ -26,6 +26,7 @@ import androidx.navigation.toRoute
 import com.deckapp.feature.deck.*
 import com.deckapp.feature.draw.*
 import com.deckapp.feature.encounters.*
+import com.deckapp.feature.encounters.EncounterListScreen
 import com.deckapp.feature.importdeck.*
 import com.deckapp.feature.library.*
 import com.deckapp.feature.session.*
@@ -232,9 +233,9 @@ fun DeckAppNavHost(
             
             composable<EncounterListRoute> {
                 EncounterListScreen(
-                    onBack = { navController.popBackStack() },
                     onEncounterClick = { id -> navController.navigate(EncounterEditorRoute(encounterId = id)) },
-                    onStartEncounter = { /* TODO */ }
+                    onStartEncounter = {},
+                    onBack = { navController.popBackStack() }
                 )
             }
             

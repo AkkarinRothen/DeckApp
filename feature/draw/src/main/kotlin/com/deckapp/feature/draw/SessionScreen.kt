@@ -170,6 +170,7 @@ fun SessionScreen(
     }
 
     var showChoirDialog by remember { mutableStateOf(false) }
+    var showIncursionDialog by remember { mutableStateOf(false) }
 
     if (showChoirDialog) {
         com.deckapp.feature.npcs.dialogs.ChoirOfFleshCharacterDialog(
@@ -178,6 +179,26 @@ fun SessionScreen(
                 viewModel.createChoirOfFleshCharacter(npc, sheetMarkdown)
                 showChoirDialog = false
             }
+        )
+    }
+
+    if (showIncursionDialog) {
+        val incursion = remember(uiState.dmNotes) { viewModel.getChoirIncursion() }
+        val settlement = remember(uiState.dmNotes) { viewModel.getChoirSettlement() }
+        val activeChar = remember(uiState.activeEncounter) {
+            uiState.activeEncounter?.creatures?.firstNotNullOfOrNull { 
+                com.deckapp.core.domain.usecase.ChoirCharacterCodec.read(it.notes)
+            }
+        }
+        com.deckapp.core.ui.components.ChoirIncursionDialog(
+            initialIncursion = incursion,
+            initialSettlement = settlement,
+            activeCharacter = activeChar,
+            onSave = { inc, set, ch ->
+                viewModel.saveChoirIncursion(inc, set, ch)
+                showIncursionDialog = false
+            },
+            onDismiss = { showIncursionDialog = false }
         )
     }
 
@@ -306,6 +327,20 @@ fun SessionScreen(
                             Spacer(Modifier.width(4.dp))
                             Text("Inquebrantable", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
                         }
+
+                        FilledTonalButton(
+                            onClick = { showIncursionDialog = true },
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                            colors = ButtonDefaults.filledTonalButtonColors(
+                                containerColor = Color(0xFF2B0A0A),
+                                contentColor = Color(0xFFD4AF37)
+                            ),
+                            modifier = Modifier.padding(end = 4.dp).height(36.dp)
+                        ) {
+                            Icon(Icons.Default.Explore, contentDescription = null, modifier = Modifier.size(15.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text("Incursión", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
+                        }
                     }
 
                     IconButton(onClick = viewModel::openSpotlight) {
@@ -374,7 +409,10 @@ fun SessionScreen(
                             onToggleCondition = viewModel::toggleCondition,
                             onEndEncounter = viewModel::endEncounter,
                             onAddPlayer = viewModel::addPlayerParticipant,
-                            onRemovePlayer = viewModel::removePlayerParticipant
+                            onRemovePlayer = viewModel::removePlayerParticipant,
+                            onChoirCombatAftermath = { creatureId, request ->
+                                viewModel.applyChoirCombatAftermath(creatureId, request)
+                            }
                         )
                     }
                     else -> {}
