@@ -1,5 +1,34 @@
 ---
 
+### Sprint 66 — Optimización de Mapas Tácticos a WebP y Ergonomía del VTT en Pantalla (16 de octubre de 2026)
+
+**FEATURE — Pipeline de Procesamiento y Conversión Automática a WebP**
+- Implementado en `FileRepositoryImpl.kt` (`processTacticalMapImage`):
+  - Ingesta de cualquier formato de imagen (`image/*`: PNG, JPG, BMP, etc.) mediante `ContentResolver` o ruta local directa.
+  - Decodificación con `inJustDecodeBounds` para cálculo adaptativo de `inSampleSize` que previene `OutOfMemoryError` en battlemaps de alta resolución (4K/8K).
+  - Escalado proporcional de alta fidelidad con resolución máxima de 2560px.
+  - Compresión nativa a WebP Lossy (85% de calidad) con fallback de API para Android 11+ (`Bitmap.CompressFormat.WEBP_LOSSY`).
+  - Persistencia permanente en el sandbox privado de la app (`context.filesDir/tactical_maps/{uuid}.webp`), eliminando la vulnerabilidad de pérdida de fondos por revocación de permisos SAF o borrado en galería externa.
+- Integración en `TacticalMapDelegate.kt`:
+  - En `createNewMap` y `updateMapImage`, el pipeline procesa la imagen de forma asíncrona en hilo de fondo (`NonCancellable + Dispatchers.IO`).
+  - Feedback inmediato mediante Snackbar reactivo (`Procesando imagen a WebP...` $\to$ `Imagen de mapa actualizada y optimizada (WebP)`).
+- Inyección de dependencias en `SessionViewModel.kt` pasando `FileRepository` al delegado táctico.
+
+**FEATURE — Corrección Ergonómica de UI y Desacoplamiento de Overlays**
+- **Eliminación del Solapamiento Superior:**
+  - Ajustado el padding superior de la tarjeta del selector/nombre de mapa en `TacticalMapView.kt` a `60.dp`, permitiendo que el tracker de `Hilos & PNJs (Mythic)` y el título del mapa táctico coexistan de manera limpia y accesible sin taparse.
+- **Reposicionamiento Adaptativo de la Action Hotbar (`SessionHotbarDock`):**
+  - En `SessionScreen.kt`, el dock de atajos rápidos detecta reactivamente el modo táctico (`mainViewMode == SessionViewMode.TACTICAL`) elevándose a `76.dp` de la base. Esto garantiza que todos los botones de la barra de herramientas táctica inferior (Pan/Zoom, Puntero, Regla, AoE, Pines, Niebla, Terreno, Ruta) queden 100% despejados y operables simultáneamente.
+
+**VALIDACIÓN Y PARIDAD**
+- Instalado y probado en dispositivo físico real (`Motorola One Fusion` - Android 11) mediante ADB y captura visual completa.
+- Compilación validada con éxito mediante Gradle con redirección de caché a `I:\.gradle_home` para sortear limitación de espacio en `J:`.
+- *Feature Parity Mandate:* Registrado para sincronizar en `TDAPP-desktop`:
+  - Implementación de `processTacticalMapImage` usando `ImageIO` o plugin de WebP en Desktop (`TDAPP-desktop`), almacenando mapas procesados en el subdirectorio de datos de usuario de escritorio.
+  - Sincronización del posicionamiento de overlays en Compose Desktop para el modo táctico.
+
+---
+
 ### Ajustes y preferencias de uso — 16 de octubre de 2026
 
 **FEATURE — Ajustes organizados y preferencias persistentes**
@@ -15,7 +44,11 @@
 - Estado de clave guardada separado del resultado de la prueba; cancelación e invalidación del resultado al cambiar la clave.
 
 **VALIDACIÓN**
-- Pendiente de completar la compilación de debug y las pruebas de dominio.
+- `:app:assembleDebug`: BUILD SUCCESSFUL con la configuración final.
+- `:core:domain:testDebugUnitTest`: validado; 26 pruebas, sin fallos, errores ni omisiones.
+- Caché alternativa de compilación en `I:\TTRPG\Visuales\Decks\.codex-settings-gradle`, con dependencias existentes compartidas, porque la unidad J: no tiene espacio suficiente para las transformaciones de Gradle.
+- Corregida la referencia de integración `mainViewMode` en el padding de la barra táctica que bloqueaba la compilación.
+- Validación estática: `git diff --check`.
 
 ---
 

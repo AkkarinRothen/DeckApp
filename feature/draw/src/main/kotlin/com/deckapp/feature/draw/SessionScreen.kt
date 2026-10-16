@@ -223,7 +223,7 @@ fun SessionScreen(
                         }
                         if (uiState.mainViewMode == SessionViewMode.MYTHIC_LOG) {
                             uiState.linkedMythicSession?.let { mythic ->
-                                Text("Mythic: ${mythic.name} (Caos ${mythic.chaosFactor})", 
+                                Text("Mythic: ${mythic.name} (Caos ${mythic.chaosFactor})",
                                     style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                             }
                         }
@@ -270,7 +270,7 @@ fun SessionScreen(
                                 contentColor = if (uiState.mainViewMode == SessionViewMode.MAP) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         ) { Icon(Icons.Default.Explore, contentDescription = "Mapa de Exploración HPL") }
-                        
+
                         IconButton(
                             onClick = { viewModel.setMainViewMode(SessionViewMode.MYTHIC_LOG) },
                             enabled = uiState.linkedMythicSession != null,
@@ -334,7 +334,7 @@ fun SessionScreen(
                 SidebarTool.COMBAT -> "Tracker de Combate"
                 else -> ""
             }
-            
+
             val rightTitle = when(uiState.activeRightSidebar) {
                 SidebarTool.NOTES -> "Notas de Sesión"
                 SidebarTool.JOURNAL -> "Diario de Viaje"
@@ -833,8 +833,8 @@ fun SessionScreen(
             }
 
             if (uiState.isLoading) {
-                Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background.copy(alpha = 0.5f)), contentAlignment = Alignment.Center) { 
-                    CircularProgressIndicator() 
+                Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background.copy(alpha = 0.5f)), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
             }
 
@@ -1253,4 +1253,5 @@ private fun DeckClusterItem(
                 }
             }
         }
-    }
+    }
+}
