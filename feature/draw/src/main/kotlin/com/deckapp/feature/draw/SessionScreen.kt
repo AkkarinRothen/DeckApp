@@ -63,6 +63,7 @@ import com.deckapp.feature.draw.components.SidebarNavigationRail
 import com.deckapp.feature.draw.components.SessionBottomFloatingDock
 import com.deckapp.feature.draw.components.SessionHotbarDock
 import com.deckapp.feature.draw.components.HotbarActionDialog
+import com.deckapp.feature.draw.components.SceneFramingDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -239,6 +240,17 @@ fun SessionScreen(
                         ) { Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = "Oráculo Mythic") }
                     }
 
+                    // Asistente de Encuadre de Escenas (Sprint 60)
+                    FilledTonalButton(
+                        onClick = viewModel::openSceneFraming,
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                        modifier = Modifier.padding(end = 4.dp).height(36.dp)
+                    ) {
+                        Icon(Icons.Default.HistoryEdu, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text("Escena", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
+                    }
+
                     IconButton(onClick = viewModel::openGlobalSearch) {
                         Icon(Icons.Default.Search, contentDescription = "Búsqueda Rápida")
                     }
@@ -382,7 +394,8 @@ fun SessionScreen(
                             viewModel.startEncounterFromScene(encounterId)
                         },
                         onPrepareSceneForBoard = viewModel::prepareSceneForBoard,
-                        onRollDiceClicked = viewModel::rollSmartDice
+                        onRollDiceClicked = viewModel::rollSmartDice,
+                        onFramingClick = viewModel::openSceneFraming
                     )
                     SidebarTool.MYTHIC_CONTEXT -> {
                         uiState.mythicState?.let { mythic ->
@@ -845,6 +858,23 @@ fun SessionScreen(
             onDismiss = viewModel::dismissHotbarActionDialog,
             onSave = viewModel::saveHotbarAction,
             onDelete = { actionId -> viewModel.deleteHotbarAction(actionId) }
+        )
+    }
+
+    if (uiState.showSceneFramingDialog) {
+        val activeScene = uiState.scenes.find { it.id == uiState.focusedSceneId && !it.isCompleted }
+            ?: uiState.scenes.firstOrNull { !it.isCompleted }
+        val currentChaos = uiState.linkedMythicSession?.chaosFactor ?: uiState.boardMythicChaos
+        val availableTables = uiState.tablesInSession.ifEmpty { uiState.allTables }
+
+        SceneFramingDialog(
+            currentChaos = currentChaos,
+            activeScene = activeScene,
+            availableNpcs = uiState.npcs,
+            availableTables = availableTables,
+            availableDecks = uiState.allDecks,
+            onDismiss = viewModel::dismissSceneFraming,
+            onConfirmFraming = viewModel::confirmSceneFraming
         )
     }
 

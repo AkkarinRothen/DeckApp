@@ -12,6 +12,8 @@ import com.deckapp.core.domain.usecase.hex.*
 import com.deckapp.core.model.*
 import com.deckapp.feature.hexploration.HexMapSessionUiState
 import com.deckapp.feature.mythic.MythicSessionUiState
+import com.deckapp.feature.draw.scene.*
+import com.deckapp.core.domain.usecase.mythic.SceneCheckResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -111,7 +113,8 @@ data class SessionUiState(
     val isSendingInspiration: Boolean = false,
     val isHotbarExpanded: Boolean = true,
     val showHotbarActionDialog: Boolean = false,
-    val editingHotbarAction: SessionHotbarAction? = null
+    val editingHotbarAction: SessionHotbarAction? = null,
+    val showSceneFramingDialog: Boolean = false
 )
 
 enum class SidebarTool {
@@ -1806,4 +1809,86 @@ class SessionViewModel @Inject constructor(
             }
         }
     }
+
+    // --- Scene Framing Assistant (Sprint 60) ---
+
+    fun openSceneFraming() {
+        _uiState.update { it.copy(showSceneFramingDialog = true) }
+    }
+
+    fun dismissSceneFraming() {
+        _uiState.update { it.copy(showSceneFramingDialog = false) }
+    }
+
+    fun confirmSceneFraming(
+        draft: SceneFramingDraft,
+        closePrevious: Boolean,
+        prevSummary: String,
+        chaosDelta: Int
+    ) {
+        viewModelScope.launch {
+            try {
+                val currentActiveScene = _uiState.value.scenes.find { it.id == _uiState.value.focusedSceneId && !it.isCompleted }
+                    ?: _uiState.value.scenes.firstOrNull { !it.isCompleted }
+
+                if (closePrevious && currentActiveScene != null) {
+                    val closure = SoloSceneClosure(
+                        summary = prevSummary.ifBlank { "Conclusión de la escena." },
+                        chaosDelta = chaosDelta
+                    )
+                    notesMutex.withLock {
+                        sessionRepository.updateDmNotes(sessionId, _uiState.value.dmNotes)
+                        val closed = CloseSoloSceneUseCase(sessionRepository)(currentActiveScene, closure)
+                        _uiState.update { state ->
+                            state.copy(
+                                dmNotes = listOf(state.dmNotes, closed.journalEntry).filter { it.isNotBlank() }.joinToString("\n\n")
+                            )
+                        }
+                    }
+                    if (closure.chaosDelta != 0) {
+                        updateBoardMythicChaos(closure.chaosDelta)
+                    }
+                }
+
+                val sceneCount = _uiState.value.scenes.size + 1
+                val newScene = Scene(
+                    sessionId = sessionId,
+                    title = draft.title,
+                    content = SoloSceneContext(
+                        location = draft.location,
+                        objective = draft.objective,
+                        situation = draft.adjustedSituation.ifBlank { draft.expectation },
+                        pendingQuestion = ""
+                    ).toSceneContent(),
+                    sortOrder = (_uiState.value.scenes.maxOfOrNull { it.sortOrder } ?: 0) + 1,
+                    linkedTableId = draft.linkedTableId,
+                    linkedDeckId = draft.linkedDeckId
+                )
+
+                val newSceneId = sessionRepository.upsertScene(newScene)
+                focusScene(newSceneId)
+
+                // Registro estructurado en Markdown en el diario
+                val journalEntry = buildFramedSceneJournalEntry(sceneCount, draft)
+                notesMutex.withLock {
+                    val currentNotes = _uiState.value.dmNotes
+                    val updatedNotes = if (currentNotes.isBlank()) journalEntry else "$currentNotes\n\n$journalEntry"
+                    _uiState.update { it.copy(dmNotes = updatedNotes, showSceneFramingDialog = false) }
+                    sessionRepository.updateDmNotes(sessionId, updatedNotes)
+                }
+
+                val snackMsg = when (draft.checkOutcome?.result) {
+                    SceneCheckResult.INTERRUPTED -> "¡Escena Interrumpida! Evento: ${draft.checkOutcome.eventFocus}"
+                    SceneCheckResult.ALTERED -> "Escena Alterada: ${draft.title}"
+                    else -> "Escena \"${draft.title}\" iniciada"
+                }
+                _uiState.update { it.copy(snackbarMessage = snackMsg) }
+
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                _uiState.update { it.copy(snackbarMessage = "Error al encuadrar escena: ${e.message}", showSceneFramingDialog = false) }
+            }
+        }
+    }
 }
+

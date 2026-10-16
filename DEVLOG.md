@@ -1,5 +1,40 @@
 ---
 
+### Sprint 60 — Mesa de Juego: Asistente de Encuadre de Escenas Solo RPG (Scene Framing Assistant) (15 de octubre de 2026)
+
+**FEATURE — Asistente de Encuadre Guiado de Escenas (`SceneFramingDialog`)**
+- Diálogo modal con estética glassmorphism oscuro (`Color(0xFA161920)`) y asistente secuencial en 3 pasos (+ paso previo de transición inteligente).
+- Botón de acceso directo destacado en la barra de herramientas superior de la mesa (`SessionScreen`) y botón de encuadre en el encabezado y estado vacío del planificador de aventuras (`PlanTab`).
+
+**FEATURE — Cierre Inteligente de Escena Previa (Paso 0)**
+- Detección automática de escenas activas sin completar al iniciar el encuadre.
+- Permite cerrar y resumir la escena previa en 1 toque con su ajuste de balance de Caos (`-1` Control, `0` Neutro, `+1` Descontrol) mediante `CloseSoloSceneUseCase`, o continuar manteniendo ambas abiertas.
+
+**FEATURE — Intención, Expectativa y Chequeo de Caos Mythic (Pasos 1 y 2)**
+- Paso 1: Definición de título, lugar, objetivo y expectativa base del personaje.
+- Paso 2: Chequeo de escena Mythic (d10 contra el Factor de Caos actual de 1 a 9) con animación de tirada y evaluación instantánea:
+  - 🟢 **NORMAL (d10 > Caos):** La escena arranca tal como se esperaba sin sobresaltos.
+  - 🟡 **ALTERADA (d10 $\le$ Caos y par):** Giro narrativo contextual automático (urgencia, cambio climático/terreno, presencia inesperada de PNJ u obstáculo imprevisto).
+  - 🔴 **INTERRUMPIDA (d10 $\le$ Caos e impar):** La escena esperada no ocurre. Generación automática de un Evento Aleatorio completo:
+    - *Foco del Evento:* (ej. Introducir un nuevo PNJ, Moverse hacia un hilo, etc.).
+    - *Significado:* Dos palabras clave de Mythic GME 2e (Acción + Tema).
+
+**FEATURE — Situación Adaptada, Vínculos y Registro Automático en Diario (Paso 3)**
+- Adaptación en tiempo real del texto de la situación inicial según el resultado del chequeo.
+- Vinculación opcional con 1 toque de recursos de la sesión (PNJs clave, Tablas aleatorias o Mazos temáticos).
+- Inserción automática de entrada formateada en Markdown en el Diario de la Sesión (`dmNotes`):
+  - Encabezado formal `## 🎬 Escena N: {Título}`.
+  - Cita destacada con el resultado del chequeo de Caos y el evento/giro.
+  - Bloques de Lugar, Objetivo y Situación Inicial.
+- Enfoque inmediato de la nueva escena en el Bento Board y tablero de juego (`focusScene`).
+
+**VALIDACIÓN Y PARIDAD**
+- 5 pruebas unitarias en `SceneFramingAssistantTest` validando chequeos normales, alterados e interrumpidos, generación de foco/significado y generación de Markdown para diario; 100% aprobadas.
+- Compilación y suite completa de pruebas en `:feature:draw:testDebugUnitTest` aprobadas.
+- *Feature Parity Mandate:* Registrado para sincronizar en `TDAPP-desktop`: componentes Compose de `SceneFramingDialog`, lógica de evaluación de chequeo de escena y formateador de diario.
+
+---
+
 ### Sprint 59 — Mesa de Juego: Action Hotbar & Quick Roll Dock (Barra Rápida de Acciones y Macros) (15 de octubre de 2026)
 
 **FEATURE — Action Hotbar & Quick Roll Dock en Mesa de Juego (`SessionHotbarDock`)**

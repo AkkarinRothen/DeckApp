@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ExpandMore
@@ -45,10 +46,10 @@ fun PlanTab(
     onUpdateHp: ((com.deckapp.core.model.EncounterCreature, Int) -> Unit)? = null,
     onStartEncounter: ((Long) -> Unit)? = null,
     onPrepareSceneForBoard: ((Scene) -> Unit)? = null,
-    onRollDiceClicked: ((String) -> Unit)? = null
+    onRollDiceClicked: ((String) -> Unit)? = null,
+    onFramingClick: (() -> Unit)? = null
 ) {
     if (scenes.isEmpty()) {
-        // ... (Empty State)
         Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(
@@ -59,6 +60,14 @@ fun PlanTab(
                 )
                 Spacer(Modifier.height(16.dp))
                 Text("Sin plan preparado", style = MaterialTheme.typography.titleSmall)
+                if (onFramingClick != null) {
+                    Spacer(Modifier.height(16.dp))
+                    Button(onClick = onFramingClick) {
+                        Icon(Icons.Default.HistoryEdu, null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text("Encuadrar Primera Escena")
+                    }
+                }
             }
         }
     } else {
@@ -68,12 +77,28 @@ fun PlanTab(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
-                Text(
-                    "ESCENAS DE AVENTURA",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "ESCENAS DE AVENTURA",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    if (onFramingClick != null) {
+                        FilledTonalButton(
+                            onClick = onFramingClick,
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                            modifier = Modifier.height(32.dp)
+                        ) {
+                            Icon(Icons.Default.Add, null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text("Encuadrar", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold))
+                        }
+                    }
+                }
             }
 
             itemsIndexed(scenes, key = { index, s -> if (s.id != 0L) s.id else "scene_$index" }) { index, scene ->
