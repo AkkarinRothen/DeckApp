@@ -20,7 +20,8 @@ data class Session(
     val recentActivityCollapsed: Boolean? = null,
     val activeBoardView: SessionBoardView = SessionBoardView.MAIN,
     val boardViewLabels: SessionBoardViewLabels = SessionBoardViewLabels(),
-    val hotbarActions: List<SessionHotbarAction> = emptyList()
+    val hotbarActions: List<SessionHotbarAction> = emptyList(),
+    val tensionClocks: List<TensionClock> = emptyList()
 )
 
 enum class SessionBoardItemType {

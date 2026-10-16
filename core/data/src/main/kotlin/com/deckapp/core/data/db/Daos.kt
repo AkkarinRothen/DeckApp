@@ -256,6 +256,9 @@ interface SessionDao {
 
     @Query("UPDATE sessions SET hotbarActionsJson = :actionsJson WHERE id = :sessionId")
     suspend fun updateHotbarActions(sessionId: Long, actionsJson: String)
+
+    @Query("UPDATE sessions SET tensionClocksJson = :clocksJson WHERE id = :sessionId")
+    suspend fun updateTensionClocks(sessionId: Long, clocksJson: String)
 }
 
 @Dao

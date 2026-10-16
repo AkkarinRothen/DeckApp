@@ -64,6 +64,9 @@ import com.deckapp.feature.draw.components.SessionBottomFloatingDock
 import com.deckapp.feature.draw.components.SessionHotbarDock
 import com.deckapp.feature.draw.components.HotbarActionDialog
 import com.deckapp.feature.draw.components.SceneFramingDialog
+import com.deckapp.feature.draw.components.clocks.SessionClocksOverlay
+import com.deckapp.feature.draw.components.clocks.ClockEditDialog
+import com.deckapp.feature.draw.components.clocks.ClockImpactDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -801,6 +804,23 @@ fun SessionScreen(
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 12.dp)
             )
+
+            // Progress Clocks Overlay (Sprint 61)
+            SessionClocksOverlay(
+                clocks = uiState.tensionClocks,
+                isExpanded = uiState.isClocksOverlayExpanded,
+                onToggleExpanded = viewModel::toggleClocksOverlayExpanded,
+                onTickClock = viewModel::tickClock,
+                onAddClock = viewModel::openCreateClockDialog,
+                onEditClock = viewModel::openEditClockDialog,
+                onResetClock = viewModel::resetClock,
+                onDeleteClock = viewModel::deleteClock,
+                onTriggerClockNow = viewModel::triggerClockNow,
+                onCopyClockToDiary = viewModel::copyClockImpactToDiary,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 10.dp, end = 12.dp)
+            )
         }
     }
 
@@ -875,6 +895,24 @@ fun SessionScreen(
             availableDecks = uiState.allDecks,
             onDismiss = viewModel::dismissSceneFraming,
             onConfirmFraming = viewModel::confirmSceneFraming
+        )
+    }
+
+    if (uiState.showClockEditDialog) {
+        ClockEditDialog(
+            clock = uiState.editingClock,
+            onDismiss = viewModel::closeClockEditDialog,
+            onSave = viewModel::saveClock
+        )
+    }
+
+    uiState.clockImpactAlert?.let { completedClock ->
+        ClockImpactDialog(
+            clock = completedClock,
+            onDismiss = viewModel::dismissClockImpactAlert,
+            onCopyToDiary = { viewModel.copyClockImpactToDiary(completedClock) },
+            onResetClock = { viewModel.resetClock(completedClock.id) },
+            onDeleteClock = { viewModel.deleteClock(completedClock.id) }
         )
     }
 

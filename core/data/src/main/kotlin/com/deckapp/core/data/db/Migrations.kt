@@ -960,6 +960,26 @@ val MIGRATION_44_45 = object : Migration(44, 45) {
     }
 }
 
+val MIGRATION_45_46 = object : Migration(45, 46) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        val hasClocks = database.query("PRAGMA table_info(`sessions`)").use { cursor ->
+            val nameIndex = cursor.getColumnIndex("name")
+            var found = false
+            while (cursor.moveToNext()) {
+                if (cursor.getString(nameIndex) == "tensionClocksJson") {
+                    found = true
+                    break
+                }
+            }
+            found
+        }
+        if (!hasClocks) {
+            database.execSQL("ALTER TABLE `sessions` ADD COLUMN `tensionClocksJson` TEXT NOT NULL DEFAULT '[]'")
+        }
+    }
+}
+
+
 
 
 

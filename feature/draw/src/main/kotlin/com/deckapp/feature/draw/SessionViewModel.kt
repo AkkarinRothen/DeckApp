@@ -114,7 +114,11 @@ data class SessionUiState(
     val isHotbarExpanded: Boolean = true,
     val showHotbarActionDialog: Boolean = false,
     val editingHotbarAction: SessionHotbarAction? = null,
-    val showSceneFramingDialog: Boolean = false
+    val showSceneFramingDialog: Boolean = false,
+    val isClocksOverlayExpanded: Boolean = false,
+    val showClockEditDialog: Boolean = false,
+    val editingClock: TensionClock? = null,
+    val clockImpactAlert: TensionClock? = null
 )
 
 enum class SidebarTool {
@@ -233,7 +237,8 @@ class SessionViewModel @Inject constructor(
                     _uiState.update { it.copy(
                         session = session,
                         dmNotes = if (it.isSoloSceneBusy || it.isSavingNotes) it.dmNotes else session.dmNotes.orEmpty(),
-                        sessionElapsedMinutes = elapsed
+                        sessionElapsedMinutes = elapsed,
+                        tensionClocks = if (session.tensionClocks.isNotEmpty()) session.tensionClocks else it.tensionClocks
                     ) }
                 }
             }.collect()
@@ -1484,33 +1489,140 @@ class SessionViewModel @Inject constructor(
         }
     }
 
-    // --- Tension Clocks ---
+    // --- Tension Clocks & Overlay (Sprint 61) ---
 
-    fun tickClock(clockId: Long, amount: Int) {
+    fun toggleClocksOverlayExpanded() {
+        _uiState.update { it.copy(isClocksOverlayExpanded = !it.isClocksOverlayExpanded) }
+    }
+
+    fun openCreateClockDialog() {
+        _uiState.update { it.copy(showClockEditDialog = true, editingClock = null) }
+    }
+
+    fun openEditClockDialog(clock: TensionClock) {
+        _uiState.update { it.copy(showClockEditDialog = true, editingClock = clock) }
+    }
+
+    fun closeClockEditDialog() {
+        _uiState.update { it.copy(showClockEditDialog = false, editingClock = null) }
+    }
+
+    fun dismissClockImpactAlert() {
+        _uiState.update { it.copy(clockImpactAlert = null) }
+    }
+
+    fun saveClock(clock: TensionClock) {
+        val currentClocks = _uiState.value.tensionClocks
+        val exists = currentClocks.any { it.id == clock.id }
+        val updatedClocks = if (exists) {
+            currentClocks.map { if (it.id == clock.id) clock else it }
+        } else {
+            currentClocks + clock
+        }
+        val isNowCompleted = clock.progress >= clock.segments
         _uiState.update { state ->
             state.copy(
-                tensionClocks = state.tensionClocks.map { clock ->
-                    if (clock.id == clockId) {
-                        val newProgress = (clock.progress + amount).coerceIn(0, clock.segments)
-                        clock.copy(progress = newProgress)
-                    } else clock
-                }
+                tensionClocks = updatedClocks,
+                showClockEditDialog = false,
+                editingClock = null,
+                clockImpactAlert = if (isNowCompleted && !clock.isCompleted) clock else state.clockImpactAlert
             )
+        }
+        viewModelScope.launch {
+            sessionRepository.updateTensionClocks(sessionId, updatedClocks)
+        }
+    }
+
+    fun tickClock(clockId: Long, amount: Int) {
+        val currentClocks = _uiState.value.tensionClocks
+        var completedClock: TensionClock? = null
+        val updatedClocks = currentClocks.map { clock ->
+            if (clock.id == clockId) {
+                val newProgress = (clock.progress + amount).coerceIn(0, clock.segments)
+                val isNowCompleted = newProgress >= clock.segments
+                val updated = clock.copy(progress = newProgress, isCompleted = isNowCompleted)
+                if (isNowCompleted && !clock.isCompleted) {
+                    completedClock = updated
+                }
+                updated
+            } else clock
+        }
+        _uiState.update { state ->
+            state.copy(
+                tensionClocks = updatedClocks,
+                clockImpactAlert = completedClock ?: state.clockImpactAlert
+            )
+        }
+        viewModelScope.launch {
+            sessionRepository.updateTensionClocks(sessionId, updatedClocks)
+        }
+    }
+
+    fun resetClock(clockId: Long) {
+        val currentClocks = _uiState.value.tensionClocks
+        val updatedClocks = currentClocks.map { clock ->
+            if (clock.id == clockId) {
+                clock.copy(progress = 0, isCompleted = false)
+            } else clock
+        }
+        _uiState.update { state ->
+            state.copy(
+                tensionClocks = updatedClocks,
+                clockImpactAlert = if (state.clockImpactAlert?.id == clockId) null else state.clockImpactAlert
+            )
+        }
+        viewModelScope.launch {
+            sessionRepository.updateTensionClocks(sessionId, updatedClocks)
+        }
+    }
+
+    fun deleteClock(clockId: Long) {
+        val currentClocks = _uiState.value.tensionClocks
+        val updatedClocks = currentClocks.filterNot { it.id == clockId }
+        _uiState.update { state ->
+            state.copy(
+                tensionClocks = updatedClocks,
+                clockImpactAlert = if (state.clockImpactAlert?.id == clockId) null else state.clockImpactAlert
+            )
+        }
+        viewModelScope.launch {
+            sessionRepository.updateTensionClocks(sessionId, updatedClocks)
+        }
+    }
+
+    fun triggerClockNow(clock: TensionClock) {
+        val updated = clock.copy(progress = clock.segments, isCompleted = true)
+        saveClock(updated)
+        _uiState.update { it.copy(clockImpactAlert = updated) }
+    }
+
+    fun copyClockImpactToDiary(clock: TensionClock) {
+        val consequenceText = clock.triggerDescription.ifBlank { "El evento o peligro programado se ha desencadenado." }
+        val diaryEntry = "\n\n### ⏰ Detonación de Reloj: ${clock.name}\n> **Consecuencia:** $consequenceText\n*Progreso alcanzado: ${clock.segments}/${clock.segments}*\n"
+        val currentNotes = _uiState.value.dmNotes
+        val updatedNotes = currentNotes + diaryEntry
+        _uiState.update { it.copy(dmNotes = updatedNotes, clockImpactAlert = null) }
+        viewModelScope.launch {
+            sessionRepository.updateDmNotes(sessionId, updatedNotes)
         }
     }
 
     fun updateClockDescriptionAndProgress(clockId: Long, newDescription: String, newProgress: Int) {
+        val currentClocks = _uiState.value.tensionClocks
+        val updatedClocks = currentClocks.map { clock ->
+            if (clock.id == clockId) {
+                clock.copy(
+                    triggerDescription = newDescription,
+                    progress = newProgress.coerceIn(0, clock.segments),
+                    isCompleted = newProgress >= clock.segments
+                )
+            } else clock
+        }
         _uiState.update { state ->
-            state.copy(
-                tensionClocks = state.tensionClocks.map { clock ->
-                    if (clock.id == clockId) {
-                        clock.copy(
-                            triggerDescription = newDescription,
-                            progress = newProgress.coerceIn(0, clock.segments)
-                        )
-                    } else clock
-                }
-            )
+            state.copy(tensionClocks = updatedClocks)
+        }
+        viewModelScope.launch {
+            sessionRepository.updateTensionClocks(sessionId, updatedClocks)
         }
     }
 
@@ -1531,7 +1643,11 @@ class SessionViewModel @Inject constructor(
             colorHex = colorHex,
             triggerDescription = triggerDescription
         )
-        _uiState.update { it.copy(tensionClocks = it.tensionClocks + newClock) }
+        val updatedClocks = _uiState.value.tensionClocks + newClock
+        _uiState.update { it.copy(tensionClocks = updatedClocks) }
+        viewModelScope.launch {
+            sessionRepository.updateTensionClocks(sessionId, updatedClocks)
+        }
         addBoardBlock(
             type = SessionBoardItemType.CLOCK,
             size = SessionBoardItemSize.S,

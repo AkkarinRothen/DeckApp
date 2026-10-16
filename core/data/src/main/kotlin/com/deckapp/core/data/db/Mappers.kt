@@ -446,7 +446,9 @@ fun SessionEntity.toDomain() = Session(
     linkedMythicSessionId = linkedMythicSessionId,
     hotbarActions = runCatching { json.decodeFromString<List<SessionHotbarAction>>(hotbarActionsJson) }
         .getOrDefault(emptyList())
-        .ifEmpty { defaultHotbarActions() }
+        .ifEmpty { defaultHotbarActions() },
+    tensionClocks = runCatching { json.decodeFromString<List<TensionClock>>(tensionClocksJson) }
+        .getOrDefault(emptyList())
 )
 
 fun Session.toEntity() = SessionEntity(
@@ -461,14 +463,16 @@ fun Session.toEntity() = SessionEntity(
     endedAt = endedAt,
     gameSystemsJson = json.encodeToString(gameSystems),
     linkedMythicSessionId = linkedMythicSessionId,
-    hotbarActionsJson = json.encodeToString(hotbarActions)
+    hotbarActionsJson = json.encodeToString(hotbarActions),
+    tensionClocksJson = json.encodeToString(tensionClocks)
 )
 
 fun SessionEntity.toBackupDto() = SessionBackupDto(
     id = id, name = name, status = status, scheduledDate = scheduledDate, 
     summary = summary, createdAt = createdAt, endedAt = endedAt, 
     showCardTitles = showCardTitles, dmNotes = dmNotes, gameSystemsJson = gameSystemsJson,
-    hotbarActionsJson = hotbarActionsJson
+    hotbarActionsJson = hotbarActionsJson,
+    tensionClocksJson = tensionClocksJson
 )
 
 fun SessionDeckRefEntity.toDomain() = SessionDeckRef(

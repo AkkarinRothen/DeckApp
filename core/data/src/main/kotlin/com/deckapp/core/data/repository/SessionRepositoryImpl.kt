@@ -101,6 +101,10 @@ class SessionRepositoryImpl @Inject constructor(
         sessionDao.updateHotbarActions(sessionId, json.encodeToString(actions))
     }
 
+    override suspend fun updateTensionClocks(sessionId: Long, clocks: List<com.deckapp.core.model.TensionClock>) {
+        sessionDao.updateTensionClocks(sessionId, json.encodeToString(clocks))
+    }
+
     // ── Scenes (Planning) ───────────────────────────────────────────────────
 
     override fun getScenesForSession(sessionId: Long): Flow<List<Scene>> =
