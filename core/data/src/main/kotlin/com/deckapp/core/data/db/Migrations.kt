@@ -941,5 +941,25 @@ val MIGRATION_43_44 = object : Migration(43, 44) {
     }
 }
 
+val MIGRATION_44_45 = object : Migration(44, 45) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        val hasHotbar = database.query("PRAGMA table_info(`sessions`)").use { cursor ->
+            val nameIndex = cursor.getColumnIndex("name")
+            var found = false
+            while (cursor.moveToNext()) {
+                if (cursor.getString(nameIndex) == "hotbarActionsJson") {
+                    found = true
+                    break
+                }
+            }
+            found
+        }
+        if (!hasHotbar) {
+            database.execSQL("ALTER TABLE `sessions` ADD COLUMN `hotbarActionsJson` TEXT NOT NULL DEFAULT '[]'")
+        }
+    }
+}
+
+
 
 

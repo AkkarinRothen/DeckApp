@@ -443,7 +443,10 @@ fun SessionEntity.toDomain() = Session(
     createdAt = createdAt,
     endedAt = endedAt,
     gameSystems = runCatching { json.decodeFromString<List<String>>(gameSystemsJson) }.getOrDefault(listOf("General")),
-    linkedMythicSessionId = linkedMythicSessionId
+    linkedMythicSessionId = linkedMythicSessionId,
+    hotbarActions = runCatching { json.decodeFromString<List<SessionHotbarAction>>(hotbarActionsJson) }
+        .getOrDefault(emptyList())
+        .ifEmpty { defaultHotbarActions() }
 )
 
 fun Session.toEntity() = SessionEntity(
@@ -457,13 +460,15 @@ fun Session.toEntity() = SessionEntity(
     createdAt = createdAt,
     endedAt = endedAt,
     gameSystemsJson = json.encodeToString(gameSystems),
-    linkedMythicSessionId = linkedMythicSessionId
+    linkedMythicSessionId = linkedMythicSessionId,
+    hotbarActionsJson = json.encodeToString(hotbarActions)
 )
 
 fun SessionEntity.toBackupDto() = SessionBackupDto(
     id = id, name = name, status = status, scheduledDate = scheduledDate, 
     summary = summary, createdAt = createdAt, endedAt = endedAt, 
-    showCardTitles = showCardTitles, dmNotes = dmNotes, gameSystemsJson = gameSystemsJson
+    showCardTitles = showCardTitles, dmNotes = dmNotes, gameSystemsJson = gameSystemsJson,
+    hotbarActionsJson = hotbarActionsJson
 )
 
 fun SessionDeckRefEntity.toDomain() = SessionDeckRef(

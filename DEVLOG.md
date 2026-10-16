@@ -1,5 +1,36 @@
 ---
 
+### Sprint 59 — Mesa de Juego: Action Hotbar & Quick Roll Dock (Barra Rápida de Acciones y Macros) (15 de octubre de 2026)
+
+**FEATURE — Action Hotbar & Quick Roll Dock en Mesa de Juego (`SessionHotbarDock`)**
+- Dock flotante horizontal colapsable en el borde inferior de la mesa de juego (`SessionScreen`), diseñado con pastilla sutil glassmorphism (`Color(0xEB161920)`), reborde de 1dp `Color(0x33FFFFFF)` y micro-animación de despliegue/ocultamiento (`AnimatedVisibility`).
+- Pastilla de control siempre visible con flecha rotatoria para colapsar y expandir sin obstruir notas ni mapas.
+- Fila de chips de macros con soporte para pulsación simple (ejecución inmediata con feedback háptico) y pulsación prolongada (menú de edición o eliminación).
+
+**FEATURE — Tipos de Atajos Soportados (`HotbarActionType`)**
+1. 🎲 **Tiradas de Dados personalizadas:** Fórmulas arbitrarias (`1d20`, `1d100`, `1d20+5`, `2d6+3`, etc.) ejecutadas en el evaluador de dados y notificadas en snackbar/historial de tiradas de la sesión.
+2. 🔮 **Consultas directas al Oráculo Mythic:** `50/50`, `Casi Seguro (+40)`, `Improbable (-20)` y `Evento Aleatorio` (Foco + Significado de 2 palabras) integrados de forma nativa en la sesión y diario.
+3. 📜 **Tirada de Tabla Aleatoria favorita:** Ejecución directa con 1 toque de tablas de botín, encuentros o rumores enlazadas por ID.
+4. 🃏 **Robo de Carta:** Extracción rápida de una carta de un mazo seleccionado con animación de descarte/mano.
+
+**FEATURE — Modal de Creación y Edición de Macros (`HotbarActionDialog`)**
+- Diálogo modal con 4 pestañas de tipo (Dado, Oráculo, Tabla, Mazo).
+- Selector de fórmulas rápidas para dados (`d4`, `d6`, `d8`, `d10`, `d12`, `d20`, `d100`).
+- Paleta de 8 colores vibrantes de acento para rápida identificación visual.
+- Acciones de Guardar y Eliminar macro.
+
+**FEATURE — Starter Pack y Persistencia Room v44 $\to$ v45 (`MIGRATION_44_45`)**
+- Precarga automática de 4 macros por defecto en nuevas sesiones (`defaultHotbarActions()`): `d20`, `d100`, `Oráculo 50/50`, `Evento Aleatorio`.
+- Persistencia en `SessionEntity` mediante columna `hotbarActionsJson TEXT NOT NULL DEFAULT '[]'` con migración Room v45 (`MIGRATION_44_45`).
+- Respaldado en la copia de seguridad global `FullBackupDto` (`SessionBackupDto.hotbarActionsJson`).
+
+**VALIDACIÓN Y PARIDAD**
+- Pruebas unitarias en `SessionHotbarTest` verificando serialización JSON, starter pack por defecto y mutaciones de lista.
+- Compilación completa y unit tests de `:feature:draw` aprobados al 100%.
+- *Feature Parity Mandate:* Registrado para sincronizar en `TDAPP-desktop`: migración Room v45 (`hotbarActionsJson`), componentes Compose/Desktop de `SessionHotbarDock` y `HotbarActionDialog`, lógica de dispatch de macros en `SessionViewModel`.
+
+---
+
 ### Sprint 58 — Mapa Táctico: Mapas Anidados (Map-in-Map), Mini-Panel Flotante, Turn Tracker con Auto-Foco y Spawneo Masivo (15 de octubre de 2026)
 
 **FEATURE — Mapas Anidados (Map-in-Map) y Breadcrumbs Jerárquicos**

@@ -126,7 +126,9 @@ data class SessionEntity(
     @ColumnInfo(name = "dm_notes") val dmNotes: String? = null,
     @ColumnInfo(defaultValue = "[\"General\"]")
     val gameSystemsJson: String = "[\"General\"]",
-    val linkedMythicSessionId: Long? = null
+    val linkedMythicSessionId: Long? = null,
+    @ColumnInfo(defaultValue = "[]")
+    val hotbarActionsJson: String = "[]"
 )
 
 @Entity(

@@ -40,6 +40,7 @@ interface SessionRepository {
 
     suspend fun updateGameSystems(sessionId: Long, gameSystems: List<String>)
     suspend fun updateLinkedMythicSession(sessionId: Long, mythicSessionId: Long?)
+    suspend fun updateHotbarActions(sessionId: Long, actions: List<com.deckapp.core.model.SessionHotbarAction>)
 
     // Scenes (Planning)
     fun getScenesForSession(sessionId: Long): Flow<List<Scene>>

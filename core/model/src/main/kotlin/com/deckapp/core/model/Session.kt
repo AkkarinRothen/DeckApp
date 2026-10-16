@@ -19,7 +19,8 @@ data class Session(
     val linkedMythicSessionId: Long? = null,
     val recentActivityCollapsed: Boolean? = null,
     val activeBoardView: SessionBoardView = SessionBoardView.MAIN,
-    val boardViewLabels: SessionBoardViewLabels = SessionBoardViewLabels()
+    val boardViewLabels: SessionBoardViewLabels = SessionBoardViewLabels(),
+    val hotbarActions: List<SessionHotbarAction> = emptyList()
 )
 
 enum class SessionBoardItemType {
@@ -168,3 +169,56 @@ data class DicePreset(
     val name: String,
     val formula: String
 )
+
+/** Tipo de acción rápida en la barra Hotbar */
+@Serializable
+enum class HotbarActionType {
+    DICE_ROLL,
+    ORACLE_QUERY,
+    RANDOM_TABLE,
+    DRAW_CARD
+}
+
+/** Atajo o macro personalizada de la barra rápida de la mesa */
+@Serializable
+data class SessionHotbarAction(
+    val id: String = java.util.UUID.randomUUID().toString(),
+    val label: String,
+    val type: HotbarActionType,
+    val payload: String, // Formula ("1d20+5"), Oracle ("50_50", "RANDOM_EVENT"), TableId ("1"), DeckId ("2")
+    val iconName: String? = null,
+    val colorHex: Long? = null
+)
+
+/** Starter Pack de atajos por defecto para sesiones de juego */
+fun defaultHotbarActions(): List<SessionHotbarAction> = listOf(
+    SessionHotbarAction(
+        label = "d20",
+        type = HotbarActionType.DICE_ROLL,
+        payload = "1d20",
+        iconName = "dice_d20",
+        colorHex = 0xFF5C6BC0L
+    ),
+    SessionHotbarAction(
+        label = "d100",
+        type = HotbarActionType.DICE_ROLL,
+        payload = "1d100",
+        iconName = "dice_d100",
+        colorHex = 0xFF42A5F5L
+    ),
+    SessionHotbarAction(
+        label = "Oráculo 50/50",
+        type = HotbarActionType.ORACLE_QUERY,
+        payload = "50_50",
+        iconName = "auto_awesome",
+        colorHex = 0xFFAB47BCL
+    ),
+    SessionHotbarAction(
+        label = "Evento Aleatorio",
+        type = HotbarActionType.ORACLE_QUERY,
+        payload = "RANDOM_EVENT",
+        iconName = "bolt",
+        colorHex = 0xFFFF7043L
+    )
+)
+

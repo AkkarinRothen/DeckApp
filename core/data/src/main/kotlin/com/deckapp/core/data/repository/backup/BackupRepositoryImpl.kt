@@ -145,7 +145,7 @@ class BackupRepositoryImpl @Inject constructor(
             backup.randomTableTags.forEach { db.tagDao().insertTableTagRef(RandomTableTagCrossRef(it.tableId, it.tagId)) }
 
             db.sessionDao().insertSessions(backup.sessions.map { 
-                SessionEntity(id = it.id, name = it.name, status = it.status, scheduledDate = it.scheduledDate, summary = it.summary, createdAt = it.createdAt, endedAt = it.endedAt, showCardTitles = it.showCardTitles, dmNotes = it.dmNotes, gameSystemsJson = it.gameSystemsJson) 
+                SessionEntity(id = it.id, name = it.name, status = it.status, scheduledDate = it.scheduledDate, summary = it.summary, createdAt = it.createdAt, endedAt = it.endedAt, showCardTitles = it.showCardTitles, dmNotes = it.dmNotes, gameSystemsJson = it.gameSystemsJson, hotbarActionsJson = it.hotbarActionsJson) 
             })
             backup.sessionDeckRefs.forEach { db.sessionDao().insertSessionDeckRef(SessionDeckRefEntity(it.sessionId, it.stackId, it.drawModeOverride, it.sortOrder)) }
             backup.sessionTableRefs.forEach { db.sessionDao().insertSessionTableRef(SessionTableRefEntity(it.sessionId, it.tableId, it.sortOrder)) }

@@ -57,7 +57,7 @@ import androidx.room.RoomDatabase
         TacticalTokenEntity::class,
         TacticalMapPinEntity::class
     ],
-    version = 44,
+    version = 45,
     exportSchema = true
 )
 abstract class DeckAppDatabase : RoomDatabase() {
@@ -123,5 +123,6 @@ abstract class DeckAppDatabase : RoomDatabase() {
         val MIGRATION_41_42 = com.deckapp.core.data.db.MIGRATION_41_42
         val MIGRATION_42_43 = com.deckapp.core.data.db.MIGRATION_42_43
         val MIGRATION_43_44 = com.deckapp.core.data.db.MIGRATION_43_44
+        val MIGRATION_44_45 = com.deckapp.core.data.db.MIGRATION_44_45
     }
 }

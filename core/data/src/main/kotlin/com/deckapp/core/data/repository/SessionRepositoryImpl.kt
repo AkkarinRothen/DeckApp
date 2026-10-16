@@ -97,6 +97,10 @@ class SessionRepositoryImpl @Inject constructor(
         sessionDao.updateLinkedMythicSession(sessionId, mythicSessionId)
     }
 
+    override suspend fun updateHotbarActions(sessionId: Long, actions: List<com.deckapp.core.model.SessionHotbarAction>) {
+        sessionDao.updateHotbarActions(sessionId, json.encodeToString(actions))
+    }
+
     // ── Scenes (Planning) ───────────────────────────────────────────────────
 
     override fun getScenesForSession(sessionId: Long): Flow<List<Scene>> =

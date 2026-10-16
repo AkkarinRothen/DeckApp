@@ -61,6 +61,8 @@ import com.deckapp.feature.draw.components.WikiQuickPreviewDialog
 
 import com.deckapp.feature.draw.components.SidebarNavigationRail
 import com.deckapp.feature.draw.components.SessionBottomFloatingDock
+import com.deckapp.feature.draw.components.SessionHotbarDock
+import com.deckapp.feature.draw.components.HotbarActionDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -772,6 +774,20 @@ fun SessionScreen(
                     onDismiss = { npcHistory.clear() }
                 )
             }
+
+            // Action Hotbar / Quick Roll Dock (Sprint 59)
+            val hotbarActions = uiState.session?.hotbarActions ?: defaultHotbarActions()
+            SessionHotbarDock(
+                actions = hotbarActions,
+                isExpanded = uiState.isHotbarExpanded,
+                onToggleExpanded = viewModel::toggleHotbarExpanded,
+                onExecuteAction = viewModel::executeHotbarAction,
+                onAddAction = viewModel::openCreateHotbarAction,
+                onEditAction = viewModel::openEditHotbarAction,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 12.dp)
+            )
         }
     }
 
@@ -817,6 +833,18 @@ fun SessionScreen(
             sessionDeckRefs = uiState.deckRefs,
             onToggleDeck = viewModel::toggleDeckInSession,
             onDismiss = viewModel::dismissSessionConfig
+        )
+    }
+
+    if (uiState.showHotbarActionDialog) {
+        val availableTables = uiState.tablesInSession.ifEmpty { uiState.allTables }
+        HotbarActionDialog(
+            action = uiState.editingHotbarAction,
+            availableTables = availableTables,
+            availableDecks = uiState.allDecks,
+            onDismiss = viewModel::dismissHotbarActionDialog,
+            onSave = viewModel::saveHotbarAction,
+            onDelete = { actionId -> viewModel.deleteHotbarAction(actionId) }
         )
     }
 

@@ -253,6 +253,9 @@ interface SessionDao {
 
     @Query("UPDATE sessions SET linkedMythicSessionId = :mythicSessionId WHERE id = :sessionId")
     suspend fun updateLinkedMythicSession(sessionId: Long, mythicSessionId: Long?)
+
+    @Query("UPDATE sessions SET hotbarActionsJson = :actionsJson WHERE id = :sessionId")
+    suspend fun updateHotbarActions(sessionId: Long, actionsJson: String)
 }
 
 @Dao

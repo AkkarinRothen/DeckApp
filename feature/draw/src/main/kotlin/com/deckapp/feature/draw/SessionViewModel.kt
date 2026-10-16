@@ -108,7 +108,10 @@ data class SessionUiState(
     val boardMythicLastEvent: String? = null,
     val isSoloSceneBusy: Boolean = false,
     val boardMemory: BoardSessionMemory = BoardSessionMemory(),
-    val isSendingInspiration: Boolean = false
+    val isSendingInspiration: Boolean = false,
+    val isHotbarExpanded: Boolean = true,
+    val showHotbarActionDialog: Boolean = false,
+    val editingHotbarAction: SessionHotbarAction? = null
 )
 
 enum class SidebarTool {
@@ -1712,4 +1715,95 @@ class SessionViewModel @Inject constructor(
     fun assignItemToGroup(itemId: Long, groupId: Long?) = boardDelegate.assignItemToGroup(itemId, groupId)
     fun mergeBoardItems(sourceId: Long, targetId: Long, onGroupCreated: (SessionBoardGroup) -> Unit = {}) =
         boardDelegate.mergeBoardItems(sourceId, targetId, onGroupCreated)
+
+    // --- Session Hotbar Actions (Sprint 59) ---
+
+    fun toggleHotbarExpanded() {
+        _uiState.update { it.copy(isHotbarExpanded = !it.isHotbarExpanded) }
+    }
+
+    fun openCreateHotbarAction() {
+        _uiState.update { it.copy(showHotbarActionDialog = true, editingHotbarAction = null) }
+    }
+
+    fun openEditHotbarAction(action: SessionHotbarAction) {
+        _uiState.update { it.copy(showHotbarActionDialog = true, editingHotbarAction = action) }
+    }
+
+    fun dismissHotbarActionDialog() {
+        _uiState.update { it.copy(showHotbarActionDialog = false, editingHotbarAction = null) }
+    }
+
+    fun saveHotbarAction(action: SessionHotbarAction) {
+        val currentActions = _uiState.value.session?.hotbarActions ?: defaultHotbarActions()
+        val index = currentActions.indexOfFirst { it.id == action.id }
+        val updatedActions = if (index >= 0) {
+            currentActions.toMutableList().apply { set(index, action) }
+        } else {
+            currentActions + action
+        }
+        _uiState.update { state ->
+            state.copy(
+                session = state.session?.copy(hotbarActions = updatedActions),
+                showHotbarActionDialog = false,
+                editingHotbarAction = null
+            )
+        }
+        viewModelScope.launch {
+            sessionRepository.updateHotbarActions(sessionId, updatedActions)
+        }
+    }
+
+    fun deleteHotbarAction(actionId: String) {
+        val currentActions = _uiState.value.session?.hotbarActions ?: defaultHotbarActions()
+        val updatedActions = currentActions.filterNot { it.id == actionId }
+        _uiState.update { state ->
+            state.copy(
+                session = state.session?.copy(hotbarActions = updatedActions),
+                showHotbarActionDialog = false,
+                editingHotbarAction = null
+            )
+        }
+        viewModelScope.launch {
+            sessionRepository.updateHotbarActions(sessionId, updatedActions)
+        }
+    }
+
+    fun executeHotbarAction(action: SessionHotbarAction) {
+        when (action.type) {
+            HotbarActionType.DICE_ROLL -> {
+                rollSmartDiceWithDescription(action.payload, action.label)
+            }
+            HotbarActionType.ORACLE_QUERY -> {
+                when (action.payload.uppercase()) {
+                    "RANDOM_EVENT" -> rollBoardMythicRandomEvent()
+                    "CERTAIN" -> rollBoardMythicFate(ProbabilityLevel.CERTAIN)
+                    "NEAR_SURE", "NEARLY_CERTAIN" -> rollBoardMythicFate(ProbabilityLevel.NEARLY_CERTAIN)
+                    "VERY_LIKELY" -> rollBoardMythicFate(ProbabilityLevel.VERY_LIKELY)
+                    "LIKELY" -> rollBoardMythicFate(ProbabilityLevel.LIKELY)
+                    "UNLIKELY" -> rollBoardMythicFate(ProbabilityLevel.UNLIKELY)
+                    "VERY_UNLIKELY" -> rollBoardMythicFate(ProbabilityLevel.VERY_UNLIKELY)
+                    "NEAR_IMPOSSIBLE", "NEARLY_IMPOSSIBLE" -> rollBoardMythicFate(ProbabilityLevel.NEARLY_IMPOSSIBLE)
+                    "IMPOSSIBLE" -> rollBoardMythicFate(ProbabilityLevel.IMPOSSIBLE)
+                    else -> rollBoardMythicFate(ProbabilityLevel.FIFTY_FIFTY)
+                }
+            }
+            HotbarActionType.RANDOM_TABLE -> {
+                val tableId = action.payload.toLongOrNull()
+                if (tableId != null) {
+                    rollActiveTable(tableId)
+                } else {
+                    _uiState.update { it.copy(snackbarMessage = "Tabla no vinculada: ${action.label}") }
+                }
+            }
+            HotbarActionType.DRAW_CARD -> {
+                val deckId = action.payload.toLongOrNull() ?: _uiState.value.selectedDeckId
+                if (deckId != null) {
+                    drawCardFromDeck(deckId)
+                } else {
+                    _uiState.update { it.copy(snackbarMessage = "No hay mazo seleccionado para robar") }
+                }
+            }
+        }
+    }
 }
