@@ -360,7 +360,7 @@ fun HotbarActionDialog(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     items(HOTBAR_COLORS) { colorHex ->
-                        val color = Color(colorHex.toULong())
+                        val color = Color(colorHex)
                         val isSelected = selectedColor == colorHex
                         Box(
                             modifier = Modifier
