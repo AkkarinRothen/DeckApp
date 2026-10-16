@@ -67,6 +67,9 @@ import com.deckapp.feature.draw.components.SceneFramingDialog
 import com.deckapp.feature.draw.components.clocks.SessionClocksOverlay
 import com.deckapp.feature.draw.components.clocks.ClockEditDialog
 import com.deckapp.feature.draw.components.clocks.ClockImpactDialog
+import com.deckapp.feature.draw.components.threads.SessionThreadsOverlay
+import com.deckapp.feature.draw.components.threads.ThreadEditDialog
+import com.deckapp.feature.draw.components.threads.MythicCharacterEditDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -805,6 +808,34 @@ fun SessionScreen(
                     .padding(bottom = 12.dp)
             )
 
+            // Threats & Threads Tracker Overlay (Sprint 62)
+            val threads = uiState.mythicState?.threads ?: emptyList()
+            val characters = uiState.mythicState?.characters ?: emptyList()
+            SessionThreadsOverlay(
+                threads = threads,
+                characters = characters,
+                isExpanded = uiState.isThreadsOverlayExpanded,
+                selectedTab = uiState.selectedThreadsTab,
+                lastRandomPick = uiState.lastRandomMythicPick,
+                onToggleExpanded = viewModel::toggleThreadsOverlayExpanded,
+                onSelectTab = viewModel::selectThreadsTab,
+                onRollRandom = viewModel::rollRandomThreadOrCharacter,
+                onClearRandomPick = viewModel::clearRandomMythicPick,
+                onCopyRandomPickToDiary = viewModel::copyLastRandomPickToDiary,
+                onToggleThreadResolved = viewModel::toggleMythicThreadStatus,
+                onAddThread = viewModel::openCreateThreadDialog,
+                onEditThread = viewModel::openEditThreadDialog,
+                onDeleteThread = viewModel::deleteMythicThread,
+                onAddCharacter = viewModel::openCreateCharacterDialog,
+                onEditCharacter = viewModel::openEditCharacterDialog,
+                onDeleteCharacter = viewModel::deleteMythicCharacter,
+                onCopySummaryToDiary = viewModel::copyThreadsSummaryToDiary,
+                onSendItemToNotes = viewModel::sendRawToNotes,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(top = 10.dp, start = 12.dp)
+            )
+
             // Progress Clocks Overlay (Sprint 61)
             SessionClocksOverlay(
                 clocks = uiState.tensionClocks,
@@ -913,6 +944,22 @@ fun SessionScreen(
             onCopyToDiary = { viewModel.copyClockImpactToDiary(completedClock) },
             onResetClock = { viewModel.resetClock(completedClock.id) },
             onDeleteClock = { viewModel.deleteClock(completedClock.id) }
+        )
+    }
+
+    if (uiState.showThreadEditDialog) {
+        ThreadEditDialog(
+            thread = uiState.editingMythicThread,
+            onDismiss = viewModel::closeThreadDialog,
+            onSave = viewModel::saveMythicThread
+        )
+    }
+
+    if (uiState.showMythicCharacterEditDialog) {
+        MythicCharacterEditDialog(
+            character = uiState.editingMythicCharacter,
+            onDismiss = viewModel::closeCharacterDialog,
+            onSave = viewModel::saveMythicCharacter
         )
     }
 

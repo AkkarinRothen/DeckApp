@@ -13,6 +13,7 @@ import com.deckapp.core.model.*
 import com.deckapp.feature.hexploration.HexMapSessionUiState
 import com.deckapp.feature.mythic.MythicSessionUiState
 import com.deckapp.feature.draw.scene.*
+import com.deckapp.feature.draw.components.threads.ThreadsOverlayTab
 import com.deckapp.core.domain.usecase.mythic.SceneCheckResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -118,7 +119,14 @@ data class SessionUiState(
     val isClocksOverlayExpanded: Boolean = false,
     val showClockEditDialog: Boolean = false,
     val editingClock: TensionClock? = null,
-    val clockImpactAlert: TensionClock? = null
+    val clockImpactAlert: TensionClock? = null,
+    val isThreadsOverlayExpanded: Boolean = false,
+    val selectedThreadsTab: ThreadsOverlayTab = ThreadsOverlayTab.THREADS,
+    val lastRandomMythicPick: String? = null,
+    val showThreadEditDialog: Boolean = false,
+    val showMythicCharacterEditDialog: Boolean = false,
+    val editingMythicThread: MythicThread? = null,
+    val editingMythicCharacter: MythicCharacter? = null
 )
 
 enum class SidebarTool {
@@ -672,11 +680,160 @@ class SessionViewModel @Inject constructor(
         }
     }
 
-    fun addMythicCharacter(name: String) {
-        val mythicId = _uiState.value.linkedMythicSession?.id ?: return
+    // --- Threats & Threads Tracker (Sprint 62) ---
+
+    suspend fun ensureLinkedMythicSessionId(): Long {
+        val currentId = _uiState.value.linkedMythicSession?.id ?: _uiState.value.session?.linkedMythicSessionId
+        if (currentId != null) return currentId
+        val sessionName = "Mítico - ${_uiState.value.session?.name ?: "Sesión"}"
+        val newSessionId = mythicRepository.saveSession(MythicSession(name = sessionName))
+        linkMythicSession(newSessionId)
+        return newSessionId
+    }
+
+    fun toggleThreadsOverlayExpanded() {
+        _uiState.update { it.copy(isThreadsOverlayExpanded = !it.isThreadsOverlayExpanded) }
+    }
+
+    fun selectThreadsTab(tab: ThreadsOverlayTab) {
+        _uiState.update { it.copy(selectedThreadsTab = tab) }
+    }
+
+    fun openCreateThreadDialog() {
+        _uiState.update { it.copy(showThreadEditDialog = true, editingMythicThread = null) }
+    }
+
+    fun openEditThreadDialog(thread: MythicThread) {
+        _uiState.update { it.copy(showThreadEditDialog = true, editingMythicThread = thread) }
+    }
+
+    fun closeThreadDialog() {
+        _uiState.update { it.copy(showThreadEditDialog = false, editingMythicThread = null) }
+    }
+
+    fun openCreateCharacterDialog() {
+        _uiState.update { it.copy(showMythicCharacterEditDialog = true, editingMythicCharacter = null) }
+    }
+
+    fun openEditCharacterDialog(character: MythicCharacter) {
+        _uiState.update { it.copy(showMythicCharacterEditDialog = true, editingMythicCharacter = character) }
+    }
+
+    fun closeCharacterDialog() {
+        _uiState.update { it.copy(showMythicCharacterEditDialog = false, editingMythicCharacter = null) }
+    }
+
+    fun saveMythicThread(id: Long, description: String) {
+        if (description.isBlank()) return
+        viewModelScope.launch {
+            val mythicId = ensureLinkedMythicSessionId()
+            if (id == 0L) {
+                mythicRepository.addThread(MythicThread(sessionId = mythicId, description = description.trim()))
+            } else {
+                val existing = _uiState.value.mythicState?.threads?.find { it.id == id }
+                mythicRepository.addThread(
+                    existing?.copy(description = description.trim())
+                        ?: MythicThread(id = id, sessionId = mythicId, description = description.trim())
+                )
+            }
+            _uiState.update { it.copy(showThreadEditDialog = false, editingMythicThread = null) }
+        }
+    }
+
+    fun saveMythicCharacter(id: Long, name: String, notes: String) {
         if (name.isBlank()) return
         viewModelScope.launch {
-            mythicRepository.addCharacter(MythicCharacter(sessionId = mythicId, name = name))
+            val mythicId = ensureLinkedMythicSessionId()
+            if (id == 0L) {
+                mythicRepository.addCharacter(MythicCharacter(sessionId = mythicId, name = name.trim(), notes = notes.trim()))
+            } else {
+                val existing = _uiState.value.mythicState?.characters?.find { it.id == id }
+                mythicRepository.addCharacter(
+                    existing?.copy(name = name.trim(), notes = notes.trim())
+                        ?: MythicCharacter(id = id, sessionId = mythicId, name = name.trim(), notes = notes.trim())
+                )
+            }
+            _uiState.update { it.copy(showMythicCharacterEditDialog = false, editingMythicCharacter = null) }
+        }
+    }
+
+    fun rollRandomThreadOrCharacter() {
+        val tab = _uiState.value.selectedThreadsTab
+        val roll = (1..100).random()
+        if (tab == ThreadsOverlayTab.THREADS) {
+            val activeThreads = _uiState.value.mythicState?.threads?.filterNot { it.isResolved } ?: emptyList()
+            if (activeThreads.isEmpty()) {
+                _uiState.update { it.copy(lastRandomMythicPick = "🎲 [d100: $roll] No hay hilos activos registrados para sortear.") }
+            } else {
+                val picked = activeThreads.random()
+                _uiState.update { it.copy(lastRandomMythicPick = "🎲 [d100: $roll] Hilo Sorteado: \"${picked.description}\"") }
+            }
+        } else {
+            val characters = _uiState.value.mythicState?.characters ?: emptyList()
+            if (characters.isEmpty()) {
+                _uiState.update { it.copy(lastRandomMythicPick = "🎲 [d100: $roll] No hay PNJs registrados en la lista de Mythic.") }
+            } else {
+                val picked = characters.random()
+                val notesSnippet = if (picked.notes.isNotBlank()) " (${picked.notes})" else ""
+                _uiState.update { it.copy(lastRandomMythicPick = "🎲 [d100: $roll] PNJ Sorteado: \"${picked.name}\"$notesSnippet") }
+            }
+        }
+    }
+
+    fun clearRandomMythicPick() {
+        _uiState.update { it.copy(lastRandomMythicPick = null) }
+    }
+
+    fun copyLastRandomPickToDiary() {
+        val pick = _uiState.value.lastRandomMythicPick ?: return
+        viewModelScope.launch {
+            val currentNotes = _uiState.value.dmNotes
+            val addition = "\n\n> **Oráculo de Trama / Evento:** $pick\n"
+            val newNotes = currentNotes + addition
+            _uiState.update { it.copy(dmNotes = newNotes, lastRandomMythicPick = null) }
+            sessionRepository.updateDmNotes(sessionId, newNotes)
+        }
+    }
+
+    fun copyThreadsSummaryToDiary() {
+        viewModelScope.launch {
+            val threads = _uiState.value.mythicState?.threads ?: emptyList()
+            val characters = _uiState.value.mythicState?.characters ?: emptyList()
+
+            val activeThreads = threads.filterNot { it.isResolved }
+            val resolvedThreads = threads.filter { it.isResolved }
+
+            val sb = java.lang.StringBuilder()
+            sb.append("\n\n### 🧵 Resumen de Hilos y Amenazas\n")
+
+            if (activeThreads.isNotEmpty()) {
+                sb.append("**Hilos Activos:**\n")
+                activeThreads.forEach { sb.append("- [ ] ${it.description}\n") }
+            }
+            if (resolvedThreads.isNotEmpty()) {
+                sb.append("**Hilos Resueltos:**\n")
+                resolvedThreads.forEach { sb.append("- [x] ${it.description}\n") }
+            }
+            if (characters.isNotEmpty()) {
+                sb.append("\n**Personajes y Amenazas:**\n")
+                characters.forEach {
+                    val note = if (it.notes.isNotBlank()) " — *${it.notes}*" else ""
+                    sb.append("- **${it.name}**$note\n")
+                }
+            }
+
+            val currentNotes = _uiState.value.dmNotes
+            val newNotes = currentNotes + sb.toString()
+            _uiState.update { it.copy(dmNotes = newNotes) }
+            sessionRepository.updateDmNotes(sessionId, newNotes)
+        }
+    }
+
+    fun addMythicCharacter(name: String) {
+        if (name.isBlank()) return
+        viewModelScope.launch {
+            val mythicId = ensureLinkedMythicSessionId()
+            mythicRepository.addCharacter(MythicCharacter(sessionId = mythicId, name = name.trim()))
         }
     }
 
@@ -704,15 +861,15 @@ class SessionViewModel @Inject constructor(
     }
 
     fun addMythicThread(description: String) {
-        val mythicId = _uiState.value.linkedMythicSession?.id ?: return
         if (description.isBlank()) return
         viewModelScope.launch {
-            mythicRepository.addThread(MythicThread(sessionId = mythicId, description = description))
+            val mythicId = ensureLinkedMythicSessionId()
+            mythicRepository.addThread(MythicThread(sessionId = mythicId, description = description.trim()))
         }
     }
 
     fun updateMythicThreadDescription(id: Long, description: String) {
-        // Optional thread note update
+        saveMythicThread(id, description)
     }
 
     fun toggleMythicThreadStatus(id: Long, isResolved: Boolean) {
@@ -731,6 +888,18 @@ class SessionViewModel @Inject constructor(
         viewModelScope.launch {
             val addition = "\n\n[Hilo Mítico: ${thread.description}]"
             val newNotes = (_uiState.value.dmNotes + "\n\n" + addition).trim()
+            _uiState.update { it.copy(dmNotes = newNotes) }
+            notesMutex.withLock {
+                if (_uiState.value.dmNotes == newNotes) sessionRepository.updateDmNotes(sessionId, newNotes)
+            }
+        }
+    }
+
+    fun sendRawToNotes(text: String) {
+        viewModelScope.launch {
+            val currentNotes = _uiState.value.dmNotes
+            val addition = "\n\n$text".trim()
+            val newNotes = (currentNotes + "\n\n" + addition).trim()
             _uiState.update { it.copy(dmNotes = newNotes) }
             notesMutex.withLock {
                 if (_uiState.value.dmNotes == newNotes) sessionRepository.updateDmNotes(sessionId, newNotes)

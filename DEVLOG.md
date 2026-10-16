@@ -1,5 +1,38 @@
 ---
 
+### Sprint 62 — Mesa de Juego: Threats & Threads Tracker Flotante (Hilos de Trama y Lista de PNJs) (15 de octubre de 2026)
+
+**FEATURE — HUD Flotante Interactivo de Hilos y Amenazas (`SessionThreadsOverlay`)**
+- Pastilla colapsable con estética glassmorphism (`Color(0xEB161920)`) anclada en la esquina superior izquierda (`Alignment.TopStart`, debajo del app bar: `padding(top = 10.dp, start = 12.dp)`), en perfecto balance simétrico con los Relojes de Tensión (`Alignment.TopEnd`) y el Action Hotbar (`Alignment.BottomCenter`).
+- Pastilla cerrada: icono `Bookmark`, contador dinámico de hilos activos (`threads.count { !it.isResolved }`) e indicador visual de apertura/cierre.
+- Panel flotante desplegable (`AnimatedVisibility` con deslizamiento vertical suave):
+  - Barra superior con título temático, botón `+` para creación rápida y botón de cierre.
+  - Selector de pestañas segmentado:
+    - 🧵 **Hilos (Threads):** Lista de metas, misiones y misterios abiertos con checkbox interactivo para marcar como resuelto (tachado de texto y feedback háptico).
+    - 👤 **PNJs (Characters):** Lista de personajes, amenazas y criaturas clave con notas contextuales y estado.
+  - Menú contextual desplegable (tres puntos) en cada elemento: *Editar*, *Enviar a Notas* y *Eliminar*.
+  - Estado vacío descriptivo con botón de creación directa para el primer elemento.
+
+**FEATURE — Oráculo Sorteador Mythic d100 Integrado**
+- Botón *"🎲 Sortear (d100)"*: Realiza una tirada aleatoria d100 y selecciona uniformemente un hilo o personaje activo de la lista según las reglas canónicas de Mythic GME 2e para eventos inesperados.
+- Banner de resultado destacado (`lastRandomMythicPick`) con el elemento sorteado, botón directo *"📋 Copiar al Diario"* y botón de descarte.
+
+**FEATURE — Resumen y Exportación al Diario de Campaña**
+- Botón *"📋 Registrar Estado en Diario"*: Inserta automáticamente un bloque estructurado en Markdown en el diario de la sesión (`dmNotes`):
+  - Hilos activos en formato checklist (`- [ ] Hilo`).
+  - Hilos resueltos (`- [x] Hilo`).
+  - Lista de personajes y amenazas con sus notas descriptivas (`- **Nombre** — *Notas*`).
+
+**FEATURE — Auto-Vinculación Transparente de Campaña Mythic**
+- Si la sesión de juego no tiene aún una campaña Mythic asociada (`linkedMythicSessionId == null`), el `SessionViewModel` crea y vincula automáticamente una sesión Mythic en segundo plano (`ensureLinkedMythicSessionId()`) al registrar el primer hilo o personaje, garantizando fluidez absoluta sin pantallas de configuración intermedias.
+
+**VALIDACIÓN Y PARIDAD**
+- 5 pruebas unitarias en `SessionThreadsTest` validando filtrado de hilos activos, alternancia de estado resuelto (`isResolved`), sorteo aleatorio d100 de hilos y personajes, y formato de resumen Markdown para el diario; 100% aprobadas.
+- Compilación y suite de pruebas en `:feature:draw:testDebugUnitTest` aprobadas.
+- *Feature Parity Mandate:* Registrado para sincronizar en `TDAPP-desktop`: componentes Compose de `SessionThreadsOverlay`, `ThreadEditDialog`, `MythicCharacterEditDialog`, métodos de ViewModel para oráculo d100 y auto-vinculación de Mythic.
+
+---
+
 ### Sprint 61 — Mesa de Juego: Relojes de Tensión y Progreso Flotantes (Progress Clocks Overlay) (15 de octubre de 2026)
 
 **FEATURE — Overlay Flotante Interactivo de Relojes (`SessionClocksOverlay`)**
