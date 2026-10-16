@@ -61,9 +61,15 @@ class ReferenceTabViewModel @Inject constructor(
             // Escaneo dinámico de assets
             val availableAssets = context.assets.list("starter_packs") ?: emptyArray()
             val packsInfo = availableAssets.filter { it.endsWith(".json") }.map { fileName ->
+                val displayName = when (fileName) {
+                    "choir_of_flesh.json" -> "Choir of Flesh (El Coro de la Carne)"
+                    "dnd_5e_2024.json" -> "D&D 5e (2024)"
+                    "twilight_2000_4e.json" -> "Twilight 2000 4e"
+                    else -> fileName.removeSuffix(".json").replace("_", " ").split(" ").joinToString(" ") { it.replaceFirstChar { c -> c.titlecase() } }
+                }
                 StarterPackInfo(
                     assetName = fileName,
-                    displayName = fileName.removeSuffix(".json").replace("_", " ").split(" ").joinToString(" ") { it.capitalize() },
+                    displayName = displayName,
                     isInstalled = installed.contains(fileName)
                 )
             }

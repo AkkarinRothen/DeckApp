@@ -1,5 +1,65 @@
 ---
 
+### Sprint 65 — Sistema Choir of Flesh: Starter Pack Integral, Bestiario Oficial (24 Criaturas), Asistente de Inquebrantable y Desinstalación Limpia (16 de octubre de 2026)
+
+**FEATURE — Starter Pack Reversible "Choir of Flesh" (`choir_of_flesh.json`)**
+- Empaquetado completo del sistema TTRPG en solitario *"Choir of Flesh"* (El Coro de la Carne) en formato JSON estandarizado (`core/data/src/main/assets/starter_packs/choir_of_flesh.json`) con codificación UTF-8 pura.
+- **10 Reglas Oficiales del Sistema:**
+  - *Mecánica Principal:* Pruebas de 1d20 + Modificador de Atributo contra Clase de Dificultad (CD). Sistema de modificadores con rango simétrico de -3 a +3 para puntuaciones de 3 a 18.
+  - *Pruebas de Estrés y Angustia:* Efectos del horror cósmico-corporal, acumulación de puntos de angustia y puntos de quiebre.
+  - *Combate Mortal y Daño Crítico:* Resolución ágil, heridas graves y penalizadores progresivos.
+  - *Dados de Uso (Usage Die):* Mecánica de degradación de suministros y munición (`Ud4` $\to$ `Ud6` $\to$ `Ud8` $\to$ `Ud10` $\to$ `Ud12`) sin contabilidad tediosa.
+  - *El Escatón y la Canción de la Carne:* Lore del apocalipsis biológico y la transmutación del mundo.
+  - *El Ancla y la Humanidad:* Conexiones afectivas y recuerdos que previenen la asimilación por el Coro.
+  - *Los Fragmentos de Gracia:* Reliquias santificadas que ofrecen poderes milagrosos a cambio de riesgo corporal.
+  - *Magia y Milagros de Sangre:* Reglas de invocación, sacrificios de PV y manifestaciones aberrantes.
+  - *Sanación y Descanso:* Reglas de respiro breve, reposo prolongado y tratamiento de infecciones de carne.
+  - *Muerte y Destino Final:* Reglas de agonía, mutación póstuma y asimilación al Coro.
+- **4 Tablas de Referencia (19 Filas):**
+  - *Modificadores por Puntuación:* 3 (-3), 4-5 (-2), 6-8 (-1), 9-12 (+0), 13-15 (+1), 16-17 (+2), 18 (+3).
+  - *Dificultad de Desafíos:* CD 8 (Fácil / Rutinaria), CD 11 (Moderada), CD 14 (Desafiante), CD 17 (Heroica / Crítica), CD 20 (Casi Imposible / Legendaria).
+  - *Dados de Uso:* Tipo de dado, tirada de degradación (1-2) y probabilidad de desgaste.
+  - *Escala de Angustia:* Efectos acumulativos (1-3 Inquietud, 4-6 Pánico, 7-9 Aberración mental, 10 Ruptura total).
+- **16 Tablas Aleatorias Oficiales (162 Entradas):**
+  - *Horrores de la Carne (d10)*, *Rumores del Páramo Escarlata (d10)*, *Efectos de la Angustia (d10)*, *Reliquias y Artefactos (d10)*, *Pecados y Máculas (d10)*, *Presagios de la Canción (d10)*, *Encuentros en el Yermo de Hueso (d10)*, *Saqueo de Cadáveres (d10)*, *Mutaciones de la Carne (d10)*, *Revelaciones del Escatón (d10)*, *Facciones del Fin (d10)*, *Lugares Blasfemos (d10)*, *Susurros del Coro (d10)*, *Semillas de Aventura (d10)*, *Armas y Despojos (d12)*, y *Generador de Inquebrantables (10 ocupaciones d10)*.
+- **Bestiario Oficial Completo (24 Criaturas):**
+  - Todas las criaturas del juego oficial importadas con sus statblocks exhaustivos, PV, CD, Ataques, Acciones Especiales, Lore, Comportamiento en Solitario y Etiquetas de Clasificación (`Aberración`, `Muerto Viviente`, `Cultista`, `Élite`, `Jefe`, `Constructo`, `Monstruosidad`):
+    - *Amalgama de Brazos*, *Apostol del Templo Rojo*, *Arpa de Tendones*, *Baluarte de Costillas*, *Campanero Ciego*, *Centinela Osario*, *Ciervo de Piel Erizada*, *Coro Viviente*, *Custodio de Quijadas*, *Danzante de Vísceras*, *Empalador Sacro*, *Enjambre de Dedos*, *Engendro de Pulmón*, *Escultor de Tumores*, *Garganta Hueca*, *Heraldo de la Melodía*, *Hilador de Nervios*, *Madre del Vientre Pétreo*, *Monje del Hábito Purpúreo*, *Niño del Quinto Diente*, *Parásito Melódico*, *Perro Quimérico de Tendones*, *Portador de la Llama Fria*, *Tejedor de Quistes*.
+
+**FEATURE — Soporte Nativo de Criaturas en Starter Packs con Desinstalación Limpia**
+- Extensión del motor de paquetes en `ReferenceRepositoryImpl.kt`:
+  - `importStarterPack`: importa criaturas definidas en el pack y las vincula con el Tag del paquete (`Choir of Flesh`). Evita duplicados si la criatura ya existe por nombre.
+  - `removeStarterPack`: remueve limpiamente las reglas, tablas de referencia, tablas aleatorias y **todas las criaturas vinculadas al Tag del paquete**, eliminando también el tag si ya no tiene dependencias. No deja datos huérfanos ni afecta personajes creados por el jugador.
+- Nuevos métodos en `NpcDao`: `getNpcByName(name)`, `getNpcsByTagName(tagName)`, `deleteNpcsByTagName(tagName)`.
+- Método en `TagDao`: `getTagByName(name)`.
+
+**FEATURE — Asistente de Creación de Inquebrantables (`ChoirOfFleshCharacterDialog`)**
+- Modal interactivo guiado por pasos con estética gótica carmesí y oro (`Color(0xFF8B0000)` / `Color(0xFFFFD700)`), accesible desde `NpcListScreen` y directamente desde la mesa de juego en `SessionScreen`:
+  - **Paso 1: Identidad y Ocupación:** 10 ocupaciones del Páramo con bonos de atributo automáticos (Cirujano de Trinchera, Sepulturero del Páramo, Monje Ciego de la Campana, Penitente de la Cadena, etc.) o aleatorización en 1 toque.
+  - **Paso 2: Atributos y Modificadores:** Tirada de 3d6 para cada uno de los 6 atributos (Fuerza, Agilidad, Vigor, Intelecto, Voluntad, Presencia) con cálculo reactivo del modificador oficial (-3 a +3).
+  - **Paso 3: El Ancla y el Pecado:** Selección o tirada de la persona/recuerdo que mantiene la cordura y la culpa que persigue al personaje.
+  - **Paso 4: El Fragmento de Gracia:** Reliquia o don sagrado que le otorga un poder milagroso inicial.
+  - **Paso 5: La Misión Inicial:** Meta personal concreta generada a partir de los rumores del páramo.
+  - **Paso 6: Equipo y Resumen:** Selección de armamento, equipo de supervivencia y Dados de Uso (`Ud6`, `Ud8`, etc.).
+- Cálculo automático de estadísticas vitales:
+  - $\text{PV Iniciales} = \text{Vigor} + 10$
+  - $\text{Clase de Dificultad (CD) Defensiva} = 10 + \text{Mod. Agilidad}$
+  - $\text{Iniciativa} = \text{Mod. Agilidad}$
+- Guardado instantáneo como PNJ/Personaje en la base de datos y botón *"Forjar y Anexar al Diario"* que vuelca la ficha completa estructurada en Markdown directamente en las notas de sesión (`dmNotes`) con exclusión mutua `notesMutex`.
+
+**VALIDACIÓN Y PARIDAD**
+- 3 pruebas unitarias en `ChoirOfFleshPackTest` verificando la integridad del JSON de starter pack, conteo exacto de 10 reglas, 4 ref tables (19 filas), 16 random tables (162 entradas) y 24 criaturas oficiales completas con PV y CD.
+- 5 pruebas unitarias en `ChoirOfFleshCharacterCreationTest` validando cálculo exacto de modificadores (-3 a +3), estadísticas derivadas (PV, CD, Iniciativa) y formateo de ficha Markdown para el diario.
+- Compilación y ejecución de tests unitarios `:core:data:testDebugUnitTest` y `:feature:npcs:testDebugUnitTest` 100% aprobadas.
+- Ensamble del APK de debug verificado con éxito mediante `./gradlew :app:assembleDebug` (BUILD SUCCESSFUL en 2m 57s).
+- *Feature Parity Mandate:* Registrado para sincronizar en `TDAPP-desktop`:
+  1. Copia del archivo de starter pack `choir_of_flesh.json` en los assets de desktop.
+  2. Métodos de `ReferenceRepositoryImpl` para importación y remoción limpia de criaturas asociadas al tag.
+  3. Diálogo Compose Desktop `ChoirOfFleshCharacterDialog` con la misma estética carmesí/oro y flujo de 6 pasos.
+  4. Botón "Inquebrantable" en la barra superior de la mesa de juego de desktop.
+
+---
+
 ### Sprint 64 — Mesa de Juego: Buscador Rápido "Spotlight" (Command Palette) y Búsqueda Federada (`SessionSpotlightDialog`) (16 de octubre de 2026)
 
 **FEATURE — Buscador Rápido Spotlight y Paleta de Comandos (`SessionSpotlightDialog`)**

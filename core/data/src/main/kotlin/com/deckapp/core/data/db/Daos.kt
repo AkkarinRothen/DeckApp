@@ -152,6 +152,9 @@ interface TagDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTags(tags: List<TagEntity>)
 
+    @Query("SELECT * FROM tags WHERE name = :name LIMIT 1")
+    suspend fun getTagByName(name: String): TagEntity?
+
     @Query("DELETE FROM tags WHERE id = :id")
     suspend fun deleteTag(id: Long)
 

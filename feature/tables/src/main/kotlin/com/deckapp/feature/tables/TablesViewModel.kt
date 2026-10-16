@@ -99,15 +99,21 @@ class TablesViewModel @Inject constructor(
             referenceRepository.getInstalledPackNames().collect { installed ->
                 val allAssets = context.assets.list("starter_packs") ?: emptyArray()
                 val tablePacks = allAssets
-                    .filter { it.endsWith(".json") && it.startsWith("tables_") }
+                    .filter { it.endsWith(".json") }
                     .map { fileName ->
-                        TablePackInfo(
-                            assetName = fileName,
-                            displayName = fileName.removeSuffix(".json")
+                        val displayName = when (fileName) {
+                            "choir_of_flesh.json" -> "Choir of Flesh (Sistema Completo)"
+                            "dnd_5e_2024.json" -> "D&D 5e (2024)"
+                            "twilight_2000_4e.json" -> "Twilight 2000 4e"
+                            else -> fileName.removeSuffix(".json")
                                 .removePrefix("tables_")
                                 .replace("_", " ")
                                 .split(" ")
-                                .joinToString(" ") { it.replaceFirstChar { c -> c.titlecase() } },
+                                .joinToString(" ") { it.replaceFirstChar { c -> c.titlecase() } }
+                        }
+                        TablePackInfo(
+                            assetName = fileName,
+                            displayName = displayName,
                             isInstalled = installed.contains(fileName)
                         )
                     }

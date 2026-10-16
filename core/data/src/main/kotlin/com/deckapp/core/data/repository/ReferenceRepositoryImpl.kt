@@ -235,6 +235,56 @@ class ReferenceRepositoryImpl @Inject constructor(
                     ))
                 }
             }
+
+            // 4. NPCs / Criaturas del paquete
+            if (backup.npcs.isNotEmpty()) {
+                val tagDao = db.tagDao()
+                val npcDao = db.npcDao()
+                val existingTag = tagDao.getTagByName(packName)
+                val tagId = existingTag?.id ?: tagDao.insertTag(
+                    TagEntity(
+                        id = 0,
+                        name = packName,
+                        color = 0xFF8B0000.toInt()
+                    )
+                )
+
+                backup.npcs.forEach { dto ->
+                    val existing = npcDao.getNpcByName(dto.name)
+                    val npcId = if (existing != null) {
+                        npcDao.upsertNpc(
+                            existing.copy(
+                                description = dto.description,
+                                imagePath = dto.imagePath ?: existing.imagePath,
+                                maxHp = dto.maxHp,
+                                currentHp = dto.currentHp,
+                                armorClass = dto.armorClass,
+                                initiativeBonus = dto.initiativeBonus,
+                                notes = dto.notes,
+                                isMonster = dto.isMonster
+                            )
+                        )
+                        existing.id
+                    } else {
+                        npcDao.upsertNpc(
+                            NpcEntity(
+                                id = 0,
+                                name = dto.name,
+                                description = dto.description,
+                                imagePath = dto.imagePath,
+                                maxHp = dto.maxHp,
+                                currentHp = dto.currentHp,
+                                armorClass = dto.armorClass,
+                                initiativeBonus = dto.initiativeBonus,
+                                notes = dto.notes,
+                                isMonster = dto.isMonster,
+                                createdAt = System.currentTimeMillis()
+                            )
+                        )
+                    }
+                    npcDao.insertCrossRef(NpcTagCrossRef(npcId = npcId, tagId = tagId))
+                }
+            }
         }
     }
 
@@ -243,6 +293,11 @@ class ReferenceRepositoryImpl @Inject constructor(
             tableDao.deleteByPack(packName)
             ruleDao.deleteByPack(packName)
             randomTableDao.deleteByPack(packName)
+            db.npcDao().deleteNpcsByTagName(packName)
+            val tag = db.tagDao().getTagByName(packName)
+            if (tag != null) {
+                db.tagDao().deleteTag(tag.id)
+            }
         }
     }
 }

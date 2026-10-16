@@ -167,6 +167,18 @@ fun SessionScreen(
         focusRequester.requestFocus()
     }
 
+    var showChoirDialog by remember { mutableStateOf(false) }
+
+    if (showChoirDialog) {
+        com.deckapp.feature.npcs.dialogs.ChoirOfFleshCharacterDialog(
+            onDismiss = { showChoirDialog = false },
+            onCharacterCreated = { npc, sheetMarkdown ->
+                viewModel.createChoirOfFleshCharacter(npc, sheetMarkdown)
+                showChoirDialog = false
+            }
+        )
+    }
+
     Scaffold(
         modifier = Modifier
             .focusRequester(focusRequester)
@@ -275,6 +287,23 @@ fun SessionScreen(
                         Icon(Icons.Default.HistoryEdu, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(4.dp))
                         Text("Escena", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
+                    }
+
+                    // Choir of Flesh (Sprint 65)
+                    if (uiState.session?.gameSystems?.any { it.contains("Choir", ignoreCase = true) } == true) {
+                        FilledTonalButton(
+                            onClick = { showChoirDialog = true },
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                            colors = ButtonDefaults.filledTonalButtonColors(
+                                containerColor = Color(0xFF380808),
+                                contentColor = Color(0xFFD4AF37)
+                            ),
+                            modifier = Modifier.padding(end = 4.dp).height(36.dp)
+                        ) {
+                            Icon(Icons.Default.Shield, contentDescription = null, modifier = Modifier.size(15.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text("Inquebrantable", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
+                        }
                     }
 
                     IconButton(onClick = viewModel::openSpotlight) {

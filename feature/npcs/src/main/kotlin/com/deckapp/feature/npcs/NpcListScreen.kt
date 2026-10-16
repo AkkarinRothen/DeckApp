@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -51,7 +52,22 @@ fun NpcListScreen(
     var searchQuery by remember { mutableStateOf("") }
     
     var peekedNpc by remember { mutableStateOf<Npc?>(null) }
+    var showChoirDialog by remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
+
+    if (showChoirDialog) {
+        com.deckapp.feature.npcs.dialogs.ChoirOfFleshCharacterDialog(
+            onDismiss = { showChoirDialog = false },
+            onCharacterCreated = { npc, _ ->
+                viewModel.saveCharacter(npc) {
+                    showChoirDialog = false
+                    scope.launch {
+                        snackbarHostState.showSnackbar("Inquebrantable forjado: ${npc.name}")
+                    }
+                }
+            }
+        )
+    }
 
     if (peekedNpc != null) {
         ModalBottomSheet(onDismissRequest = { peekedNpc = null }) {
@@ -72,6 +88,13 @@ fun NpcListScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { showChoirDialog = true }) {
+                        Icon(
+                            Icons.Default.AutoAwesome,
+                            contentDescription = "Crear Inquebrantable (Choir of Flesh)",
+                            tint = Color(0xFFD4AF37)
+                        )
+                    }
                     IconButton(onClick = { /* TODO: Filtros */ }) {
                         Icon(Icons.Default.Search, contentDescription = "Buscar")
                     }

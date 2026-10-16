@@ -2444,5 +2444,24 @@ class SessionViewModel @Inject constructor(
             }
         }
     }
+
+    // --- Choir of Flesh (Sprint 65) ---
+    fun createChoirOfFleshCharacter(npc: Npc, sheetMarkdown: String) {
+        viewModelScope.launch {
+            try {
+                npcRepository.saveNpc(npc)
+                notesMutex.withLock {
+                    val currentNotes = _uiState.value.dmNotes
+                    val updatedNotes = if (currentNotes.isBlank()) sheetMarkdown else "$currentNotes\n\n$sheetMarkdown"
+                    _uiState.update { it.copy(dmNotes = updatedNotes) }
+                    sessionRepository.updateDmNotes(sessionId, updatedNotes)
+                }
+                _uiState.update { it.copy(snackbarMessage = "Inquebrantable forjado: ${npc.name}") }
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                _uiState.update { it.copy(snackbarMessage = "Error al forjar Inquebrantable: ${e.message}") }
+            }
+        }
+    }
 }
 

@@ -1,0 +1,1994 @@
+{
+    "randomTables": [
+        {
+            "id": -2201,
+            "name": "El Ancla (Pecado Capital)",
+            "category": "Creación",
+            "description": "El pecado primordial que ancla tu alma a la realidad humana e impide la asimilación.",
+            "rollFormula": "1d10",
+            "isPinned": true,
+            "sourceType": "STARTER_PACK",
+            "sourceName": "Choir of Flesh",
+            "isBuiltIn": true,
+            "sortOrder": 2201,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2202,
+            "name": "Fragmento del Viejo Mundo",
+            "category": "Creación",
+            "description": "Un objeto relicario que conserva la memoria de cuando la tierra era humana.",
+            "rollFormula": "1d10",
+            "isPinned": true,
+            "sourceType": "STARTER_PACK",
+            "sourceName": "Choir of Flesh",
+            "isBuiltIn": true,
+            "sortOrder": 2202,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2203,
+            "name": "Susurro de Condenación y Misión",
+            "category": "Creación",
+            "description": "Rumores legendarios y misiones desesperadas que empujan al Inquebrantable.",
+            "rollFormula": "1d10",
+            "isPinned": true,
+            "sourceType": "STARTER_PACK",
+            "sourceName": "Choir of Flesh",
+            "isBuiltIn": true,
+            "sortOrder": 2203,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2204,
+            "name": "Antigua Ocupación",
+            "category": "Creación",
+            "description": "El oficio que desempeñabas antes del Escatón, con sus talentos y cargas.",
+            "rollFormula": "1d10",
+            "isPinned": true,
+            "sourceType": "STARTER_PACK",
+            "sourceName": "Choir of Flesh",
+            "isBuiltIn": true,
+            "sortOrder": 2204,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2205,
+            "name": "Colapso Mental",
+            "category": "Psicología",
+            "description": "Efectos desencadenados al alcanzar 10 de Angustia o fallar frente al horror.",
+            "rollFormula": "1d10",
+            "isPinned": true,
+            "sourceType": "STARTER_PACK",
+            "sourceName": "Choir of Flesh",
+            "isBuiltIn": true,
+            "sortOrder": 2205,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2206,
+            "name": "Encuentro en Incursión",
+            "category": "Exploración",
+            "description": "Peligros y encuentros al adentrarse en los terrenos devastados.",
+            "rollFormula": "1d20",
+            "isPinned": true,
+            "sourceType": "STARTER_PACK",
+            "sourceName": "Choir of Flesh",
+            "isBuiltIn": true,
+            "sortOrder": 2206,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2207,
+            "name": "Criaturas de la Carne",
+            "category": "Encuentros",
+            "description": "Engendros de La Carne Que Alimenta que acechan en las ruinas.",
+            "rollFormula": "1d12",
+            "isPinned": true,
+            "sourceType": "STARTER_PACK",
+            "sourceName": "Choir of Flesh",
+            "isBuiltIn": true,
+            "sortOrder": 2207,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2208,
+            "name": "Sirvientes del Coro",
+            "category": "Encuentros",
+            "description": "Legiones fanáticas y ángeles heraldos del cántico celestial.",
+            "rollFormula": "1d12",
+            "isPinned": true,
+            "sourceType": "STARTER_PACK",
+            "sourceName": "Choir of Flesh",
+            "isBuiltIn": true,
+            "sortOrder": 2208,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2209,
+            "name": "Hitos en Ruinas",
+            "category": "Exploración",
+            "description": "Monumentos y restos de la civilización destruida por el Escatón.",
+            "rollFormula": "1d20",
+            "isPinned": true,
+            "sourceType": "STARTER_PACK",
+            "sourceName": "Choir of Flesh",
+            "isBuiltIn": true,
+            "sortOrder": 2209,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2210,
+            "name": "Rasgos Naturales Apocalípticos",
+            "category": "Exploración",
+            "description": "Paisajes mutados y tierras alteradas por fuerzas sobrenaturales.",
+            "rollFormula": "1d20",
+            "isPinned": true,
+            "sourceType": "STARTER_PACK",
+            "sourceName": "Choir of Flesh",
+            "isBuiltIn": true,
+            "sortOrder": 2210,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2211,
+            "name": "Corrupción de la Carne",
+            "category": "Peligros",
+            "description": "Dilemas y tentaciones biológicas en territorio infectado.",
+            "isPinned": true,
+            "sourceType": "STARTER_PACK",
+            "sourceName": "Choir of Flesh",
+            "isBuiltIn": true,
+            "sortOrder": 2211,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2212,
+            "name": "Corrupción del Coro",
+            "category": "Peligros",
+            "description": "Dilemas y juicios celestiales frente a la armonía dorada.",
+            "isPinned": true,
+            "sourceType": "STARTER_PACK",
+            "sourceName": "Choir of Flesh",
+            "isBuiltIn": true,
+            "sortOrder": 2212,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2213,
+            "name": "Heridas: Daño Contundente",
+            "category": "Heridas",
+            "description": "Efectos al sufrir una Herida Mayor por impacto o caída.",
+            "rollFormula": "1d8",
+            "isPinned": true,
+            "sourceType": "STARTER_PACK",
+            "sourceName": "Choir of Flesh",
+            "isBuiltIn": true,
+            "sortOrder": 2213,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2214,
+            "name": "Heridas: Cortante y Perforante",
+            "category": "Heridas",
+            "description": "Efectos al sufrir una Herida Mayor por armas afiladas o garras.",
+            "rollFormula": "1d8",
+            "isPinned": true,
+            "sourceType": "STARTER_PACK",
+            "sourceName": "Choir of Flesh",
+            "isBuiltIn": true,
+            "sortOrder": 2214,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2215,
+            "name": "Heridas: Fuego y Sagrado",
+            "category": "Heridas",
+            "description": "Efectos al sufrir una Herida Mayor por fuego o fuego divino.",
+            "rollFormula": "1d8",
+            "isPinned": true,
+            "sourceType": "STARTER_PACK",
+            "sourceName": "Choir of Flesh",
+            "isBuiltIn": true,
+            "sortOrder": 2215,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2216,
+            "name": "Heridas: Ácido y Carne",
+            "category": "Heridas",
+            "description": "Efectos al sufrir una Herida Mayor por fluidos corrosivos o mutaciones.",
+            "rollFormula": "1d8",
+            "isPinned": true,
+            "sourceType": "STARTER_PACK",
+            "sourceName": "Choir of Flesh",
+            "isBuiltIn": true,
+            "sortOrder": 2216,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        }
+    ],
+    "tableEntries": [
+        {
+            "id": -220101,
+            "tableId": -2201,
+            "text": "Orgullo (Soberbia): Te niegas a arrodillarte ante coros de luz o masas de carne. Eres mejor que ellos. Tu ego es un baluarte inexpugnable."
+        },
+        {
+            "id": -220102,
+            "tableId": -2201,
+            "minRoll": 2,
+            "maxRoll": 2,
+            "text": "Ira: Un fuego abrasador arde en tus entrañas contra los que destruyeron tu mundo. No puedes sucumbir al éxtasis mientras queden enemigos a los que desmembrar.",
+            "sortOrder": 1
+        },
+        {
+            "id": -220103,
+            "tableId": -2201,
+            "minRoll": 3,
+            "maxRoll": 3,
+            "text": "Codicia: Deseas poseer, acumular y sobrevivir a cualquier costo. El Coro exige entrega total y la Carne disolución; tu avaricia se niega a soltar ni un átomo.",
+            "sortOrder": 2
+        },
+        {
+            "id": -220104,
+            "tableId": -2201,
+            "minRoll": 4,
+            "maxRoll": 4,
+            "text": "Lujuria: Un anhelo ferviente por el calor y el tacto carnal genuino del viejo mundo. Rechazas la perfección estéril del canto por el pulso visceral de los sentidos.",
+            "sortOrder": 3
+        },
+        {
+            "id": -220105,
+            "tableId": -2201,
+            "minRoll": 5,
+            "maxRoll": 5,
+            "text": "Engaño: Tu vida entera es una mentira construida con maestría. El Coro no puede moldear un alma que no es real y la Carne no puede atrapar a un fantasma.",
+            "sortOrder": 4
+        },
+        {
+            "id": -220106,
+            "tableId": -2201,
+            "minRoll": 6,
+            "maxRoll": 6,
+            "text": "Desesperación: Has visto el vacío y la futilidad. Sin falsas esperanzas que ofrecerte ni temores que infundirte, eres inmune a sus promesas de salvación.",
+            "sortOrder": 5
+        },
+        {
+            "id": -220107,
+            "tableId": -2201,
+            "minRoll": 7,
+            "maxRoll": 7,
+            "text": "Obsesión: Una única tarea terrenal te consume (entregar una carta, matar a un hombre, cumplir un juramento). El apocalipsis es una mera distracción de tu meta.",
+            "sortOrder": 6
+        },
+        {
+            "id": -220108,
+            "tableId": -2201,
+            "minRoll": 8,
+            "maxRoll": 8,
+            "text": "Gula: Hambre insaciable por la vida, el dolor y el sabor de la existencia terrena. Te niegas a ser consumido porque estás ocupado consumiendo el mundo.",
+            "sortOrder": 7
+        },
+        {
+            "id": -220109,
+            "tableId": -2201,
+            "minRoll": 9,
+            "maxRoll": 9,
+            "text": "Apatía: Desapego emocional absoluto. El cielo sangra y la tierra aúlla, pero nada te conmueve. El fin del mundo le sucede a otras personas.",
+            "sortOrder": 8
+        },
+        {
+            "id": -220110,
+            "tableId": -2201,
+            "minRoll": 10,
+            "maxRoll": 10,
+            "text": "Duda: Escepticismo corrosivo. Cada milagro es un truco y cada cántico un fraude. No puedes ser convertido si te niegas categóricamente a creer.",
+            "sortOrder": 9
+        },
+        {
+            "id": -220111,
+            "tableId": -2202,
+            "text": "Un Crucifijo Oxidado: Símbolo de la fe silenciosa anterior. Dios no canta; Dios calla, recordándote que la divinidad era paz, no una vorágine celestial."
+        },
+        {
+            "id": -220112,
+            "tableId": -2202,
+            "minRoll": 2,
+            "maxRoll": 2,
+            "text": "Un Amuleto Pagano: Piedra de río tallada con una espiral. Recuerda la tierra cuando los dioses pertenecían a los bosques y no al cielo ni a la carroña.",
+            "sortOrder": 1
+        },
+        {
+            "id": -220113,
+            "tableId": -2202,
+            "minRoll": 3,
+            "maxRoll": 3,
+            "text": "El Dibujo de un Niño: Boceto en pergamino de figuras tomadas de la mano. Un baluarte de inocencia que demuestra que la alegría simple alguna vez existió.",
+            "sortOrder": 2
+        },
+        {
+            "id": -220114,
+            "tableId": -2202,
+            "minRoll": 4,
+            "maxRoll": 4,
+            "text": "Una Moneda de Plata sin Deslustrar: Con el perfil del Rey Roberto II. Recuerda que la humanidad forjó leyes, comercio y orden frente a las bestias.",
+            "sortOrder": 3
+        },
+        {
+            "id": -220115,
+            "tableId": -2202,
+            "minRoll": 5,
+            "maxRoll": 5,
+            "text": "Una Página de Platón: Fragmento razonado sobre la existencia. Recuerda que eres un ser pensante, no alimento del foso ni títere del coro.",
+            "sortOrder": 4
+        },
+        {
+            "id": -220116,
+            "tableId": -2202,
+            "minRoll": 6,
+            "maxRoll": 6,
+            "text": "Una Bolsa de Semillas: Promesa de vida buena y pura esperando ser plantada en tierra féil, lejos de las pústulas de la Carne.",
+            "sortOrder": 5
+        },
+        {
+            "id": -220117,
+            "tableId": -2202,
+            "minRoll": 7,
+            "maxRoll": 7,
+            "text": "La Llave de una Casa Incendiada: Promesa viva de reconstruir un santuario donde descansar seguro, aunque deba erigirse sobre las cenizas del mundo.",
+            "sortOrder": 6
+        },
+        {
+            "id": -220118,
+            "tableId": -2202,
+            "minRoll": 8,
+            "maxRoll": 8,
+            "text": "Un Fragmento de Vidriera: Cristal azul y dorado de un santo olvidado. Testimonio de la verdadera historia antes de que los evangelios fueran corrompidos.",
+            "sortOrder": 7
+        },
+        {
+            "id": -220119,
+            "tableId": -2202,
+            "minRoll": 9,
+            "maxRoll": 9,
+            "text": "Una Flor Seca y sin Olor: Belleza marchita sin diseño divino ni pretensión. Símbolo del mundo apacible que florecía sin exigir adoración.",
+            "sortOrder": 8
+        },
+        {
+            "id": -220120,
+            "tableId": -2202,
+            "minRoll": 10,
+            "maxRoll": 10,
+            "text": "Un Vial con Agua de Mar: Agua salada de costas deshechas. Recordatorio de los límites del mundo finito frente al apetito infinito de la Carne.",
+            "sortOrder": 9
+        },
+        {
+            "id": -220121,
+            "tableId": -2203,
+            "text": "El Santo Silencioso: Buscas a un ermitaño inmune al himno celestial; un vacío viviente en la sinfonía divina que podría ser la clave de la resistencia."
+        },
+        {
+            "id": -220122,
+            "tableId": -2203,
+            "minRoll": 2,
+            "maxRoll": 2,
+            "text": "El Cántico Herético: Buscas las estrofas del Contra-Salmo Gnóstico, un rito discordante capaz de quebrar la carne y la fe de los Penitentes.",
+            "sortOrder": 1
+        },
+        {
+            "id": -220123,
+            "tableId": -2203,
+            "minRoll": 3,
+            "maxRoll": 3,
+            "text": "Tierra Profana: Rumores de un valle o abadía oculta que permanece intacta tanto para el Coro como para la Carne: un santuario del viejo mundo.",
+            "sortOrder": 2
+        },
+        {
+            "id": -220124,
+            "tableId": -2203,
+            "minRoll": 4,
+            "maxRoll": 4,
+            "text": "El Primer Apóstata: Buscas a la primera alma que eligió la Carne sobre el Coro; un tumor consciente que conoce el secreto de la supervivencia extrema.",
+            "sortOrder": 3
+        },
+        {
+            "id": -220125,
+            "tableId": -2203,
+            "minRoll": 5,
+            "maxRoll": 5,
+            "text": "El Hijo de los Apocalipsis Gemelos: Buscas al legendario niño nacido de un Penitente del Coro y un Apóstata de la Carne: un puente entre dos horrores.",
+            "sortOrder": 4
+        },
+        {
+            "id": -220126,
+            "tableId": -2203,
+            "minRoll": 6,
+            "maxRoll": 6,
+            "text": "La Cisterna de las Viejas Plegarias: Una catacumba donde los ecos de un millón de oraciones antiguas amortiguan el canto angélico.",
+            "sortOrder": 5
+        },
+        {
+            "id": -220127,
+            "tableId": -2203,
+            "minRoll": 7,
+            "maxRoll": 7,
+            "text": "El Nombre Blasfemo: Buscas el nombre original de la Carne Que Alimenta para otorgarle mente y obligarla a negociar o enfocar su hambre.",
+            "sortOrder": 6
+        },
+        {
+            "id": -220128,
+            "tableId": -2203,
+            "minRoll": 8,
+            "maxRoll": 8,
+            "text": "El Testamento Papal: La encíclica secreta de Silvestre II condenando a los ángeles antes de caer, detallando una debilidad cósmica.",
+            "sortOrder": 7
+        },
+        {
+            "id": -220129,
+            "tableId": -2203,
+            "minRoll": 9,
+            "maxRoll": 9,
+            "text": "La Campana Negra: Forjada con hierro de estrella caída; su tañido produce una onda de silencio absoluto que quiebra la determinación enemiga.",
+            "sortOrder": 8
+        },
+        {
+            "id": -220130,
+            "tableId": -2203,
+            "minRoll": 10,
+            "maxRoll": 10,
+            "text": "El Director Divino: Cartas astrales y visiones que señalan la ubicación del ángel Maestro que dirige la sinfonía: tu meta es asesinarlo.",
+            "sortOrder": 9
+        },
+        {
+            "id": -220131,
+            "tableId": -2204,
+            "text": "Campesino / Siervo: Conoces la tierra y el trabajo agotador. Habilidades: Levantar Cargas (FUE), Robusto (CON), Perspicacia (VOL). Resentimiento hacia nobles."
+        },
+        {
+            "id": -220132,
+            "tableId": -2204,
+            "minRoll": 2,
+            "maxRoll": 2,
+            "text": "Clero (Monje/Monja): Letrado y versado en escrituras. Habilidades: Teología (INT), Investigación (INT), Fuerza Interior (VOL). Fe desgarrada por la herejía.",
+            "sortOrder": 1
+        },
+        {
+            "id": -220133,
+            "tableId": -2204,
+            "minRoll": 3,
+            "maxRoll": 3,
+            "text": "Artesano (Herrero/Albañil): Manos precisas. Habilidades: Fuerza Bruta (FUE), Dedos Ágiles (DES), Regateo (PRE). Angustia al ver construcciones destruidas.",
+            "sortOrder": 2
+        },
+        {
+            "id": -220134,
+            "tableId": -2204,
+            "minRoll": 4,
+            "maxRoll": 4,
+            "text": "Soldado: Viviste por la espada y el metal. Habilidades: Frenesí (FUE), Golpes Precisos (DES), Entereza (VOL). La violencia es tu único lenguaje.",
+            "sortOrder": 3
+        },
+        {
+            "id": -220135,
+            "tableId": -2204,
+            "minRoll": 5,
+            "maxRoll": 5,
+            "text": "Noble: Criado para comandar. Habilidades: Tácticas (INT), Diplomacia (VOL), Liderazgo (VOL). Tu título ahora es polvo y ceniza.",
+            "sortOrder": 4
+        },
+        {
+            "id": -220136,
+            "tableId": -2204,
+            "minRoll": 6,
+            "maxRoll": 6,
+            "text": "Comerciante: Viajero de contratos y caminos. Habilidades: Resistencia (CON), Regateo (PRE), Red de Contactos (PRE). Visión mercantilista del mundo.",
+            "sortOrder": 5
+        },
+        {
+            "id": -220137,
+            "tableId": -2204,
+            "minRoll": 7,
+            "maxRoll": 7,
+            "text": "Cazador: Vivías en los márgenes agrestes. Habilidades: Emboscador (DES), Sigilo (DES), Naturalismo (INT). Desconfianza extrema de los asentamientos.",
+            "sortOrder": 6
+        },
+        {
+            "id": -220138,
+            "tableId": -2204,
+            "minRoll": 8,
+            "maxRoll": 8,
+            "text": "Erudito: Hombre de tinta y pergaminos. Habilidades: Maestría del Saber (INT), Enigmas (INT), Introspección (VOL). Mal adaptado al combate físico.",
+            "sortOrder": 7
+        },
+        {
+            "id": -220139,
+            "tableId": -2204,
+            "minRoll": 9,
+            "maxRoll": 9,
+            "text": "Sanador: Secretos de hierbas y vendas. Habilidades: Resistencia a Enfermedades (CON), Curación (INT), Mente sobre Materia (VOL). Calificado de brujo.",
+            "sortOrder": 8
+        },
+        {
+            "id": -220140,
+            "tableId": -2204,
+            "minRoll": 10,
+            "maxRoll": 10,
+            "text": "Marginado (Mendigo/Leproso): Ya vivías en el lodo. Habilidades: Robusto (CON), Pies Rápidos (DES), Lectura de Labios (INT). Sin esperanzas que perder.",
+            "sortOrder": 9
+        },
+        {
+            "id": -220141,
+            "tableId": -2205,
+            "text": "Pánico Ciego: Huyes a toda velocidad por la ruta más directa. Si estás acorralado, adoptas posición fetal e Indefenso 1 ronda."
+        },
+        {
+            "id": -220142,
+            "tableId": -2205,
+            "minRoll": 2,
+            "maxRoll": 2,
+            "text": "Furia Violenta: Atacas de inmediato a la criatura más cercana (aliada o enemiga) con tu arma más letal. Luego quedas Aturdido (1).",
+            "sortOrder": 1
+        },
+        {
+            "id": -220143,
+            "tableId": -2205,
+            "minRoll": 3,
+            "maxRoll": 3,
+            "text": "Parálisis por Terror: Caes derribado e inmovilizado. Requiere chequeo Promedio de VOL al inicio de turno o recibir daño para reaccionar.",
+            "sortOrder": 2
+        },
+        {
+            "id": -220144,
+            "tableId": -2205,
+            "minRoll": 4,
+            "maxRoll": 4,
+            "text": "Mentira Compulsiva: Racionalizas el horror con una mentira desesperada. Intentas convencer con vehemencia a todos de tu fantasía.",
+            "sortOrder": 3
+        },
+        {
+            "id": -220145,
+            "tableId": -2205,
+            "minRoll": 5,
+            "maxRoll": 5,
+            "text": "Fijación Obsesiva: Te fascinas con un detalle diminuto del horror (una nota, un ojo, un patrón) y no actúas hasta recibir daño.",
+            "sortOrder": 4
+        },
+        {
+            "id": -220146,
+            "tableId": -2205,
+            "minRoll": 6,
+            "maxRoll": 6,
+            "text": "Nueva Fobia: La fuente del colapso se convierte en fobia permanente; sufres Desventaja al encarar criaturas o entornos similares.",
+            "sortOrder": 5
+        },
+        {
+            "id": -220147,
+            "tableId": -2205,
+            "minRoll": 7,
+            "maxRoll": 7,
+            "text": "Determinación del Pecador: Te refugias en tu Pecado. Inmune a Asustado y Ventaja temporal al confrontar directamente la fuente de tu angustia.",
+            "sortOrder": 6
+        },
+        {
+            "id": -220148,
+            "tableId": -2205,
+            "minRoll": 8,
+            "maxRoll": 8,
+            "text": "Catatonía: Colapso total. Desplomado, consciente pero incapaz de moverte o hablar hasta que concluya la escena o te auxilien.",
+            "sortOrder": 7
+        },
+        {
+            "id": -220149,
+            "tableId": -2205,
+            "minRoll": 9,
+            "maxRoll": 9,
+            "text": "Voz del Coro: Crees comprender una frase sagrada del canto. Ganas 1 punto permanente e imborrable de Angustia y un rumor secreto.",
+            "sortOrder": 8
+        },
+        {
+            "id": -220150,
+            "tableId": -2205,
+            "minRoll": 10,
+            "maxRoll": 10,
+            "text": "Claridad Aterradora: Comprendes la verdad cósmica. Puedes purgar toda tu Angustia actual, pero la próxima que ganes se duplicará.",
+            "sortOrder": 9
+        },
+        {
+            "id": -220151,
+            "tableId": -2206,
+            "maxRoll": 5,
+            "weight": 5,
+            "text": "Apóstatas de la Carne: Bestias de carne viva y tumores. Tira en la tabla de Criaturas de la Carne."
+        },
+        {
+            "id": -220152,
+            "tableId": -2206,
+            "minRoll": 6,
+            "maxRoll": 10,
+            "weight": 5,
+            "text": "Fieles del Coro: Penitentes y legiones celestiales. Tira en la tabla de Sirvientes del Coro.",
+            "sortOrder": 1
+        },
+        {
+            "id": -220153,
+            "tableId": -2206,
+            "minRoll": 11,
+            "maxRoll": 17,
+            "weight": 7,
+            "text": "Supervivientes del Páramo: Grupo errante o solitario. Tira en la tabla de Supervivientes. Chequeo Promedio de CAR para obtener Rumor.",
+            "sortOrder": 2
+        },
+        {
+            "id": -220154,
+            "tableId": -2206,
+            "minRoll": 18,
+            "maxRoll": 20,
+            "weight": 3,
+            "text": "Purificadores del Coro: Inquisidores fanáticos. Si tienes alguna Mácula, atacan de inmediato sin cuartel.",
+            "sortOrder": 3
+        },
+        {
+            "id": -220155,
+            "tableId": -2207,
+            "text": "Amalgama: Masa titánica de extremidades cosidas y fauces que arremete en línea recta."
+        },
+        {
+            "id": -220156,
+            "tableId": -2207,
+            "minRoll": 2,
+            "maxRoll": 2,
+            "text": "Apóstata: Humano deformado voluntariamente por la Carne, empuñando armas primitivas con astucia.",
+            "sortOrder": 1
+        },
+        {
+            "id": -220157,
+            "tableId": -2207,
+            "minRoll": 3,
+            "maxRoll": 3,
+            "text": "Tejedor de Huesos: Arácnido colosal hecho de costillas y fémures que dispara agujas óseas.",
+            "sortOrder": 2
+        },
+        {
+            "id": -220158,
+            "tableId": -2207,
+            "minRoll": 4,
+            "maxRoll": 4,
+            "text": "Bandada de Carroña: Enjambre aéreo de carne alada y ojos vigilantes que desgarran desde las alturas.",
+            "sortOrder": 3
+        },
+        {
+            "id": -220159,
+            "tableId": -2207,
+            "minRoll": 5,
+            "maxRoll": 5,
+            "text": "Croador: Monstruosidad hinchada con sacos de bilis que vomita pus corrosivo a distancia.",
+            "sortOrder": 4
+        },
+        {
+            "id": -220160,
+            "tableId": -2207,
+            "minRoll": 6,
+            "maxRoll": 6,
+            "text": "Gusano de Carne: Anélido gigantesco de carne viva que perfora el suelo y devora armaduras.",
+            "sortOrder": 5
+        },
+        {
+            "id": -220161,
+            "tableId": -2207,
+            "minRoll": 7,
+            "maxRoll": 7,
+            "text": "Rechinador: Bestia bípeda con hileras concéntricas de dientes que trituran metal y hueso.",
+            "sortOrder": 6
+        },
+        {
+            "id": -220162,
+            "tableId": -2207,
+            "minRoll": 8,
+            "maxRoll": 8,
+            "text": "Fauces del Suelo: Trampa viva en el terreno esperando que una presa pise sus labios ocultos.",
+            "sortOrder": 7
+        },
+        {
+            "id": -220163,
+            "tableId": -2207,
+            "minRoll": 9,
+            "maxRoll": 9,
+            "text": "Licuador: Masa gelatinosa de enzimas ácidas que disuelve carne y equipo al menor contacto.",
+            "sortOrder": 8
+        },
+        {
+            "id": -220164,
+            "tableId": -2207,
+            "minRoll": 10,
+            "maxRoll": 10,
+            "text": "Madre de Tumores: Criatura inmóvil que engendra zarcillos y larvas parasitarias continuamente.",
+            "sortOrder": 9
+        },
+        {
+            "id": -220165,
+            "tableId": -2207,
+            "minRoll": 11,
+            "maxRoll": 11,
+            "text": "Acechador Silencioso: Depredador camaleónico de tendones finos que ataca desde las sombras.",
+            "sortOrder": 10
+        },
+        {
+            "id": -220166,
+            "tableId": -2207,
+            "minRoll": 12,
+            "maxRoll": 12,
+            "text": "Sabueso Desollado: Cuadrúpedo veloz guiado por el rastro del sudor y la angustia humana.",
+            "sortOrder": 11
+        },
+        {
+            "id": -220167,
+            "tableId": -2208,
+            "text": "Cantor: Penitente con la garganta abierta entonando una armonía que paraliza la voluntad."
+        },
+        {
+            "id": -220168,
+            "tableId": -2208,
+            "minRoll": 2,
+            "maxRoll": 2,
+            "text": "Portador del Incensario: Guerrero cubierto de oro que esparce humo alucinógeno sagrado.",
+            "sortOrder": 1
+        },
+        {
+            "id": -220169,
+            "tableId": -2208,
+            "minRoll": 3,
+            "maxRoll": 3,
+            "text": "Querubín: Rostro angelical de porcelana con alas afiladas como hojas de navaja.",
+            "sortOrder": 2
+        },
+        {
+            "id": -220170,
+            "tableId": -2208,
+            "minRoll": 4,
+            "maxRoll": 4,
+            "text": "Confesor: Inquisidor con máscara de hierro que arranca confesiones y quiebra mentes.",
+            "sortOrder": 3
+        },
+        {
+            "id": -220171,
+            "tableId": -2208,
+            "minRoll": 5,
+            "maxRoll": 5,
+            "text": "Flagelante: Penitente con látigos de púas benditas que busca la redención en la sangre.",
+            "sortOrder": 4
+        },
+        {
+            "id": -220172,
+            "tableId": -2208,
+            "minRoll": 6,
+            "maxRoll": 6,
+            "text": "Heraldo: Comandante angélico con trompeta de bronce que coordina las filas del Coro.",
+            "sortOrder": 5
+        },
+        {
+            "id": -220173,
+            "tableId": -2208,
+            "minRoll": 7,
+            "maxRoll": 7,
+            "text": "Cruzado Cáscara: Caballero vaciado de humanidad, una armadura pesada guiada por luz divina.",
+            "sortOrder": 6
+        },
+        {
+            "id": -220174,
+            "tableId": -2208,
+            "minRoll": 8,
+            "maxRoll": 8,
+            "text": "Mater Dolorosa: Estatua viviente que llora plata ardiente y condena a los pecadores.",
+            "sortOrder": 7
+        },
+        {
+            "id": -220175,
+            "tableId": -2208,
+            "minRoll": 9,
+            "maxRoll": 9,
+            "text": "Pilar de Fe: Monolito ambulante de mármol y alas doradas que aplasta a los heréticos.",
+            "sortOrder": 8
+        },
+        {
+            "id": -220176,
+            "tableId": -2208,
+            "minRoll": 10,
+            "maxRoll": 10,
+            "text": "Escriba de la Penitencia: Autómata que registra cada pecado y ejecuta castigos de inmediato.",
+            "sortOrder": 9
+        },
+        {
+            "id": -220177,
+            "tableId": -2208,
+            "minRoll": 11,
+            "maxRoll": 11,
+            "text": "Serafín: Ángel de seis alas de fuego sagrado que desciende con espada flamígera.",
+            "sortOrder": 10
+        },
+        {
+            "id": -220178,
+            "tableId": -2208,
+            "minRoll": 12,
+            "maxRoll": 12,
+            "text": "Trono: Rueda viviente cubierta de incontables ojos ardientes que proyecta la voluntad divina.",
+            "sortOrder": 11
+        },
+        {
+            "id": -220179,
+            "tableId": -2209,
+            "text": "El Molino Silencioso: Molino con la gran rueda atascada de maleza roja. El río fluye espeso y lento."
+        },
+        {
+            "id": -220180,
+            "tableId": -2209,
+            "minRoll": 2,
+            "maxRoll": 2,
+            "text": "La Posada del Ahorcado: Letrero con un ahorcado crujiente. Puertas tapiadas desde adentro.",
+            "sortOrder": 1
+        },
+        {
+            "id": -220181,
+            "tableId": -2209,
+            "minRoll": 3,
+            "maxRoll": 3,
+            "text": "La Mina Colapsada: Entrada derrumbada con vigas astilladas y un golpeteo rítmico en el fondo.",
+            "sortOrder": 2
+        },
+        {
+            "id": -220182,
+            "tableId": -2209,
+            "minRoll": 4,
+            "maxRoll": 4,
+            "text": "El Patio Olvidado: Barbacana solitaria de un castillo borrado de la faz de la tierra.",
+            "sortOrder": 3
+        },
+        {
+            "id": -220183,
+            "tableId": -2209,
+            "minRoll": 5,
+            "maxRoll": 5,
+            "text": "La Cantera Llorosa: Paredes de roca que rezuman líquido salado negro; la piedra es gélida.",
+            "sortOrder": 4
+        },
+        {
+            "id": -220184,
+            "tableId": -2209,
+            "minRoll": 6,
+            "maxRoll": 6,
+            "text": "La Abadía Hundida: Campanario sobresaliendo de un pantano fétido que devoró la iglesia.",
+            "sortOrder": 5
+        },
+        {
+            "id": -220185,
+            "tableId": -2209,
+            "minRoll": 7,
+            "maxRoll": 7,
+            "text": "El Camino de las Estatuas: Calzada romana con viajeros petrificados en poses de terror.",
+            "sortOrder": 6
+        },
+        {
+            "id": -220186,
+            "tableId": -2209,
+            "minRoll": 8,
+            "maxRoll": 8,
+            "text": "El Puente de Huesos: Puente sobre el abismo reparado con incontables huesos entrelazados.",
+            "sortOrder": 7
+        },
+        {
+            "id": -220187,
+            "tableId": -2209,
+            "minRoll": 9,
+            "maxRoll": 9,
+            "text": "El Transbordador Abandonado: Puesto de barquero; la barca amarrada en la orilla opuesta.",
+            "sortOrder": 8
+        },
+        {
+            "id": -220188,
+            "tableId": -2209,
+            "minRoll": 10,
+            "maxRoll": 10,
+            "text": "La Horca de Tres Brazos: Horca colosal sobre una colina con ocupantes desecados.",
+            "sortOrder": 9
+        },
+        {
+            "id": -220189,
+            "tableId": -2209,
+            "minRoll": 11,
+            "maxRoll": 11,
+            "text": "La Colonia de Leprosos: Edificio de cuarentena sellado con incontables cruces de peste.",
+            "sortOrder": 10
+        },
+        {
+            "id": -220190,
+            "tableId": -2209,
+            "minRoll": 12,
+            "maxRoll": 12,
+            "text": "El Acueducto Caído: Arcos colosales derrumbados formando un laberinto en sombras.",
+            "sortOrder": 11
+        },
+        {
+            "id": -220191,
+            "tableId": -2209,
+            "minRoll": 13,
+            "maxRoll": 13,
+            "text": "El Patio del Curtidor: Fosos químicos pestilentes con pieles estiradas de origen perturbador.",
+            "sortOrder": 12
+        },
+        {
+            "id": -220192,
+            "tableId": -2209,
+            "minRoll": 14,
+            "maxRoll": 14,
+            "text": "La Mansión Señorial: Cascarón quemado de un noble con alta chimenea solitaria.",
+            "sortOrder": 13
+        },
+        {
+            "id": -220193,
+            "tableId": -2209,
+            "minRoll": 15,
+            "maxRoll": 15,
+            "text": "El Túnel de Carne: Montaña perforada por un conducto palpitante con vello y zarcillos.",
+            "sortOrder": 14
+        },
+        {
+            "id": -220194,
+            "tableId": -2209,
+            "minRoll": 16,
+            "maxRoll": 16,
+            "text": "El Sepulcro Profanado: Cripta noble con la losa reventada con violencia desde el interior.",
+            "sortOrder": 15
+        },
+        {
+            "id": -220195,
+            "tableId": -2209,
+            "minRoll": 17,
+            "maxRoll": 17,
+            "text": "La Columna del Santo: Alta columna donde vivía un eremita, cubierta de runas blasfemas.",
+            "sortOrder": 16
+        },
+        {
+            "id": -220196,
+            "tableId": -2209,
+            "minRoll": 18,
+            "maxRoll": 18,
+            "text": "La Arboleda del Carnicero: Matadero en el bosque con cadáveres desollados colgados.",
+            "sortOrder": 17
+        },
+        {
+            "id": -220197,
+            "tableId": -2209,
+            "minRoll": 19,
+            "maxRoll": 19,
+            "text": "El Viejo Fuerte: Empalizada militar podrida con terraplenes cubiertos de moho carmesí.",
+            "sortOrder": 18
+        },
+        {
+            "id": -220198,
+            "tableId": -2209,
+            "minRoll": 20,
+            "maxRoll": 20,
+            "text": "La Escalera del Peregrino: Escalones vertiginosos tallados en la roca hacia el cielo vacío.",
+            "sortOrder": 19
+        },
+        {
+            "id": -220199,
+            "tableId": -2210,
+            "text": "El Pantano de los Susurros: Ciénaga brumosa donde el viento imita voces humanas suplicantes."
+        },
+        {
+            "id": -220200,
+            "tableId": -2210,
+            "minRoll": 2,
+            "maxRoll": 2,
+            "text": "El Bosque de Rostros: Árboles viejos cuya corteza ha crecido formando rostros gritando.",
+            "sortOrder": 1
+        },
+        {
+            "id": -220201,
+            "tableId": -2210,
+            "minRoll": 3,
+            "maxRoll": 3,
+            "text": "El Río de Sangre: Aguas de color óxido profundo que tiñen de rojo todo lo que tocan.",
+            "sortOrder": 2
+        },
+        {
+            "id": -220202,
+            "tableId": -2210,
+            "minRoll": 4,
+            "maxRoll": 4,
+            "text": "Las Colinas Anudadas: Hierba gruesa enredada en nudos que hace el avance agotador.",
+            "sortOrder": 3
+        },
+        {
+            "id": -220203,
+            "tableId": -2210,
+            "minRoll": 5,
+            "maxRoll": 5,
+            "text": "Las Llanuras de Ceniza: Manto gris ceniciento que amortigua todo sonido en el silencio total.",
+            "sortOrder": 4
+        },
+        {
+            "id": -220204,
+            "tableId": -2210,
+            "minRoll": 6,
+            "maxRoll": 6,
+            "text": "La Espina del Mundo: Picos afilados como cuchillas de hueso auténtico.",
+            "sortOrder": 5
+        },
+        {
+            "id": -220205,
+            "tableId": -2210,
+            "minRoll": 7,
+            "maxRoll": 7,
+            "text": "El Arrecife de Carne Coralina: Lago con formaciones de carne viva y aspecto de coral.",
+            "sortOrder": 6
+        },
+        {
+            "id": -220206,
+            "tableId": -2210,
+            "minRoll": 8,
+            "maxRoll": 8,
+            "text": "El Soto de los Susurros: Arboleda laberíntica donde los árboles cambian al no mirarlos.",
+            "sortOrder": 7
+        },
+        {
+            "id": -220207,
+            "tableId": -2210,
+            "minRoll": 9,
+            "maxRoll": 9,
+            "text": "Las Cuevas Cantoras: Red subterránea donde el viento genera un himno armónico resonante.",
+            "sortOrder": 8
+        },
+        {
+            "id": -220208,
+            "tableId": -2210,
+            "minRoll": 10,
+            "maxRoll": 10,
+            "text": "El Desierto de Vidrio: Suelo fundido en vidrio negro fracturado en esquirlas cortantes.",
+            "sortOrder": 9
+        },
+        {
+            "id": -220209,
+            "tableId": -2210,
+            "minRoll": 11,
+            "maxRoll": 11,
+            "text": "El Bosque Petrificado: Madera convertida en piedra dura con hojas de pizarra.",
+            "sortOrder": 10
+        },
+        {
+            "id": -220210,
+            "tableId": -2210,
+            "minRoll": 12,
+            "maxRoll": 12,
+            "text": "El Barranco Asfixiante: Niebla sulfurosa amarilla que desata ataques de tos violenta.",
+            "sortOrder": 11
+        },
+        {
+            "id": -220211,
+            "tableId": -2210,
+            "minRoll": 13,
+            "maxRoll": 13,
+            "text": "Los Riscos Dentados: Paredes rocosas que lucen como hileras de colosales molares.",
+            "sortOrder": 12
+        },
+        {
+            "id": -220212,
+            "tableId": -2210,
+            "minRoll": 14,
+            "maxRoll": 14,
+            "text": "El Valle Fúngico: Hongos gigantes bioluminiscentes que tiñen la noche de luz verdosa.",
+            "sortOrder": 13
+        },
+        {
+            "id": -220213,
+            "tableId": -2210,
+            "minRoll": 15,
+            "maxRoll": 15,
+            "text": "El Huerto Yermo: Árboles carbonizados que sostienen una única fruta petrificada perfecta.",
+            "sortOrder": 14
+        },
+        {
+            "id": -220214,
+            "tableId": -2210,
+            "minRoll": 16,
+            "maxRoll": 16,
+            "text": "La Estepa Silenciosa: Pastizal sin aves ni insectos; el silencio es absoluto y desquiciante.",
+            "sortOrder": 15
+        },
+        {
+            "id": -220215,
+            "tableId": -2210,
+            "minRoll": 17,
+            "maxRoll": 17,
+            "text": "El Delta de Venas: Riachuelos y arroyos que se ramifican imitando el sistema circulatorio.",
+            "sortOrder": 16
+        },
+        {
+            "id": -220216,
+            "tableId": -2210,
+            "minRoll": 18,
+            "maxRoll": 18,
+            "text": "Los Peñascos Colgantes: Rocas colosales suspendidas en el aire por tendones tensos.",
+            "sortOrder": 17
+        },
+        {
+            "id": -220217,
+            "tableId": -2210,
+            "minRoll": 19,
+            "maxRoll": 19,
+            "text": "Los Salares: Desierto de sal con costillas colosales de titanes semienterrados.",
+            "sortOrder": 18
+        },
+        {
+            "id": -220218,
+            "tableId": -2210,
+            "minRoll": 20,
+            "maxRoll": 20,
+            "text": "El Bosque de Hierro: Troncos que han absorbido tanto mineral que su corteza es puro metal oxidado.",
+            "sortOrder": 19
+        },
+        {
+            "id": -220219,
+            "tableId": -2211,
+            "text": "El Fruto de Carne: Un fruto dulce late en un tallo. Comerlo restaura D6 Heridas pero añade 1 Mácula."
+        },
+        {
+            "id": -220220,
+            "tableId": -2211,
+            "minRoll": 2,
+            "maxRoll": 2,
+            "text": "El Cadáver Susurrante: Escuchar su secreto otorga 1 Rumor (chequeo Promedio VOL o 1 Mácula); destruirlo atrae combate.",
+            "sortOrder": 1
+        },
+        {
+            "id": -220221,
+            "tableId": -2211,
+            "minRoll": 3,
+            "maxRoll": 3,
+            "text": "Lluvia de Gusanos: Soportarlo pudre D4 raciones (+1 Mácula); guarecerse exige chequeo de DES o quedar apresado.",
+            "sortOrder": 2
+        },
+        {
+            "id": -220222,
+            "tableId": -2211,
+            "minRoll": 4,
+            "maxRoll": 4,
+            "text": "La Mano que Llama: Ignorarla exige chequeo de VOL; estrecharla otorga una Semilla de Carne pero suma 2 Máculas.",
+            "sortOrder": 3
+        },
+        {
+            "id": -220223,
+            "tableId": -2211,
+            "minRoll": 5,
+            "maxRoll": 5,
+            "text": "Esporas Asfixiantes: Correr exige chequeo Difícil de CON (+2 Máculas si fallas) o sacrificar suministros valiosos.",
+            "sortOrder": 4
+        },
+        {
+            "id": -220224,
+            "tableId": -2211,
+            "minRoll": 6,
+            "maxRoll": 6,
+            "text": "El Muro de Ojos: Desafiarlos exige chequeo Difícil de VOL (éxito da Ventaja, fallo +2 Máculas); rodearlo suma 1 Mácula.",
+            "sortOrder": 5
+        },
+        {
+            "id": -220225,
+            "tableId": -2212,
+            "text": "El Sendero Armonioso: Camino fácil exige chequeo Promedio de VOL (fallo +1 Mácula); camino escarpado causa +1 Trauma."
+        },
+        {
+            "id": -220226,
+            "tableId": -2212,
+            "minRoll": 2,
+            "maxRoll": 2,
+            "text": "La Estatua Llorosa: Recoger lágrimas de plata elimina 1 Angustia pero suma 1 Mácula; romperla añade 1 Angustia.",
+            "sortOrder": 1
+        },
+        {
+            "id": -220227,
+            "tableId": -2212,
+            "minRoll": 3,
+            "maxRoll": 3,
+            "text": "El Silencio Repentino: Chequeo Promedio de VOL (éxito quita 1 Angustia, fallo +1 Mácula); romperlo atrae al Coro.",
+            "sortOrder": 2
+        },
+        {
+            "id": -220228,
+            "tableId": -2212,
+            "minRoll": 4,
+            "maxRoll": 4,
+            "text": "Geometría Imposible: Cruzar exige chequeo Difícil de INT (+2 Máculas si fallas) o perder 1 Turno de exploración.",
+            "sortOrder": 3
+        },
+        {
+            "id": -220229,
+            "tableId": -2212,
+            "minRoll": 5,
+            "maxRoll": 5,
+            "text": "Cuenco de Ofrendas: Ofrendar D4 raciones o un objeto otorga favor; rechazarlo añade 1 Mácula del Coro.",
+            "sortOrder": 4
+        },
+        {
+            "id": -220230,
+            "tableId": -2212,
+            "minRoll": 6,
+            "maxRoll": 6,
+            "text": "El Verso Viviente: Cumplir penitencia autoinflige +1 Trauma; atravesarlo exige chequeo Difícil de VOL o +2 Máculas.",
+            "sortOrder": 5
+        },
+        {
+            "id": -220231,
+            "tableId": -2213,
+            "text": "Aire Expulsado: Sin aliento; no puedes realizar Acciones Rápidas durante 1 ronda."
+        },
+        {
+            "id": -220232,
+            "tableId": -2213,
+            "minRoll": 2,
+            "maxRoll": 2,
+            "text": "Conmoción Leve: Desorientado; sufres -1 Carga en el próximo chequeo.",
+            "sortOrder": 1
+        },
+        {
+            "id": -220233,
+            "tableId": -2213,
+            "minRoll": 3,
+            "maxRoll": 3,
+            "text": "Empujón Brutal: Sales despedido hacia atrás D4 casillas.",
+            "sortOrder": 2
+        },
+        {
+            "id": -220234,
+            "tableId": -2213,
+            "minRoll": 4,
+            "maxRoll": 4,
+            "text": "Fisura en Costillas: Dolor agudo al respirar; sufres 1 Herida Menor extra al correr.",
+            "sortOrder": 3
+        },
+        {
+            "id": -220235,
+            "tableId": -2213,
+            "minRoll": 5,
+            "maxRoll": 5,
+            "text": "Golpe a la Rodilla: Pierdes el equilibrio y caes Derribado de inmediato.",
+            "sortOrder": 4
+        },
+        {
+            "id": -220236,
+            "tableId": -2213,
+            "minRoll": 6,
+            "maxRoll": 6,
+            "text": "Armadura Abollada: Placas dobladas; tu CD se reduce en 1 hasta reparar el equipo.",
+            "sortOrder": 5
+        },
+        {
+            "id": -220237,
+            "tableId": -2213,
+            "minRoll": 7,
+            "maxRoll": 7,
+            "text": "Hueso Roto: Extremidad inutilizada; sufres -2 Carga en chequeos con ese miembro.",
+            "sortOrder": 6
+        },
+        {
+            "id": -220238,
+            "tableId": -2213,
+            "minRoll": 8,
+            "maxRoll": 8,
+            "text": "Trauma Craneal: Caes inconsciente durante 1 ronda o quedas Aturdido (2).",
+            "sortOrder": 7
+        },
+        {
+            "id": -220239,
+            "tableId": -2214,
+            "text": "Corte Superficial: Sangrado molesto; sufres -1 Carga en chequeos de percepción."
+        },
+        {
+            "id": -220240,
+            "tableId": -2214,
+            "minRoll": 2,
+            "maxRoll": 2,
+            "text": "Desgarro Muscular: Movimiento reducido a la mitad hasta recibir curación.",
+            "sortOrder": 1
+        },
+        {
+            "id": -220241,
+            "tableId": -2214,
+            "minRoll": 3,
+            "maxRoll": 3,
+            "text": "Perforación de Armadura: La hoja atraviesa las defensas; CD reducida en 1.",
+            "sortOrder": 2
+        },
+        {
+            "id": -220242,
+            "tableId": -2214,
+            "minRoll": 4,
+            "maxRoll": 4,
+            "text": "Tendón Cortado: Pierdes el apoyo de la pierna y caes Derribado.",
+            "sortOrder": 3
+        },
+        {
+            "id": -220243,
+            "tableId": -2214,
+            "minRoll": 5,
+            "maxRoll": 5,
+            "text": "Ojo Cortado: Visión obstruida por sangre; Desventaja en ataques a distancia.",
+            "sortOrder": 4
+        },
+        {
+            "id": -220244,
+            "tableId": -2214,
+            "minRoll": 6,
+            "maxRoll": 6,
+            "text": "Arteria Tocada: Sangrado profuso; sufres 1 Herida Menor al final de cada turno.",
+            "sortOrder": 5
+        },
+        {
+            "id": -220245,
+            "tableId": -2214,
+            "minRoll": 7,
+            "maxRoll": 7,
+            "text": "Arma Incrustada: La punta queda clavada en tu cuerpo; requiere Acción Rápida para extraerla.",
+            "sortOrder": 6
+        },
+        {
+            "id": -220246,
+            "tableId": -2214,
+            "minRoll": 8,
+            "maxRoll": 8,
+            "text": "Desmembramiento / Evisceración: Pérdida de un dedo o herida mortal si no se sutura ya.",
+            "sortOrder": 7
+        },
+        {
+            "id": -220247,
+            "tableId": -2215,
+            "text": "En Llamas: Sufres la condición Ardiendo (1 Herida Menor al inicio de cada turno)."
+        },
+        {
+            "id": -220248,
+            "tableId": -2215,
+            "minRoll": 2,
+            "maxRoll": 2,
+            "text": "Ampollas Purulentas: El dolor es continuo; sufres -1 Carga en chequeos físicos.",
+            "sortOrder": 1
+        },
+        {
+            "id": -220249,
+            "tableId": -2215,
+            "minRoll": 3,
+            "maxRoll": 3,
+            "text": "Carne Abrasada: El reflejo del dolor hace que sueltes inmediatamente cualquier objeto empuñado.",
+            "sortOrder": 2
+        },
+        {
+            "id": -220250,
+            "tableId": -2215,
+            "minRoll": 4,
+            "maxRoll": 4,
+            "text": "Reverberación Sagrada: La luz abrasa el alma; ganas 1 punto de Angustia.",
+            "sortOrder": 3
+        },
+        {
+            "id": -220251,
+            "tableId": -2215,
+            "minRoll": 5,
+            "maxRoll": 5,
+            "text": "Humo Sofocante: Inhalas cenizas calientes; quedas Aturdido (1).",
+            "sortOrder": 4
+        },
+        {
+            "id": -220252,
+            "tableId": -2215,
+            "minRoll": 6,
+            "maxRoll": 6,
+            "text": "Pánico Ígneo: Huyes presuroso D4 casillas para sofocar las llamas.",
+            "sortOrder": 5
+        },
+        {
+            "id": -220253,
+            "tableId": -2215,
+            "minRoll": 7,
+            "maxRoll": 7,
+            "text": "Ignición de Ropas: Ropas y correas quemadas; reduce tu CD en 1.",
+            "sortOrder": 6
+        },
+        {
+            "id": -220254,
+            "tableId": -2215,
+            "minRoll": 8,
+            "maxRoll": 8,
+            "text": "Estigma Celestial: Quemadura indeleble en forma de sello; atrae a los fanáticos del Coro.",
+            "sortOrder": 7
+        },
+        {
+            "id": -220255,
+            "tableId": -2216,
+            "text": "Salpicadura Ácida: Vaho abrasivo en los ojos; quedas Cegado durante 1 ronda."
+        },
+        {
+            "id": -220256,
+            "tableId": -2216,
+            "minRoll": 2,
+            "maxRoll": 2,
+            "text": "Asimilación Tisular: Zarcillos carnosos se adhieren a tu piel, dejándote Restringido.",
+            "sortOrder": 1
+        },
+        {
+            "id": -220257,
+            "tableId": -2216,
+            "minRoll": 3,
+            "maxRoll": 3,
+            "text": "Vapores Sofocantes: Inhalas bilis pestilente; quedas Aturdido (1).",
+            "sortOrder": 2
+        },
+        {
+            "id": -220258,
+            "tableId": -2216,
+            "minRoll": 4,
+            "maxRoll": 4,
+            "text": "Carne Derretida: El ácido disuelve capas vivas; sufres 1 Herida Menor adicional.",
+            "sortOrder": 3
+        },
+        {
+            "id": -220259,
+            "tableId": -2216,
+            "minRoll": 5,
+            "maxRoll": 5,
+            "text": "Necrosis Progresiva: La ponzoña avanza por la sangre; sufres la condición Envenenado.",
+            "sortOrder": 4
+        },
+        {
+            "id": -220260,
+            "tableId": -2216,
+            "minRoll": 6,
+            "maxRoll": 6,
+            "text": "Infusión Caótica: Tu carne reacciona con espasmos; cada vez que golpees sufres 1 Herida Menor.",
+            "sortOrder": 5
+        },
+        {
+            "id": -220261,
+            "tableId": -2216,
+            "minRoll": 7,
+            "maxRoll": 7,
+            "text": "Armadura Disuelta: La protección metálica o de cuero se corroe; CD reducida en 2.",
+            "sortOrder": 6
+        },
+        {
+            "id": -220262,
+            "tableId": -2216,
+            "minRoll": 8,
+            "maxRoll": 8,
+            "text": "Injerto Parásito: Una boca o tumor con vello queda adherido a tu herida (+1 Mácula de la Carne).",
+            "sortOrder": 7
+        }
+    ],
+    "npcs": [
+        {
+            "id": -2301,
+            "name": "Amalgama",
+            "description": "Masa titánica de extremidades cosidas y fauces que arremete con violencia ciega.",
+            "maxHp": 18,
+            "armorClass": 12,
+            "initiativeBonus": -2,
+            "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Melee Bruto\n- **Precisión**: 1 | **Ataque**: Promedio (NO 14)\n- **Constitución**: Muy Difícil (NO 18) | **CD**: Promedio (12)\n- **Destreza**: Fácil (NO 10) | **Iniciativa**: 5\n- **Movimiento**: 2 casillas | **Número**: 1\n- **XP**: 3 XP | **Botín**: Ninguno\n\n### Táctica\nArremete en línea recta hacia el enemigo más cercano. Sus golpes desgarran armaduras y causan Daño Contundente.",
+            "isMonster": true
+        },
+        {
+            "id": -2302,
+            "name": "Apóstata",
+            "description": "Humano que abrazó voluntariamente la Carne, con injertos óseos y astucia macabra.",
+            "maxHp": 12,
+            "armorClass": 11,
+            "initiativeBonus": 1,
+            "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Melee Hostigador\n- **Precisión**: 2 | **Ataque**: Promedio (NO 14)\n- **Constitución**: Promedio (NO 14) | **CD**: Promedio (11)\n- **Destreza**: Promedio (NO 14) | **Iniciativa**: 12\n- **Movimiento**: 2 casillas | **Número**: 1-3\n- **XP**: 2 XP | **Botín**: Tirar en Saqueo\n\n### Táctica\nFlanquea a sus presas y tiende emboscadas con cuchillas de hueso.",
+            "isMonster": true
+        },
+        {
+            "id": -2303,
+            "name": "Tejedor de Huesos",
+            "description": "Arácnido aberrante construido con costillas y fémures humanos.",
+            "maxHp": 14,
+            "armorClass": 13,
+            "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Distancia / Control\n- **Precisión**: 3 | **Ataque**: Difícil (NO 16)\n- **Constitución**: Promedio (NO 14) | **CD**: Difícil (13)\n- **Destreza**: Promedio (NO 14) | **Iniciativa**: 8\n- **Movimiento**: 3 casillas | **Número**: 1\n- **XP**: 3 XP | **Botín**: D6 Agujas de Hueso\n\n### Táctica\nDispara púas óseas desde salientes y trepa muros con agilidad pasmosa.",
+            "isMonster": true
+        },
+        {
+            "id": -2304,
+            "name": "Bandada de Carroña",
+            "description": "Enjambre volante de carne palpitante, garras aviares y ojos vigilantes.",
+            "armorClass": 12,
+            "initiativeBonus": 2,
+            "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Enjambre Aéreo\n- **Precisión**: 2 | **Ataque**: Promedio (NO 14)\n- **Constitución**: Fácil (NO 10) | **CD**: Promedio (12)\n- **Destreza**: Difícil (NO 16) | **Iniciativa**: 14\n- **Movimiento**: 4 casillas (Vuelo) | **Número**: Enjambre\n- **XP**: 2 XP | **Botín**: Plumas y tendones\n\n### Táctica\nDesciende en picada sobre objetivos vulnerables, picoteando ojos y cuellos.",
+            "isMonster": true
+        },
+        {
+            "id": -2305,
+            "name": "Croador",
+            "description": "Monstruosidad anfibia hinchada con sacos de bilis ácida carmesí.",
+            "maxHp": 16,
+            "initiativeBonus": -1,
+            "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Melee / Toxina\n- **Precisión**: 2 | **Ataque**: Promedio (NO 14)\n- **Constitución**: Difícil (NO 16) | **CD**: Fácil (10)\n- **Destreza**: Fácil (NO 10) | **Iniciativa**: 6\n- **Movimiento**: 2 casillas | **Número**: 1-2\n- **XP**: 3 XP | **Botín**: Vesícula corrosiva\n\n### Táctica\nVomita ácido al ser herido. Su explosión póstuma salpica a casillas adyacentes.",
+            "isMonster": true
+        },
+        {
+            "id": -2306,
+            "name": "Gusano de Carne",
+            "description": "Anélido gigante de tendones rosáceos que horada la tierra podrida.",
+            "maxHp": 22,
+            "armorClass": 13,
+            "initiativeBonus": -3,
+            "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Tanque Excavador\n- **Precisión**: 1 | **Ataque**: Difícil (NO 16)\n- **Constitución**: Muy Difícil (NO 18) | **CD**: Difícil (13)\n- **Destreza**: Fácil (NO 10) | **Iniciativa**: 4\n- **Movimiento**: 2 casillas (Excavar) | **Número**: 1\n- **XP**: 4 XP | **Botín**: Cuero resistente\n\n### Táctica\nEmerge bajo los pies del Inquebrantable para engullirlo y derribarlo.",
+            "isMonster": true
+        },
+        {
+            "id": -2307,
+            "name": "Rechinador",
+            "description": "Bípedo colosal cubierto de mandíbulas concéntricas que rechinan sin cesar.",
+            "maxHp": 24,
+            "armorClass": 14,
+            "initiativeBonus": -1,
+            "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Bruto Acorazado\n- **Precisión**: 2 | **Ataque**: Difícil (NO 16)\n- **Constitución**: Muy Difícil (NO 18) | **CD**: Difícil (14)\n- **Destreza**: Fácil (NO 10) | **Iniciativa**: 7\n- **Movimiento**: 2 casillas | **Número**: 1\n- **XP**: 5 XP | **Botín**: Diente de Rechinador (Reliquia)\n\n### Táctica\nSu mordisco tritura armaduras reduciendo la CD del defensor en 1 por impacto.",
+            "isMonster": true
+        },
+        {
+            "id": -2308,
+            "name": "Fauces del Suelo",
+            "description": "Trampa viva de tierra y labios carnosos camuflada en el sendero.",
+            "maxHp": 20,
+            "armorClass": 12,
+            "initiativeBonus": -4,
+            "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Emboscador Estático\n- **Precisión**: 3 | **Ataque**: Difícil (NO 16)\n- **Constitución**: Difícil (NO 16) | **CD**: Promedio (12)\n- **Destreza**: Muy Fácil (NO 5) | **Iniciativa**: 3\n- **Movimiento**: Inmóvil | **Número**: 1\n- **XP**: 4 XP | **Botín**: Restos digeridos de víctimas\n\n### Táctica\nAtrapa las piernas de quien pise su casilla, infligiendo Restringido automático.",
+            "isMonster": true
+        },
+        {
+            "id": -2309,
+            "name": "Licuador",
+            "description": "Masa semilíquida translúcida repleta de enzimas disolventes.",
+            "maxHp": 12,
+            "armorClass": 11,
+            "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Disolución / Ácido\n- **Precisión**: 2 | **Ataque**: Promedio (NO 14)\n- **Constitución**: Fácil (NO 10) | **CD**: Promedio (11)\n- **Destreza**: Promedio (NO 14) | **Iniciativa**: 9\n- **Movimiento**: 3 casillas | **Número**: 1-2\n- **XP**: 2 XP | **Botín**: Frasco de ácido puro\n\n### Táctica\nDesliza su cuerpo sobre las armas del rival para desintegrar su filo.",
+            "isMonster": true
+        },
+        {
+            "id": -2310,
+            "name": "Madre de Tumores",
+            "description": "Montículo palpitante de carne nodular que engendra larvas continuamente.",
+            "maxHp": 26,
+            "armorClass": 12,
+            "initiativeBonus": -3,
+            "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Generador / Matrona\n- **Precisión**: 1 | **Ataque**: Fácil (NO 10)\n- **Constitución**: Muy Difícil (NO 18) | **CD**: Promedio (12)\n- **Destreza**: Muy Fácil (NO 5) | **Iniciativa**: 4\n- **Movimiento**: 1 casilla | **Número**: 1\n- **XP**: 5 XP | **Botín**: Semilla de Carne viva\n\n### Táctica\nExpulsa D4 larvas parasitarias cada dos rondas para abrumar por número.",
+            "isMonster": true
+        },
+        {
+            "id": -2311,
+            "name": "Acechador Silencioso",
+            "description": "Cazador bípedo de tendones negros y rostro liso sin orificios.",
+            "maxHp": 22,
+            "armorClass": 15,
+            "initiativeBonus": 3,
+            "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Asesino Letal\n- **Precisión**: 4 | **Ataque**: Muy Difícil (NO 18)\n- **Constitución**: Difícil (NO 16) | **CD**: Difícil (15)\n- **Destreza**: Muy Difícil (NO 18) | **Iniciativa**: 16\n- **Movimiento**: 3 casillas | **Número**: 1\n- **XP**: 8 XP | **Botín**: Glándula de sigilo\n\n### Táctica\nAtaca desde la retaguardia con bonificador de emboscada (+3 Maestría).",
+            "isMonster": true
+        },
+        {
+            "id": -2312,
+            "name": "Sabueso Desollado",
+            "description": "Cánido sin piel con músculos expuestos y colmillos de marfil torcido.",
+            "maxHp": 14,
+            "armorClass": 11,
+            "initiativeBonus": 2,
+            "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Rastreador Rápido\n- **Precisión**: 2 | **Ataque**: Promedio (NO 14)\n- **Constitución**: Promedio (NO 14) | **CD**: Promedio (11)\n- **Destreza**: Difícil (NO 16) | **Iniciativa**: 13\n- **Movimiento**: 4 casillas | **Número**: 2-4\n- **XP**: 2 XP | **Botín**: Dientes afilados\n\n### Táctica\nCaza en jauría. Otorga +1 de Maestría a sus aliados al flanquear.",
+            "isMonster": true
+        },
+        {
+            "id": -2313,
+            "name": "Cantor",
+            "description": "Penitente con hábito de lino y mandíbula desencajada entonando el himno.",
+            "maxHp": 12,
+            "armorClass": 11,
+            "initiativeBonus": 1,
+            "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Soporte / Himno\n- **Precisión**: 2 | **Ataque**: Promedio (NO 14)\n- **Constitución**: Promedio (NO 14) | **CD**: Promedio (11)\n- **Destreza**: Promedio (NO 14) | **Iniciativa**: 10\n- **Movimiento**: 2 casillas | **Número**: 1-3\n- **XP**: 3 XP | **Botín**: Hábito sagrado\n\n### Táctica\nSu cántico obliga a un chequeo de VOL a todos los presentes para no ganar Angustia.",
+            "isMonster": true
+        },
+        {
+            "id": -2314,
+            "name": "Portador del Incensario",
+            "description": "Guerrero encapuchado que balancea un pebetero humeante de plata y mirra.",
+            "maxHp": 16,
+            "armorClass": 13,
+            "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Niebla / Tanque\n- **Precisión**: 2 | **Ataque**: Promedio (NO 14)\n- **Constitución**: Difícil (NO 16) | **CD**: Difícil (13)\n- **Destreza**: Promedio (NO 14) | **Iniciativa**: 8\n- **Movimiento**: 2 casillas | **Número**: 1\n- **XP**: 3 XP | **Botín**: Incensario de plata\n\n### Táctica\nCrea una nube de humo sagrado que bloquea la visión y quema los pulmones.",
+            "isMonster": true
+        },
+        {
+            "id": -2315,
+            "name": "Querubín",
+            "description": "Cabeza infantil de mármol con cuatro alas plumosas de filo cortante.",
+            "armorClass": 14,
+            "initiativeBonus": 3,
+            "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Hostigador Aéreo\n- **Precisión**: 3 | **Ataque**: Promedio (NO 14)\n- **Constitución**: Fácil (NO 10) | **CD**: Difícil (14)\n- **Destreza**: Muy Difícil (NO 18) | **Iniciativa**: 15\n- **Movimiento**: 4 casillas (Vuelo) | **Número**: 2-3\n- **XP**: 2 XP | **Botín**: Pluma de plata\n\n### Táctica\nCorta gargantas al pasar a toda velocidad y eleva la voz con risas celestiales.",
+            "isMonster": true
+        },
+        {
+            "id": -2316,
+            "name": "Confesor",
+            "description": "Figura alta con máscara de hierro ciego y estola bordada en oro.",
+            "maxHp": 18,
+            "armorClass": 12,
+            "initiativeBonus": 1,
+            "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Controlador Mental\n- **Precisión**: 3 | **Ataque**: Difícil (NO 16)\n- **Constitución**: Difícil (NO 16) | **CD**: Promedio (12)\n- **Destreza**: Promedio (NO 14) | **Iniciativa**: 11\n- **Movimiento**: 2 casillas | **Número**: 1\n- **XP**: 3 XP | **Botín**: El Cristal del Confesor (Reliquia)\n\n### Táctica\nExige penitencia verbal al rival, infligiendo Aturdido si el Inquebrantable falla VOL.",
+            "isMonster": true
+        },
+        {
+            "id": -2317,
+            "name": "Flagelante",
+            "description": "Penitente fanático con torso sangrante que azota su carne con disciplina de hierro.",
+            "maxHp": 15,
+            "initiativeBonus": 2,
+            "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Furia Suicida\n- **Precisión**: 2 | **Ataque**: Promedio (NO 14)\n- **Constitución**: Promedio (NO 14) | **CD**: Fácil (10)\n- **Destreza**: Difícil (NO 16) | **Iniciativa**: 14\n- **Movimiento**: 3 casillas | **Número**: 2-4\n- **XP**: 3 XP | **Botín**: Azote de hierro\n\n### Táctica\nGana +1 de Maestría por cada herida que sufre, combatiendo hasta la muerte.",
+            "isMonster": true
+        },
+        {
+            "id": -2318,
+            "name": "Heraldo",
+            "description": "Ángel menor con armadura dorada y trompeta de latón celeste.",
+            "maxHp": 20,
+            "armorClass": 14,
+            "initiativeBonus": 1,
+            "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Comandante Sagrado\n- **Precisión**: 3 | **Ataque**: Difícil (NO 16)\n- **Constitución**: Difícil (NO 16) | **CD**: Difícil (14)\n- **Destreza**: Promedio (NO 14) | **Iniciativa**: 12\n- **Movimiento**: 3 casillas | **Número**: 1\n- **XP**: 4 XP | **Botín**: Trompeta del Heraldo\n\n### Táctica\nSu toque de clarín concede turno gratuito a todos los aliados del Coro.",
+            "isMonster": true
+        },
+        {
+            "id": -2319,
+            "name": "Cruzado Cáscara",
+            "description": "Caballero templario cuya armadura de placas alberga únicamente luz blanca y ceniza.",
+            "maxHp": 18,
+            "armorClass": 16,
+            "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Soldado Pesado\n- **Precisión**: 3 | **Ataque**: Difícil (NO 16)\n- **Constitución**: Difícil (NO 16) | **CD**: Muy Difícil (16)\n- **Destreza**: Promedio (NO 14) | **Iniciativa**: 9\n- **Movimiento**: 2 casillas | **Número**: 1-2\n- **XP**: 3 XP | **Botín**: Espada de cruzado bendita\n\n### Táctica\nForma muro de escudos; reduce el daño de ataques frontales a la mitad.",
+            "isMonster": true
+        },
+        {
+            "id": -2320,
+            "name": "Mater Dolorosa",
+            "description": "Estatua viviente de mármol de una santa llorando lágrimas de mercurio hirviente.",
+            "maxHp": 22,
+            "armorClass": 13,
+            "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Aflicción Sagrada\n- **Precisión**: 2 | **Ataque**: Promedio (NO 14)\n- **Constitución**: Muy Difícil (NO 18) | **CD**: Difícil (13)\n- **Destreza**: Fácil (NO 10) | **Iniciativa**: 8\n- **Movimiento**: 2 casillas | **Número**: 1\n- **XP**: 4 XP | **Botín**: Lágrimas de plata bendita\n\n### Táctica\nSus lágrimas calcinan a los pecadores que se acerquen a menos de 2 casillas.",
+            "isMonster": true
+        },
+        {
+            "id": -2321,
+            "name": "Pilar de Fe",
+            "description": "Columna ambulante de granito blanco con alas doradas que aplasta a los herejes.",
+            "maxHp": 28,
+            "armorClass": 17,
+            "initiativeBonus": -3,
+            "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Coloso Defensivo\n- **Precisión**: 2 | **Ataque**: Difícil (NO 16)\n- **Constitución**: Casi Imposible (NO 20) | **CD**: Muy Difícil (17)\n- **Destreza**: Muy Fácil (NO 5) | **Iniciativa**: 3\n- **Movimiento**: 1 casilla | **Número**: 1\n- **XP**: 5 XP | **Botín**: Fragmento de altar sagrado\n\n### Táctica\nGolpea el suelo provocando una onda de choque que derriba a todos los enemigos.",
+            "isMonster": true
+        },
+        {
+            "id": -2322,
+            "name": "Escriba de la Penitencia",
+            "description": "Figura esquelética vestida de púrpura que sostiene un libro de juicios y pluma de hierro.",
+            "maxHp": 14,
+            "armorClass": 12,
+            "initiativeBonus": 1,
+            "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Juicio y Sentencia\n- **Precisión**: 3 | **Ataque**: Promedio (NO 14)\n- **Constitución**: Promedio (NO 14) | **CD**: Promedio (12)\n- **Destreza**: Promedio (NO 14) | **Iniciativa**: 11\n- **Movimiento**: 2 casillas | **Número**: 1\n- **XP**: 3 XP | **Botín**: Libro de cuentas celestiales\n\n### Táctica\nLee en voz alta las culpas del Inquebrantable, duplicando la Angustia que reciba.",
+            "isMonster": true
+        },
+        {
+            "id": -2323,
+            "name": "Serafín",
+            "description": "Ángel colosal de seis alas ardientes blandiendo un mandoble de fuego sagrado.",
+            "maxHp": 30,
+            "armorClass": 16,
+            "initiativeBonus": 3,
+            "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Jefe Supremo / Fuego Divino\n- **Precisión**: 4 | **Ataque**: Muy Difícil (NO 18)\n- **Constitución**: Muy Difícil (NO 18) | **CD**: Muy Difícil (16)\n- **Destreza**: Muy Difícil (NO 18) | **Iniciativa**: 16\n- **Movimiento**: 4 casillas (Vuelo) | **Número**: 1\n- **XP**: 8 XP | **Botín**: Brasa celestial pura\n\n### Táctica\nBarre el campo con ráfagas de fuego sagrado e ignora la armadura del pecador.",
+            "isMonster": true
+        },
+        {
+            "id": -2324,
+            "name": "Trono",
+            "description": "Ruedas concéntricas de bronce viviente repletas de ojos de zafiro que todo lo ven.",
+            "maxHp": 32,
+            "armorClass": 18,
+            "initiativeBonus": -2,
+            "notes": "### Estadísticas de Choir of Flesh\n- **Rol**: Fortaleza Viviente\n- **Precisión**: 3 | **Ataque**: Difícil (NO 16)\n- **Constitución**: Casi Imposible (NO 20) | **CD**: Casi Imposible (18)\n- **Destreza**: Fácil (NO 10) | **Iniciativa**: 5\n- **Movimiento**: 2 casillas | **Número**: 1\n- **XP**: 8 XP | **Botín**: Ojo de Zafiro Celestial\n\n### Táctica\nSu mirada fulminante anula las ventajas de terreno y quema con daño radiante.",
+            "isMonster": true
+        }
+    ],
+    "referenceTables": [
+        {
+            "id": -2101,
+            "name": "Modificadores de Atributo",
+            "description": "Conversión de puntuación a modificador de tirada en Choir of Flesh.",
+            "gameSystem": "Choir of Flesh",
+            "category": "Creación",
+            "columnsJson": "[{\"header\":\"Puntuación\",\"widthWeight\":1.0},{\"header\":\"Modificador\",\"widthWeight\":1.0}]",
+            "isPinned": true,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2102,
+            "name": "Números Objetivo y Dificultades",
+            "description": "Guía de dificultad estándar para chequeos de 1d20.",
+            "gameSystem": "Choir of Flesh",
+            "category": "Mecánicas",
+            "columnsJson": "[{\"header\":\"Dificultad\",\"widthWeight\":1.2},{\"header\":\"NO Sugerido\",\"widthWeight\":0.8},{\"header\":\"Éxito Base\",\"widthWeight\":1.0}]",
+            "isPinned": true,
+            "sortOrder": 1,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2103,
+            "name": "Escala de Humanidad",
+            "description": "Efectos según la puntuación actual de Humanidad (HUM).",
+            "gameSystem": "Choir of Flesh",
+            "category": "Psicología",
+            "columnsJson": "[{\"header\":\"Puntuación\",\"widthWeight\":0.8},{\"header\":\"Efectos Tácticos y Narrativos\",\"widthWeight\":2.2}]",
+            "sortOrder": 2,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2104,
+            "name": "IA Táctica de Enemigos (Solitario)",
+            "description": "Determinación del objetivo y acciones de enemigos según su daño.",
+            "gameSystem": "Choir of Flesh",
+            "category": "Combate",
+            "columnsJson": "[{\"header\":\"Condición / Heridas\",\"widthWeight\":1.0},{\"header\":\"Acción Predilecta\",\"widthWeight\":2.0}]",
+            "sortOrder": 3,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        }
+    ],
+    "referenceRows": [
+        {
+            "id": -21011,
+            "tableId": -2101,
+            "cellsJson": "[\"3 o menos\",\"-3\"]"
+        },
+        {
+            "id": -21012,
+            "tableId": -2101,
+            "cellsJson": "[\"4 - 5\",\"-2\"]",
+            "sortOrder": 1
+        },
+        {
+            "id": -21013,
+            "tableId": -2101,
+            "cellsJson": "[\"6 - 8\",\"-1\"]",
+            "sortOrder": 2
+        },
+        {
+            "id": -21014,
+            "tableId": -2101,
+            "cellsJson": "[\"9 - 12\",\"0\"]",
+            "sortOrder": 3
+        },
+        {
+            "id": -21015,
+            "tableId": -2101,
+            "cellsJson": "[\"13 - 15\",\"+1\"]",
+            "sortOrder": 4
+        },
+        {
+            "id": -21016,
+            "tableId": -2101,
+            "cellsJson": "[\"16 - 17\",\"+2\"]",
+            "sortOrder": 5
+        },
+        {
+            "id": -21017,
+            "tableId": -2101,
+            "cellsJson": "[\"18 o más\",\"+3\"]",
+            "sortOrder": 6
+        },
+        {
+            "id": -21021,
+            "tableId": -2102,
+            "cellsJson": "[\"Muy Fácil\",\"5\",\"80%\"]"
+        },
+        {
+            "id": -21022,
+            "tableId": -2102,
+            "cellsJson": "[\"Fácil\",\"10\",\"55%\"]",
+            "sortOrder": 1
+        },
+        {
+            "id": -21023,
+            "tableId": -2102,
+            "cellsJson": "[\"Promedio\",\"14\",\"35%\"]",
+            "sortOrder": 2
+        },
+        {
+            "id": -21024,
+            "tableId": -2102,
+            "cellsJson": "[\"Difícil\",\"16\",\"25%\"]",
+            "sortOrder": 3
+        },
+        {
+            "id": -21025,
+            "tableId": -2102,
+            "cellsJson": "[\"Muy Difícil\",\"18\",\"15%\"]",
+            "sortOrder": 4
+        },
+        {
+            "id": -21026,
+            "tableId": -2102,
+            "cellsJson": "[\"Casi Imposible\",\"20\",\"5%\"]",
+            "sortOrder": 5
+        },
+        {
+            "id": -21031,
+            "tableId": -2103,
+            "cellsJson": "[\"15 - 20\",\"Mente lúcida. Pesadillas frecuentes pero sin penalizadores tácticos.\"]"
+        },
+        {
+            "id": -21032,
+            "tableId": -2103,
+            "cellsJson": "[\"10 - 14\",\"-1 Carga a chequeos sociales. El canto del Coro sosiega; la Carne no parece tan abominable.\"]",
+            "sortOrder": 1
+        },
+        {
+            "id": -21033,
+            "tableId": -2103,
+            "cellsJson": "[\"5 - 9\",\"-2 Carga a chequeos sociales. Evitas activamente el contacto con humanos.\"]",
+            "sortOrder": 2
+        },
+        {
+            "id": -21034,
+            "tableId": -2103,
+            "cellsJson": "[\"1 - 4\",\"Los animales huyen; los niños lloran al tocarte. Deseo febril por la Carne o el Coro.\"]",
+            "sortOrder": 3
+        },
+        {
+            "id": -21035,
+            "tableId": -2103,
+            "cellsJson": "[\"0\",\"Pérdida de personaje: te conviertes en un Penitente del Coro o un Deshecho de la Carne.\"]",
+            "sortOrder": 4
+        },
+        {
+            "id": -21041,
+            "tableId": -2104,
+            "cellsJson": "[\"Objetivo de Enemigo (d6)\",\"1-2: Más herido | 3-4: Más cercano | 5-6: Aleatorio\"]"
+        },
+        {
+            "id": -21042,
+            "tableId": -2104,
+            "cellsJson": "[\"Sin Heridas Mayores (d10)\",\"1-6: Ataque Estándar | 7-10: Ataque Especial\"]",
+            "sortOrder": 1
+        },
+        {
+            "id": -21043,
+            "tableId": -2104,
+            "cellsJson": "[\"1 Herida Mayor (d10)\",\"1-5: Ataque Estándar | 6-8: Ataque Especial | 9-10: Acción de Soporte\"]",
+            "sortOrder": 2
+        },
+        {
+            "id": -21044,
+            "tableId": -2104,
+            "cellsJson": "[\"2+ Heridas Mayores (d10)\",\"1-4: Ataque Estándar | 5-6: Ataque Especial | 7-8: Soporte | 9-10: Huir desesperadamente\"]",
+            "sortOrder": 3
+        }
+    ],
+    "systemRules": [
+        {
+            "id": -2001,
+            "title": "El Escatón (Año 1000 d.C.)",
+            "content": "El año 1000 d.C. no trajo el Juicio Final anunciado en las Escrituras, sino el Escatón: dos apocalipsis simultáneos y despiadados que desgarraron la cristiandad.\n\n- **El Coro Celestial**: Cielos abiertos de donde descienden legiones de ángeles cantores cuya armonía perfecta aniquila la voluntad humana, obligando a los penitentes a unirse a un cántico eterno hasta que sus cuerpos se marchitan.\n- **La Carne Que Alimenta**: La tierra misma germinó en una masa voraz de tendones, sangre, tumores y bocas balbuceantes que devora la materia orgánica para crear amalgamas vivientes.\n\nLos escasos supervivientes son conocidos como **Inquebrantables**: almas manchadas por un pecado tan profundo que ni el cántico sagrado ni la mutación ciega pueden asimilarlas.",
+            "gameSystem": "Choir of Flesh",
+            "category": "Ambientación",
+            "isPinned": true,
+            "lastUpdated": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2002,
+            "title": "Chequeos y Número Objetivo (NO)",
+            "content": "Para superar cualquier desafío, peligro o ataque:\n\n**Tirada**: 1d20 + Modificador de Atributo\n\nSi el resultado es igual o superior al **Número Objetivo (NO)**, la acción tiene éxito.\n\n### Dificultades Estándar:\n- **Muy Fácil**: NO 5 (80% éxito base)\n- **Fácil**: NO 10 (55% éxito base)\n- **Promedio**: NO 14 (35% éxito base)\n- **Difícil**: NO 16 (25% éxito base)\n- **Muy Difícil**: NO 18 (15% éxito base)\n- **Casi Imposible**: NO 20 (5% éxito base)\n\n*Un 20 natural siempre es un Éxito Crítico; un 1 natural es una Pifia Desastrosa.*",
+            "gameSystem": "Choir of Flesh",
+            "category": "Mecánicas",
+            "isPinned": true,
+            "sortOrder": 1,
+            "lastUpdated": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2003,
+            "title": "Modificadores de Maestría y Carga",
+            "content": "Las circunstancias tácticas, ventajas de terreno y equipo aplican modificadores directos:\n\n- **Maestría (+1 a +3)**: Ventaja, preparación cuidadosa, herramientas óptimas o flanqueo. Suma +1, +2 o +3 a tu tirada de 1d20.\n- **Carga (-1 a -3)**: Oscuridad, terreno resbaladizo, heridas o pánico. Resta 1, 2 o 3 a tu tirada de 1d20.\n\nLos bonos de Maestría y Carga se cancelan entre sí uno a uno.",
+            "gameSystem": "Choir of Flesh",
+            "category": "Mecánicas",
+            "sortOrder": 2,
+            "lastUpdated": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2004,
+            "title": "El Dado de Uso (Usage Die)",
+            "content": "Los recursos consumibles (raciones, antorchas, flechas, vendas, aceite) se gestionan mediante el **Dado de Uso (Ud)**:\n\n**Escala**: Ud12 → Ud10 → Ud8 → Ud6 → Ud4 → Agotado\n\n- Tras cada uso o turno de exploración, tira el Dado de Uso.\n- Si el resultado es **1 o 2**, el dado desciende un escalón.\n- Si obtienes un 1 o 2 en un **Ud4**, el recurso se agota.",
+            "gameSystem": "Choir of Flesh",
+            "category": "Supervivencia",
+            "sortOrder": 3,
+            "lastUpdated": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2005,
+            "title": "Humanidad (HUM)",
+            "content": "La Humanidad mide la cordura terrenal y la conexión con el viejo mundo (1 a 20):\n\n- **15 - 20**: Mente lúcida. Pesadillas frecuentes pero sin penalizadores.\n- **10 - 14**: -1 Carga en chequeos sociales. El canto del Coro suena tentador.\n- **5 - 9**: -2 Carga en chequeos sociales. Aversión al contacto humano.\n- **1 - 4**: Animales huyen; niños lloran. Atracción cósmica extrema.\n- **0**: **Pérdida Total del Alma**. El personaje se convierte en Penitente o Deshecho.",
+            "gameSystem": "Choir of Flesh",
+            "category": "Psicología",
+            "sortOrder": 4,
+            "lastUpdated": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2006,
+            "title": "Angustia (Distress) y Colapso Mental",
+            "content": "El horror genera **Angustia (0 a 10)**.\n\n- Al acumular **10 puntos de Angustia** o fallar un chequeo crítico de Voluntad, sufres un **Colapso Mental** (tira 1d10).\n- Tras resolver el Colapso, la Angustia se reduce a la mitad de su puntuación actual.",
+            "gameSystem": "Choir of Flesh",
+            "category": "Psicología",
+            "sortOrder": 5,
+            "lastUpdated": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2007,
+            "title": "Combate, Iniciativa y Táctica",
+            "content": "Combate posicional por casillas:\n\n- **Iniciativa**: 1d20 + Bono de Destreza vs Iniciativa del enemigo.\n- **Acciones**: 1 Estándar (Atacar, Habilidad) + 1 Movimiento (velocidad en casillas) + 1 Rápida.\n- **Defensa (CD)**: Determinada por Armadura y Destreza.\n- **Flanqueo**: Otorga +1 de Maestría si un aliado traba al mismo enemigo.",
+            "gameSystem": "Choir of Flesh",
+            "category": "Combate",
+            "sortOrder": 6,
+            "lastUpdated": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2008,
+            "title": "Trauma, Heridas y Condiciones",
+            "content": "- **Heridas Menores**: 3 Heridas Menores se convierten en 1 Herida Mayor.\n- **Heridas Mayores**: Tira 1d8 en la tabla del tipo de daño infligido.\n- **Trauma Permanente**: Secuelas duraderas que marcan el cuerpo y el alma.",
+            "gameSystem": "Choir of Flesh",
+            "category": "Combate",
+            "sortOrder": 7,
+            "lastUpdated": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2009,
+            "title": "El Toque de lo Sobrenatural: Máculas y Mutaciones",
+            "content": "- **Mácula de la Carne**: Mutaciones corporales que conceden poder físico pero erosionan la Humanidad.\n- **Canto del Coro**: Bendiciones angélicas y clarividencia a cambio de pérdida del libre albedrío.",
+            "gameSystem": "Choir of Flesh",
+            "category": "Sobrenatural",
+            "sortOrder": 8,
+            "lastUpdated": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2010,
+            "title": "Asentamientos y Supervivientes",
+            "content": "Gestión del refugio humano:\n\n- **Fases**: Recolección de Recursos (Madera, Piedra, Metal, Comida, Agua), Construcción y Mantenimiento, Eventos de Asentamiento (1d100).\n- **Población**: Crecer de Granja a Comuna o Aldea aumenta la capacidad defensiva y los recursos.",
+            "gameSystem": "Choir of Flesh",
+            "category": "Supervivencia",
+            "sortOrder": 9,
+            "lastUpdated": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        }
+    ]
+}

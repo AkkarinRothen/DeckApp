@@ -56,6 +56,13 @@ class NpcListViewModel @Inject constructor(
             onDone(name)
         }
     }
+
+    fun saveCharacter(npc: Npc, onDone: () -> Unit) {
+        viewModelScope.launch {
+            saveNpcUseCase(npc, null)
+            onDone()
+        }
+    }
 }
 
 sealed interface NpcListUiState {
