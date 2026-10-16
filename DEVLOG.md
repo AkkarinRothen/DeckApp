@@ -1,5 +1,38 @@
 ---
 
+### Sprint 64 — Mesa de Juego: Buscador Rápido "Spotlight" (Command Palette) y Búsqueda Federada (`SessionSpotlightDialog`) (16 de octubre de 2026)
+
+**FEATURE — Buscador Rápido Spotlight y Paleta de Comandos (`SessionSpotlightDialog`)**
+- Modal central flotante con estética glassmorphism (`Color(0xF212141C)`), desenfoque de fondo y bordes iluminados, accesible instantáneamente desde cualquier pantalla de la mesa de juego mediante el icono de Lupa en el TopAppBar o a través del atajo de teclado canónico `Ctrl+K` / `Ctrl+F` (optimizado para Desktop y tablets/emuladores con teclado físico).
+- **Búsqueda Federada Reactiva con Debounce (150ms):**
+  - Consulta simultánea en múltiples fuentes de datos sin congelar la UI:
+    - 🎲 **Tablas Aleatorias:** Coincidencias de nombre, categoría y fórmula en `TableRepository`.
+    - 👤 **Personajes y PNJs:** Coincidencias de nombre, rol y notas en `NpcRepository`.
+    - 📜 **Reglas y Hechizos SRD:** Búsqueda en texto y títulos de `ReferenceRepository`.
+    - 🐉 **Monstruos y Criaturas:** Coincidencias en el compendio de encuentros de `EncounterRepository`.
+    - 📝 **Diario y Notas:** Búsqueda contextual línea a línea en las notas de sesión (`dmNotes`).
+- **Filtro de Categorías por Chips:** Selector horizontal para acotar rápidamente entre `Todos`, `Tablas`, `PNJs`, `Reglas`, `Monstruos` y `Diario` con colores temáticos e iconografía representativa.
+- **Vista Previa Rápida (Quick Peek) con Acciones Contextuales en 1 Toque:**
+  - Diseño responsivo adaptativo (dos paneles en horizontal / apilado en vertical).
+  - Al seleccionar cualquier elemento, muestra su ficha técnica resumida y botones de acción rápida directos:
+    - **Tablas:** Botón *"🎲 Tirar en Tabla"* que ejecuta la tirada en tiempo real sin salir del buscador y muestra el resultado con botón *"📋 Al Diario"*.
+    - **Monstruos y Criaturas:** Botón *"⚔️ Sumar a Combate"* (añade directamente la criatura al encuentro activo de la sesión con HP, CA y notas) y botón *"📋 Al Diario"*.
+    - **PNJs:** Botón *"⚔️ Sumar a Combate"* (lo inyecta con rol y descripción como participante) y *"📋 Al Diario"*.
+    - **Reglas del Sistema:** Botón *"📋 Copiar Regla al Diario"* con formato Markdown limpio (título, sistema y descripción).
+    - **Notas de Sesión:** Botón *"📋 Copiar Fragmento"* para reusar extractos pasados.
+
+**FEATURE — Extensiones en Repositorio y Arquitectura Domain**
+- Agregado método `addCreature(creature: EncounterCreature): Long` en la interfaz `EncounterRepository` y su implementación en `EncounterRepositoryImpl`, permitiendo inyectar criaturas directamente a encuentros en ejecución sin re-persistir todo el bloque.
+- Modelos `SpotlightCategory` y `SpotlightItem` (`TableResult`, `NpcResult`, `RuleResult`, `CreatureResult`, `NoteResult`) en `feature/draw/components/spotlight/SpotlightModels.kt`.
+- Atajo de teclado global con `Modifier.focusRequester()`, `.focusable()` y `.onKeyEvent()` en `SessionScreen.kt`.
+
+**VALIDACIÓN Y PARIDAD**
+- 5 pruebas unitarias en `SessionSpotlightTest` validando asignación de categorías e IDs estables, filtrado por categorías, coincidencia insensible a mayúsculas/minúsculas, y formateo de Markdown para diario; 100% aprobadas.
+- Compilación y suite completa de pruebas unitarias `:feature:draw:testDebugUnitTest` (187 tareas) y ensamble `:app:assembleDebug` aprobados sin errores.
+- *Feature Parity Mandate:* Registrado para sincronizar en `TDAPP-desktop`: componente `SessionSpotlightDialog`, modelos `SpotlightModels.kt`, atajo `Ctrl+K`/`Ctrl+F`, y métodos del ViewModel `openSpotlight()`, `updateSpotlightQuery()`, `rollSpotlightTable()`, `addSpotlightCreatureToCombat()`, etc.
+
+---
+
 ### Sprint 63 — Mesa de Juego: Mini-Tracker de Combate e Iniciativa Flotante (`SessionCombatFloatingHud`) (15 de octubre de 2026)
 
 **FEATURE — Mini-Tracker Flotante de Combate (`SessionCombatFloatingHud`)**
