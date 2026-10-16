@@ -126,7 +126,8 @@ data class SessionUiState(
     val showThreadEditDialog: Boolean = false,
     val showMythicCharacterEditDialog: Boolean = false,
     val editingMythicThread: MythicThread? = null,
-    val editingMythicCharacter: MythicCharacter? = null
+    val editingMythicCharacter: MythicCharacter? = null,
+    val isCombatHudExpanded: Boolean = false
 )
 
 enum class SidebarTool {
@@ -1431,6 +1432,28 @@ class SessionViewModel @Inject constructor(
     fun applyDamage(creatureId: Long, delta: Int) {
         viewModelScope.launch {
             applyDamageUseCase(creatureId, delta)
+        }
+    }
+
+    fun toggleCombatHudExpanded() {
+        _uiState.update { it.copy(isCombatHudExpanded = !it.isCombatHudExpanded) }
+    }
+
+    fun copyCombatRoundToDiary() {
+        val encounter = _uiState.value.activeEncounter ?: return
+        viewModelScope.launch {
+            val sorted = encounter.creatures.sortedBy { it.sortOrder }
+            val sb = java.lang.StringBuilder()
+            sb.append("\n\n### ⚔️ Asalto ${encounter.currentRound} de Combate: ${encounter.name}\n")
+            sorted.forEach { c ->
+                val status = if (c.currentHp <= 0) " (Caído/Inconsciente)" else ""
+                val conditions = if (c.conditions.isNotEmpty()) " [${c.conditions.joinToString { cond -> cond.label }}]" else ""
+                sb.append("- **${c.name}**: ${c.currentHp}/${c.maxHp} HP$conditions$status\n")
+            }
+            val currentNotes = _uiState.value.dmNotes
+            val newNotes = (currentNotes + sb.toString()).trim()
+            _uiState.update { it.copy(dmNotes = newNotes, snackbarMessage = "Asalto copiado al diario") }
+            sessionRepository.updateDmNotes(sessionId, newNotes)
         }
     }
 

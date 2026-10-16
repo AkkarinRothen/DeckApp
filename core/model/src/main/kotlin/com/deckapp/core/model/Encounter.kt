@@ -48,6 +48,25 @@ enum class Condition {
     PETRIFIED, POISONED, PRONE, RESTRAINED, STUNNED, UNCONSCIOUS
 }
 
+val Condition.label: String
+    get() = when (this) {
+        Condition.BLINDED -> "Cegado"
+        Condition.CHARMED -> "Encantado"
+        Condition.DEAFENED -> "Ensordecido"
+        Condition.EXHAUSTED -> "Agotado"
+        Condition.FRIGHTENED -> "Asustado"
+        Condition.GRAPPLED -> "Agarrado"
+        Condition.INCAPACITATED -> "Incapacitado"
+        Condition.INVISIBLE -> "Invisible"
+        Condition.PARALYZED -> "Paralizado"
+        Condition.PETRIFIED -> "Petrificado"
+        Condition.POISONED -> "Envenenado"
+        Condition.PRONE -> "Derribado"
+        Condition.RESTRAINED -> "Apresado"
+        Condition.STUNNED -> "Aturdido"
+        Condition.UNCONSCIOUS -> "Inconsciente"
+    }
+
 /**
  * Participante de iniciativa que no es una criatura (PJs).
  */

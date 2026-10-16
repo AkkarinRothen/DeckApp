@@ -1,5 +1,34 @@
 ---
 
+### Sprint 63 — Mesa de Juego: Mini-Tracker de Combate e Iniciativa Flotante (`SessionCombatFloatingHud`) (15 de octubre de 2026)
+
+**FEATURE — Mini-Tracker Flotante de Combate (`SessionCombatFloatingHud`)**
+- Pastilla central flotante superior con estética glassmorphism (`Color(0xEB161920)`) anclada en `Alignment.TopCenter` (`padding(top = 10.dp)`), ubicada armónicamente entre Hilos/Amenazas (`TopStart`) y Relojes de Progreso (`TopEnd`), completando la trilogía superior de HUDs tácticos no invasivos de la mesa de juego.
+- Solo se muestra de manera reactiva y no intrusiva cuando hay un combate activo con participantes en la sesión.
+- **Vista Colapsada (Minimalist Pill):**
+  - Indicador de asalto actual (`R{round}`).
+  - Nombre del participante que tiene el turno activo, su barra/valor de salud (`{hp}/{maxHp}`) y estado de CA.
+  - Botón de 1 toque `▶` para avanzar turno inmediatamente sin abrir menús.
+  - Indicador de expansión/colapso para ver la cola completa.
+- **Vista Desplegada (Panel de Mando Táctico):**
+  - Cabecera con título del encuentro, contador de asalto, botones de *"Copiar Asalto al Diario"*, *"Finalizar Encuentro"* y botón de colapsar.
+  - Lista scrollable completa de la cola de iniciativa unificada (Criaturas y Jugadores/PNJs) en orden descendente.
+  - Destacado visual con borde dorado del combatiente cuyo turno está en curso.
+  - Controles express de daño y curación rápida por participante: `-1`, `-5`, `+5` HP con limitación automática (mínimo 0, máximo HP total).
+  - Menú y selector de chips para alternar condiciones SRD 5e (Cegado, Asustado, Envenenado, Inconsciente, etc.) con actualización instantánea.
+  - Detección automática de caída a 0 HP marcando al objetivo visualmente como derrotado/inconsciente.
+
+**FEATURE — Extensiones de Modelo y Diario Narrativo**
+- Propiedad de extensión unificada `Condition.label` en `core:model/Encounter.kt` para traducciones limpias y consistentes de condiciones de estado en toda la aplicación.
+- Método `copyCombatRoundToDiary()` en `SessionViewModel`: vuelca instantáneamente el estado completo de la ronda en Markdown estructurado dentro de las notas de la sesión (`dmNotes`), facilitando la crónica de juego en solitario.
+
+**VALIDACIÓN Y PARIDAD**
+- 4 pruebas unitarias en `SessionCombatHudTest` verificando la segregación de participantes unificados, ciclado de turnos e incremento de ronda al dar la vuelta, cálculo y acotación de daño/curación de HP, y formato de resumen Markdown.
+- Suite de pruebas de `:feature:draw:testDebugUnitTest` (187 tareas) y compilación `:app:assembleDebug` aprobadas al 100%.
+- *Feature Parity Mandate:* Registrado para sincronizar en `TDAPP-desktop`: componente Compose `SessionCombatFloatingHud`, propiedad `isCombatHudExpanded` en `SessionUiState`, y métodos de ViewModel para avance rápido y exportación de ronda.
+
+---
+
 ### Sprint 62 — Mesa de Juego: Threats & Threads Tracker Flotante (Hilos de Trama y Lista de PNJs) (15 de octubre de 2026)
 
 **FEATURE — HUD Flotante Interactivo de Hilos y Amenazas (`SessionThreadsOverlay`)**

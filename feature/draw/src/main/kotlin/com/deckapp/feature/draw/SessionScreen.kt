@@ -70,6 +70,7 @@ import com.deckapp.feature.draw.components.clocks.ClockImpactDialog
 import com.deckapp.feature.draw.components.threads.SessionThreadsOverlay
 import com.deckapp.feature.draw.components.threads.ThreadEditDialog
 import com.deckapp.feature.draw.components.threads.MythicCharacterEditDialog
+import com.deckapp.feature.draw.components.combat.SessionCombatFloatingHud
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -834,6 +835,22 @@ fun SessionScreen(
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(top = 10.dp, start = 12.dp)
+            )
+
+            // Mini-Combat Tracker Floating HUD (Sprint 63)
+            SessionCombatFloatingHud(
+                encounter = uiState.activeEncounter,
+                players = uiState.playerParticipants,
+                isExpanded = uiState.isCombatHudExpanded,
+                onToggleExpanded = viewModel::toggleCombatHudExpanded,
+                onNextTurn = viewModel::nextTurn,
+                onApplyDamage = viewModel::applyDamage,
+                onToggleCondition = viewModel::toggleCondition,
+                onEndCombat = viewModel::endEncounter,
+                onCopyRoundToDiary = viewModel::copyCombatRoundToDiary,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 10.dp)
             )
 
             // Progress Clocks Overlay (Sprint 61)
