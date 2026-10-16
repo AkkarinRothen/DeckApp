@@ -14,6 +14,7 @@ interface EncounterRepository {
     suspend fun saveEncounter(encounter: Encounter): Long
     suspend fun deleteEncounter(encounterId: Long)
     
+    suspend fun addCreature(creature: EncounterCreature): Long
     suspend fun updateCreature(creature: EncounterCreature)
     suspend fun deleteCreature(creatureId: Long)
     

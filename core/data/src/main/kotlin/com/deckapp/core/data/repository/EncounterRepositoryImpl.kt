@@ -58,6 +58,10 @@ class EncounterRepositoryImpl @Inject constructor(
         encounterDao.deleteEncounter(encounterId)
     }
 
+    override suspend fun addCreature(creature: EncounterCreature): Long {
+        return encounterDao.insertCreature(creature.toEntity())
+    }
+
     override suspend fun updateCreature(creature: EncounterCreature) {
         encounterDao.updateCreature(creature.toEntity())
     }

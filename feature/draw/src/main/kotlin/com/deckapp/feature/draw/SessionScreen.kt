@@ -10,6 +10,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -71,6 +72,10 @@ import com.deckapp.feature.draw.components.threads.SessionThreadsOverlay
 import com.deckapp.feature.draw.components.threads.ThreadEditDialog
 import com.deckapp.feature.draw.components.threads.MythicCharacterEditDialog
 import com.deckapp.feature.draw.components.combat.SessionCombatFloatingHud
+import com.deckapp.feature.draw.components.spotlight.SessionSpotlightDialog
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -157,7 +162,21 @@ fun SessionScreen(
         }
     }
 
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
     Scaffold(
+        modifier = Modifier
+            .focusRequester(focusRequester)
+            .focusable()
+            .onKeyEvent { event ->
+                if (event.type == KeyEventType.KeyDown && event.isCtrlPressed && (event.key == Key.K || event.key == Key.F)) {
+                    viewModel.openSpotlight()
+                    true
+                } else false
+            },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
@@ -258,8 +277,8 @@ fun SessionScreen(
                         Text("Escena", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
                     }
 
-                    IconButton(onClick = viewModel::openGlobalSearch) {
-                        Icon(Icons.Default.Search, contentDescription = "Búsqueda Rápida")
+                    IconButton(onClick = viewModel::openSpotlight) {
+                        Icon(Icons.Default.Search, contentDescription = "Búsqueda Rápida Spotlight (Ctrl+K)")
                     }
                     IconButton(onClick = onShowDiceRoller) { Icon(Icons.Default.Casino, null) }
                     IconButton(
@@ -977,6 +996,25 @@ fun SessionScreen(
             character = uiState.editingMythicCharacter,
             onDismiss = viewModel::closeCharacterDialog,
             onSave = viewModel::saveMythicCharacter
+        )
+    }
+
+    if (uiState.showSpotlightDialog) {
+        SessionSpotlightDialog(
+            query = uiState.spotlightQuery,
+            selectedCategory = uiState.selectedSpotlightCategory,
+            results = uiState.spotlightResults,
+            selectedItem = uiState.selectedSpotlightItem,
+            lastRollResult = uiState.lastSpotlightRollResult,
+            isSearching = uiState.isSpotlightSearching,
+            onQueryChange = viewModel::updateSpotlightQuery,
+            onCategorySelect = viewModel::selectSpotlightCategory,
+            onItemSelect = viewModel::selectSpotlightItem,
+            onRollTable = viewModel::rollSpotlightTable,
+            onAddCreatureToCombat = viewModel::addSpotlightCreatureToCombat,
+            onAddNpcToCombat = viewModel::addSpotlightNpcToCombat,
+            onCopyToDiary = viewModel::copySpotlightToDiary,
+            onDismiss = viewModel::closeSpotlight
         )
     }
 
