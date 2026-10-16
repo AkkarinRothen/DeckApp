@@ -39,6 +39,8 @@ fun SessionCombatFloatingHud(
     isExpanded: Boolean,
     onToggleExpanded: () -> Unit,
     onNextTurn: () -> Unit,
+    onChoirCharacterCommand: (Long, com.deckapp.core.model.ChoirCharacterCommand) -> Unit,
+    onChoirStateChange: (Long, ChoirCombatCommand) -> Unit,
     onApplyDamage: (creatureId: Long, delta: Int) -> Unit,
     onToggleCondition: (creatureId: Long, condition: Condition) -> Unit,
     onEndCombat: () -> Unit,
@@ -51,15 +53,7 @@ fun SessionCombatFloatingHud(
 
     // Unificar criaturas y jugadores en lista ordenada de iniciativa
     val unifiedList = remember(encounter.creatures, players) {
-        val list = mutableListOf<UnifiedParticipant>()
-        encounter.creatures.forEach { list.add(UnifiedParticipant.Creature(it)) }
-        players.forEach { list.add(UnifiedParticipant.Player(it)) }
-
-        list.sortedWith(
-            compareBy<UnifiedParticipant> {
-                if (it is UnifiedParticipant.Creature) it.data.sortOrder else -1
-            }.thenByDescending { it.initiative }
-        )
+        com.deckapp.core.domain.usecase.OrderCombatParticipantsUseCase(encounter.creatures, players)
     }
 
     val activeIndex = encounter.currentTurnIndex.coerceIn(0, (unifiedList.size - 1).coerceAtLeast(0))
@@ -133,7 +127,13 @@ fun SessionCombatFloatingHud(
                             else -> Color(0xFF4CAF50)
                         }
                         Text(
-                            text = "${c.currentHp}/${c.maxHp} HP",
+                            text = if (ChoirProfile.fromNotes(c.notes) != null) {
+                                val wounds = ChoirCombatState.fromNotes(c.notes)
+                                "${wounds.major} mayores · ${wounds.minor} menores"
+                            } else if (com.deckapp.core.domain.usecase.ChoirCharacterCodec.read(c.notes) != null) {
+                                val sheet = com.deckapp.core.domain.usecase.ChoirCharacterCodec.read(c.notes)!!
+                                "${sheet.major}/4 mayores · ${sheet.minor}/8 menores"
+                            } else "${c.currentHp}/${c.maxHp} HP",
                             style = MaterialTheme.typography.labelSmall,
                             color = hpColor,
                             fontWeight = FontWeight.SemiBold,
@@ -269,7 +269,14 @@ fun SessionCombatFloatingHud(
                             val participant = unifiedList[index]
                             val isCurrentTurn = index == activeIndex
 
-                            CombatParticipantItemRow(
+                            val choirCreature = (participant as? UnifiedParticipant.Creature)?.data
+                            if (choirCreature != null && ChoirProfile.fromNotes(choirCreature.notes) != null) {
+                                com.deckapp.core.ui.components.ChoirCombatControls(choirCreature,
+                                    { onChoirStateChange(choirCreature.id, it) }, isActive = isCurrentTurn)
+                            } else if (choirCreature != null && com.deckapp.core.domain.usecase.ChoirCharacterCodec.read(choirCreature.notes) != null) {
+                                com.deckapp.core.ui.components.ChoirCharacterCombatControls(choirCreature,
+                                    { onChoirCharacterCommand(choirCreature.id, it) }, isActive = isCurrentTurn)
+                            } else CombatParticipantItemRow(
                                 participant = participant,
                                 isCurrentTurn = isCurrentTurn,
                                 onApplyDamage = { delta ->

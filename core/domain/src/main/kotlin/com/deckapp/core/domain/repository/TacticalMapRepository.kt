@@ -22,6 +22,7 @@ interface TacticalMapRepository {
     suspend fun upsertTokens(tokens: List<TacticalToken>)
     suspend fun updateTokenPosition(tokenId: Long, cellX: Float, cellY: Float)
     suspend fun updateTokenHp(tokenId: Long, currentHp: Int)
+    suspend fun updateTokenHpAndTempHp(tokenId: Long, currentHp: Int, tempHp: Int)
     suspend fun deleteToken(id: Long)
     suspend fun deleteTokensByMapId(mapId: Long)
 

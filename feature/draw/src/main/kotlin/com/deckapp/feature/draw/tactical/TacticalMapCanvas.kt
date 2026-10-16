@@ -45,6 +45,7 @@ fun TacticalMapCanvas(
     onFogCellInteracted: ((col: Int, row: Int) -> Unit)? = null,
     onAddRouteWaypoint: ((cellX: Float, cellY: Float) -> Unit)? = null,
     onClearCameraFocus: () -> Unit = {},
+    onPruneFloatingTexts: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val textMeasurer = rememberTextMeasurer()
@@ -52,6 +53,14 @@ fun TacticalMapCanvas(
     var panOffset by remember { mutableStateOf(Offset.Zero) }
 
     val map = uiState.map ?: return
+
+    // Limpieza y ciclo de animación de textos flotantes de combate
+    LaunchedEffect(uiState.floatingCombatTexts.isNotEmpty()) {
+        while (uiState.floatingCombatTexts.isNotEmpty()) {
+            kotlinx.coroutines.delay(100)
+            onPruneFloatingTexts()
+        }
+    }
 
     // Auto-foco suave de cámara en el token seleccionado o con turno activo (Atlas VTT)
     LaunchedEffect(uiState.focusCameraOnTokenId) {
@@ -537,6 +546,34 @@ fun TacticalMapCanvas(
                 )
             }
 
+            // Área de Presupuesto de Movimiento del Token en Turno Activo
+            val activeTurnToken = uiState.tokens.find { it.id == uiState.activeCombatTurnTokenId }
+            if (activeTurnToken != null && map.scaleFtPerCell > 0) {
+                val tokenCenter = Offset(
+                    (activeTurnToken.cellX * map.cellSizePx) + map.gridOffsetX,
+                    (activeTurnToken.cellY * map.cellSizePx) + map.gridOffsetY
+                )
+                val movedFt = uiState.tokenMovedThisTurnFt[activeTurnToken.id] ?: 0
+                val remainingFt = (activeTurnToken.speedFt - movedFt).coerceAtLeast(0)
+                if (remainingFt > 0) {
+                    val rangePx = (remainingFt.toFloat() / map.scaleFtPerCell) * map.cellSizePx
+                    drawCircle(
+                        color = Color(0xFF2196F3).copy(alpha = 0.07f),
+                        radius = rangePx,
+                        center = tokenCenter
+                    )
+                    drawCircle(
+                        color = Color(0xFF2196F3).copy(alpha = 0.35f),
+                        radius = rangePx,
+                        center = tokenCenter,
+                        style = Stroke(
+                            width = 1.5f / zoom,
+                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f / zoom, 8f / zoom), 0f)
+                        )
+                    )
+                }
+            }
+
             // Tokens
             uiState.tokens.forEach { token ->
                 val isBeingDragged = token.id == draggingToken?.id
@@ -608,6 +645,52 @@ fun TacticalMapCanvas(
                         text = targetText,
                         center = midPoint,
                         zoom = zoom
+                    )
+                }
+            }
+
+            // Textos Flotantes de Combate Animados (Floating Combat Text)
+            val currentTime = System.currentTimeMillis()
+            uiState.floatingCombatTexts.forEach { fct ->
+                val elapsed = currentTime - fct.createdAtMillis
+                if (elapsed in 0..2400) {
+                    val progress = elapsed / 2400f
+                    val floatOffsetY = -(progress * 48f / zoom)
+                    val alpha = (1f - (progress * 1.15f)).coerceIn(0f, 1f)
+                    val targetPos = Offset(fct.startWorldPos.x, fct.startWorldPos.y + floatOffsetY)
+
+                    val fontSize = (14f / zoom).coerceIn(10f, 22f).sp
+                    val textLayout = textMeasurer.measure(
+                        text = fct.text,
+                        style = TextStyle(
+                            color = Color(fct.colorHex).copy(alpha = alpha),
+                            fontSize = fontSize,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                    )
+
+                    val bgW = textLayout.size.width + (10f / zoom)
+                    val bgH = textLayout.size.height + (4f / zoom)
+                    val bgTopLeft = Offset(targetPos.x - bgW / 2f, targetPos.y - bgH / 2f)
+
+                    drawRoundRect(
+                        color = Color.Black.copy(alpha = alpha * 0.75f),
+                        topLeft = bgTopLeft,
+                        size = Size(bgW, bgH),
+                        cornerRadius = CornerRadius(4f / zoom, 4f / zoom)
+                    )
+
+                    drawRoundRect(
+                        color = Color(fct.colorHex).copy(alpha = alpha * 0.85f),
+                        topLeft = bgTopLeft,
+                        size = Size(bgW, bgH),
+                        cornerRadius = CornerRadius(4f / zoom, 4f / zoom),
+                        style = Stroke(width = 1.2f / zoom)
+                    )
+
+                    drawText(
+                        textLayoutResult = textLayout,
+                        topLeft = Offset(targetPos.x - textLayout.size.width / 2f, targetPos.y - textLayout.size.height / 2f)
                     )
                 }
             }
@@ -920,6 +1003,24 @@ private fun DrawScope.drawTacticalToken(
         topLeft = barTopLeft,
         size = Size(barWidth * hpFraction, barHeight)
     )
+
+    // Barra de PV Temporales (Cian brillante)
+    if (token.tempHp > 0) {
+        val tempHpFraction = if (token.maxHp > 0) (token.tempHp.toFloat() / token.maxHp).coerceIn(0f, 1f) else 1f
+        val tempBarHeight = (3f / zoom).coerceAtLeast(2.5f)
+        val tempTopLeft = Offset(center.x - barWidth / 2f, barTopLeft.y - tempBarHeight - (1.5f / zoom))
+
+        drawRect(
+            color = Color(0x99000000),
+            topLeft = tempTopLeft,
+            size = Size(barWidth, tempBarHeight)
+        )
+        drawRect(
+            color = Color(0xFF00E5FF),
+            topLeft = tempTopLeft,
+            size = Size(barWidth * tempHpFraction, tempBarHeight)
+        )
+    }
 
     // Badge Flotante de Elevación (esquina superior derecha)
     if (token.elevationFt != 0) {

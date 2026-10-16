@@ -129,6 +129,22 @@ fun NpcEditorScreen(
 
             Spacer(Modifier.height(16.dp))
 
+            val character = com.deckapp.core.domain.usecase.ChoirCharacterCodec.read(npc.notes)
+            val legacy = com.deckapp.core.domain.usecase.ChoirCharacterCodec.legacy(npc.notes)
+            if (legacy != null) {
+                Text("Ficha antigua de Choir: revisa el equipo y los recursos. Los PG antiguos no se convierten en heridas.")
+                OutlinedButton(onClick = viewModel::convertChoirLegacy, modifier = Modifier.heightIn(min = 48.dp)) {
+                    Text("Convertir a ficha viva conservando las notas")
+                }
+            }
+            val choir = com.deckapp.core.model.ChoirProfile.fromNotes(npc.notes)
+            if (character != null) {
+                com.deckapp.core.ui.components.ChoirCharacterFields(character, viewModel::updateChoirCharacter)
+                com.deckapp.core.ui.components.ChoirCharacterDetails(character, viewModel::updateChoirCharacter)
+            } else if (choir != null) {
+                Text("Choir of Flesh · Iniciativa fija ${choir.initiative} · Defensa ${choir.statistics["CD"]}")
+                Text("Estadísticas y acciones del manual en la ficha de abajo.")
+            } else {
             Row(modifier = Modifier.fillMaxWidth()) {
                 StatField(
                     label = "HP Máx",
@@ -156,6 +172,9 @@ fun NpcEditorScreen(
 
             Spacer(Modifier.height(24.dp))
 
+            }
+
+            if (character == null) {
             // Notas Markdown
             Text(
                 "Notas y Lore (Markdown)",
@@ -180,6 +199,7 @@ fun NpcEditorScreen(
             
             Spacer(Modifier.height(24.dp))
 
+            }
             // Referencia de Voz
             VoiceSampleSection(
                 isRecording = viewModel.isRecording,

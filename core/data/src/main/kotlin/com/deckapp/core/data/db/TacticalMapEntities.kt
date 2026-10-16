@@ -59,6 +59,7 @@ data class TacticalTokenEntity(
     val cellY: Float = 0f,
     val currentHp: Int = 10,
     val maxHp: Int = 10,
+    val tempHp: Int = 0,
     val armorClass: Int = 10,
     val speedFt: Int = 30,
     val conditionsJson: String = "[]",

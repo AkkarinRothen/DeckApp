@@ -14,44 +14,12 @@
       "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_177_Picture_1.webp"
     },
     {
-      "name": "Bandada de Carroña",
-      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_179_Picture_1.webp"
-    },
-    {
-      "name": "Croador",
-      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_183_Picture_1.webp"
-    },
-    {
-      "name": "Gusano de Carne",
-      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_185_Picture_1.webp"
-    },
-    {
-      "name": "Rechinador",
-      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_186_Picture_1.webp"
-    },
-    {
-      "name": "Fauces del Suelo",
-      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_187_Picture_1.webp"
-    },
-    {
-      "name": "Licuador",
-      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_192_Picture_1.webp"
-    },
-    {
-      "name": "Madre de Tumores",
-      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_194_Picture_1.webp"
-    },
-    {
-      "name": "Acechador Silencioso",
-      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_200_Picture_1.webp"
-    },
-    {
-      "name": "Sabueso Desollado",
-      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_201_Picture_1.webp"
-    },
-    {
       "name": "Cantor",
       "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_178_Picture_1.webp"
+    },
+    {
+      "name": "Bandada de Carroña",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b011__page_179_Picture_1.webp"
     },
     {
       "name": "Portador del Incensario",
@@ -66,24 +34,64 @@
       "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_182_Picture_1.webp"
     },
     {
+      "name": "Croador",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_183_Picture_1.webp"
+    },
+    {
       "name": "Flagelante",
       "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_184_Picture_1.webp"
+    },
+    {
+      "name": "Gusano de Carne",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_185_Picture_1.webp"
+    },
+    {
+      "name": "Rechinador",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_186_Picture_1.webp"
+    },
+    {
+      "name": "Fauces del Suelo",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_187_Picture_1.webp"
     },
     {
       "name": "Heraldo",
       "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_188_Picture_1.webp"
     },
     {
+      "name": "Caballo",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_189_Picture_1.webp"
+    },
+    {
+      "name": "Sabueso",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_190_Picture_1.webp"
+    },
+    {
       "name": "Cruzado Cáscara",
       "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_191_Picture_1.webp"
+    },
+    {
+      "name": "Licuador",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_192_Picture_1.webp"
     },
     {
       "name": "Mater Dolorosa",
       "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_193_Picture_1.webp"
     },
     {
+      "name": "Madre de Tumores",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b012__page_194_Picture_1.webp"
+    },
+    {
+      "name": "Penitente",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_195_Picture_1.webp"
+    },
+    {
       "name": "Pilar de Fe",
       "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_196_Picture_1.webp"
+    },
+    {
+      "name": "Purificador",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_197_Picture_1.webp"
     },
     {
       "name": "Escriba de la Penitencia",
@@ -92,6 +100,22 @@
     {
       "name": "Serafín",
       "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_199_Picture_1.webp"
+    },
+    {
+      "name": "Acechador Silencioso",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_200_Picture_1.webp"
+    },
+    {
+      "name": "Sabueso Desollado",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_201_Picture_1.webp"
+    },
+    {
+      "name": "Soldado",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_202_Picture_1.webp"
+    },
+    {
+      "name": "Superviviente",
+      "imagePath": "file:///android_asset/starter_packs/choir_of_flesh/art/b013__page_203_Picture_1.webp"
     },
     {
       "name": "Trono",

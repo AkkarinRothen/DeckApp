@@ -23,14 +23,16 @@ class RollInitiativeUseCase @Inject constructor(
         encounter.creatures.forEach { creature ->
             if (forceAll || creature.initiativeRoll == null) {
                 // Usamos el motor centralizado de dados
-                val roll = DiceEvaluator.evaluate("1d20")
+                val fixed = com.deckapp.core.model.ChoirProfile.fromNotes(creature.notes)?.initiative
+                val roll = fixed ?: DiceEvaluator.evaluate("1d20")
                 val updated = creature.copy(initiativeRoll = roll)
                 encounterRepository.updateCreature(updated)
                 
                 encounterRepository.recordLog(
                     CombatLogEntry(
                         encounterId = encounterId,
-                        message = "${creature.name} saca un $roll en iniciativa (Total: ${updated.initiativeTotal})",
+                        message = if (fixed != null) "${creature.name}: iniciativa fija $fixed (Choir of Flesh)"
+                            else "${creature.name} saca un $roll en iniciativa (Total: ${updated.initiativeTotal})",
                         type = CombatLogType.META
                     )
                 )

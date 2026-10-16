@@ -43,6 +43,12 @@ fun TacticalMapView(
     onTokenSizeChanged: (tokenId: Long, newSize: Float) -> Unit,
     onTokenElevationChanged: (tokenId: Long, elevationFt: Int) -> Unit = { _, _ -> },
     onTokenVisibilityToggled: (tokenId: Long) -> Unit,
+    onApplyDamageToToken: (tokenId: Long, amount: Int) -> Unit = { _, _ -> },
+    onApplyHealingToToken: (tokenId: Long, amount: Int) -> Unit = { _, _ -> },
+    onApplyTempHpToToken: (tokenId: Long, amount: Int) -> Unit = { _, _ -> },
+    onOpenDamageCalculator: (tokenId: Long) -> Unit = { _ -> },
+    onCloseDamageCalculator: () -> Unit = {},
+    onPruneFloatingTexts: () -> Unit = {},
     onOpenNpc: ((Long) -> Unit)? = null,
     onDeleteToken: (tokenId: Long) -> Unit,
     onPinClicked: (Long) -> Unit,
@@ -186,6 +192,7 @@ fun TacticalMapView(
             onFogCellInteracted = onFogCellInteracted,
             onAddRouteWaypoint = onAddRouteWaypoint,
             onClearCameraFocus = onClearCameraFocus,
+            onPruneFloatingTexts = onPruneFloatingTexts,
             modifier = Modifier.fillMaxSize()
         )
 
@@ -331,6 +338,9 @@ fun TacticalMapView(
                 TacticalTokenHud(
                     token = token,
                     onHpChanged = { newHp -> onTokenHpChanged(token.id, newHp) },
+                    onApplyDamage = { dmg -> onApplyDamageToToken(token.id, dmg) },
+                    onApplyHealing = { heal -> onApplyHealingToToken(token.id, heal) },
+                    onOpenDamageCalculator = { onOpenDamageCalculator(token.id) },
                     onConditionToggled = { cond -> onTokenConditionToggled(token.id, cond) },
                     onSizeChanged = { newSize -> onTokenSizeChanged(token.id, newSize) },
                     onElevationChanged = { elev -> onTokenElevationChanged(token.id, elev) },
@@ -909,5 +919,20 @@ fun TacticalMapView(
                 }
             }
         )
+    }
+
+    // Diálogo de Calculadora Táctica de Daño, Curación y PV Temporales
+    if (uiState.showDamageCalculatorDialog) {
+        val calcTokenId = uiState.damageCalculatorTokenId ?: uiState.selectedTokenId
+        val targetToken = uiState.tokens.find { it.id == calcTokenId }
+        if (targetToken != null) {
+            TacticalDamageCalculatorDialog(
+                token = targetToken,
+                onApplyDamage = { dmg -> onApplyDamageToToken(targetToken.id, dmg) },
+                onApplyHealing = { heal -> onApplyHealingToToken(targetToken.id, heal) },
+                onApplyTempHp = { temp -> onApplyTempHpToToken(targetToken.id, temp) },
+                onDismiss = onCloseDamageCalculator
+            )
+        }
     }
 }

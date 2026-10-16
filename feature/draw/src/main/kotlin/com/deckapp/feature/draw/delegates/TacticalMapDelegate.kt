@@ -431,6 +431,157 @@ class TacticalMapDelegate(
         }
     }
 
+    fun openDamageCalculator(tokenId: Long) {
+        _uiState.update {
+            it.copy(
+                tacticalState = it.tacticalState.copy(
+                    showDamageCalculatorDialog = true,
+                    damageCalculatorTokenId = tokenId
+                )
+            )
+        }
+    }
+
+    fun closeDamageCalculator() {
+        _uiState.update {
+            it.copy(
+                tacticalState = it.tacticalState.copy(
+                    showDamageCalculatorDialog = false,
+                    damageCalculatorTokenId = null
+                )
+            )
+        }
+    }
+
+    fun applyDamageToToken(tokenId: Long, damageAmount: Int) {
+        if (damageAmount <= 0) return
+        val token = _uiState.value.tacticalState.tokens.find { it.id == tokenId } ?: return
+        val updatedToken = token.applyDamage(damageAmount)
+
+        val map = _uiState.value.tacticalState.map
+        val worldPos = if (map != null) {
+            androidx.compose.ui.geometry.Offset(
+                (token.cellX * map.cellSizePx) + map.gridOffsetX,
+                (token.cellY * map.cellSizePx) + map.gridOffsetY
+            )
+        } else androidx.compose.ui.geometry.Offset.Zero
+
+        val floatText = FloatingCombatText(
+            tokenId = tokenId,
+            text = "-$damageAmount",
+            colorHex = 0xFFFF1744L,
+            iconName = "damage",
+            startWorldPos = worldPos
+        )
+
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(
+                    tokens = state.tacticalState.tokens.map { if (it.id == tokenId) updatedToken else it },
+                    floatingCombatTexts = state.tacticalState.floatingCombatTexts + floatText
+                )
+            )
+        }
+
+        scope.launch {
+            tacticalMapRepository.updateTokenHpAndTempHp(tokenId, updatedToken.currentHp, updatedToken.tempHp)
+            token.encounterCreatureId?.let { creatureId ->
+                val creature = encounterRepository.getCreatureById(creatureId)
+                if (creature != null) {
+                    encounterRepository.updateCreature(creature.copy(currentHp = updatedToken.currentHp))
+                }
+            }
+        }
+    }
+
+    fun applyHealingToToken(tokenId: Long, healAmount: Int) {
+        if (healAmount <= 0) return
+        val token = _uiState.value.tacticalState.tokens.find { it.id == tokenId } ?: return
+        val updatedToken = token.applyHealing(healAmount)
+
+        val map = _uiState.value.tacticalState.map
+        val worldPos = if (map != null) {
+            androidx.compose.ui.geometry.Offset(
+                (token.cellX * map.cellSizePx) + map.gridOffsetX,
+                (token.cellY * map.cellSizePx) + map.gridOffsetY
+            )
+        } else androidx.compose.ui.geometry.Offset.Zero
+
+        val floatText = FloatingCombatText(
+            tokenId = tokenId,
+            text = "+$healAmount",
+            colorHex = 0xFF4CAF50L,
+            iconName = "heal",
+            startWorldPos = worldPos
+        )
+
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(
+                    tokens = state.tacticalState.tokens.map { if (it.id == tokenId) updatedToken else it },
+                    floatingCombatTexts = state.tacticalState.floatingCombatTexts + floatText
+                )
+            )
+        }
+
+        scope.launch {
+            tacticalMapRepository.updateTokenHpAndTempHp(tokenId, updatedToken.currentHp, updatedToken.tempHp)
+            token.encounterCreatureId?.let { creatureId ->
+                val creature = encounterRepository.getCreatureById(creatureId)
+                if (creature != null) {
+                    encounterRepository.updateCreature(creature.copy(currentHp = updatedToken.currentHp))
+                }
+            }
+        }
+    }
+
+    fun applyTempHpToToken(tokenId: Long, tempHpAmount: Int) {
+        if (tempHpAmount <= 0) return
+        val token = _uiState.value.tacticalState.tokens.find { it.id == tokenId } ?: return
+        val updatedToken = token.applyTempHp(tempHpAmount)
+
+        val map = _uiState.value.tacticalState.map
+        val worldPos = if (map != null) {
+            androidx.compose.ui.geometry.Offset(
+                (token.cellX * map.cellSizePx) + map.gridOffsetX,
+                (token.cellY * map.cellSizePx) + map.gridOffsetY
+            )
+        } else androidx.compose.ui.geometry.Offset.Zero
+
+        val floatText = FloatingCombatText(
+            tokenId = tokenId,
+            text = "🛡 +$tempHpAmount",
+            colorHex = 0xFF00E5FFL,
+            iconName = "shield",
+            startWorldPos = worldPos
+        )
+
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(
+                    tokens = state.tacticalState.tokens.map { if (it.id == tokenId) updatedToken else it },
+                    floatingCombatTexts = state.tacticalState.floatingCombatTexts + floatText
+                )
+            )
+        }
+
+        scope.launch {
+            tacticalMapRepository.updateTokenHpAndTempHp(tokenId, updatedToken.currentHp, updatedToken.tempHp)
+        }
+    }
+
+    fun pruneExpiredFloatingCombatTexts() {
+        val now = System.currentTimeMillis()
+        _uiState.update { state ->
+            val active = state.tacticalState.floatingCombatTexts.filter { now - it.createdAtMillis < 2500 }
+            if (active.size != state.tacticalState.floatingCombatTexts.size) {
+                state.copy(tacticalState = state.tacticalState.copy(floatingCombatTexts = active))
+            } else {
+                state
+            }
+        }
+    }
+
     fun toggleCondition(tokenId: Long, condition: Condition) {
         val token = _uiState.value.tacticalState.tokens.find { it.id == tokenId } ?: return
         val currentConditions = token.conditions.toMutableSet()

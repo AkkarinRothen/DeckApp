@@ -258,7 +258,12 @@ private fun HotbarActionChip(
         HotbarActionType.DRAW_CARD -> Pair(Color(0xFF26A69A), Icons.Default.Style)
     }
 
-    val chipColor = action.colorHex?.let { Color(it) } ?: typeColor
+    val chipColor = action.colorHex?.let { raw ->
+        runCatching {
+            val argb = if ((raw and 0xFF000000L) == 0L) (raw or 0xFF000000L) else raw
+            Color(argb)
+        }.getOrNull()
+    } ?: typeColor
 
     Surface(
         modifier = Modifier

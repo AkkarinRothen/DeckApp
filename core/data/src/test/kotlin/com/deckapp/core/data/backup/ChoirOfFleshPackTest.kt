@@ -49,9 +49,20 @@ class ChoirOfFleshPackTest {
         val whisperTable = pack.randomTables.find { it.name.contains("Susurro") }
         assertNotNull("Debe incluir la tabla Susurro de Condenación", whisperTable)
 
-        // 4. Verificación de Criaturas Oficiales (Bestiario completo: 24 criaturas)
-        assertEquals("Debe incluir exactamente 24 criaturas oficiales", 24, pack.npcs.size)
+        // 4. Verificación de Criaturas Oficiales (Bestiario completo: 30 criaturas)
+        assertEquals("Debe incluir exactamente 30 criaturas oficiales", 30, pack.npcs.size)
         assertTrue("Todas las criaturas deben estar marcadas como monstruos", pack.npcs.all { it.isMonster })
+
+        val missing = listOf("Caballo", "Sabueso", "Penitente", "Purificador", "Soldado", "Superviviente")
+        assertTrue(pack.npcs.map { it.name }.containsAll(missing))
+        pack.npcs.forEach { npc ->
+            val profile = com.deckapp.core.model.ChoirProfile.fromNotes(npc.notes)
+            assertNotNull("Perfil cotejado: ${npc.name}", profile)
+            assertTrue(profile!!.standard.isNotBlank())
+            assertTrue(profile.special.isNotBlank())
+            assertTrue(profile.support.isNotBlank())
+            assertTrue(npc.imagePath?.endsWith(".webp") == true)
+        }
 
         // 12 Criaturas de la Carne
         val fleshNames = listOf(

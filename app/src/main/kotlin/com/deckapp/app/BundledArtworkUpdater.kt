@@ -20,9 +20,16 @@ class BundledArtworkUpdater @Inject constructor(
             .bufferedReader(Charsets.UTF_8).use { stream ->
                 Json { ignoreUnknownKeys = true }.decodeFromString<FullBackupDto>(stream.readText().trimStart('\uFEFF'))
             }
+        val previous = context.assets.open("starter_packs/choir_of_flesh/legacy-bestiary.json")
+            .bufferedReader(Charsets.UTF_8).use {
+                Json { ignoreUnknownKeys = true }.decodeFromString<FullBackupDto>(it.readText())
+            }
         references.updateStarterPackArtwork(
-            pack.copy(systemRules = pack.systemRules.filter { it.category == "Ilustraciones del manual" }),
-            packName
+            pack.copy(systemRules = pack.systemRules.filter {
+                it.category == "Ilustraciones del manual" || it.title == "Combate, Iniciativa y Táctica"
+            }),
+            packName,
+            previous
         )
     }
 }

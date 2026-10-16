@@ -367,6 +367,8 @@ fun SessionScreen(
                             encounter = uiState.activeEncounter!!,
                             players = uiState.playerParticipants,
                             log = uiState.combatLog,
+                            onChoirCharacterCommand = viewModel::updateChoirCharacter,
+                            onChoirStateChange = viewModel::updateChoirCombatState,
                             onApplyDamage = viewModel::applyDamage,
                             onNextTurn = viewModel::nextTurn,
                             onToggleCondition = viewModel::toggleCondition,
@@ -528,6 +530,12 @@ fun SessionScreen(
                                     onTokenSizeChanged = viewModel.tacticalMapDelegate::updateTokenSize,
                                     onTokenElevationChanged = viewModel.tacticalMapDelegate::updateTokenElevation,
                                     onTokenVisibilityToggled = viewModel.tacticalMapDelegate::toggleTokenVisibility,
+                                    onApplyDamageToToken = viewModel.tacticalMapDelegate::applyDamageToToken,
+                                    onApplyHealingToToken = viewModel.tacticalMapDelegate::applyHealingToToken,
+                                    onApplyTempHpToToken = viewModel.tacticalMapDelegate::applyTempHpToToken,
+                                    onOpenDamageCalculator = viewModel.tacticalMapDelegate::openDamageCalculator,
+                                    onCloseDamageCalculator = viewModel.tacticalMapDelegate::closeDamageCalculator,
+                                    onPruneFloatingTexts = viewModel.tacticalMapDelegate::pruneExpiredFloatingCombatTexts,
                                     onOpenNpc = { npcId ->
                                         npcHistory.clear()
                                         uiState.npcs.find { it.id == npcId }?.let { npcHistory.add(it) }
@@ -896,6 +904,8 @@ fun SessionScreen(
                 isExpanded = uiState.isCombatHudExpanded,
                 onToggleExpanded = viewModel::toggleCombatHudExpanded,
                 onNextTurn = viewModel::nextTurn,
+                onChoirCharacterCommand = viewModel::updateChoirCharacter,
+                            onChoirStateChange = viewModel::updateChoirCombatState,
                 onApplyDamage = viewModel::applyDamage,
                 onToggleCondition = viewModel::toggleCondition,
                 onEndCombat = viewModel::endEncounter,

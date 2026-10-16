@@ -979,6 +979,25 @@ val MIGRATION_45_46 = object : Migration(45, 46) {
     }
 }
 
+val MIGRATION_46_47 = object : Migration(46, 47) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        val hasTempHp = database.query("PRAGMA table_info(`tactical_tokens`)").use { cursor ->
+            val nameIndex = cursor.getColumnIndex("name")
+            var found = false
+            while (cursor.moveToNext()) {
+                if (cursor.getString(nameIndex) == "tempHp") {
+                    found = true
+                    break
+                }
+            }
+            found
+        }
+        if (!hasTempHp) {
+            database.execSQL("ALTER TABLE `tactical_tokens` ADD COLUMN `tempHp` INTEGER NOT NULL DEFAULT 0")
+        }
+    }
+}
+
 
 
 

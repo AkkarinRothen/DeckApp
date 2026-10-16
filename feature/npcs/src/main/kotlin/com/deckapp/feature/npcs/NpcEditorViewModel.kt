@@ -22,6 +22,7 @@ class NpcEditorViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getNpcByIdUseCase: GetNpcByIdUseCase,
     private val saveNpcUseCase: SaveNpcUseCase,
+    private val updateChoirCharacterUseCase: com.deckapp.core.domain.usecase.UpdateChoirCharacterUseCase,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -73,6 +74,15 @@ class NpcEditorViewModel @Inject constructor(
     fun updateInitiative(bonus: String) { initiativeInput = bonus }
     fun updateNotes(notes: String) { npc = npc.copy(notes = notes) }
     fun updateMonster(isMonster: Boolean) { npc = npc.copy(isMonster = isMonster) }
+
+    fun updateChoirCharacter(sheet: com.deckapp.core.model.ChoirCharacter) {
+        npc = com.deckapp.core.domain.usecase.ChoirCharacterRules.toNpc(npc, sheet)
+    }
+
+    fun convertChoirLegacy() {
+        val sheet = com.deckapp.core.domain.usecase.ChoirCharacterCodec.legacy(npc.notes) ?: return
+        npc = com.deckapp.core.domain.usecase.ChoirCharacterRules.toNpc(npc.copy(notes = ""), sheet)
+    }
 
     fun onImageSelected(uri: Uri?) {
         selectedImageUri = uri
@@ -139,7 +149,7 @@ class NpcEditorViewModel @Inject constructor(
 
     fun save(onSaved: () -> Unit) {
         viewModelScope.launch {
-            val finalNpc = npc.copy(
+            val finalNpc = if (com.deckapp.core.domain.usecase.ChoirCharacterCodec.read(npc.notes) != null) npc else npc.copy(
                 maxHp = hpInput.toIntOrNull() ?: npc.maxHp,
                 currentHp = hpInput.toIntOrNull() ?: npc.currentHp,
                 armorClass = acInput.toIntOrNull() ?: npc.armorClass,
@@ -151,6 +161,7 @@ class NpcEditorViewModel @Inject constructor(
                 voiceSampleFile = if (hasNewSample && tempAudioFile != null) tempAudioFile else null,
                 voiceSampleUri = selectedVoiceUri
             )
+            if (finalNpc.id != 0L) updateChoirCharacterUseCase.sync(finalNpc.id)
             onSaved()
         }
     }

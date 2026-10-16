@@ -172,6 +172,8 @@ class SessionViewModel @Inject constructor(
     private val updateCardStateUseCase: UpdateCardStateUseCase,
     private val undoLastActionUseCase: UndoLastActionUseCase,
     private val nextTurnUseCase: NextTurnUseCase,
+    private val updateChoirCharacterUseCase: com.deckapp.core.domain.usecase.UpdateChoirCharacterUseCase,
+    private val updateChoirCombatStateUseCase: com.deckapp.core.domain.usecase.UpdateChoirCombatStateUseCase,
     private val applyDamageUseCase: ApplyDamageUseCase,
     private val rollInitiativeUseCase: RollInitiativeUseCase,
     private val calculateInitiativeOrderUseCase: CalculateInitiativeOrderUseCase,
@@ -1470,7 +1472,7 @@ class SessionViewModel @Inject constructor(
         }
     }
 
-    fun addSpotlightCreatureToCombat(name: String, hp: Int, ac: Int, notes: String) {
+    fun addSpotlightCreatureToCombat(name: String, hp: Int, ac: Int, notes: String, npcId: Long? = null, imagePath: String? = null, initiativeBonus: Int = 0) {
         viewModelScope.launch {
             val currentEncounter = _uiState.value.activeEncounter
             val targetEncounterId = if (currentEncounter == null) {
@@ -1494,6 +1496,9 @@ class SessionViewModel @Inject constructor(
                 currentHp = hp,
                 armorClass = ac,
                 notes = notes,
+                npcId = npcId,
+                imagePath = imagePath,
+                initiativeBonus = initiativeBonus,
                 sortOrder = maxSort + 1
             )
             encounterRepository.addCreature(creature)
@@ -1506,9 +1511,12 @@ class SessionViewModel @Inject constructor(
             val npc = npcRepository.getNpcById(npcId) ?: return@launch
             addSpotlightCreatureToCombat(
                 name = npc.name,
-                hp = 10,
-                ac = 10,
-                notes = npc.description.ifBlank { npc.notes }
+                hp = npc.maxHp,
+                ac = npc.armorClass,
+                notes = npc.notes.ifBlank { npc.description },
+                npcId = npc.id,
+                imagePath = npc.imagePath,
+                initiativeBonus = npc.initiativeBonus
             )
         }
     }
@@ -1682,6 +1690,16 @@ class SessionViewModel @Inject constructor(
 
     // --- Combat Actions ---
 
+    fun updateChoirCharacter(creatureId: Long, command: com.deckapp.core.model.ChoirCharacterCommand) {
+        viewModelScope.launch { updateChoirCharacterUseCase(creatureId, command) }
+    }
+
+    fun updateChoirCombatState(creatureId: Long, command: com.deckapp.core.model.ChoirCombatCommand) {
+        viewModelScope.launch {
+            updateChoirCombatStateUseCase(creatureId, command)
+        }
+    }
+
     fun applyDamage(creatureId: Long, delta: Int) {
         viewModelScope.launch {
             applyDamageUseCase(creatureId, delta)
@@ -1701,7 +1719,14 @@ class SessionViewModel @Inject constructor(
             sorted.forEach { c ->
                 val status = if (c.currentHp <= 0) " (Caído/Inconsciente)" else ""
                 val conditions = if (c.conditions.isNotEmpty()) " [${c.conditions.joinToString { cond -> cond.label }}]" else ""
-                sb.append("- **${c.name}**: ${c.currentHp}/${c.maxHp} HP$conditions$status\n")
+                val choir = com.deckapp.core.model.ChoirProfile.fromNotes(c.notes)
+                if (choir != null) {
+                    val wounds = com.deckapp.core.model.ChoirCombatState.fromNotes(c.notes)
+                    sb.append("- **${c.name}**: ${wounds.major} heridas mayores, ${wounds.minor} menores$conditions\n")
+                } else if (com.deckapp.core.domain.usecase.ChoirCharacterCodec.read(c.notes) != null) {
+                    val sheet = com.deckapp.core.domain.usecase.ChoirCharacterCodec.read(c.notes)!!
+                    sb.append("- **${c.name}**: ${sheet.major}/4 mayores, ${sheet.minor}/8 menores; Vigor ${sheet.vigor}; Trauma ${sheet.trauma}$conditions\n")
+                } else sb.append("- **${c.name}**: ${c.currentHp}/${c.maxHp} HP$conditions$status\n")
             }
             val currentNotes = _uiState.value.dmNotes
             val newNotes = (currentNotes + sb.toString()).trim()

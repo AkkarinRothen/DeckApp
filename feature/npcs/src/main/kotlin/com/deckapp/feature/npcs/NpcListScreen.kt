@@ -241,8 +241,16 @@ fun NpcCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                val choir = com.deckapp.core.model.ChoirProfile.fromNotes(npc.notes)
+                val character = com.deckapp.core.domain.usecase.ChoirCharacterCodec.read(npc.notes)
+                if (character != null) {
+                    Text("Inquebrantable · HUM ${character.humanity} · Vigor ${character.vigor}", color = MaterialTheme.colorScheme.primary)
+                } else if (choir != null) {
+                    Text("Choir of Flesh · Init ${choir.initiative}", color = MaterialTheme.colorScheme.primary)
+                } else {
                 StatBadge(label = "HP", value = npc.maxHp.toString(), color = Color(0xFFEF5350))
                 StatBadge(label = "AC", value = npc.armorClass.toString(), color = Color(0xFF42A5F5))
+                }
             }
         }
     }
@@ -285,9 +293,17 @@ fun NpcPeekContent(npc: Npc, onEdit: () -> Unit) {
         Spacer(Modifier.height(24.dp))
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            val choir = com.deckapp.core.model.ChoirProfile.fromNotes(npc.notes)
+            val character = com.deckapp.core.domain.usecase.ChoirCharacterCodec.read(npc.notes)
+            if (character != null) {
+                Text("Defensa ${com.deckapp.core.domain.usecase.ChoirCharacterRules.defense(character)} · Vigor ${character.vigor} · Heridas ${character.major}/4 y ${character.minor}/8", color = MaterialTheme.colorScheme.primary)
+            } else if (choir != null) {
+                Text("Defensa ${choir.statistics["CD"]} · Iniciativa fija ${choir.initiative}", color = MaterialTheme.colorScheme.primary)
+            } else {
             StatPeekBox("HP", npc.maxHp.toString(), Color(0xFFEF5350))
             StatPeekBox("AC", npc.armorClass.toString(), Color(0xFF42A5F5))
             StatPeekBox("INIT", if (npc.initiativeBonus >= 0) "+${npc.initiativeBonus}" else npc.initiativeBonus.toString(), Color(0xFFFFB74D))
+            }
         }
 
         if (npc.notes.isNotBlank()) {

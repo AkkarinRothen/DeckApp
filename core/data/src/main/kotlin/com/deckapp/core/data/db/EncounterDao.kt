@@ -40,6 +40,9 @@ interface EncounterDao {
     @Query("SELECT * FROM encounter_creatures WHERE id = :id")
     suspend fun getCreatureById(id: Long): EncounterCreatureEntity?
 
+    @Query("SELECT * FROM encounter_creatures WHERE npcId IN (:npcIds)")
+    suspend fun getCreaturesByNpcIds(npcIds: List<Long>): List<EncounterCreatureEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCreatures(creatures: List<EncounterCreatureEntity>)
 

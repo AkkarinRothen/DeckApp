@@ -36,7 +36,7 @@ data class EncounterCreature(
     val npcId: Long? = null
 ) {
     /** Iniciativa total calculada (Roll + Bonus) */
-    val initiativeTotal: Int? get() = initiativeRoll?.let { it + initiativeBonus }
+    val initiativeTotal: Int? get() = ChoirProfile.fromNotes(notes)?.initiative ?: initiativeRoll?.let { it + initiativeBonus }
 }
 
 /**

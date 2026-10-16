@@ -244,6 +244,14 @@ private fun CreatureEditorItem(
             
             Spacer(Modifier.height(12.dp))
             
+            val choir = com.deckapp.core.model.ChoirProfile.fromNotes(creature.notes)
+            val character = com.deckapp.core.domain.usecase.ChoirCharacterCodec.read(creature.notes)
+            if (character != null) {
+                Text("Inquebrantable · Defensa ${com.deckapp.core.domain.usecase.ChoirCharacterRules.defense(character)} · Iniciativa ${com.deckapp.core.domain.usecase.ChoirCharacterRules.initiative(character)}")
+            } else if (choir != null) {
+                Text("Choir of Flesh · Iniciativa fija ${choir.initiative}")
+                Text("Defensa ${choir.statistics["CD"]} · Ataque ${choir.statistics["Ataque"]}")
+            } else {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = creature.maxHp.toString(),
@@ -266,6 +274,7 @@ private fun CreatureEditorItem(
                     modifier = Modifier.weight(1f),
                     keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
                 )
+            }
             }
         }
     }

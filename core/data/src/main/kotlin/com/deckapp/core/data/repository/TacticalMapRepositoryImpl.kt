@@ -57,6 +57,9 @@ class TacticalMapRepositoryImpl @Inject constructor(
     override suspend fun updateTokenHp(tokenId: Long, currentHp: Int) =
         dao.updateTokenHp(tokenId, currentHp)
 
+    override suspend fun updateTokenHpAndTempHp(tokenId: Long, currentHp: Int, tempHp: Int) =
+        dao.updateTokenHpAndTempHp(tokenId, currentHp, tempHp)
+
     override suspend fun deleteToken(id: Long) =
         dao.deleteToken(id)
 

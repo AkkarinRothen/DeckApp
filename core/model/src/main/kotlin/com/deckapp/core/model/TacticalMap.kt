@@ -87,6 +87,7 @@ data class TacticalToken(
     val cellY: Float = 0f,
     val currentHp: Int = 10,
     val maxHp: Int = 10,
+    val tempHp: Int = 0,
     val armorClass: Int = 10,
     val speedFt: Int = 30,
     val conditions: Set<Condition> = emptySet(),
@@ -96,6 +97,23 @@ data class TacticalToken(
     val npcId: Long? = null,
     val notes: String = ""
 )
+
+fun TacticalToken.applyDamage(damage: Int): TacticalToken {
+    val dmgToTemp = minOf(tempHp, damage)
+    val remainingDmg = damage - dmgToTemp
+    val newTemp = tempHp - dmgToTemp
+    val newHp = (currentHp - remainingDmg).coerceAtLeast(0)
+    return copy(currentHp = newHp, tempHp = newTemp)
+}
+
+fun TacticalToken.applyHealing(healAmount: Int): TacticalToken {
+    val newHp = (currentHp + healAmount).coerceAtMost(maxHp)
+    return copy(currentHp = newHp)
+}
+
+fun TacticalToken.applyTempHp(newTempHp: Int): TacticalToken {
+    return copy(tempHp = maxOf(tempHp, newTempHp))
+}
 
 @Serializable
 enum class MapPinExplorationState {

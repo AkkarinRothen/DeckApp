@@ -30,7 +30,8 @@ interface ReferenceRepository {
 
     suspend fun importStarterPack(backup: com.deckapp.core.model.backup.FullBackupDto, packName: String)
     /** Backfills packaged artwork and missing tables without changing user-edited content. */
-    suspend fun updateStarterPackArtwork(artwork: com.deckapp.core.model.backup.FullBackupDto, packName: String)
+    suspend fun updateStarterPackArtwork(artwork: com.deckapp.core.model.backup.FullBackupDto, packName: String,
+        previous: com.deckapp.core.model.backup.FullBackupDto? = null)
     suspend fun removeStarterPack(packName: String)
     fun getInstalledPackNames(): Flow<Set<String>>
 }

@@ -27,6 +27,9 @@ import com.deckapp.core.model.TokenFaction
 fun TacticalTokenHud(
     token: TacticalToken,
     onHpChanged: (newHp: Int) -> Unit,
+    onApplyDamage: (amount: Int) -> Unit = { dmg -> onHpChanged((token.currentHp - dmg).coerceAtLeast(0)) },
+    onApplyHealing: (amount: Int) -> Unit = { heal -> onHpChanged((token.currentHp + heal).coerceAtMost(token.maxHp)) },
+    onOpenDamageCalculator: () -> Unit = {},
     onConditionToggled: (Condition) -> Unit,
     onSizeChanged: (newSize: Float) -> Unit,
     onElevationChanged: (newElevationFt: Int) -> Unit = {},
@@ -209,71 +212,107 @@ fun TacticalTokenHud(
                 }
             }
 
-            // Barra de HP con controles rápidos de daño y curación
+            // Barra de HP con controles rápidos de daño, curación y calculadora táctica
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 // Daño rápido (-5, -1)
                 FilledTonalButton(
-                    onClick = { onHpChanged((token.currentHp - 5).coerceAtLeast(0)) },
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                    onClick = { onApplyDamage(5) },
+                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
                     colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.errorContainer),
                     modifier = Modifier.height(34.dp)
                 ) {
-                    Text("-5", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onErrorContainer)
+                    Text("-5", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onErrorContainer, fontSize = 12.sp)
                 }
 
                 FilledTonalButton(
-                    onClick = { onHpChanged((token.currentHp - 1).coerceAtLeast(0)) },
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                    onClick = { onApplyDamage(1) },
+                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
                     colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f)),
                     modifier = Modifier.height(34.dp)
                 ) {
-                    Text("-1", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onErrorContainer)
+                    Text("-1", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onErrorContainer, fontSize = 12.sp)
                 }
 
-                // Indicador visual de HP
-                Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                // Indicador visual de HP (Clickeable para abrir la calculadora completa)
+                Surface(
+                    onClick = onOpenDamageCalculator,
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 2.dp)
                 ) {
-                    Text(
-                        text = "${token.currentHp} / ${token.maxHp} HP",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                    LinearProgressIndicator(
-                        progress = { if (token.maxHp > 0) (token.currentHp.toFloat() / token.maxHp).coerceIn(0f, 1f) else 1f },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(6.dp)
-                            .clip(RoundedCornerShape(3.dp)),
-                        color = when {
-                            token.currentHp > token.maxHp * 0.5f -> Color(0xFF4CAF50)
-                            token.currentHp > token.maxHp * 0.2f -> Color(0xFFFFC107)
-                            else -> Color(0xFFF44336)
-                        },
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
+                    Column(
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = "${token.currentHp} / ${token.maxHp} HP",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                            if (token.tempHp > 0) {
+                                Surface(
+                                    shape = RoundedCornerShape(6.dp),
+                                    color = Color(0xFF00E5FF).copy(alpha = 0.25f)
+                                ) {
+                                    Text(
+                                        text = "+${token.tempHp}",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = Color(0xFF00E5FF),
+                                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                                    )
+                                }
+                            }
+                            Icon(
+                                imageVector = Icons.Default.Calculate,
+                                contentDescription = "Calculadora",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
+
+                        LinearProgressIndicator(
+                            progress = { if (token.maxHp > 0) (token.currentHp.toFloat() / token.maxHp).coerceIn(0f, 1f) else 1f },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(5.dp)
+                                .clip(RoundedCornerShape(3.dp)),
+                            color = when {
+                                token.currentHp > token.maxHp * 0.5f -> Color(0xFF4CAF50)
+                                token.currentHp > token.maxHp * 0.2f -> Color(0xFFFFC107)
+                                else -> Color(0xFFF44336)
+                            },
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    }
                 }
 
                 // Curación rápida (+1, +5)
                 FilledTonalButton(
-                    onClick = { onHpChanged(token.currentHp + 1) },
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                    onClick = { onApplyHealing(1) },
+                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
                     modifier = Modifier.height(34.dp)
                 ) {
-                    Text("+1", fontWeight = FontWeight.Bold)
+                    Text("+1", fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 }
 
                 FilledTonalButton(
-                    onClick = { onHpChanged(token.currentHp + 5) },
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                    onClick = { onApplyHealing(5) },
+                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
                     modifier = Modifier.height(34.dp)
                 ) {
-                    Text("+5", fontWeight = FontWeight.Bold)
+                    Text("+5", fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 }
             }
 

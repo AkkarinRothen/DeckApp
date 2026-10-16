@@ -57,7 +57,7 @@ import androidx.room.RoomDatabase
         TacticalTokenEntity::class,
         TacticalMapPinEntity::class
     ],
-    version = 46,
+    version = 47,
     exportSchema = true
 )
 abstract class DeckAppDatabase : RoomDatabase() {

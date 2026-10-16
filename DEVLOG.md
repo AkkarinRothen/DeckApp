@@ -1,5 +1,17 @@
 ---
 
+### Choir of Flesh — Bestiario cotejado y controles de combate (16 de octubre de 2026)
+
+- Se completan Caballo, Sabueso, Penitente, Purificador, Soldado y Superviviente: 30 fichas con retratos WebP existentes.
+- Las 30 descripciones, estadísticas, 90 acciones y rasgos se extraen del capítulo V completo del manual local. Se eliminan las conversiones inventadas a PG/CA de las fichas empaquetadas; se conservan los grados dinámicos, números de grupo ♟, alcances, tipos de daño y referencias de página.
+- `scripts/integrate-choir-bestiary.py` genera `bestiary.json` y actualiza el paquete de manera reproducible. El generador Kotlin consume este bestiario cotejado, para no restaurar las fichas anteriores.
+- Actualización automática de paquetes instalados: incorpora las fichas ausentes, sustituye texto anterior solo si coincide con el original distribuido, conserva notas/retratos personales e incorpora reglas a los encuentros vinculados a PNJs del paquete. No cambia PG actuales ni otros campos de encuentros existentes.
+- Sidebar y HUD de sesión comparten controles de heridas mayores/menores, decisión d10 según heridas, objetivo d6, rasgos visibles y consulta de acciones. Estado persistido en las notas del encuentro, compatible con copias y respaldos; cambios registrados en historial y heridas incluidas al copiar el asalto al diario.
+- Iniciativa fija de PNJs Choir, intercalada con iniciativas de jugadores. Al añadir un PNJ desde la vista rápida se conservan ficha, imagen e identidad, en lugar de descartarlos por una descripción y valores 10/10.
+- Calculador de NO del PJ basado en la tabla dinámica del capítulo III (modificadores −5 a +10). Maestría y Carga se aplican después. Los efectos particulares, excepciones de rasgos, duración, inmunidades y tablas de efectos de heridas se resuelven consultando la ficha; no se ejecutan automáticamente como daño de PG.
+- Validación: 360 campos estadísticos y 90 entradas de acciones coinciden con el capítulo V; 30 identidades únicas y extracción reproducible. Pasaron 49 pruebas de dominio y 1 del paquete. APK debug compilada y auditada: JSON idéntico a la fuente cotejada, 30 retratos resueltos, 116 WebP reales, 16 tablas aleatorias y clases nuevas de combate presentes. SHA-256: `cb3ec102c2ffbd5dcc1fde591e2be13786d2c774c158ea74395d2297ef8bd5ba`. No se instaló en el dispositivo en esta entrega.
+
+
 ### Sprint 67 — Ergonomía Visual Bento para Mapas Tácticos y Gestión Segura de Escenarios (16 de octubre de 2026)
 
 **FEATURE — Selector de Mapas Tácticos Estilo Bento (`TacticalMapSelectorSheet`)**
@@ -64,7 +76,7 @@
 **VALIDACIÓN**
 - 33 pruebas de dominio aprobadas, incluidas 7 nuevas para carga de recursos, idempotencia y cambios de sistema; prueba existente del paquete Choir of Flesh aprobada.
 - 116 WebP decodificados y verificados, 24 retratos distintos y 116 enlaces de galería válidos; consultas SQL de propiedad verificadas con tablas de nombres coincidentes.
-- Pendiente de cerrar el ensamblado final y verificar los activos incluidos en el APK.
+- Ensamblado final verificado: `BUILD SUCCESSFUL` en `choir-validation-final.log`. APK inspeccionado: 116 WebP reales, 24 retratos, 13 galerías y 116 enlaces válidos a activos incluidos.
 - Paridad Desktop: pendiente de trasladar activos y sincronización de tablas de sistema.
 
 ---

@@ -40,6 +40,8 @@ fun CombatTab(
     encounter: Encounter,
     players: List<PlayerInitiativeParticipant> = emptyList(),
     log: List<CombatLogEntry> = emptyList(),
+    onChoirCharacterCommand: (Long, com.deckapp.core.model.ChoirCharacterCommand) -> Unit,
+    onChoirStateChange: (Long, com.deckapp.core.model.ChoirCombatCommand) -> Unit,
     onApplyDamage: (Long, Int) -> Unit,
     onNextTurn: () -> Unit,
     onToggleCondition: (Long, Condition) -> Unit,
@@ -49,21 +51,7 @@ fun CombatTab(
 ) {
     // Unificar criaturas y jugadores en una sola lista para la iniciativa
     val unifiedList = remember(encounter.creatures, players) {
-        val list = mutableListOf<UnifiedParticipant>()
-        encounter.creatures.forEach { creature ->
-            list.add(UnifiedParticipant.Creature(creature))
-        }
-        players.forEach { player ->
-            list.add(UnifiedParticipant.Player(player))
-        }
-
-        // Ordenamos prioritariamente por sortOrder (NPCs) e iniciativa (PJs)
-        // El objetivo es que coincida con la lógica de NextTurnUseCase.
-        list.sortedWith(
-            compareBy<UnifiedParticipant> { 
-                if (it is UnifiedParticipant.Creature) it.data.sortOrder else -1 
-            }.thenByDescending { it.initiative }
-        )
+        com.deckapp.core.domain.usecase.OrderCombatParticipantsUseCase(encounter.creatures, players)
     }
 
     
@@ -127,7 +115,13 @@ fun CombatTab(
                 
                 when (participant) {
                     is UnifiedParticipant.Creature -> {
-                        CombatCreatureItem(
+                        if (com.deckapp.core.model.ChoirProfile.fromNotes(participant.data.notes) != null) {
+                            com.deckapp.core.ui.components.ChoirCombatControls(participant.data,
+                                { onChoirStateChange(participant.data.id, it) }, Modifier.animateItem(), isActive = isActive)
+                        } else if (com.deckapp.core.domain.usecase.ChoirCharacterCodec.read(participant.data.notes) != null) {
+                            com.deckapp.core.ui.components.ChoirCharacterCombatControls(participant.data,
+                                { onChoirCharacterCommand(participant.data.id, it) }, Modifier.animateItem(), isActive = isActive)
+                        } else CombatCreatureItem(
                             creature = participant.data,
                             isActive = isActive,
                             onApplyDamage = { onApplyDamage(participant.data.id, it) },

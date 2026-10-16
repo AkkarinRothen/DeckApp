@@ -446,35 +446,35 @@ fun LibraryScreen(
                 ) {
                     item {
                         AssistChip(
-                            onClick = onNpcLibrary,
+                            onClick = { focusManager.clearFocus(); onNpcLibrary() },
                             label = { Text("NPCs", style = MaterialTheme.typography.labelSmall) },
                             leadingIcon = { Icon(Icons.Default.Group, contentDescription = null, modifier = Modifier.size(16.dp)) }
                         )
                     }
                     item {
                         AssistChip(
-                            onClick = onEncounterLibrary,
+                            onClick = { focusManager.clearFocus(); onEncounterLibrary() },
                             label = { Text("Encuentros", style = MaterialTheme.typography.labelSmall) },
                             leadingIcon = { Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp)) }
                         )
                     }
                     item {
                         AssistChip(
-                            onClick = onHexplorationClick,
+                            onClick = { focusManager.clearFocus(); onHexplorationClick() },
                             label = { Text("Mapas Hex", style = MaterialTheme.typography.labelSmall) },
                             leadingIcon = { Icon(Icons.Default.Layers, contentDescription = null, modifier = Modifier.size(16.dp)) }
                         )
                     }
                     item {
                         AssistChip(
-                            onClick = onReferenceClick,
+                            onClick = { focusManager.clearFocus(); onReferenceClick() },
                             label = { Text("Referencias", style = MaterialTheme.typography.labelSmall) },
                             leadingIcon = { Icon(Icons.Default.Description, contentDescription = null, modifier = Modifier.size(16.dp)) }
                         )
                     }
                     item {
                         AssistChip(
-                            onClick = onWikiClick,
+                            onClick = { focusManager.clearFocus(); onWikiClick() },
                             label = { Text("Wiki", style = MaterialTheme.typography.labelSmall) },
                             leadingIcon = { Icon(Icons.Default.MenuBook, contentDescription = null, modifier = Modifier.size(16.dp)) }
                         )
@@ -602,13 +602,13 @@ fun LibraryScreen(
                 containerColor = Color.Transparent,
                 divider = {}
             ) {
-                Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }) {
+                Tab(selected = selectedTab == 0, onClick = { focusManager.clearFocus(); selectedTab = 0 }) {
                     Text("Mazos", modifier = Modifier.padding(12.dp))
                 }
-                Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }) {
+                Tab(selected = selectedTab == 1, onClick = { focusManager.clearFocus(); selectedTab = 1 }) {
                     Text("Tablas", modifier = Modifier.padding(12.dp))
                 }
-                Tab(selected = selectedTab == 2, onClick = { selectedTab = 2 }) {
+                Tab(selected = selectedTab == 2, onClick = { focusManager.clearFocus(); selectedTab = 2 }) {
                     Text("Baúl", modifier = Modifier.padding(12.dp))
                 }
             }

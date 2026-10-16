@@ -30,6 +30,16 @@ data class PersistentAoE(
     val anchorTokenId: Long? = null
 )
 
+data class FloatingCombatText(
+    val id: String = java.util.UUID.randomUUID().toString(),
+    val tokenId: Long,
+    val text: String,
+    val colorHex: Long,
+    val iconName: String? = null,
+    val startWorldPos: Offset,
+    val createdAtMillis: Long = System.currentTimeMillis()
+)
+
 data class TacticalUiState(
     val undoLabel: String? = null,
     val isEditingMap: Boolean = false,
@@ -40,6 +50,9 @@ data class TacticalUiState(
     val selectedTokenId: Long? = null,
     val selectedPinId: Long? = null,
     val activeTool: TacticalTool = TacticalTool.NAVIGATE,
+    val showDamageCalculatorDialog: Boolean = false,
+    val damageCalculatorTokenId: Long? = null,
+    val floatingCombatTexts: List<FloatingCombatText> = emptyList(),
     // Estado de plantillas AoE
     val activeAoeShape: TacticalMeasureShape = TacticalMeasureShape.CIRCLE,
     val aoeRadiusFt: Int = 20,

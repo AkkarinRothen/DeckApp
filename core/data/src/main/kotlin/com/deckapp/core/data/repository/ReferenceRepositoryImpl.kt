@@ -310,27 +310,72 @@ class ReferenceRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateStarterPackArtwork(artwork: com.deckapp.core.model.backup.FullBackupDto, packName: String) {
+    override suspend fun updateStarterPackArtwork(artwork: com.deckapp.core.model.backup.FullBackupDto, packName: String,
+        previous: com.deckapp.core.model.backup.FullBackupDto?) {
         db.withTransaction {
             // Recheck ownership in the transaction so an uninstall cannot resurrect the pack.
             val ownedNpcs = db.npcDao().getNpcsByTagName(packName).associateBy { it.name }
             if (ownedNpcs.isEmpty() && ruleDao.getAllRulesSync().none { it.sourcePack == packName } &&
                 tableDao.getAllTablesSync().none { it.sourcePack == packName }) return@withTransaction
+            val oldProfiles = previous?.npcs?.associateBy { it.name }.orEmpty()
+            // Detect an old library from its content, including restored old backups.
+            // Once upgraded, intentionally deleted templates stay deleted on later launches.
+            val needsBestiaryUpgrade = ownedNpcs.values.none {
+                com.deckapp.core.model.ChoirProfile.fromNotes(it.notes) != null
+            }
+            val tagDao = db.tagDao()
+            val tagId = tagDao.getTagByName(packName)?.id ?: tagDao.insertTag(
+                TagEntity(name = packName, color = 0xFF8B0000.toInt()))
             artwork.npcs.forEach { dto ->
-                val existing = ownedNpcs[dto.name] ?: return@forEach
-                val image = dto.imagePath ?: return@forEach
-                if (existing.imagePath.isNullOrBlank() ||
-                    existing.imagePath?.startsWith("file:///android_asset/starter_packs/choir_of_flesh/") == true) {
-                    if (existing.imagePath != image) db.npcDao().upsertNpc(existing.copy(imagePath = image))
+                val existing = ownedNpcs[dto.name]
+                if (existing == null) {
+                    if (!needsBestiaryUpgrade) return@forEach
+                    // Insert a separate owned template rather than claiming a personal namesake.
+                    run {
+                        val id = db.npcDao().upsertNpc(NpcEntity(
+                            name = dto.name, description = dto.description, imagePath = dto.imagePath,
+                            maxHp = dto.maxHp, currentHp = dto.currentHp, armorClass = dto.armorClass,
+                            initiativeBonus = dto.initiativeBonus, notes = dto.notes,
+                            isMonster = dto.isMonster, createdAt = System.currentTimeMillis()))
+                        db.npcDao().insertCrossRef(NpcTagCrossRef(id, tagId))
+                    }
+                    return@forEach
+                }
+                val old = oldProfiles[dto.name]
+                val packagedPortrait = existing.imagePath.isNullOrBlank() ||
+                    existing.imagePath?.startsWith("file:///android_asset/starter_packs/choir_of_flesh/") == true
+                val notes = com.deckapp.core.domain.usecase.MergeChoirProfileUseCase.notes(existing.notes, dto.notes, old?.notes)
+                val updated = existing.copy(
+                    imagePath = if (packagedPortrait) dto.imagePath ?: existing.imagePath else existing.imagePath,
+                    notes = notes,
+                    description = if (existing.description == old?.description) dto.description else existing.description
+                )
+                if (updated != existing) db.npcDao().upsertNpc(updated)
+            }
+            // Existing encounters retain their own wound state, personal notes and numeric fields.
+            // Only profiles linked to an NPC owned by this pack are eligible for this upgrade.
+            val profilesById = ownedNpcs.mapNotNull { (name, npc) ->
+                artwork.npcs.find { it.name == name }?.let { npc.id to it }
+            }.toMap()
+            val encounterDao = db.encounterDao()
+            if (profilesById.isNotEmpty()) {
+                encounterDao.getCreaturesByNpcIds(profilesById.keys.toList()).forEach { creature ->
+                    val dto = profilesById[creature.npcId] ?: return@forEach
+                    val notes = com.deckapp.core.domain.usecase.MergeChoirProfileUseCase.notes(
+                        creature.notes, dto.notes, oldProfiles[dto.name]?.notes)
+                    if (notes != creature.notes) encounterDao.updateCreature(creature.copy(notes = notes))
                 }
             }
             artwork.systemRules.forEach { dto ->
-                if (ruleDao.getRuleByPackAndTitle(packName, dto.title) == null) {
+                val existing = ruleDao.getRuleByPackAndTitle(packName, dto.title)
+                if (existing == null) {
                     ruleDao.insertRule(SystemRuleEntity(
                         title = dto.title, content = dto.content, gameSystem = dto.gameSystem,
                         category = dto.category, sortOrder = dto.sortOrder, sourcePack = packName,
                         lastUpdated = System.currentTimeMillis()
                     ))
+                } else if (existing.content == previous?.systemRules?.find { it.title == dto.title }?.content) {
+                    ruleDao.updateRule(existing.copy(content = dto.content, lastUpdated = System.currentTimeMillis()))
                 }
             }
             // Older installed versions can predate the pack's random tables.

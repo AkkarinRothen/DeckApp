@@ -46,6 +46,9 @@ interface TacticalMapDao {
     @Query("UPDATE tactical_tokens SET currentHp = :currentHp WHERE id = :tokenId")
     suspend fun updateTokenHp(tokenId: Long, currentHp: Int)
 
+    @Query("UPDATE tactical_tokens SET currentHp = :currentHp, tempHp = :tempHp WHERE id = :tokenId")
+    suspend fun updateTokenHpAndTempHp(tokenId: Long, currentHp: Int, tempHp: Int)
+
     @Query("DELETE FROM tactical_tokens WHERE id = :id")
     suspend fun deleteToken(id: Long)
 
