@@ -2,11 +2,14 @@ package com.deckapp.core.data.repository
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.pdf.PdfRenderer
 import android.net.Uri
+import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.provider.DocumentsContract
+import java.io.IOException
 import com.deckapp.core.domain.repository.FileRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.BufferedInputStream
@@ -549,4 +552,80 @@ class FileRepositoryImpl @Inject constructor(
 
     override suspend fun readTextFromUri(uri: Uri): String =
         context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() } ?: ""
+
+    override suspend fun processTacticalMapImage(
+        sourceUri: Uri,
+        maxDimension: Int,
+        quality: Int
+    ): String = withContext(Dispatchers.IO) {
+        val resolvedUri = if (sourceUri.scheme == null) {
+            Uri.fromFile(File(sourceUri.path ?: sourceUri.toString()))
+        } else {
+            sourceUri
+        }
+
+        // 1. Obtener dimensiones sin cargar toda la imagen en RAM
+        val boundsOptions = BitmapFactory.Options().apply {
+            inJustDecodeBounds = true
+        }
+        context.contentResolver.openInputStream(resolvedUri)?.use { input ->
+            BitmapFactory.decodeStream(input, null, boundsOptions)
+        } ?: throw IOException("No se pudo abrir el stream de la imagen: $resolvedUri")
+
+        val origWidth = boundsOptions.outWidth
+        val origHeight = boundsOptions.outHeight
+        if (origWidth <= 0 || origHeight <= 0) {
+            throw IOException("Dimensiones inválidas para la imagen: $origWidth x $origHeight")
+        }
+
+        // 2. Calcular inSampleSize para evitar OutOfMemoryError en mapas de alta resolución
+        var sampleSize = 1
+        var halfWidth = origWidth / 2
+        var halfHeight = origHeight / 2
+        while ((halfWidth / sampleSize) >= maxDimension || (halfHeight / sampleSize) >= maxDimension) {
+            sampleSize *= 2
+        }
+
+        val decodeOptions = BitmapFactory.Options().apply {
+            inSampleSize = sampleSize
+            inPreferredConfig = Bitmap.Config.ARGB_8888
+        }
+
+        val sampledBitmap = context.contentResolver.openInputStream(resolvedUri)?.use { input ->
+            BitmapFactory.decodeStream(input, null, decodeOptions)
+        } ?: throw IOException("Fallo al decodificar bitmap de: $resolvedUri")
+
+        // 3. Escalar con alta calidad si aún excede maxDimension
+        val currentWidth = sampledBitmap.width
+        val currentHeight = sampledBitmap.height
+        val finalBitmap = if (currentWidth > maxDimension || currentHeight > maxDimension) {
+            val scale = minOf(maxDimension.toFloat() / currentWidth, maxDimension.toFloat() / currentHeight)
+            val targetW = (currentWidth * scale).toInt().coerceAtLeast(1)
+            val targetH = (currentHeight * scale).toInt().coerceAtLeast(1)
+            val scaled = Bitmap.createScaledBitmap(sampledBitmap, targetW, targetH, true)
+            if (scaled != sampledBitmap) {
+                sampledBitmap.recycle()
+            }
+            scaled
+        } else {
+            sampledBitmap
+        }
+
+        // 4. Guardar como WebP en el directorio privado de la app (filesDir/tactical_maps/)
+        val mapsDir = File(context.filesDir, "tactical_maps").apply { mkdirs() }
+        val outputFile = File(mapsDir, "map_${UUID.randomUUID()}.webp")
+
+        FileOutputStream(outputFile).use { outStream ->
+            val format = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                Bitmap.CompressFormat.WEBP_LOSSY
+            } else {
+                @Suppress("DEPRECATION")
+                Bitmap.CompressFormat.WEBP
+            }
+            finalBitmap.compress(format, quality, outStream)
+        }
+        finalBitmap.recycle()
+
+        outputFile.absolutePath
+    }
 }

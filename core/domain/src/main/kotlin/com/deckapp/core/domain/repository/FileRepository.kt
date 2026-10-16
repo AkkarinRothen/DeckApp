@@ -20,6 +20,19 @@ interface FileRepository {
     /** Copia cualquier tipo de archivo a una categoría general. */
     suspend fun copyFileToInternalByCategory(sourceUri: Uri, category: String, fileName: String): String
 
+    /**
+     * Procesa una imagen para mapa táctico:
+     * - Re-escala proporcionalmente si ancho o alto superan [maxDimension].
+     * - Comprime a WebP con calidad [quality]%.
+     * - Guarda en almacenamiento interno bajo `tactical_maps/`.
+     * @return Ruta absoluta al archivo WebP resultante.
+     */
+    suspend fun processTacticalMapImage(
+        sourceUri: Uri,
+        maxDimension: Int = 2560,
+        quality: Int = 85
+    ): String
+
     suspend fun deleteImagesForDeck(deckId: Long)
 
     /** Borra un archivo específico dada su ruta absoluta en el almacenamiento interno. */

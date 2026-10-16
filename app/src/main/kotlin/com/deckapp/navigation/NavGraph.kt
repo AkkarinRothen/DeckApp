@@ -1,5 +1,7 @@
 package com.deckapp.navigation
 
+import com.deckapp.core.model.StartPage
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
@@ -44,6 +46,7 @@ import com.deckapp.core.domain.usecase.GlobalSearchResultType
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeckAppNavHost(
+    startPage: StartPage = StartPage.LIBRARY,
     quickNoteViewModel: QuickNoteViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
@@ -116,7 +119,7 @@ fun DeckAppNavHost(
                         selected = currentDestination?.hasRoute(LibraryRoute::class) == true,
                         onClick = {
                             navController.navigate(LibraryRoute) {
-                                popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
+                                popUpTo(navController.graph.findStartDestination().id) { inclusive = false }
                                 launchSingleTop = true
                             }
                         },
@@ -147,7 +150,11 @@ fun DeckAppNavHost(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = LibraryRoute,
+            startDestination = when (startPage) {
+                StartPage.LIBRARY -> LibraryRoute
+                StartPage.SESSIONS -> SessionListRoute
+                StartPage.REFERENCES -> ReferenceListRoute
+            },
             modifier = Modifier.padding(innerPadding)
         ) {
             composable<LibraryRoute> {

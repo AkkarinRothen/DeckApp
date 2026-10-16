@@ -131,8 +131,10 @@ fun SessionScreen(
 
     // Wake lock and other logic...
     val activity = context as? Activity
-    DisposableEffect(Unit) {
-        activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    val keepScreenOn = com.deckapp.core.ui.theme.LocalGeneralPreferences.current.keepScreenOn
+    DisposableEffect(activity, keepScreenOn) {
+        if (keepScreenOn) activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        else activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         onDispose { activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
     }
 
@@ -845,6 +847,7 @@ fun SessionScreen(
 
             // Action Hotbar / Quick Roll Dock (Sprint 59)
             val hotbarActions = uiState.session?.hotbarActions ?: defaultHotbarActions()
+            val hotbarBottomPadding = if (uiState.mainViewMode == SessionViewMode.TACTICAL) 76.dp else 12.dp
             SessionHotbarDock(
                 actions = hotbarActions,
                 isExpanded = uiState.isHotbarExpanded,
@@ -854,7 +857,7 @@ fun SessionScreen(
                 onEditAction = viewModel::openEditHotbarAction,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 12.dp)
+                    .padding(bottom = hotbarBottomPadding)
             )
 
             // Threats & Threads Tracker Overlay (Sprint 62)
@@ -1250,5 +1253,4 @@ private fun DeckClusterItem(
                 }
             }
         }
-    }
-}
+    }

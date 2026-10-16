@@ -187,7 +187,7 @@ fun TacticalMapView(
             shadowElevation = 6.dp,
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .padding(start = 16.dp, top = 16.dp)
+                .padding(start = 16.dp, top = 60.dp)
         ) {
             var showMapDropdown by remember { mutableStateOf(false) }
 

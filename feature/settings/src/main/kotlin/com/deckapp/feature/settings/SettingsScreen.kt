@@ -1,5 +1,9 @@
 package com.deckapp.feature.settings
 
+import com.deckapp.feature.settings.components.GeminiApiKeyEditor
+
+import com.deckapp.feature.settings.components.GeneralPreferencesCard
+
 import com.deckapp.core.ui.components.DeckCard
 import com.deckapp.core.ui.components.DeckButton
 import com.deckapp.core.ui.components.DeckOutlinedButton
@@ -15,7 +19,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
@@ -51,6 +54,11 @@ fun SettingsScreen(
     val restoreBackupLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri -> uri?.let { viewModel.restoreBackup(it) } }
+
+    var category by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf("General") }
+
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+    LaunchedEffect(category) { listState.scrollToItem(0) }
 
     var showRestoreConfirm by remember { mutableStateOf(false) }
 
@@ -90,211 +98,250 @@ fun SettingsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Ajustes") })
+            Column {
+                TopAppBar(title = { Text("Ajustes") })
+                androidx.compose.foundation.lazy.LazyRow(
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(listOf("General", "Apariencia y lectura", "Partidas", "Importación e IA", "Datos", "Acerca de")) { label ->
+                        FilterChip(selected = category == label, onClick = { category = label }, label = { Text(label) })
+                    }
+                }
+            }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
-        if (uiState.isLoading && uiState.decksStorage.isEmpty()) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        if (category == "Datos" && uiState.isLoading && uiState.decksStorage.isEmpty()) {
+            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
             return@Scaffold
         }
 
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // ── Copia de Seguridad ──────────────────────────────────────
-            item {
-                Text(
-                    "Copia de Seguridad",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-
-            item {
-                BackupCard(
-                    isProcessing = uiState.isBackingUp || uiState.isRestoring,
-                    onCreateBackup = {
-                        val dateStr = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
-                        createBackupLauncher.launch("deckapp_backup_$dateStr.zip")
-                    },
-                    onRestoreBackup = {
-                        showRestoreConfirm = true
-                    }
-                )
-            }
-
-            item { HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp)) }
-
-            // ── Almacenamiento ──────────────────────────────────────────
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        "Almacenamiento",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    IconButton(onClick = { viewModel.loadStorageInfo() }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refrescar")
+            when (category) {
+                "General" -> {
+                    item {
+                        GeneralPreferencesCard(
+                            uiState.generalPreferences, "General", viewModel::setGeneralPreferences
+                        )
                     }
                 }
-            }
+                "Apariencia y lectura" -> {
+                    item {
+                        GeneralPreferencesCard(
+                            uiState.generalPreferences, "Lectura", viewModel::setGeneralPreferences
+                        )
+                    }
+                    // ── Apariencia ──────────────────────────────────────────
+                    item { HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp)) }
 
-            item {
-                StorageSummaryCard(
-                    totalSizeBytes = uiState.totalSizeBytes,
-                    systemTotalBytes = uiState.systemTotalBytes,
-                    systemFreeBytes = uiState.systemFreeBytes,
-                    deckCount = uiState.decksStorage.size,
-                    isClearing = uiState.isClearingCache,
-                    onClearCache = { viewModel.clearCache() }
-                )
-            }
+                    item {
+                        Text(
+                            "Apariencia",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
 
-            if (uiState.decksStorage.isNotEmpty()) {
-                items(uiState.decksStorage, key = { it.id }) { info ->
-                    DeckStorageRow(
-                        info = info,
-                        totalSizeBytes = uiState.totalSizeBytes
-                    )
-                }
-            }
+                    item {
+                        ThemeSelectorCard(
+                            currentTheme = uiState.appTheme,
+                            onThemeSelected = { viewModel.setAppTheme(it) }
+                        )
+                    }
 
-            // ── Apariencia ──────────────────────────────────────────
-            item { HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp)) }
+                    item {
+                        TableAppearanceCard(
+                            appearance = uiState.tableAppearance,
+                            onTextureSelected = viewModel::setTextureIntensity,
+                            onDensitySelected = viewModel::setTableDensity
+                        )
+                    }
 
-            item {
-                Text(
-                    "Apariencia",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-
-            item {
-                ThemeSelectorCard(
-                    currentTheme = uiState.appTheme,
-                    onThemeSelected = { viewModel.setAppTheme(it) }
-                )
-            }
-
-            item {
-                TableAppearanceCard(
-                    appearance = uiState.tableAppearance,
-                    onTextureSelected = viewModel::setTextureIntensity,
-                    onDensitySelected = viewModel::setTableDensity
-                )
-            }
-
-            item {
-                AppearancePresetsCard(uiState.tableAppearance.accent, uiState.appearancePresets,
-                    viewModel::setThemeAccent, viewModel::saveAppearancePreset,
-                    viewModel::applyAppearancePreset, viewModel::deleteAppearancePreset)
-            }
-
-            // ── Calidad de imagen ───────────────────────────────────────
-            item { HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp)) }
-
-            item {
-                Text(
-                    "Importación",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-
-            item {
-                JpegQualitySelector(
-                    currentQuality = uiState.jpegQuality,
-                    onQualitySelected = { viewModel.setJpegQuality(it) }
-                )
-            }
-
-            item {
-                GeminiApiKeyEditor(
-                    currentKey = uiState.geminiApiKey,
-                    onKeyChanged = { viewModel.setGeminiApiKey(it) }
-                )
-            }
-
-            item {
-                AutoVisionToggle(
-                    enabled = uiState.autoVisionEnabled,
-                    apiKeyConfigured = uiState.geminiApiKey.isNotBlank(),
-                    onToggle = { viewModel.setAutoVisionEnabled(it) }
-                )
-            }
-
-            // ── Experiencia de Usuario ───────────────────────────────────
-            item { HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp)) }
-
-            item {
-                Text(
-                    "Experiencia de Usuario",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-
-            item {
-                SimplifiedModeToggle(
-                    enabled = uiState.simplifiedModeEnabled,
-                    onToggle = { viewModel.setSimplifiedModeEnabled(it) }
-                )
-            }
-
-            // ── Librerías ───────────────────────────────────────────────
-            item { HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp)) }
-
-            item {
-                Text(
-                    "Librerías de terceros",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-
-            item {
-                DeckCard(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("• Jetpack Compose (UI Framework)", style = MaterialTheme.typography.bodySmall)
-                        Text("• Hilt (Inyección de dependencias)", style = MaterialTheme.typography.bodySmall)
-                        Text("• Room (Base de datos local)", style = MaterialTheme.typography.bodySmall)
-                        Text("• Coil (Carga de imágenes)", style = MaterialTheme.typography.bodySmall)
-                        Text("• Markwon (Renderizado Markdown)", style = MaterialTheme.typography.bodySmall)
-                        Text("• PdfRenderer (Framework nativo)", style = MaterialTheme.typography.bodySmall)
-                        Text("• Kotlinx Serialization (Backup Engine)", style = MaterialTheme.typography.bodySmall)
+                    item {
+                        AppearancePresetsCard(uiState.tableAppearance.accent, uiState.appearancePresets,
+                            viewModel::setThemeAccent, viewModel::saveAppearancePreset,
+                            viewModel::applyAppearancePreset, viewModel::deleteAppearancePreset)
                     }
                 }
-            }
+                "Partidas" -> {
+                    item {
+                        GeneralPreferencesCard(
+                            uiState.generalPreferences, "Partidas", viewModel::setGeneralPreferences
+                        )
+                    }
+                    // ── Experiencia de Usuario ───────────────────────────────────
+                    item { HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp)) }
 
-            // ── Acerca de ───────────────────────────────────────────────
-            item { HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp)) }
+                    item {
+                        Text(
+                            "Experiencia de Usuario",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
 
-            item {
-                Text(
-                    "Acerca de",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
+                    item {
+                        SimplifiedModeToggle(
+                            enabled = uiState.simplifiedModeEnabled,
+                            onToggle = { viewModel.setSimplifiedModeEnabled(it) }
+                        )
+                    }
+                }
+                "Importación e IA" -> {
+                    // ── Calidad de imagen ───────────────────────────────────────
+                    item { HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp)) }
 
-            item {
-                DeckCard(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        InfoRow(label = "Versión", value = uiState.appVersion)
-                        InfoRow(label = "Licencia", value = "MIT / Personal")
-                        InfoRow(label = "Desarrollado para", value = "DMs de TTRPG")
+                    item {
+                        Text(
+                            "Importación",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    item {
+                        JpegQualitySelector(
+                            currentQuality = uiState.jpegQuality,
+                            onQualitySelected = { viewModel.setJpegQuality(it) }
+                        )
+                    }
+
+                    item {
+                        GeminiApiKeyEditor(
+                            currentKey = uiState.geminiApiKey,
+                            onKeyChanged = viewModel::setGeminiApiKey,
+                            isTesting = uiState.isTestingConnection,
+                            connectionMessage = uiState.connectionMessage,
+                            onTest = viewModel::testGeminiConnection
+                        )
+                    }
+
+                    item {
+                        AutoVisionToggle(
+                            enabled = uiState.autoVisionEnabled,
+                            apiKeyConfigured = uiState.geminiApiKey.isNotBlank(),
+                            onToggle = { viewModel.setAutoVisionEnabled(it) }
+                        )
+                    }
+                }
+                "Datos" -> {
+                    // ── Copia de Seguridad ──────────────────────────────────────
+                    item {
+                        Text(
+                            "Copia de Seguridad",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    item {
+                        BackupCard(
+                            isProcessing = uiState.isBackingUp || uiState.isRestoring,
+                            onCreateBackup = {
+                                val dateStr = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
+                                createBackupLauncher.launch("deckapp_backup_$dateStr.zip")
+                            },
+                            onRestoreBackup = {
+                                showRestoreConfirm = true
+                            }
+                        )
+                    }
+
+                    item { HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp)) }
+
+                    // ── Almacenamiento ──────────────────────────────────────────
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                "Almacenamiento",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            IconButton(onClick = { viewModel.loadStorageInfo() }) {
+                                Icon(Icons.Default.Refresh, contentDescription = "Refrescar")
+                            }
+                        }
+                    }
+
+                    item {
+                        StorageSummaryCard(
+                            totalSizeBytes = uiState.totalSizeBytes,
+                            systemTotalBytes = uiState.systemTotalBytes,
+                            systemFreeBytes = uiState.systemFreeBytes,
+                            deckCount = uiState.decksStorage.size,
+                            isClearing = uiState.isClearingCache,
+                            onClearCache = { viewModel.clearCache() }
+                        )
+                    }
+
+                    if (uiState.decksStorage.isNotEmpty()) {
+                        items(uiState.decksStorage, key = { it.id }) { info ->
+                            DeckStorageRow(
+                                info = info,
+                                totalSizeBytes = uiState.totalSizeBytes
+                            )
+                        }
+                    }
+                }
+                "Acerca de" -> {
+                    // ── Librerías ───────────────────────────────────────────────
+                    item { HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp)) }
+
+                    item {
+                        Text(
+                            "Librerías de terceros",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    item {
+                        DeckCard(modifier = Modifier.fillMaxWidth()) {
+                            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text("• Jetpack Compose (UI Framework)", style = MaterialTheme.typography.bodySmall)
+                                Text("• Hilt (Inyección de dependencias)", style = MaterialTheme.typography.bodySmall)
+                                Text("• Room (Base de datos local)", style = MaterialTheme.typography.bodySmall)
+                                Text("• Coil (Carga de imágenes)", style = MaterialTheme.typography.bodySmall)
+                                Text("• Markwon (Renderizado Markdown)", style = MaterialTheme.typography.bodySmall)
+                                Text("• PdfRenderer (Framework nativo)", style = MaterialTheme.typography.bodySmall)
+                                Text("• Kotlinx Serialization (Backup Engine)", style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
+                    }
+
+                    // ── Acerca de ───────────────────────────────────────────────
+                    item { HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp)) }
+
+                    item {
+                        Text(
+                            "Acerca de",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    item {
+                        DeckCard(modifier = Modifier.fillMaxWidth()) {
+                            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                InfoRow(label = "Versión", value = uiState.appVersion)
+                                InfoRow(label = "Licencia", value = "MIT / Personal")
+                                InfoRow(label = "Desarrollado para", value = "DMs de TTRPG")
+                            }
+                        }
                     }
                 }
             }
@@ -476,38 +523,6 @@ private fun JpegQualitySelector(currentQuality: Int, onQualitySelected: (Int) ->
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun GeminiApiKeyEditor(currentKey: String, onKeyChanged: (String) -> Unit) {
-    var text by remember(currentKey) { mutableStateOf(currentKey) }
-    DeckCard(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(
-                "Gemini AI (Google)",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Text(
-                "API Key para procesar tablas con IA. Los datos se enviarán a Google.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
-                label = { Text("Google AI API Key") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                trailingIcon = {
-                    if (text != currentKey) {
-                        IconButton(onClick = { onKeyChanged(text) }) {
-                            Icon(Icons.Default.Check, "Guardar")
-                        }
-                    }
-                }
-            )
         }
     }
 }

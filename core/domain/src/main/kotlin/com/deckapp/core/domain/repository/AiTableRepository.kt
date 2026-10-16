@@ -17,6 +17,7 @@ sealed class AiStreamEvent {
 }
 
 interface AiTableRepository {
+    suspend fun testConnection(apiKey: String)
     suspend fun reconstructTable(rawText: String, apiKey: String): AiTableSuggestions
     fun streamTableFromImage(
         bitmap: Bitmap,

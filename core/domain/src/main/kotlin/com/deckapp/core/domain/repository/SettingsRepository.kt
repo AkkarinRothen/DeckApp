@@ -1,11 +1,16 @@
 package com.deckapp.core.domain.repository
 
+import com.deckapp.core.model.GeneralPreferences
+
 import com.deckapp.core.model.AppTheme
 import com.deckapp.core.model.TableAppearance
 import com.deckapp.core.model.AppearancePreset
 import kotlinx.coroutines.flow.Flow
 
 interface SettingsRepository {
+    fun getGeneralPreferences(): GeneralPreferences
+    fun setGeneralPreferences(preferences: GeneralPreferences)
+    fun observeGeneralPreferences(): Flow<GeneralPreferences>
     fun getBoardSessionMemory(sessionId: Long): com.deckapp.core.model.BoardSessionMemory
     fun setBoardSessionMemory(sessionId: Long, memory: com.deckapp.core.model.BoardSessionMemory)
     fun getGeminiApiKey(): String

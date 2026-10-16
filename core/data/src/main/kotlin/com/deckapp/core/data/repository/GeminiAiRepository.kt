@@ -20,7 +20,17 @@ import javax.inject.Inject
 
 class GeminiAiRepository @Inject constructor() : AiTableRepository, AiReferenceRepository {
 
-    // ... (rest of the class)
+    override suspend fun testConnection(apiKey: String) {
+        requireApiKey(apiKey)
+        try {
+            val response = getTextModel(apiKey).generateContent("Responde solamente OK.")
+            if (response.text.isNullOrBlank()) throw AiApiException("Gemini devolvió una respuesta vacía.")
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            throw AiApiException(friendlyGeminiError(e), e)
+        }
+    }
 
     override suspend fun recognizeReferenceTableFromImage(bitmap: Bitmap, apiKey: String): ReferenceTableAiResult {
         requireApiKey(apiKey)

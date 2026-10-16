@@ -1,5 +1,24 @@
 ---
 
+### Ajustes y preferencias de uso — 16 de octubre de 2026
+
+**FEATURE — Ajustes organizados y preferencias persistentes**
+- Secciones General, Apariencia y lectura, Partidas, Importación e IA, Datos y Acerca de con selector visible al desplazarse.
+- Pantalla inicial configurable entre Biblioteca, Sesiones y Referencias; se conserva la navegación activa y la selección se aplica al iniciar nuevamente.
+- Tamaño de texto entre 100 % y 130 %, adicional al ajuste de Android, aplicado a Compose y al contenido Markdown.
+- Preferencias para mantener encendida la pantalla de la mesa y habilitar/deshabilitar la respuesta háptica de la app; valores iniciales compatibles con el comportamiento anterior.
+- Preferencias guardadas en SettingsRepository con StateFlow, sin cambios de esquema de Room.
+
+**FEATURE — Editor de clave Gemini**
+- Clave oculta por defecto con acciones para mostrar, guardar y eliminar.
+- Prueba explícita de conexión usando el modelo de texto existente, con indicación de consumo de cuota, progreso y tiempo máximo de 30 segundos.
+- Estado de clave guardada separado del resultado de la prueba; cancelación e invalidación del resultado al cambiar la clave.
+
+**VALIDACIÓN**
+- Pendiente de completar la compilación de debug y las pruebas de dominio.
+
+---
+
 ### Sprint 65 — Sistema Choir of Flesh: Starter Pack Integral, Bestiario Oficial (24 Criaturas), Asistente de Inquebrantable y Desinstalación Limpia (16 de octubre de 2026)
 
 **FEATURE — Starter Pack Reversible "Choir of Flesh" (`choir_of_flesh.json`)**

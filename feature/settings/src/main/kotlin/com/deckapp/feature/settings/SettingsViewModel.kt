@@ -1,5 +1,9 @@
 package com.deckapp.feature.settings
 
+import com.deckapp.core.domain.repository.AiTableRepository
+
+import com.deckapp.core.model.GeneralPreferences
+
 import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
@@ -30,6 +34,9 @@ data class DeckStorageInfo(
 )
 
 data class SettingsUiState(
+    val generalPreferences: GeneralPreferences = GeneralPreferences(),
+    val isTestingConnection: Boolean = false,
+    val connectionMessage: String? = null,
     val appVersion: String = "",
     val decksStorage: List<DeckStorageInfo> = emptyList(),
     val totalSizeBytes: Long = 0L,
@@ -52,6 +59,7 @@ data class SettingsUiState(
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
+    private val aiRepository: AiTableRepository,
     private val cardRepository: CardRepository,
     private val fileRepository: FileRepository,
     private val settingsRepository: SettingsRepository,
@@ -74,6 +82,7 @@ class SettingsViewModel @Inject constructor(
         val theme = settingsRepository.getAppTheme()
         _uiState.update { 
             it.copy(
+                generalPreferences = settingsRepository.getGeneralPreferences(),
                 appVersion = version, 
                 jpegQuality = quality, 
                 geminiApiKey = apiKey, 
@@ -84,7 +93,41 @@ class SettingsViewModel @Inject constructor(
                 appearancePresets = settingsRepository.getAppearancePresets()
             ) 
         }
+        viewModelScope.launch {
+            settingsRepository.observeGeneralPreferences().collect { preferences ->
+                _uiState.update { it.copy(generalPreferences = preferences) }
+            }
+        }
         loadStorageInfo()
+    }
+
+    fun setGeneralPreferences(preferences: GeneralPreferences) {
+        settingsRepository.setGeneralPreferences(preferences)
+    }
+
+    private var connectionVersion = 0
+    private var connectionJob: kotlinx.coroutines.Job? = null
+
+    fun testGeminiConnection() {
+        if (_uiState.value.isTestingConnection) return
+        val key = _uiState.value.geminiApiKey
+        if (key.isBlank()) return
+        _uiState.update { it.copy(isTestingConnection = true, connectionMessage = null) }
+        val version = connectionVersion
+        connectionJob = viewModelScope.launch {
+            try {
+                kotlinx.coroutines.withTimeout(30_000) { aiRepository.testConnection(key) }
+                if (version == connectionVersion) _uiState.update { it.copy(connectionMessage = "Conexión comprobada con esta clave.") }
+            } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+                if (version == connectionVersion) _uiState.update { it.copy(connectionMessage = "La prueba agotó el tiempo de espera. Intenta nuevamente.") }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                if (version == connectionVersion) _uiState.update { it.copy(connectionMessage = "No se pudo comprobar la conexión. Revisa la clave, la red y la cuota de Gemini.") }
+            } finally {
+                if (version == connectionVersion) _uiState.update { it.copy(isTestingConnection = false) }
+            }
+        }
     }
 
     fun setAppTheme(theme: AppTheme) {
@@ -170,8 +213,11 @@ class SettingsViewModel @Inject constructor(
     }
     
     fun setGeminiApiKey(key: String) {
-        settingsRepository.setGeminiApiKey(key)
-        _uiState.update { it.copy(geminiApiKey = key) }
+        connectionVersion++
+        connectionJob?.cancel()
+        val trimmed = key.trim()
+        settingsRepository.setGeminiApiKey(trimmed)
+        _uiState.update { it.copy(geminiApiKey = trimmed, connectionMessage = null, isTestingConnection = false) }
     }
 
     fun setAutoVisionEnabled(enabled: Boolean) {

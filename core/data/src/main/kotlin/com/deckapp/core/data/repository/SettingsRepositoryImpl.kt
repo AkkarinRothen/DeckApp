@@ -1,5 +1,9 @@
 package com.deckapp.core.data.repository
 
+import com.deckapp.core.model.StartPage
+
+import com.deckapp.core.model.GeneralPreferences
+
 import android.content.Context
 import com.deckapp.core.domain.repository.SettingsRepository
 import com.deckapp.core.model.AppTheme
@@ -30,6 +34,28 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override fun setBoardSessionMemory(sessionId: Long, memory: com.deckapp.core.model.BoardSessionMemory) {
         prefs.edit().putString("board_session_$sessionId", BoardMemoryCodec.encode(memory)).apply()
+    }
+
+    private val generalPreferencesFlow = MutableStateFlow(
+        GeneralPreferences(
+            startPage = runCatching {
+                StartPage.valueOf(prefs.getString("start_page", "LIBRARY")!!)
+            }.getOrDefault(StartPage.LIBRARY),
+            keepScreenOn = prefs.getBoolean("keep_screen_on", true),
+            hapticsEnabled = prefs.getBoolean("haptics_enabled", true),
+            textScale = prefs.getFloat("text_scale", 1f).takeIf { it.isFinite() }?.coerceIn(1f, 1.3f) ?: 1f
+        )
+    )
+
+    override fun getGeneralPreferences() = generalPreferencesFlow.value
+    override fun observeGeneralPreferences() = generalPreferencesFlow.asStateFlow()
+    override fun setGeneralPreferences(preferences: GeneralPreferences) {
+        val safe = preferences.copy(textScale = preferences.textScale.takeIf { it.isFinite() }?.coerceIn(1f, 1.3f) ?: 1f)
+        prefs.edit().putString("start_page", safe.startPage.name)
+            .putBoolean("keep_screen_on", safe.keepScreenOn)
+            .putBoolean("haptics_enabled", safe.hapticsEnabled)
+            .putFloat("text_scale", safe.textScale).apply()
+        generalPreferencesFlow.value = safe
     }
 
     private val _appThemeFlow = MutableStateFlow(loadInitialTheme())

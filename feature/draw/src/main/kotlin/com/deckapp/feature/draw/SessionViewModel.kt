@@ -186,6 +186,7 @@ class SessionViewModel @Inject constructor(
     private val hexRepository: com.deckapp.core.domain.repository.HexRepository,
     private val tacticalMapRepository: com.deckapp.core.domain.repository.TacticalMapRepository,
     private val calculateTacticalDistanceUseCase: com.deckapp.core.domain.usecase.CalculateTacticalDistanceUseCase,
+    private val fileRepository: com.deckapp.core.domain.repository.FileRepository,
     @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -217,6 +218,7 @@ class SessionViewModel @Inject constructor(
         tableRepository = tableRepository,
         rollTableUseCase = rollTableUseCase,
         wikiRepository = wikiRepository,
+        fileRepository = fileRepository,
         context = context
     )
 

@@ -23,7 +23,7 @@ fun MarkdownText(
 ) {
     val context = LocalContext.current
     val colorInt = color.toArgb()
-    val fontSizeSp = style.fontSize.value
+    val fontSizeSp = style.fontSize.value * com.deckapp.core.ui.theme.LocalGeneralPreferences.current.textScale
 
     // Procesar [[Links]] bidireccionales antes de pasar a Markwon
     val processedMarkdown = remember(markdown) {

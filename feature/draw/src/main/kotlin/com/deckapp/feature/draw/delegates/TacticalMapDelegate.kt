@@ -2,6 +2,7 @@ package com.deckapp.feature.draw.delegates
 
 import androidx.compose.ui.geometry.Offset
 import com.deckapp.core.domain.repository.EncounterRepository
+import com.deckapp.core.domain.repository.FileRepository
 import com.deckapp.core.domain.repository.TacticalMapRepository
 import com.deckapp.core.domain.repository.TableRepository
 import com.deckapp.core.domain.repository.WikiRepository
@@ -36,6 +37,7 @@ class TacticalMapDelegate(
     private val tableRepository: TableRepository? = null,
     private val rollTableUseCase: RollTableUseCase? = null,
     private val wikiRepository: WikiRepository? = null,
+    private val fileRepository: FileRepository? = null,
     private val context: android.content.Context? = null
 ) {
 
@@ -556,13 +558,32 @@ class TacticalMapDelegate(
         }
     }
 
+    private suspend fun optimizeImageToWebP(rawPathOrUri: String): String {
+        if (rawPathOrUri.isBlank() || fileRepository == null || rawPathOrUri.endsWith(".webp", ignoreCase = true)) {
+            return rawPathOrUri
+        }
+        return try {
+            val uri = if (rawPathOrUri.startsWith("/") || !rawPathOrUri.contains("://")) {
+                android.net.Uri.fromFile(java.io.File(rawPathOrUri))
+            } else {
+                android.net.Uri.parse(rawPathOrUri)
+            }
+            fileRepository.processTacticalMapImage(uri, maxDimension = 2560, quality = 85)
+        } catch (e: Exception) {
+            android.util.Log.e("TacticalMapDelegate", "Fallo al procesar imagen a WebP, usando original: $rawPathOrUri", e)
+            rawPathOrUri
+        }
+    }
+
     fun updateMapImage(imageUri: String) {
         val map = _uiState.value.tacticalState.map ?: return
         scope.launch {
+            _uiState.update { it.copy(snackbarMessage = "Procesando imagen a WebP...") }
+            val processedImageUri = optimizeImageToWebP(imageUri)
             tacticalMapRepository.upsertTacticalMap(
-                map.copy(imageUri = imageUri)
+                map.copy(imageUri = processedImageUri)
             )
-            _uiState.update { it.copy(snackbarMessage = "Imagen de mapa actualizada") }
+            _uiState.update { it.copy(snackbarMessage = "Imagen de mapa actualizada y optimizada (WebP)") }
         }
     }
 
@@ -1046,9 +1067,13 @@ class TacticalMapDelegate(
         sceneId: Long?
     ) {
         scope.launch {
+            if (imageUri.isNotBlank()) {
+                _uiState.update { it.copy(snackbarMessage = "Procesando imagen a WebP...") }
+            }
+            val processedImageUri = optimizeImageToWebP(imageUri)
             val newMap = TacticalMap(
                 name = name,
-                imageUri = imageUri,
+                imageUri = processedImageUri,
                 gridType = gridType,
                 cellSizePx = cellSizePx,
                 scaleFtPerCell = scaleFtPerCell,

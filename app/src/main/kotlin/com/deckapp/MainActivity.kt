@@ -30,6 +30,20 @@ class MainActivity : ComponentActivity() {
             val tableAppearance by settingsRepository.observeTableAppearance()
                 .collectAsStateWithLifecycle(initialValue = settingsRepository.getTableAppearance())
 
+            val preferences by settingsRepository.observeGeneralPreferences()
+                .collectAsStateWithLifecycle(initialValue = settingsRepository.getGeneralPreferences())
+            val density = androidx.compose.ui.platform.LocalDensity.current
+            val platformHaptics = androidx.compose.ui.platform.LocalHapticFeedback.current
+            val haptics = androidx.compose.runtime.remember(platformHaptics, preferences.hapticsEnabled) {
+                object : androidx.compose.ui.hapticfeedback.HapticFeedback {
+                    override fun performHapticFeedback(hapticFeedbackType: androidx.compose.ui.hapticfeedback.HapticFeedbackType) {
+                        if (preferences.hapticsEnabled) platformHaptics.performHapticFeedback(hapticFeedbackType)
+                    }
+                }
+            }
+            // Keep the start destination stable while preferences change in this activity.
+            val startPage = androidx.compose.runtime.saveable.rememberSaveable { preferences.startPage }
+
             SideEffect {
                 val light = appTheme == AppTheme.LIGHT || appTheme == AppTheme.PARCHMENT
                 WindowCompat.getInsetsController(window, window.decorView).apply {
@@ -39,7 +53,15 @@ class MainActivity : ComponentActivity() {
             }
 
             DeckAppTheme(appTheme = appTheme, tableAppearance = tableAppearance) {
-                DeckAppNavHost()
+                androidx.compose.runtime.CompositionLocalProvider(
+                    com.deckapp.core.ui.theme.LocalGeneralPreferences provides preferences,
+                    androidx.compose.ui.platform.LocalDensity provides androidx.compose.ui.unit.Density(
+                        density.density, density.fontScale * preferences.textScale
+                    ),
+                    androidx.compose.ui.platform.LocalHapticFeedback provides haptics
+                ) {
+                    DeckAppNavHost(startPage = startPage)
+                }
             }
         }
     }
