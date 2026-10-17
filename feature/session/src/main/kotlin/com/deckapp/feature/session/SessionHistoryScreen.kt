@@ -402,11 +402,14 @@ private fun CardEventContent(event: TimelineEvent.CardEvent) {
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Text(
-                text = event.card?.title ?: "Carta #${event.event.cardId}",
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium
-            )
+            val cardText = event.card?.title ?: event.event.cardId?.let { "Carta #$it" }
+            if (cardText != null) {
+                Text(
+                    text = cardText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
         event.card?.activeFace?.imagePath?.let { path ->
             AsyncImage(

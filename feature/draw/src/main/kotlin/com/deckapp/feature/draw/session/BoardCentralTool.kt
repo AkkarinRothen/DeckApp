@@ -104,7 +104,7 @@ val BoardCentralTool = SessionCentralConnector(
                     SessionBoardItemType.COMBAT -> viewModel.toggleLeftSidebar(SidebarTool.COMBAT)
                     SessionBoardItemType.NOTES -> viewModel.toggleRightSidebar(SidebarTool.NOTES)
                     SessionBoardItemType.NPCS -> viewModel.toggleRightSidebar(SidebarTool.NPCS)
-                    SessionBoardItemType.REFERENCE -> viewModel.toggleRightSidebar(SidebarTool.PLAN)
+                    SessionBoardItemType.REFERENCE -> viewModel.toggleRightSidebar(SidebarTool.REFERENCES)
                     SessionBoardItemType.MYTHIC -> viewModel.toggleRightSidebar(SidebarTool.MYTHIC_CONTEXT)
                     SessionBoardItemType.MAP -> viewModel.setMainViewMode(SessionViewMode.MAP)
                     SessionBoardItemType.WIKI_MAP -> viewModel.toggleRightSidebar(SidebarTool.PLAN)

@@ -12,6 +12,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -46,6 +48,7 @@ import com.deckapp.feature.draw.components.CardItem
 import com.deckapp.feature.draw.components.PileTray
 import com.deckapp.feature.tables.TableDetailSheet
 import com.deckapp.feature.draw.components.NotesTab
+import com.deckapp.feature.draw.components.NotesTabMode
 import com.deckapp.feature.draw.components.NpcsTab
 import com.deckapp.feature.tables.TablesTab
 import com.deckapp.feature.reference.ReferenceTab
@@ -57,14 +60,18 @@ import com.deckapp.core.ui.components.EdgeTab
 import com.deckapp.feature.hexploration.components.HexcrawlView
 import com.deckapp.feature.mythic.components.MythicCenterView
 import com.deckapp.feature.mythic.components.MythicContextTab
-import com.deckapp.feature.draw.components.NpcQuickPreviewDialog
 import com.deckapp.feature.draw.components.WikiQuickPreviewDialog
 
 import com.deckapp.feature.draw.components.SidebarNavigationRail
 import com.deckapp.feature.draw.components.SessionBottomFloatingDock
 import com.deckapp.feature.draw.components.SessionHotbarDock
+import com.deckapp.feature.draw.components.SessionTopHudCapsule
 import com.deckapp.feature.draw.components.HotbarActionDialog
 import com.deckapp.feature.draw.components.SceneFramingDialog
+import com.deckapp.feature.draw.components.DeckWorkspace
+import com.deckapp.feature.draw.components.SessionTopBar
+import com.deckapp.feature.draw.components.SessionBottomBar
+import com.deckapp.feature.draw.components.SessionDialogsHost
 import com.deckapp.feature.draw.components.clocks.SessionClocksOverlay
 import com.deckapp.feature.draw.components.clocks.ClockEditDialog
 import com.deckapp.feature.draw.components.clocks.ClockImpactDialog
@@ -110,16 +117,15 @@ fun SessionScreen(
         buildList {
             add(SidebarTool.DECKS to Icons.Default.Style)
             add(SidebarTool.TABLES to Icons.Default.Casino)
-            if (uiState.hasActiveEncounter) {
-                add(SidebarTool.COMBAT to Icons.Default.CrisisAlert)
-            }
+            add(SidebarTool.COMBAT to if (uiState.hasActiveEncounter) Icons.Default.CrisisAlert else Icons.Default.SportsKabaddi)
         }
     }
 
     val rightTools = remember(uiState.linkedMythicSession) {
         buildList {
             add(SidebarTool.NOTES to Icons.Default.EditNote)
-            add(SidebarTool.WIKI to Icons.AutoMirrored.Filled.MenuBook)
+            add(SidebarTool.REFERENCES to Icons.AutoMirrored.Filled.MenuBook)
+            add(SidebarTool.WIKI to Icons.Default.Book)
             add(SidebarTool.JOURNAL to Icons.AutoMirrored.Filled.LibraryBooks)
             if (uiState.linkedMythicSession != null) {
                 add(SidebarTool.MYTHIC_CONTEXT to Icons.Default.AutoAwesome)
@@ -171,36 +177,7 @@ fun SessionScreen(
 
     var showChoirDialog by remember { mutableStateOf(false) }
     var showIncursionDialog by remember { mutableStateOf(false) }
-
-    if (showChoirDialog) {
-        com.deckapp.feature.npcs.dialogs.ChoirOfFleshCharacterDialog(
-            onDismiss = { showChoirDialog = false },
-            onCharacterCreated = { npc, sheetMarkdown ->
-                viewModel.createChoirOfFleshCharacter(npc, sheetMarkdown)
-                showChoirDialog = false
-            }
-        )
-    }
-
-    if (showIncursionDialog) {
-        val incursion = remember(uiState.dmNotes) { viewModel.getChoirIncursion() }
-        val settlement = remember(uiState.dmNotes) { viewModel.getChoirSettlement() }
-        val activeChar = remember(uiState.activeEncounter) {
-            uiState.activeEncounter?.creatures?.firstNotNullOfOrNull { 
-                com.deckapp.core.domain.usecase.ChoirCharacterCodec.read(it.notes)
-            }
-        }
-        com.deckapp.core.ui.components.ChoirIncursionDialog(
-            initialIncursion = incursion,
-            initialSettlement = settlement,
-            activeCharacter = activeChar,
-            onSave = { inc, set, ch ->
-                viewModel.saveChoirIncursion(inc, set, ch)
-                showIncursionDialog = false
-            },
-            onDismiss = { showIncursionDialog = false }
-        )
-    }
+    var returnToGuideAfterIncursion by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier
@@ -214,146 +191,31 @@ fun SessionScreen(
             },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = uiState.session?.name ?: "Sesión",
-                                style = MaterialTheme.typography.titleMedium,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            val elapsedText = remember(uiState.sessionElapsedMinutes) {
-                                val h = uiState.sessionElapsedMinutes / 60
-                                val m = uiState.sessionElapsedMinutes % 60
-                                if (h > 0) "${h}h ${m}m" else "${m}m"
-                            }
-                            Surface(
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f),
-                                shape = CircleShape
-                            ) {
-                                Text(
-                                    text = elapsedText,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                        if (uiState.mainViewMode == SessionViewMode.MYTHIC_LOG) {
-                            uiState.linkedMythicSession?.let { mythic ->
-                                Text("Mythic: ${mythic.name} (Caos ${mythic.chaosFactor})",
-                                    style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
-                            }
-                        }
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onSessionEnd) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
-                },
-                actions = {
-                    // Undo button — visible only after a DRAW action
-                    AnimatedVisibility(visible = uiState.canUndo) {
-                        IconButton(onClick = { viewModel.undoLastDraw() }) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.Undo,
-                                contentDescription = "Deshacer último robo",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-
-                    // Switcher de Modo Central (Mesa vs Mapa Táctico vs Hexploración vs Oráculo)
-                    Row(
-                        modifier = Modifier
-                            .padding(end = 8.dp)
-                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), MaterialTheme.shapes.medium)
-                    ) {
-                        IconButton(
-                            onClick = { viewModel.setMainViewMode(SessionViewMode.BOARD) },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                contentColor = if (uiState.mainViewMode == SessionViewMode.BOARD) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        ) { Icon(Icons.Default.Dashboard, contentDescription = "Mesa de Juego") }
-
-                        IconButton(
-                            onClick = { viewModel.setMainViewMode(SessionViewMode.TACTICAL) },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                contentColor = if (uiState.mainViewMode == SessionViewMode.TACTICAL) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        ) { Icon(Icons.Default.GridOn, contentDescription = "Mapa Táctico de Batalla") }
-
-                        IconButton(
-                            onClick = { viewModel.setMainViewMode(SessionViewMode.MAP) },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                contentColor = if (uiState.mainViewMode == SessionViewMode.MAP) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        ) { Icon(Icons.Default.Explore, contentDescription = "Mapa de Exploración HPL") }
-
-                        IconButton(
-                            onClick = { viewModel.setMainViewMode(SessionViewMode.MYTHIC_LOG) },
-                            enabled = uiState.linkedMythicSession != null,
-                            colors = IconButtonDefaults.iconButtonColors(
-                                contentColor = if (uiState.mainViewMode == SessionViewMode.MYTHIC_LOG) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        ) { Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = "Oráculo Mythic") }
-                    }
-
-                    // Asistente de Encuadre de Escenas (Sprint 60)
-                    FilledTonalButton(
-                        onClick = viewModel::openSceneFraming,
-                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                        modifier = Modifier.padding(end = 4.dp).height(36.dp)
-                    ) {
-                        Icon(Icons.Default.HistoryEdu, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text("Escena", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
-                    }
-
-                    // Choir of Flesh (Sprint 65)
-                    if (uiState.session?.gameSystems?.any { it.contains("Choir", ignoreCase = true) } == true) {
-                        FilledTonalButton(
-                            onClick = { showChoirDialog = true },
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                            colors = ButtonDefaults.filledTonalButtonColors(
-                                containerColor = Color(0xFF380808),
-                                contentColor = Color(0xFFD4AF37)
-                            ),
-                            modifier = Modifier.padding(end = 4.dp).height(36.dp)
-                        ) {
-                            Icon(Icons.Default.Shield, contentDescription = null, modifier = Modifier.size(15.dp))
-                            Spacer(Modifier.width(4.dp))
-                            Text("Inquebrantable", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
-                        }
-
-                        FilledTonalButton(
-                            onClick = { showIncursionDialog = true },
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                            colors = ButtonDefaults.filledTonalButtonColors(
-                                containerColor = Color(0xFF2B0A0A),
-                                contentColor = Color(0xFFD4AF37)
-                            ),
-                            modifier = Modifier.padding(end = 4.dp).height(36.dp)
-                        ) {
-                            Icon(Icons.Default.Explore, contentDescription = null, modifier = Modifier.size(15.dp))
-                            Spacer(Modifier.width(4.dp))
-                            Text("Incursión", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
-                        }
-                    }
-
-                    IconButton(onClick = viewModel::openSpotlight) {
-                        Icon(Icons.Default.Search, contentDescription = "Búsqueda Rápida Spotlight (Ctrl+K)")
-                    }
-                    IconButton(onClick = onShowDiceRoller) { Icon(Icons.Default.Casino, null) }
-                    IconButton(
-                        onClick = { uiState.session?.id?.let(onHistoryClick) },
-                        enabled = uiState.session != null
-                    ) { Icon(Icons.Default.History, contentDescription = "Historial de sesión") }
-                    IconButton(onClick = { viewModel.openSessionConfig() }) { Icon(Icons.Default.Settings, null) }
-                }
+            Column {
+            SessionTopBar(
+                session = uiState.session,
+                sessionElapsedMinutes = uiState.sessionElapsedMinutes,
+                canUndo = uiState.canUndo,
+                mainViewMode = uiState.mainViewMode,
+                linkedMythicSession = uiState.linkedMythicSession,
+                onSessionEnd = onSessionEnd,
+                onUndo = viewModel::undoLastDraw,
+                onSetMainViewMode = viewModel::setMainViewMode,
+                onOpenSceneFraming = viewModel::openSceneFraming,
+                onOpenChoirDialog = { showChoirDialog = true },
+                onOpenIncursionDialog = { showIncursionDialog = true },
+                onOpenChoirProcedures = viewModel.choirGuideDelegate::open,
+                onOpenSpotlight = viewModel::openSpotlight,
+                onShowDiceRoller = onShowDiceRoller,
+                onHistoryClick = { uiState.session?.id?.let(onHistoryClick) },
+                onOpenSessionConfig = viewModel::openSessionConfig
             )
+            if (uiState.session?.gameSystems?.any { it.contains("Choir", true) } == true) {
+                com.deckapp.feature.draw.components.ChoirProcedureBar(
+                    uiState.boardMemory.choirGuide, viewModel.choirGuideDelegate::open
+                )
+            }
+            }
         }
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize()) {
@@ -372,6 +234,7 @@ fun SessionScreen(
 
             val rightTitle = when(uiState.activeRightSidebar) {
                 SidebarTool.NOTES -> "Notas de Sesión"
+                SidebarTool.REFERENCES -> "Compendio & Reglas"
                 SidebarTool.JOURNAL -> "Diario de Viaje"
                 SidebarTool.WIKI -> "Lore del Mundo"
                 SidebarTool.NPCS -> "Personajes (NPCs)"
@@ -397,23 +260,29 @@ fun SessionScreen(
                         onEditTable = onEditTable,
                         onImportTable = { onImportTable(uiState.sessionId) }
                     )
-                    SidebarTool.COMBAT -> if (uiState.activeEncounter != null) {
-                        CombatTab(
-                            encounter = uiState.activeEncounter!!,
-                            players = uiState.playerParticipants,
-                            log = uiState.combatLog,
-                            onChoirCharacterCommand = viewModel::updateChoirCharacter,
-                            onChoirStateChange = viewModel::updateChoirCombatState,
-                            onApplyDamage = viewModel::applyDamage,
-                            onNextTurn = viewModel::nextTurn,
-                            onToggleCondition = viewModel::toggleCondition,
-                            onEndEncounter = viewModel::endEncounter,
-                            onAddPlayer = viewModel::addPlayerParticipant,
-                            onRemovePlayer = viewModel::removePlayerParticipant,
-                            onChoirCombatAftermath = { creatureId, request ->
-                                viewModel.applyChoirCombatAftermath(creatureId, request)
-                            }
-                        )
+                    SidebarTool.COMBAT -> {
+                        if (uiState.activeEncounter != null) {
+                            CombatTab(
+                                encounter = uiState.activeEncounter!!,
+                                players = uiState.playerParticipants,
+                                log = uiState.combatLog,
+                                onChoirCharacterCommand = viewModel::updateChoirCharacter,
+                                onChoirStateChange = viewModel::updateChoirCombatState,
+                                onApplyDamage = viewModel::applyDamage,
+                                onNextTurn = viewModel::nextTurn,
+                                onToggleCondition = viewModel::toggleCondition,
+                                onEndEncounter = viewModel::endEncounter,
+                                onAddPlayer = viewModel::addPlayerParticipant,
+                                onRemovePlayer = viewModel::removePlayerParticipant,
+                                onChoirCombatAftermath = { creatureId, request ->
+                                    viewModel.applyChoirCombatAftermath(creatureId, request)
+                                }
+                            )
+                        } else {
+                            CombatEmptyState(
+                                onStartQuickCombat = { viewModel.startQuickCombat() }
+                            )
+                        }
                     }
                     else -> {}
                 }
@@ -425,36 +294,23 @@ fun SessionScreen(
                         notes = uiState.dmNotes,
                         isSaving = uiState.isSavingNotes,
                         onNotesChange = viewModel::updateNotes,
-                        onAddQuickNote = viewModel::showQuickNote
+                        onAddQuickNote = viewModel::showQuickNote,
+                        initialMode = NotesTabMode.NOTES
                     )
-                    SidebarTool.JOURNAL -> {
-                        val journalTool = tools.find { it.id == "journal" }
-                        if (journalTool != null) {
-                            val context = SessionToolContext(
-                                sessionId = uiState.sessionId,
-                                onNavigateTo = { /* navegar */ },
-                                onShowDiceRoller = onShowDiceRoller,
-                                onRollTable = viewModel::rollActiveTable,
-                                onDrawCard = viewModel::drawCardFromDeck,
-                                onNpcClick = { npcId ->
-                                    npcHistory.clear()
-                                    uiState.npcs.find { it.id == npcId }?.let { npcHistory.add(it) }
-                                },
-                                onWikiClick = { /* wiki */ },
-                                onStartEncounter = { encounterId ->
-                                    viewModel.startEncounterFromScene(encounterId)
-                                },
-                                onRollDice = viewModel::rollSmartDice,
-                                onPrepareSceneForBoard = viewModel::prepareSceneForBoard,
-                                isSidebarOpen = isAnySidebarOpen
-                            )
-                            journalTool.content(context)
-                        } else {
-                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                Text("Log Cronológico de HPL", style = MaterialTheme.typography.bodyMedium)
-                            }
-                        }
-                    }
+                    SidebarTool.REFERENCES -> ReferenceTab(
+                        sessionGameSystems = uiState.session?.gameSystems ?: emptyList(),
+                        onEditTable = onEditReferenceTable,
+                        onEditRule = onEditSystemRule,
+                        onNewTable = { onNewReferenceTable(uiState.session?.gameSystems?.firstOrNull() ?: "") },
+                        onNewRule = { onNewSystemRule(uiState.session?.gameSystems?.firstOrNull() ?: "") }
+                    )
+                    SidebarTool.JOURNAL -> NotesTab(
+                        notes = uiState.dmNotes,
+                        isSaving = uiState.isSavingNotes,
+                        onNotesChange = viewModel::updateNotes,
+                        onAddQuickNote = viewModel::showQuickNote,
+                        initialMode = NotesTabMode.ACTIVITY
+                    )
                     SidebarTool.WIKI -> WikiTab()
                     SidebarTool.NPCS -> NpcsTab(
                         npcs = uiState.npcs,
@@ -485,7 +341,7 @@ fun SessionScreen(
                             uiState.npcs.find { it.id == npcId }?.let { npcHistory.add(it) }
                         },
                         onWikiClick = { wikiId ->
-                            // Open Wiki quick view
+                            peekingWikiEntry = uiState.wikiEntries.find { it.id == wikiId }
                         },
                         onStartEncounter = { encounterId ->
                             viewModel.startEncounterFromScene(encounterId)
@@ -510,8 +366,25 @@ fun SessionScreen(
                                 onSendThreadToNotes = viewModel::sendMythicThreadToNotes,
                                 modifier = Modifier.fillMaxSize()
                             )
-                        } ?: Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("Vincula una crónica de Mythic para ver el contexto", style = MaterialTheme.typography.bodyMedium)
+                        } ?: Box(Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(Icons.Default.AutoAwesome, null, modifier = Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary)
+                                Text("Sin crónica Mythic vinculada", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                                Text(
+                                    "Vincula o crea una crónica para gestionar hilos de trama y personajes.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                )
+                                Button(onClick = viewModel::openSessionConfig) {
+                                    Icon(Icons.Default.Link, null)
+                                    Spacer(Modifier.width(6.dp))
+                                    Text("Vincular en Ajustes")
+                                }
+                            }
                         }
                     }
                     else -> {}
@@ -555,13 +428,19 @@ fun SessionScreen(
                                     npcs = uiState.npcs,
                                     activeEncounter = uiState.activeEncounter,
                                     distanceCalculator = viewModel.tacticalMapDelegate.distanceCalculator,
-                                    onToolSelected = viewModel.tacticalMapDelegate::setTacticalTool,
+                                    onToolSelected = { tool ->
+                                        if (uiState.isHotbarExpanded) viewModel.toggleHotbarExpanded()
+                                        viewModel.tacticalMapDelegate.setTacticalTool(tool)
+                                    },
                                     onAoeShapeSelected = viewModel.tacticalMapDelegate::setAoeShape,
                                     onAoeRadiusSelected = viewModel.tacticalMapDelegate::setAoeRadius,
                                     onPersistAoE = viewModel.tacticalMapDelegate::persistCurrentAoE,
                                     onClearPersistentAoEs = viewModel.tacticalMapDelegate::clearPersistentAoEs,
                                     onAoEPositionChanged = viewModel.tacticalMapDelegate::updateAoEPosition,
-                                    onTokenSelected = viewModel.tacticalMapDelegate::selectToken,
+                                    onTokenSelected = { tok ->
+                                        if (uiState.isHotbarExpanded) viewModel.toggleHotbarExpanded()
+                                        viewModel.tacticalMapDelegate.selectToken(tok)
+                                    },
                                     onTokenMoved = viewModel.tacticalMapDelegate::moveToken,
                                     onTokenHpChanged = viewModel.tacticalMapDelegate::updateTokenHp,
                                     onTokenConditionToggled = viewModel.tacticalMapDelegate::toggleCondition,
@@ -579,8 +458,14 @@ fun SessionScreen(
                                         uiState.npcs.find { it.id == npcId }?.let { npcHistory.add(it) }
                                     },
                                     onDeleteToken = viewModel.tacticalMapDelegate::deleteToken,
-                                    onPinClicked = viewModel.tacticalMapDelegate::selectPin,
-                                    onMapClicked = viewModel.tacticalMapDelegate::openCreatePin,
+                                    onPinClicked = { pin ->
+                                        if (uiState.isHotbarExpanded) viewModel.toggleHotbarExpanded()
+                                        viewModel.tacticalMapDelegate.selectPin(pin)
+                                    },
+                                    onMapClicked = { x, y ->
+                                        if (uiState.isHotbarExpanded) viewModel.toggleHotbarExpanded()
+                                        viewModel.tacticalMapDelegate.openCreatePin(x, y)
+                                    },
                                     onAddToken = viewModel.tacticalMapDelegate::addToken,
                                     onAddTokenFromNpc = viewModel.tacticalMapDelegate::addTokenFromNpc,
                                     onSyncEncounter = viewModel.tacticalMapDelegate::syncTokensFromEncounter,
@@ -626,6 +511,16 @@ fun SessionScreen(
                                     onEditPin = viewModel.tacticalMapDelegate::openEditPin,
                                     onRollInlineFormula = viewModel.tacticalMapDelegate::rollInlineFormula,
                                     onDismissPin = { viewModel.tacticalMapDelegate.selectPin(null) },
+                                    onPinMoved = viewModel.tacticalMapDelegate::movePin,
+                                    onCreatePinFromPreset = viewModel.tacticalMapDelegate::createPinFromPreset,
+                                    onPinPresetSelected = viewModel.tacticalMapDelegate::setActivePinPreset,
+                                    onResetRoomCounter = { viewModel.tacticalMapDelegate.setNextRoomNumber(1) },
+                                    onToggleShowSecretPins = viewModel.tacticalMapDelegate::toggleShowSecretPins,
+                                    onToggleStickyPin = viewModel.tacticalMapDelegate::toggleStickyPin,
+                                    onToggleStickyPinMinimized = viewModel.tacticalMapDelegate::toggleStickyPinMinimized,
+                                    onTogglePinLocked = viewModel.tacticalMapDelegate::togglePinLocked,
+                                    onDeletePin = viewModel.tacticalMapDelegate::deletePin,
+                                    onFocusPinCoordinates = viewModel.tacticalMapDelegate::focusCameraOnCoordinates,
                                     dmNotes = uiState.dmNotes,
                                     onNotesChanged = viewModel::updateNotes,
                                     onToggleSidePanel = viewModel.tacticalMapDelegate::toggleSidePanel,
@@ -636,6 +531,10 @@ fun SessionScreen(
                                     onRollSidePanelFateCheck = viewModel.tacticalMapDelegate::rollSidePanelFateCheck,
                                     onRollSidePanelRandomEvent = viewModel.tacticalMapDelegate::rollSidePanelRandomEvent,
                                     onWikiSearchQueryChanged = viewModel.tacticalMapDelegate::setWikiSearchQuery,
+                                    isToolbarMinimized = (uiState.mainViewMode == SessionViewMode.TACTICAL && uiState.isHotbarExpanded),
+                                    onToggleToolbarMinimized = {
+                                        if (uiState.isHotbarExpanded) viewModel.toggleHotbarExpanded()
+                                    },
                                     modifier = Modifier.fillMaxSize()
                                 )
                             }
@@ -652,7 +551,25 @@ fun SessionScreen(
                                         modifier = Modifier.fillMaxSize()
                                     )
                                 } ?: Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                    Text("VINCULA UN MAPA EN CONFIGURACIÓN", style = MaterialTheme.typography.labelLarge)
+                                    Column(
+                                        modifier = Modifier.padding(24.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                                    ) {
+                                        Icon(Icons.Default.Explore, contentDescription = null, modifier = Modifier.size(56.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
+                                        Text("Sin Mapa de Hexploración", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                        Text(
+                                            "Esta sesión no tiene un mapa hexagonal vinculado para explorar casillas y terreno.",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                        )
+                                        Button(onClick = viewModel::openSessionConfig) {
+                                            Icon(Icons.Default.Settings, contentDescription = null)
+                                            Spacer(Modifier.width(8.dp))
+                                            Text("Vincular Mapa en Ajustes")
+                                        }
+                                    }
                                 }
                             }
                             SessionViewMode.MYTHIC_LOG -> {
@@ -668,7 +585,25 @@ fun SessionScreen(
                                         modifier = Modifier.fillMaxSize().padding(16.dp)
                                     )
                                 } ?: Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                    Text("VINCULA UNA SESIÓN MYTHIC", style = MaterialTheme.typography.labelLarge)
+                                    Column(
+                                        modifier = Modifier.padding(24.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                                    ) {
+                                        Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(56.dp), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
+                                        Text("Sin Sesión Mythic Vinculada", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                        Text(
+                                            "Vincula una aventura Mythic para gestionar Factor Caos, lista de hilos y personajes.",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                        )
+                                        Button(onClick = viewModel::openSessionConfig) {
+                                            Icon(Icons.Default.Settings, contentDescription = null)
+                                            Spacer(Modifier.width(8.dp))
+                                            Text("Configurar Sesión")
+                                        }
+                                    }
                                 }
                             }
                             SessionViewMode.BOARD -> {
@@ -682,7 +617,9 @@ fun SessionScreen(
                                         npcHistory.clear()
                                         uiState.npcs.find { it.id == npcId }?.let { npcHistory.add(it) }
                                     },
-                                    onWikiClick = { /* wiki */ },
+                                    onWikiClick = { wikiId ->
+                                        peekingWikiEntry = uiState.wikiEntries.find { it.id == wikiId }
+                                    },
                                     onStartEncounter = { encounterId ->
                                         viewModel.startEncounterFromScene(encounterId)
                                     },
@@ -702,13 +639,56 @@ fun SessionScreen(
                 }
             }
 
+            val topHudEncounter = if (uiState.mainViewMode == SessionViewMode.TACTICAL) null else uiState.activeEncounter
+            val threads = uiState.mythicState?.threads ?: emptyList()
+            val characters = uiState.mythicState?.characters ?: emptyList()
+            val topHudCapsuleContent = @Composable {
+                SessionTopHudCapsule(
+                    encounter = topHudEncounter,
+                    players = uiState.playerParticipants,
+                    onNextTurn = viewModel::nextTurn,
+                    onChoirCharacterCommand = viewModel::updateChoirCharacter,
+                    onChoirStateChange = viewModel::updateChoirCombatState,
+                    onApplyDamage = viewModel::applyDamage,
+                    onToggleCondition = viewModel::toggleCondition,
+                    onEndCombat = viewModel::endEncounter,
+                    onCopyRoundToDiary = viewModel::copyCombatRoundToDiary,
+                    clocks = uiState.tensionClocks,
+                    onTickClock = viewModel::tickClock,
+                    onAddClock = viewModel::openCreateClockDialog,
+                    onEditClock = viewModel::openEditClockDialog,
+                    onResetClock = viewModel::resetClock,
+                    onDeleteClock = viewModel::deleteClock,
+                    onTriggerClockNow = viewModel::triggerClockNow,
+                    onCopyClockToDiary = viewModel::copyClockImpactToDiary,
+                    threads = threads,
+                    characters = characters,
+                    selectedThreadsTab = uiState.selectedThreadsTab,
+                    lastRandomPick = uiState.lastRandomMythicPick,
+                    onSelectThreadsTab = viewModel::selectThreadsTab,
+                    onRollRandom = viewModel::rollRandomThreadOrCharacter,
+                    onClearRandomPick = viewModel::clearRandomMythicPick,
+                    onCopyRandomPickToDiary = viewModel::copyLastRandomPickToDiary,
+                    onToggleThreadResolved = viewModel::toggleMythicThreadStatus,
+                    onAddThread = viewModel::openCreateThreadDialog,
+                    onEditThread = viewModel::openEditThreadDialog,
+                    onDeleteThread = viewModel::deleteMythicThread,
+                    onAddCharacter = viewModel::openCreateCharacterDialog,
+                    onEditCharacter = viewModel::openEditCharacterDialog,
+                    onDeleteCharacter = viewModel::deleteMythicCharacter,
+                    onCopySummaryToDiary = viewModel::copyThreadsSummaryToDiary,
+                    onSendItemToNotes = viewModel::sendRawToNotes,
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                )
+            }
+
             if (isLandscape) {
                 Row(
                     modifier = Modifier.fillMaxSize(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (isLeftSidebarOpen) {
-                        Row(modifier = Modifier.fillMaxHeight().width(380.dp + 64.dp)) {
+                        Row(modifier = Modifier.fillMaxHeight().widthIn(min = 260.dp, max = 320.dp)) {
                             SidebarNavigationRail(
                                 tools = leftTools,
                                 activeTool = uiState.activeLeftSidebar,
@@ -759,11 +739,16 @@ fun SessionScreen(
                             .weight(1f)
                             .fillMaxHeight()
                     ) {
-                        centralWorkspaceContent()
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            topHudCapsuleContent()
+                            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                                centralWorkspaceContent()
+                            }
+                        }
                     }
 
                     if (isRightSidebarOpen) {
-                        Row(modifier = Modifier.fillMaxHeight().width(380.dp + 64.dp)) {
+                        Row(modifier = Modifier.fillMaxHeight().widthIn(min = 260.dp, max = 320.dp)) {
                             BentoSidebar(
                                 isVisible = true,
                                 alignment = Alignment.CenterEnd,
@@ -793,6 +778,7 @@ fun SessionScreen(
                             rightTools.forEach { (tool, icon) ->
                                 val label = when(tool) {
                                     SidebarTool.NOTES -> "Notas"
+                                    SidebarTool.REFERENCES -> "Reglas"
                                     SidebarTool.WIKI -> "Wiki"
                                     SidebarTool.JOURNAL -> "Diario"
                                     SidebarTool.MYTHIC_CONTEXT -> "Mythic"
@@ -814,10 +800,24 @@ fun SessionScreen(
                 } // end Row
             } // end if (isLandscape)
             if (!isLandscape) {
-                // Portrait: central content fills most of the screen
-                // Tool panels open as ModalBottomSheet from the bottom
-                Box(modifier = Modifier.fillMaxSize()) {
-                    centralWorkspaceContent()
+                // Portrait: central content with top capsule in normal layout flow and tools bar at bottom
+                Column(modifier = Modifier.fillMaxSize()) {
+                    topHudCapsuleContent()
+                    Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                        centralWorkspaceContent()
+                    }
+                    SessionBottomBar(
+                        activeTool = if (isLeftSidebarOpen) uiState.activeLeftSidebar else uiState.activeRightSidebar,
+                        hasActiveEncounter = uiState.activeEncounter != null,
+                        hasLinkedMythic = uiState.linkedMythicSession != null,
+                        onToolClick = { tool ->
+                            if (tool in listOf(SidebarTool.DECKS, SidebarTool.TABLES, SidebarTool.COMBAT)) {
+                                viewModel.toggleLeftSidebar(tool)
+                            } else {
+                                viewModel.toggleRightSidebar(tool)
+                            }
+                        }
+                    )
                 }
 
                 // Left tool ModalBottomSheet (Decks, Tables, Combat)
@@ -851,9 +851,11 @@ fun SessionScreen(
 
                 // Right tool ModalBottomSheet (Notes, Wiki, Journal, NPCs, Plan, Mythic)
                 if (isRightSidebarOpen) {
+                    val isNotesOrJournal = uiState.activeRightSidebar == SidebarTool.NOTES ||
+                            uiState.activeRightSidebar == SidebarTool.JOURNAL
                     ModalBottomSheet(
                         onDismissRequest = { viewModel.toggleRightSidebar(SidebarTool.NONE) },
-                        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false),
+                        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = isNotesOrJournal),
                         dragHandle = {
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
@@ -871,7 +873,7 @@ fun SessionScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .fillMaxHeight(0.72f)
+                                .fillMaxHeight(if (isNotesOrJournal) 0.92f else 0.72f)
                         ) {
                             rightSidebarContent()
                         }
@@ -885,16 +887,14 @@ fun SessionScreen(
                 }
             }
 
-            quickViewNpc?.let { npc ->
-                NpcQuickPreviewDialog(
-                    npc = npc,
-                    onDismiss = { npcHistory.clear() }
-                )
-            }
 
             // Action Hotbar / Quick Roll Dock (Sprint 59)
             val hotbarActions = uiState.session?.hotbarActions ?: defaultHotbarActions()
-            val hotbarBottomPadding = if (uiState.mainViewMode == SessionViewMode.TACTICAL) 76.dp else 12.dp
+            val hotbarBottomPadding = if (!isLandscape) {
+                if (uiState.isHotbarExpanded) 60.dp else 64.dp
+            } else if (uiState.mainViewMode == SessionViewMode.TACTICAL) {
+                if (uiState.isHotbarExpanded) 12.dp else 80.dp
+            } else 12.dp
             SessionHotbarDock(
                 actions = hotbarActions,
                 isExpanded = uiState.isHotbarExpanded,
@@ -903,476 +903,159 @@ fun SessionScreen(
                 onAddAction = viewModel::openCreateHotbarAction,
                 onEditAction = viewModel::openEditHotbarAction,
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
+                    .align(if (uiState.isHotbarExpanded) Alignment.BottomCenter else Alignment.BottomEnd)
+                    .then(if (uiState.isHotbarExpanded) Modifier.fillMaxWidth() else Modifier.wrapContentSize())
                     .padding(bottom = hotbarBottomPadding)
             )
 
-            // Threats & Threads Tracker Overlay (Sprint 62)
-            val threads = uiState.mythicState?.threads ?: emptyList()
-            val characters = uiState.mythicState?.characters ?: emptyList()
-            SessionThreadsOverlay(
-                threads = threads,
-                characters = characters,
-                isExpanded = uiState.isThreadsOverlayExpanded,
-                selectedTab = uiState.selectedThreadsTab,
-                lastRandomPick = uiState.lastRandomMythicPick,
-                onToggleExpanded = viewModel::toggleThreadsOverlayExpanded,
-                onSelectTab = viewModel::selectThreadsTab,
-                onRollRandom = viewModel::rollRandomThreadOrCharacter,
-                onClearRandomPick = viewModel::clearRandomMythicPick,
-                onCopyRandomPickToDiary = viewModel::copyLastRandomPickToDiary,
-                onToggleThreadResolved = viewModel::toggleMythicThreadStatus,
-                onAddThread = viewModel::openCreateThreadDialog,
-                onEditThread = viewModel::openEditThreadDialog,
-                onDeleteThread = viewModel::deleteMythicThread,
-                onAddCharacter = viewModel::openCreateCharacterDialog,
-                onEditCharacter = viewModel::openEditCharacterDialog,
-                onDeleteCharacter = viewModel::deleteMythicCharacter,
-                onCopySummaryToDiary = viewModel::copyThreadsSummaryToDiary,
-                onSendItemToNotes = viewModel::sendRawToNotes,
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(top = 10.dp, start = 12.dp)
-            )
 
-            // Mini-Combat Tracker Floating HUD (Sprint 63)
-            SessionCombatFloatingHud(
-                encounter = uiState.activeEncounter,
-                players = uiState.playerParticipants,
-                isExpanded = uiState.isCombatHudExpanded,
-                onToggleExpanded = viewModel::toggleCombatHudExpanded,
-                onNextTurn = viewModel::nextTurn,
-                onChoirCharacterCommand = viewModel::updateChoirCharacter,
-                            onChoirStateChange = viewModel::updateChoirCombatState,
-                onApplyDamage = viewModel::applyDamage,
-                onToggleCondition = viewModel::toggleCondition,
-                onEndCombat = viewModel::endEncounter,
-                onCopyRoundToDiary = viewModel::copyCombatRoundToDiary,
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 10.dp)
-            )
-
-            // Progress Clocks Overlay (Sprint 61)
-            SessionClocksOverlay(
-                clocks = uiState.tensionClocks,
-                isExpanded = uiState.isClocksOverlayExpanded,
-                onToggleExpanded = viewModel::toggleClocksOverlayExpanded,
-                onTickClock = viewModel::tickClock,
-                onAddClock = viewModel::openCreateClockDialog,
-                onEditClock = viewModel::openEditClockDialog,
-                onResetClock = viewModel::resetClock,
-                onDeleteClock = viewModel::deleteClock,
-                onTriggerClockNow = viewModel::triggerClockNow,
-                onCopyClockToDiary = viewModel::copyClockImpactToDiary,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(top = 10.dp, end = 12.dp)
-            )
         }
     }
 
-    peekingWikiEntry?.let { wiki ->
-        WikiQuickPreviewDialog(
-            wikiEntry = wiki,
-            onDismiss = { peekingWikiEntry = null }
-        )
-    }
-
-    peekingTable?.let { table ->
-        val lastResult = uiState.recentTableRolls.firstOrNull { it.tableId == table.id }
-        val recentResults = uiState.recentTableRolls.filter { it.tableId == table.id }
-        TableDetailSheet(
-            table = table,
-            lastResult = lastResult,
-            recentResults = recentResults,
-            isRolling = false,
-            onRoll = { viewModel.rollActiveTable(table.id) },
-            onExport = {},
-            onDismiss = { peekingTable = null }
-        )
-    }
-
-    if (uiState.showSessionConfig) {
-        SessionConfigSheet(
-            sessionName = uiState.session?.name.orEmpty(),
-            onRenameSession = viewModel::renameSession,
-            selectedSystems = uiState.session?.gameSystems ?: emptyList(),
-            onSystemsChanged = viewModel::updateGameSystems,
-            availableSystems = uiState.availableSystems,
-            boardViewLabels = uiState.session?.boardViewLabels ?: SessionBoardViewLabels(),
-            onBoardViewLabelChanged = viewModel::updateBoardViewLabel,
-            linkedMythicSession = uiState.linkedMythicSession,
-            allMythicSessions = uiState.allMythicSessions,
-            onLinkMythic = viewModel::linkMythicSession,
-            onCreateAndLinkMythic = viewModel::createAndLinkMythicSession,
-            linkedHexMapId = uiState.linkedHexMapId,
-            allHexMaps = uiState.allHexMaps,
-            onLinkHexMap = viewModel::linkHexMap,
-            onResetFloatingPanels = viewModel::resetFloatingPanels,
-            allDecks = uiState.allDecks,
-            sessionDeckRefs = uiState.deckRefs,
-            onToggleDeck = viewModel::toggleDeckInSession,
-            onDismiss = viewModel::dismissSessionConfig
-        )
-    }
-
-    if (uiState.showHotbarActionDialog) {
-        val availableTables = uiState.tablesInSession.ifEmpty { uiState.allTables }
-        HotbarActionDialog(
-            action = uiState.editingHotbarAction,
-            availableTables = availableTables,
-            availableDecks = uiState.allDecks,
-            onDismiss = viewModel::dismissHotbarActionDialog,
-            onSave = viewModel::saveHotbarAction,
-            onDelete = { actionId -> viewModel.deleteHotbarAction(actionId) }
-        )
-    }
-
-    if (uiState.showSceneFramingDialog) {
-        val activeScene = uiState.scenes.find { it.id == uiState.focusedSceneId && !it.isCompleted }
-            ?: uiState.scenes.firstOrNull { !it.isCompleted }
-        val currentChaos = uiState.linkedMythicSession?.chaosFactor ?: uiState.boardMythicChaos
-        val availableTables = uiState.tablesInSession.ifEmpty { uiState.allTables }
-
-        SceneFramingDialog(
-            currentChaos = currentChaos,
-            activeScene = activeScene,
-            availableNpcs = uiState.npcs,
-            availableTables = availableTables,
-            availableDecks = uiState.allDecks,
-            onDismiss = viewModel::dismissSceneFraming,
-            onConfirmFraming = viewModel::confirmSceneFraming
-        )
-    }
-
-    if (uiState.showClockEditDialog) {
-        ClockEditDialog(
-            clock = uiState.editingClock,
-            onDismiss = viewModel::closeClockEditDialog,
-            onSave = viewModel::saveClock
-        )
-    }
-
-    uiState.clockImpactAlert?.let { completedClock ->
-        ClockImpactDialog(
-            clock = completedClock,
-            onDismiss = viewModel::dismissClockImpactAlert,
-            onCopyToDiary = { viewModel.copyClockImpactToDiary(completedClock) },
-            onResetClock = { viewModel.resetClock(completedClock.id) },
-            onDeleteClock = { viewModel.deleteClock(completedClock.id) }
-        )
-    }
-
-    if (uiState.showThreadEditDialog) {
-        ThreadEditDialog(
-            thread = uiState.editingMythicThread,
-            onDismiss = viewModel::closeThreadDialog,
-            onSave = viewModel::saveMythicThread
-        )
-    }
-
-    if (uiState.showMythicCharacterEditDialog) {
-        MythicCharacterEditDialog(
-            character = uiState.editingMythicCharacter,
-            onDismiss = viewModel::closeCharacterDialog,
-            onSave = viewModel::saveMythicCharacter
-        )
-    }
-
-    if (uiState.showSpotlightDialog) {
-        SessionSpotlightDialog(
-            query = uiState.spotlightQuery,
-            selectedCategory = uiState.selectedSpotlightCategory,
-            results = uiState.spotlightResults,
-            selectedItem = uiState.selectedSpotlightItem,
-            lastRollResult = uiState.lastSpotlightRollResult,
-            isSearching = uiState.isSpotlightSearching,
-            onQueryChange = viewModel::updateSpotlightQuery,
-            onCategorySelect = viewModel::selectSpotlightCategory,
-            onItemSelect = viewModel::selectSpotlightItem,
-            onRollTable = viewModel::rollSpotlightTable,
-            onAddCreatureToCombat = viewModel::addSpotlightCreatureToCombat,
-            onAddNpcToCombat = viewModel::addSpotlightNpcToCombat,
-            onCopyToDiary = viewModel::copySpotlightToDiary,
-            onDismiss = viewModel::closeSpotlight
-        )
-    }
-
-    if (uiState.tacticalState.showCreatePinDialog) {
-        com.deckapp.feature.draw.tactical.TacticalPinDialog(
-            initialPin = uiState.tacticalState.pinToEdit,
-            defaultCellX = uiState.tacticalState.pendingPinCoordinates?.first ?: 0f,
-            defaultCellY = uiState.tacticalState.pendingPinCoordinates?.second ?: 0f,
-            mapId = uiState.tacticalState.map?.id ?: 0L,
-            availableTables = uiState.tacticalState.availableTables,
-            availableEncounters = uiState.tacticalState.availableEncounters,
-            availableWikiEntries = uiState.tacticalState.availableWikiEntries,
-            availableMaps = uiState.tacticalState.availableMaps,
-            onDismiss = viewModel.tacticalMapDelegate::dismissPinDialogs,
-            onSavePin = viewModel.tacticalMapDelegate::savePin
-        )
-    }
-
-    val selectedPinForSheet = uiState.tacticalState.selectedPin
-    if (selectedPinForSheet != null && uiState.tacticalState.showPinDetailDialog) {
-        com.deckapp.feature.draw.tactical.TacticalPinSheet(
-            pin = selectedPinForSheet,
-            availableTables = uiState.tacticalState.availableTables,
-            availableEncounters = uiState.tacticalState.availableEncounters,
-            availableWikiEntries = uiState.tacticalState.availableWikiEntries,
-            onDismiss = { viewModel.tacticalMapDelegate.selectPin(null) },
-            onEditPin = viewModel.tacticalMapDelegate::openEditPin,
-            onDeletePin = viewModel.tacticalMapDelegate::deletePin,
-            onUpdateExplorationState = { viewModel.tacticalMapDelegate.updatePinExplorationState(selectedPinForSheet.id, it) },
-            onRollTable = { viewModel.tacticalMapDelegate.rollPinTable(selectedPinForSheet.id) },
-            onDeleteDiscovery = { viewModel.tacticalMapDelegate.removePinDiscovery(selectedPinForSheet.id, it) },
-            onStartEncounter = { encounterId -> viewModel.startEncounterFromScene(encounterId) },
-            onPreviewWiki = { wiki -> viewModel.tacticalMapDelegate.setPreviewWikiEntry(wiki) }
-        )
-    }
-
-    if (uiState.tacticalState.showCreateMapDialog) {
-        com.deckapp.feature.draw.tactical.TacticalCreateMapDialog(
-            scenes = uiState.scenes,
-            activeSceneId = uiState.focusedSceneId,
-            onDismiss = viewModel.tacticalMapDelegate::dismissMultimapDialogs,
-            onCreateMap = { name, uri, gridType, cellSize, scaleFt, sceneId ->
-                viewModel.tacticalMapDelegate.createNewMap(name, uri, gridType, cellSize, scaleFt, sceneId)
-            }
-        )
-    }
-
-    if (uiState.tacticalState.showMapSelectorSheet) {
-        com.deckapp.feature.draw.tactical.TacticalMapSelectorSheet(
-            availableMaps = uiState.tacticalState.availableMaps,
-            currentMapId = uiState.tacticalState.map?.id,
-            scenes = uiState.scenes,
-            onSelectMap = viewModel.tacticalMapDelegate::switchMap,
-            onCreateNewMap = viewModel.tacticalMapDelegate::openCreateMapDialog,
-            onChangeMapImage = { mapId, uri -> viewModel.tacticalMapDelegate.updateMapImage(uri, mapId) },
-            onRenameMap = viewModel.tacticalMapDelegate::openRenameMapDialog,
-            onLinkScene = viewModel.tacticalMapDelegate::openLinkSceneDialog,
-            onDeleteMap = viewModel.tacticalMapDelegate::deleteMap,
-            onDismiss = viewModel.tacticalMapDelegate::dismissMapSelector
-        )
-    }
-
-    uiState.tacticalState.mapToRename?.let { map ->
-        var newMapName by remember(map.id) { mutableStateOf(map.name) }
-        AlertDialog(
-            onDismissRequest = viewModel.tacticalMapDelegate::dismissMultimapDialogs,
-            title = { Text("Renombrar Mapa") },
-            text = {
-                OutlinedTextField(
-                    value = newMapName,
-                    onValueChange = { newMapName = it },
-                    label = { Text("Nombre del mapa") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        if (newMapName.isNotBlank()) {
-                            viewModel.tacticalMapDelegate.renameMap(map.id, newMapName)
-                        }
-                    }
-                ) {
-                    Text("Guardar")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = viewModel.tacticalMapDelegate::dismissMultimapDialogs) {
-                    Text("Cancelar")
-                }
-            }
-        )
-    }
-
-    uiState.tacticalState.mapToLinkScene?.let { map ->
-        AlertDialog(
-            onDismissRequest = viewModel.tacticalMapDelegate::dismissMultimapDialogs,
-            title = { Text("Vincular Mapa a Escena") },
-            text = {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 280.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    item {
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = if (map.sceneId == null) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    viewModel.tacticalMapDelegate.linkMapToScene(map.id, null)
-                                }
-                        ) {
-                            Text(
-                                "Sin escena vinculada",
-                                modifier = Modifier.padding(12.dp),
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                    }
-                    items(uiState.scenes, key = { it.id }) { sc ->
-                        val isSelected = map.sceneId == sc.id
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    viewModel.tacticalMapDelegate.linkMapToScene(map.id, sc.id)
-                                }
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Icon(Icons.Default.Movie, contentDescription = null, modifier = Modifier.size(16.dp))
-                                Text(
-                                    sc.title,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                                )
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = {},
-            dismissButton = {
-                TextButton(onClick = viewModel.tacticalMapDelegate::dismissMultimapDialogs) {
-                    Text("Cerrar")
-                }
-            }
-        )
-    }
-
-    uiState.tacticalState.mapToDelete?.let { map ->
-        com.deckapp.feature.draw.tactical.TacticalDeleteMapConfirmDialog(
-            map = map,
-            onConfirm = { viewModel.tacticalMapDelegate.confirmDeleteMap(map.id) },
-            onDismiss = viewModel.tacticalMapDelegate::dismissDeleteMapDialog
-        )
-    }
-
+    SessionDialogsHost(
+        uiState = uiState,
+        viewModel = viewModel,
+        showChoirDialog = showChoirDialog,
+        onDismissChoirDialog = { showChoirDialog = false },
+        showIncursionDialog = showIncursionDialog,
+        onDismissIncursionDialog = {
+            showIncursionDialog = false
+            if (returnToGuideAfterIncursion) viewModel.choirGuideDelegate.open()
+            returnToGuideAfterIncursion = false
+        },
+        onOpenIncursionFromGuide = {
+            viewModel.choirGuideDelegate.close()
+            returnToGuideAfterIncursion = true
+            showIncursionDialog = true
+        },
+        peekingWikiEntry = peekingWikiEntry,
+        onDismissWikiPreview = { peekingWikiEntry = null },
+        quickViewNpc = quickViewNpc,
+        onDismissNpcPreview = { npcHistory.clear() },
+        peekingTable = peekingTable,
+        onDismissTablePreview = { peekingTable = null }
+    )
 }
 
 @Composable
-private fun DeckWorkspace(
-    uiState: SessionUiState,
-    onToggleCollapse: (Long) -> Unit,
-    onDraw: (Long) -> Unit,
-    onCardClick: (Long, Long) -> Unit,
-    onDiscard: (Long) -> Unit,
-    onRevealCard: (Long) -> Unit,
-    onRollTable: (Long) -> Unit
+fun CombatEmptyState(
+    onStartQuickCombat: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        items(uiState.deckRefs, key = { it.stackId }) { ref ->
-            val cardsInCluster = uiState.handByDeck[ref.stackId] ?: emptyList()
-            DeckClusterItem(
-                deckName = uiState.deckNames[ref.stackId] ?: "Mazo",
-                cards = cardsInCluster,
-                availableCount = uiState.deckCardCounts[ref.stackId] ?: 0,
-                isCollapsed = ref.stackId in uiState.collapsedDeckIds,
-                showTitle = uiState.session?.showCardTitles ?: true,
-                aspectRatio = uiState.deckAspectRatios[ref.stackId] ?: CardAspectRatio.STANDARD,
-                backImagePath = uiState.deckBackImages[ref.stackId],
-                sessionId = uiState.session?.id ?: 0L,
-                onToggleCollapse = { onToggleCollapse(ref.stackId) },
-                onDraw = { onDraw(ref.stackId) },
-                onCardClick = onCardClick,
-                onDiscard = onDiscard,
-                onRevealCard = onRevealCard,
-                onRollTable = onRollTable
-            )
+        Icon(
+            Icons.Default.SportsKabaddi,
+            contentDescription = null,
+            modifier = Modifier.size(56.dp),
+            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+        )
+        Spacer(Modifier.height(12.dp))
+        Text(
+            text = "Sin combate activo",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = "Inicia un combate rápido para añadir participantes, seguir turnos y gestionar iniciativa y puntos de golpe.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+        Spacer(Modifier.height(20.dp))
+        Button(
+            onClick = onStartQuickCombat,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(Icons.Default.FlashOn, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text("Iniciar Combate Rápido")
         }
-        item { Spacer(Modifier.height(80.dp)) }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DeckClusterItem(
-    deckName: String,
-    cards: List<Card>,
-    availableCount: Int,
-    isCollapsed: Boolean,
-    showTitle: Boolean,
-    aspectRatio: CardAspectRatio,
-    backImagePath: String?,
-    sessionId: Long,
-    onToggleCollapse: () -> Unit,
-    onDraw: () -> Unit,
-    onCardClick: (Long, Long) -> Unit,
-    onDiscard: (Long) -> Unit,
-    onRevealCard: (Long) -> Unit,
-    onRollTable: (Long) -> Unit
+fun JournalTab(
+    notes: String,
+    onEditNotes: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
-    ) {
-        Column {
+    if (notes.isBlank()) {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                Icons.AutoMirrored.Filled.LibraryBooks,
+                contentDescription = null,
+                modifier = Modifier.size(56.dp),
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+            )
+            Spacer(Modifier.height(12.dp))
+            Text(
+                "Diario de Viaje Vacío",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "La bitácora registrará automáticamente asaltos de combate, eventos del oráculo y tus apuntes narrativos.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+            Spacer(Modifier.height(16.dp))
+            FilledTonalButton(onClick = onEditNotes) {
+                Icon(Icons.Default.EditNote, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text("Escribir Primera Entrada")
+            }
+        }
+    } else {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(12.dp)
+        ) {
             Row(
-                modifier = Modifier.fillMaxWidth().clickable { onToggleCollapse() }.padding(16.dp),
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(deckName, style = MaterialTheme.typography.titleSmall)
-                    Text("${cards.size} en mano · $availableCount libres", style = MaterialTheme.typography.labelSmall)
+                Text(
+                    "Registro Cronológico",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                TextButton(onClick = onEditNotes) {
+                    Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text("Editar")
                 }
-                IconButton(onClick = onDraw) { Icon(Icons.Default.Add, null) }
             }
-
-            if (!isCollapsed && cards.isNotEmpty()) {
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(cards, key = { it.id }) { card ->
-                        val dismissState = rememberSwipeToDismissBoxState(
-                            confirmValueChange = {
-                                if (it != SwipeToDismissBoxValue.Settled) {
-                                    onDiscard(card.id)
-                                    true
-                                } else false
-                            }
-                        )
-
-                        SwipeToDismissBox(
-                            state = dismissState,
-                            backgroundContent = {
-                                val color = if (dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) Color.Red else Color.Red
-                                Box(Modifier.fillMaxSize().background(color.copy(alpha = 0.2f), RoundedCornerShape(8.dp)))
-                            }
-                        ) {
-                            CardItem(
-                                card = card,
-                                aspectRatio = aspectRatio,
-                                showTitle = showTitle,
-                                backImagePath = backImagePath,
-                                onClick = { onCardClick(card.id, sessionId) },
-                                onDiscard = { onDiscard(card.id) },
-                                onReveal = { onRevealCard(card.id) },
-                                onRollTable = onRollTable
-                            )
-                        }
-                    }
-                }
+            HorizontalDivider(Modifier.padding(vertical = 4.dp))
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(vertical = 8.dp)
+            ) {
+                Text(
+                    text = notes,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
             }
         }
     }

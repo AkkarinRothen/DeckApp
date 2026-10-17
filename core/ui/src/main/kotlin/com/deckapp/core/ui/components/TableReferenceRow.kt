@@ -1,6 +1,7 @@
 package com.deckapp.core.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -11,6 +12,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,7 +38,8 @@ fun TableReferenceRow(
     text: String,
     alternate: Boolean,
     selected: Boolean = false,
-    subTableLabel: String? = null
+    subTableLabel: String? = null,
+    onClick: (() -> Unit)? = null
 ) {
     val compact = LocalTableAppearance.current.density == TableDensity.COMPACT
     val accent = MaterialTheme.colorScheme.primary
@@ -50,6 +53,7 @@ fun TableReferenceRow(
         Modifier.fillMaxWidth().background(background)
             .drawBehind { if (selected) drawRect(accent, size = Size(3.dp.toPx(), size.height)) }
             .semantics { if (selected) stateDescription = "Última tirada" }
+            .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick).heightIn(min = 48.dp) else Modifier)
             .padding(horizontal = 12.dp, vertical = if (compact) 6.dp else 12.dp),
         verticalAlignment = Alignment.Top
     ) {

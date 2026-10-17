@@ -39,6 +39,8 @@ fun TacticalMapCanvas(
     onTokenMoved: (tokenId: Long, newCellX: Float, newCellY: Float) -> Unit,
     onPinClicked: (Long) -> Unit,
     onMapClicked: (cellX: Float, cellY: Float) -> Unit,
+    onPinMoved: (pinId: Long, newCellX: Float, newCellY: Float) -> Unit = { _, _, _ -> },
+    onCreatePinFromPreset: (cellX: Float, cellY: Float) -> Unit = { _, _ -> },
     onAoEPositionChanged: ((origin: Offset, angle: Float) -> Unit)? = null,
     onGuidedCalibrationPoint: ((Offset) -> Unit)? = null,
     onTerrainCellInteracted: ((col: Int, row: Int) -> Unit)? = null,
@@ -72,11 +74,23 @@ fun TacticalMapCanvas(
         onClearCameraFocus()
     }
 
+    // Auto-foco suave de cámara en coordenadas de Pin / Sala
+    LaunchedEffect(uiState.focusCameraOnCoordinates) {
+        val coords = uiState.focusCameraOnCoordinates ?: return@LaunchedEffect
+        val worldX = (coords.first * map.cellSizePx) + map.gridOffsetX
+        val worldY = (coords.second * map.cellSizePx) + map.gridOffsetY
+        panOffset = Offset(-worldX * zoom + 400f, -worldY * zoom + 300f)
+        onClearCameraFocus()
+    }
+
     // Estado local de dragging interactivo
     var draggingToken by remember { mutableStateOf<TacticalToken?>(null) }
     var dragWorldPos by remember { mutableStateOf(Offset.Zero) }
     var dragStartCell by remember { mutableStateOf<Pair<Float, Float>?>(null) }
     var currentDragDistanceFt by remember { mutableIntStateOf(0) }
+
+    var draggingPin by remember { mutableStateOf<TacticalMapPin?>(null) }
+    var dragPinWorldPos by remember { mutableStateOf(Offset.Zero) }
 
     // Medición libre interactiva
     var measureStartPos by remember { mutableStateOf<Offset?>(null) }
@@ -119,8 +133,15 @@ fun TacticalMapCanvas(
             modifier = Modifier
                 .fillMaxSize()
                 .transformable(state = transformState, enabled = uiState.activeTool == TacticalTool.NAVIGATE)
-                .pointerInput(uiState.activeTool, uiState.tokens, uiState.isGuidedCalibrationActive) {
+                .pointerInput(uiState.activeTool, uiState.tokens, uiState.pins, uiState.showSecretPins, uiState.isGuidedCalibrationActive) {
                     detectTapGestures(
+                        onLongPress = { screenOffset ->
+                            val worldX = (screenOffset.x - panOffset.x) / zoom
+                            val worldY = (screenOffset.y - panOffset.y) / zoom
+                            val cellX = (worldX - map.gridOffsetX) / map.cellSizePx
+                            val cellY = (worldY - map.gridOffsetY) / map.cellSizePx
+                            onMapClicked(cellX, cellY)
+                        },
                         onTap = { screenOffset ->
                             val worldX = (screenOffset.x - panOffset.x) / zoom
                             val worldY = (screenOffset.y - panOffset.y) / zoom
@@ -165,11 +186,12 @@ fun TacticalMapCanvas(
                                 return@detectTapGestures
                             }
 
-                            // Comprobar pines
-                            val clickedPin = uiState.pins.find { pin ->
+                            // Comprobar pines (respetando filtro de secretos)
+                            val visiblePins = uiState.pins.filter { !it.isSecret || uiState.showSecretPins }
+                            val clickedPin = visiblePins.find { pin ->
                                 val pinPxX = (pin.cellX * map.cellSizePx) + map.gridOffsetX
                                 val pinPxY = (pin.cellY * map.cellSizePx) + map.gridOffsetY
-                                hypot(worldX - pinPxX, worldY - pinPxY) <= (map.cellSizePx * 0.4f)
+                                hypot(worldX - pinPxX, worldY - pinPxY) <= (map.cellSizePx * 0.45f)
                             }
                             if (clickedPin != null) {
                                 onPinClicked(clickedPin.id)
@@ -191,14 +213,16 @@ fun TacticalMapCanvas(
                                 if (uiState.activeTool == TacticalTool.AOE) {
                                     aoeLocalOrigin = worldPos
                                     onAoEPositionChanged?.invoke(worldPos, aoeLocalAngle)
-                                } else {
-                                    onMapClicked(cellX, cellY)
+                                } else if (uiState.activeTool == TacticalTool.PIN) {
+                                    val targetCellX = floor(cellX) + 0.5f
+                                    val targetCellY = floor(cellY) + 0.5f
+                                    onCreatePinFromPreset(targetCellX, targetCellY)
                                 }
                             }
                         }
                     )
                 }
-                .pointerInput(uiState.activeTool, uiState.tokens, zoom, panOffset) {
+                .pointerInput(uiState.activeTool, uiState.tokens, uiState.pins, uiState.lockedPinIds, uiState.showSecretPins, zoom, panOffset) {
                     if (uiState.activeTool == TacticalTool.TERRAIN) {
                         detectDragGestures(
                             onDragStart = { start ->
@@ -273,6 +297,43 @@ fun TacticalMapCanvas(
                                 val dy = currentDragWorld.y - aoeLocalOrigin.y
                                 aoeLocalAngle = (atan2(dy, dx) * 180f / PI.toFloat())
                                 onAoEPositionChanged?.invoke(aoeLocalOrigin, aoeLocalAngle)
+                            }
+                        )
+                    } else if (uiState.activeTool == TacticalTool.PIN) {
+                        detectDragGestures(
+                            onDragStart = { startOffset ->
+                                val worldX = (startOffset.x - panOffset.x) / zoom
+                                val worldY = (startOffset.y - panOffset.y) / zoom
+                                val visiblePins = uiState.pins.filter { !it.isSecret || uiState.showSecretPins }
+                                val touchedPin = visiblePins.find { pin ->
+                                    val pinPxX = (pin.cellX * map.cellSizePx) + map.gridOffsetX
+                                    val pinPxY = (pin.cellY * map.cellSizePx) + map.gridOffsetY
+                                    hypot(worldX - pinPxX, worldY - pinPxY) <= (map.cellSizePx * 0.45f)
+                                }
+                                if (touchedPin != null && !uiState.lockedPinIds.contains(touchedPin.id)) {
+                                    draggingPin = touchedPin
+                                    dragPinWorldPos = Offset(
+                                        (touchedPin.cellX * map.cellSizePx) + map.gridOffsetX,
+                                        (touchedPin.cellY * map.cellSizePx) + map.gridOffsetY
+                                    )
+                                }
+                            },
+                            onDrag = { change, dragAmount ->
+                                change.consume()
+                                if (draggingPin != null) {
+                                    dragPinWorldPos += (dragAmount / zoom)
+                                }
+                            },
+                            onDragEnd = {
+                                draggingPin?.let { pin ->
+                                    val snappedCellX = floor((dragPinWorldPos.x - map.gridOffsetX) / map.cellSizePx) + 0.5f
+                                    val snappedCellY = floor((dragPinWorldPos.y - map.gridOffsetY) / map.cellSizePx) + 0.5f
+                                    onPinMoved(pin.id, snappedCellX, snappedCellY)
+                                }
+                                draggingPin = null
+                            },
+                            onDragCancel = {
+                                draggingPin = null
                             }
                         )
                     } else if (uiState.activeTool != TacticalTool.NAVIGATE && uiState.activeTool != TacticalTool.ROUTE) {
@@ -514,29 +575,96 @@ fun TacticalMapCanvas(
 
             // Pines de secretos/habitaciones
             uiState.pins.forEach { pin ->
-                val pxX = (pin.cellX * map.cellSizePx) + map.gridOffsetX
-                val pxY = (pin.cellY * map.cellSizePx) + map.gridOffsetY
-                val pinRadius = map.cellSizePx * 0.28f
+                if (pin.isSecret && !uiState.showSecretPins) return@forEach
 
+                val isBeingDragged = pin.id == draggingPin?.id
+                val pxX = if (isBeingDragged) dragPinWorldPos.x else (pin.cellX * map.cellSizePx) + map.gridOffsetX
+                val pxY = if (isBeingDragged) dragPinWorldPos.y else (pin.cellY * map.cellSizePx) + map.gridOffsetY
+                val pinRadius = map.cellSizePx * 0.32f
+                val center = Offset(pxX, pxY)
+
+                val isSticky = uiState.stickyPinId == pin.id
+                val isLocked = uiState.lockedPinIds.contains(pin.id)
+
+                // Halo indicador para Pin Fijado (Sticky Note)
+                if (isSticky) {
+                    drawCircle(
+                        color = Color(0xFFFFD54F).copy(alpha = 0.35f),
+                        radius = pinRadius * 1.55f,
+                        center = center
+                    )
+                    drawCircle(
+                        color = Color(0xFFFFD54F),
+                        radius = pinRadius * 1.45f,
+                        center = center,
+                        style = Stroke(width = 2.5f / zoom)
+                    )
+                }
+
+                // Efectos según estado de exploración
+                when (pin.explorationState) {
+                    MapPinExplorationState.DISCOVERED -> {
+                        drawCircle(
+                            color = Color(0xFF00E5FF).copy(alpha = 0.3f),
+                            radius = pinRadius * 1.35f,
+                            center = center
+                        )
+                    }
+                    MapPinExplorationState.EXPLORED -> {
+                        // Resplandor sutil o marca tenue
+                    }
+                    MapPinExplorationState.UNKNOWN -> {
+                        // Estado base
+                    }
+                }
+
+                val baseColor = when (pin.explorationState) {
+                    MapPinExplorationState.EXPLORED -> Color(pin.colorHex).copy(alpha = 0.65f)
+                    else -> Color(pin.colorHex)
+                }
+
+                // Círculo base del pin
                 drawCircle(
-                    color = Color(pin.colorHex),
+                    color = baseColor,
                     radius = pinRadius,
-                    center = Offset(pxX, pxY)
-                )
-                drawCircle(
-                    color = Color.White,
-                    radius = pinRadius,
-                    center = Offset(pxX, pxY),
-                    style = Stroke(width = 2f / zoom)
+                    center = center
                 )
 
-                val initial = if (pin.isSecret) "?" else "!"
-                val pinFontSize = (13f / zoom).coerceIn(8f, 24f).sp
+                // Borde (guiones para pines secretos, sólido para los demás)
+                drawCircle(
+                    color = if (pin.isSecret) Color(0xFFE040FB) else Color.White,
+                    radius = pinRadius,
+                    center = center,
+                    style = Stroke(
+                        width = 2.5f / zoom,
+                        pathEffect = if (pin.isSecret) PathEffect.dashPathEffect(floatArrayOf(6f / zoom, 4f / zoom)) else null
+                    )
+                )
+
+                // Determinación del glifo o número a renderizar
+                val label = when {
+                    pin.title.startsWith("Sala ") && pin.title.removePrefix("Sala ").all { it.isDigit() } -> {
+                        pin.title.removePrefix("Sala ")
+                    }
+                    pin.title.isNotBlank() && pin.title.length <= 3 && pin.title.all { it.isDigit() || it.isLetter() } -> {
+                        pin.title
+                    }
+                    pin.iconName == "trap" -> "⚠"
+                    pin.iconName == "chest" -> "★"
+                    pin.iconName in listOf("door", "stairs", "portal") -> "⎅"
+                    pin.iconName == "skull" -> "☠"
+                    pin.iconName == "info" -> "i"
+                    pin.isSecret -> "?"
+                    else -> "!"
+                }
+
+                val pinFontSize = (if (label.length > 2) 11f else 13f) / zoom
+                val constrainedFontSize = pinFontSize.coerceIn(8f, 24f).sp
                 val textLayout = textMeasurer.measure(
-                    text = initial,
+                    text = label,
                     style = TextStyle(
-                        color = Color.Black,
-                        fontSize = pinFontSize,
+                        color = Color.White,
+                        fontSize = constrainedFontSize,
                         fontWeight = FontWeight.Bold
                     )
                 )
@@ -544,6 +672,22 @@ fun TacticalMapCanvas(
                     textLayoutResult = textLayout,
                     topLeft = Offset(pxX - textLayout.size.width / 2f, pxY - textLayout.size.height / 2f)
                 )
+
+                // Indicador de candado si está bloqueado contra arrastre
+                if (isLocked) {
+                    val lockOffset = Offset(pxX + pinRadius * 0.72f, pxY - pinRadius * 0.72f)
+                    drawCircle(
+                        color = Color(0xFF212121),
+                        radius = pinRadius * 0.36f,
+                        center = lockOffset
+                    )
+                    drawCircle(
+                        color = Color(0xFFFF5252),
+                        radius = pinRadius * 0.36f,
+                        center = lockOffset,
+                        style = Stroke(width = 1.5f / zoom)
+                    )
+                }
             }
 
             // Área de Presupuesto de Movimiento del Token en Turno Activo

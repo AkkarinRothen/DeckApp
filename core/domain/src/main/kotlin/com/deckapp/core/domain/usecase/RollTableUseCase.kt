@@ -91,9 +91,9 @@ class RollTableUseCase @Inject constructor(
             return result
         }
 
-        val entry = pickEntry(table, sessionId)
+        val (entry, rolledRangeValue) = pickEntry(table, sessionId)
         val rollValue = if (table.rollMode == TableRollMode.RANGE) {
-            entry?.minRoll ?: 1
+            rolledRangeValue ?: entry?.minRoll ?: 0
         } else {
             DiceEvaluator.evaluate(table.rollFormula)
         }
@@ -112,7 +112,8 @@ class RollTableUseCase @Inject constructor(
             tableName = table.name,
             sessionId = sessionId,
             rollValue = rollValue,
-            resolvedText = resolvedText
+            resolvedText = resolvedText,
+            selectedEntryIndex = entry?.let(table.entries::indexOf)?.takeIf { it >= 0 }
         )
         
         if (persistResult && table.id > 0) {
@@ -122,10 +123,30 @@ class RollTableUseCase @Inject constructor(
         return result
     }
 
+    /** Record a die rolled at the table by the player, without rolling the parent table again. */
+    suspend fun selectEntry(tableId: Long, entryIndex: Int, sessionId: Long,
+                            dieValue: Int? = null): TableRollResult? {
+        val table = tableRepository.getTableWithEntries(tableId) ?: return null
+        val entry = table.entries.getOrNull(entryIndex) ?: return null
+        if (table.rollMode == TableRollMode.RANGE && dieValue != null && dieValue !in entry.minRoll..entry.maxRoll)
+            return null
+        var resolvedText = resolveText(entry.text, sessionId, 0)
+        entry.subTableId?.let { id ->
+            val subResult = invoke(id, sessionId, 1, persistResult = false)
+            resolvedText = "$resolvedText → ${subResult.resolvedText}"
+        }
+        val result = TableRollResult(tableId = table.id, tableName = table.name,
+            sessionId = sessionId,
+            rollValue = if (table.rollMode == TableRollMode.RANGE) dieValue ?: entry.minRoll else entryIndex + 1,
+            resolvedText = resolvedText, selectedEntryIndex = entryIndex)
+        if (table.id > 0) tableRepository.saveRollResult(result)
+        return result
+    }
+
     // ── Selección de entrada ──────────────────────────────────────────────────
 
-    private suspend fun pickEntry(table: RandomTable, sessionId: Long?): TableEntry? {
-        if (table.entries.isEmpty()) return null
+    private suspend fun pickEntry(table: RandomTable, sessionId: Long?): Pair<TableEntry?, Int?> {
+        if (table.entries.isEmpty()) return null to null
 
         val lastResults = if (table.isNoRepeat && sessionId != null) {
             tableRepository.getRecentResultsForTable(sessionId, table.id, 5)
@@ -136,14 +157,16 @@ class RollTableUseCase @Inject constructor(
             TableRollMode.RANGE -> {
                 // En modo rango, el dado manda. Si sale repetido, re-tiramos hasta un límite.
                 var entry: TableEntry? = null
+                var rolledValue: Int? = null
                 repeat(10) {
                     val roll = DiceEvaluator.evaluate(table.rollFormula)
+                    rolledValue = roll
                     entry = table.entries.find { roll in it.minRoll..it.maxRoll }
                     if (!table.isNoRepeat || entry == null || entry?.text !in lastTexts) {
-                        return entry
+                        return entry to roll
                     }
                 }
-                entry ?: table.entries.randomOrNull()
+                (entry ?: table.entries.randomOrNull()) to rolledValue
             }
             TableRollMode.WEIGHTED -> {
                 val availableEntries = if (table.isNoRepeat) {
@@ -154,10 +177,10 @@ class RollTableUseCase @Inject constructor(
 
                 val totalWeight = availableEntries.sumOf { it.weight }.coerceAtLeast(1)
                 var pick = Random.nextInt(totalWeight)
-                availableEntries.firstOrNull { e ->
+                (availableEntries.firstOrNull { e ->
                     pick -= e.weight
                     pick < 0
-                } ?: availableEntries.randomOrNull()
+                } ?: availableEntries.randomOrNull()) to null
             }
             TableRollMode.SEQUENTIAL -> {
                 val lastResult = if (sessionId != null) {
@@ -166,17 +189,17 @@ class RollTableUseCase @Inject constructor(
                 
                 val sorted = table.entries.sortedBy { it.sortOrder }
                 if (lastResult == null) {
-                    sorted.firstOrNull()
+                    sorted.firstOrNull() to null
                 } else {
                     val lastIndex = sorted.indexOfFirst { it.text == lastResult.resolvedText }
                     if (lastIndex == -1 || lastIndex >= sorted.size - 1) {
-                        sorted.firstOrNull()
+                        sorted.firstOrNull() to null
                     } else {
-                        sorted[lastIndex + 1]
+                        sorted[lastIndex + 1] to null
                     }
                 }
             }
-            TableRollMode.MACRO -> null // No se usa en pickEntry para macros
+            TableRollMode.MACRO -> null to null // No se usa en pickEntry para macros
         }
     }
 

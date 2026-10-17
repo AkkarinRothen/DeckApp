@@ -46,22 +46,14 @@ data class ChoirIncursion(
     val nodes: List<ChoirIncursionNode> = defaultNodes(),
     val incursionNotes: String = ""
 ) {
-    val currentNode: ChoirIncursionNode? get() = nodes.getOrNull(currentNodeIndex)
+    val currentNode: ChoirIncursionNode? get() = nodes.firstOrNull { it.index == currentNodeIndex }
     val isFinished: Boolean get() = status != ChoirIncursionStatus.ACTIVE
     val canExtract: Boolean get() = currentNodeIndex > 0 && (currentNode?.state == ChoirNodeState.CLEARED || currentNode?.state == ChoirNodeState.FLED)
 
     companion object {
-        fun defaultNodes(): List<ChoirIncursionNode> = listOf(
-            ChoirIncursionNode(0, "Punto de Entrada · Campamento Base", ChoirNodeType.ENTRANCE, ChoirNodeState.CURRENT, "Umbral del asentamiento hacia la zona infectada por el Coro."),
-            ChoirIncursionNode(1, "Nodo 1: Muralla de Huesos Rotos", ChoirNodeType.EXPLORATION, description = "Vestigios de barricadas humanas cubiertas por venas palpitantes."),
-            ChoirIncursionNode(2, "Nodo 2: Charcas de Bilis y Limo", ChoirNodeType.HAZARD, description = "Gases asfixiantes y terreno digestivo inestable."),
-            ChoirIncursionNode(3, "Nodo 3: Emboscada de Despojos", ChoirNodeType.COMBAT, description = "Ecos de pasos acelerados; criaturas carroñeras de la carne."),
-            ChoirIncursionNode(4, "Nodo 4: Cripta del Monasterio Caído", ChoirNodeType.RELIC_CACHE, description = "Estatua mutilada que aún conserva una lámpara con aceite bendito."),
-            ChoirIncursionNode(5, "Nodo 5: El Corredor de Espinas", ChoirNodeType.HAZARD, description = "Costillas curvadas que forman un túnel claustrofóbico."),
-            ChoirIncursionNode(6, "Nodo 6: Nidal de Quistes", ChoirNodeType.COMBAT, description = "Masa de quistes que laten al unísono de la Canción."),
-            ChoirIncursionNode(7, "Nodo 7: Puesto de Escucha del Coro", ChoirNodeType.EXPLORATION, description = "Antena biológica que emite susurros que erosionan la mente."),
-            ChoirIncursionNode(8, "Nodo 8: Altar Central del Escatón", ChoirNodeType.BOSS_CHAMBER, description = "Cámara final donde la melodía se vuelve ensordecedora.")
-        )
+        fun defaultNodes(): List<ChoirIncursionNode> =
+            listOf(ChoirIncursionNode(0, "Entrada", ChoirNodeType.ENTRANCE, ChoirNodeState.CURRENT)) +
+                (1..8).map { ChoirIncursionNode(it, "Nodo $it") }
     }
 }
 

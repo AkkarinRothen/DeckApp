@@ -6,11 +6,23 @@ import com.deckapp.core.model.*
  * Reglas canónicas del Tablero de Incursión y Gestión del Asentamiento (Choir of Flesh).
  */
 object ChoirIncursionRules {
+    /** Conexiones impresas en Incursion Grid_clean.pdf. */
+    private val paths = mapOf(
+        0 to setOf(1, 3), 1 to setOf(0, 2, 4), 2 to setOf(1, 5),
+        3 to setOf(0, 4, 6), 4 to setOf(1, 3, 5, 7), 5 to setOf(2, 4, 8),
+        6 to setOf(3, 7), 7 to setOf(4, 6, 8), 8 to setOf(5, 7)
+    )
 
-    fun advance(incursion: ChoirIncursion): ChoirIncursion {
+    fun destinations(incursion: ChoirIncursion): List<Int> =
+        if (incursion.isFinished) emptyList() else paths[incursion.currentNodeIndex].orEmpty()
+            .filter { target -> incursion.nodes.any { it.index == target } }.sorted()
+
+    fun advance(incursion: ChoirIncursion): ChoirIncursion =
+        destinations(incursion).firstOrNull()?.let { advance(incursion, it) } ?: incursion
+
+    fun advance(incursion: ChoirIncursion, destination: Int): ChoirIncursion {
         if (incursion.isFinished) return incursion
-        val nextIndex = (incursion.currentNodeIndex + 1).coerceAtMost(8)
-        if (nextIndex == incursion.currentNodeIndex) return incursion
+        if (destination !in destinations(incursion)) return incursion
 
         val updatedNodes = incursion.nodes.map { node ->
             when (node.index) {
@@ -18,18 +30,13 @@ object ChoirIncursionRules {
                     if (node.state == ChoirNodeState.CURRENT) node.copy(state = ChoirNodeState.CLEARED)
                     else node
                 }
-                nextIndex -> node.copy(state = ChoirNodeState.CURRENT)
+                destination -> node.copy(state = ChoirNodeState.CURRENT)
                 else -> node
             }
         }
 
-        val targetNode = updatedNodes.find { it.index == nextIndex }
-        val addedSong = targetNode?.songDelta ?: 1
-        val newSong = (incursion.songLevel + addedSong).coerceIn(0, 10)
-
         return incursion.copy(
-            currentNodeIndex = nextIndex,
-            songLevel = newSong,
+            currentNodeIndex = destination,
             nodes = updatedNodes
         )
     }
@@ -50,13 +57,9 @@ object ChoirIncursionRules {
             else "${incursion.lootCollected.trim()}, ${lootFound.trim()}"
         } else incursion.lootCollected
 
-        val isBossFinal = incursion.currentNodeIndex == 8
-        val newStatus = if (isBossFinal) ChoirIncursionStatus.EXTRACTED_SUCCESS else incursion.status
-
         return incursion.copy(
             nodes = updatedNodes,
-            lootCollected = newLoot,
-            status = newStatus
+            lootCollected = newLoot
         )
     }
 
@@ -67,10 +70,7 @@ object ChoirIncursionRules {
                 node.copy(state = ChoirNodeState.FLED)
             } else node
         }
-        return incursion.copy(
-            nodes = updatedNodes,
-            songLevel = (incursion.songLevel + 1).coerceAtMost(10)
-        )
+        return incursion.copy(nodes = updatedNodes)
     }
 
     fun extractToSettlement(
@@ -80,10 +80,7 @@ object ChoirIncursionRules {
         val extractedIncursion = incursion.copy(status = ChoirIncursionStatus.EXTRACTED_SUCCESS)
         val logEntry = "Incursión '${incursion.title}' finalizada con éxito. Nodos explorados: ${incursion.currentNodeIndex}/8. Botín: ${if (incursion.lootCollected.isBlank()) "Ninguno" else incursion.lootCollected}."
 
-        val updatedSettlement = settlement.copy(
-            morale = (settlement.morale + 1).coerceAtMost(10),
-            log = settlement.log + logEntry
-        )
+        val updatedSettlement = settlement.copy(log = settlement.log + logEntry)
         return extractedIncursion to updatedSettlement
     }
 
@@ -92,46 +89,7 @@ object ChoirIncursionRules {
         settlement: ChoirSettlement? = null
     ): Pair<ChoirCharacter, ChoirSettlement?> {
         val maxVigor = ChoirCharacterRules.vigorMaximum(character)
-        val hasRations = character.rations > 0 || (settlement != null && settlement.stockRations > 0)
-
-        val updatedChar = if (character.rations > 0) {
-            character.copy(rations = character.rations - 1, vigor = maxVigor)
-        } else {
-            character.copy(vigor = maxVigor)
-        }
-
-        val updatedSettlement = if (character.rations == 0 && settlement != null && settlement.stockRations > 0) {
-            settlement.copy(stockRations = settlement.stockRations - 1)
-        } else settlement
-
-        return updatedChar to updatedSettlement
+        return character.copy(vigor = maxVigor) to settlement
     }
 
-    fun restLong(
-        character: ChoirCharacter,
-        settlement: ChoirSettlement,
-        treatmentSuccess: Boolean = true
-    ): Pair<ChoirCharacter, ChoirSettlement> {
-        val maxVigor = ChoirCharacterRules.vigorMaximum(character)
-        val rationsToSpend = 2.coerceAtMost(settlement.stockRations)
-        val medicalToSpend = 1.coerceAtMost(settlement.stockMedicalSupplies)
-
-        val updatedSettlement = settlement.copy(
-            stockRations = settlement.stockRations - rationsToSpend,
-            stockMedicalSupplies = settlement.stockMedicalSupplies - medicalToSpend
-        )
-
-        val newAnguish = (character.anguish - 2).coerceAtLeast(0)
-        val newTrauma = if (treatmentSuccess && character.trauma > 0) character.trauma - 1 else character.trauma
-
-        val updatedChar = character.copy(
-            vigor = maxVigor,
-            anguish = newAnguish,
-            trauma = newTrauma,
-            major = 0,
-            minor = 0
-        )
-
-        return updatedChar to updatedSettlement
-    }
 }

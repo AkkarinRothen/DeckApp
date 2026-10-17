@@ -128,18 +128,21 @@ fun boardBlockMeta(
         )
     }
     SessionBoardItemType.MAP -> {
-        val title = locationName ?: item.titleOverride ?: "Mapa Hexagonal"
+        val hasLinkedMap = linkedHexMapId != null
+        val title = locationName ?: item.titleOverride ?: if (hasLinkedMap) "Mapa Hexagonal" else "Sin Mapa Vinculado"
         val day = linkedMapDayNumber?.let { "Día $it" }
         val loc = linkedMapPartyLocation?.let { "Pos: $it" }
-        val subtitle = listOfNotNull(day, loc).joinToString(" · ").ifBlank { "Exploración" }
+        val subtitle = listOfNotNull(day, loc).joinToString(" · ").ifBlank {
+            if (hasLinkedMap) "Exploración" else "Toca para vincular"
+        }
         BoardBlockMeta(
             title = title,
             subtitle = subtitle,
             icon = Icons.Default.Map,
-            color = Color(0xFF795548),
-            preview = subtitle,
-            footnote = "Mapa activo",
-            ctaLabel = "Abrir"
+            color = if (hasLinkedMap) Color(0xFF795548) else Color(0xFF757575),
+            preview = if (hasLinkedMap) subtitle else "No hay un mapa asignado a esta sesión",
+            footnote = if (hasLinkedMap) "Mapa activo" else "Sin mapa vinculado",
+            ctaLabel = if (hasLinkedMap) "Abrir" else "Vincular"
         )
     }
     SessionBoardItemType.MYTHIC -> {

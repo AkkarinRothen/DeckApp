@@ -66,8 +66,8 @@ fun ChoirCombatAftermathDialog(
         else -> false
     }
 
-    val festered = if (!treatmentSucceeded && isWounded) character.minor else 0
-    val totalMajor = if (isWounded) (character.major + festered).coerceAtMost(4) else 0
+    val festered = if (!treatmentSucceeded && character.minor > 0) 1 else 0
+    val totalMajor = character.major + festered
     val traumaGained = totalMajor
 
     AlertDialog(
@@ -340,7 +340,7 @@ fun ChoirCombatAftermathDialog(
                                     Text("• Se adquiere +${character.major} Trauma por las heridas mayores.", style = MaterialTheme.typography.bodySmall)
                                 }
                             } else {
-                                Text("• $festered heridas menores supuran a mayores.", style = MaterialTheme.typography.bodySmall)
+                                Text(if (festered > 0) "• Las heridas menores infectadas causan 1 herida mayor." else "• No hay heridas menores que puedan infectarse.", style = MaterialTheme.typography.bodySmall)
                                 Text("• Se adquiere +$traumaGained Trauma (Total Trauma: ${character.trauma + traumaGained}).", style = MaterialTheme.typography.bodySmall)
                             }
                             Text("• Todas las heridas de combate serán limpiadas.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

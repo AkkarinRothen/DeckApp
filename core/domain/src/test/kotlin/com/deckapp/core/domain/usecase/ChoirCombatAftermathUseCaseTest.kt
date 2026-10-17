@@ -69,10 +69,10 @@ class ChoirCombatAftermathUseCaseTest {
 
         assertFalse(result.medicalSupplySpent)
         assertFalse(result.treatmentSucceeded)
-        assertEquals(2, result.minorFesteredToMajor)
-        // 1 major + 2 festered minor = 3 major -> 3 trauma gained
-        assertEquals(3, result.traumaGained)
-        assertEquals(4, result.updatedCharacter.trauma) // 1 previous + 3 gained
+        assertEquals(1, result.minorFesteredToMajor)
+        // Todas las heridas menores infectadas generan una sola herida mayor.
+        assertEquals(2, result.traumaGained)
+        assertEquals(3, result.updatedCharacter.trauma)
         assertEquals(0, result.updatedCharacter.major)   // Cleared
         assertEquals(0, result.updatedCharacter.minor)   // Cleared
     }

@@ -136,6 +136,31 @@ fun CombatBlockContent(
 
     var damageDialogTarget by remember { mutableStateOf<EncounterCreature?>(null) }
     var showAddPlayerDialog by remember { mutableStateOf(false) }
+    var showConfirmEndCombat by remember { mutableStateOf(false) }
+
+    if (showConfirmEndCombat) {
+        AlertDialog(
+            onDismissRequest = { showConfirmEndCombat = false },
+            title = { Text("Finalizar combate") },
+            text = { Text("¿Deseas concluir el encuentro \"${activeEncounter.name}\"? Se cerrará la iniciativa actual.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showConfirmEndCombat = false
+                        onEndEncounter()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Finalizar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showConfirmEndCombat = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 
     if (damageDialogTarget != null) {
         QuickDamageDialog(
@@ -458,7 +483,7 @@ fun CombatBlockContent(
                         Icon(Icons.Default.SkipNext, "Siguiente turno", tint = meta.color)
                     }
                     IconButton(
-                        onClick = onEndEncounter,
+                        onClick = { showConfirmEndCombat = true },
                         modifier = Modifier.size(36.dp)
                     ) {
                         Icon(Icons.Default.DeleteForever, "Terminar encuentro", tint = MaterialTheme.colorScheme.error)

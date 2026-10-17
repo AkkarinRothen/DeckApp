@@ -47,6 +47,7 @@ data class TablesUiState(
     val selectedTableIds: Set<Long> = emptySet(),
     val searchQuery: String = "",
     val activeTable: RandomTable? = null,
+    val autoRollOnOpen: Boolean = false,
     val sessionTableIds: Set<Long> = emptySet(),
     val showAllTables: Boolean = true,
     val isGridView: Boolean = false,
@@ -285,7 +286,15 @@ class TablesViewModel @Inject constructor(
     }
 
     fun clearSelection() = _uiState.update { it.copy(selectedTableIds = emptySet()) }
-    fun openTable(table: RandomTable) = _uiState.update { it.copy(activeTable = table) }
+    fun openTable(table: RandomTable) = _uiState.update { it.copy(activeTable = table, autoRollOnOpen = false) }
+
+    fun openTableForRoll(tableId: Long) {
+        viewModelScope.launch {
+            tableRepository.getTableWithEntries(tableId)?.let { table ->
+                _uiState.update { it.copy(activeTable = table, autoRollOnOpen = true) }
+            }
+        }
+    }
     
     fun openTableByName(name: String) {
         viewModelScope.launch {
@@ -298,7 +307,7 @@ class TablesViewModel @Inject constructor(
         }
     }
 
-    fun closeTable() = _uiState.update { it.copy(activeTable = null) }
+    fun closeTable() = _uiState.update { it.copy(activeTable = null, autoRollOnOpen = false) }
 
     fun togglePin(table: RandomTable) {
         viewModelScope.launch {
@@ -386,6 +395,22 @@ class TablesViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.update { it.copy(isRolling = false) }
             }
+        }
+    }
+
+    fun selectTableEntry(tableId: Long, entryIndex: Int, sessionId: Long, dieValue: Int?) {
+        viewModelScope.launch {
+            val result = rollTableUseCase.selectEntry(tableId, entryIndex, sessionId, dieValue)
+                ?: run {
+                    _uiState.update { it.copy(snackbarMessage = "La entrada de la tabla ya no está disponible") }
+                    return@launch
+                }
+            addQuickNoteUseCase(
+                content = "[${result.tableName}] Elección manual (${result.rollValue}): ${result.resolvedText}",
+                sessionId = sessionId
+            )
+            _uiState.update { state -> state.copy(lastResult = result,
+                quickRollResults = state.quickRollResults + (tableId to result)) }
         }
     }
 

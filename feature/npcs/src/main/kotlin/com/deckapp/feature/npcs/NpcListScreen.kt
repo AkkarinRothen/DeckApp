@@ -70,12 +70,15 @@ fun NpcListScreen(
     }
 
     if (peekedNpc != null) {
-        ModalBottomSheet(onDismissRequest = { peekedNpc = null }) {
-            NpcPeekContent(npc = peekedNpc!!, onEdit = { 
-                onEditNpc(peekedNpc!!.id)
+        com.deckapp.core.ui.components.NpcDetailSheet(
+            npc = peekedNpc!!,
+            onDismiss = { peekedNpc = null },
+            onEdit = {
+                val id = peekedNpc!!.id
                 peekedNpc = null
-            })
-        }
+                onEditNpc(id)
+            }
+        )
     }
 
     Scaffold(

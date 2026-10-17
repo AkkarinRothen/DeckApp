@@ -93,10 +93,18 @@ data class TacticalUiState(
     val pendingPinCoordinates: Pair<Float, Float>? = null,
     val pinToEdit: TacticalMapPin? = null,
     val showMapSettingsDialog: Boolean = false,
+    // Mejoras de Pines y Dungeon Keying
+    val activePinPreset: TacticalPinPreset = TacticalPinPreset.ROOM_AUTO,
+    val nextRoomNumber: Int = 1,
+    val showSecretPins: Boolean = true,
+    val stickyPinId: Long? = null,
+    val isStickyPinMinimized: Boolean = false,
+    val lockedPinIds: Set<Long> = emptySet(),
     // Gestión Multimapa de la Sesión y Vínculo con Escenas
     val availableMaps: List<TacticalMap> = emptyList(),
     val mapBreadcrumbs: List<Pair<Long, String>> = emptyList(),
     val focusCameraOnTokenId: Long? = null,
+    val focusCameraOnCoordinates: Pair<Float, Float>? = null,
     val showMapSelectorSheet: Boolean = false,
     val showCreateMapDialog: Boolean = false,
     val mapToRename: TacticalMap? = null,
@@ -129,6 +137,7 @@ data class TacticalUiState(
 ) {
     val selectedToken: TacticalToken? get() = tokens.find { it.id == selectedTokenId }
     val selectedPin: TacticalMapPin? get() = pins.find { it.id == selectedPinId }
+    val stickyPin: TacticalMapPin? get() = pins.find { it.id == stickyPinId }
     val targetingAttackerToken: TacticalToken? get() = tokens.find { it.id == targetingAttackerTokenId }
     val pendingAttackTargetToken: TacticalToken? get() = tokens.find { it.id == pendingAttackTargetTokenId }
 
@@ -141,7 +150,22 @@ data class TacticalUiState(
         }
 }
 
+enum class TacticalPinPreset(
+    val label: String,
+    val iconName: String,
+    val colorHex: Long,
+    val isSecret: Boolean
+) {
+    ROOM_AUTO("Sala", "room", 0xFFFFA000L, true),
+    TRAP("Trampa", "trap", 0xFFFF5252L, true),
+    TREASURE("Tesoro", "chest", 0xFFFFD700L, true),
+    DOOR_SUBMAP("Puerta", "door", 0xFF00E5FFL, false),
+    COMBAT("Encuentro", "skull", 0xFFE91E63L, true),
+    LORE_NOTE("Lore", "info", 0xFFAB47BCL, false)
+}
+
 enum class TacticalSidePanelTab {
+    PINS,
     NOTES_WIKI,
     DICE,
     MYTHIC,

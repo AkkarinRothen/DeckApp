@@ -46,6 +46,7 @@ fun SessionClocksOverlay(
     onDeleteClock: (clockId: Long) -> Unit,
     onTriggerClockNow: (TensionClock) -> Unit,
     onCopyClockToDiary: (TensionClock) -> Unit,
+    showHeaderPill: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
@@ -56,7 +57,8 @@ fun SessionClocksOverlay(
         horizontalAlignment = Alignment.End
     ) {
         // ── Pastilla de Activación (Collapsed / Header Pill) ──────────────────
-        Surface(
+        if (showHeaderPill) {
+            Surface(
             shape = RoundedCornerShape(20.dp),
             color = Color(0xEB161920),
             border = BorderStroke(
@@ -115,6 +117,7 @@ fun SessionClocksOverlay(
                 )
             }
         }
+    }
 
         // ── Panel Flotante Expandido ──────────────────────────────────────────
         AnimatedVisibility(

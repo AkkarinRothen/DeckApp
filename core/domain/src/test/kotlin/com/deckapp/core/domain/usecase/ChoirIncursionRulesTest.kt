@@ -7,18 +7,21 @@ import org.junit.Test
 class ChoirIncursionRulesTest {
 
     @Test
-    fun `advance incursion moves to next node and updates song level`() {
+    fun `grid offers only printed passages and moves to chosen node`() {
         val inc = ChoirIncursion()
         assertEquals(0, inc.currentNodeIndex)
         assertEquals(0, inc.songLevel)
         assertEquals(ChoirNodeState.CURRENT, inc.nodes[0].state)
         assertEquals(ChoirNodeState.UNEXPLORED, inc.nodes[1].state)
 
-        val advanced = ChoirIncursionRules.advance(inc)
-        assertEquals(1, advanced.currentNodeIndex)
-        assertEquals(1, advanced.songLevel)
+        assertEquals(listOf(1, 3), ChoirIncursionRules.destinations(inc))
+        assertEquals(0, ChoirIncursionRules.advance(inc, 8).currentNodeIndex)
+        val advanced = ChoirIncursionRules.advance(inc, 3)
+        assertEquals(3, advanced.currentNodeIndex)
+        assertEquals(0, advanced.songLevel)
         assertEquals(ChoirNodeState.CLEARED, advanced.nodes[0].state)
-        assertEquals(ChoirNodeState.CURRENT, advanced.nodes[1].state)
+        assertEquals(ChoirNodeState.CURRENT, advanced.nodes[3].state)
+        assertEquals(listOf(0, 4, 6), ChoirIncursionRules.destinations(advanced))
     }
 
     @Test
@@ -30,21 +33,21 @@ class ChoirIncursionRulesTest {
         assertTrue(cleared.lootCollected.contains("Amuleto de Diente"))
         assertEquals(ChoirIncursionStatus.ACTIVE, cleared.status)
 
-        // Advance to node 8 (Boss)
+        // El nodo 8 no determina automáticamente el final de la incursión.
         var bossInc = inc.copy(currentNodeIndex = 8)
         bossInc = ChoirIncursionRules.clearCurrentNode(bossInc, "Reliquia de la Carne")
-        assertEquals(ChoirIncursionStatus.EXTRACTED_SUCCESS, bossInc.status)
+        assertEquals(ChoirIncursionStatus.ACTIVE, bossInc.status)
         assertTrue(bossInc.lootCollected.contains("Reliquia de la Carne"))
     }
 
     @Test
-    fun `extract to settlement boosts morale and logs entry`() {
-        val inc = ChoirIncursionRules.advance(ChoirIncursion())
+    fun `extract to settlement logs journey without granting invented morale`() {
+        val inc = ChoirIncursionRules.clearCurrentNode(ChoirIncursionRules.advance(ChoirIncursion()))
         val settlement = ChoirSettlement(morale = 5)
 
         val (extractedInc, updatedSettlement) = ChoirIncursionRules.extractToSettlement(inc, settlement)
         assertEquals(ChoirIncursionStatus.EXTRACTED_SUCCESS, extractedInc.status)
-        assertEquals(6, updatedSettlement.morale)
+        assertEquals(5, updatedSettlement.morale)
         assertTrue(updatedSettlement.log.isNotEmpty())
     }
 

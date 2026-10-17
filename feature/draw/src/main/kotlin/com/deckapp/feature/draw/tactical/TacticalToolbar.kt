@@ -1,6 +1,7 @@
 package com.deckapp.feature.draw.tactical
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -12,6 +13,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.deckapp.core.model.TacticalMeasureShape
@@ -29,6 +32,14 @@ fun TacticalToolbar(
     routeWaypointsCount: Int = 0,
     currentRouteDistanceFt: Int = 0,
     selectedTokenSpeedFt: Int? = null,
+    // Pines de Dungeon
+    activePinPreset: TacticalPinPreset = TacticalPinPreset.ROOM_AUTO,
+    nextRoomNumber: Int = 1,
+    showSecretPins: Boolean = true,
+    onPinPresetSelected: (TacticalPinPreset) -> Unit = {},
+    onResetRoomNumber: () -> Unit = {},
+    onToggleShowSecretPins: () -> Unit = {},
+    onOpenDungeonKey: () -> Unit = {},
     onToolSelected: (TacticalTool) -> Unit,
     onAoeShapeSelected: (TacticalMeasureShape) -> Unit,
     onAoeRadiusSelected: (Int) -> Unit,
@@ -43,11 +54,53 @@ fun TacticalToolbar(
     onRemoveLastRouteWaypoint: () -> Unit = {},
     onCommitRouteMovement: () -> Unit = {},
     onClearRoute: () -> Unit = {},
+    isSidePanelOpen: Boolean = false,
+    onToggleSidePanel: () -> Unit = {},
+    isMinimized: Boolean = false,
+    onToggleMinimize: () -> Unit = {},
     onAddTokenClicked: () -> Unit,
     onCalibrateGridClicked: () -> Unit,
     onOpenMapSettingsClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    if (isMinimized) {
+        Surface(
+            shape = RoundedCornerShape(20.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.94f),
+            tonalElevation = 6.dp,
+            shadowElevation = 8.dp,
+            modifier = modifier
+                .padding(bottom = 12.dp)
+                .clickable(onClick = onToggleMinimize)
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Handyman,
+                    contentDescription = "Expandir herramientas",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    text = "Herramientas",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowUp,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+        return
+    }
+
     Column(
         modifier = modifier.padding(bottom = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -200,6 +253,95 @@ fun TacticalToolbar(
                         Icon(Icons.Default.PushPin, contentDescription = null, modifier = Modifier.size(14.dp))
                         Spacer(Modifier.width(4.dp))
                         Text("Fijar", fontSize = 11.sp)
+                    }
+                }
+            }
+        }
+
+        // Sub-barra contextual de Pines de Dungeon
+        AnimatedVisibility(
+            visible = activeTool == TacticalTool.PIN,
+            enter = slideInVertically { it } + fadeIn(),
+            exit = slideOutVertically { it } + fadeOut()
+        ) {
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.94f),
+                tonalElevation = 6.dp,
+                shadowElevation = 8.dp
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .horizontalScroll(rememberScrollState()),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    TacticalPinPreset.entries.forEach { preset ->
+                        val isSelected = activePinPreset == preset
+                        FilterChip(
+                            selected = isSelected,
+                            onClick = { onPinPresetSelected(preset) },
+                            label = {
+                                Text(
+                                    if (preset == TacticalPinPreset.ROOM_AUTO) "Sala #$nextRoomNumber" else preset.label,
+                                    fontSize = 11.sp
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = when (preset) {
+                                        TacticalPinPreset.ROOM_AUTO -> Icons.Default.MeetingRoom
+                                        TacticalPinPreset.TRAP -> Icons.Default.Warning
+                                        TacticalPinPreset.TREASURE -> Icons.Default.Inventory2
+                                        TacticalPinPreset.DOOR_SUBMAP -> Icons.Default.DoorSliding
+                                        TacticalPinPreset.COMBAT -> Icons.Default.Dangerous
+                                        TacticalPinPreset.LORE_NOTE -> Icons.Default.Info
+                                    },
+                                    contentDescription = null,
+                                    modifier = Modifier.size(13.dp),
+                                    tint = Color(preset.colorHex)
+                                )
+                            }
+                        )
+                    }
+
+                    if (activePinPreset == TacticalPinPreset.ROOM_AUTO && nextRoomNumber > 1) {
+                        FilledTonalIconButton(
+                            onClick = onResetRoomNumber,
+                            modifier = Modifier.size(30.dp)
+                        ) {
+                            Icon(Icons.Default.RestartAlt, contentDescription = "Reiniciar a Sala 1", modifier = Modifier.size(14.dp))
+                        }
+                    }
+
+                    VerticalDivider(modifier = Modifier.height(20.dp).padding(horizontal = 2.dp))
+
+                    // Ocultar / Mostrar pines secretos
+                    FilterChip(
+                        selected = showSecretPins,
+                        onClick = onToggleShowSecretPins,
+                        label = { Text(if (showSecretPins) "Secretos Visibles" else "Secretos Ocultos", fontSize = 11.sp) },
+                        leadingIcon = {
+                            Icon(
+                                if (showSecretPins) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                contentDescription = null,
+                                modifier = Modifier.size(13.dp)
+                            )
+                        }
+                    )
+
+                    VerticalDivider(modifier = Modifier.height(20.dp).padding(horizontal = 2.dp))
+
+                    // Botón para abrir la lista de salas (Dungeon Key)
+                    FilledTonalButton(
+                        onClick = onOpenDungeonKey,
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                        modifier = Modifier.height(30.dp)
+                    ) {
+                        Icon(Icons.Default.FormatListNumbered, contentDescription = null, modifier = Modifier.size(13.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text("Índice de Salas", fontSize = 11.sp)
                     }
                 }
             }
@@ -444,6 +586,33 @@ fun TacticalToolbar(
                     onClick = onOpenMapSettingsClicked
                 ) {
                     Icon(Icons.Default.Image, contentDescription = "Fondo de Mapa")
+                }
+
+                VerticalDivider(modifier = Modifier.height(28.dp).padding(horizontal = 2.dp))
+
+                // Abrir Panel Lateral Táctico (Dados, Destino, Notas, Índice de Salas)
+                IconButton(
+                    onClick = onToggleSidePanel,
+                    colors = if (isSidePanelOpen) {
+                        IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                    } else IconButtonDefaults.iconButtonColors()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.DashboardCustomize,
+                        contentDescription = "Panel Lateral Táctico",
+                        tint = if (isSidePanelOpen) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                // Minimizar barra de herramientas
+                IconButton(
+                    onClick = onToggleMinimize
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = "Minimizar barra de herramientas",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         }

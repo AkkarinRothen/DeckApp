@@ -979,6 +979,163 @@ class TacticalMapDelegate(
         _uiState.update { it.copy(tacticalState = it.tacticalState.copy(previewWikiEntry = entry)) }
     }
 
+    fun setActivePinPreset(preset: TacticalPinPreset) {
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(activePinPreset = preset)
+            )
+        }
+    }
+
+    fun setNextRoomNumber(num: Int) {
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(nextRoomNumber = num.coerceAtLeast(1))
+            )
+        }
+    }
+
+    fun toggleShowSecretPins() {
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(
+                    showSecretPins = !state.tacticalState.showSecretPins
+                )
+            )
+        }
+    }
+
+    fun toggleStickyPin(pinId: Long) {
+        _uiState.update { state ->
+            val currentSticky = state.tacticalState.stickyPinId
+            val newSticky = if (currentSticky == pinId) null else pinId
+            state.copy(
+                tacticalState = state.tacticalState.copy(
+                    stickyPinId = newSticky,
+                    isStickyPinMinimized = false
+                )
+            )
+        }
+    }
+
+    fun toggleStickyPinMinimized() {
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(
+                    isStickyPinMinimized = !state.tacticalState.isStickyPinMinimized
+                )
+            )
+        }
+    }
+
+    fun closeStickyPin() {
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(
+                    stickyPinId = null,
+                    isStickyPinMinimized = false
+                )
+            )
+        }
+    }
+
+    fun togglePinLocked(pinId: Long) {
+        _uiState.update { state ->
+            val currentLocked = state.tacticalState.lockedPinIds
+            val updated = if (currentLocked.contains(pinId)) currentLocked - pinId else currentLocked + pinId
+            state.copy(
+                tacticalState = state.tacticalState.copy(lockedPinIds = updated)
+            )
+        }
+    }
+
+    fun movePin(pinId: Long, newCellX: Float, newCellY: Float) {
+        val tactical = _uiState.value.tacticalState
+        if (tactical.lockedPinIds.contains(pinId)) return
+        val currentPin = tactical.pins.find { it.id == pinId } ?: return
+        val updated = currentPin.copy(cellX = newCellX, cellY = newCellY)
+        scope.launch {
+            tacticalMapRepository.upsertPin(updated)
+        }
+    }
+
+    fun createPinFromPreset(cellX: Float, cellY: Float) {
+        val tactical = _uiState.value.tacticalState
+        val mapId = tactical.map?.id ?: return
+        val preset = tactical.activePinPreset
+
+        val title: String
+        val iconName: String
+        val colorHex: Long
+        val isSecret: Boolean
+        when (preset) {
+            TacticalPinPreset.ROOM_AUTO -> {
+                val roomNum = tactical.nextRoomNumber
+                setNextRoomNumber(roomNum + 1)
+                title = "Sala $roomNum"
+                iconName = "room"
+                colorHex = 0xFFFFA000L
+                isSecret = true
+            }
+            TacticalPinPreset.TRAP -> {
+                title = "Trampa"
+                iconName = "trap"
+                colorHex = 0xFFFF5252L
+                isSecret = true
+            }
+            TacticalPinPreset.TREASURE -> {
+                title = "Tesoro"
+                iconName = "chest"
+                colorHex = 0xFFFFD700L
+                isSecret = true
+            }
+            TacticalPinPreset.DOOR_SUBMAP -> {
+                title = "Puerta"
+                iconName = "door"
+                colorHex = 0xFF00E5FFL
+                isSecret = false
+            }
+            TacticalPinPreset.COMBAT -> {
+                title = "Encuentro"
+                iconName = "skull"
+                colorHex = 0xFFE91E63L
+                isSecret = true
+            }
+            TacticalPinPreset.LORE_NOTE -> {
+                title = "Nota"
+                iconName = "info"
+                colorHex = 0xFFAB47BCL
+                isSecret = false
+            }
+        }
+
+        val newPin = TacticalMapPin(
+            mapId = mapId,
+            cellX = cellX,
+            cellY = cellY,
+            title = title,
+            iconName = iconName,
+            colorHex = colorHex,
+            isSecret = isSecret,
+            explorationState = MapPinExplorationState.UNKNOWN
+        )
+
+        scope.launch {
+            tacticalMapRepository.upsertPin(newPin)
+            _uiState.update { it.copy(snackbarMessage = "Pin colocado: $title") }
+        }
+    }
+
+    fun focusCameraOnCoordinates(cellX: Float, cellY: Float) {
+        _uiState.update { state ->
+            state.copy(
+                tacticalState = state.tacticalState.copy(
+                    focusCameraOnCoordinates = Pair(cellX, cellY)
+                )
+            )
+        }
+    }
+
 
     // ==========================================
     // NIEBLA DE GUERRA (FOG OF WAR)
@@ -1608,7 +1765,12 @@ class TacticalMapDelegate(
 
     fun clearCameraFocus() {
         _uiState.update { state ->
-            state.copy(tacticalState = state.tacticalState.copy(focusCameraOnTokenId = null))
+            state.copy(
+                tacticalState = state.tacticalState.copy(
+                    focusCameraOnTokenId = null,
+                    focusCameraOnCoordinates = null
+                )
+            )
         }
     }
 

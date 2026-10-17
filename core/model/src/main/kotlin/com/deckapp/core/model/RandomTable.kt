@@ -45,7 +45,9 @@ data class TableRollResult(
     val sessionId: Long?,
     val rollValue: Int,
     val resolvedText: String,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
+    /** Ubicación transitoria para animar el resultado; el historial conserva dado y texto. */
+    val selectedEntryIndex: Int? = null
 )
 
 @Serializable

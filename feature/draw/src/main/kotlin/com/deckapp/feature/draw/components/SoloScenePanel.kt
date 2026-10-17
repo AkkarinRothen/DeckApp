@@ -1,11 +1,12 @@
 package com.deckapp.feature.draw.components
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -37,18 +38,76 @@ internal fun SoloScenePanel(
     val editingScene = if (editingSceneId == 0L) Scene(sessionId = sessionId, title = "", sortOrder = (scenes.maxOfOrNull { it.sortOrder } ?: -1) + 1)
         else scenes.firstOrNull { it.id == editingSceneId }
     val closingScene = scenes.firstOrNull { it.id == closingSceneId }
+    var isCollapsed by rememberSaveable(sessionId) { mutableStateOf(true) }
     var detailsExpanded by rememberSaveable(selectedScene?.id) { mutableStateOf(false) }
     val context = selectedScene?.soloContext()
-    OutlinedCard(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text("Escena activa", style = MaterialTheme.typography.labelSmall)
-                    Text(selectedScene?.title ?: "Prepará tu próxima escena", style = MaterialTheme.typography.titleMedium,
-                        maxLines = 1, overflow = TextOverflow.Ellipsis)
+
+    OutlinedCard(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            // Cabecera compacta siempre visible
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { isCollapsed = !isCollapsed }
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = selectedScene?.title ?: "Sin escena activa",
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Surface(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = androidx.compose.foundation.shape.CircleShape
+                        ) {
+                            Text(
+                                text = "Caos $chaos",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+                    if (isCollapsed) {
+                        val subtitle = context?.location?.ifBlank { null }
+                            ?: context?.objective?.ifBlank { null }
+                            ?: if (selectedScene != null) "Toca para ver u oracular" else "Toca para crear escena"
+                        Text(
+                            text = subtitle,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
+
+                // Selector de escena
                 Box {
-                    IconButton(onClick = { showSelector = true }, enabled = !busy, modifier = Modifier.size(48.dp)) {
+                    IconButton(onClick = { showSelector = true }, enabled = !busy, modifier = Modifier.size(36.dp)) {
                         Icon(Icons.Default.ExpandMore, contentDescription = "Elegir escena")
                     }
                     DropdownMenu(expanded = showSelector, onDismissRequest = { showSelector = false }) {
@@ -61,46 +120,66 @@ internal fun SoloScenePanel(
                         })
                     }
                 }
-            }
-            if (context != null) {
-                val overview = listOf(context.location, context.objective).filter { it.isNotBlank() }.joinToString(" · ")
-                if (overview.isNotBlank()) Text(overview, style = MaterialTheme.typography.bodySmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                if (detailsExpanded && context.situation.isNotBlank()) Text(context.situation, style = MaterialTheme.typography.bodySmall, maxLines = 3, overflow = TextOverflow.Ellipsis)
-                if (context.pendingQuestion.isNotBlank()) Text("Pregunta: ${context.pendingQuestion}", style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 2, overflow = TextOverflow.Ellipsis)
-                Text("${probability.displayLabel()} · Caos $chaos", style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    item {
-                        FilledTonalButton(onClick = { onAsk(context.pendingQuestion) },
-                            enabled = !busy && context.pendingQuestion.isNotBlank(), modifier = Modifier.heightIn(min = 48.dp)) { Text("Preguntar") }
-                    }
-                    item {
-                        TextButton(onClick = { editingSceneId = selectedScene?.id }, enabled = !busy,
-                            modifier = Modifier.heightIn(min = 48.dp)) { Text("Editar escena") }
-                    }
-                    item {
-                        TextButton(onClick = { closingSceneId = selectedScene?.id }, enabled = !busy,
-                            modifier = Modifier.heightIn(min = 48.dp)) { Text("Cerrar escena") }
-                    }
-                    item {
-                        TextButton(onClick = { detailsExpanded = !detailsExpanded }, modifier = Modifier.heightIn(min = 48.dp)) {
-                            Text(if (detailsExpanded) "Menos contexto" else "Ver contexto")
-                        }
-                    }
+
+                // Botón expandir/plegar acordeón
+                IconButton(
+                    onClick = { isCollapsed = !isCollapsed },
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        imageVector = if (isCollapsed) Icons.Default.ExpandMore else Icons.Default.ExpandLess,
+                        contentDescription = if (isCollapsed) "Expandir escena" else "Plegar escena"
+                    )
                 }
-            } else {
-                TextButton(onClick = {
-                    editingSceneId = 0L
-                }, enabled = !busy, modifier = Modifier.heightIn(min = 48.dp)) { Text("Crear escena") }
             }
-            if (lastOracleResult != null && lastOracleResult.sceneId == selectedScene?.id && lastOracleResult.question.isNotBlank()) {
-                Text("${lastOracleResult.question} → ${lastOracleResult.answerLabel}", style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 2, overflow = TextOverflow.Ellipsis)
-                TextButton(onClick = { onAppendToDiary(oracleJournalEntry(lastOracleResult)) },
-                    enabled = !busy, modifier = Modifier.heightIn(min = 48.dp)) { Text("Guardar consulta en el diario") }
+
+            // Contenido desplegado en acordeón
+            androidx.compose.animation.AnimatedVisibility(visible = !isCollapsed) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    if (context != null) {
+                        val overview = listOf(context.location, context.objective).filter { it.isNotBlank() }.joinToString(" · ")
+                        if (overview.isNotBlank()) Text(overview, style = MaterialTheme.typography.bodySmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        if (detailsExpanded && context.situation.isNotBlank()) Text(context.situation, style = MaterialTheme.typography.bodySmall, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                        if (context.pendingQuestion.isNotBlank()) Text("Pregunta: ${context.pendingQuestion}", style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        Text("${probability.displayLabel()} · Factor de Caos $chaos", style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            item {
+                                FilledTonalButton(onClick = { onAsk(context.pendingQuestion) },
+                                    enabled = !busy && context.pendingQuestion.isNotBlank(), modifier = Modifier.heightIn(min = 40.dp)) { Text("Preguntar") }
+                            }
+                            item {
+                                TextButton(onClick = { editingSceneId = selectedScene?.id }, enabled = !busy,
+                                    modifier = Modifier.heightIn(min = 40.dp)) { Text("Editar escena") }
+                            }
+                            item {
+                                TextButton(onClick = { closingSceneId = selectedScene?.id }, enabled = !busy,
+                                    modifier = Modifier.heightIn(min = 40.dp)) { Text("Cerrar escena") }
+                            }
+                            item {
+                                TextButton(onClick = { detailsExpanded = !detailsExpanded }, modifier = Modifier.heightIn(min = 40.dp)) {
+                                    Text(if (detailsExpanded) "Menos contexto" else "Ver contexto")
+                                }
+                            }
+                        }
+                    } else {
+                        TextButton(onClick = {
+                            editingSceneId = 0L
+                        }, enabled = !busy, modifier = Modifier.heightIn(min = 40.dp)) { Text("Crear escena") }
+                    }
+                    if (lastOracleResult != null && lastOracleResult.sceneId == selectedScene?.id && lastOracleResult.question.isNotBlank()) {
+                        Text("${lastOracleResult.question} → ${lastOracleResult.answerLabel}", style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        TextButton(onClick = { onAppendToDiary(oracleJournalEntry(lastOracleResult)) },
+                            enabled = !busy, modifier = Modifier.heightIn(min = 40.dp)) { Text("Guardar consulta en el diario") }
+                    }
+                    if (busy) LinearProgressIndicator(Modifier.fillMaxWidth())
+                }
             }
-            if (busy) LinearProgressIndicator(Modifier.fillMaxWidth())
         }
     }
     editingScene?.let { scene ->

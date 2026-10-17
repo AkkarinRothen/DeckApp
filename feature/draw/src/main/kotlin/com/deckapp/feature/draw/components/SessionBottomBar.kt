@@ -35,25 +35,19 @@ import com.deckapp.feature.draw.SidebarTool
 @Composable
 fun SessionBottomBar(
     activeTool: SidebarTool,
-    hasActiveEncounter: Boolean,
-    hasLinkedMythic: Boolean,
+    hasActiveEncounter: Boolean = false,
+    hasLinkedMythic: Boolean = false,
     onToolClick: (SidebarTool) -> Unit,
-    onShowDiceRoller: () -> Unit,
-    onDrawCard: () -> Unit,
-    onShowQuickNote: () -> Unit,
-    onShowSearch: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val tools = buildList {
         add(SidebarTool.DECKS to (Icons.Default.Style to "Mazos"))
         add(SidebarTool.TABLES to (Icons.Default.Casino to "Tablas"))
-        if (hasActiveEncounter) {
-            add(SidebarTool.COMBAT to (Icons.Default.CrisisAlert to "Combate"))
-        }
+        add(SidebarTool.COMBAT to (Icons.Default.CrisisAlert to "Combate"))
         add(SidebarTool.NOTES to (Icons.Default.EditNote to "Notas"))
-        add(SidebarTool.WIKI to (Icons.AutoMirrored.Filled.MenuBook to "Wiki"))
-        add(SidebarTool.JOURNAL to (Icons.AutoMirrored.Filled.LibraryBooks to "Diario"))
-        add(SidebarTool.NPCS to (Icons.Default.Groups to "NPCs"))
+        add(SidebarTool.NPCS to (Icons.Default.Groups to "PNJs"))
+        add(SidebarTool.REFERENCES to (Icons.AutoMirrored.Filled.MenuBook to "Reglas"))
+        add(SidebarTool.WIKI to (Icons.Default.Public to "Wiki"))
         add(SidebarTool.PLAN to (Icons.Default.HistoryEdu to "Plan"))
         if (hasLinkedMythic) {
             add(SidebarTool.MYTHIC_CONTEXT to (Icons.Default.AutoAwesome to "Mythic"))
@@ -74,9 +68,9 @@ fun SessionBottomBar(
         ) {
             // Tabs de herramientas scrollables
             LazyRow(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(horizontal = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 items(tools, key = { it.first.name }) { (tool, iconLabel) ->
@@ -88,50 +82,6 @@ fun SessionBottomBar(
                         onClick = { onToolClick(tool) }
                     )
                 }
-            }
-
-            // Separador vertical
-            Box(
-                modifier = Modifier
-                    .width(1.dp)
-                    .height(32.dp)
-                    .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-            )
-
-            // Acciones rápidas fijas
-            Row(
-                modifier = Modifier.padding(horizontal = 6.dp),
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                QuickActionIconButton(
-                    icon = Icons.Default.Casino,
-                    contentDescription = "Lanzar dado",
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    onClick = onShowDiceRoller
-                )
-                QuickActionIconButton(
-                    icon = Icons.Default.Style,
-                    contentDescription = "Robar carta",
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    onClick = onDrawCard
-                )
-                QuickActionIconButton(
-                    icon = Icons.Default.EditNote,
-                    contentDescription = "Nota rápida",
-                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                    onClick = onShowQuickNote
-                )
-                QuickActionIconButton(
-                    icon = Icons.Default.Search,
-                    contentDescription = "Búsqueda global",
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    onClick = onShowSearch
-                )
             }
         }
     }

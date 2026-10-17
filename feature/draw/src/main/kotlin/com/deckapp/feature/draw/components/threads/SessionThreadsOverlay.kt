@@ -59,6 +59,7 @@ fun SessionThreadsOverlay(
     onDeleteCharacter: (characterId: Long) -> Unit,
     onCopySummaryToDiary: () -> Unit,
     onSendItemToNotes: (String) -> Unit,
+    showHeaderPill: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
@@ -70,7 +71,8 @@ fun SessionThreadsOverlay(
         horizontalAlignment = Alignment.Start
     ) {
         // ── Pastilla de Activación (Collapsed / Header Pill) ──────────────────
-        Surface(
+        if (showHeaderPill) {
+            Surface(
             shape = RoundedCornerShape(20.dp),
             color = Color(0xEB161920),
             border = BorderStroke(1.dp, Color(0x33FFFFFF)),
@@ -125,6 +127,7 @@ fun SessionThreadsOverlay(
                 )
             }
         }
+    }
 
         // ── Panel Flotante Expandido ──────────────────────────────────────────
         AnimatedVisibility(

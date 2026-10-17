@@ -40,6 +40,32 @@ fun TacticalTokenHud(
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var showConfirmDeleteToken by remember { mutableStateOf(false) }
+
+    if (showConfirmDeleteToken) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDeleteToken = false },
+            title = { Text("Eliminar token") },
+            text = { Text("¿Deseas eliminar el token \"${token.name}\" del mapa táctico?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showConfirmDeleteToken = false
+                        onDeleteToken()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Eliminar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showConfirmDeleteToken = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -192,7 +218,7 @@ fun TacticalTokenHud(
                     }
 
                     // Botón borrar
-                    IconButton(onClick = onDeleteToken, modifier = Modifier.size(34.dp)) {
+                    IconButton(onClick = { showConfirmDeleteToken = true }, modifier = Modifier.size(34.dp)) {
                         Icon(
                             imageVector = Icons.Default.DeleteOutline,
                             contentDescription = "Eliminar Token",

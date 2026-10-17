@@ -47,9 +47,8 @@ fun SessionHotbarDock(
 ) {
     Column(
         modifier = modifier
-            .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = if (isExpanded) Alignment.CenterHorizontally else Alignment.End
     ) {
         // Contenido Expandido de la Barra
         AnimatedVisibility(

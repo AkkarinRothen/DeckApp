@@ -166,22 +166,22 @@ fun ChoirIncursionDialog(
                     if (selectedTab == 0) {
                         IncursionTabContent(
                             incursion = incursion,
-                            onAdvance = {
-                                incursion = ChoirIncursionRules.advance(incursion)
-                                statusMessage = "Avanzado a: ${incursion.currentNode?.title}"
+                            onAdvance = { destination ->
+                                incursion = ChoirIncursionRules.advance(incursion, destination)
+                                statusMessage = "Movimiento registrado: ${incursion.currentNode?.title}"
                             },
                             onClearNode = {
                                 showLootDialog = true
                             },
                             onFleeNode = {
                                 incursion = ChoirIncursionRules.fleeCurrentNode(incursion)
-                                statusMessage = "Huida realizada. ¡La Canción de la Carne aumenta!"
+                                statusMessage = "Huida registrada."
                             },
                             onExtract = {
                                 val (inc, set) = ChoirIncursionRules.extractToSettlement(incursion, settlement)
                                 incursion = inc
                                 settlement = set
-                                statusMessage = "¡Extracción exitosa al asentamiento! Moral +1."
+                                statusMessage = "Extracción registrada en el asentamiento."
                             },
                             onResetIncursion = {
                                 incursion = ChoirIncursion(title = "Nueva Incursión al Páramo")
@@ -197,16 +197,7 @@ fun ChoirIncursionDialog(
                                     val (upChar, upSet) = ChoirIncursionRules.restShort(character!!, settlement)
                                     character = upChar
                                     if (upSet != null) settlement = upSet
-                                    statusMessage = "Respiro breve completado: Vigor restaurado al máximo (${upChar.vigor})."
-                                }
-                            },
-                            onRestLong = { success ->
-                                if (character != null) {
-                                    val (upChar, upSet) = ChoirIncursionRules.restLong(character!!, settlement, success)
-                                    character = upChar
-                                    settlement = upSet
-                                    statusMessage = if (success) "Descanso prolongado: Angustia -2, Trauma -1, Vigor al máximo."
-                                    else "Descanso prolongado: Angustia -2, Vigor al máximo (trauma persistente)."
+                                    statusMessage = "Descanso de 6 horas registrado: Vigor restaurado (${upChar.vigor})."
                                 }
                             },
                             onRollRumor = {
@@ -297,7 +288,7 @@ fun ChoirIncursionDialog(
 @Composable
 private fun IncursionTabContent(
     incursion: ChoirIncursion,
-    onAdvance: () -> Unit,
+    onAdvance: (Int) -> Unit,
     onClearNode: () -> Unit,
     onFleeNode: () -> Unit,
     onExtract: () -> Unit,
@@ -344,11 +335,7 @@ private fun IncursionTabContent(
                 )
 
                 Text(
-                    text = when {
-                        incursion.songLevel >= 8 -> "¡Enajenación total! Las criaturas del Coro atacan con furia desenfrenada (+2 daño, pruebas de Angustia CD 14)."
-                        incursion.songLevel >= 4 -> "Los susurros vibran en los dientes y huesos. Pruebas de Angustia con desventaja."
-                        else -> "Ecos lejanos en la niebla escarlata. Comportamiento en solitario estándar."
-                    },
+                    text = "La grilla indica las conexiones; resuelve los eventos y efectos con el manual o tus tablas de sesión.",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White.copy(alpha = 0.7f)
                 )
@@ -444,19 +431,6 @@ private fun IncursionTabContent(
                             }
                         }
 
-                        if ((currentNode.state == ChoirNodeState.CLEARED || currentNode.state == ChoirNodeState.FLED) &&
-                            incursion.currentNodeIndex < 8 && !incursion.isFinished) {
-                            Button(
-                                onClick = onAdvance,
-                                modifier = Modifier.weight(1f),
-                                colors = ButtonDefaults.buttonColors(containerColor = GoldAccent, contentColor = Color.Black)
-                            ) {
-                                Icon(Icons.Default.ArrowForward, contentDescription = null, modifier = Modifier.size(16.dp))
-                                Spacer(Modifier.width(4.dp))
-                                Text("Avanzar Nodo", fontWeight = FontWeight.Bold)
-                            }
-                        }
-
                         if (incursion.canExtract && !incursion.isFinished) {
                             Button(
                                 onClick = onExtract,
@@ -466,6 +440,16 @@ private fun IncursionTabContent(
                                 Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null, modifier = Modifier.size(16.dp))
                                 Spacer(Modifier.width(4.dp))
                                 Text("Extraerse")
+                            }
+                        }
+                    }
+                    if ((currentNode.state == ChoirNodeState.CLEARED || currentNode.state == ChoirNodeState.FLED) && !incursion.isFinished) {
+                        Text("Pasajes conectados", color = GoldAccent, style = MaterialTheme.typography.labelLarge)
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            ChoirIncursionRules.destinations(incursion).forEach { destination ->
+                                OutlinedButton(onClick = { onAdvance(destination) }, modifier = Modifier.heightIn(min = 48.dp)) {
+                                    Text(if (destination == 0) "Entrada" else "Nodo $destination")
+                                }
                             }
                         }
                     }
@@ -559,7 +543,6 @@ private fun SettlementTabContent(
     settlement: ChoirSettlement,
     character: ChoirCharacter?,
     onRestShort: () -> Unit,
-    onRestLong: (Boolean) -> Unit,
     onRollRumor: () -> Unit,
     onAddFacility: (String) -> Unit
 ) {
@@ -596,7 +579,7 @@ private fun SettlementTabContent(
         }
 
         // --- Descanso y Recuperación ---
-        Text("Sanación & Descanso (pp. 62-63)", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = GoldAccent)
+        Text("Descanso y recuperación", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = GoldAccent)
 
         Surface(
             color = DarkCard,
@@ -620,23 +603,12 @@ private fun SettlementTabContent(
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32))
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("Respiro Breve", fontWeight = FontWeight.Bold)
-                            Text("Gasta 1 Ración · Vigor max", style = MaterialTheme.typography.labelSmall)
-                        }
-                    }
-
-                    Button(
-                        onClick = { onRestLong(true) },
-                        modifier = Modifier.weight(1f),
-                        enabled = character != null && settlement.stockRations >= 2,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1565C0))
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("Descanso Largo", fontWeight = FontWeight.Bold)
-                            Text("2 Raciones, 1 Med · Angustia -2", style = MaterialTheme.typography.labelSmall)
+                            Text("Descanso ≥6 horas", fontWeight = FontWeight.Bold)
+                            Text("Recupera todo el Vigor", style = MaterialTheme.typography.labelSmall)
                         }
                     }
                 }
+                Text("Para reducir Trauma, usa el procedimiento de cuidado o descanso semanal del manual y registra el resultado en la ficha.", color = Color.White.copy(alpha = 0.8f), style = MaterialTheme.typography.bodySmall)
             }
         }
 

@@ -135,10 +135,15 @@ fun TablesTab(
         val activeTable = uiState.activeTable!!
         TableDetailSheet(
             table = activeTable,
-            lastResult = uiState.lastResult,
+            lastResult = uiState.lastResult?.takeIf { it.tableId == activeTable.id }
+                ?: uiState.sessionRollLog.firstOrNull { it.tableId == activeTable.id },
             recentResults = uiState.recentResults,
             isRolling = uiState.isRolling,
+            autoRollOnOpen = uiState.autoRollOnOpen,
             onRoll = { viewModel.rollTable(activeTable.id, sessionId) },
+            onSelectEntry = if (sessionId != null) { index, die ->
+                viewModel.selectTableEntry(activeTable.id, index, sessionId, die)
+            } else null,
             onExport = { showExportDialog = true },
             onEdit = {
                 viewModel.closeTable()
@@ -226,10 +231,16 @@ fun TablesTab(
                         )
                     }
                     items(uiState.allTags) { tag ->
+                        val tagLabel = when (tag.name) {
+                            "choir_of_flesh.json" -> "Choir of Flesh"
+                            "dnd_5e_2024.json" -> "D&D 5e"
+                            "twilight_2000_4e.json" -> "Twilight 2000"
+                            else -> tag.name.removeSuffix(".json").replace("_", " ")
+                        }
                         FilterChip(
                             selected = tag.id in uiState.selectedTagIds,
                             onClick = { viewModel.toggleTagFilter(tag.id) },
-                            label = { Text(tag.name) },
+                            label = { Text(tagLabel) },
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = Color(tag.color).copy(alpha = 0.2f),
                                 selectedLabelColor = Color(tag.color)
@@ -291,10 +302,9 @@ fun TablesTab(
                                 pinnedTables = uiState.pinnedTables,
                                 recentTables = uiState.recentTables,
                                 onTableClick = { table ->
-                                    if (uiState.isSimplifiedMode) viewModel.rollTable(table.id, sessionId)
-                                    else viewModel.openTable(table)
+                                    viewModel.openTable(table)
                                 },
-                                onQuickRoll = { id -> viewModel.rollTable(id, sessionId) }
+                                onQuickRoll = viewModel::openTableForRoll
                             )
                         }
                     }
@@ -332,7 +342,7 @@ fun TablesTab(
                                     elevation = elevation,
                                     onLongClick = { 
                                         if (uiState.selectedTableIds.isEmpty() && uiState.isSimplifiedMode) {
-                                            viewModel.openTable(table)
+                                            viewModel.toggleTableSelection(table.id)
                                         } else {
                                             viewModel.toggleTableSelection(table.id)
                                         }
@@ -340,13 +350,11 @@ fun TablesTab(
                                     onClick = {
                                         if (uiState.selectedTableIds.isNotEmpty()) {
                                             viewModel.toggleTableSelection(table.id)
-                                        } else if (uiState.isSimplifiedMode) {
-                                            viewModel.rollTable(table.id, sessionId)
                                         } else {
                                             viewModel.openTable(table)
                                         }
                                     },
-                                    onQuickRoll = { viewModel.rollTable(table.id, sessionId) },
+                                    onQuickRoll = { viewModel.openTableForRoll(table.id) },
                                     onTogglePin = { viewModel.togglePin(table) },
                                     quickRollResult = uiState.quickRollResults[table.id],
                                     onDismissResult = { viewModel.clearQuickRoll(table.id) }
@@ -367,33 +375,46 @@ fun TablesTab(
                 modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)
             )
         } else {
-            Column(
+            var fabMenuExpanded by remember { mutableStateOf(false) }
+            Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = 16.dp, bottom = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                horizontalAlignment = Alignment.End
+                    .padding(end = 16.dp, bottom = 16.dp)
             ) {
-                SmallFloatingActionButton(
-                    onClick = { viewModel.setShowPackDialog(true) },
-                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-                ) {
-                    Icon(Icons.Default.AutoAwesome, contentDescription = "Packs de tablas")
-                }
-
-                SmallFloatingActionButton(
-                    onClick = onImportTable,
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                ) {
-                    Icon(Icons.Default.LibraryAdd, contentDescription = "Importar tabla")
-                }
-
                 FloatingActionButton(
-                    onClick = { onCreateTable(sessionId) }
+                    onClick = { fabMenuExpanded = true }
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Nueva tabla")
+                    Icon(Icons.Default.Add, contentDescription = "Acciones de tablas")
+                }
+
+                DropdownMenu(
+                    expanded = fabMenuExpanded,
+                    onDismissRequest = { fabMenuExpanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Nueva tabla") },
+                        leadingIcon = { Icon(Icons.Default.Add, contentDescription = null) },
+                        onClick = {
+                            fabMenuExpanded = false
+                            onCreateTable(sessionId)
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Importar tabla") },
+                        leadingIcon = { Icon(Icons.Default.LibraryAdd, contentDescription = null) },
+                        onClick = {
+                            fabMenuExpanded = false
+                            onImportTable()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Packs de tablas") },
+                        leadingIcon = { Icon(Icons.Default.AutoAwesome, contentDescription = null) },
+                        onClick = {
+                            fabMenuExpanded = false
+                            viewModel.setShowPackDialog(true)
+                        }
+                    )
                 }
             }
         }
@@ -454,43 +475,46 @@ private fun FeaturedTableCard(
 ) {
     PaperCard(
         onClick = { onClick(table) },
-        modifier = Modifier.width(160.dp),
+        modifier = Modifier.width(170.dp),
         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    Icons.Default.Casino,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Spacer(Modifier.width(6.dp))
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Default.Casino,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(Modifier.width(8.dp))
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     table.name,
-                    style = MaterialTheme.typography.labelLarge,
+                    style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                Text(
+                    table.category,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
-            
-            Spacer(Modifier.height(4.dp))
-            
-            Text(
-                table.category,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            
-            Spacer(Modifier.height(12.dp))
-            
-            FilledTonalButton(
+            IconButton(
                 onClick = { onQuickRoll(table.id) },
-                modifier = Modifier.fillMaxWidth().height(32.dp),
-                contentPadding = PaddingValues(0.dp)
+                modifier = Modifier.size(28.dp)
             ) {
-                Text("Tirar", style = MaterialTheme.typography.labelSmall)
+                Icon(
+                    Icons.Default.Refresh,
+                    contentDescription = "Tirar",
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }

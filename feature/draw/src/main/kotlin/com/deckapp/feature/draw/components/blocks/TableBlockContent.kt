@@ -59,7 +59,8 @@ fun TableBlockContent(
     randomTable: RandomTable? = null,
     pinnedTableRoll: TableRollResult? = null,
     onPinTableRoll: ((TableRollResult) -> Unit)? = null,
-    onUnpinTableRoll: (() -> Unit)? = null
+    onUnpinTableRoll: (() -> Unit)? = null,
+    onOpenTable: (() -> Unit)? = null
 ) {
     val haptic = LocalHapticFeedback.current
     val compact = item.size == SessionBoardItemSize.S ||
@@ -82,6 +83,38 @@ fun TableBlockContent(
             onTogglePin = if (isPinned) onUnpinTableRoll
                 else onPinTableRoll?.let { pin -> { pin(result) } }
         )
+    }
+
+    if (item.resourceId == null) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Icon(Icons.Default.Casino, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+            Text(
+                "Sin tabla vinculada",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                "Asigna una tabla a este bloque para tirar directamente desde la mesa.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+            if (onOpenTable != null) {
+                FilledTonalButton(
+                    onClick = onOpenTable,
+                    modifier = Modifier.padding(top = 4.dp)
+                ) {
+                    Icon(Icons.Default.Casino, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Elegir tabla")
+                }
+            }
+        }
+        return
     }
 
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {

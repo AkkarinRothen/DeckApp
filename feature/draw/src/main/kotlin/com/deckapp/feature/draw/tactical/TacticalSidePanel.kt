@@ -41,6 +41,13 @@ fun TacticalSidePanel(
     onAdvanceCombatTurn: () -> Unit,
     onSelectToken: (Long) -> Unit,
     onClose: () -> Unit,
+    onFocusPinCoordinates: (cellX: Float, cellY: Float) -> Unit = { _, _ -> },
+    onPinClicked: (Long) -> Unit = {},
+    onToggleStickyPin: (Long) -> Unit = {},
+    onTogglePinLocked: (Long) -> Unit = {},
+    onEditPin: (TacticalMapPin) -> Unit = {},
+    onDeletePin: (Long) -> Unit = {},
+    onToggleShowSecretPins: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -93,6 +100,7 @@ fun TacticalSidePanel(
             ) {
                 val tabs = listOf(
                     TacticalSidePanelTab.NOTES_WIKI to ("Notas & Wiki" to Icons.AutoMirrored.Filled.MenuBook),
+                    TacticalSidePanelTab.PINS to ("Pines (${uiState.pins.size})" to Icons.Default.LocationOn),
                     TacticalSidePanelTab.DICE to ("Dados" to Icons.Default.Casino),
                     TacticalSidePanelTab.MYTHIC to ("Mythic" to Icons.Default.AutoAwesome),
                     TacticalSidePanelTab.COMBAT to ("Combate" to Icons.Default.SportsKabaddi)
@@ -124,6 +132,21 @@ fun TacticalSidePanel(
                             wikiEntries = uiState.availableWikiEntries,
                             searchQuery = uiState.wikiSearchQuery,
                             onSearchQueryChanged = onWikiSearchQueryChanged
+                        )
+                    }
+                    TacticalSidePanelTab.PINS -> {
+                        SidePanelPinsTab(
+                            pins = uiState.pins,
+                            showSecretPins = uiState.showSecretPins,
+                            lockedPinIds = uiState.lockedPinIds,
+                            stickyPinId = uiState.stickyPinId,
+                            onFocusPinCoordinates = onFocusPinCoordinates,
+                            onPinClicked = onPinClicked,
+                            onToggleStickyPin = onToggleStickyPin,
+                            onTogglePinLocked = onTogglePinLocked,
+                            onEditPin = onEditPin,
+                            onDeletePin = onDeletePin,
+                            onToggleShowSecretPins = onToggleShowSecretPins
                         )
                     }
                     TacticalSidePanelTab.DICE -> {
@@ -703,6 +726,255 @@ private fun SidePanelCombatTab(
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(16.dp)
                         )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SidePanelPinsTab(
+    pins: List<TacticalMapPin>,
+    showSecretPins: Boolean,
+    lockedPinIds: Set<Long>,
+    stickyPinId: Long?,
+    onFocusPinCoordinates: (cellX: Float, cellY: Float) -> Unit,
+    onPinClicked: (Long) -> Unit,
+    onToggleStickyPin: (Long) -> Unit,
+    onTogglePinLocked: (Long) -> Unit,
+    onEditPin: (TacticalMapPin) -> Unit,
+    onDeletePin: (Long) -> Unit,
+    onToggleShowSecretPins: () -> Unit
+) {
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedFilter by remember { mutableStateOf("ALL") }
+
+    val filteredPins = remember(pins, searchQuery, selectedFilter, showSecretPins) {
+        pins.filter { pin ->
+            if (pin.isSecret && !showSecretPins) return@filter false
+
+            val matchesSearch = searchQuery.isBlank() ||
+                pin.title.contains(searchQuery, ignoreCase = true) ||
+                pin.description.contains(searchQuery, ignoreCase = true)
+
+            val matchesFilter = when (selectedFilter) {
+                "ROOMS" -> pin.iconName == "room" || (pin.title.startsWith("Sala ") || pin.title.all { it.isDigit() })
+                "TRAPS" -> pin.iconName == "trap"
+                "TREASURES" -> pin.iconName == "chest"
+                "COMBAT" -> pin.iconName == "skull"
+                "SECRETS" -> pin.isSecret
+                else -> true
+            }
+
+            matchesSearch && matchesFilter
+        }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        // Buscador
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            placeholder = { Text("Buscar salas, notas...", fontSize = 12.sp) },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(16.dp)) },
+            trailingIcon = {
+                if (searchQuery.isNotEmpty()) {
+                    IconButton(onClick = { searchQuery = "" }, modifier = Modifier.size(24.dp)) {
+                        Icon(Icons.Default.Clear, contentDescription = "Limpiar", modifier = Modifier.size(14.dp))
+                    }
+                }
+            },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+            textStyle = MaterialTheme.typography.bodySmall
+        )
+
+        // Filtros rápidos
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            val filterOptions = listOf(
+                "ALL" to "Todos (${pins.size})",
+                "ROOMS" to "Salas",
+                "TRAPS" to "Trampas",
+                "TREASURES" to "Tesoros",
+                "COMBAT" to "Combate",
+                "SECRETS" to "Secretos"
+            )
+            filterOptions.forEach { (key, label) ->
+                FilterChip(
+                    selected = selectedFilter == key,
+                    onClick = { selectedFilter = key },
+                    label = { Text(label, fontSize = 11.sp) }
+                )
+            }
+        }
+
+        // Barra de estado de exploración y toggle de secretos
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val exploredCount = pins.count { it.explorationState == MapPinExplorationState.EXPLORED }
+            Text(
+                text = "Exploradas: $exploredCount / ${pins.size}",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.outline
+            )
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Secretos", fontSize = 11.sp, color = MaterialTheme.colorScheme.outline)
+                IconButton(onClick = onToggleShowSecretPins, modifier = Modifier.size(24.dp)) {
+                    Icon(
+                        imageVector = if (showSecretPins) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                        contentDescription = "Alternar secretos",
+                        tint = if (showSecretPins) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+        }
+
+        HorizontalDivider()
+
+        // Lista de pines
+        if (filteredPins.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = if (searchQuery.isNotBlank()) "No se encontraron salas o pines." else "No hay pines en este mapa.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline
+                )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(filteredPins, key = { it.id }) { pin ->
+                    val isSticky = stickyPinId == pin.id
+                    val isLocked = lockedPinIds.contains(pin.id)
+
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f),
+                        border = if (isSticky) androidx.compose.foundation.BorderStroke(2.dp, Color(0xFFFFD54F)) else null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                onFocusPinCoordinates(pin.cellX, pin.cellY)
+                                onPinClicked(pin.id)
+                            }
+                    ) {
+                        Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(26.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(pin.colorHex)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = when {
+                                            pin.title.startsWith("Sala ") && pin.title.removePrefix("Sala ").all { it.isDigit() } ->
+                                                pin.title.removePrefix("Sala ")
+                                            pin.title.isNotBlank() && pin.title.length <= 3 -> pin.title
+                                            pin.iconName == "trap" -> "⚠"
+                                            pin.iconName == "chest" -> "★"
+                                            pin.iconName in listOf("door", "stairs", "portal") -> "⎅"
+                                            pin.iconName == "skull" -> "☠"
+                                            pin.iconName == "info" -> "i"
+                                            pin.isSecret -> "?"
+                                            else -> "!"
+                                        },
+                                        color = Color.White,
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = pin.title,
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                        Text("(${pin.cellX.toInt()}, ${pin.cellY.toInt()})", fontSize = 10.sp, color = MaterialTheme.colorScheme.outline)
+                                        Text("• ${pin.explorationState.name}", fontSize = 10.sp, color = when(pin.explorationState) {
+                                            MapPinExplorationState.EXPLORED -> MaterialTheme.colorScheme.outline
+                                            MapPinExplorationState.DISCOVERED -> MaterialTheme.colorScheme.primary
+                                            MapPinExplorationState.UNKNOWN -> MaterialTheme.colorScheme.tertiary
+                                        })
+                                    }
+                                }
+
+                                IconButton(
+                                    onClick = { onTogglePinLocked(pin.id) },
+                                    modifier = Modifier.size(24.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = if (isLocked) Icons.Default.Lock else Icons.Default.LockOpen,
+                                        contentDescription = "Bloquear posición",
+                                        tint = if (isLocked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+
+                                IconButton(
+                                    onClick = { onToggleStickyPin(pin.id) },
+                                    modifier = Modifier.size(24.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.PushPin,
+                                        contentDescription = "Fijar nota",
+                                        tint = if (isSticky) Color(0xFFFFD54F) else MaterialTheme.colorScheme.outline,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+
+                                IconButton(
+                                    onClick = { onFocusPinCoordinates(pin.cellX, pin.cellY) },
+                                    modifier = Modifier.size(24.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.MyLocation,
+                                        contentDescription = "Centrar cámara",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            }
+
+                            if (pin.description.isNotBlank()) {
+                                Text(
+                                    text = pin.description,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
                     }
                 }
             }

@@ -114,7 +114,7 @@ data class SessionUiState(
     val isSoloSceneBusy: Boolean = false,
     val boardMemory: BoardSessionMemory = BoardSessionMemory(),
     val isSendingInspiration: Boolean = false,
-    val isHotbarExpanded: Boolean = true,
+    val isHotbarExpanded: Boolean = false,
     val showHotbarActionDialog: Boolean = false,
     val editingHotbarAction: SessionHotbarAction? = null,
     val showSceneFramingDialog: Boolean = false,
@@ -136,11 +136,15 @@ data class SessionUiState(
     val spotlightResults: List<SpotlightItem> = emptyList(),
     val selectedSpotlightItem: SpotlightItem? = null,
     val lastSpotlightRollResult: TableRollResult? = null,
-    val isSpotlightSearching: Boolean = false
+    val isSpotlightSearching: Boolean = false,
+    val showChoirGuide: Boolean = false,
+    val choirGuideSourcePage: Int? = null,
+    val choirGuideTableId: Long? = null,
+    val choirGuideError: String? = null
 )
 
 enum class SidebarTool {
-    NONE, TABLES, DECKS, COMBAT, NOTES, JOURNAL, MYTHIC_CONTEXT, WIKI, NPCS, PLAN
+    NONE, TABLES, DECKS, COMBAT, NOTES, JOURNAL, MYTHIC_CONTEXT, WIKI, NPCS, PLAN, REFERENCES
 }
 
 enum class SessionViewMode {
@@ -203,13 +207,18 @@ class SessionViewModel @Inject constructor(
         set(value) { savedStateHandle["peekCardId"] = value }
 
     private val initialBoardMemory = settingsRepository.getBoardSessionMemory(sessionId)
-    private var spotlightJob: kotlinx.coroutines.Job? = null
     private val _uiState = MutableStateFlow(SessionUiState(
         sessionId = sessionId, boardMemory = initialBoardMemory,
         focusedSceneId = initialBoardMemory.focusedSceneId,
-        pinnedTableRolls = initialBoardMemory.pinnedTableResults
+        pinnedTableRolls = initialBoardMemory.pinnedTableResults,
+        showChoirGuide = initialBoardMemory.choirGuide.anguishChecks.isNotEmpty()
     ))
     val uiState: StateFlow<SessionUiState> = _uiState.asStateFlow()
+
+    val choirGuideDelegate = com.deckapp.feature.draw.delegates.ChoirGuideDelegate(
+        sessionId, _uiState, viewModelScope, sessionRepository, notesMutex,
+        updateMemory = { updateBoardMemory(it) }
+    )
 
     val tacticalMapDelegate = com.deckapp.feature.draw.delegates.TacticalMapDelegate(
         sessionId = sessionId,
@@ -230,6 +239,83 @@ class SessionViewModel @Inject constructor(
         _uiState = _uiState,
         scope = viewModelScope,
         sessionRepository = sessionRepository
+    )
+
+    val deckDelegate = com.deckapp.feature.draw.delegates.SessionDeckDelegate(
+        sessionId = sessionId,
+        _uiState = _uiState,
+        scope = viewModelScope,
+        cardRepository = cardRepository,
+        sessionRepository = sessionRepository,
+        drawCardUseCase = drawCardUseCase,
+        discardCardUseCase = discardCardUseCase,
+        resetDeckUseCase = resetDeckUseCase,
+        shuffleDeckUseCase = shuffleDeckUseCase,
+        updateCardStateUseCase = updateCardStateUseCase,
+        undoLastActionUseCase = undoLastActionUseCase,
+        getPeekCardId = { peekCardId },
+        setPeekCardId = { peekCardId = it }
+    )
+
+    val combatDelegate = com.deckapp.feature.draw.delegates.SessionCombatDelegate(
+        sessionId = sessionId,
+        _uiState = _uiState,
+        scope = viewModelScope,
+        encounterRepository = encounterRepository,
+        sessionRepository = sessionRepository,
+        npcRepository = npcRepository,
+        applyDamageUseCase = applyDamageUseCase,
+        rollInitiativeUseCase = rollInitiativeUseCase,
+        calculateInitiativeOrderUseCase = calculateInitiativeOrderUseCase,
+        toggleConditionUseCase = toggleConditionUseCase,
+        cleanupCombatUseCase = cleanupCombatUseCase,
+        updateChoirCharacterUseCase = updateChoirCharacterUseCase,
+        updateChoirCombatStateUseCase = updateChoirCombatStateUseCase,
+        notesMutex = notesMutex,
+        onUpdateNotes = { updateNotes(it) }
+    )
+
+    val mythicDelegate = com.deckapp.feature.draw.delegates.SessionMythicDelegate(
+        sessionId = sessionId,
+        _uiState = _uiState,
+        scope = viewModelScope,
+        mythicRepository = mythicRepository,
+        sessionRepository = sessionRepository,
+        rollMythicFateUseCase = rollMythicFateUseCase,
+        notesMutex = notesMutex,
+        onUpdateNotes = { updateNotes(it) },
+        updateBoardMemory = { updateBoardMemory(it) },
+        focusScene = { focusScene(it) }
+    )
+
+    val spotlightDelegate = com.deckapp.feature.draw.delegates.SessionSpotlightDelegate(
+        sessionId = sessionId,
+        _uiState = _uiState,
+        scope = viewModelScope,
+        tableRepository = tableRepository,
+        npcRepository = npcRepository,
+        referenceRepository = referenceRepository,
+        encounterRepository = encounterRepository,
+        rollTableUseCase = rollTableUseCase,
+        sessionRepository = sessionRepository
+    )
+
+    val clocksDelegate = com.deckapp.feature.draw.delegates.SessionClocksDelegate(
+        sessionId = sessionId,
+        _uiState = _uiState,
+        scope = viewModelScope,
+        sessionRepository = sessionRepository,
+        notesMutex = notesMutex,
+        onAddBoardBlock = { type, _, _, resId ->
+            boardDelegate.addBoardBlock(type, resId)
+        },
+        onRollSmartDice = { formula, desc -> rollSmartDiceWithDescription(formula, desc) },
+        onRollMythicRandomEvent = { rollBoardMythicRandomEvent() },
+        onRollMythicFate = { rollBoardMythicFate(it) },
+        onRollTable = { rollActiveTable(it) },
+        onDrawCard = { drawCardFromDeck(it) },
+        onUpdateBoardMythicChaos = { updateBoardMythicChaos(it) },
+        onFocusScene = { focusScene(it) }
     )
 
     // Un flujo que emite la hora actual cada minuto para cálculos reactivos
@@ -264,6 +350,8 @@ class SessionViewModel @Inject constructor(
                         sessionElapsedMinutes = elapsed,
                         tensionClocks = if (session.tensionClocks.isNotEmpty()) session.tensionClocks else it.tensionClocks
                     ) }
+                    choirGuideDelegate.retryJournal()
+                    choirGuideDelegate.observeCharacters(_uiState.value.npcs)
                 }
             }.collect()
         }
@@ -476,6 +564,7 @@ class SessionViewModel @Inject constructor(
         viewModelScope.launch {
             npcRepository.getAllNpcs().collect { npcs ->
                 _uiState.update { it.copy(npcs = npcs, npcCount = npcs.size) }
+                choirGuideDelegate.observeCharacters(npcs)
             }
         }
 
@@ -513,14 +602,16 @@ class SessionViewModel @Inject constructor(
     fun toggleLeftSidebar(tool: SidebarTool) {
         _uiState.update { state ->
             val next = if (state.activeLeftSidebar == tool) SidebarTool.NONE else tool
-            state.copy(activeLeftSidebar = next)
+            val nextRight = if (next != SidebarTool.NONE && state.activeRightSidebar != SidebarTool.NONE) SidebarTool.NONE else state.activeRightSidebar
+            state.copy(activeLeftSidebar = next, activeRightSidebar = nextRight)
         }
     }
 
     fun toggleRightSidebar(tool: SidebarTool) {
         _uiState.update { state ->
             val next = if (state.activeRightSidebar == tool) SidebarTool.NONE else tool
-            state.copy(activeRightSidebar = next)
+            val nextLeft = if (next != SidebarTool.NONE && state.activeLeftSidebar != SidebarTool.NONE) SidebarTool.NONE else state.activeLeftSidebar
+            state.copy(activeRightSidebar = next, activeLeftSidebar = nextLeft)
         }
     }
 
@@ -530,402 +621,86 @@ class SessionViewModel @Inject constructor(
 
     // --- Mythic Unified Actions ---
     
-    fun performMythicFateCheck(question: String, prob: ProbabilityLevel) {
-        val mythicId = _uiState.value.linkedMythicSession?.id ?: return
-        viewModelScope.launch {
-            rollMythicFateUseCase(mythicId, question, prob)
-        }
-    }
+    fun performMythicFateCheck(question: String, prob: ProbabilityLevel) =
+        mythicDelegate.performMythicFateCheck(question, prob)
 
-    fun quickMythicCheck() = performMythicFateCheck("Consulta rápida", ProbabilityLevel.FIFTY_FIFTY)
+    fun quickMythicCheck() = mythicDelegate.quickMythicCheck()
 
-    fun updateMythicChaos(delta: Int) {
-        val session = _uiState.value.linkedMythicSession ?: return
-        val next = (session.chaosFactor + delta).coerceIn(1, 9)
-        viewModelScope.launch {
-            mythicRepository.updateChaosFactor(session.id, next)
-        }
-    }
+    fun updateMythicChaos(delta: Int) = mythicDelegate.updateMythicChaos(delta)
 
-    fun setBoardMythicProbability(prob: ProbabilityLevel) {
-        _uiState.update { it.copy(boardMythicProbability = prob) }
-    }
+    fun setBoardMythicProbability(prob: ProbabilityLevel) = mythicDelegate.setBoardMythicProbability(prob)
 
-    fun updateBoardMythicChaos(delta: Int) {
-        val currentChaos = _uiState.value.linkedMythicSession?.chaosFactor ?: _uiState.value.boardMythicChaos
-        val next = (currentChaos + delta).coerceIn(1, 9)
-        _uiState.update { it.copy(boardMythicChaos = next) }
-        _uiState.value.linkedMythicSession?.let { session ->
-            viewModelScope.launch {
-                mythicRepository.updateChaosFactor(session.id, next)
-            }
-        }
-    }
+    fun updateBoardMythicChaos(delta: Int) = mythicDelegate.updateBoardMythicChaos(delta)
 
     fun rollBoardMythicFate(
         probability: ProbabilityLevel = _uiState.value.boardMythicProbability,
         forcedRoll: Int? = null,
         question: String = ""
-    ) {
-        val chaos = _uiState.value.linkedMythicSession?.chaosFactor ?: _uiState.value.boardMythicChaos
-        val rollValue = forcedRoll ?: kotlin.random.Random.nextInt(1, 101)
-        val fateCheckUseCase = com.deckapp.core.domain.usecase.mythic.FateCheckUseCase()
-        val (result, isRandomEvent) = fateCheckUseCase(probability, chaos, rollValue)
+    ) = mythicDelegate.rollBoardMythicFate(probability, forcedRoll, question)
 
-        val fateChart = arrayOf(
-            intArrayOf(95, 97, 99, 99, 99, 99, 99, 99, 99),
-            intArrayOf(75, 83, 90, 95, 97, 99, 99, 99, 99),
-            intArrayOf(55, 65, 75, 83, 90, 95, 97, 99, 99),
-            intArrayOf(35, 45, 55, 65, 75, 83, 90, 95, 97),
-            intArrayOf(25, 35, 45, 55, 65, 75, 83, 90, 95),
-            intArrayOf(15, 25, 35, 45, 55, 65, 75, 83, 90),
-            intArrayOf(10, 15, 25, 35, 45, 55, 65, 75, 83),
-            intArrayOf(5, 10, 15, 25, 35, 45, 55, 65, 75),
-            intArrayOf(3, 5, 10, 15, 25, 35, 45, 55, 65)
-        )
-        val targetThreshold = fateChart[probability.ordinal][chaos - 1]
+    fun rollBoardMythicRandomEvent(): String = mythicDelegate.rollBoardMythicRandomEvent()
 
-        val randomEventDesc = if (isRandomEvent) {
-            val action = com.deckapp.core.domain.usecase.mythic.MythicReferenceData.actionKeywords.random()
-            val subject = com.deckapp.core.domain.usecase.mythic.MythicReferenceData.subjectKeywords.random()
-            "$action · $subject"
-        } else null
+    fun appendToNotes(textToAppend: String) = mythicDelegate.appendToNotes(textToAppend)
 
-        val fateItem = BoardMythicFateResult(
-            odds = probability,
-            chaos = chaos,
-            roll = rollValue,
-            targetThreshold = targetThreshold,
-            fateResult = result,
-            isRandomEvent = isRandomEvent,
-            randomEventDescription = randomEventDesc,
-            question = question.trim(),
-            sceneTitle = activeSoloScene()?.title.orEmpty(),
-            sceneId = activeSoloScene()?.id
-        )
+    fun activeSoloScene(): Scene? = mythicDelegate.activeSoloScene()
 
-        _uiState.update { state ->
-            state.copy(
-                boardMythicProbability = probability,
-                boardMythicChaos = chaos,
-                boardMythicLastResult = fateItem,
-                boardMythicHistory = (listOf(fateItem) + state.boardMythicHistory).take(10)
-            )
-        }
+    fun saveSoloScene(scene: Scene, onSuccess: () -> Unit) =
+        mythicDelegate.saveSoloScene(scene, onSuccess)
 
-        _uiState.value.linkedMythicSession?.let { session ->
-            viewModelScope.launch {
-                mythicRepository.saveRoll(
-                    MythicRoll(
-                        sessionId = session.id,
-                        question = question.trim().ifBlank { "Consulta Bento" },
-                        probability = probability,
-                        chaosFactor = chaos,
-                        roll = rollValue,
-                        result = result,
-                        isRandomEvent = isRandomEvent,
-                        eventAction = randomEventDesc ?: "",
-                        sceneNumber = session.sceneNumber
-                    )
-                )
-            }
-        }
-    }
-
-    fun rollBoardMythicRandomEvent(): String {
-        val action = com.deckapp.core.domain.usecase.mythic.MythicReferenceData.actionKeywords.random()
-        val subject = com.deckapp.core.domain.usecase.mythic.MythicReferenceData.subjectKeywords.random()
-        val eventText = "$action · $subject"
-        _uiState.update { it.copy(boardMythicLastEvent = eventText) }
-        return eventText
-    }
-
-    fun appendToNotes(textToAppend: String) {
-        val current = _uiState.value.dmNotes
-        val updated = if (current.isBlank()) textToAppend else "$current\n\n$textToAppend"
-        updateNotes(updated)
-    }
-
-    fun activeSoloScene(): Scene? = _uiState.value.let { state ->
-        state.scenes.firstOrNull { it.id == state.focusedSceneId && !it.isCompleted }
-            ?: state.scenes.firstOrNull { !it.isCompleted }
-    }
-
-    fun saveSoloScene(scene: Scene, onSuccess: () -> Unit) {
-        if (_uiState.value.isSoloSceneBusy || scene.title.isBlank() || scene.sessionId != sessionId) return
-        _uiState.update { it.copy(isSoloSceneBusy = true) }
-        viewModelScope.launch {
-            try {
-                val id = sessionRepository.upsertScene(scene)
-                focusScene(id)
-                onSuccess()
-            } catch (error: Exception) {
-                if (error is kotlinx.coroutines.CancellationException) throw error
-                _uiState.update { it.copy(snackbarMessage = "No se pudo guardar la escena: ${error.message}") }
-            } finally {
-                _uiState.update { it.copy(isSoloSceneBusy = false) }
-            }
-        }
-    }
-
-    fun closeSoloScene(scene: Scene, closure: SoloSceneClosure, onSuccess: () -> Unit) {
-        if (_uiState.value.isSoloSceneBusy || scene.sessionId != sessionId) return
-        _uiState.update { it.copy(isSoloSceneBusy = true) }
-        viewModelScope.launch {
-            try {
-                notesMutex.withLock {
-                    sessionRepository.updateDmNotes(sessionId, _uiState.value.dmNotes)
-                    val closed = CloseSoloSceneUseCase(sessionRepository)(scene, closure)
-                    _uiState.update { state ->
-                        state.copy(
-                            dmNotes = listOf(state.dmNotes, closed.journalEntry).filter { it.isNotBlank() }.joinToString("\n\n"),
-                            focusedSceneId = closed.nextSceneId
-                        )
-                    }
-                    // Persist edits made while the close transaction was running as well.
-                    val savedNotes = _uiState.value.dmNotes
-                    sessionRepository.updateDmNotes(sessionId, savedNotes)
-                    _uiState.update { state -> if (state.dmNotes == savedNotes) state.copy(isSavingNotes = false) else state }
-                }
-                updateBoardMemory { it.copy(focusedSceneId = _uiState.value.focusedSceneId) }
-                if (closure.chaosDelta != 0) updateBoardMythicChaos(closure.chaosDelta)
-                onSuccess()
-                _uiState.update { it.copy(snackbarMessage = "Escena cerrada y guardada en el diario") }
-            } catch (error: Exception) {
-                if (error is kotlinx.coroutines.CancellationException) throw error
-                _uiState.update { it.copy(snackbarMessage = "No se pudo cerrar la escena: ${error.message}") }
-            } finally {
-                _uiState.update { it.copy(isSoloSceneBusy = false) }
-            }
-        }
-    }
+    fun closeSoloScene(scene: Scene, closure: SoloSceneClosure, onSuccess: () -> Unit) =
+        mythicDelegate.closeSoloScene(scene, closure, onSuccess)
 
     // --- Threats & Threads Tracker (Sprint 62) ---
 
-    suspend fun ensureLinkedMythicSessionId(): Long {
-        val currentId = _uiState.value.linkedMythicSession?.id ?: _uiState.value.session?.linkedMythicSessionId
-        if (currentId != null) return currentId
-        val sessionName = "Mítico - ${_uiState.value.session?.name ?: "Sesión"}"
-        val newSessionId = mythicRepository.saveSession(MythicSession(name = sessionName))
-        linkMythicSession(newSessionId)
-        return newSessionId
-    }
+    suspend fun ensureLinkedMythicSessionId(): Long = mythicDelegate.ensureLinkedMythicSessionId()
 
-    fun toggleThreadsOverlayExpanded() {
-        _uiState.update { it.copy(isThreadsOverlayExpanded = !it.isThreadsOverlayExpanded) }
-    }
+    fun toggleThreadsOverlayExpanded() = mythicDelegate.toggleThreadsOverlayExpanded()
 
-    fun selectThreadsTab(tab: ThreadsOverlayTab) {
-        _uiState.update { it.copy(selectedThreadsTab = tab) }
-    }
+    fun selectThreadsTab(tab: ThreadsOverlayTab) = mythicDelegate.selectThreadsTab(tab)
 
-    fun openCreateThreadDialog() {
-        _uiState.update { it.copy(showThreadEditDialog = true, editingMythicThread = null) }
-    }
+    fun openCreateThreadDialog() = mythicDelegate.openCreateThreadDialog()
 
-    fun openEditThreadDialog(thread: MythicThread) {
-        _uiState.update { it.copy(showThreadEditDialog = true, editingMythicThread = thread) }
-    }
+    fun openEditThreadDialog(thread: MythicThread) = mythicDelegate.openEditThreadDialog(thread)
 
-    fun closeThreadDialog() {
-        _uiState.update { it.copy(showThreadEditDialog = false, editingMythicThread = null) }
-    }
+    fun closeThreadDialog() = mythicDelegate.closeThreadDialog()
 
-    fun openCreateCharacterDialog() {
-        _uiState.update { it.copy(showMythicCharacterEditDialog = true, editingMythicCharacter = null) }
-    }
+    fun openCreateCharacterDialog() = mythicDelegate.openCreateCharacterDialog()
 
-    fun openEditCharacterDialog(character: MythicCharacter) {
-        _uiState.update { it.copy(showMythicCharacterEditDialog = true, editingMythicCharacter = character) }
-    }
+    fun openEditCharacterDialog(character: MythicCharacter) = mythicDelegate.openEditCharacterDialog(character)
 
-    fun closeCharacterDialog() {
-        _uiState.update { it.copy(showMythicCharacterEditDialog = false, editingMythicCharacter = null) }
-    }
+    fun closeCharacterDialog() = mythicDelegate.closeCharacterDialog()
 
-    fun saveMythicThread(id: Long, description: String) {
-        if (description.isBlank()) return
-        viewModelScope.launch {
-            val mythicId = ensureLinkedMythicSessionId()
-            if (id == 0L) {
-                mythicRepository.addThread(MythicThread(sessionId = mythicId, description = description.trim()))
-            } else {
-                val existing = _uiState.value.mythicState?.threads?.find { it.id == id }
-                mythicRepository.addThread(
-                    existing?.copy(description = description.trim())
-                        ?: MythicThread(id = id, sessionId = mythicId, description = description.trim())
-                )
-            }
-            _uiState.update { it.copy(showThreadEditDialog = false, editingMythicThread = null) }
-        }
-    }
+    fun saveMythicThread(id: Long, description: String) = mythicDelegate.saveMythicThread(id, description)
 
-    fun saveMythicCharacter(id: Long, name: String, notes: String) {
-        if (name.isBlank()) return
-        viewModelScope.launch {
-            val mythicId = ensureLinkedMythicSessionId()
-            if (id == 0L) {
-                mythicRepository.addCharacter(MythicCharacter(sessionId = mythicId, name = name.trim(), notes = notes.trim()))
-            } else {
-                val existing = _uiState.value.mythicState?.characters?.find { it.id == id }
-                mythicRepository.addCharacter(
-                    existing?.copy(name = name.trim(), notes = notes.trim())
-                        ?: MythicCharacter(id = id, sessionId = mythicId, name = name.trim(), notes = notes.trim())
-                )
-            }
-            _uiState.update { it.copy(showMythicCharacterEditDialog = false, editingMythicCharacter = null) }
-        }
-    }
+    fun saveMythicCharacter(id: Long, name: String, notes: String) = mythicDelegate.saveMythicCharacter(id, name, notes)
 
-    fun rollRandomThreadOrCharacter() {
-        val tab = _uiState.value.selectedThreadsTab
-        val roll = (1..100).random()
-        if (tab == ThreadsOverlayTab.THREADS) {
-            val activeThreads = _uiState.value.mythicState?.threads?.filterNot { it.isResolved } ?: emptyList()
-            if (activeThreads.isEmpty()) {
-                _uiState.update { it.copy(lastRandomMythicPick = "🎲 [d100: $roll] No hay hilos activos registrados para sortear.") }
-            } else {
-                val picked = activeThreads.random()
-                _uiState.update { it.copy(lastRandomMythicPick = "🎲 [d100: $roll] Hilo Sorteado: \"${picked.description}\"") }
-            }
-        } else {
-            val characters = _uiState.value.mythicState?.characters ?: emptyList()
-            if (characters.isEmpty()) {
-                _uiState.update { it.copy(lastRandomMythicPick = "🎲 [d100: $roll] No hay PNJs registrados en la lista de Mythic.") }
-            } else {
-                val picked = characters.random()
-                val notesSnippet = if (picked.notes.isNotBlank()) " (${picked.notes})" else ""
-                _uiState.update { it.copy(lastRandomMythicPick = "🎲 [d100: $roll] PNJ Sorteado: \"${picked.name}\"$notesSnippet") }
-            }
-        }
-    }
+    fun rollRandomThreadOrCharacter() = mythicDelegate.rollRandomThreadOrCharacter()
 
-    fun clearRandomMythicPick() {
-        _uiState.update { it.copy(lastRandomMythicPick = null) }
-    }
+    fun clearRandomMythicPick() = mythicDelegate.clearRandomMythicPick()
 
-    fun copyLastRandomPickToDiary() {
-        val pick = _uiState.value.lastRandomMythicPick ?: return
-        viewModelScope.launch {
-            val currentNotes = _uiState.value.dmNotes
-            val addition = "\n\n> **Oráculo de Trama / Evento:** $pick\n"
-            val newNotes = currentNotes + addition
-            _uiState.update { it.copy(dmNotes = newNotes, lastRandomMythicPick = null) }
-            sessionRepository.updateDmNotes(sessionId, newNotes)
-        }
-    }
+    fun copyLastRandomPickToDiary() = mythicDelegate.copyLastRandomPickToDiary()
 
-    fun copyThreadsSummaryToDiary() {
-        viewModelScope.launch {
-            val threads = _uiState.value.mythicState?.threads ?: emptyList()
-            val characters = _uiState.value.mythicState?.characters ?: emptyList()
+    fun copyThreadsSummaryToDiary() = mythicDelegate.copyThreadsSummaryToDiary()
 
-            val activeThreads = threads.filterNot { it.isResolved }
-            val resolvedThreads = threads.filter { it.isResolved }
+    fun addMythicCharacter(name: String) = mythicDelegate.addMythicCharacter(name)
 
-            val sb = java.lang.StringBuilder()
-            sb.append("\n\n### 🧵 Resumen de Hilos y Amenazas\n")
+    fun deleteMythicCharacter(id: Long) = mythicDelegate.deleteMythicCharacter(id)
 
-            if (activeThreads.isNotEmpty()) {
-                sb.append("**Hilos Activos:**\n")
-                activeThreads.forEach { sb.append("- [ ] ${it.description}\n") }
-            }
-            if (resolvedThreads.isNotEmpty()) {
-                sb.append("**Hilos Resueltos:**\n")
-                resolvedThreads.forEach { sb.append("- [x] ${it.description}\n") }
-            }
-            if (characters.isNotEmpty()) {
-                sb.append("\n**Personajes y Amenazas:**\n")
-                characters.forEach {
-                    val note = if (it.notes.isNotBlank()) " — *${it.notes}*" else ""
-                    sb.append("- **${it.name}**$note\n")
-                }
-            }
+    fun updateMythicCharacterNotes(id: Long, notes: String) = mythicDelegate.updateMythicCharacterNotes(id, notes)
 
-            val currentNotes = _uiState.value.dmNotes
-            val newNotes = currentNotes + sb.toString()
-            _uiState.update { it.copy(dmNotes = newNotes) }
-            sessionRepository.updateDmNotes(sessionId, newNotes)
-        }
-    }
+    fun sendMythicCharacterToNotes(character: MythicCharacter) = mythicDelegate.sendMythicCharacterToNotes(character)
 
-    fun addMythicCharacter(name: String) {
-        if (name.isBlank()) return
-        viewModelScope.launch {
-            val mythicId = ensureLinkedMythicSessionId()
-            mythicRepository.addCharacter(MythicCharacter(sessionId = mythicId, name = name.trim()))
-        }
-    }
+    fun addMythicThread(description: String) = mythicDelegate.addMythicThread(description)
 
-    fun deleteMythicCharacter(id: Long) {
-        viewModelScope.launch {
-            mythicRepository.deleteCharacter(id)
-        }
-    }
+    fun updateMythicThreadDescription(id: Long, description: String) = mythicDelegate.updateMythicThreadDescription(id, description)
 
-    fun updateMythicCharacterNotes(id: Long, notes: String) {
-        viewModelScope.launch {
-            mythicRepository.updateCharacterNotes(id, notes)
-        }
-    }
+    fun toggleMythicThreadStatus(id: Long, isResolved: Boolean) = mythicDelegate.toggleMythicThreadStatus(id, isResolved)
 
-    fun sendMythicCharacterToNotes(character: MythicCharacter) {
-        viewModelScope.launch {
-            val addition = "\n\n[Personaje Mítico: ${character.name}]\n${character.notes}".trim()
-            val newNotes = (_uiState.value.dmNotes + "\n\n" + addition).trim()
-            _uiState.update { it.copy(dmNotes = newNotes) }
-            notesMutex.withLock {
-                if (_uiState.value.dmNotes == newNotes) sessionRepository.updateDmNotes(sessionId, newNotes)
-            }
-        }
-    }
+    fun deleteMythicThread(id: Long) = mythicDelegate.deleteMythicThread(id)
 
-    fun addMythicThread(description: String) {
-        if (description.isBlank()) return
-        viewModelScope.launch {
-            val mythicId = ensureLinkedMythicSessionId()
-            mythicRepository.addThread(MythicThread(sessionId = mythicId, description = description.trim()))
-        }
-    }
+    fun sendMythicThreadToNotes(thread: MythicThread) = mythicDelegate.sendMythicThreadToNotes(thread)
 
-    fun updateMythicThreadDescription(id: Long, description: String) {
-        saveMythicThread(id, description)
-    }
-
-    fun toggleMythicThreadStatus(id: Long, isResolved: Boolean) {
-        viewModelScope.launch {
-            mythicRepository.updateThreadStatus(id, isResolved)
-        }
-    }
-
-    fun deleteMythicThread(id: Long) {
-        viewModelScope.launch {
-            mythicRepository.deleteThread(id)
-        }
-    }
-
-    fun sendMythicThreadToNotes(thread: MythicThread) {
-        viewModelScope.launch {
-            val addition = "\n\n[Hilo Mítico: ${thread.description}]"
-            val newNotes = (_uiState.value.dmNotes + "\n\n" + addition).trim()
-            _uiState.update { it.copy(dmNotes = newNotes) }
-            notesMutex.withLock {
-                if (_uiState.value.dmNotes == newNotes) sessionRepository.updateDmNotes(sessionId, newNotes)
-            }
-        }
-    }
-
-    fun sendRawToNotes(text: String) {
-        viewModelScope.launch {
-            val currentNotes = _uiState.value.dmNotes
-            val addition = "\n\n$text".trim()
-            val newNotes = (currentNotes + "\n\n" + addition).trim()
-            _uiState.update { it.copy(dmNotes = newNotes) }
-            notesMutex.withLock {
-                if (_uiState.value.dmNotes == newNotes) sessionRepository.updateDmNotes(sessionId, newNotes)
-            }
-        }
-    }
+    fun sendRawToNotes(text: String) = mythicDelegate.sendRawToNotes(text)
 
     fun focusScene(sceneId: Long?) {
         updateBoardMemory { it.copy(focusedSceneId = sceneId) }
@@ -942,43 +717,11 @@ class SessionViewModel @Inject constructor(
         updateBoardMemory { it.copy(views = it.views + (view.name to layout)) }
     }
 
-    fun captureBoardInspiration(item: BoardInspiration) {
-        updateBoardMemory { it.captureInspiration(item) }
-    }
+    fun captureBoardInspiration(item: BoardInspiration) = mythicDelegate.captureBoardInspiration(item)
 
-    fun setBoardInspirationStatus(id: String, status: InspirationStatus) {
-        updateBoardMemory { it.setInspirationStatus(id, status) }
-    }
+    fun setBoardInspirationStatus(id: String, status: InspirationStatus) = mythicDelegate.setBoardInspirationStatus(id, status)
 
-    fun sendBoardInspirationToDiary(id: String) {
-        if (_uiState.value.isSendingInspiration || _uiState.value.isSoloSceneBusy) return
-        val item = _uiState.value.boardMemory.inspiration.firstOrNull { it.id == id } ?: return
-        if (item.status == InspirationStatus.USED) return
-        _uiState.update { it.copy(isSendingInspiration = true, isSavingNotes = true) }
-        viewModelScope.launch {
-            var savedNotes: String? = null
-            try {
-                notesMutex.withLock {
-                    val entry = item.toDiaryEntry()
-                    _uiState.update { state ->
-                        val notes = if (entry in state.dmNotes) state.dmNotes
-                            else listOf(state.dmNotes, entry).filter { it.isNotBlank() }.joinToString("\n\n")
-                        state.copy(dmNotes = notes)
-                    }
-                    savedNotes = _uiState.value.dmNotes
-                    sessionRepository.updateDmNotes(sessionId, savedNotes.orEmpty())
-                }
-                setBoardInspirationStatus(id, InspirationStatus.USED)
-                _uiState.update { it.copy(snackbarMessage = "Inspiración guardada en el diario") }
-            } catch (error: Exception) {
-                if (error is kotlinx.coroutines.CancellationException) throw error
-                _uiState.update { it.copy(snackbarMessage = "No se pudo guardar: ${error.message}") }
-            } finally {
-                _uiState.update { it.copy(isSendingInspiration = false,
-                    isSavingNotes = if (it.dmNotes == savedNotes || savedNotes == null) false else it.isSavingNotes) }
-            }
-        }
-    }
+    fun sendBoardInspirationToDiary(id: String) = mythicDelegate.sendBoardInspirationToDiary(id)
 
     fun prepareSceneForBoard(scene: Scene) {
         boardDelegate.prepareSceneResources(scene)
@@ -1013,16 +756,7 @@ class SessionViewModel @Inject constructor(
     fun openSessionConfig() = _uiState.update { it.copy(showSessionConfig = true) }
     fun dismissSessionConfig() = _uiState.update { it.copy(showSessionConfig = false) }
 
-    fun toggleDeckInSession(deckId: Long) {
-        viewModelScope.launch {
-            val isPresent = _uiState.value.deckRefs.any { it.stackId == deckId }
-            if (isPresent) {
-                sessionRepository.removeDeckFromSession(sessionId, deckId)
-            } else {
-                sessionRepository.addDeckToSession(SessionDeckRef(sessionId, deckId))
-            }
-        }
-    }
+    fun toggleDeckInSession(deckId: Long) = deckDelegate.toggleDeckInSession(deckId)
 
     fun toggleTableInSession(tableId: Long) {
         viewModelScope.launch {
@@ -1039,21 +773,13 @@ class SessionViewModel @Inject constructor(
      * Alterna el estado expandido/colapsado de un cluster de mazo en el Workspace Bento.
      * El estado de colapso es efímero (no se persiste en Room).
      */
-    fun toggleDeckCollapse(stackId: Long) {
-        _uiState.update { state ->
-            val current = state.collapsedDeckIds
-            val updated = if (stackId in current) current - stackId else current + stackId
-            state.copy(collapsedDeckIds = updated)
-        }
-    }
+    fun toggleDeckCollapse(stackId: Long) = deckDelegate.toggleDeckCollapse(stackId)
 
     /**
      * Registra el último cluster con el que interactuó el DM.
      * El FAB usa esta información para saber de qué mazo robar.
      */
-    fun setLastInteractedDeck(stackId: Long) {
-        _uiState.update { it.copy(selectedDeckId = stackId) }
-    }
+    fun setLastInteractedDeck(stackId: Long) = deckDelegate.setLastInteractedDeck(stackId)
 
     /** Conserva un resultado visible al retomar la mesa sin alterar el historial de tiradas. */
     fun pinTableRoll(tableId: Long, result: TableRollResult) {
@@ -1069,8 +795,29 @@ class SessionViewModel @Inject constructor(
     fun rollActiveTable(tableId: Long) {
         viewModelScope.launch {
             val result = rollTableUseCase(tableId, sessionId)
-            _uiState.update { it.copy(snackbarMessage = "${result.tableName}: ${result.resolvedText}") }
+            recordTableResult(result, manual = false)
         }
+    }
+
+    fun selectTableEntry(tableId: Long, entryIndex: Int, dieValue: Int?) {
+        viewModelScope.launch {
+            val result = rollTableUseCase.selectEntry(tableId, entryIndex, sessionId, dieValue)
+            if (result == null) {
+                _uiState.update { it.copy(snackbarMessage = "La entrada ya no está disponible") }
+            } else recordTableResult(result, manual = true)
+        }
+    }
+
+    private fun recordTableResult(result: TableRollResult, manual: Boolean) {
+        val method = if (manual) "elección manual" else "tirada"
+        val time = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Date())
+        val entry = "[$time] Tabla ${result.tableName} ($method, ${result.rollValue}): ${result.resolvedText}"
+        val notes = _uiState.value.dmNotes.let { if (it.isBlank()) entry else "$it\n$entry" }
+        updateNotes(notes)
+        _uiState.update { it.copy(
+            recentTableRolls = (listOf(result) + it.recentTableRolls).take(30),
+            snackbarMessage = "${result.tableName}: ${result.resolvedText}"
+        ) }
     }
 
     /** Abre el dialog de nota rápida. */
@@ -1127,541 +874,71 @@ class SessionViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Selecciona un mazo y roba una carta de él.
-     */
-    fun drawCardFromDeck(stackId: Long) {
-        _uiState.update { it.copy(selectedDeckId = stackId) }
-        viewModelScope.launch {
-            val deckRef = _uiState.value.deckRefs.find { it.stackId == stackId } ?: return@launch
-            val card = drawCardUseCase(
-                deckId = stackId,
-                sessionId = sessionId,
-                drawMode = deckRef.drawModeOverride ?: DrawMode.RANDOM
-            )
-            if (card == null) {
-                val deckName = _uiState.value.deckNames[stackId] ?: "Mazo"
-                _uiState.update { it.copy(snackbarMessage = "\"$deckName\" no tiene más cartas disponibles") }
-            }
-        }
-    }
+    // --- Decks & Cards Operations (Delegated to SessionDeckDelegate) ---
 
-    /**
-     * Roba una carta del mazo seleccionado.
-     * DrawCardUseCase persiste el DrawEvent ANTES de retornar → crash-safe.
-     */
-    fun drawCard() {
-        val state = _uiState.value
-        val deckId = state.selectedDeckId ?: state.deckRefs.firstOrNull()?.stackId ?: return
-        val deckRef = state.deckRefs.find { it.stackId == deckId } ?: return
-        viewModelScope.launch {
-            val card = drawCardUseCase(
-                deckId = deckRef.stackId,
-                sessionId = sessionId,
-                drawMode = deckRef.drawModeOverride ?: DrawMode.RANDOM
-            )
-            if (card == null) {
-                val deckName = state.deckNames[deckId] ?: "Mazo"
-                _uiState.update { it.copy(snackbarMessage = "\"$deckName\" no tiene más cartas disponibles") }
-            }
-        }
-    }
-
-    /** Descarta una carta de la mano a la pila. */
-    fun discardCard(cardId: Long) {
-        viewModelScope.launch {
-            discardCardUseCase(sessionId, cardId)
-        }
-    }
-
-    /** Regresa todas las cartas de la pila al mazo (Shuffle back). Activa animación C-5. */
-    fun shufflePileBack(stackId: Long? = null) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isShuffling = true) }
-
-            val piledCards = cardRepository.getPiledCards(sessionId).first()
-            val cardsToReturn = if (stackId != null) {
-                piledCards.filter { it.stackId == stackId }
-            } else {
-                piledCards
-            }
-
-            if (cardsToReturn.isNotEmpty()) {
-                // Marcamos como no robadas usando el Use Case unificado
-                cardsToReturn.forEach { card ->
-                    updateCardStateUseCase(card.id, UpdateCardStateUseCase.CardStateUpdate(isDrawn = false))
-                }
-                
-                // Barajamos el mazo o mazos afectados para que el orden sea fresco
-                if (stackId != null) {
-                    shuffleDeckUseCase(stackId, onlyAvailable = true)
-                } else {
-                    cardsToReturn.map { it.stackId }.distinct().forEach { id ->
-                        shuffleDeckUseCase(id, onlyAvailable = true)
-                    }
-                }
-
-                // Registramos el evento de barajado
-                sessionRepository.logEvent(
-                    DrawEvent(
-                        sessionId = sessionId,
-                        cardId = null,
-                        action = DrawAction.SHUFFLE_BACK,
-                        metadata = if (stackId != null) "Mazo: $stackId" else "Toda la pila"
-                    )
-                )
-            }
-
-            // Tiempo mínimo de animación: 900ms
-            delay(900)
-            _uiState.update { it.copy(isShuffling = false, snackbarMessage = if (cardsToReturn.isNotEmpty()) "Pila barajada de vuelta al mazo" else null) }
-        }
-    }
-
-    // ── D-2: Robar por palo ──────────────────────────────────────────────────
-
-    /** Abre el sheet de "Robar por palo" cargando los palos disponibles del mazo activo. */
-    fun openDrawBySuit() {
-        val deckId = _uiState.value.selectedDeckId ?: return
-        viewModelScope.launch {
-            val suits = cardRepository.getCardsForStack(deckId).first()
-                .filter { !it.isDrawn }
-                .mapNotNull { it.suit }
-                .distinct()
-                .sorted()
-            _uiState.update { it.copy(showDrawBySuitSheet = true, availableSuitsForDraw = suits) }
-        }
-    }
-
-    /** Roba una carta aleatoria del palo indicado en el mazo activo. */
-    fun drawCardBySuit(suit: String) {
-        val deckId = _uiState.value.selectedDeckId ?: return
-        _uiState.update { it.copy(showDrawBySuitSheet = false) }
-        viewModelScope.launch {
-            val available = cardRepository.getCardsForStack(deckId).first()
-                .filter { !it.isDrawn && it.suit == suit }
-            if (available.isEmpty()) {
-                _uiState.update { it.copy(snackbarMessage = "No quedan cartas del palo \"$suit\"") }
-                return@launch
-            }
-            val card = available.random()
-            val deck = cardRepository.getDeckById(deckId).first()
-            val faceDown = deck?.drawFaceDown == true
-            
-            updateCardStateUseCase(
-                cardId = card.id, 
-                update = UpdateCardStateUseCase.CardStateUpdate(
-                    isDrawn = true, 
-                    lastDrawnAt = System.currentTimeMillis(),
-                    isRevealed = !faceDown
-                )
-            )
-
-            sessionRepository.logEvent(
-                DrawEvent(sessionId = sessionId, cardId = card.id, action = DrawAction.DRAW)
-            )
-        }
-    }
-
-    fun closeDrawBySuitSheet() {
-        _uiState.update { it.copy(showDrawBySuitSheet = false) }
-    }
-
-    /** Mueve una carta específica de la pila a la mano. */
-    fun returnToHand(cardId: Long) {
-        viewModelScope.launch {
-            updateCardStateUseCase(cardId, UpdateCardStateUseCase.CardStateUpdate(isDrawn = true, lastDrawnAt = System.currentTimeMillis()))
-        }
-    }
-
-    /** Mueve una carta específica de la pila de vuelta al mazo. */
-    fun returnToDeck(cardId: Long) {
-        viewModelScope.launch {
-            updateCardStateUseCase(cardId, UpdateCardStateUseCase.CardStateUpdate(isDrawn = false))
-        }
-    }
-
-    /** Resetea todos los mazos de la sesión. */
-    fun resetDeck() {
-        viewModelScope.launch {
-            _uiState.value.deckRefs.forEach { ref ->
-                resetDeckUseCase(sessionId, ref.stackId)
-            }
-        }
-    }
-
-    /**
-     * Resetea un único mazo: devuelve al mazo todas sus cartas (mano + pila de descarte).
-     * Loguea un RESET individual con metadata del stackId.
-     */
-    fun resetSingleDeck(stackId: Long) {
-        viewModelScope.launch {
-            resetDeckUseCase(sessionId, stackId)
-            val name = _uiState.value.deckNames[stackId] ?: "Mazo"
-            _uiState.update { it.copy(snackbarMessage = "\"$name\" reseteado") }
-        }
-    }
-
-    /** Deshace la última acción via event log. */
-    fun undo() {
-        viewModelScope.launch {
-            val undone = undoLastActionUseCase(sessionId)
-            val msg = if (undone) "Acción deshecha" else "Nada que deshacer"
-            _uiState.update { it.copy(snackbarMessage = msg) }
-        }
-    }
-
-    /** Finaliza la sesión marcándola como inactiva en Room. */
+    fun drawCardFromDeck(stackId: Long) = deckDelegate.drawCardFromDeck(stackId)
+    fun drawCard() = deckDelegate.drawCard()
+    fun discardCard(cardId: Long) = deckDelegate.discardCard(cardId)
+    fun shufflePileBack(stackId: Long? = null) = deckDelegate.shufflePileBack(stackId)
+    fun openDrawBySuit() = deckDelegate.openDrawBySuit()
+    fun drawCardBySuit(suit: String) = deckDelegate.drawCardBySuit(suit)
+    fun closeDrawBySuitSheet() = deckDelegate.closeDrawBySuitSheet()
+    fun returnToHand(cardId: Long) = deckDelegate.returnToHand(cardId)
+    fun returnToDeck(cardId: Long) = deckDelegate.returnToDeck(cardId)
+    fun resetDeck() = deckDelegate.resetDeck()
+    fun resetSingleDeck(stackId: Long) = deckDelegate.resetSingleDeck(stackId)
+    fun undo() = deckDelegate.undo()
+    fun undoLastDraw() = deckDelegate.undoLastDraw()
     fun endSession() {
         viewModelScope.launch {
             sessionRepository.endSession(sessionId)
             _uiState.update { it.copy(sessionEnded = true) }
         }
     }
-
-    /** Alterna el modo nocturno. */
-    fun toggleNightMode() {
-        _uiState.update { it.copy(nightMode = !it.nightMode) }
-    }
-
-    /** Alterna la visibilidad de los nombres de las cartas. */
-    fun toggleCardTitles() {
-        val current = _uiState.value.session?.showCardTitles ?: true
-        viewModelScope.launch {
-            sessionRepository.toggleCardTitles(sessionId, !current)
-        }
-    }
-
-    /** Ordena la mano actual por valor de carta (Iniciativa). */
-    fun sortByValue() {
-        val sortedHand = _uiState.value.hand.sortedBy { it.value ?: Int.MAX_VALUE }
-        _uiState.update { it.copy(hand = sortedHand) }
-    }
-
-    /** Muestra la primera carta disponible del mazo sin modificar su estado (Peek). */
-    fun peekTopCard() {
-        val deckId = _uiState.value.selectedDeckId ?: _uiState.value.deckRefs.firstOrNull()?.stackId ?: return
-        viewModelScope.launch {
-            val card = cardRepository.getTopCard(deckId)
-            if (card == null) {
-                _uiState.update { it.copy(snackbarMessage = "No hay cartas disponibles") }
-            } else {
-                _uiState.update { it.copy(peekCard = card) }
-                peekCardId = card.id
-            }
-        }
-    }
-
-    fun clearPeek() {
-        _uiState.update { it.copy(peekCard = null) }
-        peekCardId = null
-    }
-
-    /** Revela una carta que fue robada boca abajo. Loguea FLIP como evento de revelación. */
-    fun revealCard(cardId: Long) {
-        viewModelScope.launch {
-            updateCardStateUseCase(cardId, UpdateCardStateUseCase.CardStateUpdate(isRevealed = true))
-            sessionRepository.logEvent(
-                DrawEvent(sessionId = sessionId, cardId = cardId, action = DrawAction.FLIP,
-                    metadata = "reveal")
-            )
-        }
-    }
-
-    /**
-     * Roba [count] cartas del mazo seleccionado en secuencia.
-     * Si el mazo se queda sin cartas antes de completar, notifica con un snackbar.
-     */
-    fun dealCards(count: Int) {
-        val state = _uiState.value
-        val deckId = state.selectedDeckId ?: state.deckRefs.firstOrNull()?.stackId ?: return
-        val deckRef = state.deckRefs.find { it.stackId == deckId } ?: return
-        viewModelScope.launch {
-            var drawn = 0
-            repeat(count) {
-                val card = drawCardUseCase(
-                    deckId = deckRef.stackId,
-                    sessionId = sessionId,
-                    drawMode = deckRef.drawModeOverride ?: DrawMode.RANDOM
-                )
-                if (card != null) drawn++
-            }
-            if (drawn < count) {
-                _uiState.update { it.copy(snackbarMessage = "Solo quedaban $drawn carta${if (drawn != 1) "s" else ""} disponibles") }
-            }
-        }
-    }
-
-    fun clearSnackbar() {
-        _uiState.update { it.copy(snackbarMessage = null) }
-    }
-
-    fun clearSnackbarMessage() = clearSnackbar()
-
-    fun clearError() {
-        _uiState.update { it.copy(errorMessage = null) }
-    }
-
-    fun clearErrorMessage() = clearError()
-
+    fun toggleNightMode() = deckDelegate.toggleNightMode()
+    fun toggleCardTitles() = deckDelegate.toggleCardTitles()
+    fun sortByValue() = deckDelegate.sortByValue()
+    fun peekTopCard() = deckDelegate.peekTopCard()
+    fun clearPeek() = deckDelegate.clearPeek()
+    fun revealCard(cardId: Long) = deckDelegate.revealCard(cardId)
+    fun dealCards(count: Int) = deckDelegate.dealCards(count)
+    fun clearSnackbar() = deckDelegate.clearSnackbar()
+    fun clearSnackbarMessage() = deckDelegate.clearSnackbar()
+    fun clearError() = deckDelegate.clearError()
+    fun clearErrorMessage() = deckDelegate.clearError()
     fun saveCheckpointOnPause() {
         // Estado reactivo y persistido en Room
     }
 
-    fun undoLastDraw() {
-        viewModelScope.launch {
-            val success = undoLastActionUseCase(sessionId)
-            if (success) {
-                _uiState.update { it.copy(canUndo = false, snackbarMessage = "Acción deshecha") }
-            }
-        }
-    }
-
-    fun openGlobalSearch() {
-        openSpotlight()
-    }
+    fun openGlobalSearch() = spotlightDelegate.openGlobalSearch()
 
     // --- Spotlight Command Palette (Sprint 64) ---
 
-    fun openSpotlight() {
-        _uiState.update { 
-            it.copy(
-                showSpotlightDialog = true,
-                spotlightQuery = "",
-                selectedSpotlightItem = null,
-                lastSpotlightRollResult = null
-            ) 
-        }
-        performSpotlightSearch("", _uiState.value.selectedSpotlightCategory)
-    }
+    fun openSpotlight() = spotlightDelegate.openSpotlight()
 
-    fun closeSpotlight() {
-        _uiState.update { it.copy(showSpotlightDialog = false) }
-    }
+    fun closeSpotlight() = spotlightDelegate.closeSpotlight()
 
-    fun updateSpotlightQuery(query: String) {
-        _uiState.update { it.copy(spotlightQuery = query, isSpotlightSearching = true) }
-        spotlightJob?.cancel()
-        spotlightJob = viewModelScope.launch {
-            delay(150)
-            performSpotlightSearch(query, _uiState.value.selectedSpotlightCategory)
-        }
-    }
+    fun updateSpotlightQuery(query: String) = spotlightDelegate.updateSpotlightQuery(query)
 
-    fun selectSpotlightCategory(category: SpotlightCategory) {
-        _uiState.update { it.copy(selectedSpotlightCategory = category, isSpotlightSearching = true) }
-        spotlightJob?.cancel()
-        spotlightJob = viewModelScope.launch {
-            performSpotlightSearch(_uiState.value.spotlightQuery, category)
-        }
-    }
+    fun selectSpotlightCategory(category: SpotlightCategory) = spotlightDelegate.selectSpotlightCategory(category)
 
-    fun selectSpotlightItem(item: SpotlightItem) {
-        _uiState.update { 
-            it.copy(
-                selectedSpotlightItem = item,
-                lastSpotlightRollResult = null
-            ) 
-        }
-    }
+    fun selectSpotlightItem(item: SpotlightItem) = spotlightDelegate.selectSpotlightItem(item)
 
-    fun rollSpotlightTable(tableId: Long) {
-        viewModelScope.launch {
-            val result = rollTableUseCase(tableId, sessionId, persistResult = true)
-            _uiState.update { it.copy(lastSpotlightRollResult = result) }
-        }
-    }
+    fun rollSpotlightTable(tableId: Long) = spotlightDelegate.rollSpotlightTable(tableId)
 
-    fun addSpotlightCreatureToCombat(name: String, hp: Int, ac: Int, notes: String, npcId: Long? = null, imagePath: String? = null, initiativeBonus: Int = 0) {
-        viewModelScope.launch {
-            val currentEncounter = _uiState.value.activeEncounter
-            val targetEncounterId = if (currentEncounter == null) {
-                encounterRepository.saveEncounter(
-                    Encounter(
-                        name = "Combate de Sesión",
-                        linkedSessionId = sessionId,
-                        isActive = true,
-                        currentRound = 1
-                    )
-                )
-            } else {
-                currentEncounter.id
-            }
+    fun addSpotlightCreatureToCombat(
+        name: String,
+        hp: Int,
+        ac: Int,
+        notes: String,
+        npcId: Long? = null,
+        imagePath: String? = null,
+        initiativeBonus: Int = 0
+    ) = spotlightDelegate.addSpotlightCreatureToCombat(name, hp, ac, notes, npcId, imagePath, initiativeBonus)
 
-            val maxSort = currentEncounter?.creatures?.maxOfOrNull { it.sortOrder } ?: 0
-            val creature = EncounterCreature(
-                encounterId = targetEncounterId,
-                name = name,
-                maxHp = hp,
-                currentHp = hp,
-                armorClass = ac,
-                notes = notes,
-                npcId = npcId,
-                imagePath = imagePath,
-                initiativeBonus = initiativeBonus,
-                sortOrder = maxSort + 1
-            )
-            encounterRepository.addCreature(creature)
-            _uiState.update { it.copy(snackbarMessage = "$name sumado al combate") }
-        }
-    }
+    fun addSpotlightNpcToCombat(npcId: Long) = spotlightDelegate.addSpotlightNpcToCombat(npcId)
 
-    fun addSpotlightNpcToCombat(npcId: Long) {
-        viewModelScope.launch {
-            val npc = npcRepository.getNpcById(npcId) ?: return@launch
-            addSpotlightCreatureToCombat(
-                name = npc.name,
-                hp = npc.maxHp,
-                ac = npc.armorClass,
-                notes = npc.notes.ifBlank { npc.description },
-                npcId = npc.id,
-                imagePath = npc.imagePath,
-                initiativeBonus = npc.initiativeBonus
-            )
-        }
-    }
-
-    fun copySpotlightToDiary(text: String) {
-        viewModelScope.launch {
-            val currentNotes = _uiState.value.dmNotes
-            val newNotes = (currentNotes + "\n\n" + text.trim()).trim()
-            _uiState.update { it.copy(dmNotes = newNotes, snackbarMessage = "Copiado al diario") }
-            sessionRepository.updateDmNotes(sessionId, newNotes)
-        }
-    }
-
-    private fun performSpotlightSearch(query: String, category: SpotlightCategory) {
-        viewModelScope.launch {
-            val cleanQuery = query.trim().lowercase()
-            val results = mutableListOf<SpotlightItem>()
-
-            // 1. Tablas aleatorias
-            if (category == SpotlightCategory.ALL || category == SpotlightCategory.TABLES) {
-                runCatching {
-                    val allTables = tableRepository.getAllTables().first()
-                    val filteredTables = if (cleanQuery.isBlank()) allTables.take(15)
-                    else allTables.filter { 
-                        it.name.lowercase().contains(cleanQuery) || 
-                        it.category.lowercase().contains(cleanQuery) 
-                    }
-                    filteredTables.forEach { t ->
-                        results.add(
-                            SpotlightItem.TableResult(
-                                tableId = t.id,
-                                title = t.name,
-                                subtitle = "${t.category} · ${t.rollFormula}",
-                                formula = t.rollFormula,
-                                rowCount = t.entries.size,
-                                description = t.description
-                            )
-                        )
-                    }
-                }
-            }
-
-            // 2. PNJs
-            if (category == SpotlightCategory.ALL || category == SpotlightCategory.NPCS) {
-                runCatching {
-                    val allNpcs = npcRepository.getAllNpcs().first()
-                    val filteredNpcs = if (cleanQuery.isBlank()) allNpcs.take(15)
-                    else allNpcs.filter {
-                        it.name.lowercase().contains(cleanQuery) ||
-                        it.description.lowercase().contains(cleanQuery) ||
-                        it.notes.lowercase().contains(cleanQuery)
-                    }
-                    filteredNpcs.forEach { n ->
-                        results.add(
-                            SpotlightItem.NpcResult(
-                                npcId = n.id,
-                                title = n.name,
-                                subtitle = if (n.isMonster) "Monstruo / PNJ" else "PNJ",
-                                notes = n.description.ifBlank { n.notes },
-                                imagePath = n.imagePath
-                            )
-                        )
-                    }
-                }
-            }
-
-            // 3. Reglas del sistema SRD
-            if (category == SpotlightCategory.ALL || category == SpotlightCategory.RULES) {
-                runCatching {
-                    val allRules = referenceRepository.getAllSystemRules().first()
-                    val filteredRules = if (cleanQuery.isBlank()) allRules.take(15)
-                    else allRules.filter {
-                        it.title.lowercase().contains(cleanQuery) ||
-                        it.gameSystem.lowercase().contains(cleanQuery) ||
-                        it.category.lowercase().contains(cleanQuery) ||
-                        it.content.lowercase().contains(cleanQuery)
-                    }
-                    filteredRules.forEach { r ->
-                        results.add(
-                            SpotlightItem.RuleResult(
-                                ruleId = r.id,
-                                title = r.title,
-                                subtitle = "${r.gameSystem} · ${r.category}",
-                                content = r.content,
-                                gameSystem = r.gameSystem
-                            )
-                        )
-                    }
-                }
-            }
-
-            // 4. Monstruos y criaturas de encuentros
-            if (category == SpotlightCategory.ALL || category == SpotlightCategory.MONSTERS) {
-                runCatching {
-                    val allEncounters = encounterRepository.getAllEncounters().first()
-                    val allCreatures = allEncounters.flatMap { it.creatures }.distinctBy { it.name }
-                    val filteredCreatures = if (cleanQuery.isBlank()) allCreatures.take(15)
-                    else allCreatures.filter {
-                        it.name.lowercase().contains(cleanQuery) ||
-                        it.notes.lowercase().contains(cleanQuery)
-                    }
-                    filteredCreatures.forEach { c ->
-                        results.add(
-                            SpotlightItem.CreatureResult(
-                                creatureId = c.id,
-                                title = c.name,
-                                subtitle = "HP: ${c.maxHp} · CA: ${c.armorClass}",
-                                hp = c.maxHp,
-                                ac = c.armorClass,
-                                initiativeBonus = c.initiativeBonus,
-                                notes = c.notes
-                            )
-                        )
-                    }
-                }
-            }
-
-            // 5. Diario y notas de la sesión
-            if ((category == SpotlightCategory.ALL || category == SpotlightCategory.NOTES) && cleanQuery.isNotBlank()) {
-                val notes = _uiState.value.dmNotes
-                notes.lines().forEachIndexed { index, line ->
-                    if (line.lowercase().contains(cleanQuery) && line.isNotBlank()) {
-                        results.add(
-                            SpotlightItem.NoteResult(
-                                lineNumber = index + 1,
-                                title = "Nota L${index + 1}",
-                                subtitle = "Diario de Sesión",
-                                snippet = line.trim()
-                            )
-                        )
-                    }
-                }
-            }
-
-            val finalResults = results.take(35)
-            val autoSelected = finalResults.firstOrNull()
-            _uiState.update { 
-                it.copy(
-                    spotlightResults = finalResults,
-                    selectedSpotlightItem = if (it.selectedSpotlightItem != null && finalResults.any { r -> r.id == it.selectedSpotlightItem.id }) it.selectedSpotlightItem else autoSelected,
-                    isSpotlightSearching = false
-                ) 
-            }
-        }
-    }
+    fun copySpotlightToDiary(text: String) = spotlightDelegate.copySpotlightToDiary(text)
 
     // --- NPCs & Voice ---
 
@@ -1688,243 +965,55 @@ class SessionViewModel @Inject constructor(
         voicePlayer.stop()
     }
 
-    // --- Combat Actions ---
+    // --- Combat & Encounter Actions (Delegated to SessionCombatDelegate) ---
 
-    fun updateChoirCharacter(creatureId: Long, command: com.deckapp.core.model.ChoirCharacterCommand) {
-        viewModelScope.launch { updateChoirCharacterUseCase(creatureId, command) }
-    }
+    fun updateChoirCharacter(creatureId: Long, command: com.deckapp.core.model.ChoirCharacterCommand) =
+        combatDelegate.updateChoirCharacter(creatureId, command)
 
     fun applyChoirCombatAftermath(
         creatureId: Long,
         request: ChoirAftermathRequest,
         onComplete: (ChoirAftermathResult?) -> Unit = {}
-    ) {
-        viewModelScope.launch {
-            val result = updateChoirCharacterUseCase.applyAftermath(creatureId, request)
-            if (result != null) {
-                val updatedNotes = "${_uiState.value.dmNotes}\n\n${result.summaryReport}"
-                updateNotes(updatedNotes)
-            }
-            onComplete(result)
-        }
-    }
+    ) = combatDelegate.applyChoirCombatAftermath(creatureId, request, onComplete)
 
-    fun getChoirIncursion(): ChoirIncursion {
-        return ChoirIncursionCodec.readIncursion(_uiState.value.dmNotes) ?: ChoirIncursion()
-    }
+    fun getChoirIncursion(): ChoirIncursion = combatDelegate.getChoirIncursion()
 
-    fun getChoirSettlement(): ChoirSettlement {
-        return ChoirIncursionCodec.readSettlement(_uiState.value.dmNotes) ?: ChoirSettlement()
-    }
+    fun getChoirSettlement(): ChoirSettlement = combatDelegate.getChoirSettlement()
 
     fun saveChoirIncursion(
         incursion: ChoirIncursion,
         settlement: ChoirSettlement,
-        character: ChoirCharacter? = null
-    ) {
-        val currentNotes = _uiState.value.dmNotes
-        val withIncursion = ChoirIncursionCodec.writeIncursion(currentNotes, incursion)
-        val withBoth = ChoirIncursionCodec.writeSettlement(withIncursion, settlement)
-        updateNotes(withBoth)
-    }
+        character: ChoirCharacter? = null,
+        characterCreatureId: Long? = null
+    ) = combatDelegate.saveChoirIncursion(incursion, settlement, character, characterCreatureId)
 
-    fun updateChoirCombatState(creatureId: Long, command: com.deckapp.core.model.ChoirCombatCommand) {
-        viewModelScope.launch {
-            updateChoirCombatStateUseCase(creatureId, command)
-        }
-    }
+    fun updateChoirCombatState(creatureId: Long, command: com.deckapp.core.model.ChoirCombatCommand) =
+        combatDelegate.updateChoirCombatState(creatureId, command)
 
-    fun applyDamage(creatureId: Long, delta: Int) {
-        viewModelScope.launch {
-            applyDamageUseCase(creatureId, delta)
-        }
-    }
+    fun applyDamage(creatureId: Long, delta: Int) = combatDelegate.applyDamage(creatureId, delta)
 
-    fun toggleCombatHudExpanded() {
-        _uiState.update { it.copy(isCombatHudExpanded = !it.isCombatHudExpanded) }
-    }
+    fun toggleCombatHudExpanded() = combatDelegate.toggleCombatHudExpanded()
 
-    fun copyCombatRoundToDiary() {
-        val encounter = _uiState.value.activeEncounter ?: return
-        viewModelScope.launch {
-            val sorted = encounter.creatures.sortedBy { it.sortOrder }
-            val sb = java.lang.StringBuilder()
-            sb.append("\n\n### ⚔️ Asalto ${encounter.currentRound} de Combate: ${encounter.name}\n")
-            sorted.forEach { c ->
-                val status = if (c.currentHp <= 0) " (Caído/Inconsciente)" else ""
-                val conditions = if (c.conditions.isNotEmpty()) " [${c.conditions.joinToString { cond -> cond.label }}]" else ""
-                val choir = com.deckapp.core.model.ChoirProfile.fromNotes(c.notes)
-                if (choir != null) {
-                    val wounds = com.deckapp.core.model.ChoirCombatState.fromNotes(c.notes)
-                    sb.append("- **${c.name}**: ${wounds.major} heridas mayores, ${wounds.minor} menores$conditions\n")
-                } else if (com.deckapp.core.domain.usecase.ChoirCharacterCodec.read(c.notes) != null) {
-                    val sheet = com.deckapp.core.domain.usecase.ChoirCharacterCodec.read(c.notes)!!
-                    sb.append("- **${c.name}**: ${sheet.major}/4 mayores, ${sheet.minor}/8 menores; Vigor ${sheet.vigor}; Trauma ${sheet.trauma}$conditions\n")
-                } else sb.append("- **${c.name}**: ${c.currentHp}/${c.maxHp} HP$conditions$status\n")
-            }
-            val currentNotes = _uiState.value.dmNotes
-            val newNotes = (currentNotes + sb.toString()).trim()
-            _uiState.update { it.copy(dmNotes = newNotes, snackbarMessage = "Asalto copiado al diario") }
-            sessionRepository.updateDmNotes(sessionId, newNotes)
-        }
-    }
+    fun copyCombatRoundToDiary() = combatDelegate.copyCombatRoundToDiary()
 
-    fun nextTurn() {
-        val encounter = _uiState.value.activeEncounter ?: return
-        val players = _uiState.value.playerParticipants
-        
-        viewModelScope.launch {
-            // Unificar para calcular el total de participantes
-            val totalParticipants = encounter.creatures.size + players.size
-            if (totalParticipants == 0) return@launch
-            
-            var nextIndex = encounter.currentTurnIndex + 1
-            var nextRound = encounter.currentRound
-            
-            if (nextIndex >= totalParticipants) {
-                nextIndex = 0
-                nextRound++
-            }
-            
-            encounterRepository.saveEncounter(
-                encounter.copy(
-                    currentTurnIndex = nextIndex,
-                    currentRound = nextRound
-                )
-            )
-            
-            // Registrar log
-            if (nextRound > encounter.currentRound) {
-                encounterRepository.recordLog(
-                    com.deckapp.core.model.CombatLogEntry(
-                        encounterId = encounter.id,
-                        message = "Inicio de la Ronda $nextRound",
-                        type = com.deckapp.core.model.CombatLogType.ROUND_START
-                    )
-                )
-            }
-        }
-    }
+    fun nextTurn() = combatDelegate.nextTurn()
 
-    /** Inicia el proceso de combate: tira iniciativa para los que faltan y establece el orden. */
-    fun startCombatProcess() {
-        val encounter = _uiState.value.activeEncounter ?: return
-        viewModelScope.launch {
-            // 1. Tirar dados para criaturas sin iniciativa (NPCs)
-            rollInitiativeUseCase(encounter.id)
-            // 2. Establecer el orden determinista (sortOrder)
-            calculateInitiativeOrderUseCase(encounter.id)
-        }
-    }
+    fun startCombatProcess() = combatDelegate.startCombatProcess()
 
-    /** Cambia el estado de una condición con registro narrativo automático. */
-    fun toggleCondition(creatureId: Long, condition: Condition) {
-        viewModelScope.launch {
-            toggleConditionUseCase(creatureId, condition)
-        }
-    }
+    fun toggleCondition(creatureId: Long, condition: Condition) = combatDelegate.toggleCondition(creatureId, condition)
 
-    /** Elimina una criatura y recalcula el orden del tracker. */
-    fun removeCreature(creatureId: Long) {
-        val encounter = _uiState.value.activeEncounter ?: return
-        viewModelScope.launch {
-            cleanupCombatUseCase.removeCreature(encounter.id, creatureId)
-        }
-    }
+    fun removeCreature(creatureId: Long) = combatDelegate.removeCreature(creatureId)
 
-    fun addPlayerParticipant(name: String, initiative: Int) {
-        _uiState.update { it.copy(
-            playerParticipants = it.playerParticipants + PlayerInitiativeParticipant(name = name, initiativeTotal = initiative)
-        ) }
-    }
+    fun addPlayerParticipant(name: String, initiative: Int) = combatDelegate.addPlayerParticipant(name, initiative)
 
-    fun removePlayerParticipant(id: String) {
-        _uiState.update { it.copy(
-            playerParticipants = it.playerParticipants.filter { p -> p.id != id }
-        ) }
-    }
+    fun removePlayerParticipant(id: String) = combatDelegate.removePlayerParticipant(id)
 
-    fun endEncounter() {
-        val encounter = _uiState.value.activeEncounter ?: return
-        viewModelScope.launch {
-            // 1. Generar Resumen
-            val survivors = encounter.creatures
-                .filter { it.currentHp > 0 }
-                .joinToString(", ") { it.name }
-            val summary = """
-                
-                --- RESUMEN DE COMBATE: ${encounter.name} ---
-                Rondas: ${encounter.currentRound}
-                Supervivientes: ${if (survivors.isEmpty()) "Ninguno" else survivors}
-                ------------------------------------------
-            """.trimIndent()
-            
-            // 2. Anexar a notas
-            val updatedNotes = "${_uiState.value.dmNotes}\n$summary"
-            updateNotes(updatedNotes)
-            
-            // 3. Desactivar el encuentro y limpiar PJs temporales
-            encounterRepository.saveEncounter(encounter.copy(isActive = false))
-            
-            // 4. Volver a mazos si estábamos en combate
-            if (_uiState.value.activeTab == 5) {
-                _uiState.update { it.copy(
-                    activeTab = 0, 
-                    snackbarMessage = "Combate finalizado y resumido en notas",
-                    playerParticipants = emptyList() // Limpiamos PJs al terminar
-                ) }
-            }
-        }
-    }
+    fun endEncounter() = combatDelegate.endEncounter()
 
-    /** Genera un log de texto con los eventos de la sesión. */
-    suspend fun getSessionLogText(): String {
-        val events = sessionRepository.getEventsForSession(sessionId).first()
-        val sessionName = _uiState.value.session?.name ?: "Sesión"
-        val sb = StringBuilder()
-        sb.append("LOG DE SESIÓN: $sessionName\n")
-        sb.append("Generado: ${java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(java.util.Date())}\n")
-        sb.append("--------------------------------------------------\n\n")
+    suspend fun getSessionLogText(): String = combatDelegate.getSessionLogText()
 
-        sb.append("--- ACTIVIDAD DE CARTAS ---\n")
-        events.forEach { event ->
-            val time = java.text.SimpleDateFormat("HH:mm:ss").format(java.util.Date(event.timestamp))
-            sb.append("[$time] ${event.action}: Carta ${event.cardId} ${event.metadata}\n")
-        }
-        
-        // Sprint 16: Logs de Combate
-        val encounters = encounterRepository.getAllEncounters().first()
-            .filter { it.linkedSessionId == sessionId }
-        
-        if (encounters.isNotEmpty()) {
-            sb.append("\n\n--- HISTORIAL DE COMBATES ---\n")
-            encounters.forEach { enc ->
-                sb.append("\nENCUENTRO: ${enc.name} (Rondas: ${enc.currentRound})\n")
-                val logEntries = encounterRepository.getLogForEncounter(enc.id).first()
-                logEntries.reversed().forEach { entry ->
-                    val time = java.text.SimpleDateFormat("HH:mm:ss").format(java.util.Date(entry.timestamp))
-                    sb.append("[$time] ${entry.message}\n")
-                }
-            }
-        }
-        
-        return sb.toString()
-    }
-
-    /** Escribe el log de la sesión en el URI proporcionado. */
-    fun exportLog(uri: android.net.Uri, contentResolver: android.content.ContentResolver) {
-        viewModelScope.launch {
-            try {
-                val text = getSessionLogText()
-                contentResolver.openOutputStream(uri)?.use { output ->
-                    output.write(text.toByteArray())
-                }
-                _uiState.update { it.copy(snackbarMessage = "Log exportado correctamente") }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(errorMessage = "Error al exportar log: ${e.message}") }
-            }
-        }
-    }
+    fun exportLog(uri: android.net.Uri, contentResolver: android.content.ContentResolver) =
+        combatDelegate.exportLog(uri, contentResolver)
     fun toggleSceneCompletion(sceneId: Long, completed: Boolean) {
         viewModelScope.launch {
             sessionRepository.updateSceneCompletion(sceneId, completed)
@@ -1995,170 +1084,26 @@ class SessionViewModel @Inject constructor(
 
     // --- Tension Clocks & Overlay (Sprint 61) ---
 
-    fun toggleClocksOverlayExpanded() {
-        _uiState.update { it.copy(isClocksOverlayExpanded = !it.isClocksOverlayExpanded) }
-    }
-
-    fun openCreateClockDialog() {
-        _uiState.update { it.copy(showClockEditDialog = true, editingClock = null) }
-    }
-
-    fun openEditClockDialog(clock: TensionClock) {
-        _uiState.update { it.copy(showClockEditDialog = true, editingClock = clock) }
-    }
-
-    fun closeClockEditDialog() {
-        _uiState.update { it.copy(showClockEditDialog = false, editingClock = null) }
-    }
-
-    fun dismissClockImpactAlert() {
-        _uiState.update { it.copy(clockImpactAlert = null) }
-    }
-
-    fun saveClock(clock: TensionClock) {
-        val currentClocks = _uiState.value.tensionClocks
-        val exists = currentClocks.any { it.id == clock.id }
-        val updatedClocks = if (exists) {
-            currentClocks.map { if (it.id == clock.id) clock else it }
-        } else {
-            currentClocks + clock
-        }
-        val isNowCompleted = clock.progress >= clock.segments
-        _uiState.update { state ->
-            state.copy(
-                tensionClocks = updatedClocks,
-                showClockEditDialog = false,
-                editingClock = null,
-                clockImpactAlert = if (isNowCompleted && !clock.isCompleted) clock else state.clockImpactAlert
-            )
-        }
-        viewModelScope.launch {
-            sessionRepository.updateTensionClocks(sessionId, updatedClocks)
-        }
-    }
-
-    fun tickClock(clockId: Long, amount: Int) {
-        val currentClocks = _uiState.value.tensionClocks
-        var completedClock: TensionClock? = null
-        val updatedClocks = currentClocks.map { clock ->
-            if (clock.id == clockId) {
-                val newProgress = (clock.progress + amount).coerceIn(0, clock.segments)
-                val isNowCompleted = newProgress >= clock.segments
-                val updated = clock.copy(progress = newProgress, isCompleted = isNowCompleted)
-                if (isNowCompleted && !clock.isCompleted) {
-                    completedClock = updated
-                }
-                updated
-            } else clock
-        }
-        _uiState.update { state ->
-            state.copy(
-                tensionClocks = updatedClocks,
-                clockImpactAlert = completedClock ?: state.clockImpactAlert
-            )
-        }
-        viewModelScope.launch {
-            sessionRepository.updateTensionClocks(sessionId, updatedClocks)
-        }
-    }
-
-    fun resetClock(clockId: Long) {
-        val currentClocks = _uiState.value.tensionClocks
-        val updatedClocks = currentClocks.map { clock ->
-            if (clock.id == clockId) {
-                clock.copy(progress = 0, isCompleted = false)
-            } else clock
-        }
-        _uiState.update { state ->
-            state.copy(
-                tensionClocks = updatedClocks,
-                clockImpactAlert = if (state.clockImpactAlert?.id == clockId) null else state.clockImpactAlert
-            )
-        }
-        viewModelScope.launch {
-            sessionRepository.updateTensionClocks(sessionId, updatedClocks)
-        }
-    }
-
-    fun deleteClock(clockId: Long) {
-        val currentClocks = _uiState.value.tensionClocks
-        val updatedClocks = currentClocks.filterNot { it.id == clockId }
-        _uiState.update { state ->
-            state.copy(
-                tensionClocks = updatedClocks,
-                clockImpactAlert = if (state.clockImpactAlert?.id == clockId) null else state.clockImpactAlert
-            )
-        }
-        viewModelScope.launch {
-            sessionRepository.updateTensionClocks(sessionId, updatedClocks)
-        }
-    }
-
-    fun triggerClockNow(clock: TensionClock) {
-        val updated = clock.copy(progress = clock.segments, isCompleted = true)
-        saveClock(updated)
-        _uiState.update { it.copy(clockImpactAlert = updated) }
-    }
-
-    fun copyClockImpactToDiary(clock: TensionClock) {
-        val consequenceText = clock.triggerDescription.ifBlank { "El evento o peligro programado se ha desencadenado." }
-        val diaryEntry = "\n\n### ⏰ Detonación de Reloj: ${clock.name}\n> **Consecuencia:** $consequenceText\n*Progreso alcanzado: ${clock.segments}/${clock.segments}*\n"
-        val currentNotes = _uiState.value.dmNotes
-        val updatedNotes = currentNotes + diaryEntry
-        _uiState.update { it.copy(dmNotes = updatedNotes, clockImpactAlert = null) }
-        viewModelScope.launch {
-            sessionRepository.updateDmNotes(sessionId, updatedNotes)
-        }
-    }
-
-    fun updateClockDescriptionAndProgress(clockId: Long, newDescription: String, newProgress: Int) {
-        val currentClocks = _uiState.value.tensionClocks
-        val updatedClocks = currentClocks.map { clock ->
-            if (clock.id == clockId) {
-                clock.copy(
-                    triggerDescription = newDescription,
-                    progress = newProgress.coerceIn(0, clock.segments),
-                    isCompleted = newProgress >= clock.segments
-                )
-            } else clock
-        }
-        _uiState.update { state ->
-            state.copy(tensionClocks = updatedClocks)
-        }
-        viewModelScope.launch {
-            sessionRepository.updateTensionClocks(sessionId, updatedClocks)
-        }
-    }
-
+    fun toggleClocksOverlayExpanded() = clocksDelegate.toggleClocksOverlayExpanded()
+    fun openCreateClockDialog() = clocksDelegate.openCreateClockDialog()
+    fun openEditClockDialog(clock: TensionClock) = clocksDelegate.openEditClockDialog(clock)
+    fun closeClockEditDialog() = clocksDelegate.closeClockEditDialog()
+    fun dismissClockImpactAlert() = clocksDelegate.dismissClockImpactAlert()
+    fun saveClock(clock: TensionClock) = clocksDelegate.saveClock(clock)
+    fun tickClock(clockId: Long, amount: Int) = clocksDelegate.tickClock(clockId, amount)
+    fun resetClock(clockId: Long) = clocksDelegate.resetClock(clockId)
+    fun deleteClock(clockId: Long) = clocksDelegate.deleteClock(clockId)
+    fun triggerClockNow(clock: TensionClock) = clocksDelegate.triggerClockNow(clock)
+    fun copyClockImpactToDiary(clock: TensionClock) = clocksDelegate.copyClockImpactToDiary(clock)
+    fun updateClockDescriptionAndProgress(clockId: Long, newDescription: String, newProgress: Int) =
+        clocksDelegate.updateClockDescriptionAndProgress(clockId, newDescription, newProgress)
     fun createClockAndAddToBoard(
         name: String,
         segments: Int,
         colorHex: String?,
         triggerDescription: String,
         targetGroupId: Long? = null
-    ) {
-        val clockId = System.currentTimeMillis()
-        val newClock = TensionClock(
-            id = clockId,
-            sessionId = sessionId,
-            name = name,
-            segments = segments,
-            progress = 0,
-            colorHex = colorHex,
-            triggerDescription = triggerDescription
-        )
-        val updatedClocks = _uiState.value.tensionClocks + newClock
-        _uiState.update { it.copy(tensionClocks = updatedClocks) }
-        viewModelScope.launch {
-            sessionRepository.updateTensionClocks(sessionId, updatedClocks)
-        }
-        addBoardBlock(
-            type = SessionBoardItemType.CLOCK,
-            size = SessionBoardItemSize.S,
-            titleOverride = name,
-            resourceId = clockId
-        )
-    }
+    ) = clocksDelegate.createClockAndAddToBoard(name, segments, colorHex, triggerDescription, targetGroupId)
 
     fun renameSession(name: String) {
         viewModelScope.launch {
@@ -2168,13 +1113,7 @@ class SessionViewModel @Inject constructor(
         }
     }
 
-    fun createAndLinkMythicSession() {
-        viewModelScope.launch {
-            val sessionName = "Mítico - ${_uiState.value.session?.name ?: "Sesión"}"
-            val newSessionId = mythicRepository.saveSession(MythicSession(name = sessionName))
-            linkMythicSession(newSessionId)
-        }
-    }
+    fun createAndLinkMythicSession() = mythicDelegate.createAndLinkMythicSession()
 
     fun resetFloatingPanels() {
         _uiState.update { it.copy(activeLeftSidebar = SidebarTool.NONE, activeRightSidebar = SidebarTool.NONE) }
@@ -2201,14 +1140,21 @@ class SessionViewModel @Inject constructor(
         }
     }
 
-    // --- NPCs & Wiki Updates ---
-
-    fun updateNpcHp(npcId: Long, hp: Int) {
+    fun startQuickCombat(name: String = "Combate Rápido") {
         viewModelScope.launch {
-            val npc = npcRepository.getNpcById(npcId) ?: return@launch
-            npcRepository.saveNpc(npc.copy(currentHp = hp))
+            val encounter = Encounter(
+                name = name,
+                linkedSessionId = sessionId,
+                isActive = true
+            )
+            encounterRepository.saveEncounter(encounter)
+            setActiveBoardView(SessionBoardView.COMBAT)
         }
     }
+
+    // --- NPCs & Wiki Updates ---
+
+    fun updateNpcHp(npcId: Long, hp: Int) = combatDelegate.updateNpcHp(npcId, hp)
 
     fun updateWikiEntry(entry: WikiEntry) {
         viewModelScope.launch {
@@ -2341,193 +1287,39 @@ class SessionViewModel @Inject constructor(
 
     // --- Session Hotbar Actions (Sprint 59) ---
 
-    fun toggleHotbarExpanded() {
-        _uiState.update { it.copy(isHotbarExpanded = !it.isHotbarExpanded) }
-    }
+    fun toggleHotbarExpanded() = clocksDelegate.toggleHotbarExpanded()
 
-    fun openCreateHotbarAction() {
-        _uiState.update { it.copy(showHotbarActionDialog = true, editingHotbarAction = null) }
-    }
+    fun openCreateHotbarAction() = clocksDelegate.openCreateHotbarAction()
 
-    fun openEditHotbarAction(action: SessionHotbarAction) {
-        _uiState.update { it.copy(showHotbarActionDialog = true, editingHotbarAction = action) }
-    }
+    fun openEditHotbarAction(action: SessionHotbarAction) = clocksDelegate.openEditHotbarAction(action)
 
-    fun dismissHotbarActionDialog() {
-        _uiState.update { it.copy(showHotbarActionDialog = false, editingHotbarAction = null) }
-    }
+    fun dismissHotbarActionDialog() = clocksDelegate.dismissHotbarActionDialog()
 
-    fun saveHotbarAction(action: SessionHotbarAction) {
-        val currentActions = _uiState.value.session?.hotbarActions ?: defaultHotbarActions()
-        val index = currentActions.indexOfFirst { it.id == action.id }
-        val updatedActions = if (index >= 0) {
-            currentActions.toMutableList().apply { set(index, action) }
-        } else {
-            currentActions + action
-        }
-        _uiState.update { state ->
-            state.copy(
-                session = state.session?.copy(hotbarActions = updatedActions),
-                showHotbarActionDialog = false,
-                editingHotbarAction = null
-            )
-        }
-        viewModelScope.launch {
-            sessionRepository.updateHotbarActions(sessionId, updatedActions)
-        }
-    }
+    fun saveHotbarAction(action: SessionHotbarAction) = clocksDelegate.saveHotbarAction(action)
 
-    fun deleteHotbarAction(actionId: String) {
-        val currentActions = _uiState.value.session?.hotbarActions ?: defaultHotbarActions()
-        val updatedActions = currentActions.filterNot { it.id == actionId }
-        _uiState.update { state ->
-            state.copy(
-                session = state.session?.copy(hotbarActions = updatedActions),
-                showHotbarActionDialog = false,
-                editingHotbarAction = null
-            )
-        }
-        viewModelScope.launch {
-            sessionRepository.updateHotbarActions(sessionId, updatedActions)
-        }
-    }
+    fun deleteHotbarAction(actionId: String) = clocksDelegate.deleteHotbarAction(actionId)
 
-    fun executeHotbarAction(action: SessionHotbarAction) {
-        when (action.type) {
-            HotbarActionType.DICE_ROLL -> {
-                rollSmartDiceWithDescription(action.payload, action.label)
-            }
-            HotbarActionType.ORACLE_QUERY -> {
-                when (action.payload.uppercase()) {
-                    "RANDOM_EVENT" -> rollBoardMythicRandomEvent()
-                    "CERTAIN" -> rollBoardMythicFate(ProbabilityLevel.CERTAIN)
-                    "NEAR_SURE", "NEARLY_CERTAIN" -> rollBoardMythicFate(ProbabilityLevel.NEARLY_CERTAIN)
-                    "VERY_LIKELY" -> rollBoardMythicFate(ProbabilityLevel.VERY_LIKELY)
-                    "LIKELY" -> rollBoardMythicFate(ProbabilityLevel.LIKELY)
-                    "UNLIKELY" -> rollBoardMythicFate(ProbabilityLevel.UNLIKELY)
-                    "VERY_UNLIKELY" -> rollBoardMythicFate(ProbabilityLevel.VERY_UNLIKELY)
-                    "NEAR_IMPOSSIBLE", "NEARLY_IMPOSSIBLE" -> rollBoardMythicFate(ProbabilityLevel.NEARLY_IMPOSSIBLE)
-                    "IMPOSSIBLE" -> rollBoardMythicFate(ProbabilityLevel.IMPOSSIBLE)
-                    else -> rollBoardMythicFate(ProbabilityLevel.FIFTY_FIFTY)
-                }
-            }
-            HotbarActionType.RANDOM_TABLE -> {
-                val tableId = action.payload.toLongOrNull()
-                if (tableId != null) {
-                    rollActiveTable(tableId)
-                } else {
-                    _uiState.update { it.copy(snackbarMessage = "Tabla no vinculada: ${action.label}") }
-                }
-            }
-            HotbarActionType.DRAW_CARD -> {
-                val deckId = action.payload.toLongOrNull() ?: _uiState.value.selectedDeckId
-                if (deckId != null) {
-                    drawCardFromDeck(deckId)
-                } else {
-                    _uiState.update { it.copy(snackbarMessage = "No hay mazo seleccionado para robar") }
-                }
-            }
-        }
-    }
+    fun executeHotbarAction(action: SessionHotbarAction) = clocksDelegate.executeHotbarAction(action)
 
     // --- Scene Framing Assistant (Sprint 60) ---
 
-    fun openSceneFraming() {
-        _uiState.update { it.copy(showSceneFramingDialog = true) }
-    }
+    fun openSceneFraming() = clocksDelegate.openSceneFraming()
 
-    fun dismissSceneFraming() {
-        _uiState.update { it.copy(showSceneFramingDialog = false) }
-    }
+    fun dismissSceneFraming() = clocksDelegate.dismissSceneFraming()
 
     fun confirmSceneFraming(
         draft: SceneFramingDraft,
         closePrevious: Boolean,
         prevSummary: String,
         chaosDelta: Int
-    ) {
-        viewModelScope.launch {
-            try {
-                val currentActiveScene = _uiState.value.scenes.find { it.id == _uiState.value.focusedSceneId && !it.isCompleted }
-                    ?: _uiState.value.scenes.firstOrNull { !it.isCompleted }
-
-                if (closePrevious && currentActiveScene != null) {
-                    val closure = SoloSceneClosure(
-                        summary = prevSummary.ifBlank { "Conclusión de la escena." },
-                        chaosDelta = chaosDelta
-                    )
-                    notesMutex.withLock {
-                        sessionRepository.updateDmNotes(sessionId, _uiState.value.dmNotes)
-                        val closed = CloseSoloSceneUseCase(sessionRepository)(currentActiveScene, closure)
-                        _uiState.update { state ->
-                            state.copy(
-                                dmNotes = listOf(state.dmNotes, closed.journalEntry).filter { it.isNotBlank() }.joinToString("\n\n")
-                            )
-                        }
-                    }
-                    if (closure.chaosDelta != 0) {
-                        updateBoardMythicChaos(closure.chaosDelta)
-                    }
-                }
-
-                val sceneCount = _uiState.value.scenes.size + 1
-                val newScene = Scene(
-                    sessionId = sessionId,
-                    title = draft.title,
-                    content = SoloSceneContext(
-                        location = draft.location,
-                        objective = draft.objective,
-                        situation = draft.adjustedSituation.ifBlank { draft.expectation },
-                        pendingQuestion = ""
-                    ).toSceneContent(),
-                    sortOrder = (_uiState.value.scenes.maxOfOrNull { it.sortOrder } ?: 0) + 1,
-                    linkedTableId = draft.linkedTableId,
-                    linkedDeckId = draft.linkedDeckId
-                )
-
-                val newSceneId = sessionRepository.upsertScene(newScene)
-                focusScene(newSceneId)
-
-                // Registro estructurado en Markdown en el diario
-                val journalEntry = buildFramedSceneJournalEntry(sceneCount, draft)
-                notesMutex.withLock {
-                    val currentNotes = _uiState.value.dmNotes
-                    val updatedNotes = if (currentNotes.isBlank()) journalEntry else "$currentNotes\n\n$journalEntry"
-                    _uiState.update { it.copy(dmNotes = updatedNotes, showSceneFramingDialog = false) }
-                    sessionRepository.updateDmNotes(sessionId, updatedNotes)
-                }
-
-                val snackMsg = when (draft.checkOutcome?.result) {
-                    SceneCheckResult.INTERRUPTED -> "¡Escena Interrumpida! Evento: ${draft.checkOutcome.eventFocus}"
-                    SceneCheckResult.ALTERED -> "Escena Alterada: ${draft.title}"
-                    else -> "Escena \"${draft.title}\" iniciada"
-                }
-                _uiState.update { it.copy(snackbarMessage = snackMsg) }
-
-            } catch (e: Exception) {
-                if (e is kotlinx.coroutines.CancellationException) throw e
-                _uiState.update { it.copy(snackbarMessage = "Error al encuadrar escena: ${e.message}", showSceneFramingDialog = false) }
-            }
-        }
-    }
+    ) = clocksDelegate.confirmSceneFraming(draft, closePrevious, prevSummary, chaosDelta)
 
     // --- Choir of Flesh (Sprint 65) ---
-    fun createChoirOfFleshCharacter(npc: Npc, sheetMarkdown: String) {
-        viewModelScope.launch {
-            try {
-                npcRepository.saveNpc(npc)
-                notesMutex.withLock {
-                    val currentNotes = _uiState.value.dmNotes
-                    val updatedNotes = if (currentNotes.isBlank()) sheetMarkdown else "$currentNotes\n\n$sheetMarkdown"
-                    _uiState.update { it.copy(dmNotes = updatedNotes) }
-                    sessionRepository.updateDmNotes(sessionId, updatedNotes)
-                }
-                _uiState.update { it.copy(snackbarMessage = "Inquebrantable forjado: ${npc.name}") }
-            } catch (e: Exception) {
-                if (e is kotlinx.coroutines.CancellationException) throw e
-                _uiState.update { it.copy(snackbarMessage = "Error al forjar Inquebrantable: ${e.message}") }
-            }
-        }
-    }
+    fun createChoirOfFleshCharacter(npc: Npc, sheetMarkdown: String) =
+        combatDelegate.createChoirOfFleshCharacter(npc, sheetMarkdown)
+
+    fun addNpcToCombat(npc: Npc) = combatDelegate.addNpcToCombat(npc)
+
+    fun logNpcToDiary(npc: Npc) = combatDelegate.logNpcToDiary(npc)
 }
 

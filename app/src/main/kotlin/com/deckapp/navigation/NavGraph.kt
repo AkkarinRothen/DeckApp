@@ -113,8 +113,11 @@ fun DeckAppNavHost(
             detectTapGestures(onLongPress = { showQuickNote = true })
         },
         bottomBar = {
-            if (currentDestination?.hasRoute(ImportRoute::class) != true &&
-                currentDestination?.hasRoute(TableImportRoute::class) != true) {
+            val hideBottomBar = currentDestination?.hasRoute(ImportRoute::class) == true ||
+                currentDestination?.hasRoute(TableImportRoute::class) == true ||
+                currentDestination?.hasRoute(SessionRoute::class) == true
+
+            if (!hideBottomBar) {
                 NavigationBar {
                     NavigationBarItem(
                         selected = currentDestination?.hasRoute(LibraryRoute::class) == true,

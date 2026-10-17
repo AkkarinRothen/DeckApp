@@ -1,3 +1,181 @@
+### Rediseño UX Mesa de Juego — Implementación Integral Entregas 1 a 6 (17 de octubre de 2026)
+
+**Auditoría Física y Optimización de Pantalla (Motorola One Fusion & Landscape):**
+- **Entrega 1: Recuperación de Espacio Vertical y Cabecera Compacta:**
+  - *Retiro de NavigationBar global en sesión activa:* En [NavGraph.kt](file:///i:/TTRPG/Visuales/Decks/Deckapp/app/src/main/kotlin/com/deckapp/navigation/NavGraph.kt), se añadió `SessionRoute::class` a la condición `hideBottomBar`, recuperando ~70dp de espacio vertical útil para el tablero y el workspace de juego.
+  - *Cabecera compacta adaptable (`SessionTopBar.kt`):* Selector de modo responsivo. En pantallas compactas (< 500dp como móviles en vertical 360-400dp), los 4 botones de modo se unifican en un pill dropdown (`[ :: Mesa ▼ ]`, `[ ⊞ Táctico ▼ ]`, etc.) con checkmark indicador. En pantallas anchas/horizontal se preserva la fila de iconos. Las acciones secundarias se agruparon en el menú overflow `MoreVert`, reduciendo padding táctil de 48dp a 32-36dp para Undo, Spotlight y Dados.
+  - *Contrato de dimensiones en BentoSidebar (`BentoSidebar.kt`):* Se eliminó el `Modifier.fillMaxSize()` raíz que forzaba overlay de pantalla completa; el `scrim` oscurecido ahora es opcional (`showOverlay = false` por defecto en sidebars empotrados) y se aplicaron dimensiones elásticas en horizontal (`widthIn(min = 260.dp, max = 320.dp)`) asegurando que el canvas central mantenga >= 450dp de ancho utilizable.
+
+- **Entrega 2: Rutas y Salidas a Estados Vacíos:**
+  - *Tracker de Combate sin encuentro:* Se eliminó la hoja inferior vacía. Ahora [SessionScreen.kt](file:///i:/TTRPG/Visuales/Decks/Deckapp/feature/draw/src/main/kotlin/com/deckapp/feature/draw/SessionScreen.kt) muestra `CombatEmptyState` con ilustración, explicación guiada y el botón directo de 1 toque `⚡ Iniciar Combate Rápido`, que invoca `startQuickCombat()` en [SessionViewModel.kt](file:///i:/TTRPG/Visuales/Decks/Deckapp/feature/draw/src/main/kotlin/com/deckapp/feature/draw/SessionViewModel.kt) inicializando de inmediato un encuentro vinculado con seguimiento de rondas.
+  - *Hexploración sin mapa vinculado:* El bloque de tablero en [BoardBlockMeta.kt](file:///i:/TTRPG/Visuales/Decks/Deckapp/feature/draw/src/main/kotlin/com/deckapp/feature/draw/components/BoardBlockMeta.kt) ahora evalúa `linkedHexMapId != null` para mostrar honestamente "Sin mapa vinculado" en vez de "Mapa activo". Además, en modo Hexploración se renderiza un estado vacío con botón interactivo `⚙ Vincular Mapa en Ajustes`.
+  - *Pestaña de Referencias conectada:* Corregido el desvío en [BoardCentralTool.kt](file:///i:/TTRPG/Visuales/Decks/Deckapp/feature/draw/src/main/kotlin/com/deckapp/feature/draw/components/BoardCentralTool.kt) y en los rieles laterales; `SidebarTool.REFERENCES` ahora monta directamente el componente `ReferenceTab` con las tablas de referencia y reglas del sistema de la sesión.
+  - *Diario de Bitácora Cronológico:* Se reemplazó el texto provisional por `JournalTab`, permitiendo visualizar el registro cronológico de bitácora y acceder rápidamente a la edición de notas.
+
+- **Entrega 3: Bloques y Consulta — PNJs, Tablas y Mazos:**
+  - *Ficha Compartida Unificada (`NpcDetailSheet.kt`):* Creada en `core:ui` y adoptada en `NpcsTab`, `NpcListScreen` y el visor de búsqueda de sesión. Reorganizó la ficha situando estadísticas, recursos de sistema (Choir: Flesh/Armor/Stress/HP) y acciones en la zona superior visible, con retrato táctil ampliable en diálogo modal y reproducción de voz.
+  - *Búsqueda en tiempo real y chips de sistema en PNJs (`NpcsTab.kt`):* Buscador dinámico con filtrado instantáneo por nombre y tags, y chips de sistema ("Choir of Flesh", "D&D / d20", etc.).
+  - *Visor de Tabla Limpio (`TableDetailSheet.kt`):* Cabecera concisa con fórmula y nombre legible; acciones de administración (Editar / Exportar) agrupadas en menú contextual `MoreVert`, liberando espacio para las entradas de tabla. Botón directo de 1 toque "Registrar en Diario" para asentar tiradas o selecciones manuales.
+  - *Catálogo de Tablas (`TablesTab.kt`):* Limpieza de tags técnicos (`.json` eliminado del chip de sistema visible), reemplazo de 3 FABs flotantes apilados por un único FAB con dropdown de administración, y tarjetas compactas con botón directo de tirada rápida.
+  - *Bloque de Mesa Sin Vínculo (`TableBlockContent.kt`):* Sustituido el botón deshabilitado "Tirar" por un banner explicativo con botón activo "Elegir tabla" que abre el catálogo para vincularla de inmediato.
+  - *Mazos de Juego (`DeckWorkspace.kt`):* Botón explícito "Robar" y flecha de expansión; supresión del `SwipeToDismissBox` dentro del `LazyRow` horizontal de la mano para prevenir descartes involuntarios al hacer scroll.
+  - *Historial de Sesión (`SessionHistoryScreen.kt`):* Corregido el rótulo técnico "Carta #null" en eventos de reinicio de mazo.
+
+- **Entrega 4: Registro y Escritura — Notas, Diario y Teclado:**
+  - *Teclado móvil sin obstrucción en Notas (`NotesTab.kt`):* Insets dinámicos de teclado (`Modifier.imePadding()`) posicionados en la columna raíz, logrando que la barra de herramientas Markdown flote justo sobre el teclado virtual de Android sin tapar el texto. Scroll fluido y área visible óptima.
+  - *Persistencia de estado y rotación:* Uso de `rememberSaveable(stateSaver = TextFieldValue.Saver)` para preservar cursor, selección, texto y scroll al rotar o alternar entre herramientas.
+  - *Superficie dual:* Selector visual claro entre "Notas Libres" (editor Markdown) y "Actividad" (lector cronológico de bitácora con copia de 1 toque).
+  - *Hojas inferiores al 92%:* En móvil vertical, `ModalBottomSheet` expande a 0.92f de la pantalla con `skipPartiallyExpanded = true` para edición de notas y lectura de diario sin compresión.
+  - *Visor Wiki Markdown (`WikiQuickPreviewDialog.kt`):* Diálogo completo de previsualización rápida con renderizado Markdown, tags de categoría e imágenes ampliables, conectado con callbacks `onWikiClick` en la mesa y plan.
+
+- **Entrega 5: Juego Activo — Táctico, Combate, Hexploración y Mythic:**
+  - *Eliminación de Solapamiento Top HUD (`SessionTopHudCapsule.kt`):* Reubicado dentro del flujo secuencial de layout de la pantalla en lugar de flotar como overlay absoluto sobre las pestañas de mesa. Chips de Hilos, Combate y Relojes sólo se renderizan cuando existen alertas reales, dejando 100% visible el espacio de pestañas ("Principal", "Exploración", "Editar").
+  - *Hotbar Dock Discreto (`SessionHotbarDock.kt` & `SessionViewModel.kt`):* Estado inicial minimizado por defecto (`isHotbarExpanded = false`). La sesión abre con la píldora compacta `⚡ Atajos (4) ^` en la esquina inferior derecha, dejando todo el contenido del tablero visible y accesible.
+  - *Protección contra clics accidentales en Combate (`CombatBlockContent.kt`):* Diálogo modal de confirmación `showConfirmEndCombat` antes de finalizar o reiniciar el combate, previniendo toques accidentales sobre el icono de papelera al lado de "Siguiente turno".
+  - *Ajuste de offset en Mapa Táctico (`TacticalMapView.kt`):* Margen superior adaptable en teléfonos para que los controles no colisionen con el selector de mapas ni el título. Confirmación modal en `TacticalTokenHud.kt` antes de eliminar tokens.
+  - *Mythic Contextual:* Estado vacío con acción directa "Vincular en Ajustes".
+
+- **Entrega 6: Procedimientos y Accesibilidad:**
+  - *Barra de herramientas de sesión (`SessionBottomBar.kt`):* Barra inferior horizontal con desplazamiento suave para las 9 herramientas principales de sesión (`Mazos`, `Tablas`, `Combate`, `Notas`, `PNJs`, `Reglas`, `Wiki`, `Plan`, `Mythic`). Permite acceder a cualquier herramienta desde vertical sin requerir la presencia de un bloque en el tablero.
+  - *Validación en dispositivo físico:* Compilación Release de 4m 33s, instalación vía ADB y verificación interactiva paso a paso en el Motorola One Fusion real (taps en Tablas, PNJ, Reglas, scroll horizontal de la barra, confirmación de combate).
+
+
+---
+
+### Rediseño de Layout y Eliminación de Solapamientos en la Mesa de Juego (17 de octubre de 2026)
+
+**Arquitectura de Capas y Resolución de Colisiones en Pantalla Móvil y Desktop:**
+- **Coordinación Inteligente Inferior (Hotbar vs TacticalToolbar):**
+  - Implementación de alternancia dinámica y exclusión mutua: al expandir la Hotbar de macros/dados (`SessionHotbarDock`), la barra táctica se minimiza automáticamente a una píldora compacta (`Herramientas` con acceso de 1 toque para restaurar).
+  - Al seleccionar cualquier herramienta táctica o interactuar con el lienzo del mapa, la Hotbar se contrae automáticamente sin invadir el área de juego.
+  - Anclaje coordinado de elevación: cuando la Hotbar está colapsada en modo táctico, se posiciona en `BottomEnd` a `80.dp` de la base, flotando limpiamente por encima de la barra táctica sin pisar los botones de acción ni el banner de resolución de ataque (`TacticalAttackResolutionBanner`).
+- **Desduplicación y Pila Vertical Superior (Top Stack):**
+  - En modo Táctico (`SessionViewMode.TACTICAL`), la Cápsula HUD superior (`SessionTopHudCapsule`) suprime el módulo de combate duplicado, delegando el tracking de turnos exclusivamente a la `TacticalInitiativeBar` nativa del mapa (con retratos y auto-foco).
+  - Reemplazo de anclajes dispersos por una columna unificada (`Column` en `TopCenter` con espaciado uniforme): ahora se apilan de forma orgánica el banner de calibración guiada, el indicador de puntería, los breadcrumbs de mapas anidados, la barra de iniciativa y el mini-HUD del token seleccionado, eliminando el solapamiento visual entre ellos.
+  - La cabecera del mapa (`TopStart`) se adaptó con ancho máximo y truncamiento elíptico para evitar invadir la barra de iniciativa en pantallas estrechas.
+- **Acceso Limpio al Panel Lateral y Despeje de Canvas:**
+  - Se añadió un botón directo en la `TacticalToolbar` principal para abrir/cerrar el Panel Lateral Táctico (dados, destino, notas del DM, índice de salas), eliminando la solapa flotante invasiva en medio del borde derecho en modo vertical/móvil.
+  - El mini-panel flotante de notas fijas / pines (`TacticalFloatingPinPanel`) se silencia automáticamente cuando el drawer lateral está abierto en teléfonos, evitando solapamientos y conflictos de gestos táctiles.
+
+---
+
+### Sistema Avanzado de Pines y Dungeon Key en Mapa Táctico (17 de octubre de 2026)
+
+**Pines Tácticos — Presets Rápidos, Drag & Drop y Renderizado Semántico**
+- **Presets de Colocación Inmediata a 1 Toque (`TacticalToolbar.kt`):**
+  - Al seleccionar la herramienta `PIN`, se despliega una sub-barra contextual animada con 6 presets directos: `ROOM_AUTO` (numeración autoincremental de salas estilo Dungeon Crawl), `TRAP` (Trampa), `TREASURE` (Tesoro), `DOOR_SUBMAP` (Puerta / Escalera), `COMBAT` (Encuentro) y `LORE_NOTE` (Nota).
+  - Incluye botón para reiniciar el contador de salas a 1 y toggle visual para ocultar/mostrar pines secretos de DM.
+  - Se eliminó la apertura accidental de diálogos al tocar casillas vacías en modos `NAVIGATE` y `SELECT`. Long press abre el diálogo completo de creación/edición.
+- **Renderizado Dinámico en Canvas (`TacticalMapCanvas.kt`):**
+  - Los pines muestran badges inteligentes con el número de sala o glifo semántico (`⚠`, `★`, `⎅`, `☠`, `i`, `?`).
+  - Respeto del estado de exploración (`MapPinExplorationState.DISCOVERED` con halo cian, `EXPLORED` con atenuado sutil, `UNKNOWN`).
+  - Distinción visual para pines secretos (borde discontinuo púrpura) y pines anclados (halo dorado).
+- **Arrastre Dinámico y Bloqueo de Posición (Drag & Drop + Lock):**
+  - En modo `PIN`, los pines desbloqueados pueden ser arrastrados a cualquier celda de la grilla con persistencia instantánea en la base de datos.
+  - Indicador de candado en el pin y toggle en el panel para prevenir reubicaciones involuntarias.
+- **Notas Fijadas en Pantalla ("Sticky Notes" en `TacticalFloatingPinPanel.kt`):**
+  - Se incorporó el botón de chincheta (`PushPin`): permite mantener la tarjeta de la sala o secreto anclada en pantalla incluso mientras el DM interactúa con otras áreas del mapa o tokens.
+  - Botón para colapsar la nota fija en una pastilla horizontal compacta en la esquina superior con título y acceso de 1 toque a expandir o cerrar.
+- **Pestaña "Dungeon Key" / Índice de Salas en el Panel Lateral (`TacticalSidePanel.kt`):**
+  - Nueva pestaña `Pines` que lista todas las habitaciones y puntos de interés del mapa actual.
+  - Buscador en tiempo real por texto o descripción, filtros por categoría ("Salas", "Trampas", "Tesoros", "Combate", "Secretos") y métricas de exploración (ej. Exploradas: 3 / 10).
+  - Botón de 1 toque para centrar la cámara suavemente sobre el pin en el mapa (`onFocusPinCoordinates`).
+
+---
+
+### Choir of Flesh — Flujo guiado de tablas y ajustes de reglas (17 de octubre de 2026)
+
+**Tablas — Consulta manual, registro y tirada animada**
+- En una sesión, abrir una tabla permite leer sus resultados sin tirar. Al tocar una fila se registra la elección en el diario; para rangos se puede indicar el valor del dado y se valida contra la fila seleccionada.
+- Las tiradas directas muestran la tabla y animan el desplazamiento hasta la fila elegida. Las tablas de rango conservan el valor exacto obtenido, y no solo el límite inferior de la fila.
+
+**Choir of Flesh — Reglas y persistencia**
+- Cotejo de heridas infectadas y reglas de incursión con las ayudas del sistema: una o más heridas menores infectadas producen una herida mayor; se corrigieron rutas de cuadrícula, descansos y efectos automáticos no respaldados por el material.
+- Guardar la ficha de una criatura persiste los cambios y sincroniza copias preparadas y encuentros activos.
+- Validación: compilación final de módulos de tablas, sesión y APK Debug completada correctamente. Las pruebas de dominio (59) habían pasado en la compilación completa anterior; el último ajuste del índice de fila se verificó con esta compilación.
+
+---
+---
+
+### Rediseño de Layout y Resolución de Superposición en la Mesa de Juego (16 de octubre de 2026)
+
+**UI & UX — Optimización de Espacio y Eliminación de Solapamientos en `SessionScreen`**
+- **Cápsula Flotante Superior Unificada (`SessionTopHudCapsule.kt`):**
+  - Se unificaron los 3 widgets flotantes superiores que colisionaban horizontalmente en pantallas móviles (`SessionThreadsOverlay` en `TopStart`, `SessionCombatFloatingHud` en `TopCenter` y `SessionClocksOverlay` en `TopEnd`) en una única pastilla horizontal centrada compacta con diseño de cristal translúcido.
+  - Implementación de **expansión mutuamente exclusiva**: al tocar el chip de Hilos, Combate o Relojes, se despliega únicamente ese panel y se cierran automáticamente los demás, previniendo invasión del área de juego.
+  - El chip de combate activo incluye avance rápido de turno en 1 toque directo desde la cabecera.
+- **Acordeón Colapsable para Escenas en Solitario (`SoloScenePanel.kt`):**
+  - Transformado en un componente tipo acordeón que inicia plegado en una barra delgada de ~40dp (mostrando título de escena, factor de caos y botón selector) liberando el 40% del alto vertical superior que antes asfixiaba los bloques de la mesa.
+  - Expansión animada fluida con un toque para acceder a notas de contexto y oráculos de escena.
+- **Dock de Atajos Rápidos No Intrusivo (`SessionHotbarDock.kt`):**
+  - Al estar colapsada, la pastilla de atajos se ubica en la esquina inferior derecha (`Alignment.BottomEnd`) ocupando solo su ancho mínimo para no bloquear el centro ni las cartas de la mesa.
+  - Al expandirse, se despliega a pantalla completa en la base para facilitar el acceso ergonómico con los pulgares.
+- **Despliegue Directo:**
+  - Compilado APK Release sin minificación (`app-release.apk`) e instalado exitosamente vía ADB por Wi-Fi en el dispositivo Motorola One Fusion.
+
+---
+
+### Modularización Arquitectónica de `:feature:draw` — Fase 3: Modularización de UI en `SessionScreen` (16 de octubre de 2026)
+
+**ARCHITECTURE — Descomposición Modular de la Pantalla Principal de Sesión (`SessionScreen.kt`)**
+- **Creación de `SessionTopBar` (`com.deckapp.feature.draw.components.SessionTopBar`):**
+  - Encapsula toda la barra superior `TopAppBar`: cronómetro de tiempo transcurrido en sesión, botón de deshacer último robo animado, selector central de modos (Mesa de Juego, Mapa Táctico, Mapa de Hexploración, Oráculo Mythic), asistente de encuadre de escenas, accesos directos al Coro de Carne (Inquebrantables e Incursión), buscador Spotlight (`Ctrl+K`), lanzador de dados, historial y configuración.
+  - Alivia ~150 líneas de maquetación en `SessionScreen.kt`.
+- **Creación de `SessionDialogsHost` (`com.deckapp.feature.draw.components.SessionDialogsHost`):**
+  - Centraliza la orquestación y el ciclo de vida de más de 12 diálogos modales, hojas de detalle y alertas contextuales: previsualizaciones rápidas de NPCs y Lore Wiki, visor de tablas aleatorias `TableDetailSheet`, configuración global de sesión `SessionConfigSheet`, edición de botones Hotbar, asistente de escenas, edición y detonación de Relojes de Tensión, gestión de Hilos y Personajes de Mythic, Command Palette Spotlight, y todos los diálogos y confirmaciones del mapa táctico (creación de pines, hojas de pin, creación/selección/renombrado/eliminado de mapas).
+  - Alivia ~320 líneas de diálogos dispersos en `SessionScreen.kt`.
+- **Creación de `DeckWorkspace` (`com.deckapp.feature.draw.components.DeckWorkspace`):**
+  - Extrae el área de trabajo y cluster de mazos de cartas (`DeckWorkspace` y `DeckClusterItem`) con soporte de swipe-to-dismiss para descarte de cartas, ratios de aspecto personalizados y reversos dinámicos.
+  - Alivia ~110 líneas de código privado al fondo del archivo.
+- **Impacto y Limpieza en `SessionScreen.kt`:**
+  - Reducción drástica del archivo monolítico de **1.380 líneas a 834 líneas** (~40% de reducción).
+  - Componentes reutilizables, legibles y desacoplados con responsabilidades claras y ciclo de vida visual ordenado.
+- **Validación y Pruebas Unitarias:**
+  - Compilación limpia de `:feature:draw:compileDebugKotlin`.
+  - Ejecución de la suite completa de pruebas unitarias (`:feature:draw:testDebugUnitTest`): **109 de 109 pruebas aprobadas exitosamente**.
+
+---
+
+### Modularización Arquitectónica de `:feature:draw` — Fase 2: Delegados de Mythic, Spotlight y Relojes/Acciones (16 de octubre de 2026)
+
+**ARCHITECTURE — Desacoplamiento de SessionViewModel en Delegados Especializados (Fase 2)**
+- **Creación de `SessionMythicDelegate` (`com.deckapp.feature.draw.delegates`):**
+  - Encapsula el Oráculo Mítico (Fate Checks, Factor de Caos, tiradas forzadas, eventos aleatorios), escenas en solitario y diario estructurado (`saveSoloScene`, `closeSoloScene`), gestión de hilos y personajes de trama (`threads` y `characters`), y captura/traspaso de inspiración al diario de sesión.
+  - Alivia ~480 líneas de lógica en `SessionViewModel`.
+- **Creación de `SessionSpotlightDelegate` (`com.deckapp.feature.draw.delegates`):**
+  - Encapsula el Command Palette Spotlight (Sprint 64): búsqueda global asíncrona reactiva con debounce de 150ms sobre tablas aleatorias, PNJs, reglas del sistema SRD, criaturas de encuentros y notas de sesión.
+  - Gestiona la conversión fluida de resultados encontrados en criaturas añadidas al combate o fragmentos exportados al diario.
+  - Alivia ~250 líneas de búsqueda y orquestación.
+- **Creación de `SessionClocksDelegate` (`com.deckapp.feature.draw.delegates`):**
+  - Encapsula la gestión completa de Relojes de Tensión (Sprint 61: creación, avance por pulsos, reseteo, detonación y volcado de alertas de impacto al diario), la botonera de acciones rápidas Hotbar (Sprint 59: ejecución polimórfica de dados, oráculos, tablas y cartas) y el Asistente de Encuadre de Escenas (Sprint 60: chequeos d10 de caos, giros de situación y generación estructurada de escenas en Markdown).
+  - Alivia ~380 líneas de lógica transversal.
+- **Reducción Masiva de `SessionViewModel`:**
+  - `SessionViewModel.kt` se reduce de 2.534 líneas iniciales a 1.273 líneas (~50% de reducción de tamaño), manteniendo 100% de compatibilidad binaria y funcional mediante métodos forwarders directos.
+- **Validación y Pruebas Unitarias:**
+  - Creados tests unitarios exhaustivos para los 3 nuevos delegados:
+    - `SessionMythicDelegateTest` (9 tests unitarios).
+    - `SessionSpotlightDelegateTest` (8 tests unitarios).
+    - `SessionClocksDelegateTest` (7 tests unitarios).
+  - Ejecución de la suite completa de pruebas unitarias (`:feature:draw:testDebugUnitTest`): **109 de 109 pruebas aprobadas con 0 fallos**.
+
+---
+
+### Modularización Arquitectónica de `:feature:draw` — Fase 1: Delegados de Cartas y Combate (16 de octubre de 2026)
+
+**ARCHITECTURE — Desacoplamiento de SessionViewModel en Delegados Especializados**
+- **Creación de `SessionDeckDelegate` (`com.deckapp.feature.draw.delegates`):**
+  - Encapsula toda la lógica de cartas, mazos, descarte, robo aleatorio, robo por palo (`DrawBySuit`), barajado reactivo de pila de descarte (`shufflePileBack`), peek sin mutación, ordenamiento de mano y colapso de clusters Bento.
+  - Alivia ~300 líneas de lógica acoplada en `SessionViewModel`.
+- **Creación de `SessionCombatDelegate` (`com.deckapp.feature.draw.delegates`):**
+  - Encapsula tracker de combate, asaltos, turnos, iniciativa, cálculo de orden determinista, daño, condiciones, participantes temporales de jugadores (PJs), exportación de logs narrativos y reglas de combate del Coro de Carne (*Choir of Flesh* / Inquebrantables).
+  - Alivia ~350 líneas de lógica de combate y persistencia de notas en `SessionViewModel`.
+- **Compatibilidad 100% hacia atrás en `SessionViewModel`:**
+  - Instanciación de ambos delegados en el ViewModel con métodos pasarela (*forwarders*) para preservar íntegra la API pública requerida por `SessionScreen` y tests existentes sin romper llamadas ni contratos.
+- **Validación y Pruebas Unitarias:**
+  - Creados tests unitarios aislados: `SessionDeckDelegateTest` y `SessionCombatDelegateTest` con MockK y Coroutines Test.
+  - Compilación de `:feature:draw:compileDebugKotlin` exitosa.
+  - 85 tests unitarios de `:feature:draw:testDebugUnitTest` aprobados al 100%.
+
 ---
 
 ### Choir of Flesh — Asistente de Juego Guiado: Cierre de Combate, Incursión (8 Nodos) y Asentamiento (16 de octubre de 2026)

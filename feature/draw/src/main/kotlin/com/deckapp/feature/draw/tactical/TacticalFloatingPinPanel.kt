@@ -43,6 +43,12 @@ fun TacticalFloatingPinPanel(
     onToggleSecret: (Long) -> Unit,
     onEditPin: (TacticalMapPin) -> Unit,
     onRollInlineFormula: (formula: String, label: String) -> Unit,
+    isSticky: Boolean = false,
+    isMinimized: Boolean = false,
+    isLocked: Boolean = false,
+    onToggleSticky: () -> Unit = {},
+    onToggleMinimized: () -> Unit = {},
+    onToggleLocked: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val targetMap = remember(pin.targetMapId, availableMaps) {
@@ -61,6 +67,67 @@ fun TacticalFloatingPinPanel(
         diceRegex.findAll(pin.description).map { it.value }.distinct().toList()
     }
 
+    if (isMinimized) {
+        Surface(
+            shape = RoundedCornerShape(20.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.96f),
+            tonalElevation = 6.dp,
+            shadowElevation = 8.dp,
+            modifier = modifier
+                .padding(12.dp)
+                .clickable { onToggleMinimized() }
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                        .background(Color(pin.colorHex)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PushPin,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(14.dp)
+                    )
+                }
+                Text(
+                    text = pin.title,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                IconButton(
+                    onClick = onToggleMinimized,
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.UnfoldMore,
+                        contentDescription = "Expandir",
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Cerrar",
+                        modifier = Modifier.size(14.dp)
+                    )
+                }
+            }
+        }
+        return
+    }
+
     Surface(
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.96f),
@@ -76,7 +143,7 @@ fun TacticalFloatingPinPanel(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // Cabecera: Icono semántico + Título + Botón Cerrar
+            // Cabecera: Icono semántico + Título + Sticky / Lock / Minimizar / Cerrar
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -128,6 +195,44 @@ fun TacticalFloatingPinPanel(
                             )
                         }
                     }
+                }
+
+                // Botón Candado (Bloquear movimiento)
+                IconButton(
+                    onClick = onToggleLocked,
+                    modifier = Modifier.size(28.dp)
+                ) {
+                    Icon(
+                        imageVector = if (isLocked) Icons.Default.Lock else Icons.Default.LockOpen,
+                        contentDescription = if (isLocked) "Desbloquear" else "Bloquear posición",
+                        tint = if (isLocked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+
+                // Botón Chincheta (Sticky Note)
+                IconButton(
+                    onClick = onToggleSticky,
+                    modifier = Modifier.size(28.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PushPin,
+                        contentDescription = if (isSticky) "Desfijar de pantalla" else "Fijar nota en pantalla",
+                        tint = if (isSticky) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+
+                // Botón Minimizar a píldora
+                IconButton(
+                    onClick = onToggleMinimized,
+                    modifier = Modifier.size(28.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.UnfoldLess,
+                        contentDescription = "Minimizar",
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
 
                 IconButton(

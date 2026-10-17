@@ -45,6 +45,7 @@ fun SessionCombatFloatingHud(
     onToggleCondition: (creatureId: Long, condition: Condition) -> Unit,
     onEndCombat: () -> Unit,
     onCopyRoundToDiary: () -> Unit,
+    showHeaderPill: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     if (encounter == null || (encounter.creatures.isEmpty() && players.isEmpty())) return
@@ -67,9 +68,10 @@ fun SessionCombatFloatingHud(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // ── Pastilla Inteligente Superior Central (Collapsed View) ───────────
-        Surface(
-            shape = RoundedCornerShape(20.dp),
-            color = Color(0xEB161920),
+        if (showHeaderPill) {
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                color = Color(0xEB161920),
             border = BorderStroke(1.2.dp, activeBorderColor.copy(alpha = 0.85f)),
             shadowElevation = 8.dp,
             modifier = Modifier
@@ -181,6 +183,7 @@ fun SessionCombatFloatingHud(
                 )
             }
         }
+    }
 
         // ── Panel Flotante Expandido ──────────────────────────────────────────
         AnimatedVisibility(

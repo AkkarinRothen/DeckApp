@@ -13,18 +13,23 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Casino
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.deckapp.core.model.RandomTable
+import com.deckapp.core.model.TableRollMode
 import com.deckapp.core.model.TableRollResult
 import com.deckapp.core.ui.components.PaperSurface
 import com.deckapp.core.ui.components.paperBackground
@@ -34,6 +39,7 @@ import com.deckapp.feature.tables.components.TableEntriesPreview
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.delay
 
 /**
  * BottomSheet de resultado de tirada para una tabla aleatoria.
@@ -50,12 +56,32 @@ fun TableDetailSheet(
     lastResult: TableRollResult?,
     recentResults: List<TableRollResult>,
     isRolling: Boolean,
+    autoRollOnOpen: Boolean = false,
     onRoll: () -> Unit,
     onExport: () -> Unit,
     onEdit: () -> Unit = {},
+    onSelectEntry: ((Int, Int?) -> Unit)? = null,
+    onSendToNotes: ((tableName: String, resultText: String) -> Unit)? = null,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var revealKey by remember(table.id) { mutableIntStateOf(0) }
+    var rollingIndex by remember(table.id) { mutableStateOf<Int?>(null) }
+    var manualDie by remember(table.id) { mutableStateOf("") }
+    var manualError by remember(table.id) { mutableStateOf<String?>(null) }
+    var headerMenuExpanded by remember { mutableStateOf(false) }
+    LaunchedEffect(revealKey) {
+        if (revealKey > 0 && table.entries.isNotEmpty()) {
+            repeat(12) { step ->
+                rollingIndex = (step * table.entries.size / 12).coerceAtMost(table.entries.lastIndex)
+                delay(60)
+            }
+            rollingIndex = null
+        }
+    }
+    LaunchedEffect(table.id, autoRollOnOpen) {
+        if (autoRollOnOpen) { revealKey++; onRoll() }
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -70,31 +96,43 @@ fun TableDetailSheet(
                 .padding(bottom = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Cabecera con botón de exportar
+            // Cabecera compacta con menú de administración secundario
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 ThemeChapterHeader(table.name, Modifier.weight(1f), categoryEmblem(table.category))
-                IconButton(onClick = onEdit) {
-                    Icon(
-                        Icons.Default.Edit,
-                        contentDescription = "Editar tabla",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                IconButton(onClick = onExport) {
-                    Icon(
-                        Icons.Default.Share,
-                        contentDescription = "Exportar tabla",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                Box {
+                    IconButton(onClick = { headerMenuExpanded = true }) {
+                        Icon(
+                            Icons.Default.MoreVert,
+                            contentDescription = "Opciones",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = headerMenuExpanded,
+                        onDismissRequest = { headerMenuExpanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Editar tabla") },
+                            leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) },
+                            onClick = { headerMenuExpanded = false; onEdit() }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Exportar tabla") },
+                            leadingIcon = { Icon(Icons.Default.Share, contentDescription = null) },
+                            onClick = { headerMenuExpanded = false; onExport() }
+                        )
+                    }
                 }
             }
             Text(
                 text = buildString {
                     if (table.tags.isNotEmpty()) {
-                        append(table.tags.joinToString("  ·  ") { it.name })
+                        append(table.tags.joinToString("  ·  ") {
+                            it.name.removeSuffix(".json").replace("_", " ")
+                        })
                         append("  ·  ")
                     }
                     append(table.rollFormula)
@@ -107,6 +145,39 @@ fun TableDetailSheet(
             Spacer(Modifier.height(24.dp))
             HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
             Spacer(Modifier.height(16.dp))
+
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                DeckButton(onClick = { revealKey++; onRoll() }, enabled = !isRolling,
+                    modifier = Modifier.weight(1f)) {
+                    Icon(Icons.Default.Refresh, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text(if (lastResult == null) "Tirar" else "Tirar de nuevo")
+                }
+                DeckOutlinedButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text("Cerrar") }
+            }
+            if (onSelectEntry != null) {
+                Text("Modo manual: consulta la tabla y toca la fila obtenida con tus dados.",
+                    style = MaterialTheme.typography.bodySmall)
+                if (table.rollMode == TableRollMode.RANGE && table.entries.any { it.minRoll != it.maxRoll }) {
+                    OutlinedTextField(value = manualDie, onValueChange = { value ->
+                        if (value.all(Char::isDigit)) { manualDie = value; manualError = null }
+                    }, label = { Text("Número del dado para rangos (si corresponde)") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true, modifier = Modifier.fillMaxWidth())
+                }
+                manualError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            }
+            TableEntriesPreview(table, if (isRolling) null else lastResult?.rollValue,
+                onSelectEntry = onSelectEntry?.let { select -> { entryIndex ->
+                    val entry = table.entries[entryIndex]
+                    val die = manualDie.toIntOrNull()
+                    if (table.rollMode == TableRollMode.RANGE && entry.minRoll != entry.maxRoll && die == null)
+                        manualError = "Escribe el número del dado para este rango."
+                    else if (table.rollMode == TableRollMode.RANGE && die != null && die !in entry.minRoll..entry.maxRoll)
+                        manualError = "El dado no pertenece a la fila elegida."
+                    else { manualError = null; select(entryIndex, die) }
+                } }, rollingIndex = rollingIndex, revealKey = revealKey,
+                selectedEntryIndex = lastResult?.selectedEntryIndex)
 
             // Resultado principal
             AnimatedContent(
@@ -147,6 +218,17 @@ fun TableDetailSheet(
                                 style = MaterialTheme.typography.bodyLarge,
                                 textAlign = TextAlign.Center
                             )
+                            if (onSendToNotes != null) {
+                                Spacer(Modifier.height(12.dp))
+                                OutlinedButton(
+                                    onClick = { onSendToNotes(table.name, text) },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Icon(Icons.Default.EditNote, contentDescription = null, modifier = Modifier.size(18.dp))
+                                    Spacer(Modifier.width(8.dp))
+                                    Text("Registrar en Diario")
+                                }
+                            }
                         }
                     }
                 } else {
@@ -167,32 +249,6 @@ fun TableDetailSheet(
                     }
                 }
             }
-
-            Spacer(Modifier.height(24.dp))
-
-            // Botones de acción
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                DeckButton(
-                    onClick = onRoll,
-                    enabled = !isRolling,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(Icons.Default.Refresh, contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text(if (lastResult == null) "Tirar" else "Tirar de nuevo")
-                }
-                DeckOutlinedButton(
-                    onClick = onDismiss,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("Cerrar")
-                }
-            }
-
-            TableEntriesPreview(table, if (isRolling) null else lastResult?.rollValue)
 
             // Historial de tiradas de esta sesión
             if (recentResults.isNotEmpty()) {

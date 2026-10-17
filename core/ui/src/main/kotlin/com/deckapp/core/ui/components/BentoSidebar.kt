@@ -101,6 +101,7 @@ fun BentoSidebar(
     title: String,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
+    showOverlay: Boolean = false,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val isLeft = alignment == Alignment.CenterStart
@@ -110,9 +111,9 @@ fun BentoSidebar(
     val exitTransition = if (isLeft) slideOutHorizontally(targetOffsetX = { -it }) + fadeOut()
                         else slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        // Overlay para cerrar al tocar fuera
-        if (isVisible) {
+    Box(modifier = modifier) {
+        // Overlay para cerrar al tocar fuera sólo cuando showOverlay es true
+        if (isVisible && showOverlay) {
             Box(
                 Modifier
                     .fillMaxSize()
@@ -125,18 +126,18 @@ fun BentoSidebar(
             visible = isVisible,
             enter = enterTransition,
             exit = exitTransition,
-            modifier = modifier
+            modifier = Modifier
                 .align(alignment)
                 .fillMaxHeight()
-                .width(320.dp)
+                .fillMaxWidth()
         ) {
             Surface(
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
-                tonalElevation = 12.dp,
-                shadowElevation = 16.dp,
-                shape = if (isLeft) RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp) 
-                        else RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp),
-                modifier = Modifier.fillMaxHeight()
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
+                tonalElevation = 8.dp,
+                shadowElevation = 12.dp,
+                shape = if (isLeft) RoundedCornerShape(topEnd = 16.dp, bottomEnd = 16.dp) 
+                        else RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp),
+                modifier = Modifier.fillMaxSize()
             ) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     // Header del Sidebar

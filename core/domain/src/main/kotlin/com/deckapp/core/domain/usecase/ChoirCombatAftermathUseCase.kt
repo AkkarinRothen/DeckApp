@@ -30,7 +30,7 @@ data class ChoirAftermathResult(
  * 1. Si no está herido: no hay supuración de heridas, se añade XP y botín.
  * 2. Si está herido: se puede gastar 1 suministro médico para chequeo de Inteligencia (NO 10 Promedio).
  * 3. Si falla o no hay suministros: chequeo de Constitución (NO 10 Promedio).
- * 4. Fallo: las heridas menores supuran y se convierten en heridas mayores.
+ * 4. Fallo: si hubo heridas menores, todas juntas provocan una herida mayor.
  * 5. Por cada herida mayor: se gana +1 Trauma.
  * 6. Se limpian las heridas de combate (Clear Injuries).
  */
@@ -85,8 +85,8 @@ object ChoirCombatAftermathUseCase {
             }
         }
 
-        val festered = if (!treatmentSuccess) prevMinor else 0
-        val totalMajorBeforeClear = (prevMajor + festered).coerceAtMost(4)
+        val festered = if (!treatmentSuccess && prevMinor > 0) 1 else 0
+        val totalMajorBeforeClear = prevMajor + festered
         val traumaGained = totalMajorBeforeClear
 
         val updated = original.copy(
@@ -107,7 +107,7 @@ object ChoirCombatAftermathUseCase {
             if (treatmentSuccess) {
                 append("- Tratamiento exitoso: Las heridas menores fueron estabilizadas sin infectarse.\n")
             } else {
-                append("- Tratamiento fallido: $festered heridas menores supuraron a mayores.\n")
+                append("- Tratamiento fallido: ${if (festered > 0) "las heridas menores provocaron 1 herida mayor" else "no había heridas menores que pudieran infectarse"}.\n")
             }
             if (traumaGained > 0) {
                 append("- Trauma adquirido: +$traumaGained (Total Trauma: ${updated.trauma}).\n")

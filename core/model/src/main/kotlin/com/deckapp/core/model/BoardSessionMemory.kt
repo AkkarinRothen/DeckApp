@@ -34,5 +34,6 @@ data class BoardSessionMemory(
     val views: Map<String, BoardViewMemory> = emptyMap(),
     val focusedSceneId: Long? = null,
     val inspiration: List<BoardInspiration> = emptyList(),
-    val pinnedTableResults: Map<Long, TableRollResult> = emptyMap()
+    val pinnedTableResults: Map<Long, TableRollResult> = emptyMap(),
+    val choirGuide: ChoirGuideMemory = ChoirGuideMemory()
 )

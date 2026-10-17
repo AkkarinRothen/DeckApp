@@ -129,7 +129,8 @@ internal fun BoardBlockContent(
             onDiceClicked = { formula -> onDiceClicked(formula, false, false, null) },
             onRollTable = onRollTable,
             onSendToNotes = onSendToNotes,
-            onRecordCombatNote = onRecordCombatNote
+            onRecordCombatNote = onRecordCombatNote,
+            onOpenTable = onOpen
         )
         SessionBoardItemType.NOTES -> NoteBlockContent(
             item = item,
