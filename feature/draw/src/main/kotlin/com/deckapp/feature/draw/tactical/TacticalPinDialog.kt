@@ -27,14 +27,14 @@ import com.deckapp.core.model.*
 private data class PinIconOption(val key: String, val label: String, val icon: ImageVector)
 
 private val PIN_ICONS = listOf(
-    PinIconOption("info", "Info", Icons.Default.Info),
-    PinIconOption("door", "Puerta", Icons.Default.MeetingRoom),
-    PinIconOption("trap", "Trampa", Icons.Default.Warning),
-    PinIconOption("chest", "Tesoro", Icons.Default.Inventory2),
-    PinIconOption("skull", "Peligro", Icons.Default.Dangerous),
-    PinIconOption("secret", "Secreto", Icons.Default.Key),
-    PinIconOption("stairs", "Escalera", Icons.Default.MeetingRoom),
-    PinIconOption("portal", "Mapa", Icons.Default.Map)
+    PinIconOption("info", "Info", TacticalPinIcons.Info),
+    PinIconOption("door", "Puerta", TacticalPinIcons.Door),
+    PinIconOption("trap", "Trampa", TacticalPinIcons.Trap),
+    PinIconOption("chest", "Tesoro", TacticalPinIcons.Chest),
+    PinIconOption("skull", "Peligro", TacticalPinIcons.Skull),
+    PinIconOption("secret", "Secreto", TacticalPinIcons.Secret),
+    PinIconOption("stairs", "Escalera", TacticalPinIcons.Stairs),
+    PinIconOption("portal", "Portal", TacticalPinIcons.Portal)
 )
 
 private val PIN_COLORS = listOf(

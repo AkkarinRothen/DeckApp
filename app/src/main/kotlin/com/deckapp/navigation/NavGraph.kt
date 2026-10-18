@@ -39,6 +39,7 @@ import com.deckapp.feature.hexploration.*
 import com.deckapp.feature.mythic.*
 import com.deckapp.feature.dice.DiceRollerBottomSheet
 import com.deckapp.core.ui.components.QuickNoteOverlay
+import com.deckapp.core.ui.icons.DeckIcons
 import com.deckapp.app.QuickNoteViewModel
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -127,13 +128,13 @@ fun DeckAppNavHost(
                                 launchSingleTop = true
                             }
                         },
-                        icon = { Icon(Icons.AutoMirrored.Filled.LibraryBooks, null) },
+                        icon = { Icon(DeckIcons.Library, null) },
                         label = { Text("Librería") }
                     )
                     NavigationBarItem(
                         selected = currentDestination?.hasRoute(SessionListRoute::class) == true,
                         onClick = { navController.navigate(SessionListRoute) },
-                        icon = { Icon(Icons.Default.PlayArrow, null) },
+                        icon = { Icon(DeckIcons.Sessions, null) },
                         label = { Text("Sesiones") }
                     )
                     NavigationBarItem(

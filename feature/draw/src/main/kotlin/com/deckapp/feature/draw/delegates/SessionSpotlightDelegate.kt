@@ -9,6 +9,7 @@ import com.deckapp.core.domain.usecase.RollTableUseCase
 import com.deckapp.core.model.Encounter
 import com.deckapp.core.model.EncounterCreature
 import com.deckapp.feature.draw.SessionUiState
+import com.deckapp.feature.draw.ChoirGuideNotes
 import com.deckapp.feature.draw.components.spotlight.SpotlightCategory
 import com.deckapp.feature.draw.components.spotlight.SpotlightItem
 import kotlinx.coroutines.CoroutineScope
@@ -262,7 +263,7 @@ class SessionSpotlightDelegate(
 
             // 5. Diario y notas de la sesión
             if ((category == SpotlightCategory.ALL || category == SpotlightCategory.NOTES) && cleanQuery.isNotBlank()) {
-                val notes = _uiState.value.dmNotes
+                val notes = ChoirGuideNotes.visible(_uiState.value.dmNotes)
                 notes.lines().forEachIndexed { index, line ->
                     if (line.lowercase().contains(cleanQuery) && line.isNotBlank()) {
                         results.add(

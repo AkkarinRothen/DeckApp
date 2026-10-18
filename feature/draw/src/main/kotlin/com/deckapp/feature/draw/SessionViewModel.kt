@@ -853,7 +853,8 @@ class SessionViewModel @Inject constructor(
     }
 
     /** Actualiza las notas de la sesión (llamado desde el editor con debounce en la UI). */
-    fun updateNotes(notes: String) {
+    fun updateNotes(editedNotes: String) {
+        val notes = ChoirGuideNotes.preserveReceipts(editedNotes, _uiState.value.dmNotes)
         if (notes == _uiState.value.dmNotes) return
         
         _uiState.update { it.copy(dmNotes = notes, isSavingNotes = true) }

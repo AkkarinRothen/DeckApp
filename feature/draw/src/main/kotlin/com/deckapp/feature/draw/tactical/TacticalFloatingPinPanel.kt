@@ -156,14 +156,7 @@ fun TacticalFloatingPinPanel(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = when (pin.iconName) {
-                            "stairs", "portal", "map" -> Icons.Default.MeetingRoom
-                            "door" -> Icons.Default.DoorSliding
-                            "chest" -> Icons.Default.Inventory2
-                            "trap" -> Icons.Default.Warning
-                            "skull" -> Icons.Default.Dangerous
-                            else -> Icons.Default.Info
-                        },
+                        imageVector = TacticalPinIcons.forName(pin.iconName),
                         contentDescription = null,
                         tint = Color.White,
                         modifier = Modifier.size(18.dp)

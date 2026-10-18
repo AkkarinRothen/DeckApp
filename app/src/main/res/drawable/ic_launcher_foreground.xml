@@ -3,11 +3,22 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Silueta simple de carta de juego -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M38,20 L70,20 Q74,20 74,24 L74,84 Q74,88 70,88 L38,88 Q34,88 34,84 L34,24 Q34,20 38,20 Z" />
-    <path
-        android:fillColor="#BB86FC"
-        android:pathData="M42,30 L66,30 L66,78 L42,78 Z" />
+    <!-- Two offset cards and a faceted die, inside the adaptive icon safe area. -->
+    <path android:fillColor="#7B4934"
+        android:pathData="M24,34 L60,20 Q64,18 66,22 L84,71 Q86,75 82,77 L46,91 Q42,93 40,89 L22,40 Q20,36 24,34 Z" />
+    <path android:fillColor="#D9BE88"
+        android:pathData="M31,25 L76,25 Q81,25 81,30 L81,77 Q81,82 76,82 L31,82 Q26,82 26,77 L26,30 Q26,25 31,25 Z" />
+    <path android:fillColor="#241B19"
+        android:pathData="M33,30 L74,30 Q76,30 76,32 L76,75 Q76,77 74,77 L33,77 Q31,77 31,75 L31,32 Q31,30 33,30 Z" />
+    <path android:fillColor="#B97855"
+        android:pathData="M54,36 L68,48 L63,66 L45,66 L40,48 Z" />
+    <path android:fillColor="#E9D7B1"
+        android:pathData="M54,39 L65,48 L61,63 L47,63 L43,48 Z" />
+    <path android:fillColor="#8B553C"
+        android:pathData="M43,48 L54,39 L54,54 Z M54,39 L65,48 L54,54 Z M43,48 L54,54 L47,63 Z M65,48 L61,63 L54,54 Z" />
+    <path android:fillColor="#E9D7B1"
+        android:pathData="M54,54 L61,63 L47,63 Z" />
+    <path android:strokeColor="#D9BE88" android:strokeWidth="1.5"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M37,35 L42,35 M67,35 L72,35 M37,72 L42,72 M67,72 L72,72" />
 </vector>

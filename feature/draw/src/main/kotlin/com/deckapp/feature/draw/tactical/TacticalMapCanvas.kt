@@ -641,7 +641,7 @@ fun TacticalMapCanvas(
                     )
                 )
 
-                // Determinación del glifo o número a renderizar
+                // Room numbers and short user labels stay as text; pin types use vector geometry.
                 val label = when {
                     pin.title.startsWith("Sala ") && pin.title.removePrefix("Sala ").all { it.isDigit() } -> {
                         pin.title.removePrefix("Sala ")
@@ -649,29 +649,25 @@ fun TacticalMapCanvas(
                     pin.title.isNotBlank() && pin.title.length <= 3 && pin.title.all { it.isDigit() || it.isLetter() } -> {
                         pin.title
                     }
-                    pin.iconName == "trap" -> "⚠"
-                    pin.iconName == "chest" -> "★"
-                    pin.iconName in listOf("door", "stairs", "portal") -> "⎅"
-                    pin.iconName == "skull" -> "☠"
-                    pin.iconName == "info" -> "i"
-                    pin.isSecret -> "?"
-                    else -> "!"
+                    else -> null
                 }
 
-                val pinFontSize = (if (label.length > 2) 11f else 13f) / zoom
-                val constrainedFontSize = pinFontSize.coerceIn(8f, 24f).sp
-                val textLayout = textMeasurer.measure(
-                    text = label,
-                    style = TextStyle(
-                        color = Color.White,
-                        fontSize = constrainedFontSize,
-                        fontWeight = FontWeight.Bold
+                if (label != null) {
+                    val pinFontSize = (if (label.length > 2) 11f else 13f) / zoom
+                    val constrainedFontSize = pinFontSize.coerceIn(8f, 24f).sp
+                    val textLayout = textMeasurer.measure(
+                        text = label,
+                        style = TextStyle(
+                            color = Color.White,
+                            fontSize = constrainedFontSize,
+                            fontWeight = FontWeight.Bold
+                        )
                     )
-                )
-                drawText(
-                    textLayoutResult = textLayout,
-                    topLeft = Offset(pxX - textLayout.size.width / 2f, pxY - textLayout.size.height / 2f)
-                )
+                    drawText(textLayoutResult = textLayout,
+                        topLeft = Offset(pxX - textLayout.size.width / 2f, pxY - textLayout.size.height / 2f))
+                } else {
+                    drawTacticalPinSymbol(if (pin.isSecret) "secret" else pin.iconName, center, pinRadius)
+                }
 
                 // Indicador de candado si está bloqueado contra arrastre
                 if (isLocked) {

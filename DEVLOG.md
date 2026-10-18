@@ -1,3 +1,7 @@
+### Choir of Flesh — guía de procedimientos (18 de octubre de 2026)
+
+Se integraron las seis hojas de procedimientos como WebP sin conexión y una guía contextual para exploración exterior, preparación y exploración de incursiones y pruebas de Angustia. La guía conserva el paso, ofrece tirada física o de la app, registra la confirmación en el diario y permite volver a la secuencia tras una interrupción. El resto de los procedimientos está disponible como índice de referencia. Se ocultaron en la lectura y edición del diario las marcas internas que evitan registros duplicados. Detalle y límites en [docs/ux/choir-procedimientos-2026-10-18.md](docs/ux/choir-procedimientos-2026-10-18.md). Validación: 73 pruebas de dominio, 116 de interfaz, APK de desarrollo compilado e instalado y recorrido físico en Motorola One Fusion.
+
 ### Rediseño UX Mesa de Juego — Implementación Integral Entregas 1 a 6 (17 de octubre de 2026)
 
 **Auditoría Física y Optimización de Pantalla (Motorola One Fusion & Landscape):**

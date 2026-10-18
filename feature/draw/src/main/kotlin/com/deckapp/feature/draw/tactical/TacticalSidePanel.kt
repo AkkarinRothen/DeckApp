@@ -891,23 +891,14 @@ private fun SidePanelPinsTab(
                                         .background(Color(pin.colorHex)),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text(
-                                        text = when {
-                                            pin.title.startsWith("Sala ") && pin.title.removePrefix("Sala ").all { it.isDigit() } ->
-                                                pin.title.removePrefix("Sala ")
-                                            pin.title.isNotBlank() && pin.title.length <= 3 -> pin.title
-                                            pin.iconName == "trap" -> "⚠"
-                                            pin.iconName == "chest" -> "★"
-                                            pin.iconName in listOf("door", "stairs", "portal") -> "⎅"
-                                            pin.iconName == "skull" -> "☠"
-                                            pin.iconName == "info" -> "i"
-                                            pin.isSecret -> "?"
-                                            else -> "!"
-                                        },
-                                        color = Color.White,
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                                    val shortLabel = when {
+                                        pin.title.startsWith("Sala ") && pin.title.removePrefix("Sala ").all { it.isDigit() } -> pin.title.removePrefix("Sala ")
+                                        pin.title.isNotBlank() && pin.title.length <= 3 && pin.title.all { it.isLetterOrDigit() } -> pin.title
+                                        else -> null
+                                    }
+                                    if (shortLabel != null) Text(shortLabel, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                    else Icon(TacticalPinIcons.forName(if (pin.isSecret) "secret" else pin.iconName),
+                                        contentDescription = null, tint = Color.White, modifier = Modifier.size(17.dp))
                                 }
 
                                 Column(modifier = Modifier.weight(1f)) {

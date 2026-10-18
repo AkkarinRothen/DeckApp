@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.deckapp.core.model.MythicSession
 import com.deckapp.core.model.Session
+import com.deckapp.core.ui.icons.DeckIcons
 import com.deckapp.feature.draw.SessionViewMode
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -124,10 +125,10 @@ fun SessionTopBar(
                             .padding(end = 4.dp)
                     ) {
                         val (icon, label) = when (mainViewMode) {
-                            SessionViewMode.BOARD -> Icons.Default.Dashboard to "Mesa"
-                            SessionViewMode.TACTICAL -> Icons.Default.GridOn to "Táctico"
-                            SessionViewMode.MAP -> Icons.Default.Explore to "Mapa"
-                            SessionViewMode.MYTHIC_LOG -> Icons.AutoMirrored.Filled.MenuBook to "Mythic"
+                            SessionViewMode.BOARD -> DeckIcons.Board to "Mesa"
+                            SessionViewMode.TACTICAL -> DeckIcons.Tactical to "Táctico"
+                            SessionViewMode.MAP -> DeckIcons.Map to "Mapa"
+                            SessionViewMode.MYTHIC_LOG -> DeckIcons.Journal to "Mythic"
                         }
                         Icon(icon, contentDescription = null, modifier = Modifier.size(15.dp))
                         Spacer(Modifier.width(3.dp))
@@ -141,7 +142,7 @@ fun SessionTopBar(
                     ) {
                         DropdownMenuItem(
                             text = { Text("Mesa de Juego") },
-                            leadingIcon = { Icon(Icons.Default.Dashboard, contentDescription = null) },
+                            leadingIcon = { Icon(DeckIcons.Board, contentDescription = null) },
                             trailingIcon = if (mainViewMode == SessionViewMode.BOARD) {
                                 { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary) }
                             } else null,
@@ -152,7 +153,7 @@ fun SessionTopBar(
                         )
                         DropdownMenuItem(
                             text = { Text("Mapa Táctico") },
-                            leadingIcon = { Icon(Icons.Default.GridOn, contentDescription = null) },
+                            leadingIcon = { Icon(DeckIcons.Tactical, contentDescription = null) },
                             trailingIcon = if (mainViewMode == SessionViewMode.TACTICAL) {
                                 { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary) }
                             } else null,
@@ -163,7 +164,7 @@ fun SessionTopBar(
                         )
                         DropdownMenuItem(
                             text = { Text("Hexploración") },
-                            leadingIcon = { Icon(Icons.Default.Explore, contentDescription = null) },
+                            leadingIcon = { Icon(DeckIcons.Map, contentDescription = null) },
                             trailingIcon = if (mainViewMode == SessionViewMode.MAP) {
                                 { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary) }
                             } else null,
@@ -175,7 +176,7 @@ fun SessionTopBar(
                         if (linkedMythicSession != null) {
                             DropdownMenuItem(
                                 text = { Text("Oráculo Mythic") },
-                                leadingIcon = { Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = null) },
+                                leadingIcon = { Icon(DeckIcons.Journal, contentDescription = null) },
                                 trailingIcon = if (mainViewMode == SessionViewMode.MYTHIC_LOG) {
                                     { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary) }
                                 } else null,
@@ -205,7 +206,7 @@ fun SessionTopBar(
                         colors = IconButtonDefaults.iconButtonColors(
                             contentColor = if (mainViewMode == SessionViewMode.BOARD) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                    ) { Icon(Icons.Default.Dashboard, contentDescription = "Mesa de Juego", modifier = Modifier.size(18.dp)) }
+                    ) { Icon(DeckIcons.Board, contentDescription = "Mesa de Juego", modifier = Modifier.size(18.dp)) }
 
                     IconButton(
                         onClick = { onSetMainViewMode(SessionViewMode.TACTICAL) },
@@ -213,7 +214,7 @@ fun SessionTopBar(
                         colors = IconButtonDefaults.iconButtonColors(
                             contentColor = if (mainViewMode == SessionViewMode.TACTICAL) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                    ) { Icon(Icons.Default.GridOn, contentDescription = "Mapa Táctico", modifier = Modifier.size(18.dp)) }
+                    ) { Icon(DeckIcons.Tactical, contentDescription = "Mapa Táctico", modifier = Modifier.size(18.dp)) }
 
                     IconButton(
                         onClick = { onSetMainViewMode(SessionViewMode.MAP) },
@@ -221,7 +222,7 @@ fun SessionTopBar(
                         colors = IconButtonDefaults.iconButtonColors(
                             contentColor = if (mainViewMode == SessionViewMode.MAP) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                    ) { Icon(Icons.Default.Explore, contentDescription = "Hexploración", modifier = Modifier.size(18.dp)) }
+                    ) { Icon(DeckIcons.Map, contentDescription = "Hexploración", modifier = Modifier.size(18.dp)) }
 
                     IconButton(
                         onClick = { onSetMainViewMode(SessionViewMode.MYTHIC_LOG) },
@@ -230,7 +231,7 @@ fun SessionTopBar(
                         colors = IconButtonDefaults.iconButtonColors(
                             contentColor = if (mainViewMode == SessionViewMode.MYTHIC_LOG) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                    ) { Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = "Oráculo Mythic", modifier = Modifier.size(18.dp)) }
+                    ) { Icon(DeckIcons.Journal, contentDescription = "Oráculo Mythic", modifier = Modifier.size(18.dp)) }
                 }
             }
 
@@ -247,7 +248,7 @@ fun SessionTopBar(
                 onClick = onShowDiceRoller,
                 modifier = Modifier.size(36.dp)
             ) {
-                Icon(Icons.Default.Casino, contentDescription = "Lanzador de dados", modifier = Modifier.size(20.dp))
+                Icon(DeckIcons.Dice, contentDescription = "Lanzador de dados", modifier = Modifier.size(20.dp))
             }
 
             // Menú de Más Opciones (Secundarios y Sistema)
@@ -276,7 +277,7 @@ fun SessionTopBar(
                         HorizontalDivider()
                         DropdownMenuItem(
                             text = { Text("Choir: Procedimientos") },
-                            leadingIcon = { Icon(Icons.Default.Checklist, contentDescription = null) },
+                            leadingIcon = { Icon(DeckIcons.Guide, contentDescription = null) },
                             onClick = {
                                 showOverflowMenu = false
                                 onOpenChoirProcedures()
@@ -292,7 +293,7 @@ fun SessionTopBar(
                         )
                         DropdownMenuItem(
                             text = { Text("Choir: Incursión") },
-                            leadingIcon = { Icon(Icons.Default.Explore, contentDescription = null, tint = Color(0xFFD4AF37)) },
+                            leadingIcon = { Icon(DeckIcons.Map, contentDescription = null, tint = Color(0xFFD4AF37)) },
                             onClick = {
                                 showOverflowMenu = false
                                 onOpenIncursionDialog()

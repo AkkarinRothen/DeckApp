@@ -291,7 +291,7 @@ fun SessionScreen(
             val rightSidebarContent = @Composable {
                 when(uiState.activeRightSidebar) {
                     SidebarTool.NOTES -> NotesTab(
-                        notes = uiState.dmNotes,
+                        notes = ChoirGuideNotes.visible(uiState.dmNotes),
                         isSaving = uiState.isSavingNotes,
                         onNotesChange = viewModel::updateNotes,
                         onAddQuickNote = viewModel::showQuickNote,
@@ -305,7 +305,7 @@ fun SessionScreen(
                         onNewRule = { onNewSystemRule(uiState.session?.gameSystems?.firstOrNull() ?: "") }
                     )
                     SidebarTool.JOURNAL -> NotesTab(
-                        notes = uiState.dmNotes,
+                        notes = ChoirGuideNotes.visible(uiState.dmNotes),
                         isSaving = uiState.isSavingNotes,
                         onNotesChange = viewModel::updateNotes,
                         onAddQuickNote = viewModel::showQuickNote,
@@ -521,7 +521,7 @@ fun SessionScreen(
                                     onTogglePinLocked = viewModel.tacticalMapDelegate::togglePinLocked,
                                     onDeletePin = viewModel.tacticalMapDelegate::deletePin,
                                     onFocusPinCoordinates = viewModel.tacticalMapDelegate::focusCameraOnCoordinates,
-                                    dmNotes = uiState.dmNotes,
+                                    dmNotes = ChoirGuideNotes.visible(uiState.dmNotes),
                                     onNotesChanged = viewModel::updateNotes,
                                     onToggleSidePanel = viewModel.tacticalMapDelegate::toggleSidePanel,
                                     onSetSidePanelOpen = viewModel.tacticalMapDelegate::setSidePanelOpen,

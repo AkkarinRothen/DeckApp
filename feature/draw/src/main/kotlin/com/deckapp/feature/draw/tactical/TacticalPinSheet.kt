@@ -80,14 +80,7 @@ fun TacticalPinSheet(
                         .background(Color(pin.colorHex).copy(alpha = 0.25f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    val iconVector = when (pin.iconName.lowercase()) {
-                        "door" -> Icons.Default.MeetingRoom
-                        "trap" -> Icons.Default.Warning
-                        "chest" -> Icons.Default.Inventory2
-                        "skull" -> Icons.Default.Dangerous
-                        "secret" -> Icons.Default.Key
-                        else -> Icons.Default.Info
-                    }
+                    val iconVector = TacticalPinIcons.forName(pin.iconName)
                     Icon(
                         imageVector = iconVector,
                         contentDescription = null,

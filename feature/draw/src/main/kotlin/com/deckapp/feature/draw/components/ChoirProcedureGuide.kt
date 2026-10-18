@@ -1,5 +1,7 @@
 package com.deckapp.feature.draw.components
 
+import com.deckapp.core.ui.icons.DeckIcons
+
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.*
@@ -42,7 +44,7 @@ fun ChoirProcedureBar(memory: ChoirGuideMemory, onOpen: () -> Unit) {
     val step = ChoirProcedureCatalog.current(memory) ?: return
     Surface(onClick = onOpen, color = MaterialTheme.colorScheme.secondaryContainer) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.Checklist, contentDescription = null, modifier = Modifier.size(20.dp))
+            Icon(DeckIcons.Guide, contentDescription = null, modifier = Modifier.size(20.dp))
             Column(Modifier.weight(1f).padding(horizontal = 10.dp)) {
                 Text("Ahora: ${step.title}", style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text("Después: ${step.next}", style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -158,7 +160,7 @@ fun ChoirProcedureGuide(state: SessionUiState, delegate: ChoirGuideDelegate, onO
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true,
                             modifier = Modifier.fillMaxWidth())
                         if (!step.isCounter) {
-                            TextButton(onClick = { delegate.roll() }) { Icon(Icons.Default.Casino, null); Spacer(Modifier.width(6.dp)); Text("Tirar 1d${step.die} en la app") }
+                            TextButton(onClick = { delegate.roll() }) { Icon(DeckIcons.Dice, null); Spacer(Modifier.width(6.dp)); Text("Tirar 1d${step.die} en la app") }
                             Text("${memory.draftMethod}. Tirar prepara el resultado; confirmar lo registra.", style = MaterialTheme.typography.bodySmall)
                         }
                     }

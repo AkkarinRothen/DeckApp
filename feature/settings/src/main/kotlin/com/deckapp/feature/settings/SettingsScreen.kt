@@ -8,6 +8,7 @@ import com.deckapp.core.ui.components.DeckCard
 import com.deckapp.core.ui.components.DeckButton
 import com.deckapp.core.ui.components.DeckOutlinedButton
 import com.deckapp.core.ui.components.DeckTextButton
+import com.deckapp.core.ui.icons.DeckIcons
 
 import com.deckapp.feature.settings.components.TableAppearanceCard
 import com.deckapp.feature.settings.components.ThemeComponentsPreview
@@ -29,6 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
@@ -672,7 +674,7 @@ private fun ThemeSelectorCard(
                 ThemeOptionButton(
                     title = "Oscuro",
                     subtitle = "OLED",
-                    icon = "🌙",
+                    icon = DeckIcons.Moon,
                     isSelected = currentTheme == AppTheme.DARK,
                     onClick = { onThemeSelected(AppTheme.DARK) },
                     modifier = Modifier.widthIn(min = 120.dp)
@@ -681,7 +683,7 @@ private fun ThemeSelectorCard(
                 ThemeOptionButton(
                     title = "Pergamino",
                     subtitle = "TTRPG",
-                    icon = "📜",
+                    icon = DeckIcons.Journal,
                     isSelected = currentTheme == AppTheme.PARCHMENT,
                     onClick = { onThemeSelected(AppTheme.PARCHMENT) },
                     modifier = Modifier.widthIn(min = 120.dp)
@@ -690,12 +692,12 @@ private fun ThemeSelectorCard(
                 ThemeOptionButton(
                     title = "Claro",
                     subtitle = "Moderno",
-                    icon = "☀️",
+                    icon = DeckIcons.Sun,
                     isSelected = currentTheme == AppTheme.LIGHT,
                     onClick = { onThemeSelected(AppTheme.LIGHT) },
                     modifier = Modifier.widthIn(min = 120.dp)
                 )
-                ThemeOptionButton(title = "Pergamino nocturno", subtitle = "Tinta marfil", icon = "🕯️",
+                ThemeOptionButton(title = "Pergamino nocturno", subtitle = "Tinta marfil", icon = DeckIcons.Candle,
                     isSelected = currentTheme == AppTheme.PARCHMENT_NIGHT,
                     onClick = { onThemeSelected(AppTheme.PARCHMENT_NIGHT) }, modifier = Modifier.widthIn(min = 120.dp))
             }
@@ -708,7 +710,7 @@ private fun ThemeSelectorCard(
 private fun ThemeOptionButton(
     title: String,
     subtitle: String,
-    icon: String,
+    icon: ImageVector,
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -725,7 +727,8 @@ private fun ThemeOptionButton(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            Text(text = icon, style = MaterialTheme.typography.titleMedium)
+            Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(24.dp),
+                tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant)
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelMedium,

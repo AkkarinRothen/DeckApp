@@ -6,11 +6,12 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.deckapp.core.model.*
+import com.deckapp.core.ui.icons.DeckIcons
 
 data class BoardBlockMeta(
     val title: String,
     val subtitle: String = "",
-    val icon: ImageVector = Icons.Default.Dashboard,
+    val icon: ImageVector = DeckIcons.Board,
     val color: Color = Color(0xFF6200EE),
     val preview: String = "",
     val footnote: String = "",
@@ -43,7 +44,7 @@ fun boardBlockMeta(
         BoardBlockMeta(
             title = title,
             subtitle = subtitle,
-            icon = Icons.Default.Casino,
+            icon = DeckIcons.Dice,
             color = Color(0xFFE91E63),
             preview = preview,
             footnote = latestTableRoll?.let { "Última tirada guardada" } ?: "Lista para tirar",
@@ -55,7 +56,7 @@ fun boardBlockMeta(
         BoardBlockMeta(
             title = title,
             subtitle = "Bitácora",
-            icon = Icons.Default.EditNote,
+            icon = DeckIcons.Journal,
             color = Color(0xFF4CAF50),
             preview = notesPreview.ifBlank { "Sin notas guardadas" },
             footnote = "Notas persistentes",
@@ -80,7 +81,7 @@ fun boardBlockMeta(
         BoardBlockMeta(
             title = title,
             subtitle = "Dados rápidos",
-            icon = Icons.Default.Casino,
+            icon = DeckIcons.Dice,
             color = Color(0xFF9C27B0),
             preview = "d4, d6, d8, d10, d12, d20, d100",
             footnote = "Presiona para tirar dados",
@@ -95,7 +96,7 @@ fun boardBlockMeta(
         BoardBlockMeta(
             title = name,
             subtitle = "$inHand en mano · $inDeck en mazo",
-            icon = Icons.Default.Style,
+            icon = DeckIcons.Library,
             color = Color(0xFF3F51B5),
             preview = "$inHand cartas en mano",
             footnote = "Toca para robar carta",
@@ -138,7 +139,7 @@ fun boardBlockMeta(
         BoardBlockMeta(
             title = title,
             subtitle = subtitle,
-            icon = Icons.Default.Map,
+            icon = DeckIcons.Map,
             color = if (hasLinkedMap) Color(0xFF795548) else Color(0xFF757575),
             preview = if (hasLinkedMap) subtitle else "No hay un mapa asignado a esta sesión",
             footnote = if (hasLinkedMap) "Mapa activo" else "Sin mapa vinculado",
@@ -163,7 +164,7 @@ fun boardBlockMeta(
         BoardBlockMeta(
             title = title,
             subtitle = "Referencia rápida",
-            icon = Icons.AutoMirrored.Filled.MenuBook,
+            icon = DeckIcons.Journal,
             color = Color(0xFF607D8B),
             preview = "Reglas y entradas de wiki",
             footnote = "Compendio disponible",

@@ -12,6 +12,7 @@ import com.deckapp.core.model.SessionBoardItemType
 import com.deckapp.core.model.SessionBoardViewLabels
 import com.deckapp.core.ui.session.SessionCentralConnector
 import com.deckapp.feature.draw.SessionViewModel
+import com.deckapp.feature.draw.ChoirGuideNotes
 import com.deckapp.feature.draw.SidebarTool
 import com.deckapp.feature.draw.SessionViewMode
 import com.deckapp.core.domain.usecase.boardInspirationCandidates
@@ -42,8 +43,8 @@ val BoardCentralTool = SessionCentralConnector(
             onPinTableRoll = viewModel::pinTableRoll,
             onUnpinTableRoll = viewModel::unpinTableRoll,
             recentDiceRolls = uiState.recentDiceRolls,
-            notesPreview = uiState.dmNotes.take(300),
-            notesContent = uiState.dmNotes,
+            notesPreview = ChoirGuideNotes.visible(uiState.dmNotes).take(300),
+            notesContent = ChoirGuideNotes.visible(uiState.dmNotes),
             isSavingNotes = uiState.isSavingNotes,
             onUpdateNotes = viewModel::updateNotes,
             npcCount = uiState.npcCount,

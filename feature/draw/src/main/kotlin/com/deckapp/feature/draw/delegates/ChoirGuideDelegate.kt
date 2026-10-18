@@ -140,7 +140,7 @@ class ChoirGuideDelegate(
                 if (marker !in persisted.dmNotes.orEmpty()) {
                     val current = ui.value.dmNotes
                     val time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(entry.timestamp))
-                    val addition = "[$time] **Choir · Procedimientos**\n${entry.text}\n$marker"
+                    val addition = "[$time] Choir · Procedimientos\n${entry.text}\n$marker"
                     val updated = if (marker in current) current else if (current.isBlank()) addition else "$current\n\n$addition"
                     ui.update { it.copy(dmNotes = updated, isSavingNotes = true) }
                     try { sessions.updateDmNotes(sessionId, updated) }
