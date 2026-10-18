@@ -269,6 +269,7 @@ fun SessionDialogsHost(
             onDeletePin = viewModel.tacticalMapDelegate::deletePin,
             onUpdateExplorationState = { viewModel.tacticalMapDelegate.updatePinExplorationState(selectedPinForSheet.id, it) },
             onRollTable = { viewModel.tacticalMapDelegate.rollPinTable(selectedPinForSheet.id) },
+            onRollSpecificTable = { tableId -> viewModel.tacticalMapDelegate.rollPinTable(selectedPinForSheet.id, tableId) },
             onDeleteDiscovery = { viewModel.tacticalMapDelegate.removePinDiscovery(selectedPinForSheet.id, it) },
             onStartEncounter = { encounterId -> viewModel.startEncounterFromScene(encounterId) },
             onPreviewWiki = { wiki -> viewModel.tacticalMapDelegate.setPreviewWikiEntry(wiki) }

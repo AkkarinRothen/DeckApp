@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.deckapp.core.model.Npc
 import com.deckapp.core.model.WikiEntry
+import com.deckapp.core.ui.icons.DeckIcons
 
 @Composable
 fun SceneActionChips(
@@ -59,7 +60,7 @@ fun SceneActionChips(
                 item {
                     ActionChip(
                         label = "Tirar Tabla",
-                        icon = Icons.Default.Casino,
+                        icon = DeckIcons.Table,
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         onClick = { onRollTable(tableId) }
                     )
@@ -70,7 +71,7 @@ fun SceneActionChips(
                 item {
                     ActionChip(
                         label = "Robar Carta",
-                        icon = Icons.Default.Style,
+                        icon = DeckIcons.Library,
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         onClick = { onDrawCard(deckId) }
                     )

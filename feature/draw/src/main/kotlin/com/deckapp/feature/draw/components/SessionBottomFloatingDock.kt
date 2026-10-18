@@ -1,5 +1,7 @@
 package com.deckapp.feature.draw.components
 
+import com.deckapp.core.ui.icons.DeckIcons
+
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
@@ -73,28 +75,28 @@ fun SessionBottomFloatingDock(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 DockActionButton(
-                    icon = Icons.Default.Casino,
+                    icon = DeckIcons.Dice,
                     label = "Dado",
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     onClick = onShowDiceRoller
                 )
                 DockActionButton(
-                    icon = Icons.Default.Style,
+                    icon = DeckIcons.Library,
                     label = "Carta",
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     onClick = onDrawCard
                 )
                 DockActionButton(
-                    icon = Icons.Default.EditNote,
+                    icon = DeckIcons.Journal,
                     label = "Nota",
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                     onClick = onShowQuickNote
                 )
                 DockActionButton(
-                    icon = Icons.Default.Search,
+                    icon = DeckIcons.Search,
                     label = "Buscar",
                     containerColor = MaterialTheme.colorScheme.surfaceVariant,
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant,

@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.deckapp.feature.draw.SidebarTool
+import com.deckapp.core.ui.icons.DeckIcons
 
 /**
  * Barra inferior unificada de la mesa de sesión para portrait.
@@ -41,16 +42,16 @@ fun SessionBottomBar(
     modifier: Modifier = Modifier
 ) {
     val tools = buildList {
-        add(SidebarTool.DECKS to (Icons.Default.Style to "Mazos"))
-        add(SidebarTool.TABLES to (Icons.Default.Casino to "Tablas"))
+        add(SidebarTool.DECKS to (DeckIcons.Library to "Mazos"))
+        add(SidebarTool.TABLES to (DeckIcons.Table to "Tablas"))
         add(SidebarTool.COMBAT to (Icons.Default.CrisisAlert to "Combate"))
-        add(SidebarTool.NOTES to (Icons.Default.EditNote to "Notas"))
+        add(SidebarTool.NOTES to (DeckIcons.Journal to "Notas"))
         add(SidebarTool.NPCS to (Icons.Default.Groups to "PNJs"))
-        add(SidebarTool.REFERENCES to (Icons.AutoMirrored.Filled.MenuBook to "Reglas"))
+        add(SidebarTool.REFERENCES to (DeckIcons.Journal to "Reglas"))
         add(SidebarTool.WIKI to (Icons.Default.Public to "Wiki"))
         add(SidebarTool.PLAN to (Icons.Default.HistoryEdu to "Plan"))
         if (hasLinkedMythic) {
-            add(SidebarTool.MYTHIC_CONTEXT to (Icons.Default.AutoAwesome to "Mythic"))
+            add(SidebarTool.MYTHIC_CONTEXT to (DeckIcons.Oracle to "Mythic"))
         }
     }
 

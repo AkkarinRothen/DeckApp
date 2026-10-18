@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.deckapp.core.model.TacticalToken
 import com.deckapp.core.model.TokenFaction
+import com.deckapp.core.ui.icons.DeckIcons
 import kotlin.random.Random
 
 @Composable
@@ -231,13 +232,16 @@ fun TacticalDamageCalculatorDialog(
                                 shape = RoundedCornerShape(8.dp),
                                 color = MaterialTheme.colorScheme.primaryContainer
                             ) {
-                                Text(
-                                    text = "🎲 $lastRolledFormula = $displayValue",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                )
+                                Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(DeckIcons.Dice, null, modifier = Modifier.size(16.dp),
+                                        tint = MaterialTheme.colorScheme.onPrimaryContainer)
+                                    Spacer(Modifier.width(4.dp))
+                                    Text("$lastRolledFormula = $displayValue",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer)
+                                }
                             }
                         }
                     }

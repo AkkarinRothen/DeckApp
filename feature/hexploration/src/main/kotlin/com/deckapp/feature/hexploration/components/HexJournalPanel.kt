@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -29,10 +30,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.deckapp.core.model.HexActivityType
 import com.deckapp.core.model.HexDay
+import com.deckapp.core.ui.icons.DeckIcons
 
 @Composable
 fun HexJournalPanel(
@@ -109,8 +112,7 @@ private fun DayCard(
                     fontWeight = FontWeight.Bold
                 )
                 if (!expanded && day.activitiesLog.isNotEmpty()) {
-                    val preview = day.activitiesLog.take(2)
-                        .joinToString(" · ") { activityIcon(it.type) + " " + it.description }
+                    val preview = day.activitiesLog.take(2).joinToString(" · ") { it.description }
                     Text(
                         preview,
                         style = MaterialTheme.typography.bodySmall,
@@ -147,11 +149,13 @@ private fun DayCard(
             ) {
                 if (day.activitiesLog.isNotEmpty()) {
                     day.activitiesLog.forEach { entry ->
-                        Text(
-                            "${activityIcon(entry.type)} ${entry.description}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(activityIcon(entry.type), contentDescription = null,
+                                modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(entry.description, modifier = Modifier.padding(start = 8.dp),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
                     }
                 } else {
                     Text(
@@ -183,11 +187,11 @@ private fun DayCard(
     }
 }
 
-private fun activityIcon(type: HexActivityType): String = when (type) {
-    HexActivityType.TRAVEL       -> "🚶"
-    HexActivityType.EXPLORE      -> "🗺"
-    HexActivityType.RECONNOITER  -> "🔍"
-    HexActivityType.MAP_AREA     -> "📜"
-    HexActivityType.FORTIFY_CAMP -> "⛺"
-    HexActivityType.CUSTOM       -> "•"
+private fun activityIcon(type: HexActivityType): ImageVector = when (type) {
+    HexActivityType.TRAVEL       -> DeckIcons.Travel
+    HexActivityType.EXPLORE      -> DeckIcons.Map
+    HexActivityType.RECONNOITER  -> DeckIcons.Search
+    HexActivityType.MAP_AREA     -> DeckIcons.Journal
+    HexActivityType.FORTIFY_CAMP -> DeckIcons.Camp
+    HexActivityType.CUSTOM       -> DeckIcons.Guide
 }

@@ -917,6 +917,37 @@ private fun SidePanelPinsTab(
                                             MapPinExplorationState.UNKNOWN -> MaterialTheme.colorScheme.tertiary
                                         })
                                     }
+
+                                    // Indicador de estado de tablas de la sala (Dungeon Key)
+                                    val tables = pin.effectiveTableLinks
+                                    if (tables.isNotEmpty()) {
+                                        val rolledCount = tables.count { link -> pin.discoveriesForTable(link.tableId).isNotEmpty() }
+                                        val isAllRolled = rolledCount == tables.size
+                                        Surface(
+                                            shape = RoundedCornerShape(4.dp),
+                                            color = if (isAllRolled) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f) else MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+                                            modifier = Modifier.padding(top = 2.dp)
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(3.dp)
+                                            ) {
+                                                Icon(
+                                                    Icons.Default.Casino,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(10.dp),
+                                                    tint = if (isAllRolled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                                                )
+                                                Text(
+                                                    text = "${tables.size} tabla${if (tables.size > 1) "s" else ""} • $rolledCount/${tables.size} tiradas",
+                                                    fontSize = 9.sp,
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    color = if (isAllRolled) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondaryContainer
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
 
                                 IconButton(

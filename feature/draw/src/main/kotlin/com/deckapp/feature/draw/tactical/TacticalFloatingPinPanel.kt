@@ -1,6 +1,7 @@
 package com.deckapp.feature.draw.tactical
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -40,6 +41,7 @@ fun TacticalFloatingPinPanel(
     onEnterSubMap: (Long) -> Unit,
     onSpawnEncounter: (encounterId: Long, cellX: Float, cellY: Float) -> Unit,
     onRollPinTable: (Long) -> Unit,
+    onRollSpecificPinTable: (pinId: Long, tableId: Long) -> Unit = { pinId, _ -> onRollPinTable(pinId) },
     onToggleSecret: (Long) -> Unit,
     onEditPin: (TacticalMapPin) -> Unit,
     onRollInlineFormula: (formula: String, label: String) -> Unit,
@@ -353,15 +355,55 @@ fun TacticalFloatingPinPanel(
                     }
                 }
 
-                // 3. Tirar en tabla vinculada
-                if (targetTable != null) {
-                    OutlinedButton(
-                        onClick = { onRollPinTable(pin.id) },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(Icons.Default.Casino, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(Modifier.width(6.dp))
-                        Text("Tirar en ${targetTable.name}", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                // 3. Tirar en tabla(s) vinculada(s)
+                val tableLinks = pin.effectiveTableLinks
+                if (tableLinks.isNotEmpty()) {
+                    if (tableLinks.size == 1) {
+                        val singleLink = tableLinks.first()
+                        val currentTable = availableTables.find { it.id == singleLink.tableId }
+                        val labelPrefix = if (singleLink.label.isNotBlank()) "[${singleLink.label}] " else ""
+                        OutlinedButton(
+                            onClick = { onRollSpecificPinTable(pin.id, singleLink.tableId) },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.Default.Casino, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text("Tirar en $labelPrefix${currentTable?.name ?: "Tabla"}", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
+                    } else {
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.25f),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text(
+                                    "Tirada rápida de tablas (${tableLinks.size}):",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                tableLinks.forEach { link ->
+                                    val currentTable = availableTables.find { it.id == link.tableId }
+                                    val labelPrefix = if (link.label.isNotBlank()) "[${link.label}] " else ""
+                                    OutlinedButton(
+                                        onClick = { onRollSpecificPinTable(pin.id, link.tableId) },
+                                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                                        modifier = Modifier.fillMaxWidth().height(32.dp)
+                                    ) {
+                                        Icon(Icons.Default.Casino, contentDescription = null, modifier = Modifier.size(13.dp))
+                                        Spacer(Modifier.width(6.dp))
+                                        Text(
+                                            "$labelPrefix${currentTable?.name ?: "Tabla #${link.tableId}"}",
+                                            fontSize = 11.sp,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 

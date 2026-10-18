@@ -932,15 +932,15 @@ class TacticalMapDelegate(
         }
     }
 
-    fun rollPinTable(pinId: Long) {
+    fun rollPinTable(pinId: Long, tableId: Long? = null) {
         val mapId = _uiState.value.tacticalState.map?.id ?: return
         val pin = _uiState.value.tacticalState.pins.find { it.id == pinId } ?: return
-        val tableId = pin.targetTableId ?: return
+        val effectiveTableId = tableId ?: pin.effectiveTableLinks.firstOrNull()?.tableId ?: pin.targetTableId ?: return
         val roller = rollTableUseCase ?: return
 
         scope.launch {
             try {
-                val result = roller(tableId = tableId, sessionId = sessionId)
+                val result = roller(tableId = effectiveTableId, sessionId = sessionId)
                 mapEdit {
                     val currentPin = tacticalMapRepository.getPinsByMapId(mapId).first().find { it.id == pinId } ?: return@mapEdit
                     val newDiscoveries = currentPin.discoveries + result
@@ -954,12 +954,53 @@ class TacticalMapDelegate(
                         explorationState = newExploration
                     )
                     tacticalMapRepository.upsertPin(updated)
-                    _uiState.update { it.copy(snackbarMessage = "Tirada en ${currentPin.title}: ${result.resolvedText}") }
+
+                    // Registro automático en el diario de notas de sesión
+                    val time = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Date())
+                    val linkRole = currentPin.effectiveTableLinks.find { it.tableId == effectiveTableId }?.label
+                    val roleSuffix = if (!linkRole.isNullOrBlank()) " [$linkRole]" else ""
+                    val entry = "[$time] Pin \"${currentPin.title}\"$roleSuffix — Tabla ${result.tableName} (${result.rollValue}): ${result.resolvedText}"
+                    val currentNotes = _uiState.value.dmNotes
+                    val updatedNotes = if (currentNotes.isBlank()) entry else "$currentNotes\n$entry"
+
+                    _uiState.update { state ->
+                        state.copy(
+                            dmNotes = updatedNotes,
+                            recentTableRolls = (listOf(result) + state.recentTableRolls).take(30),
+                            snackbarMessage = "Tirada en ${currentPin.title}: ${result.resolvedText}"
+                        )
+                    }
                 }
             } catch (e: Exception) {
-
                 _uiState.update { it.copy(snackbarMessage = "Error al tirar en tabla: ${e.message}") }
             }
+        }
+    }
+
+    fun addTableLinkToPin(pinId: Long, tableId: Long, label: String = "") {
+        val mapId = _uiState.value.tacticalState.map?.id ?: return
+        mapEdit {
+            val pin = tacticalMapRepository.getPinsByMapId(mapId).first().find { it.id == pinId } ?: return@mapEdit
+            val existing = pin.effectiveTableLinks
+            if (existing.any { it.tableId == tableId }) return@mapEdit
+            val updated = pin.copy(
+                tableLinks = existing + PinTableLink(tableId = tableId, label = label),
+                targetTableId = pin.targetTableId ?: tableId
+            )
+            tacticalMapRepository.upsertPin(updated)
+        }
+    }
+
+    fun removeTableLinkFromPin(pinId: Long, tableId: Long) {
+        val mapId = _uiState.value.tacticalState.map?.id ?: return
+        mapEdit {
+            val pin = tacticalMapRepository.getPinsByMapId(mapId).first().find { it.id == pinId } ?: return@mapEdit
+            val updatedLinks = pin.effectiveTableLinks.filterNot { it.tableId == tableId }
+            val updated = pin.copy(
+                tableLinks = updatedLinks,
+                targetTableId = updatedLinks.firstOrNull()?.tableId
+            )
+            tacticalMapRepository.upsertPin(updated)
         }
     }
 

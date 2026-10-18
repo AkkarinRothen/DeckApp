@@ -240,7 +240,7 @@ fun SessionTopBar(
                 onClick = onOpenSpotlight,
                 modifier = Modifier.size(36.dp)
             ) {
-                Icon(Icons.Default.Search, contentDescription = "Búsqueda Rápida Spotlight", modifier = Modifier.size(20.dp))
+                Icon(DeckIcons.Search, contentDescription = "Búsqueda Rápida Spotlight", modifier = Modifier.size(20.dp))
             }
 
             // Lanzador de Dados Rápido

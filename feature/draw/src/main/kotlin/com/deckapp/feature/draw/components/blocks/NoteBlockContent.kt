@@ -24,6 +24,7 @@ import com.deckapp.core.model.BoardMythicFateResult
 import com.deckapp.core.model.DiceRollResult
 import com.deckapp.core.model.SessionBoardItem
 import com.deckapp.core.ui.components.SmartText
+import com.deckapp.core.ui.icons.DeckIcons
 import com.deckapp.feature.draw.components.BoardBlockMeta
 import com.deckapp.core.domain.usecase.oracleJournalEntry
 import java.time.LocalTime
@@ -144,7 +145,9 @@ fun NoteBlockContent(
                         },
                         contentPadding = PaddingValues(horizontal = 6.dp)
                     ) {
-                        Text("🔮 Oráculo", style = MaterialTheme.typography.labelSmall)
+                        Icon(DeckIcons.Oracle, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text("Oráculo", style = MaterialTheme.typography.labelSmall)
                     }
 
                     // Solo Journal: Insertar Dado
@@ -164,7 +167,9 @@ fun NoteBlockContent(
                         },
                         contentPadding = PaddingValues(horizontal = 6.dp)
                     ) {
-                        Text("🎲 Dado", style = MaterialTheme.typography.labelSmall)
+                        Icon(DeckIcons.Dice, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text("Dado", style = MaterialTheme.typography.labelSmall)
                     }
 
                     // Solo Journal: Insertar Chispa
@@ -229,7 +234,11 @@ fun NoteBlockContent(
                                 val updated = if (notesContent.isBlank()) snippet else "$notesContent\n\n$snippet"
                                 onUpdateNotes(updated)
                             },
-                            label = { Text("+ 🔮 ${lastMythicResult.answerLabel}", fontSize = 11.sp) },
+                            label = { Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(DeckIcons.Oracle, null, modifier = Modifier.size(14.dp))
+                                Spacer(Modifier.width(4.dp))
+                                Text("+ ${lastMythicResult.answerLabel}", fontSize = 11.sp)
+                            } },
                             modifier = Modifier.height(28.dp)
                         )
                     }
@@ -241,7 +250,11 @@ fun NoteBlockContent(
                                 val updated = if (notesContent.isBlank()) snippet else "$notesContent\n\n$snippet"
                                 onUpdateNotes(updated)
                             },
-                            label = { Text("+ 🎲 ${lastDiceResult.total}", fontSize = 11.sp) },
+                            label = { Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(DeckIcons.Dice, null, modifier = Modifier.size(14.dp))
+                                Spacer(Modifier.width(4.dp))
+                                Text("+ ${lastDiceResult.total}", fontSize = 11.sp)
+                            } },
                             modifier = Modifier.height(28.dp)
                         )
                     }

@@ -44,7 +44,7 @@ fun boardBlockMeta(
         BoardBlockMeta(
             title = title,
             subtitle = subtitle,
-            icon = DeckIcons.Dice,
+            icon = DeckIcons.Table,
             color = Color(0xFFE91E63),
             preview = preview,
             footnote = latestTableRoll?.let { "Última tirada guardada" } ?: "Lista para tirar",

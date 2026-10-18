@@ -99,5 +99,6 @@ data class TacticalMapPinEntity(
     val targetEncounterId: Long? = null,
     val targetWikiEntryId: Long? = null,
     val targetMapId: Long? = null,
-    val discoveriesJson: String = "[]"
+    val discoveriesJson: String = "[]",
+    val tableLinksJson: String = "[]"
 )

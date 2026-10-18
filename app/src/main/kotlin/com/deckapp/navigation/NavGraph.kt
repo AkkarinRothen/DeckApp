@@ -140,7 +140,7 @@ fun DeckAppNavHost(
                     NavigationBarItem(
                         selected = false,
                         onClick = { showGlobalSearch = true },
-                        icon = { Icon(Icons.Default.Search, null) },
+                        icon = { Icon(DeckIcons.Search, null) },
                         label = { Text("Buscar") }
                     )
                     NavigationBarItem(

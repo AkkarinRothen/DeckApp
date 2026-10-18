@@ -107,6 +107,16 @@ fun TacticalMapPinEntity.toDomain(): TacticalMapPin {
         mapperJson.decodeFromString<List<PinDiscovery>>(discoveriesJson)
     }.getOrDefault(emptyList())
 
+    val decodedTableLinks: List<PinTableLink> = runCatching {
+        mapperJson.decodeFromString<List<PinTableLink>>(tableLinksJson)
+    }.getOrDefault(emptyList()).let { links ->
+        if (links.isEmpty() && targetTableId != null) {
+            listOf(PinTableLink(tableId = targetTableId, label = ""))
+        } else {
+            links
+        }
+    }
+
     return TacticalMapPin(
         id = id,
         mapId = mapId,
@@ -118,17 +128,23 @@ fun TacticalMapPinEntity.toDomain(): TacticalMapPin {
         colorHex = colorHex,
         isSecret = isSecret == 1,
         explorationState = runCatching { PinExplorationState.valueOf(explorationState) }.getOrDefault(PinExplorationState.UNKNOWN),
-        targetTableId = targetTableId,
+        targetTableId = targetTableId ?: decodedTableLinks.firstOrNull()?.tableId,
         targetEncounterId = targetEncounterId,
         targetWikiEntryId = targetWikiEntryId,
         targetMapId = targetMapId,
-        discoveries = decodedDiscoveries
+        discoveries = decodedDiscoveries,
+        tableLinks = decodedTableLinks
     )
 }
 
 fun TacticalMapPin.toEntity(): TacticalMapPinEntity {
     val encodedDiscoveries = runCatching {
         mapperJson.encodeToString(discoveries)
+    }.getOrDefault("[]")
+
+    val finalTableLinks = effectiveTableLinks
+    val encodedTableLinks = runCatching {
+        mapperJson.encodeToString(finalTableLinks)
     }.getOrDefault("[]")
 
     return TacticalMapPinEntity(
@@ -142,10 +158,11 @@ fun TacticalMapPin.toEntity(): TacticalMapPinEntity {
         colorHex = colorHex,
         isSecret = if (isSecret) 1 else 0,
         explorationState = explorationState.name,
-        targetTableId = targetTableId,
+        targetTableId = targetTableId ?: finalTableLinks.firstOrNull()?.tableId,
         targetEncounterId = targetEncounterId,
         targetWikiEntryId = targetWikiEntryId,
         targetMapId = targetMapId,
-        discoveriesJson = encodedDiscoveries
+        discoveriesJson = encodedDiscoveries,
+        tableLinksJson = encodedTableLinks
     )
 }

@@ -998,7 +998,22 @@ val MIGRATION_46_47 = object : Migration(46, 47) {
     }
 }
 
-
-
-
+val MIGRATION_47_48 = object : Migration(47, 48) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        val hasTableLinks = database.query("PRAGMA table_info(`tactical_map_pins`)").use { cursor ->
+            val nameIndex = cursor.getColumnIndex("name")
+            var found = false
+            while (cursor.moveToNext()) {
+                if (cursor.getString(nameIndex) == "tableLinksJson") {
+                    found = true
+                    break
+                }
+            }
+            found
+        }
+        if (!hasTableLinks) {
+            database.execSQL("ALTER TABLE `tactical_map_pins` ADD COLUMN `tableLinksJson` TEXT NOT NULL DEFAULT '[]'")
+        }
+    }
+}
 

@@ -507,6 +507,7 @@ fun SessionScreen(
                                     onNavigateToSubMap = viewModel.tacticalMapDelegate::navigateToSubMap,
                                     onSpawnEncounter = viewModel.tacticalMapDelegate::spawnEncounterOnMap,
                                     onRollPinTable = viewModel.tacticalMapDelegate::rollPinTable,
+                                    onRollSpecificPinTable = viewModel.tacticalMapDelegate::rollPinTable,
                                     onTogglePinSecret = viewModel.tacticalMapDelegate::togglePinSecret,
                                     onEditPin = viewModel.tacticalMapDelegate::openEditPin,
                                     onRollInlineFormula = viewModel.tacticalMapDelegate::rollInlineFormula,

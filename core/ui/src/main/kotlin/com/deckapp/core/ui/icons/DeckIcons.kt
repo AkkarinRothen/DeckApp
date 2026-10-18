@@ -79,6 +79,14 @@ object DeckIcons {
         moveTo(6f, 18f); lineTo(12f, 10f); lineTo(18f, 18f)
     } }
 
+    val Table by lazy { lineIcon("Deck table") {
+        moveTo(3f, 3f); lineTo(21f, 3f); lineTo(21f, 21f); lineTo(3f, 21f); close()
+        moveTo(3f, 8f); lineTo(21f, 8f)
+        moveTo(3f, 14f); lineTo(21f, 14f)
+        moveTo(9f, 8f); lineTo(9f, 21f)
+        moveTo(6f, 5.5f); lineTo(6.1f, 5.5f)
+    } }
+
     val Guide by lazy { lineIcon("Deck guide") {
         moveTo(5f, 3f); lineTo(16f, 3f); lineTo(19f, 6f); lineTo(19f, 21f); lineTo(5f, 21f); close()
         moveTo(16f, 3f); lineTo(16f, 6f); lineTo(19f, 6f)
@@ -113,5 +121,36 @@ object DeckIcons {
         moveTo(12f, 3f); curveTo(14f, 5f, 14f, 7f, 12f, 9f)
         curveTo(10f, 7f, 10f, 5f, 12f, 3f); close()
         moveTo(6f, 21f); lineTo(18f, 21f)
+    } }
+
+    val Search by lazy { lineIcon("Deck search") {
+        moveTo(10f, 3f); curveTo(14f, 3f, 17f, 6f, 17f, 10f)
+        curveTo(17f, 14f, 14f, 17f, 10f, 17f)
+        curveTo(6f, 17f, 3f, 14f, 3f, 10f)
+        curveTo(3f, 6f, 6f, 3f, 10f, 3f); close()
+        moveTo(15f, 15f); lineTo(21f, 21f)
+    } }
+
+    val Travel by lazy { lineIcon("Deck travel") {
+        moveTo(12f, 3f); curveTo(14f, 3f, 14f, 6f, 12f, 6f)
+        curveTo(10f, 6f, 10f, 3f, 12f, 3f); close()
+        moveTo(12f, 7f); lineTo(10f, 13f); lineTo(7f, 15f)
+        moveTo(12f, 8f); lineTo(16f, 11f); lineTo(19f, 11f)
+        moveTo(10f, 13f); lineTo(15f, 15f); lineTo(17f, 21f)
+        moveTo(10f, 13f); lineTo(7f, 21f)
+    } }
+
+    val Camp by lazy { lineIcon("Deck camp") {
+        moveTo(12f, 3f); lineTo(22f, 20f); lineTo(2f, 20f); close()
+        moveTo(12f, 3f); lineTo(12f, 20f)
+        moveTo(12f, 20f); lineTo(16f, 13f); lineTo(20f, 20f)
+    } }
+
+    val Oracle by lazy { lineIcon("Deck oracle") {
+        moveTo(2f, 12f); curveTo(6f, 6f, 18f, 6f, 22f, 12f)
+        curveTo(18f, 18f, 6f, 18f, 2f, 12f); close()
+        moveTo(12f, 9f); curveTo(16f, 9f, 16f, 15f, 12f, 15f)
+        curveTo(8f, 15f, 8f, 9f, 12f, 9f); close()
+        moveTo(12f, 3f); lineTo(12f, 5f)
     } }
 }

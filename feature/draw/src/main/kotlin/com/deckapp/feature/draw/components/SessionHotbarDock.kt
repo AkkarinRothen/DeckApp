@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import com.deckapp.core.ui.icons.DeckIcons
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -251,10 +252,10 @@ private fun HotbarActionChip(
     onLongClick: () -> Unit
 ) {
     val (typeColor, defaultIcon) = when (action.type) {
-        HotbarActionType.DICE_ROLL -> Pair(Color(0xFF5C6BC0), Icons.Default.Casino)
-        HotbarActionType.ORACLE_QUERY -> Pair(Color(0xFFAB47BC), Icons.Default.AutoAwesome)
-        HotbarActionType.RANDOM_TABLE -> Pair(Color(0xFFFFA000), Icons.Default.FormatListNumbered)
-        HotbarActionType.DRAW_CARD -> Pair(Color(0xFF26A69A), Icons.Default.Style)
+        HotbarActionType.DICE_ROLL -> Pair(Color(0xFF5C6BC0), DeckIcons.Dice)
+        HotbarActionType.ORACLE_QUERY -> Pair(Color(0xFFAB47BC), DeckIcons.Oracle)
+        HotbarActionType.RANDOM_TABLE -> Pair(Color(0xFFFFA000), DeckIcons.Table)
+        HotbarActionType.DRAW_CARD -> Pair(Color(0xFF26A69A), DeckIcons.Library)
     }
 
     val chipColor = action.colorHex?.let { raw ->

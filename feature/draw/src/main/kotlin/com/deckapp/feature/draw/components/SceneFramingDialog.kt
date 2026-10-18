@@ -626,7 +626,7 @@ fun SceneFramingDialog(
                                     ) {
                                         Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(18.dp))
                                         Spacer(Modifier.width(6.dp))
-                                        Text("🎬 Comenzar Escena")
+                                        Text("Comenzar escena")
                                     }
                                 }
                             }

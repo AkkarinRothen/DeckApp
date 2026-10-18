@@ -66,7 +66,7 @@ fun TacticalPinDialog(
     var selectedColorHex by remember { mutableStateOf(initialPin?.colorHex ?: 0xFFFFA000L) }
     var isSecret by remember { mutableStateOf(initialPin?.isSecret ?: true) }
     var explorationState by remember { mutableStateOf(initialPin?.explorationState ?: MapPinExplorationState.UNKNOWN) }
-    var targetTableId by remember { mutableStateOf(initialPin?.targetTableId) }
+    var tableLinks by remember { mutableStateOf(initialPin?.effectiveTableLinks ?: emptyList()) }
     var targetEncounterId by remember { mutableStateOf(initialPin?.targetEncounterId) }
     var targetWikiEntryId by remember { mutableStateOf(initialPin?.targetWikiEntryId) }
     var targetMapId by remember { mutableStateOf(initialPin?.targetMapId) }
@@ -76,9 +76,6 @@ fun TacticalPinDialog(
     var showWikiPicker by remember { mutableStateOf(false) }
     var showMapPicker by remember { mutableStateOf(false) }
 
-    val linkedTableName = remember(targetTableId, availableTables) {
-        availableTables.find { it.id == targetTableId }?.name
-    }
     val linkedEncounterName = remember(targetEncounterId, availableEncounters) {
         availableEncounters.find { it.id == targetEncounterId }?.name
     }
@@ -151,38 +148,88 @@ fun TacticalPinDialog(
                     color = MaterialTheme.colorScheme.outline
                 )
 
-                // Vínculo Tabla Aleatoria
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                // Vínculos a Tablas Aleatorias (Múltiples tablas por sala)
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier.weight(1f)
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Icon(Icons.Default.Casino, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+                            Text("Tablas de la sala (${tableLinks.size})", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                        }
+                        TextButton(onClick = { showTablePicker = true }) {
+                            Text("+ Añadir tabla", fontSize = 11.sp)
+                        }
+                    }
+
+                    if (tableLinks.isEmpty()) {
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Icon(Icons.Default.Casino, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
                             Text(
-                                text = linkedTableName?.let { "Tabla: $it" } ?: "Sin tabla vinculada",
+                                "Ninguna tabla vinculada a esta sala",
                                 style = MaterialTheme.typography.bodySmall,
-                                fontWeight = if (linkedTableName != null) FontWeight.Medium else FontWeight.Normal
+                                color = MaterialTheme.colorScheme.outline,
+                                modifier = Modifier.padding(10.dp)
                             )
                         }
-                        if (targetTableId != null) {
-                            IconButton(onClick = { targetTableId = null }, modifier = Modifier.size(28.dp)) {
-                                Icon(Icons.Default.Close, contentDescription = "Quitar", modifier = Modifier.size(16.dp))
-                            }
-                        } else {
-                            TextButton(onClick = { showTablePicker = true }) {
-                                Text("+ Vincular", fontSize = 11.sp)
+                    } else {
+                        tableLinks.forEachIndexed { index, link ->
+                            val currentTable = availableTables.find { it.id == link.tableId }
+                            val tableName = currentTable?.name ?: "Tabla #${link.tableId}"
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            text = tableName,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            fontWeight = FontWeight.SemiBold,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        IconButton(
+                                            onClick = { tableLinks = tableLinks.filterIndexed { i, _ -> i != index } },
+                                            modifier = Modifier.size(24.dp)
+                                        ) {
+                                            Icon(Icons.Default.Close, contentDescription = "Quitar", modifier = Modifier.size(14.dp))
+                                        }
+                                    }
+
+                                    // Chips rápidos para asignar rol/etiqueta a la tabla
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Text("Rol:", fontSize = 10.sp, color = MaterialTheme.colorScheme.outline)
+                                        val rolePresets = listOf("Botín", "Encuentro", "Secreto", "Evento", "Trampa")
+                                        rolePresets.forEach { preset ->
+                                            val isSelected = link.label.equals(preset, ignoreCase = true)
+                                            FilterChip(
+                                                selected = isSelected,
+                                                onClick = {
+                                                    val newLabel = if (isSelected) "" else preset
+                                                    tableLinks = tableLinks.mapIndexed { i, item ->
+                                                        if (i == index) item.copy(label = newLabel) else item
+                                                    }
+                                                },
+                                                label = { Text(preset, fontSize = 9.sp) },
+                                                modifier = Modifier.height(26.dp)
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -405,11 +452,12 @@ fun TacticalPinDialog(
                         colorHex = selectedColorHex,
                         isSecret = isSecret,
                         explorationState = explorationState,
-                        targetTableId = targetTableId,
+                        targetTableId = tableLinks.firstOrNull()?.tableId,
                         targetEncounterId = targetEncounterId,
                         targetWikiEntryId = targetWikiEntryId,
                         targetMapId = targetMapId,
-                        discoveries = initialPin?.discoveries ?: emptyList()
+                        discoveries = initialPin?.discoveries ?: emptyList(),
+                        tableLinks = tableLinks
                     )
                     onSavePin(finalPin)
                     onDismiss()
@@ -430,8 +478,10 @@ fun TacticalPinDialog(
         ResourcePickerModal(
             title = "Vincular Tabla Aleatoria",
             items = availableTables.map { ResourceItem(it.id, it.name, it.category) },
-            onSelect = {
-                targetTableId = it
+            onSelect = { selectedTableId ->
+                if (tableLinks.none { it.tableId == selectedTableId }) {
+                    tableLinks = tableLinks + PinTableLink(tableId = selectedTableId, label = "")
+                }
                 showTablePicker = false
             },
             onDismiss = { showTablePicker = false }

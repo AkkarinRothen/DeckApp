@@ -10,6 +10,7 @@ import javax.inject.Inject
 import com.deckapp.core.data.db.DeckAppDatabase
 import androidx.room.withTransaction
 import com.deckapp.core.data.db.*
+import com.deckapp.core.data.db.toBackupDto
 
 class BackupRepositoryImpl @Inject constructor(
     private val db: DeckAppDatabase,
@@ -110,7 +111,8 @@ class BackupRepositoryImpl @Inject constructor(
                     targetEncounterId = it.targetEncounterId,
                     targetWikiEntryId = it.targetWikiEntryId,
                     targetMapId = it.targetMapId,
-                    discoveriesJson = it.discoveriesJson
+                    discoveriesJson = it.discoveriesJson,
+                    tableLinksJson = it.tableLinksJson
                 )
             }
         )
@@ -259,7 +261,8 @@ class BackupRepositoryImpl @Inject constructor(
                         targetEncounterId = it.targetEncounterId,
                         targetWikiEntryId = it.targetWikiEntryId,
                         targetMapId = it.targetMapId,
-                        discoveriesJson = it.discoveriesJson
+                        discoveriesJson = it.discoveriesJson,
+                        tableLinksJson = it.tableLinksJson
                     )
                 })
             }

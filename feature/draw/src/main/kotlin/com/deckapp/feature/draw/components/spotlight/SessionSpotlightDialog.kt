@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.deckapp.core.model.TableRollResult
+import com.deckapp.core.ui.icons.DeckIcons
 
 private val SpotlightBg = Color(0xF212141C)
 private val CardBg = Color(0xFF1B1E28)
@@ -440,11 +441,12 @@ private fun SpotlightQuickPeekContent(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Column(modifier = Modifier.padding(10.dp)) {
-                                    Text(
-                                        text = "🎲 Resultado [dado: ${lastRollResult.rollValue}]:",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = Color(0xFF81C784)
-                                    )
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(DeckIcons.Dice, null, modifier = Modifier.size(16.dp), tint = Color(0xFF81C784))
+                                        Spacer(Modifier.width(4.dp))
+                                        Text("Resultado [dado: ${lastRollResult.rollValue}]:",
+                                            style = MaterialTheme.typography.labelSmall, color = Color(0xFF81C784))
+                                    }
                                     Text(
                                         text = lastRollResult.resolvedText,
                                         style = MaterialTheme.typography.bodyMedium,

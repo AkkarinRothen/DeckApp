@@ -1,3 +1,33 @@
+### Pines × Tablas 2.0 — Vínculos Múltiples, Roles y Tiradas Rápidas en Mapa Táctico (18 de octubre de 2026)
+
+**Categoría:** `FEATURE / ARCHITECTURE`
+
+Se completó la implementación integral acordada para la conexión entre el sistema de pines del mapa táctico y el motor de tablas aleatorias:
+- **Modelo y Base de Datos (Room v48):**
+  - Incorporada entidad de dominio `PinTableLink(tableId, label)` para asignar múltiples tablas a un único pin con etiquetas de rol contextuales ("Botín", "Encuentro", "Secreto", "Evento", "Trampa").
+  - Migración Room no destructiva `MIGRATION_47_48` que añade `tableLinksJson TEXT NOT NULL DEFAULT '[]'` a `tactical_map_pins`, conservando compatibilidad retroactiva completa con el campo legacy `targetTableId`.
+  - Mappers y exportación/restauración de backups (`BackupRepositoryImpl`) sincronizados con el nuevo esquema.
+- **Hoja Detalle de Pin (`TacticalPinSheet`):**
+  - Reemplazada la tarjeta de tabla única por un contenedor de tablas de la sala (`pin.effectiveTableLinks`).
+  - Cada fila muestra su chip de rol ("Botín", etc.), nombre de tabla y botón "Tirar" independiente de 1 toque.
+  - Historial de descubrimientos particionado por tabla (`pin.discoveriesForTable(tableId)`), permitiendo eliminar descubrimientos individuales sin afectar a las otras tablas vinculadas.
+- **Diálogo de Configuración de Pin (`TacticalPinDialog`):**
+  - Soporte para agregar múltiples tablas desde el catálogo de la campaña.
+  - Selector de chips de rol inmediato ("Botín", "Encuentro", "Secreto", "Evento", "Trampa") por tabla vinculada y eliminación rápida con un tap.
+- **Tirada Rápida In-Situ sobre el Canvas (`TacticalFloatingPinPanel` & `TacticalMapView`):**
+  - Si el pin tiene una tabla: botón directo "🎲 Tirar en [Rol] Nombre".
+  - Si tiene múltiples tablas: contenedor compacto de tirada rápida con botones directos para cada tabla sin necesidad de abrir el diálogo modal completo.
+- **Dungeon Key (`TacticalSidePanel`):**
+  - Cada tarjeta de sala/pin en el índice lateral ahora incluye un badge de estado: total de tablas vinculadas y progreso de tiradas registradas (ej. `🎲 2 tablas • 1/2 tiradas`).
+- **Registro Automático en Diario de Sesión (`TacticalMapDelegate`):**
+  - Cada tirada ejecutada desde un pin o panel flotante genera de inmediato una entrada con timestamp, título del pin, rol, nombre de tabla y resultado en `dmNotes` y en el historial de sesión.
+- **Validación:**
+  - Tests unitarios de `:core:domain` completados con éxito (60 tareas).
+  - Módulos `:core:model`, `:core:data` y `:feature:draw` compilados sin errores.
+  - APK Debug de desarrollo (`:app:assembleDebug`) generado satisfactoriamente en 4m 2s.
+
+---
+
 ### Choir of Flesh — guía de procedimientos (18 de octubre de 2026)
 
 Se integraron las seis hojas de procedimientos como WebP sin conexión y una guía contextual para exploración exterior, preparación y exploración de incursiones y pruebas de Angustia. La guía conserva el paso, ofrece tirada física o de la app, registra la confirmación en el diario y permite volver a la secuencia tras una interrupción. El resto de los procedimientos está disponible como índice de referencia. Se ocultaron en la lectura y edición del diario las marcas internas que evitan registros duplicados. Detalle y límites en [docs/ux/choir-procedimientos-2026-10-18.md](docs/ux/choir-procedimientos-2026-10-18.md). Validación: 73 pruebas de dominio, 116 de interfaz, APK de desarrollo compilado e instalado y recorrido físico en Motorola One Fusion.

@@ -127,6 +127,15 @@ typealias PinDiscovery = TableRollResult
 typealias MapPin = TacticalMapPin
 
 /**
+ * Vínculo de una tabla aleatoria a un pin con rol o etiqueta contextual opcional (ej: "Botín", "Encuentro", "Secreto").
+ */
+@Serializable
+data class PinTableLink(
+    val tableId: Long,
+    val label: String = ""
+)
+
+/**
  * Pin de información o secretos de dungeon fijado a una coordenada del mapa (Room Keying).
  */
 @Serializable
@@ -145,8 +154,30 @@ data class TacticalMapPin(
     val targetEncounterId: Long? = null,
     val targetWikiEntryId: Long? = null,
     val targetMapId: Long? = null,
-    val discoveries: List<TableRollResult> = emptyList()
+    val discoveries: List<TableRollResult> = emptyList(),
+    val tableLinks: List<PinTableLink> = emptyList()
 )
+
+/**
+ * Devuelve todos los vínculos de tablas, unificando los tableLinks modernos
+ * con el targetTableId legacy si aún no fue migrado a la lista.
+ */
+val TacticalMapPin.effectiveTableLinks: List<PinTableLink>
+    get() {
+        if (tableLinks.isNotEmpty()) return tableLinks
+        return if (targetTableId != null) {
+            listOf(PinTableLink(tableId = targetTableId, label = ""))
+        } else {
+            emptyList()
+        }
+    }
+
+/**
+ * Descubrimientos agrupados por tableId para visualización por tabla.
+ */
+fun TacticalMapPin.discoveriesForTable(tableId: Long): List<TableRollResult> {
+    return discoveries.filter { it.tableId == tableId }
+}
 
 /**
  * Formas geométricas para plantillas de Área de Efecto (AoE) y medición de distancia.

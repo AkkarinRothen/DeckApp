@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.deckapp.core.model.*
@@ -36,6 +37,7 @@ fun TacticalPinSheet(
     onDeletePin: (Long) -> Unit,
     onUpdateExplorationState: (MapPinExplorationState) -> Unit = {},
     onRollTable: () -> Unit = {},
+    onRollSpecificTable: (Long) -> Unit = { onRollTable() },
     onDeleteDiscovery: (Int) -> Unit = {},
     onStartEncounter: (Long) -> Unit = {},
     onPreviewWiki: (WikiEntry) -> Unit = {},
@@ -209,15 +211,16 @@ fun TacticalPinSheet(
                 }
             }
 
-            // Conexión con Tabla Aleatoria
-            if (pin.targetTableId != null) {
+            // Conexión con Tablas Aleatorias (Múltiples tablas por sala)
+            val tableLinks = pin.effectiveTableLinks
+            if (tableLinks.isNotEmpty()) {
                 Surface(
                     shape = RoundedCornerShape(12.dp),
                     color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.35f),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
@@ -229,61 +232,116 @@ fun TacticalPinSheet(
                             ) {
                                 Icon(Icons.Default.Casino, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
                                 Text(
-                                    text = linkedTable?.name ?: "Tabla vinculada (#${pin.targetTableId})",
+                                    text = "Tablas de la sala (${tableLinks.size})",
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
-                            FilledTonalButton(
-                                onClick = onRollTable,
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                                modifier = Modifier.height(34.dp)
+                            TextButton(
+                                onClick = { onEditPin(pin) },
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
                             ) {
-                                Icon(Icons.Default.Casino, contentDescription = null, modifier = Modifier.size(14.dp))
-                                Spacer(Modifier.width(6.dp))
-                                Text("Tirar", fontSize = 12.sp)
+                                Text("+ Gestionar", fontSize = 11.sp)
                             }
                         }
 
-                        // Historial de Descubrimientos de esta sala
-                        if (pin.discoveries.isNotEmpty()) {
-                            Text(
-                                text = "DESCUBRIMIENTOS REALIZADOS:",
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontSize = 10.sp
-                            )
-                            pin.discoveries.forEachIndexed { index, disc ->
-                                Surface(
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
+                        tableLinks.forEach { link ->
+                            val currentTable = availableTables.find { it.id == link.tableId }
+                            val tableName = currentTable?.name ?: "Tabla vinculada (#${link.tableId})"
+                            val tableDiscoveries = pin.discoveriesForTable(link.tableId)
+
+                            Surface(
+                                shape = RoundedCornerShape(10.dp),
+                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                     Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                                        modifier = Modifier.fillMaxWidth(),
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
-                                        Column(modifier = Modifier.weight(1f)) {
+                                        Row(
+                                            modifier = Modifier.weight(1f),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                        ) {
+                                            if (link.label.isNotBlank()) {
+                                                Surface(
+                                                    shape = RoundedCornerShape(6.dp),
+                                                    color = MaterialTheme.colorScheme.primaryContainer
+                                                ) {
+                                                    Text(
+                                                        text = link.label,
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                        fontWeight = FontWeight.Bold,
+                                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                                        fontSize = 10.sp
+                                                    )
+                                                }
+                                            }
                                             Text(
-                                                text = disc.resolvedText,
-                                                style = MaterialTheme.typography.bodySmall,
-                                                fontWeight = FontWeight.Medium
-                                            )
-                                            Text(
-                                                text = "Resultado: ${disc.rollValue}",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = MaterialTheme.colorScheme.outline
+                                                text = tableName,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.SemiBold,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
                                             )
                                         }
-                                        IconButton(
-                                            onClick = { onDeleteDiscovery(index) },
-                                            modifier = Modifier.size(26.dp)
+
+                                        FilledTonalButton(
+                                            onClick = { onRollSpecificTable(link.tableId) },
+                                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
+                                            modifier = Modifier.height(32.dp)
                                         ) {
-                                            Icon(Icons.Default.Close, contentDescription = "Borrar", modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.outline)
+                                            Icon(Icons.Default.Casino, contentDescription = null, modifier = Modifier.size(13.dp))
+                                            Spacer(Modifier.width(4.dp))
+                                            Text("Tirar", fontSize = 11.sp)
+                                        }
+                                    }
+
+                                    // Historial de descubrimientos de esta tabla específica
+                                    if (tableDiscoveries.isNotEmpty()) {
+                                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                            tableDiscoveries.forEach { disc ->
+                                                val originalIndex = pin.discoveries.indexOf(disc)
+                                                Surface(
+                                                    shape = RoundedCornerShape(6.dp),
+                                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                                    modifier = Modifier.fillMaxWidth()
+                                                ) {
+                                                    Row(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        horizontalArrangement = Arrangement.SpaceBetween
+                                                    ) {
+                                                        Column(modifier = Modifier.weight(1f)) {
+                                                            Text(
+                                                                text = disc.resolvedText,
+                                                                style = MaterialTheme.typography.bodySmall,
+                                                                fontWeight = FontWeight.Medium
+                                                            )
+                                                            Text(
+                                                                text = "Resultado: ${disc.rollValue}",
+                                                                style = MaterialTheme.typography.labelSmall,
+                                                                color = MaterialTheme.colorScheme.outline
+                                                            )
+                                                        }
+                                                        if (originalIndex >= 0) {
+                                                            IconButton(
+                                                                onClick = { onDeleteDiscovery(originalIndex) },
+                                                                modifier = Modifier.size(22.dp)
+                                                            ) {
+                                                                Icon(Icons.Default.Close, contentDescription = "Borrar", modifier = Modifier.size(12.dp), tint = MaterialTheme.colorScheme.outline)
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }
