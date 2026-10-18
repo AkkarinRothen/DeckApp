@@ -1,5 +1,6 @@
 package com.deckapp.feature.draw.delegates
 
+import android.content.Context
 import androidx.compose.ui.geometry.Offset
 import com.deckapp.core.domain.repository.EncounterRepository
 import com.deckapp.core.domain.repository.FileRepository
@@ -820,6 +821,104 @@ class TacticalMapDelegate(
                 speedFt = 30
             )
             tacticalMapRepository.upsertToken(initialHero)
+        }
+    }
+
+    /**
+     * Carga las plantillas de mapas del sistema a la sesión actual (o las extrae del starter pack).
+     */
+    fun loadSystemMaps(context: Context, systemFilter: String = "choir_of_flesh") {
+        scope.launch {
+            var templateMaps = tacticalMapRepository.getAllTacticalMaps().first()
+                .filter { it.sessionId == null && it.imageUri.contains(systemFilter) }
+
+            if (templateMaps.isEmpty()) {
+                try {
+                    val assetJson = context.assets.open("starter_packs/choir_of_flesh.json").bufferedReader().use { it.readText() }
+                    val jsonParser = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+                    val backupDto = jsonParser.decodeFromString<com.deckapp.core.model.backup.FullBackupDto>(assetJson)
+                    backupDto.tacticalMaps.forEach { dto ->
+                        val mapEntity = TacticalMap(
+                            id = 0,
+                            name = dto.name,
+                            imageUri = dto.imageUri,
+                            gridType = when (dto.gridType) {
+                                "NONE" -> GridType.NONE
+                                "HEX_FLAT" -> GridType.HEX_FLAT
+                                "HEX_POINTY" -> GridType.HEX_POINTY
+                                else -> GridType.SQUARE
+                            },
+                            cellSizePx = dto.cellSizePx,
+                            gridOffsetX = dto.gridOffsetX,
+                            gridOffsetY = dto.gridOffsetY,
+                            gridColorHex = dto.gridColorHex,
+                            gridOpacity = dto.gridOpacity,
+                            scaleFtPerCell = dto.scaleFtPerCell,
+                            diagonalRule = DiagonalRule.ALTERNATING_5_10_5,
+                            sessionId = null
+                        )
+                        val mapId = tacticalMapRepository.upsertTacticalMap(mapEntity)
+                        backupDto.tacticalMapPins.filter { it.mapId == dto.id }.forEach { pinDto ->
+                            tacticalMapRepository.upsertPin(
+                                TacticalMapPin(
+                                    id = 0,
+                                    mapId = mapId,
+                                    cellX = pinDto.cellX,
+                                    cellY = pinDto.cellY,
+                                    title = pinDto.title,
+                                    description = pinDto.description,
+                                    iconName = pinDto.iconName,
+                                    colorHex = pinDto.colorHex,
+                                    isSecret = pinDto.isSecret != 0,
+                                    explorationState = when (pinDto.explorationState) {
+                                        "EXPLORED" -> MapPinExplorationState.EXPLORED
+                                        "DISCOVERED" -> MapPinExplorationState.DISCOVERED
+                                        else -> MapPinExplorationState.UNKNOWN
+                                    },
+                                    targetTableId = pinDto.targetTableId,
+                                    tableLinks = try {
+                                        jsonParser.decodeFromString<List<PinTableLink>>(pinDto.tableLinksJson)
+                                    } catch (_: Exception) {
+                                        emptyList()
+                                    }
+                                )
+                            )
+                        }
+                    }
+                    templateMaps = tacticalMapRepository.getAllTacticalMaps().first()
+                        .filter { it.sessionId == null && it.imageUri.contains(systemFilter) }
+                } catch (e: Exception) {
+                    android.util.Log.e("TacticalMapDelegate", "Error loading system maps from asset", e)
+                }
+            }
+
+            val existingMaps = tacticalMapRepository.getTacticalMapsBySessionId(sessionId).first()
+            val existingMapNames = existingMaps.map { it.name }.toSet()
+            var firstClonedMapId: Long? = null
+            var clonedCount = 0
+
+            templateMaps.forEach { template ->
+                if (template.name !in existingMapNames) {
+                    val clonedMap = template.copy(id = 0, sessionId = sessionId)
+                    val newMapId = tacticalMapRepository.upsertTacticalMap(clonedMap)
+                    if (firstClonedMapId == null) {
+                        firstClonedMapId = newMapId
+                    }
+                    val templatePins = tacticalMapRepository.getPinsByMapId(template.id).first()
+                    templatePins.forEach { pin ->
+                        val clonedPin = pin.copy(id = 0, mapId = newMapId)
+                        tacticalMapRepository.upsertPin(clonedPin)
+                    }
+                    clonedCount++
+                }
+            }
+
+            if (firstClonedMapId != null) {
+                switchMap(firstClonedMapId)
+                _uiState.update { it.copy(snackbarMessage = "$clonedCount mapas del sistema importados a la sesión") }
+            } else if (existingMaps.any { it.name in templateMaps.map { t -> t.name } }) {
+                _uiState.update { it.copy(snackbarMessage = "Los mapas del sistema ya están cargados en esta sesión") }
+            }
         }
     }
 

@@ -65,6 +65,9 @@ interface TacticalMapDao {
     @Query("DELETE FROM tactical_map_pins WHERE id = :id")
     suspend fun deletePin(id: Long)
 
+    @Query("DELETE FROM tactical_map_pins WHERE mapId = :mapId")
+    suspend fun deletePinsByMapId(mapId: Long)
+
     // Bulk Backup & Restore
     @Query("SELECT * FROM tactical_maps")
     suspend fun getAllMapsSync(): List<TacticalMapEntity>

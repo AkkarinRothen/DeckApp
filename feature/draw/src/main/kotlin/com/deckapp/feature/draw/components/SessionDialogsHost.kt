@@ -96,6 +96,9 @@ fun SessionDialogsHost(
                 viewModel.saveChoirIncursion(inc, set, ch, activeChar?.first)
                 onDismissIncursionDialog()
             },
+            onOpenTacticalMap = {
+                viewModel.setMainViewMode(com.deckapp.feature.draw.SessionViewMode.TACTICAL)
+            },
             onDismiss = onDismissIncursionDialog
         )
     }
@@ -288,12 +291,18 @@ fun SessionDialogsHost(
     }
 
     if (uiState.tacticalState.showMapSelectorSheet) {
+        val context = androidx.compose.ui.platform.LocalContext.current
+        val isChoir = uiState.session?.gameSystems?.any { it.contains("Choir", ignoreCase = true) } == true
         TacticalMapSelectorSheet(
             availableMaps = uiState.tacticalState.availableMaps,
             currentMapId = uiState.tacticalState.map?.id,
             scenes = uiState.scenes,
             onSelectMap = viewModel.tacticalMapDelegate::switchMap,
             onCreateNewMap = viewModel.tacticalMapDelegate::openCreateMapDialog,
+            onLoadSystemMaps = {
+                viewModel.tacticalMapDelegate.loadSystemMaps(context, "choir_of_flesh")
+            },
+            isChoirOfFlesh = isChoir,
             onChangeMapImage = { mapId, uri -> viewModel.tacticalMapDelegate.updateMapImage(uri, mapId) },
             onRenameMap = viewModel.tacticalMapDelegate::openRenameMapDialog,
             onLinkScene = viewModel.tacticalMapDelegate::openLinkSceneDialog,

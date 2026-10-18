@@ -33,6 +33,8 @@ fun TacticalMapSelectorSheet(
     scenes: List<Scene>,
     onSelectMap: (Long) -> Unit,
     onCreateNewMap: () -> Unit,
+    onLoadSystemMaps: (() -> Unit)? = null,
+    isChoirOfFlesh: Boolean = false,
     onChangeMapImage: (Long, String) -> Unit = { _, _ -> },
     onRenameMap: (TacticalMap) -> Unit,
     onLinkScene: (TacticalMap) -> Unit,
@@ -101,14 +103,30 @@ fun TacticalMapSelectorSheet(
                     }
                 }
 
-                FilledTonalButton(
-                    onClick = onCreateNewMap,
-                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
-                    modifier = Modifier.height(36.dp)
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text("Nuevo Mapa", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (isChoirOfFlesh && onLoadSystemMaps != null) {
+                        OutlinedButton(
+                            onClick = {
+                                onLoadSystemMaps()
+                                onDismiss()
+                            },
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                            modifier = Modifier.height(36.dp)
+                        ) {
+                            Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text("Mapas Choir", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+                    FilledTonalButton(
+                        onClick = onCreateNewMap,
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
+                        modifier = Modifier.height(36.dp)
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text("Nuevo Mapa", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    }
                 }
             }
 
@@ -124,11 +142,34 @@ fun TacticalMapSelectorSheet(
                         .padding(vertical = 36.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        "No hay mapas en esta sesión. Pulsa '+ Nuevo Mapa' para crear uno.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.outline
-                    )
+                    if (isChoirOfFlesh && onLoadSystemMaps != null) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Text(
+                                "No hay mapas en esta sesión.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+                            FilledTonalButton(
+                                onClick = {
+                                    onLoadSystemMaps()
+                                    onDismiss()
+                                }
+                            ) {
+                                Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(8.dp))
+                                Text("Cargar Mapas de Choir of Flesh")
+                            }
+                        }
+                    } else {
+                        Text(
+                            "No hay mapas en esta sesión. Pulsa '+ Nuevo Mapa' para crear uno.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                    }
                 }
             } else {
                 LazyColumn(

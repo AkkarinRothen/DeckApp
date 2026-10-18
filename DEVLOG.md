@@ -1,3 +1,31 @@
+### Choir of Flesh — Mapas Tácticos Oficiales, Pines 2.0 Pre-configurados y Expansión de Tablas (18 de octubre de 2026)
+
+**Categoría:** `FEATURE / CONTENT / UX`
+
+Se integraron de forma nativa los mapas tácticos oficiales y la biblioteca ampliada de tablas del sistema *Choir of Flesh*:
+- **Mapas Tácticos Oficiales en Alta Definición (WebP):**
+  - *Cuadrícula de Incursión (8 Nodos):* Renderizado en `starter_packs/choir_of_flesh/maps/incursion_grid.webp` (1684×1191 px). Viene pre-cargado con 9 pines de dungeon (Punto de Partida y Habitaciones 1 a 8), equipados con roles interactivos (`Encuentro`, `Criatura`, `Botín`) conectados a las tablas del sistema.
+  - *Cuadrícula de Combate Individual (5×5):* `combat_grid.webp` calibrado al píxel exacto con celdas de 185 px, desfase `(X: 132, Y: 426)`, cuadrícula cuadrada con escala de 5 pies y rosa de los vientos.
+  - *Combate Multijugador (10×5):* `multiplayer_combat_grid.webp` calibrado a 185 px por celda, desfase `(X: 267, Y: 439)`, 10 columnas por 5 filas.
+- **Soporte de Mapas y Pines en el Motor de Starter Packs (`ReferenceRepositoryImpl`):**
+  - `importStarterPack()` ahora importa y remapea mapas tácticos y pines con remapeo automático de IDs de tablas y serialización JSON de `tableLinks`.
+  - Desinstalación limpia (`removeStarterPack`): elimina de forma segura las plantillas de mapas y pines asociados al paquete.
+- **Carga de Mapas del Sistema a la Sesión (`TacticalMapSelectorSheet` & `TacticalMapDelegate`):**
+  - En sesiones con sistema *Choir of Flesh*, el selector de mapas muestra el botón rápido *"Mapas Choir"* o *"Cargar Mapas de Choir of Flesh"*, clonando instantáneamente las 3 plantillas y sus pines interactivos al mapa activo de la sesión.
+- **Conexión Asistente de Incursión (`ChoirIncursionDialog`):**
+  - Añadido botón con icono de mapa en la cabecera del asistente para saltar de inmediato al modo Táctico con la cuadrícula de incursión.
+- **Expansión de Tablas Oficiales en el Starter Pack (`choir_of_flesh.json`):**
+  - Añadidas 6 tablas esenciales extraídas de los manuales y hojas de ayuda (`Tables Aid`):
+    - *Tabla de Botín (D100 Looting)* (ID: -2217)
+    - *Tabla de Rapiña (D20 Scavenging)* (ID: -2218)
+    - *Eventos de Asentamiento / Refugio (D100)* (ID: -2219)
+    - *El Precio del Coro (D100)* (ID: -2220)
+    - *Dones de los Deshechos (D20)* (ID: -2221)
+    - *Complicaciones de Escena (D6)* (ID: -2222)
+  - El paquete ahora cuenta con 22 tablas aleatorias oficiales y 315 entradas.
+
+---
+
 ### Pines × Tablas 2.0 — Vínculos Múltiples, Roles y Tiradas Rápidas en Mapa Táctico (18 de octubre de 2026)
 
 **Categoría:** `FEATURE / ARCHITECTURE`

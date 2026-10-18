@@ -9,6 +9,7 @@ import com.deckapp.core.model.Tag
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.encodeToString
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -194,7 +195,7 @@ class ReferenceRepositoryImpl @Inject constructor(
             }
 
             // 3. Tablas Aleatorias: preserve database identities when reinstalling.
-            importRandomTables(backup, packName, replaceExisting = true)
+            val randomTableIdMap = importRandomTables(backup, packName, replaceExisting = true)
 
             // 4. NPCs / Criaturas del paquete
             if (backup.npcs.isNotEmpty()) {
@@ -245,6 +246,79 @@ class ReferenceRepositoryImpl @Inject constructor(
                     npcDao.insertCrossRef(NpcTagCrossRef(npcId = npcId, tagId = tagId))
                 }
             }
+
+            // 5. Tactical Maps & Pins del paquete
+            if (backup.tacticalMaps.isNotEmpty()) {
+                val tacticalMapDao = db.tacticalMapDao()
+                val mapIdMap = mutableMapOf<Long, Long>()
+                val existingMaps = tacticalMapDao.getAllMapsSync().filter { it.sessionId == null }
+
+                backup.tacticalMaps.forEach { dto ->
+                    val existing = existingMaps.find { it.name == dto.name }
+                    val mapEntity = TacticalMapEntity(
+                        id = existing?.id ?: 0,
+                        name = dto.name,
+                        imageUri = dto.imageUri,
+                        gridType = dto.gridType,
+                        cellSizePx = dto.cellSizePx,
+                        gridOffsetX = dto.gridOffsetX,
+                        gridOffsetY = dto.gridOffsetY,
+                        gridColorHex = dto.gridColorHex,
+                        gridOpacity = dto.gridOpacity,
+                        scaleFtPerCell = dto.scaleFtPerCell,
+                        diagonalRule = dto.diagonalRule,
+                        sessionId = null,
+                        sceneId = null,
+                        fogOfWarMaskJson = dto.fogOfWarMaskJson,
+                        terrainMaskJson = dto.terrainMaskJson,
+                        areasJson = dto.areasJson,
+                        createdAt = existing?.createdAt ?: System.currentTimeMillis()
+                    )
+                    val mapId = tacticalMapDao.upsertMap(mapEntity)
+                    mapIdMap[dto.id] = mapId
+                    existing?.let { tacticalMapDao.deletePinsByMapId(it.id) }
+                }
+
+                if (backup.tacticalMapPins.isNotEmpty()) {
+                    val jsonSerializer = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+                    backup.tacticalMapPins.forEach { pinDto ->
+                        val newMapId = mapIdMap[pinDto.mapId]
+                        if (newMapId != null) {
+                            val remappedTargetTableId = pinDto.targetTableId?.let { randomTableIdMap[it] ?: it }
+                            val remappedTableLinksJson = try {
+                                val links = jsonSerializer.decodeFromString<List<com.deckapp.core.model.PinTableLink>>(pinDto.tableLinksJson)
+                                val remappedLinks = links.map { link ->
+                                    link.copy(tableId = randomTableIdMap[link.tableId] ?: link.tableId)
+                                }
+                                jsonSerializer.encodeToString(remappedLinks)
+                            } catch (_: Exception) {
+                                pinDto.tableLinksJson
+                            }
+
+                            tacticalMapDao.upsertPin(
+                                TacticalMapPinEntity(
+                                    id = 0,
+                                    mapId = newMapId,
+                                    cellX = pinDto.cellX,
+                                    cellY = pinDto.cellY,
+                                    title = pinDto.title,
+                                    description = pinDto.description,
+                                    iconName = pinDto.iconName,
+                                    colorHex = pinDto.colorHex,
+                                    isSecret = pinDto.isSecret,
+                                    explorationState = pinDto.explorationState,
+                                    targetTableId = remappedTargetTableId,
+                                    targetEncounterId = pinDto.targetEncounterId,
+                                    targetWikiEntryId = pinDto.targetWikiEntryId,
+                                    targetMapId = pinDto.targetMapId?.let { mapIdMap[it] ?: it },
+                                    discoveriesJson = pinDto.discoveriesJson,
+                                    tableLinksJson = remappedTableLinksJson
+                                )
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -252,7 +326,7 @@ class ReferenceRepositoryImpl @Inject constructor(
         backup: com.deckapp.core.model.backup.FullBackupDto,
         packName: String,
         replaceExisting: Boolean
-    ) {
+    ): Map<Long, Long> {
         val randomTableIdMap = mutableMapOf<Long, Long>()
         val writtenTableIds = mutableSetOf<Long>()
         backup.randomTables.forEach { dto ->
@@ -308,6 +382,7 @@ class ReferenceRepositoryImpl @Inject constructor(
                 ))
             }
         }
+        return randomTableIdMap
     }
 
     override suspend fun updateStarterPackArtwork(artwork: com.deckapp.core.model.backup.FullBackupDto, packName: String,
@@ -392,6 +467,14 @@ class ReferenceRepositoryImpl @Inject constructor(
             val tag = db.tagDao().getTagByName(packName)
             if (tag != null) {
                 db.tagDao().deleteTag(tag.id)
+            }
+            val packSlug = packName.lowercase().replace(" ", "_")
+            val tacticalMapDao = db.tacticalMapDao()
+            val packMaps = tacticalMapDao.getAllMapsSync().filter { it.sessionId == null && it.imageUri.contains(packSlug) }
+            packMaps.forEach { map ->
+                tacticalMapDao.deletePinsByMapId(map.id)
+                tacticalMapDao.deleteTokensByMapId(map.id)
+                tacticalMapDao.deleteMap(map.id)
             }
         }
     }

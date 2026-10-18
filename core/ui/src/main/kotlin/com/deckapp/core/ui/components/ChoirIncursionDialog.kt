@@ -41,6 +41,7 @@ fun ChoirIncursionDialog(
     initialSettlement: ChoirSettlement,
     activeCharacter: ChoirCharacter? = null,
     onSave: (ChoirIncursion, ChoirSettlement, ChoirCharacter?) -> Unit,
+    onOpenTacticalMap: (() -> Unit)? = null,
     onDismiss: () -> Unit
 ) {
     var incursion by remember { mutableStateOf(initialIncursion) }
@@ -102,6 +103,14 @@ fun ChoirIncursionDialog(
                         }
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (onOpenTacticalMap != null) {
+                                IconButton(onClick = {
+                                    onDismiss()
+                                    onOpenTacticalMap()
+                                }) {
+                                    Icon(Icons.Default.Map, contentDescription = "Abrir Mapa Táctico", tint = GoldAccent)
+                                }
+                            }
                             IconButton(onClick = onDismiss) {
                                 Icon(Icons.Default.Close, contentDescription = "Cerrar", tint = Color.White)
                             }

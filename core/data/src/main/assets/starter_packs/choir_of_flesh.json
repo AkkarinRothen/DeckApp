@@ -221,6 +221,96 @@
             "sortOrder": 2216,
             "createdAt": 1776300000000,
             "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2217,
+            "name": "Tabla de Botín (Looting)",
+            "category": "Exploración",
+            "description": "Hallazgos y suministros rescatados al saquear las habitaciones del Coro.",
+            "rollFormula": "1d100",
+            "rollMode": "RANGE",
+            "isPinned": true,
+            "sourceType": "STARTER_PACK",
+            "sourceName": "Choir of Flesh",
+            "isBuiltIn": true,
+            "sortOrder": 2217,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2218,
+            "name": "Tabla de Rapiña (Scavenging)",
+            "category": "Exploración",
+            "description": "Búsqueda apresurada de recursos en áreas previamente transitadas.",
+            "rollFormula": "1d20",
+            "rollMode": "RANGE",
+            "isPinned": true,
+            "sourceType": "STARTER_PACK",
+            "sourceName": "Choir of Flesh",
+            "isBuiltIn": true,
+            "sortOrder": 2218,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2219,
+            "name": "Eventos de Asentamiento (Refugio)",
+            "category": "Asentamiento",
+            "description": "Sucesos que sacuden el refugio durante la fase de asentamiento.",
+            "rollFormula": "1d100",
+            "rollMode": "RANGE",
+            "isPinned": true,
+            "sourceType": "STARTER_PACK",
+            "sourceName": "Choir of Flesh",
+            "isBuiltIn": true,
+            "sortOrder": 2219,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2220,
+            "name": "El Precio del Coro",
+            "category": "Magia y Fe",
+            "description": "Consecuencias sobrenaturales y precio del alma al invocar las oraciones del Coro.",
+            "rollFormula": "1d100",
+            "rollMode": "RANGE",
+            "isPinned": true,
+            "sourceType": "STARTER_PACK",
+            "sourceName": "Choir of Flesh",
+            "isBuiltIn": true,
+            "sortOrder": 2220,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2221,
+            "name": "Dones de los Deshechos",
+            "category": "Mutaciones",
+            "description": "Mutaciones biológicas de La Carne Que Alimenta concedidas o impuestas.",
+            "rollFormula": "1d20",
+            "rollMode": "RANGE",
+            "isPinned": true,
+            "sourceType": "STARTER_PACK",
+            "sourceName": "Choir of Flesh",
+            "isBuiltIn": true,
+            "sortOrder": 2221,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
+        },
+        {
+            "id": -2222,
+            "name": "Complicaciones de Escena",
+            "category": "Oráculo",
+            "description": "Giros y complicaciones imprevistas durante la exploración o conflicto.",
+            "rollFormula": "1d6",
+            "rollMode": "RANGE",
+            "isPinned": true,
+            "sourceType": "STARTER_PACK",
+            "sourceName": "Choir of Flesh",
+            "isBuiltIn": true,
+            "sortOrder": 2222,
+            "createdAt": 1776300000000,
+            "sourcePack": "Choir of Flesh"
         }
     ],
     "tableEntries": [
@@ -1476,6 +1566,1383 @@
             "maxRoll": 8,
             "text": "Injerto Parásito: Una boca o tumor con vello queda adherido a tu herida (+1 Mácula de la Carne).",
             "sortOrder": 7
+        },
+        {
+            "id": -5000,
+            "tableId": -2217,
+            "minRoll": 1,
+            "maxRoll": 5,
+            "weight": 1,
+            "text": "D4 Rations: Stale, hard bread and a strip of salted, unidentifiable meat. Barely edible, but it's food.",
+            "sortOrder": 1
+        },
+        {
+            "id": -5001,
+            "tableId": -2217,
+            "minRoll": 6,
+            "maxRoll": 8,
+            "weight": 1,
+            "text": "Tattered Bandages: A roll of linen cloth, stained but usable for staunching a wound in an emergency. Serves as 1x Medical Supplies.",
+            "sortOrder": 6
+        },
+        {
+            "id": -5002,
+            "tableId": -2217,
+            "minRoll": 9,
+            "maxRoll": 10,
+            "weight": 1,
+            "text": "Flint and Steel: A well-used set. The flint is chipped, but it still sparks. A priceless tool for survival.",
+            "sortOrder": 9
+        },
+        {
+            "id": -5003,
+            "tableId": -2217,
+            "minRoll": 11,
+            "maxRoll": 12,
+            "weight": 1,
+            "text": "repairs or as crude caltrops.",
+            "sortOrder": 11
+        },
+        {
+            "id": -5004,
+            "tableId": -2217,
+            "minRoll": 13,
+            "maxRoll": 14,
+            "weight": 1,
+            "text": "A Wooden Bowl and Spoon: A simple, carved set. A small comfort of civilization.",
+            "sortOrder": 13
+        },
+        {
+            "id": -5005,
+            "tableId": -2217,
+            "minRoll": 15,
+            "maxRoll": 16,
+            "weight": 1,
+            "text": "A Half-Empty Waterskin: Contains a few sips of stale, slightly murky water. 17-18 A Whetstone: A smooth, grey stone, essential for keeping a blade from dulling.",
+            "sortOrder": 15
+        },
+        {
+            "id": -5006,
+            "tableId": -2217,
+            "minRoll": 19,
+            "maxRoll": 20,
+            "weight": 1,
+            "text": "A Ball of Twine: About 20 feet of surprisingly strong twine made from nettles.",
+            "sortOrder": 19
+        },
+        {
+            "id": -5007,
+            "tableId": -2217,
+            "minRoll": 21,
+            "maxRoll": 22,
+            "weight": 1,
+            "text": "A Crude Fishing Hook and Line: A bent nail and a length of gut. Might work in a pinch.",
+            "sortOrder": 21
+        },
+        {
+            "id": -5008,
+            "tableId": -2217,
+            "minRoll": 23,
+            "maxRoll": 24,
+            "weight": 1,
+            "text": "A Small, Sharp Knife: A simple utility knife, good for skinning or carving, but not for a real fight.",
+            "sortOrder": 23
+        },
+        {
+            "id": -5009,
+            "tableId": -2217,
+            "minRoll": 25,
+            "maxRoll": 26,
+            "weight": 1,
+            "text": "A Pair of Worn Leather Gloves: Patched and stiff, but they protect the hands from splinters and scrapes.",
+            "sortOrder": 25
+        },
+        {
+            "id": -5010,
+            "tableId": -2217,
+            "minRoll": 27,
+            "maxRoll": 28,
+            "weight": 1,
+            "text": "A Tallow Candle: A stub of a candle that will only burn for an hour at most. 29-30 A Flask of Poor Quality Ale: Watery and sour, but it’s alcohol. Can be used as a disinfectant or a morale booster. 31-32 A Small Pouch of Herbs: Common herbs for tea or seasoning. Might be a mild painkiller.",
+            "sortOrder": 27
+        },
+        {
+            "id": -5011,
+            "tableId": -2217,
+            "minRoll": 33,
+            "maxRoll": 34,
+            "weight": 1,
+            "text": "A Wooden Toy: A roughly carved horse toy that once belonged to a child.",
+            "sortOrder": 33
+        },
+        {
+            "id": -5012,
+            "tableId": -2217,
+            "minRoll": 35,
+            "maxRoll": 36,
+            "weight": 1,
+            "text": "A Tarnished Silver Coin: Worthless as currency now, but its weight is a reminder of order and society.",
+            "sortOrder": 35
+        },
+        {
+            "id": -5013,
+            "tableId": -2217,
+            "minRoll": 37,
+            "maxRoll": 38,
+            "weight": 1,
+            "text": "A Lock of Hair: Tied with a faded ribbon and kept in a small leather pouch. 39-40 A Broken Locket: The hinge is broken and the portrait inside is missing, leaving only a ghostly outline.",
+            "sortOrder": 37
+        },
+        {
+            "id": -5014,
+            "tableId": -2217,
+            "minRoll": 41,
+            "maxRoll": 42,
+            "weight": 1,
+            "text": "A Set of Knucklebones: Four small, polished animal bones used for a simple gambling game.",
+            "sortOrder": 41
+        },
+        {
+            "id": -5015,
+            "tableId": -2217,
+            "minRoll": 43,
+            "maxRoll": 44,
+            "weight": 1,
+            "text": "A Page Torn from a Book: A single page of dense, philosophical text, now mostly meaningless.",
+            "sortOrder": 43
+        },
+        {
+            "id": -5016,
+            "tableId": -2217,
+            "minRoll": 45,
+            "maxRoll": 46,
+            "weight": 1,
+            "text": "A Pressed, Scentless Flower: A fragile, faded bloom kept between two pieces of wood.",
+            "sortOrder": 45
+        },
+        {
+            "id": -5017,
+            "tableId": -2217,
+            "minRoll": 47,
+            "maxRoll": 48,
+            "weight": 1,
+            "text": "A Key: A heavy iron key, rusted and ornate.",
+            "sortOrder": 47
+        },
+        {
+            "id": -5018,
+            "tableId": -2217,
+            "minRoll": 49,
+            "maxRoll": 50,
+            "weight": 1,
+            "text": "A Half-Written Letter: A letter to a loved one, ending abruptly mid-sentence.",
+            "sortOrder": 49
+        },
+        {
+            "id": -5019,
+            "tableId": -2217,
+            "minRoll": 51,
+            "maxRoll": 52,
+            "weight": 1,
+            "text": "A Small Pouch of Salt: Invaluable for preserving food or adding flavor to a miserable meal.",
+            "sortOrder": 51
+        },
+        {
+            "id": -5020,
+            "tableId": -2217,
+            "minRoll": 53,
+            "maxRoll": 54,
+            "weight": 1,
+            "text": "A Rag Doll: Stuffed with straw, missing one button eye.",
+            "sortOrder": 53
+        },
+        {
+            "id": -5021,
+            "tableId": -2217,
+            "minRoll": 55,
+            "maxRoll": 60,
+            "weight": 1,
+            "text": "A wondrous item. Roll on the Artifacts table.",
+            "sortOrder": 55
+        },
+        {
+            "id": -5022,
+            "tableId": -2217,
+            "minRoll": 71,
+            "maxRoll": 80,
+            "weight": 1,
+            "text": "A weapon. Roll on the Random Weapons table.",
+            "sortOrder": 71
+        },
+        {
+            "id": -5023,
+            "tableId": -2217,
+            "minRoll": 81,
+            "maxRoll": 90,
+            "weight": 1,
+            "text": "An armor. Roll on the Random Armor table.",
+            "sortOrder": 81
+        },
+        {
+            "id": -5024,
+            "tableId": -2217,
+            "minRoll": 91,
+            "maxRoll": 100,
+            "weight": 1,
+            "text": "Some useful gear. Roll on the Random Gear table.",
+            "sortOrder": 91
+        },
+        {
+            "id": -5025,
+            "tableId": -2218,
+            "minRoll": 1,
+            "maxRoll": 1,
+            "weight": 1,
+            "text": "Nothing of value.",
+            "sortOrder": 1
+        },
+        {
+            "id": -5026,
+            "tableId": -2218,
+            "minRoll": 2,
+            "maxRoll": 2,
+            "weight": 1,
+            "text": "D4☈",
+            "sortOrder": 2
+        },
+        {
+            "id": -5027,
+            "tableId": -2218,
+            "minRoll": 3,
+            "maxRoll": 5,
+            "weight": 1,
+            "text": "Random weapon.",
+            "sortOrder": 3
+        },
+        {
+            "id": -5028,
+            "tableId": -2218,
+            "minRoll": 7,
+            "maxRoll": 8,
+            "weight": 1,
+            "text": "Random armor.",
+            "sortOrder": 7
+        },
+        {
+            "id": -5029,
+            "tableId": -2218,
+            "minRoll": 10,
+            "maxRoll": 14,
+            "weight": 1,
+            "text": "Random piece of gear.",
+            "sortOrder": 10
+        },
+        {
+            "id": -5030,
+            "tableId": -2218,
+            "minRoll": 15,
+            "maxRoll": 15,
+            "weight": 1,
+            "text": "1x Seed of Flesh.",
+            "sortOrder": 15
+        },
+        {
+            "id": -5031,
+            "tableId": -2218,
+            "minRoll": 16,
+            "maxRoll": 18,
+            "weight": 1,
+            "text": "D4 Resources. Roll on the Resources table once (page 208).",
+            "sortOrder": 16
+        },
+        {
+            "id": -5032,
+            "tableId": -2218,
+            "minRoll": 19,
+            "maxRoll": 20,
+            "weight": 1,
+            "text": "A wondrous item. Roll on the Artifacts table. Random Weapon",
+            "sortOrder": 19
+        },
+        {
+            "id": -5033,
+            "tableId": -2218,
+            "minRoll": 1,
+            "maxRoll": 8,
+            "weight": 1,
+            "text": "Arming Sword",
+            "sortOrder": 1
+        },
+        {
+            "id": -5034,
+            "tableId": -2218,
+            "minRoll": 9,
+            "maxRoll": 16,
+            "weight": 1,
+            "text": "Crossbow",
+            "sortOrder": 9
+        },
+        {
+            "id": -5035,
+            "tableId": -2218,
+            "minRoll": 17,
+            "maxRoll": 23,
+            "weight": 1,
+            "text": "Dagger",
+            "sortOrder": 17
+        },
+        {
+            "id": -5036,
+            "tableId": -2218,
+            "minRoll": 24,
+            "maxRoll": 30,
+            "weight": 1,
+            "text": "Dane Axe",
+            "sortOrder": 24
+        },
+        {
+            "id": -5037,
+            "tableId": -2218,
+            "minRoll": 31,
+            "maxRoll": 37,
+            "weight": 1,
+            "text": "Falchion",
+            "sortOrder": 31
+        },
+        {
+            "id": -5038,
+            "tableId": -2218,
+            "minRoll": 38,
+            "maxRoll": 44,
+            "weight": 1,
+            "text": "Flail",
+            "sortOrder": 38
+        },
+        {
+            "id": -5039,
+            "tableId": -2218,
+            "minRoll": 45,
+            "maxRoll": 51,
+            "weight": 1,
+            "text": "Greatsword",
+            "sortOrder": 45
+        },
+        {
+            "id": -5040,
+            "tableId": -2218,
+            "minRoll": 52,
+            "maxRoll": 58,
+            "weight": 1,
+            "text": "Longbow",
+            "sortOrder": 52
+        },
+        {
+            "id": -5041,
+            "tableId": -2218,
+            "minRoll": 59,
+            "maxRoll": 65,
+            "weight": 1,
+            "text": "Mace",
+            "sortOrder": 59
+        },
+        {
+            "id": -5042,
+            "tableId": -2218,
+            "minRoll": 66,
+            "maxRoll": 72,
+            "weight": 1,
+            "text": "Maul",
+            "sortOrder": 66
+        },
+        {
+            "id": -5043,
+            "tableId": -2218,
+            "minRoll": 73,
+            "maxRoll": 79,
+            "weight": 1,
+            "text": "Quarterstaff",
+            "sortOrder": 73
+        },
+        {
+            "id": -5044,
+            "tableId": -2218,
+            "minRoll": 80,
+            "maxRoll": 86,
+            "weight": 1,
+            "text": "Sling",
+            "sortOrder": 80
+        },
+        {
+            "id": -5045,
+            "tableId": -2218,
+            "minRoll": 87,
+            "maxRoll": 93,
+            "weight": 1,
+            "text": "Spear",
+            "sortOrder": 87
+        },
+        {
+            "id": -5046,
+            "tableId": -2218,
+            "minRoll": 94,
+            "maxRoll": 100,
+            "weight": 1,
+            "text": "Throwing Knife Random Gear Random Gear",
+            "sortOrder": 94
+        },
+        {
+            "id": -5047,
+            "tableId": -2218,
+            "minRoll": 1,
+            "maxRoll": 5,
+            "weight": 1,
+            "text": "Backpack",
+            "sortOrder": 1
+        },
+        {
+            "id": -5048,
+            "tableId": -2218,
+            "minRoll": 56,
+            "maxRoll": 60,
+            "weight": 1,
+            "text": "Lamp",
+            "sortOrder": 56
+        },
+        {
+            "id": -5049,
+            "tableId": -2218,
+            "minRoll": 6,
+            "maxRoll": 10,
+            "weight": 1,
+            "text": "Bedroll",
+            "sortOrder": 6
+        },
+        {
+            "id": -5050,
+            "tableId": -2218,
+            "minRoll": 61,
+            "maxRoll": 64,
+            "weight": 1,
+            "text": "Lamp Oil",
+            "sortOrder": 61
+        },
+        {
+            "id": -5051,
+            "tableId": -2218,
+            "minRoll": 11,
+            "maxRoll": 15,
+            "weight": 1,
+            "text": "Bullet Purse",
+            "sortOrder": 11
+        },
+        {
+            "id": -5052,
+            "tableId": -2218,
+            "minRoll": 65,
+            "maxRoll": 68,
+            "weight": 1,
+            "text": "Medical Supplies",
+            "sortOrder": 65
+        },
+        {
+            "id": -5053,
+            "tableId": -2218,
+            "minRoll": 16,
+            "maxRoll": 20,
+            "weight": 1,
+            "text": "Candle",
+            "sortOrder": 16
+        },
+        {
+            "id": -5054,
+            "tableId": -2218,
+            "minRoll": 69,
+            "maxRoll": 72,
+            "weight": 1,
+            "text": "Net",
+            "sortOrder": 69
+        },
+        {
+            "id": -5055,
+            "tableId": -2218,
+            "minRoll": 21,
+            "maxRoll": 25,
+            "weight": 1,
+            "text": "Chain",
+            "sortOrder": 21
+        },
+        {
+            "id": -5056,
+            "tableId": -2218,
+            "minRoll": 73,
+            "maxRoll": 76,
+            "weight": 1,
+            "text": "Quiver",
+            "sortOrder": 73
+        },
+        {
+            "id": -5057,
+            "tableId": -2218,
+            "minRoll": 26,
+            "maxRoll": 30,
+            "weight": 1,
+            "text": "Clothing (new)",
+            "sortOrder": 26
+        },
+        {
+            "id": -5058,
+            "tableId": -2218,
+            "minRoll": 77,
+            "maxRoll": 80,
+            "weight": 1,
+            "text": "Rope",
+            "sortOrder": 77
+        },
+        {
+            "id": -5059,
+            "tableId": -2218,
+            "minRoll": 31,
+            "maxRoll": 35,
+            "weight": 1,
+            "text": "Clothing (used and ragged)",
+            "sortOrder": 31
+        },
+        {
+            "id": -5060,
+            "tableId": -2218,
+            "minRoll": 81,
+            "maxRoll": 84,
+            "weight": 1,
+            "text": "Sack",
+            "sortOrder": 81
+        },
+        {
+            "id": -5061,
+            "tableId": -2218,
+            "minRoll": 36,
+            "maxRoll": 40,
+            "weight": 1,
+            "text": "Crowbar",
+            "sortOrder": 36
+        },
+        {
+            "id": -5062,
+            "tableId": -2218,
+            "minRoll": 85,
+            "maxRoll": 88,
+            "weight": 1,
+            "text": "Tent",
+            "sortOrder": 85
+        },
+        {
+            "id": -5063,
+            "tableId": -2218,
+            "minRoll": 41,
+            "maxRoll": 45,
+            "weight": 1,
+            "text": "Flask (empty)",
+            "sortOrder": 41
+        },
+        {
+            "id": -5064,
+            "tableId": -2218,
+            "minRoll": 89,
+            "maxRoll": 92,
+            "weight": 1,
+            "text": "Thieves’ Tools",
+            "sortOrder": 89
+        },
+        {
+            "id": -5065,
+            "tableId": -2218,
+            "minRoll": 46,
+            "maxRoll": 50,
+            "weight": 1,
+            "text": "Flint & Steel",
+            "sortOrder": 46
+        },
+        {
+            "id": -5066,
+            "tableId": -2218,
+            "minRoll": 93,
+            "maxRoll": 96,
+            "weight": 1,
+            "text": "Torch",
+            "sortOrder": 93
+        },
+        {
+            "id": -5067,
+            "tableId": -2218,
+            "minRoll": 51,
+            "maxRoll": 55,
+            "weight": 1,
+            "text": "Grappling Hook",
+            "sortOrder": 51
+        },
+        {
+            "id": -5068,
+            "tableId": -2218,
+            "minRoll": 97,
+            "maxRoll": 100,
+            "weight": 1,
+            "text": "Waterskin Random Armor",
+            "sortOrder": 97
+        },
+        {
+            "id": -5069,
+            "tableId": -2218,
+            "minRoll": 1,
+            "maxRoll": 15,
+            "weight": 1,
+            "text": "Chainmail",
+            "sortOrder": 1
+        },
+        {
+            "id": -5070,
+            "tableId": -2218,
+            "minRoll": 16,
+            "maxRoll": 30,
+            "weight": 1,
+            "text": "Gambeson",
+            "sortOrder": 16
+        },
+        {
+            "id": -5071,
+            "tableId": -2218,
+            "minRoll": 31,
+            "maxRoll": 44,
+            "weight": 1,
+            "text": "Heavy Shield",
+            "sortOrder": 31
+        },
+        {
+            "id": -5072,
+            "tableId": -2218,
+            "minRoll": 45,
+            "maxRoll": 58,
+            "weight": 1,
+            "text": "Leather Cap",
+            "sortOrder": 45
+        },
+        {
+            "id": -5073,
+            "tableId": -2218,
+            "minRoll": 59,
+            "maxRoll": 72,
+            "weight": 1,
+            "text": "Light Shield",
+            "sortOrder": 59
+        },
+        {
+            "id": -5074,
+            "tableId": -2218,
+            "minRoll": 73,
+            "maxRoll": 86,
+            "weight": 1,
+            "text": "Scale Armor",
+            "sortOrder": 73
+        },
+        {
+            "id": -5075,
+            "tableId": -2218,
+            "minRoll": 87,
+            "maxRoll": 100,
+            "weight": 1,
+            "text": "Spangenhelm D4 Artifacts",
+            "sortOrder": 87
+        },
+        {
+            "id": -5076,
+            "tableId": -2218,
+            "minRoll": 1,
+            "maxRoll": 1,
+            "weight": 1,
+            "text": "A Masterwork weapon. Roll on the Random Weapons table to determine which type of weapon it is.",
+            "sortOrder": 1
+        },
+        {
+            "id": -5077,
+            "tableId": -2218,
+            "minRoll": 2,
+            "maxRoll": 2,
+            "weight": 1,
+            "text": "A Masterwork armor. Roll on the Random Armor table to determine which type of armor it is.",
+            "sortOrder": 2
+        },
+        {
+            "id": -5078,
+            "tableId": -2218,
+            "minRoll": 3,
+            "maxRoll": 3,
+            "weight": 1,
+            "text": "A vestige of the old religion. Generate a Relic.",
+            "sortOrder": 3
+        },
+        {
+            "id": -5079,
+            "tableId": -2218,
+            "minRoll": 4,
+            "maxRoll": 4,
+            "weight": 1,
+            "text": "An Apocalyptic Item. Roll on the Apocalyptic Items table.",
+            "sortOrder": 4
+        },
+        {
+            "id": -5080,
+            "tableId": -2219,
+            "minRoll": 1,
+            "maxRoll": 10,
+            "weight": 1,
+            "text": "Attack! Either a group of Penitents or Unmade have discovered your settlement, or maybe even just a group of organized scavengers.",
+            "sortOrder": 1
+        },
+        {
+            "id": -5081,
+            "tableId": -2219,
+            "minRoll": 11,
+            "maxRoll": 15,
+            "weight": 1,
+            "text": "The Flesh writhes, causing the ground to shift and shake violently. A random improvement is damaged, making it unavailable for D4 months.",
+            "sortOrder": 11
+        },
+        {
+            "id": -5082,
+            "tableId": -2219,
+            "minRoll": 16,
+            "maxRoll": 20,
+            "weight": 1,
+            "text": "For a week, a distant chanting is audible. It never gets closer, but sleep is difficult, driving people away. -1 Population. Every PC must make an Average WIL check or gain 1 Anguish.",
+            "sortOrder": 16
+        },
+        {
+            "id": -5083,
+            "tableId": -2219,
+            "minRoll": 21,
+            "maxRoll": 25,
+            "weight": 1,
+            "text": "An Unmade has somehow infiltrated your settlement, devouring D6 Food before it was taken down.",
+            "sortOrder": 21
+        },
+        {
+            "id": -5084,
+            "tableId": -2219,
+            "minRoll": 26,
+            "maxRoll": 30,
+            "weight": 1,
+            "text": "A strange, rust-colored mold appears on food stores: -D4 Food. An Average survival (INT) check is needed to purge it; failure means it will consume another 2 Food next Settlement Phase.",
+            "sortOrder": 26
+        },
+        {
+            "id": -5085,
+            "tableId": -2219,
+            "minRoll": 31,
+            "maxRoll": 35,
+            "weight": 1,
+            "text": "An NPC begins having vivid, terrifying visions. The community is divided. Are they blessed or mad? This creates a new factional conflict: -1 Population, +2 Renown.",
+            "sortOrder": 31
+        },
+        {
+            "id": -5086,
+            "tableId": -2219,
+            "minRoll": 36,
+            "maxRoll": 40,
+            "weight": 1,
+            "text": "A mundane but debilitating sickness sweeps through the camp. -D4 population. PCs must make an Average CON check or suffer the Sickened (2) Condition for a week on all STR checks.",
+            "sortOrder": 36
+        },
+        {
+            "id": -5087,
+            "tableId": -2219,
+            "minRoll": 41,
+            "maxRoll": 45,
+            "weight": 1,
+            "text": "A lone, enigmatic stranger arrives. They ask for nothing but a place to rest. They might be a powerful ally, a harbinger of doom, or something else entirely. Settlement Events (Continued)",
+            "sortOrder": 41
+        },
+        {
+            "id": -5088,
+            "tableId": -2219,
+            "minRoll": 46,
+            "maxRoll": 50,
+            "weight": 1,
+            "text": "A small group of D6 survivors stumbles into your haven, starving and terrified. They plead for sanctuary. Accepting them adds to your Population and increases your Renown by +5. Refusing them causes +D4 Discontent. 51-55 For an unexplained reason, the horrors of the world seem distant. The air is still, the sky is clear.",
+            "sortOrder": 46
+        },
+        {
+            "id": -5089,
+            "tableId": -2219,
+            "minRoll": 56,
+            "maxRoll": 60,
+            "weight": 1,
+            "text": "While digging new latrines or expanding a cellar, someone finds a hidden cache from the old world. Gain D4 Treasure and make a roll on the Scavenging table.",
+            "sortOrder": 56
+        },
+        {
+            "id": -5090,
+            "tableId": -2219,
+            "minRoll": 61,
+            "maxRoll": 64,
+            "weight": 1,
+            "text": "A baby is born in the settlement, a powerful symbol of a future that might exist. +5 Renown. However, the child bears a strange birthmark, a Stigmata of the Flesh or a sign of the Choir’s “perfection”. The community is filled with both hope and fear.",
+            "sortOrder": 61
+        },
+        {
+            "id": -5091,
+            "tableId": -2219,
+            "minRoll": 65,
+            "maxRoll": 68,
+            "weight": 1,
+            "text": "Two prominent NPCs have a bitter falling out over a key decision (resource allocation, defense strategy). You must mediate. Failure to resolve it results in -1 Population, as the settlement divides its loyalty.",
+            "sortOrder": 65
+        },
+        {
+            "id": -5092,
+            "tableId": -2219,
+            "minRoll": 69,
+            "maxRoll": 72,
+            "weight": 1,
+            "text": "A powerful, mutated beast (a Hard creature) claims the territory near the settlement as its hunting ground, preying on scavengers and lookouts. It must be dealt with.",
+            "sortOrder": 69
+        },
+        {
+            "id": -5093,
+            "tableId": -2219,
+            "minRoll": 73,
+            "maxRoll": 76,
+            "weight": 1,
+            "text": "A scavenger party returns with a relic of the old world—a book of poetry, a child's toy, a musical instrument. It reminds everyone of what was lost. +D4 Humanity.",
+            "sortOrder": 73
+        },
+        {
+            "id": -5094,
+            "tableId": -2219,
+            "minRoll": 77,
+            "maxRoll": 80,
+            "weight": 1,
+            "text": "A nearby source of a vital resource is found (a grove of edible mushrooms, a stream that runs clear, a patch of wild herbs). +1 Food and Water for D4 Settlement Phases.",
+            "sortOrder": 77
+        },
+        {
+            "id": -5095,
+            "tableId": -2219,
+            "minRoll": 81,
+            "maxRoll": 84,
+            "weight": 1,
+            "text": "A section of the settlement collapses due to erosion or poor construction. A random improvement is destroyed.",
+            "sortOrder": 81
+        },
+        {
+            "id": -5096,
+            "tableId": -2219,
+            "minRoll": 85,
+            "maxRoll": 88,
+            "weight": 1,
+            "text": "A strange, oily black rain falls for three days. It is not immediately harmful, but it poisons the earth. Food & water improvements stop producing for the next Settlement Phase.",
+            "sortOrder": 85
+        },
+        {
+            "id": -5097,
+            "tableId": -2219,
+            "minRoll": 89,
+            "maxRoll": 92,
+            "weight": 1,
+            "text": "A citizen discovers what appears to be a holy relic: the finger bone of a saint, a tear-stained icon, a splinter of the Cross. It emanates a palpable aura of peace. While it is in the settlement, +10 Renown. However, its power may attract the attention of the Choir.",
+            "sortOrder": 89
+        },
+        {
+            "id": -5098,
+            "tableId": -2219,
+            "minRoll": 93,
+            "maxRoll": 96,
+            "weight": 1,
+            "text": "Inspired by necessity, the community works together to solve a lingering problem: a broken piece of equipment is repaired, a new defensive tactic is devised, or a social rift is mended. +5 Renown.",
+            "sortOrder": 93
+        },
+        {
+            "id": -5099,
+            "tableId": -2219,
+            "minRoll": 97,
+            "maxRoll": 100,
+            "weight": 1,
+            "text": "For one full day, the world falls utterly silent. No wind, no birdsong, no distant screams. Even the Choir’s ever-present hum vanishes. The silence is absolute and terrifying. Every PC and NPC must make a Hard WIL check. On a success, the clarity is profound; they lose D4 Anguish. On a failure, the emptiness is maddening; they gain D4 Anguish.",
+            "sortOrder": 97
+        },
+        {
+            "id": -5100,
+            "tableId": -2220,
+            "minRoll": 1,
+            "maxRoll": 4,
+            "weight": 1,
+            "text": "For the next hour, you hear faint, angelic chimes at the edge of hearing, and all food and drink tastes of ash and communion wine.",
+            "sortOrder": 1
+        },
+        {
+            "id": -5101,
+            "tableId": -2220,
+            "minRoll": 5,
+            "maxRoll": 8,
+            "weight": 1,
+            "text": "Painless wounds weep sweet-smelling oil from your palms for the next hour before vanishing. You gain 1 Anguish.",
+            "sortOrder": 5
+        },
+        {
+            "id": -5102,
+            "tableId": -2220,
+            "minRoll": 9,
+            "maxRoll": 12,
+            "weight": 1,
+            "text": "A faint, multi-layered harmony now accompanies your voice. You suffer a -1 Burden to all stealth-related checks until your next rest.",
+            "sortOrder": 9
+        },
+        {
+            "id": -5103,
+            "tableId": -2220,
+            "minRoll": 13,
+            "maxRoll": 16,
+            "weight": 1,
+            "text": "You feel as though you are being watched by a thousand unseen eyes. You gain +2 Anguish.",
+            "sortOrder": 13
+        },
+        {
+            "id": -5104,
+            "tableId": -2220,
+            "minRoll": 17,
+            "maxRoll": 20,
+            "weight": 1,
+            "text": "The prayer gnaws at your sense of self. Lose 1 Humanity.",
+            "sortOrder": 17
+        },
+        {
+            "id": -5105,
+            "tableId": -2220,
+            "minRoll": 21,
+            "maxRoll": 24,
+            "weight": 1,
+            "text": "Your mind is flooded with a chorus of angelical voices. You are Stunned (2).",
+            "sortOrder": 21
+        },
+        {
+            "id": -5106,
+            "tableId": -2220,
+            "minRoll": 25,
+            "maxRoll": 28,
+            "weight": 1,
+            "text": "God’s eyes are upon you, only for a fleeting instant, but enough to cause you Burning.",
+            "sortOrder": 25
+        },
+        {
+            "id": -5107,
+            "tableId": -2220,
+            "minRoll": 29,
+            "maxRoll": 32,
+            "weight": 1,
+            "text": "The miracle is tainted by a glimpse of the Choir’s true form. You must roll on the Breakdown table (page 49).",
+            "sortOrder": 29
+        },
+        {
+            "id": -5108,
+            "tableId": -2220,
+            "minRoll": 33,
+            "maxRoll": 36,
+            "weight": 1,
+            "text": "For the next 24 hours, you cry tiny, sharp shards of colored glass that cause you to gain +1 Trauma.",
+            "sortOrder": 33
+        },
+        {
+            "id": -5109,
+            "tableId": -2220,
+            "minRoll": 37,
+            "maxRoll": 40,
+            "weight": 1,
+            "text": "Your prayer is answered, but one of your mundane possessions (chosen randomly), perhaps even your Shard of the Old World, crumbles to dust.",
+            "sortOrder": 37
+        },
+        {
+            "id": -5110,
+            "tableId": -2220,
+            "minRoll": 41,
+            "maxRoll": 44,
+            "weight": 1,
+            "text": "The Choir overwrites one of your memories with a memory of a perfect, celestial city. You gain D4 Anguish.",
+            "sortOrder": 41
+        },
+        {
+            "id": -5111,
+            "tableId": -2220,
+            "minRoll": 45,
+            "maxRoll": 48,
+            "weight": 1,
+            "text": "A somewhat large (20 cm), random patch of your skin becomes unnaturally smooth, white, and cold, like polished marble. It is numb and cannot be harmed, but you lose all sensation in that area. If this effect happens multiple times, it will always be a different patch of skin.",
+            "sortOrder": 45
+        },
+        {
+            "id": -5112,
+            "tableId": -2220,
+            "minRoll": 49,
+            "maxRoll": 52,
+            "weight": 1,
+            "text": "A flash of impossible light erupts from your body in a Burst 1. All creatures in the area (including you) are Blinded.",
+            "sortOrder": 49
+        },
+        {
+            "id": -5113,
+            "tableId": -2220,
+            "minRoll": 53,
+            "maxRoll": 56,
+            "weight": 1,
+            "text": "Your body vibrates with the Choir’s hymn. You suffer 2 Minor Injuries as your organs bleed.",
+            "sortOrder": 53
+        },
+        {
+            "id": -5114,
+            "tableId": -2220,
+            "minRoll": 57,
+            "maxRoll": 60,
+            "weight": 1,
+            "text": "The Choir finds your mortal essence distasteful but necessary fuel. Lose D4 Humanity.",
+            "sortOrder": 57
+        },
+        {
+            "id": -5115,
+            "tableId": -2220,
+            "minRoll": 61,
+            "maxRoll": 64,
+            "weight": 1,
+            "text": "An old scar vanishes, a missing tooth regrows, or a minor ailment is cured without your consent. Your body is altered against your will; gain 2 additional Anguish and lose 1 Humanity.",
+            "sortOrder": 61
+        },
+        {
+            "id": -5116,
+            "tableId": -2220,
+            "minRoll": 65,
+            "maxRoll": 68,
+            "weight": 1,
+            "text": "The prayer is answered, but you gain D4+2 Anguish. The Choir’s Price (Continued)",
+            "sortOrder": 65
+        },
+        {
+            "id": -5117,
+            "tableId": -2220,
+            "minRoll": 69,
+            "maxRoll": 72,
+            "weight": 1,
+            "text": "The prayer succeeds, but a random ally within sight suffers an identical Price from this table (roll again, ignoring results 69 and higher).",
+            "sortOrder": 69
+        },
+        {
+            "id": -5118,
+            "tableId": -2220,
+            "minRoll": 73,
+            "maxRoll": 76,
+            "weight": 1,
+            "text": "You don’t just hear the Choir; you understand a piece of it. You immediately gain D4 Rumors, but you also gain a permanent point of Anguish.",
+            "sortOrder": 73
+        },
+        {
+            "id": -5119,
+            "tableId": -2220,
+            "minRoll": 77,
+            "maxRoll": 80,
+            "weight": 1,
+            "text": "A new mouth splits open on your neck or torso. It constantly whispers verses from the Choir’s hymn in a language you don’t understand. You have Disadvantage on all PRE checks. This is permanent.",
+            "sortOrder": 77
+        },
+        {
+            "id": -5120,
+            "tableId": -2220,
+            "minRoll": 81,
+            "maxRoll": 84,
+            "weight": 1,
+            "text": "The prayer acts as a sonic beacon. You are immediately attacked by a Hard Choir creature.",
+            "sortOrder": 81
+        },
+        {
+            "id": -5121,
+            "tableId": -2220,
+            "minRoll": 85,
+            "maxRoll": 88,
+            "weight": 1,
+            "text": "One of your arms or legs (determined randomly) is “perfected”, transforming into a useless but beautiful porcelain version of it. You gain the “Missing Limb” Drawback and 2 Trauma.",
+            "sortOrder": 85
+        },
+        {
+            "id": -5122,
+            "tableId": -2220,
+            "minRoll": 89,
+            "maxRoll": 92,
+            "weight": 1,
+            "text": "The prayer has the exact opposite of its intended effect. A healing prayer causes a Major Injury. An attack prayer heals the target. A prayer for safety creates a new hazard.",
+            "sortOrder": 89
+        },
+        {
+            "id": -5123,
+            "tableId": -2220,
+            "minRoll": 93,
+            "maxRoll": 96,
+            "weight": 1,
+            "text": "The prayer is answered, but its power splashes onto those nearby. All allies within a Blast 2 area must make an Average WIL check or lose 2 Humanity.",
+            "sortOrder": 93
+        },
+        {
+            "id": -5124,
+            "tableId": -2220,
+            "minRoll": 97,
+            "maxRoll": 99,
+            "weight": 1,
+            "text": "You are momentarily pulled into the Choir’s Embrace, disappearing for 1 round. You return afterwards, but the experience shatters your mortal mind. Lose D4+1 Humanity and gain D8 Anguish. You must also roll on the Trauma table.",
+            "sortOrder": 97
+        },
+        {
+            "id": -5125,
+            "tableId": -2220,
+            "minRoll": 100,
+            "maxRoll": 100,
+            "weight": 1,
+            "text": "Your prayer is answered with overwhelming force, and you are deemed worthy of ascension. Your mind is filled with the glory of the Choir’s song as your body is reshaped. Your character becomes a Penitent NPC under the GM’s control.",
+            "sortOrder": 100
+        },
+        {
+            "id": -5126,
+            "tableId": -2221,
+            "minRoll": 1,
+            "maxRoll": 1,
+            "weight": 1,
+            "text": "Tendinous Lasher: One of your arms elongates into a whip-like tendon tipped with a shard of bone. You can make melee attacks with it up to 2 squares away that adds +2 Mastery to your attack rolls and deals Slashing damage.",
+            "sortOrder": 1
+        },
+        {
+            "id": -5127,
+            "tableId": -2221,
+            "minRoll": 2,
+            "maxRoll": 2,
+            "weight": 1,
+            "text": "Chitinous Plates: Thick, bony plates erupt from your skin, forming a partial carapace. You gain a permanent +1 DR.",
+            "sortOrder": 2
+        },
+        {
+            "id": -5128,
+            "tableId": -2221,
+            "minRoll": 3,
+            "maxRoll": 3,
+            "weight": 1,
+            "text": "Caustic Spittle: As a Standard Action you can vomit a stream of digestive acid at a target within 3 squares. This is a ranged attack that deals Corrosive damage and inflicts the Burning condition on a successful hit. You can use this once per combat.",
+            "sortOrder": 3
+        },
+        {
+            "id": -5129,
+            "tableId": -2221,
+            "minRoll": 4,
+            "maxRoll": 4,
+            "weight": 1,
+            "text": "Hyper-Adrenal Gland: A pulsating tumor grows on your neck or back. Once per day, you can trigger it to gain an extra Standard Action on your turn.",
+            "sortOrder": 4
+        },
+        {
+            "id": -5130,
+            "tableId": -2221,
+            "minRoll": 5,
+            "maxRoll": 5,
+            "weight": 1,
+            "text": "Amorphous Flesh: Your bone structure becomes partially fluid. You can move through spaces as small as a quarter of your normal size without penalty. You gain a +2 Mastery on any check made to escape grapples or bonds.",
+            "sortOrder": 5
+        },
+        {
+            "id": -5131,
+            "tableId": -2221,
+            "minRoll": 6,
+            "maxRoll": 6,
+            "weight": 1,
+            "text": "Grasping Pseudopod: A thick, boneless tendril emerges from your torso. It can hold items, open doors, or manipulate objects as a third limb, though it is too clumsy for fine tasks like writing or wielding a weapon effectively.",
+            "sortOrder": 6
+        },
+        {
+            "id": -5132,
+            "tableId": -2221,
+            "minRoll": 7,
+            "maxRoll": 7,
+            "weight": 1,
+            "text": "Marrow Spikes: Your bones perpetually grow and break through your skin. As a Free Action, you can extend or retract sharp bone spikes from your knuckles and elbows. Your unarmed attacks now deal an additional Minor Injury every time you strike.",
+            "sortOrder": 7
+        },
+        {
+            "id": -5133,
+            "tableId": -2221,
+            "minRoll": 8,
+            "maxRoll": 8,
+            "weight": 1,
+            "text": "Ceaseless Regeneration: Your flesh crawls and reforms constantly. At the start of your turn, you automatically heal 1 Minor Injury. This cannot heal Major Injuries.",
+            "sortOrder": 8
+        },
+        {
+            "id": -5134,
+            "tableId": -2221,
+            "minRoll": 9,
+            "maxRoll": 9,
+            "weight": 1,
+            "text": "Cluster Eyes: A patch of your skin grows a cluster of twitching, unblinking eyes. You can see in dim light as if it were bright light, and you cannot be surprised by attacks from behind. Blessings of The Flesh Unlike the Choir, which offers its “gifts” in response to prayers, the Flesh That Feeds does not listen. It is a crawling, wordless hunger that dissolves everything into pulp. Those unfortunate enough to earn its blessing must offer a piece of themselves to the Abyss and embrace dissolution as a form of salvation. A player can choose to perform an Act of Apostasy. This requires a moment of intense, personal ritual where the character willfully mutilates themselves, immediately suffering 1 Major Injury, and consuming a Seed of Flesh. These grotesque items that appear as small, pulsating sacks, can be found wherever the Flesh rules. Performing an Act of Apostasy causes the character to immediately lose D4 HUM. Upon paying this price, the character is granted a Blessing of the Flesh. They must roll once on the Gifts of the Unmade table and once on the Stigmata of the Abyss table. The results are permanent. - 71 - Core Rules Gifts of the Unmade (Continued)",
+            "sortOrder": 9
+        },
+        {
+            "id": -5135,
+            "tableId": -2221,
+            "minRoll": 10,
+            "maxRoll": 10,
+            "weight": 1,
+            "text": "The Hunger Within: You have a gaping, fanged maw on your stomach or palm. As a melee attack, you can bite a target. If the attack hits, they are Poisoned.",
+            "sortOrder": 10
+        },
+        {
+            "id": -5136,
+            "tableId": -2221,
+            "minRoll": 11,
+            "maxRoll": 11,
+            "weight": 1,
+            "text": "Solvent Touch: Your hands secrete a powerful enzyme. By concentrating for one minute while in physical contact, you can dissolve a 5 x 5 inches section of non- living organic material (wood, leather, rope). This cannot be used on creatures.",
+            "sortOrder": 11
+        },
+        {
+            "id": -5137,
+            "tableId": -2221,
+            "minRoll": 12,
+            "maxRoll": 12,
+            "weight": 1,
+            "text": "Barbed Hide: Your skin is covered in sharp, backward-facing barbs. Any creature that hits you with an unarmed or natural weapon attack suffers 1 Minor Injury.",
+            "sortOrder": 12
+        },
+        {
+            "id": -5138,
+            "tableId": -2221,
+            "minRoll": 13,
+            "maxRoll": 13,
+            "weight": 1,
+            "text": "Corpulent Storage: Your torso becomes a hollow, fleshy cavity. You gain 5 extra inventory slots, but any items stored within are covered in a thick, foul-smelling slime when retrieved.",
+            "sortOrder": 13
+        },
+        {
+            "id": -5139,
+            "tableId": -2221,
+            "minRoll": 14,
+            "maxRoll": 14,
+            "weight": 1,
+            "text": "Slithering Tail: Your legs fuse into a single, powerful serpentine tail. Your Move speed increases by +1. You cannot be knocked Prone by conventional means.",
+            "sortOrder": 14
+        },
+        {
+            "id": -5140,
+            "tableId": -2221,
+            "minRoll": 15,
+            "maxRoll": 15,
+            "weight": 1,
+            "text": "Flesh-Wisp: You can detach a fist-sized glob of your own flesh, which can scuttle on tiny legs. You can telepathically sense its general direction and emotional state (safe, threatened). It has a Move of 1 and dies if it takes any damage, reforming on your body after 24 hours.",
+            "sortOrder": 15
+        },
+        {
+            "id": -5141,
+            "tableId": -2221,
+            "minRoll": 16,
+            "maxRoll": 16,
+            "weight": 1,
+            "text": "Tremor Sense: By placing your bare skin against the ground, you can automatically detect any moving creature or object also in contact with the ground within a 90 feet radius.",
+            "sortOrder": 16
+        },
+        {
+            "id": -5142,
+            "tableId": -2221,
+            "minRoll": 17,
+            "maxRoll": 17,
+            "weight": 1,
+            "text": "Chameleonic Skin: Your skin writhes and changes color to mimic your surroundings. You have Advantage on all DEX checks related to hiding when you remain still for at least one round.",
+            "sortOrder": 17
+        },
+        {
+            "id": -5143,
+            "tableId": -2221,
+            "minRoll": 18,
+            "maxRoll": 18,
+            "weight": 1,
+            "text": "Implanting Spur: As a ranged attack, you can fire a sharpened bone spur from your wrist to a target up to 3 squares away. If it hits, it deals 1 Minor Injury and burrows into the target's flesh. At the start of their turn, they suffer an additional Minor Injury every round, unless they use a Standard Action to rip it out.",
+            "sortOrder": 18
+        },
+        {
+            "id": -5144,
+            "tableId": -2221,
+            "minRoll": 19,
+            "maxRoll": 19,
+            "weight": 1,
+            "text": "Abyssal Glimpse: Once per combat and as a Standard Action, you can peel back your face to reveal a swirling vortex of flesh within. Make a check against the target’s WIL, if you succeed they are Frightened (2).",
+            "sortOrder": 19
+        },
+        {
+            "id": -5145,
+            "tableId": -2221,
+            "minRoll": 20,
+            "maxRoll": 20,
+            "weight": 1,
+            "text": "Mucous Trail: You constantly secrete a thick, viscous slime. You can choose to leave a trail behind you, making the ground in any square you pass through Difficult Terrain (page 51) for one hour. Too Far Gone While the Choir’s influence is all-pervasive, there is a point where a person has walked too far down the Flesh’s path, and not even God can reach them. A creature with 5 or more Gifts of the Unmade/Stigmata of the Abyss can no longer use Prayers, as God doesn’t hear them.",
+            "sortOrder": 20
+        },
+        {
+            "id": -5146,
+            "tableId": -2222,
+            "minRoll": 1,
+            "maxRoll": 1,
+            "weight": 1,
+            "text": "There’s an unexpected event at a very good or bad moment.",
+            "sortOrder": 1
+        },
+        {
+            "id": -5147,
+            "tableId": -2222,
+            "minRoll": 2,
+            "maxRoll": 2,
+            "weight": 1,
+            "text": "Something that appears to be one way is actually another.",
+            "sortOrder": 2
+        },
+        {
+            "id": -5148,
+            "tableId": -2222,
+            "minRoll": 3,
+            "maxRoll": 3,
+            "weight": 1,
+            "text": "A new character(s), or an existing character’s true nature, is revealed (reinforcements appear, a harmless NPC is actually an enemy agent, etc.).",
+            "sortOrder": 3
+        },
+        {
+            "id": -5149,
+            "tableId": -2222,
+            "minRoll": 4,
+            "maxRoll": 4,
+            "weight": 1,
+            "text": "The physical environment changes (weather, floor collapse, a trap is triggered, etc.).",
+            "sortOrder": 4
+        },
+        {
+            "id": -5150,
+            "tableId": -2222,
+            "minRoll": 5,
+            "maxRoll": 5,
+            "weight": 1,
+            "text": "A useful item (key, gear, a letter) is found or lost.",
+            "sortOrder": 5
+        },
+        {
+            "id": -5151,
+            "tableId": -2222,
+            "minRoll": 6,
+            "maxRoll": 6,
+            "weight": 1,
+            "text": "The social environment changes (a character's mother is actually their aunt, a PC is mistaken for someone else, etc.). Yes/No Oracle (D100) If the action or event is... The probability of it happening is… Almost Impossible 20% Very Unlikely 30% Unlikely 40% Fifty-Fifty 50% Likely 60% Very Likely 70% Almost Certain 80% Surprise/Unknown Events (2D8) Descriptor",
+            "sortOrder": 6
+        },
+        {
+            "id": -5152,
+            "tableId": -2222,
+            "minRoll": 7,
+            "maxRoll": 8,
+            "weight": 1,
+            "text": "1 – Encounter Hostile Neutral Neutral Friendly 2 – Physical Struggle Illness/Curse Trap Labor 3 – Environment Natural Weather Unnatural Deprivation 4 – Knowledge Forbidden Secret/Hidden Research Historical 5 – Player Character Gear Relationship Health Emotional 6 – Non-Player Character Behavior Change Misunderstanding Disappearance Assistance Required 7 – Location Assault Gathering Hidden Destroyed 8 – Faction or party Internal Struggle External Aggression Struggle Disappearance",
+            "sortOrder": 7
         }
     ],
     "npcs": [
@@ -2205,6 +3672,229 @@
             "category": "Ilustraciones del manual",
             "sortOrder": 1012,
             "sourcePack": "Choir of Flesh"
+        }
+    ],
+    "tacticalMaps": [
+        {
+            "id": -3001,
+            "name": "Cuadrícula de Incursión (8 Nodos)",
+            "imageUri": "file:///android_asset/starter_packs/choir_of_flesh/maps/incursion_grid.webp",
+            "gridType": "NONE",
+            "cellSizePx": 100.0,
+            "gridOffsetX": 0.0,
+            "gridOffsetY": 0.0,
+            "gridColorHex": 1090519039,
+            "gridOpacity": 0.0,
+            "scaleFtPerCell": 10,
+            "diagonalRule": "ALTERNATING_5_10_5",
+            "sessionId": null,
+            "sceneId": null,
+            "fogOfWarMaskJson": "",
+            "terrainMaskJson": "",
+            "areasJson": "[]",
+            "createdAt": 1776300000000
+        },
+        {
+            "id": -3002,
+            "name": "Cuadrícula de Combate (5×5)",
+            "imageUri": "file:///android_asset/starter_packs/choir_of_flesh/maps/combat_grid.webp",
+            "gridType": "SQUARE",
+            "cellSizePx": 185.0,
+            "gridOffsetX": 132.0,
+            "gridOffsetY": 426.0,
+            "gridColorHex": 1090519039,
+            "gridOpacity": 0.35,
+            "scaleFtPerCell": 5,
+            "diagonalRule": "ALTERNATING_5_10_5",
+            "sessionId": null,
+            "sceneId": null,
+            "fogOfWarMaskJson": "",
+            "terrainMaskJson": "",
+            "areasJson": "[]",
+            "createdAt": 1776300000000
+        },
+        {
+            "id": -3003,
+            "name": "Combate Multijugador (10×5)",
+            "imageUri": "file:///android_asset/starter_packs/choir_of_flesh/maps/multiplayer_combat_grid.webp",
+            "gridType": "SQUARE",
+            "cellSizePx": 185.0,
+            "gridOffsetX": 267.0,
+            "gridOffsetY": 439.0,
+            "gridColorHex": 1090519039,
+            "gridOpacity": 0.35,
+            "scaleFtPerCell": 5,
+            "diagonalRule": "ALTERNATING_5_10_5",
+            "sessionId": null,
+            "sceneId": null,
+            "fogOfWarMaskJson": "",
+            "terrainMaskJson": "",
+            "areasJson": "[]",
+            "createdAt": 1776300000000
+        }
+    ],
+    "tacticalMapPins": [
+        {
+            "id": -3100,
+            "mapId": -3001,
+            "cellX": 2.8,
+            "cellY": 1.98,
+            "title": "Punto de Partida",
+            "description": "Campamento base y acceso seguro a la incursión.",
+            "iconName": "flag",
+            "colorHex": 4283215696,
+            "isSecret": 0,
+            "explorationState": "EXPLORED",
+            "targetTableId": null,
+            "targetEncounterId": null,
+            "targetWikiEntryId": null,
+            "targetMapId": null,
+            "discoveriesJson": "[]",
+            "tableLinksJson": "[]"
+        },
+        {
+            "id": -3101,
+            "mapId": -3001,
+            "cellX": 8.42,
+            "cellY": 1.98,
+            "title": "Habitación 1",
+            "description": "Primera estancia tras el umbral. Registra peligros y saquea si está asegurada.",
+            "iconName": "door",
+            "colorHex": 4294942720,
+            "isSecret": 1,
+            "explorationState": "UNKNOWN",
+            "targetTableId": -2206,
+            "targetEncounterId": null,
+            "targetWikiEntryId": null,
+            "targetMapId": null,
+            "discoveriesJson": "[]",
+            "tableLinksJson": "[{\"tableId\": -2206, \"label\": \"Encuentro\"}, {\"tableId\": -2207, \"label\": \"Criatura\"}, {\"tableId\": -2217, \"label\": \"Botín\"}]"
+        },
+        {
+            "id": -3102,
+            "mapId": -3001,
+            "cellX": 14.03,
+            "cellY": 1.98,
+            "title": "Habitación 2",
+            "description": "Cámara exterior con restos del viejo mundo.",
+            "iconName": "door",
+            "colorHex": 4294942720,
+            "isSecret": 1,
+            "explorationState": "UNKNOWN",
+            "targetTableId": -2206,
+            "targetEncounterId": null,
+            "targetWikiEntryId": null,
+            "targetMapId": null,
+            "discoveriesJson": "[]",
+            "tableLinksJson": "[{\"tableId\": -2206, \"label\": \"Encuentro\"}, {\"tableId\": -2207, \"label\": \"Criatura\"}, {\"tableId\": -2217, \"label\": \"Botín\"}]"
+        },
+        {
+            "id": -3103,
+            "mapId": -3001,
+            "cellX": 2.8,
+            "cellY": 5.95,
+            "title": "Habitación 3",
+            "description": "Flanco occidental de la incursión.",
+            "iconName": "door",
+            "colorHex": 4294942720,
+            "isSecret": 1,
+            "explorationState": "UNKNOWN",
+            "targetTableId": -2206,
+            "targetEncounterId": null,
+            "targetWikiEntryId": null,
+            "targetMapId": null,
+            "discoveriesJson": "[]",
+            "tableLinksJson": "[{\"tableId\": -2206, \"label\": \"Encuentro\"}, {\"tableId\": -2207, \"label\": \"Criatura\"}, {\"tableId\": -2217, \"label\": \"Botín\"}]"
+        },
+        {
+            "id": -3104,
+            "mapId": -3001,
+            "cellX": 8.42,
+            "cellY": 5.95,
+            "title": "Habitación 4",
+            "description": "Encrucijada central de pasillos y ecos de dolor.",
+            "iconName": "door",
+            "colorHex": 4294942720,
+            "isSecret": 1,
+            "explorationState": "UNKNOWN",
+            "targetTableId": -2206,
+            "targetEncounterId": null,
+            "targetWikiEntryId": null,
+            "targetMapId": null,
+            "discoveriesJson": "[]",
+            "tableLinksJson": "[{\"tableId\": -2206, \"label\": \"Encuentro\"}, {\"tableId\": -2207, \"label\": \"Criatura\"}, {\"tableId\": -2217, \"label\": \"Botín\"}]"
+        },
+        {
+            "id": -3105,
+            "mapId": -3001,
+            "cellX": 14.03,
+            "cellY": 5.95,
+            "title": "Habitación 5",
+            "description": "Ala oriental con paredes pulsantes de carne.",
+            "iconName": "door",
+            "colorHex": 4294942720,
+            "isSecret": 1,
+            "explorationState": "UNKNOWN",
+            "targetTableId": -2206,
+            "targetEncounterId": null,
+            "targetWikiEntryId": null,
+            "targetMapId": null,
+            "discoveriesJson": "[]",
+            "tableLinksJson": "[{\"tableId\": -2206, \"label\": \"Encuentro\"}, {\"tableId\": -2207, \"label\": \"Criatura\"}, {\"tableId\": -2217, \"label\": \"Botín\"}]"
+        },
+        {
+            "id": -3106,
+            "mapId": -3001,
+            "cellX": 2.8,
+            "cellY": 9.92,
+            "title": "Habitación 6",
+            "description": "Profundidades del suroeste.",
+            "iconName": "door",
+            "colorHex": 4294942720,
+            "isSecret": 1,
+            "explorationState": "UNKNOWN",
+            "targetTableId": -2206,
+            "targetEncounterId": null,
+            "targetWikiEntryId": null,
+            "targetMapId": null,
+            "discoveriesJson": "[]",
+            "tableLinksJson": "[{\"tableId\": -2206, \"label\": \"Encuentro\"}, {\"tableId\": -2207, \"label\": \"Criatura\"}, {\"tableId\": -2217, \"label\": \"Botín\"}]"
+        },
+        {
+            "id": -3107,
+            "mapId": -3001,
+            "cellX": 8.42,
+            "cellY": 9.92,
+            "title": "Habitación 7",
+            "description": "Antesala del horror definitivo.",
+            "iconName": "door",
+            "colorHex": 4294942720,
+            "isSecret": 1,
+            "explorationState": "UNKNOWN",
+            "targetTableId": -2206,
+            "targetEncounterId": null,
+            "targetWikiEntryId": null,
+            "targetMapId": null,
+            "discoveriesJson": "[]",
+            "tableLinksJson": "[{\"tableId\": -2206, \"label\": \"Encuentro\"}, {\"tableId\": -2207, \"label\": \"Criatura\"}, {\"tableId\": -2217, \"label\": \"Botín\"}]"
+        },
+        {
+            "id": -3108,
+            "mapId": -3001,
+            "cellX": 14.03,
+            "cellY": 9.92,
+            "title": "Habitación 8 (Núcleo de Incursión)",
+            "description": "Núcleo de la incursión: abominación mayor, reliquia sagrada o salida final.",
+            "iconName": "skull",
+            "colorHex": 4294198070,
+            "isSecret": 1,
+            "explorationState": "UNKNOWN",
+            "targetTableId": -2206,
+            "targetEncounterId": null,
+            "targetWikiEntryId": null,
+            "targetMapId": null,
+            "discoveriesJson": "[]",
+            "tableLinksJson": "[{\"tableId\": -2206, \"label\": \"Encuentro\"}, {\"tableId\": -2207, \"label\": \"Criatura\"}, {\"tableId\": -2217, \"label\": \"Botín\"}]"
         }
     ]
 }
