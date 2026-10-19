@@ -146,7 +146,10 @@ data class SessionUiState(
     val choirGuideError: String? = null,
     val showMicrosettingBuilder: Boolean = false,
     val activeMicrosetting: com.deckapp.core.model.MicrosettingCluster? = null,
-    val editingMicrosettingBoardItemId: Long? = null
+    val editingMicrosettingBoardItemId: Long? = null,
+    val showStoryEngineGuide: Boolean = false,
+    val storyEngineGuideTab: com.deckapp.feature.draw.model.StoryEngineGuideTab = com.deckapp.feature.draw.model.StoryEngineGuideTab.DECK_OF_WORLDS,
+    val storyEngineGuideStepIndex: Int = 0
 )
 
 enum class SidebarTool {
@@ -331,6 +334,15 @@ class SessionViewModel @Inject constructor(
         cardRepository = cardRepository,
         notesMutex = notesMutex,
         onAppendToNotes = { appendToNotes(it) }
+    )
+
+    val storyEngineGuideDelegate = com.deckapp.feature.draw.delegates.StoryEngineGuideDelegate(
+        sessionId = sessionId,
+        ui = _uiState,
+        scope = viewModelScope,
+        sessionRepository = sessionRepository,
+        deckDelegate = deckDelegate,
+        openMicrosettingBuilder = { openMicrosettingBuilder() }
     )
 
     // Un flujo que emite la hora actual cada minuto para cálculos reactivos

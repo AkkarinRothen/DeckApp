@@ -104,3 +104,46 @@ En cumplimiento de la decisión de empaquetado del usuario, se crearon **2 paque
 - Se registraron los nombres amigables en `TablesViewModel`, `SessionViewModel`, `ReferenceTabViewModel`, `ReferenceListViewModel` y `TablesTab`.
 - Preservación de cartas de usuario en `ReferenceRepositoryImpl`: las re-importaciones preservan cartas en mano/sesiones basadas en `imagePath`.
 
+---
+
+## 8. Guía Interactiva de Procedimientos en Sesión (`StoryEngineProcedureGuide` & `StoryEngineProcedureBar`)
+
+Siguiendo el patrón establecido por Choir of Flesh (`ChoirProcedureBar` y `ChoirProcedureGuide`), se implementa una barra de estado contextual y una hoja modal interactiva para guiar paso a paso la creación de microescenarios y premisas narrativas:
+
+### A. Detección y Activación Contextual
+- La barra `StoryEngineProcedureBar` se renderiza automáticamente debajo de la `SessionTopBar` si la sesión activa tiene configurado el sistema `"Story Engine"` o `"Deck of Worlds"` en `session.gameSystems`.
+- En el menú de más opciones (`SessionTopBar`), se exponen accesos directos rápidos:
+  - *Story Engine: Guía de Pasos*
+  - *Story Engine: Creador Microsettings*
+
+### B. Barra Contextual (`StoryEngineProcedureBar`)
+- Indica el paso activo actual (ej: *Deck of Worlds · Paso 1: Región (Bioma y Terreno)*) y un adelanto de la siguiente acción.
+- Al pulsarla, despliega la guía interactiva modal `StoryEngineProcedureGuide`.
+
+### C. Hoja Modal Interactiva (`StoryEngineProcedureGuide`)
+Organizada en 3 pestañas dinámicas con selector horizontal de fases:
+1. **Pestaña `Deck of Worlds` (6 Pasos):**
+   - **Paso 1: Región** (Bioma y Terreno) — Núcleo Central, fija 0°.
+   - **Paso 2: Punto de Interés** (Hito / Sitio) — 2 opciones, 1d2 (Giro 180°).
+   - **Paso 3: Nombres y Apelativos** — 4 pistas cardinales, 1d4 (Giro 90°).
+   - **Paso 4: Orígenes e Historia** (El Pasado) — 4 pistas cardinales, 1d4 (Giro 90°).
+   - **Paso 5: Atributos y Cultura** (El Presente) — 4 pistas cardinales, 1d4 (Giro 90°).
+   - **Paso 6: Acontecimientos y Crisis** (El Futuro) — 2 opciones, 1d2 (Giro 180°).
+2. **Pestaña `New Story Engine` (4 Pasos):**
+   - **Paso 1: Agente / Potenciador** (Quién) — 2 opciones, 1d2.
+   - **Paso 2: Trasfondo y Motivación** (Por Qué) — 4 pistas cardinales, 1d4.
+   - **Paso 3: Misterio y Conflicto** (Qué se Interpone) — 2 opciones, 1d2.
+   - **Paso 4: Objeto Único o Reliquia** (Catalizador) — 4 pistas cardinales, 1d4.
+3. **Pestaña `Expansiones`:**
+   - Guía de combinación de expansiones Cartográficas (enlace de microsettings adyacentes), Creativas (profundidad cultural) y de Género (inyección temática).
+
+### D. Interacciones y Acciones Integradas
+- **Botón `Robar Carta`:** Busca el sub-mazo asociado al paso en la sesión. Si el mazo existe en la biblioteca global pero aún no está en la sesión, lo añade automáticamente (`sessionRepository.addDeckToSession`) y ejecuta el robo (`deckDelegate.drawCardFromDeck`).
+- **Botón `Rotar Pista (1d2 / 1d4)`:** Rota la última carta en mano correspondiente a dicho mazo para orientar la siguiente pista hacia el borde activo inferior (0°).
+- **Acceso Directo al Tablero:** Botón para abrir el generador modular de microsetting (`MicrosettingBuilderDialog`) o visualizar el cluster sobre la mesa de juego.
+- **Inspiración y Preguntas Guía:** Cada paso incluye preguntas de apoyo creativo para el DM y jugadores, además de consejos prácticos de diseño.
+
+### E. Delegado de Gestión (`StoryEngineGuideDelegate`)
+- Gestiona el estado reactivo (`showStoryEngineGuide`, `storyEngineGuideTab`, `storyEngineGuideStepIndex`) en `SessionUiState`.
+- Resuelve búsquedas semánticas de mazos por palabras clave (`región`, `landmark`, `namesake`, `origin`, `attribute`, `advent`, `booster`, `backstory`, `mystery`, `unique item`).
+

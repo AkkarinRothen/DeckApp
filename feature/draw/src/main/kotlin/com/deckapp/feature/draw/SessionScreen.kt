@@ -205,6 +205,8 @@ fun SessionScreen(
                 onOpenChoirDialog = { showChoirDialog = true },
                 onOpenIncursionDialog = { showIncursionDialog = true },
                 onOpenChoirProcedures = viewModel.choirGuideDelegate::open,
+                onOpenStoryEngineGuide = viewModel.storyEngineGuideDelegate::open,
+                onOpenMicrosettingBuilder = { viewModel.openMicrosettingBuilder() },
                 onOpenSpotlight = viewModel::openSpotlight,
                 onShowDiceRoller = onShowDiceRoller,
                 onHistoryClick = { uiState.session?.id?.let(onHistoryClick) },
@@ -213,6 +215,13 @@ fun SessionScreen(
             if (uiState.session?.gameSystems?.any { it.contains("Choir", true) } == true) {
                 com.deckapp.feature.draw.components.ChoirProcedureBar(
                     uiState.boardMemory.choirGuide, viewModel.choirGuideDelegate::open
+                )
+            }
+            if (uiState.session?.gameSystems?.any { it.contains("Story Engine", true) || it.contains("Deck of Worlds", true) } == true) {
+                com.deckapp.feature.draw.components.StoryEngineProcedureBar(
+                    tab = uiState.storyEngineGuideTab,
+                    stepIndex = uiState.storyEngineGuideStepIndex,
+                    onOpen = viewModel.storyEngineGuideDelegate::open
                 )
             }
             }

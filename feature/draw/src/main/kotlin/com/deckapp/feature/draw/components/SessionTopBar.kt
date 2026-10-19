@@ -41,6 +41,8 @@ fun SessionTopBar(
     onOpenChoirDialog: () -> Unit,
     onOpenIncursionDialog: () -> Unit,
     onOpenChoirProcedures: () -> Unit,
+    onOpenStoryEngineGuide: () -> Unit = {},
+    onOpenMicrosettingBuilder: () -> Unit = {},
     onOpenSpotlight: () -> Unit,
     onShowDiceRoller: () -> Unit,
     onHistoryClick: () -> Unit,
@@ -48,6 +50,7 @@ fun SessionTopBar(
     modifier: Modifier = Modifier
 ) {
     val showChoirButtons = session?.gameSystems?.any { it.contains("Choir", ignoreCase = true) } == true
+    val showStoryEngineButtons = session?.gameSystems?.any { it.contains("Story Engine", ignoreCase = true) || it.contains("Deck of Worlds", ignoreCase = true) } == true
     var showOverflowMenu by remember { mutableStateOf(false) }
 
     TopAppBar(
@@ -297,6 +300,27 @@ fun SessionTopBar(
                             onClick = {
                                 showOverflowMenu = false
                                 onOpenIncursionDialog()
+                            }
+                        )
+                        HorizontalDivider()
+                    }
+
+                    if (showStoryEngineButtons) {
+                        HorizontalDivider()
+                        DropdownMenuItem(
+                            text = { Text("Story Engine: Guía de Pasos") },
+                            leadingIcon = { Icon(Icons.Default.Public, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                            onClick = {
+                                showOverflowMenu = false
+                                onOpenStoryEngineGuide()
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Story Engine: Creador Microsettings") },
+                            leadingIcon = { Icon(DeckIcons.Board, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                            onClick = {
+                                showOverflowMenu = false
+                                onOpenMicrosettingBuilder()
                             }
                         )
                         HorizontalDivider()

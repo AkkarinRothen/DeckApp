@@ -49,6 +49,12 @@ fun SessionDialogsHost(
     if (uiState.showChoirGuide) {
         ChoirProcedureGuide(uiState, viewModel.choirGuideDelegate, onOpenIncursionFromGuide)
     }
+    if (uiState.showStoryEngineGuide) {
+        StoryEngineProcedureGuide(
+            state = uiState,
+            delegate = viewModel.storyEngineGuideDelegate
+        )
+    }
     uiState.choirGuideSourcePage?.let { page ->
         ChoirProcedureSource(page, onPage = { viewModel.choirGuideDelegate.source(it) }, onClose = { viewModel.choirGuideDelegate.source(null) })
     }

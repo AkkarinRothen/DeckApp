@@ -1,3 +1,31 @@
+### Guía Interactiva y Asistente de Procedimiento de Story Engine y Deck of Worlds en Sesión (19 de octubre de 2026)
+
+**Categoría:** `FEATURE / STORY ENGINE / SESSION / UX / WORKFLOW / PARITY`
+
+- **Barra de Procedimiento Contextual (`StoryEngineProcedureBar`):**
+  - Se activa automáticamente bajo la barra superior de la sesión cuando la sesión actual tiene los sistemas "Story Engine" o "Deck of Worlds".
+  - Muestra un banner contextual distintivo en tono terracota/ámbar con acceso rápido a la fase actual y botones para abrir la guía paso a paso y el generador de microsettings.
+  - Coexiste armoniosamente con el asistente de *Choir of Flesh* sin conflictos visuales ni funcionales.
+- **Asistente Modal de Procedimiento (`StoryEngineProcedureGuide`):**
+  - Implementado como Bottom Sheet modal con 3 pestañas temáticas:
+    1. *Deck of Worlds*: 6 fases de construcción de microsettings (Región, Punto de Interés, Nombres, Orígenes, Atributos y Acontecimientos).
+    2. *New Story Engine*: 4 fases de formulación narrativa (Potenciador, Trasfondo, Misterio y Objeto Único).
+    3. *Expansiones*: Matriz y guía de integración para expansiones cartográficas, creativas y temáticas de género.
+  - Cada fase incluye:
+    - Chip de progreso e indicador numérico.
+    - Descripción del objetivo creativo y preguntas disparadoras de inspiración en español.
+    - Consejo de experto/pro-tip para el Director de Juego / Narrador Solo.
+    - Botón de acción **Robar Carta**: busca el mazo correspondiente en la sesión (o en la biblioteca si no está añadido a la sesión y lo vincula automáticamente), roba una carta a la mesa y muestra un Snackbar de confirmación.
+    - Botón de acción **Rotar Pista**: cicla la orientación activa hacia el borde inferior (0° / Sur) para revelar la siguiente opción narrativa (1d4 a 90° en 4 bordes, 1d2 a 180° en 2 bordes).
+    - Botón de acceso directo para abrir el modal `MicrosettingBuilderDialog`.
+- **Arquitectura y Delegados (`StoryEngineGuideDelegate`):**
+  - Control de estado desacoplado dentro de `SessionViewModel` mediante `StoryEngineGuideDelegate`, gestionando selección de pestañas, avance de pasos, extracción y rotación de cartas asociadas.
+  - Pruebas unitarias completas implementadas en `StoryEngineGuideDelegateTest` con MockK y Coroutines Test.
+- **Paridad con Desktop:**
+  - Especificación arquitectónica y de interfaz documentada en `docs/planning/DESKTOP_PARITY_STORY_ENGINE.md` (Sección 8: Procedimiento y Guía en Sesión).
+
+---
+
 ### Incorporación de las 13 Expansiones de The Story Engine y Deck of Worlds (19 de octubre de 2026)
 
 **Categoría:** `FEATURE / STORY ENGINE / EXPANSIONS / PACKAGING / OCR PIPELINE / PARITY`
