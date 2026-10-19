@@ -68,6 +68,9 @@ internal fun BoardBlockContent(
     deckBackImages: Map<Long, String?>,
     onDrawCardFromDeck: (Long) -> Unit,
     onShuffleDeck: (Long) -> Unit,
+    onShuffleOnly: (Long) -> Unit = onShuffleDeck,
+    onShuffleDiscards: (Long) -> Unit = onShuffleDeck,
+    piledByDeck: Map<Long, Int> = emptyMap(),
     onResetDeck: (Long) -> Unit,
     onDiscardCard: (Long) -> Unit,
     onRevealCard: (Long) -> Unit,
@@ -108,7 +111,10 @@ internal fun BoardBlockContent(
     onRollBoardMythicFate: (ProbabilityLevel) -> Unit = {},
     onAskBoardMythicQuestion: (ProbabilityLevel, String) -> Unit = { _, _ -> },
     onRollBoardMythicEvent: () -> Unit = {},
-    onAppendToNotes: (String) -> Unit = {}
+    onAppendToNotes: (String) -> Unit = {},
+    onGenerateMicrosetting: ((Long) -> Unit)? = null,
+    onRotateMicrosettingSlot: ((Long, MicrosettingSlotType) -> Unit)? = null,
+    onRedrawMicrosettingSlot: ((Long, MicrosettingSlotType) -> Unit)? = null
 ) {
     when (item.type) {
         SessionBoardItemType.TABLE -> TableBlockContent(
@@ -234,15 +240,18 @@ internal fun BoardBlockContent(
                 meta = meta,
                 cards = handByDeck[deckId] ?: emptyList(),
                 availableCount = deckCardCounts[deckId] ?: 0,
+                discardCount = piledByDeck[deckId] ?: 0,
                 aspectRatio = deckAspectRatios[deckId] ?: CardAspectRatio.STANDARD,
                 backImagePath = deckBackImages[deckId],
                 sessionId = sessionId,
                 compactInFolder = compactInFolder,
                 onDraw = { onDrawCardFromDeck(deckId) },
-                onShuffle = { onShuffleDeck(deckId) },
+                onShuffle = { onShuffleOnly(deckId) },
+                onShuffleDiscards = { onShuffleDiscards(deckId) },
                 onReset = { onResetDeck(deckId) },
                 onDiscard = onDiscardCard,
-                onRevealCard = onRevealCard
+                onRevealCard = onRevealCard,
+                onCardClick = onCardClick
             )
         }
         SessionBoardItemType.NPCS -> {
@@ -284,6 +293,19 @@ internal fun BoardBlockContent(
             npcs = npcs,
             onDiceClicked = { formula: String -> onDiceClicked(formula, false, false, null) },
             onToggleCondition = onToggleCondition
+        )
+        SessionBoardItemType.MICROSETTING -> MicrosettingBlockContent(
+            item = item,
+            meta = meta,
+            compactInFolder = compactInFolder,
+            onOpenBuilder = onOpen,
+            onGenerate = { onGenerateMicrosetting?.invoke(item.id) ?: onOpen() },
+            onRotateSlot = { slot -> onRotateMicrosettingSlot?.invoke(item.id, slot) },
+            onRedrawSlot = { slot -> onRedrawMicrosettingSlot?.invoke(item.id, slot) },
+            onSendToNotes = { cluster ->
+                onAppendToNotes(MicrosettingCodec.formatMarkdown(cluster))
+            },
+            onOpenCard = onCardClick
         )
     }
 }

@@ -69,7 +69,7 @@ fun TableLibraryScreen(
         TableDetailSheet(
             table = uiState.activeTable!!,
             lastResult = uiState.lastResult,
-            recentResults = emptyList(), 
+            recentResults = emptyList<com.deckapp.core.model.TableRollResult>(), 
             isRolling = uiState.isRolling,
             onRoll = { viewModel.rollTable(uiState.activeTable!!.id, sessionId = null) },
             onExport = { /* Opcional */ },
@@ -250,7 +250,7 @@ fun TableLibraryScreen(
 }
 
 @Composable
-internal fun TablePackDialog(
+fun TablePackDialog(
     packs: List<TablePackInfo>,
     onDismiss: () -> Unit,
     onInstall: (String) -> Unit,

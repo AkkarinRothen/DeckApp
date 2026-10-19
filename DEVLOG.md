@@ -1,4 +1,77 @@
-### Choir of Flesh — Mapas Tácticos Oficiales, Pines 2.0 Pre-configurados y Expansión de Tablas (18 de octubre de 2026)
+### Mejoras de Bloques de Mazos en Mesa, Iconografía Vectorial y Validación Story Engine (18 de octubre de 2026)
+
+**Categoría:** `FEATURE / UX / VECTOR ASSETS / HARDWARE QA`
+
+- **Rediseño y Ergonomía de Bloques de Mazos en Mesa (`DeckBlockContent.kt`):**
+  - **Estructura en 3 zonas visuales:** Cabecera con contadores precisos (*N en mano · N en mazo · N descartadas*), botón de acción principal (*Robar*, deshabilitado con estado *"Agotado"* al vaciarse el mazo) y carrusel de cartas en mano.
+  - **Separación semántica de barajado:** Se implementó `shuffleDeckOnly` en `SessionDeckDelegate` y `SessionViewModel` para permitir barajar las cartas restantes disponibles en el mazo sin forzar la recuperación de descartes.
+  - **Diálogos de confirmación:** Protección contra acciones destructivas masivas para *"Descartar mano"* y *"Reiniciar mazo"*, mostrando con precisión el impacto de cartas afectadas.
+  - **Navegación al Visor de Cartas:** Cableado completo del callback `onCardClick` a través de `SessionToolConnector`, `BoardCentralTool`, `SessionBoardTab`, `SessionBoardPagerContent`, `BoardItemUiContext`, `BoardBlockCard` y `BoardBlockCardAux` hacia `DeckBlockContent`.
+- **Iconografía Vectorial & Launcher Adaptable:**
+  - Sustitución de glifos/emojis hardcodeados por símbolos vectoriales dedicados en `DeckIcons.kt` (mapas, dados, cartas, compendio, diario, explorador).
+  - Lanzador de Android modernizado con soporte para capas adaptable y monocroma temática.
+- **Validación en Dispositivo Físico (Motorola One Fusion):**
+  - Verificada en hardware real la integración de cartas *The Story Engine: Deck of Worlds* con selector de opciones dinámico (modos 1, 2 y 4 pistas con tiradas de dado d2/d4 y brújula de orientación).
+  - Corregida la colisión entre el `ModalBottomSheet` de selección de mazos y el diálogo de instalación de paquetes de inicio en `SessionViewModel`.
+
+---
+
+### Gestión Dinámica de Mazos en Sesión Activa & Selector de Paquetes de Inicio (18 de octubre de 2026)
+
+**Categoría:** `FEATURE / TABLETOP UX / ARCHITECTURE`
+
+Se implementó el sistema completo para añadir, conmutar y gestionar mazos en una sesión de juego ya iniciada sin perder el progreso ni salir de la mesa:
+- **Selector Modal de Mazos (`SessionDeckPickerSheet`):**
+  - Búsqueda en tiempo real por título o etiquetas del mazo.
+  - Vista previa de miniatura con `toCoilModel()`, total de cartas disponibles y etiqueta de sistema principal.
+  - Indicador dinámico de estado (activo/inactivo) con switch de conmutación directa.
+  - Badge y alerta de seguridad: si un mazo contiene cartas activas en la mesa o mano del jugador y se desactiva, se despliega un diálogo de confirmación informando que las cartas pasarán a la pila de descarte para evitar inconsistencias en el estado.
+  - Acceso directo a Paquetes de Inicio (`Starter Packs`): botón rápido en la cabecera del sheet para instalar colecciones de cartas (e.g. *The Story Engine: Deck of Worlds*, *Choir of Flesh*) sin interrumpir la sesión.
+- **Acceso Directo desde la Barra Lateral de Mazos (`DeckWorkspace`):**
+  - Cabecera con conteo de mazos en juego (`Mazos en juego (N)`) y botón rápido *"Gestionar"*.
+  - Estado vacío interactivo cuando no hay mazos asignados con botón de acción destacado: *"Añadir Mazos a la Mesa"*.
+- **Acceso desde Configuración de Sesión (`SessionConfigSheet`):**
+  - Sección *"Mazos en la Mesa"* con tarjeta resumen, conteo de mazos activos y botón de edición/gestión que abre `SessionDeckPickerSheet`.
+- **Integración y Diálogos en `SessionViewModel` & `SessionDialogsHost`:**
+  - Coordinación de estados `showDeckPicker` y `showStarterPackDialog`.
+  - Escaneo dinámico de assets de paquetes de inicio (`context.assets.list("starter_packs")`) e instalación/desinstalación reactiva.
+
+---
+
+### The Story Engine: Deck of Worlds — Mazos Instalables y Motor de Microsetting para Mesa (18 de octubre de 2026)
+
+**Categoría:** `FEATURE / CONTENT / TABLETOP UX`
+
+Se integró completamente la colección oficial de cartas de creación de mundos *The Story Engine: Deck of Worlds* como paquete de inicio (`starter pack`) instalable y motor interactivo para la mesa de juego:
+- **Extracción de Assets y Conversión Vectorial/WebP (246 cartas):**
+  - Procesados todos los PDFs oficiales (`The Story Engine_ Deck of Worlds_All [2022-06-04]`).
+  - Extraídas y recortadas las 240 cartas (40 cartas por cada uno de los 6 sub-mazos) y los 6 reversos temáticos con proporciones de borde exactas en formato WebP de alta densidad optimizado para móviles en `starter_packs/deck_of_worlds/cards/`.
+  - Sub-mazos indexados:
+    - *Región (Region Cards)*: 40 cartas (fondo verde/dorado) que definen la geografía y bioma.
+    - *Hito / Punto de Interés (Landmark Cards)*: 40 cartas (fondo azul) para estructuras naturales o artificiales.
+    - *Nombre / Identidad (Namesake Cards)*: 40 cartas (fondo naranja/ámbar) con etimologías y títulos.
+    - *Origen / Historia (Origin Cards)*: 40 cartas (fondo violeta/púrpura) de trasfondo y mitología.
+    - *Atributo / Rasgo (Attribute Cards)*: 40 cartas (fondo turquesa/cian) con características distintivas.
+    - *Acontecimiento / Crisis (Advent Cards)*: 40 cartas (fondo rojo/carmesí) de conflictos y eventos en curso.
+- **Starter Pack JSON Oficial (`story_engine_deck_of_worlds.json`):**
+  - Definidos los 6 mazos con metadatos completos, reglas de orientación con pistas en 4 bordes (`FOUR_EDGE_CUES`), 4 opciones de sugerencia narrativa por carta en los ángulos 0°, 90°, 180° y 270°, y reglas de microsetting.
+- **Modelo de Dominio de Microsettings (`Microsetting.kt` & `SessionBoardItemType.MICROSETTING`):**
+  - Nuevas estructuras de datos `MicrosettingCluster`, `MicrosettingCardItem`, `MicrosettingSlotType` y serializador `MicrosettingCodec`.
+  - Agregado el nuevo bloque de mesa `MICROSETTING` al tablero de sesión, permitiendo fijar constelaciones de cartas de mundo vivas en el tapete.
+- **Generador Interactivo de Microsettings (`MicrosettingBuilderDialog`):**
+  - Generación de constelaciones completas con 1 toque (robo sincronizado de los 6 mazos).
+  - Selector interactivo tipo brújula para rotar y activar cada una de las 4 pistas de borde en 90°, 180°, 270° o 0°.
+  - Redibujado individual por slot para reemplazar cartas específicas conservando el resto del micro-escenario.
+  - Síntesis y formateo del hook narrativo listo para copiar o insertar directamente en el Diario/Notas del Director.
+- **Bloque de Mesa en el Tablero de Sesión (`MicrosettingBlockContent` & `MicrosettingDelegate`):**
+  - Renderizado responsivo para teléfonos y tablets con miniaturas de cartas rotadas según la orientación elegida.
+  - Badges de slot con colores distintivos por mazo, controles in-situ de rotación y re-robo, y botón de exportación al diario.
+- **Herramienta Central y Selectores de Bloques:**
+  - Integrada la opción en el selector central y en el sheet de añadir bloques (`SessionBoardBlockPickerSheet`).
+
+---
+
+
 
 **Categoría:** `FEATURE / CONTENT / UX`
 

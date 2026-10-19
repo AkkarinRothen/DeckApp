@@ -51,7 +51,6 @@ import com.deckapp.core.ui.components.paperBackground
 import com.deckapp.core.model.TableDensity
 import com.deckapp.core.ui.theme.LocalTableAppearance
 import com.deckapp.feature.tables.library.TablePackDialog
-import com.deckapp.feature.tables.library.components.TableGridItem
 import sh.calvin.reorderable.*
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -141,8 +140,10 @@ fun TablesTab(
             isRolling = uiState.isRolling,
             autoRollOnOpen = uiState.autoRollOnOpen,
             onRoll = { viewModel.rollTable(activeTable.id, sessionId) },
-            onSelectEntry = if (sessionId != null) { index, die ->
-                viewModel.selectTableEntry(activeTable.id, index, sessionId, die)
+            onSelectEntry = if (sessionId != null) {
+                { index: Int, die: Int? ->
+                    viewModel.selectTableEntry(activeTable.id, index, sessionId, die)
+                }
             } else null,
             onExport = { showExportDialog = true },
             onEdit = {
@@ -233,6 +234,7 @@ fun TablesTab(
                     items(uiState.allTags) { tag ->
                         val tagLabel = when (tag.name) {
                             "choir_of_flesh.json" -> "Choir of Flesh"
+                            "story_engine_deck_of_worlds.json" -> "Deck of Worlds"
                             "dnd_5e_2024.json" -> "D&D 5e"
                             "twilight_2000_4e.json" -> "Twilight 2000"
                             else -> tag.name.removeSuffix(".json").replace("_", " ")

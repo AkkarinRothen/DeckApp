@@ -252,7 +252,8 @@ fun SessionScreen(
                         onCardClick = onCardClick,
                         onDiscard = { viewModel.discardCard(it) },
                         onRevealCard = { viewModel.revealCard(it) },
-                        onRollTable = viewModel::rollActiveTable
+                        onRollTable = viewModel::rollActiveTable,
+                        onOpenDeckPicker = viewModel::openDeckPicker
                     )
                     SidebarTool.TABLES -> TablesTab(
                         sessionId = uiState.sessionId,
@@ -626,7 +627,8 @@ fun SessionScreen(
                                     },
                                     onRollDice = viewModel::rollSmartDice,
                                     onPrepareSceneForBoard = viewModel::prepareSceneForBoard,
-                                    isSidebarOpen = isAnySidebarOpen
+                                    isSidebarOpen = isAnySidebarOpen,
+                                    onCardClick = { cardId -> onCardClick(cardId, uiState.sessionId) }
                                 )
                                 val centralTool = centralTools.find { it.id == "board" }
                                 if (centralTool != null) {

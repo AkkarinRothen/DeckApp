@@ -589,7 +589,8 @@ class BoardDelegate(
         SessionBoardItemType.MAP,
         SessionBoardItemType.WIKI_MAP,
         SessionBoardItemType.MYTHIC,
-        SessionBoardItemType.COMBAT -> SessionBoardItemSize.L
+        SessionBoardItemType.COMBAT,
+        SessionBoardItemType.MICROSETTING -> SessionBoardItemSize.L
         SessionBoardItemType.DICE -> SessionBoardItemSize.S
         else -> SessionBoardItemSize.M
     }
@@ -601,6 +602,7 @@ class BoardDelegate(
         SessionBoardItemType.MAP,
         SessionBoardItemType.WIKI_MAP -> "live"
         SessionBoardItemType.COMBAT -> "live"
+        SessionBoardItemType.MICROSETTING -> "cluster"
         else -> null
     }
 

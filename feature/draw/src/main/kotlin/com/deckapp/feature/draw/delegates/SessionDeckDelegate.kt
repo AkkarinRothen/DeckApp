@@ -345,6 +345,30 @@ class SessionDeckDelegate(
         shufflePileBack(stackId)
     }
 
+    /** Baraja las cartas disponibles en el mazo sin alterar descartes ni mano. */
+    fun shuffleDeckOnly(stackId: Long) {
+        scope.launch {
+            _uiState.update { it.copy(isShuffling = true) }
+            shuffleDeckUseCase(stackId, onlyAvailable = true)
+            val name = _uiState.value.deckNames[stackId] ?: "Mazo"
+            sessionRepository.logEvent(
+                DrawEvent(
+                    sessionId = sessionId,
+                    cardId = null,
+                    action = DrawAction.SHUFFLE_BACK,
+                    metadata = "Barajadas disponibles: $stackId"
+                )
+            )
+            delay(500)
+            _uiState.update {
+                it.copy(
+                    isShuffling = false,
+                    snackbarMessage = "\"$name\" barajado"
+                )
+            }
+        }
+    }
+
     fun clearSnackbar() {
         _uiState.update { it.copy(snackbarMessage = null) }
     }

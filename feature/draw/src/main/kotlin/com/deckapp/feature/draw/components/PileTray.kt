@@ -67,7 +67,7 @@ fun PileTray(
                 ) {
                     items(pile) { card ->
                         AsyncImage(
-                            model = card.activeFace.imagePath?.let { File(it) },
+                            model = com.deckapp.core.ui.util.toCoilModel(card.activeFace.imagePath),
                             contentDescription = null,
                             modifier = Modifier
                                 .fillMaxHeight()

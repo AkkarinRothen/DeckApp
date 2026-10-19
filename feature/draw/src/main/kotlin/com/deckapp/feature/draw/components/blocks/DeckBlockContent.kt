@@ -11,7 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,12 +35,14 @@ fun DeckBlockContent(
     meta: BoardBlockMeta,
     cards: List<Card>,
     availableCount: Int,
+    discardCount: Int = 0,
     aspectRatio: CardAspectRatio,
     backImagePath: String?,
     sessionId: Long,
     compactInFolder: Boolean,
     onDraw: () -> Unit,
     onShuffle: () -> Unit,
+    onShuffleDiscards: () -> Unit = onShuffle,
     onReset: () -> Unit,
     onDiscard: (Long) -> Unit,
     onRevealCard: (Long) -> Unit,
@@ -49,6 +51,67 @@ fun DeckBlockContent(
 ) {
     val haptic = LocalHapticFeedback.current
 
+    var showDiscardHandConfirm by remember { mutableStateOf(false) }
+    var showResetConfirm by remember { mutableStateOf(false) }
+
+    if (showDiscardHandConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDiscardHandConfirm = false },
+            title = { Text("¿Descartar mano?") },
+            text = { Text("Se enviarán ${cards.size} carta(s) de tu mano a la pila de descarte.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDiscardHandConfirm = false
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        cards.forEach { onDiscard(it.id) }
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Descartar ${cards.size}")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDiscardHandConfirm = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    if (showResetConfirm) {
+        AlertDialog(
+            onDismissRequest = { showResetConfirm = false },
+            title = { Text("¿Reiniciar mazo?") },
+            text = {
+                val handText = if (cards.isNotEmpty()) "${cards.size} en mano" else null
+                val discardText = if (discardCount > 0) "$discardCount descartadas" else null
+                val details = listOfNotNull(handText, discardText).joinToString(" y ")
+                Text(
+                    if (details.isNotBlank()) "Se devolverán al mazo todas las cartas ($details) y se barajará por completo."
+                    else "¿Deseas barajar y reiniciar el mazo por completo?"
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showResetConfirm = false
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onReset()
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Reiniciar mazo")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showResetConfirm = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
     if (item.size == SessionBoardItemSize.S || compactInFolder) {
         // Layout S: Ultra compacto y responsivo
         CompactDeckBlockContent(
@@ -56,11 +119,14 @@ fun DeckBlockContent(
             meta = meta,
             cards = cards,
             availableCount = availableCount,
+            discardCount = discardCount,
             aspectRatio = aspectRatio,
             backImagePath = backImagePath,
             onDraw = {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                onDraw()
+                if (availableCount > 0) {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onDraw()
+                }
             },
             onDiscard = onDiscard,
             onRevealCard = onRevealCard,
@@ -68,19 +134,20 @@ fun DeckBlockContent(
             modifier = modifier
         )
     } else {
-        // Layout M y L
+        // Layout M y L: 3 Zonas Claramente Delimitadas
         Column(
             modifier = modifier
                 .fillMaxWidth()
                 .animateContentSize(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // Cabecera interactiva
+            // Zona 1 & 2: Cabecera con Estado y Acciones de Robo
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                // Zona 1: Chips de Estado
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -97,20 +164,28 @@ fun DeckBlockContent(
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                         )
                     }
+
                     Text(
                         text = "· $availableCount en mazo",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+
+                    if (discardCount > 0) {
+                        Text(
+                            text = "· $discardCount desc.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        )
+                    }
                 }
 
-                // Acciones rápidas en la cabecera
+                // Zona 2: Acciones directas (Revelar todas / Descartar mano / Robar)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     if (cards.isNotEmpty()) {
-                        // Botón revelar todas si alguna está oculta
                         val unrevealedCount = cards.count { !it.isRevealed }
                         if (unrevealedCount > 0) {
                             IconButton(
@@ -118,7 +193,7 @@ fun DeckBlockContent(
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     cards.filter { !it.isRevealed }.forEach { onRevealCard(it.id) }
                                 },
-                                modifier = Modifier.size(32.dp)
+                                modifier = Modifier.size(34.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Visibility,
@@ -129,46 +204,55 @@ fun DeckBlockContent(
                             }
                         }
 
-                        // Botón de descarte masivo de mano
                         IconButton(
                             onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                cards.forEach { onDiscard(it.id) }
+                                showDiscardHandConfirm = true
                             },
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier.size(34.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.DeleteSweep,
                                 contentDescription = "Descartar mano",
-                                tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
+                                tint = MaterialTheme.colorScheme.error.copy(alpha = 0.85f),
                                 modifier = Modifier.size(18.dp)
                             )
                         }
                     }
 
-                    // Botón primario Robar
+                    // Botón Primario de Robo
                     Button(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             onDraw()
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = meta.color),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                        enabled = availableCount > 0,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = meta.color,
+                            disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                        ),
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
                         modifier = Modifier.height(34.dp)
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = "Robar", modifier = Modifier.size(16.dp))
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = if (availableCount > 0) "Robar" else "Agotado",
+                            modifier = Modifier.size(16.dp)
+                        )
                         Spacer(Modifier.width(4.dp))
-                        Text("Robar", style = MaterialTheme.typography.labelLarge)
+                        Text(
+                            if (availableCount > 0) "Robar" else "Agotado",
+                            style = MaterialTheme.typography.labelLarge
+                        )
                     }
                 }
             }
 
-            // Carrusel de cartas en mano (M y L)
+            // Zona 3: Carrusel de Cartas en Mano
             if (cards.isNotEmpty()) {
                 LazyRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp),
+                        .padding(vertical = 2.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(cards, key = { it.id }) { card ->
@@ -228,15 +312,15 @@ fun DeckBlockContent(
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(
-                            text = "Sin cartas en la mesa",
+                            text = if (availableCount > 0) "Mano vacía · Pulsa Robar para sacar una carta" else "Mazo agotado",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f)
                         )
                     }
                 }
             }
 
-            // Botones de acción extendidos en tamaño L (Grande)
+            // Barra de Controles Extendidos en tamaño L (Grande)
             if (item.size == SessionBoardItemSize.L) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -255,41 +339,40 @@ fun DeckBlockContent(
                     ) {
                         Icon(Icons.Default.Shuffle, contentDescription = "Barajar", modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text("Barajar", style = MaterialTheme.typography.labelLarge)
+                        Text("Barajar ($availableCount)", style = MaterialTheme.typography.labelMedium)
                     }
 
-                    OutlinedButton(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onReset()
-                        },
-                        border = BorderStroke(1.dp, meta.color.copy(alpha = 0.5f)),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = meta.color),
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(36.dp)
-                    ) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Reiniciar", modifier = Modifier.size(16.dp))
-                        Spacer(Modifier.width(6.dp))
-                        Text("Reiniciar", style = MaterialTheme.typography.labelLarge)
-                    }
-
-                    if (cards.isNotEmpty()) {
+                    if (discardCount > 0) {
                         OutlinedButton(
                             onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                cards.forEach { onDiscard(it.id) }
+                                onShuffleDiscards()
                             },
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.4f)),
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                            border = BorderStroke(1.dp, meta.color.copy(alpha = 0.5f)),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = meta.color),
                             modifier = Modifier
                                 .weight(1f)
                                 .height(36.dp)
                         ) {
-                            Icon(Icons.Default.DeleteSweep, contentDescription = "Descartar", modifier = Modifier.size(16.dp))
+                            Icon(Icons.Default.Refresh, contentDescription = "Recuperar", modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(6.dp))
-                            Text("Descartar", style = MaterialTheme.typography.labelLarge)
+                            Text("Recuperar ($discardCount)", style = MaterialTheme.typography.labelMedium)
                         }
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            showResetConfirm = true
+                        },
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.45f)),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(36.dp)
+                    ) {
+                        Icon(Icons.Default.RestartAlt, contentDescription = "Reiniciar", modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text("Reiniciar", style = MaterialTheme.typography.labelMedium)
                     }
                 }
             }
@@ -303,6 +386,7 @@ private fun CompactDeckBlockContent(
     meta: BoardBlockMeta,
     cards: List<Card>,
     availableCount: Int,
+    discardCount: Int = 0,
     aspectRatio: CardAspectRatio,
     backImagePath: String?,
     onDraw: () -> Unit,
@@ -339,14 +423,14 @@ private fun CompactDeckBlockContent(
                 Box(Modifier.fillMaxSize()) {
                     if (lastCard.isRevealed) {
                         AsyncImage(
-                            model = lastCard.activeFace.imagePath?.let { File(it) },
+                            model = com.deckapp.core.ui.util.toCoilModel(lastCard.activeFace.imagePath),
                             contentDescription = lastCard.title,
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
                         )
                     } else {
                         AsyncImage(
-                            model = backImagePath?.let { File(it) },
+                            model = com.deckapp.core.ui.util.toCoilModel(backImagePath),
                             contentDescription = "Dorso",
                             modifier = Modifier
                                 .fillMaxSize()
@@ -361,6 +445,22 @@ private fun CompactDeckBlockContent(
                                 .align(Alignment.Center)
                                 .size(14.dp)
                         )
+                    }
+
+                    if (cards.size > 1) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .background(meta.color, RoundedCornerShape(topStart = 4.dp))
+                                .padding(horizontal = 3.dp, vertical = 1.dp)
+                        ) {
+                            Text(
+                                text = "${cards.size}",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
                     }
                 }
             }
@@ -382,8 +482,9 @@ private fun CompactDeckBlockContent(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                val descText = if (discardCount > 0) " · $discardCount desc." else ""
                 Text(
-                    text = "${cards.size} en mano · $availableCount mazo",
+                    text = "${cards.size} en mano · $availableCount mazo$descText",
                     style = MaterialTheme.typography.labelSmall,
                     color = meta.color,
                     maxLines = 1,
@@ -415,13 +516,17 @@ private fun CompactDeckBlockContent(
 
                 FilledIconButton(
                     onClick = onDraw,
-                    colors = IconButtonDefaults.filledIconButtonColors(containerColor = meta.color),
+                    enabled = availableCount > 0,
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = meta.color,
+                        disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                    ),
                     modifier = Modifier.size(34.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Robar",
-                        tint = Color.White,
+                        tint = if (availableCount > 0) Color.White else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -443,22 +548,26 @@ private fun CompactDeckBlockContent(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "$availableCount restantes",
+                    text = if (availableCount > 0) "$availableCount restantes" else "Agotado",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = meta.color
+                    color = if (availableCount > 0) meta.color else MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
                 )
             }
 
             FilledIconButton(
                 onClick = onDraw,
-                colors = IconButtonDefaults.filledIconButtonColors(containerColor = meta.color),
+                enabled = availableCount > 0,
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = meta.color,
+                    disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                ),
                 modifier = Modifier.size(38.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Robar",
-                    tint = Color.White,
+                    tint = if (availableCount > 0) Color.White else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
                     modifier = Modifier.size(20.dp)
                 )
             }

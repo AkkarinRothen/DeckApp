@@ -30,6 +30,9 @@ class ExportDeckToZipUseCase @Inject constructor(
                 name = deck.name,
                 description = deck.description,
                 drawMode = deck.drawMode.name,
+                defaultContentMode = deck.defaultContentMode.name,
+                drawFaceDown = deck.drawFaceDown,
+                displayCount = deck.displayCount,
                 aspectRatio = deck.aspectRatio.name,
                 backImagePath = deck.backImagePath?.let { File(it).name },
                 tags = deck.tags.map { it.name },
@@ -43,7 +46,8 @@ class ExportDeckToZipUseCase @Inject constructor(
                             FaceManifest(
                                 name = face.name,
                                 fileName = face.imagePath?.let { File(it).name },
-                                contentMode = face.contentMode.name
+                                contentMode = face.contentMode.name,
+                                zones = face.zones
                             )
                         }
                     )

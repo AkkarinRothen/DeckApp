@@ -40,10 +40,18 @@ interface CardStackDao {
 
     @Query("DELETE FROM card_stacks WHERE id IN (:deckIds)")
     suspend fun bulkDeleteStacks(deckIds: List<Long>)
+
+    @Query("SELECT * FROM card_stacks")
+    suspend fun getAllStacksSync(): List<CardStackEntity>
+
+    @Query("SELECT * FROM card_stacks WHERE name = :name LIMIT 1")
+    suspend fun getStackByName(name: String): CardStackEntity?
 }
 
 @Dao
 interface CardDao {
+    @Update
+    suspend fun updateCard(card: CardEntity)
     @Query("SELECT * FROM cards WHERE stackId = :stackId ORDER BY sortOrder ASC")
     fun getCardsForStack(stackId: Long): Flow<List<CardEntity>>
 
@@ -61,6 +69,12 @@ interface CardDao {
 
     @Query("DELETE FROM cards WHERE id = :id")
     suspend fun deleteCard(id: Long)
+
+    @Query("SELECT * FROM cards WHERE stackId = :stackId ORDER BY sortOrder ASC")
+    suspend fun getCardsForStackSync(stackId: Long): List<CardEntity>
+
+    @Query("DELETE FROM cards WHERE stackId = :stackId")
+    suspend fun deleteCardsByStackId(stackId: Long)
 
     @Query("UPDATE cards SET isDrawn = :isDrawn, last_drawn_at = :lastDrawnAt WHERE id = :cardId")
     suspend fun updateDrawnState(cardId: Long, isDrawn: Boolean, lastDrawnAt: Long?)
@@ -125,6 +139,8 @@ interface CardDao {
 
 @Dao
 interface CardFaceDao {
+    @Update
+    suspend fun updateFace(face: CardFaceEntity)
     @Query("SELECT * FROM card_faces WHERE cardId = :cardId ORDER BY faceIndex ASC")
     fun getFacesForCard(cardId: Long): Flow<List<CardFaceEntity>>
 
@@ -139,6 +155,9 @@ interface CardFaceDao {
 
     @Query("DELETE FROM card_faces WHERE cardId = :cardId")
     suspend fun deleteFacesForCard(cardId: Long)
+
+    @Query("DELETE FROM card_faces WHERE cardId IN (SELECT id FROM cards WHERE stackId = :stackId)")
+    suspend fun deleteFacesForStack(stackId: Long)
 }
 
 @Dao
@@ -163,6 +182,9 @@ interface TagDao {
 
     @Query("SELECT t.* FROM tags t INNER JOIN card_tags ct ON t.id = ct.tagId WHERE ct.cardId = :cardId")
     suspend fun getTagsForCard(cardId: Long): List<TagEntity>
+
+    @Query("SELECT stackId FROM card_stack_tags WHERE tagId = :tagId")
+    suspend fun getStackIdsForTag(tagId: Long): List<Long>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertStackTagRef(ref: CardStackTagCrossRef)

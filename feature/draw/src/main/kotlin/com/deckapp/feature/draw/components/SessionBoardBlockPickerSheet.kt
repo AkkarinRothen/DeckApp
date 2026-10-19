@@ -1,4 +1,4 @@
-﻿package com.deckapp.feature.draw.components
+package com.deckapp.feature.draw.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -644,6 +644,14 @@ private fun buildBoardPickerEntries(
         subtitle = "Utilidad",
         preview = "Bloque rapido para tiradas y utilidades de mesa.",
         filter = BoardPickerFilter.UTILITIES
+    )
+    addStaticEntry(
+        type = SessionBoardItemType.MICROSETTING,
+        icon = Icons.Default.Public,
+        title = "Microsetting de Mundo",
+        subtitle = "The Story Engine: Deck of Worlds",
+        preview = "Cluster interactivo para combinar Región, Hito, Nombre, Origen, Atributo y Acontecimiento.",
+        filter = BoardPickerFilter.NARRATIVE
     )
 
     return entries

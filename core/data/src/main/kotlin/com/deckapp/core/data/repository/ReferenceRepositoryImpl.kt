@@ -319,6 +319,140 @@ class ReferenceRepositoryImpl @Inject constructor(
                     }
                 }
             }
+
+            // 6. Decks & Cards del paquete
+            if (backup.decks.isNotEmpty()) {
+                val cardStackDao = db.cardStackDao()
+                val cardDao = db.cardDao()
+                val cardFaceDao = db.cardFaceDao()
+                val tagDao = db.tagDao()
+
+                val existingTag = tagDao.getTagByName(packName)
+                val packTagId = existingTag?.id ?: tagDao.insertTag(
+                    TagEntity(
+                        id = 0,
+                        name = packName,
+                        color = 0xFF2E7D32.toInt()
+                    )
+                )
+
+                val deckIdMap = mutableMapOf<Long, Long>()
+                val existingStacks = cardStackDao.getAllStacksSync()
+                // A Deck of Worlds reimport must retain card IDs, draws and session history.
+                val preserveStoryCards = packName == "story_engine_deck_of_worlds.json"
+                val existingStoryByImage = mutableMapOf<String, Pair<CardEntity, CardFaceEntity>>()
+                if (preserveStoryCards) {
+                    backup.decks.mapNotNull { dto -> existingStacks.find { it.name == dto.name }?.id }
+                        .forEach { stackId ->
+                            cardDao.getCardsForStackSync(stackId).forEach { card ->
+                                val face = cardFaceDao.getFacesForCardSync(card.id).firstOrNull()
+                                face?.let { existingFace ->
+                                    existingFace.imagePath?.let { path ->
+                                        existingStoryByImage[path] = card to existingFace
+                                    }
+                                }
+                            }
+                        }
+                }
+
+                backup.decks.forEach { dto ->
+                    val existing = existingStacks.find { it.name == dto.name }
+                    val stackEntity = CardStackEntity(
+                        id = existing?.id ?: 0,
+                        name = dto.name,
+                        type = dto.type,
+                        description = dto.description,
+                        coverImagePath = dto.coverImagePath,
+                        sourceFolderPath = dto.sourceFolderPath,
+                        defaultContentMode = dto.defaultContentMode,
+                        drawMode = dto.drawMode,
+                        drawFaceDown = dto.drawFaceDown,
+                        backImagePath = dto.backImagePath,
+                        displayCount = dto.displayCount,
+                        aspectRatio = dto.aspectRatio,
+                        isArchived = dto.isArchived,
+                        sortOrder = dto.sortOrder,
+                        createdAt = existing?.createdAt ?: System.currentTimeMillis()
+                    )
+                    val stackId = if (existing == null) {
+                        cardStackDao.insertStack(stackEntity)
+                    } else {
+                        cardStackDao.updateStack(stackEntity)
+                        existing.id
+                    }
+                    deckIdMap[dto.id] = stackId
+                    tagDao.insertStackTagRef(CardStackTagCrossRef(stackId, packTagId))
+
+                    if (existing != null && !preserveStoryCards) {
+                        cardFaceDao.deleteFacesForStack(existing.id)
+                        cardDao.deleteCardsByStackId(existing.id)
+                    }
+                }
+
+                val cardIdMap = mutableMapOf<Long, Long>()
+                backup.cards.forEach { cardDto ->
+                    val newStackId = deckIdMap[cardDto.stackId] ?: return@forEach
+                    val sourceFace = backup.cardFaces.firstOrNull { it.cardId == cardDto.id }
+                    val preserved = if (preserveStoryCards) sourceFace?.imagePath?.let(existingStoryByImage::get) else null
+                    if (preserved != null) {
+                        val oldCard = preserved.first
+                        cardDao.updateCard(oldCard.copy(
+                            stackId = newStackId,
+                            originDeckId = cardDto.originDeckId?.let { deckIdMap[it] } ?: newStackId,
+                            title = if (oldCard.title.matches(Regex(".*#[0-9]+"))) cardDto.title else oldCard.title,
+                            suit = cardDto.suit,
+                            sortOrder = cardDto.sortOrder
+                        ))
+                        cardIdMap[cardDto.id] = oldCard.id
+                        tagDao.insertCardTagRef(CardTagCrossRef(oldCard.id, packTagId))
+                        return@forEach
+                    }
+                    val cardEntity = CardEntity(
+                        id = 0,
+                        stackId = newStackId,
+                        originDeckId = cardDto.originDeckId?.let { deckIdMap[it] } ?: newStackId,
+                        title = cardDto.title,
+                        suit = cardDto.suit,
+                        value = cardDto.value,
+                        currentFaceIndex = cardDto.currentFaceIndex,
+                        currentRotation = cardDto.currentRotation,
+                        isReversed = cardDto.isReversed,
+                        isDrawn = cardDto.isDrawn,
+                        isRevealed = cardDto.isRevealed,
+                        sortOrder = cardDto.sortOrder,
+                        linkedTableId = cardDto.linkedTableId?.let { randomTableIdMap[it] ?: it },
+                        dmNotes = cardDto.dmNotes,
+                        lastDrawnAt = cardDto.lastDrawnAt
+                    )
+                    val cardId = cardDao.insertCard(cardEntity)
+                    cardIdMap[cardDto.id] = cardId
+                    tagDao.insertCardTagRef(CardTagCrossRef(cardId, packTagId))
+                }
+
+                backup.cardFaces.forEach { faceDto ->
+                    val newCardId = cardIdMap[faceDto.cardId] ?: return@forEach
+                    val preservedFace = if (preserveStoryCards) faceDto.imagePath?.let(existingStoryByImage::get)?.second else null
+                    if (preservedFace != null) {
+                        cardFaceDao.updateFace(preservedFace.copy(
+                            name = if (preservedFace.name.matches(Regex(".*#[0-9]+"))) faceDto.name else preservedFace.name,
+                            contentMode = faceDto.contentMode,
+                            zonesJson = if (preservedFace.zonesJson == "[]") faceDto.zonesJson else preservedFace.zonesJson
+                        ))
+                        return@forEach
+                    }
+                    val faceEntity = CardFaceEntity(
+                        id = 0,
+                        cardId = newCardId,
+                        faceIndex = faceDto.faceIndex,
+                        name = faceDto.name,
+                        imagePath = faceDto.imagePath,
+                        contentMode = faceDto.contentMode,
+                        zonesJson = faceDto.zonesJson,
+                        reversedImagePath = faceDto.reversedImagePath
+                    )
+                    cardFaceDao.insertFace(faceEntity)
+                }
+            }
         }
     }
 
@@ -466,6 +600,13 @@ class ReferenceRepositoryImpl @Inject constructor(
             db.npcDao().deleteNpcsByTagName(packName)
             val tag = db.tagDao().getTagByName(packName)
             if (tag != null) {
+                val taggedStackIds = db.tagDao().getStackIdsForTag(tag.id)
+                taggedStackIds.forEach { stackId ->
+                    db.cardFaceDao().deleteFacesForStack(stackId)
+                    db.cardDao().deleteCardsByStackId(stackId)
+                    db.tagDao().deleteTagsForStack(stackId)
+                    db.cardStackDao().deleteStack(stackId)
+                }
                 db.tagDao().deleteTag(tag.id)
             }
             val packSlug = packName.lowercase().replace(" ", "_")

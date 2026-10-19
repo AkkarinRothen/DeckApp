@@ -32,6 +32,7 @@ import com.deckapp.core.model.DiceRollResult
 import com.deckapp.core.model.Encounter
 import com.deckapp.core.model.HexPoi
 import com.deckapp.core.model.HexTile
+import com.deckapp.core.model.MicrosettingSlotType
 import com.deckapp.core.model.MythicSession
 import com.deckapp.core.model.Npc
 import com.deckapp.core.model.PlayerInitiativeParticipant
@@ -114,6 +115,10 @@ internal fun SessionBoardPagerContent(
     deckBackImages: Map<Long, String?>,
     onDrawCardFromDeck: (Long) -> Unit,
     onShuffleDeck: (Long) -> Unit,
+    onShuffleOnly: (Long) -> Unit = onShuffleDeck,
+    onShuffleDiscards: (Long) -> Unit = onShuffleDeck,
+    onCardClick: (Long) -> Unit = {},
+    piledByDeck: Map<Long, Int> = emptyMap(),
     onResetDeck: (Long) -> Unit,
     onDiscardCard: (Long) -> Unit,
     onRevealCard: (Long) -> Unit,
@@ -170,7 +175,10 @@ internal fun SessionBoardPagerContent(
     onWorkspaceLayoutChanged: (SessionBoardView, com.deckapp.core.model.BoardViewMemory) -> Unit = { _, _ -> },
     workspaceActions: @Composable () -> Unit = {},
     soloSceneHeader: @Composable () -> Unit = {},
-    onAppendToNotes: (String) -> Unit = {}
+    onAppendToNotes: (String) -> Unit = {},
+    onGenerateMicrosetting: (Long) -> Unit = {},
+    onRotateMicrosettingSlot: (Long, MicrosettingSlotType) -> Unit = { _, _ -> },
+    onRedrawMicrosettingSlot: (Long, MicrosettingSlotType) -> Unit = { _, _ -> }
 ) {
     val boardBounds = remember { mutableStateMapOf<Long, Rect>() }
     val groupBounds = remember { mutableStateMapOf<Long, Rect>() }
@@ -289,9 +297,13 @@ internal fun SessionBoardPagerContent(
             onMapTile = onMapTile,
             onDrawCardFromDeck = onDrawCardFromDeck,
             onShuffleDeck = onShuffleDeck,
+            onShuffleOnly = onShuffleOnly,
+            onShuffleDiscards = onShuffleDiscards,
             onResetDeck = onResetDeck,
             onDiscardCard = onDiscardCard,
             onRevealCard = onRevealCard,
+            onCardClick = onCardClick,
+            piledByDeck = piledByDeck,
             onUpdateWikiEntry = onUpdateWikiEntry,
             onRollTable = onRollTable,
             onTagClicked = onTagClicked,
@@ -311,7 +323,10 @@ internal fun SessionBoardPagerContent(
             onRollBoardMythicFate = onRollBoardMythicFate,
             onAskBoardMythicQuestion = onAskBoardMythicQuestion,
             onRollBoardMythicEvent = onRollBoardMythicEvent,
-            onAppendToNotes = onAppendToNotes
+            onAppendToNotes = onAppendToNotes,
+            onGenerateMicrosetting = onGenerateMicrosetting,
+            onRotateMicrosettingSlot = onRotateMicrosettingSlot,
+            onRedrawMicrosettingSlot = onRedrawMicrosettingSlot
         )
     }
 
@@ -428,6 +443,7 @@ internal fun SessionBoardPagerContent(
                             SessionBoardItemType.WIKI_MAP -> wikiEntries.firstOrNull { it.id == item.resourceId }?.title ?: "Lugar"
                             SessionBoardItemType.MAP -> linkedMapName ?: "Mapa"
                             SessionBoardItemType.REFERENCE -> "Referencias"
+                            SessionBoardItemType.MICROSETTING -> "Microsetting"
                         }
                     },
                     workspaceMemory = workspaceMemory,

@@ -333,7 +333,7 @@ fun DeckDetailScreen(
                     val coverPath = deck.coverImagePath
                     if (coverPath != null) {
                         AsyncImage(
-                            model = File(coverPath),
+                            model = com.deckapp.core.ui.util.toCoilModel(coverPath),
                             contentDescription = deck.name,
                             modifier = Modifier.fillMaxWidth().height(180.dp),
                             contentScale = ContentScale.Crop
@@ -882,7 +882,7 @@ private fun MergeDeckDialog(
                                 ) {
                                     if (deck.coverImagePath != null) {
                                         AsyncImage(
-                                            model = File(deck.coverImagePath!!),
+                                            model = com.deckapp.core.ui.util.toCoilModel(deck.coverImagePath),
                                             contentDescription = null,
                                             modifier = Modifier.size(40.dp),
                                             contentScale = ContentScale.Crop

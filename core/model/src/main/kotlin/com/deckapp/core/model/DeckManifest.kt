@@ -7,11 +7,14 @@ data class DeckManifest(
     val name: String,
     val description: String = "",
     val drawMode: String = "TOP",
+    val defaultContentMode: String = "IMAGE_ONLY",
+    val drawFaceDown: Boolean = false,
+    val displayCount: Boolean = true,
     val aspectRatio: String = "STANDARD",
     val backImagePath: String? = null,
     val tags: List<String> = emptyList(),
     val cards: List<CardManifest> = emptyList(),
-    val exportVersion: Int = 1
+    val exportVersion: Int = 2
 )
 
 @Serializable
@@ -27,5 +30,6 @@ data class CardManifest(
 data class FaceManifest(
     val name: String,
     val fileName: String?,
-    val contentMode: String = "CARDS_TTRPG"
+    val contentMode: String = "IMAGE_ONLY",
+    val zones: List<ContentZone> = emptyList()
 )

@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.StickyNote2
 import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Casino
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
@@ -68,6 +69,7 @@ fun CardViewScreen(
     var showCompass by remember { mutableStateOf(false) }
     // Sprint 15: Sheet de notas
     var showNotesSheet by remember { mutableStateOf(false) }
+    var showOptionPicker by remember { mutableStateOf(false) }
     
     // Resetear al cambiar de carta o de cara
     LaunchedEffect(uiState.card?.id, uiState.card?.currentFaceIndex) {
@@ -96,6 +98,12 @@ fun CardViewScreen(
                 },
                 actions = {
                     uiState.card?.let { card ->
+                        if (card.activeFace.contentMode == CardContentMode.TOP_BOTTOM_SPLIT ||
+                            card.activeFace.contentMode == CardContentMode.FOUR_EDGE_CUES) {
+                            IconButton(onClick = { showOptionPicker = true }) {
+                                Icon(Icons.Default.Casino, contentDescription = "Elegir o tirar una opción")
+                            }
+                        }
                         // V-6: toggle "ver todas las caras"
                         if (card.faces.size > 1) {
                             IconButton(onClick = { showAllFaces = !showAllFaces; showCompass = false }) {
@@ -263,7 +271,10 @@ fun CardViewScreen(
                     ) {
                         Column {
                             when (face.contentMode) {
-                                CardContentMode.TOP_BOTTOM_SPLIT -> TopBottomZonePanel(zones = face.zones)
+                                CardContentMode.TOP_BOTTOM_SPLIT -> TopBottomZonePanel(
+                                    zones = face.zones,
+                                    selectedIndex = if (card.currentRotation == 180) 1 else 0
+                                )
                                 CardContentMode.FOUR_QUADRANT -> FourQuadrantZonePanel(
                                     zones = face.zones, selectedQuadrant = selectedQuadrant
                                 )
@@ -317,6 +328,38 @@ fun CardViewScreen(
             isSaving = uiState.isSavingNotes,
             onNotesChange = { viewModel.updateNotes(it) },
             onDismiss = { showNotesSheet = false }
+        )
+    }
+    if (showOptionPicker && uiState.card != null) {
+        val card = uiState.card!!
+        val fourOptions = card.activeFace.contentMode == CardContentMode.FOUR_EDGE_CUES
+        val labels = if (fourOptions) listOf("Norte", "Este", "Sur", "Oeste")
+            else listOf("Superior", "Inferior")
+        fun choose(index: Int) {
+            viewModel.setRotation(if (fourOptions) index * 90 else index * 180)
+            showCompass = fourOptions
+            showOptionPicker = false
+        }
+        AlertDialog(
+            onDismissRequest = { showOptionPicker = false },
+            title = { Text("Opciones de la carta") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Elegí una pista o resolvela al azar. La imagen conserva el texto original de cada zona.")
+                    labels.forEachIndexed { index, label ->
+                        OutlinedButton(onClick = { choose(index) }, modifier = Modifier.fillMaxWidth()) {
+                            val text = card.activeFace.zones.getOrNull(index)?.text.orEmpty()
+                            Text(if (text.isBlank()) label else "$label · $text", maxLines = 2)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { choose(labels.indices.random()) }) { Text("Tirar d${labels.size}") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showOptionPicker = false }) { Text("Cerrar") }
+            }
         )
     }
 }
@@ -492,7 +535,7 @@ private fun PlayerViewOverlay(face: CardFace, cardTitle: String, onDismiss: () -
         val imagePath = face.imagePath
         if (imagePath != null) {
             AsyncImage(
-                model = File(imagePath),
+                model = com.deckapp.core.ui.util.toCoilModel(imagePath),
                 contentDescription = cardTitle,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Fit
@@ -556,7 +599,7 @@ private fun FaceStrip(
             ) {
                 if (face.imagePath != null) {
                     coil.compose.AsyncImage(
-                        model = java.io.File(face.imagePath!!),
+                        model = com.deckapp.core.ui.util.toCoilModel(face.imagePath),
                         contentDescription = face.name,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
@@ -736,7 +779,7 @@ private fun CardFaceImage(face: CardFace, title: String) {
     val imagePath = face.imagePath
     if (imagePath != null) {
         AsyncImage(
-            model = File(imagePath),
+            model = com.deckapp.core.ui.util.toCoilModel(imagePath),
             contentDescription = title,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Fit
@@ -849,7 +892,7 @@ private fun FourQuadrantZonePanel(zones: List<ContentZone>, selectedQuadrant: In
 
 /** Panel de dos zonas para [CardContentMode.TOP_BOTTOM_SPLIT]. */
 @Composable
-private fun TopBottomZonePanel(zones: List<ContentZone>) {
+private fun TopBottomZonePanel(zones: List<ContentZone>, selectedIndex: Int) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceContainerHigh
@@ -862,10 +905,10 @@ private fun TopBottomZonePanel(zones: List<ContentZone>) {
         ) {
             val labels = listOf("Superior", "Inferior")
             zones.take(2).forEachIndexed { i, zone ->
-                if (zone.text.isNotBlank()) {
                     Surface(
                         modifier = Modifier.weight(1f),
-                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        color = if (i == selectedIndex) MaterialTheme.colorScheme.primaryContainer
+                            else MaterialTheme.colorScheme.surfaceContainer,
                         shape = MaterialTheme.shapes.small
                     ) {
                         Column(modifier = Modifier.padding(8.dp)) {
@@ -874,18 +917,19 @@ private fun TopBottomZonePanel(zones: List<ContentZone>) {
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary
                             )
-                            Spacer(Modifier.height(4.dp))
-                            MarkdownText(
-                                markdown = zone.text,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .verticalScroll(rememberScrollState())
-                                    .heightIn(max = 120.dp),
-                                style = MaterialTheme.typography.bodySmall
-                            )
+                            if (zone.text.isNotBlank()) {
+                                Spacer(Modifier.height(4.dp))
+                                MarkdownText(
+                                    markdown = zone.text,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .verticalScroll(rememberScrollState())
+                                        .heightIn(max = 120.dp),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
                         }
                     }
-                }
             }
         }
     }

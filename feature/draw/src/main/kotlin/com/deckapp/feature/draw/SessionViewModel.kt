@@ -60,6 +60,9 @@ data class SessionUiState(
     val tablesInSession: List<RandomTable> = emptyList(),
     val showResourceManager: Boolean = false,
     val showSessionConfig: Boolean = false,
+    val showDeckPicker: Boolean = false,
+    val showStarterPackDialog: Boolean = false,
+    val availableStarterPacks: List<com.deckapp.feature.reference.StarterPackInfo> = emptyList(),
     val availableSystems: List<String> = emptyList(),
     // C-5 — Animación de barajar
     val isShuffling: Boolean = false,
@@ -140,7 +143,10 @@ data class SessionUiState(
     val showChoirGuide: Boolean = false,
     val choirGuideSourcePage: Int? = null,
     val choirGuideTableId: Long? = null,
-    val choirGuideError: String? = null
+    val choirGuideError: String? = null,
+    val showMicrosettingBuilder: Boolean = false,
+    val activeMicrosetting: com.deckapp.core.model.MicrosettingCluster? = null,
+    val editingMicrosettingBoardItemId: Long? = null
 )
 
 enum class SidebarTool {
@@ -316,6 +322,15 @@ class SessionViewModel @Inject constructor(
         onDrawCard = { drawCardFromDeck(it) },
         onUpdateBoardMythicChaos = { updateBoardMythicChaos(it) },
         onFocusScene = { focusScene(it) }
+    )
+
+    val microsettingDelegate = com.deckapp.feature.draw.delegates.MicrosettingDelegate(
+        sessionId = sessionId,
+        ui = _uiState,
+        scope = viewModelScope,
+        cardRepository = cardRepository,
+        notesMutex = notesMutex,
+        onAppendToNotes = { appendToNotes(it) }
     )
 
     // Un flujo que emite la hora actual cada minuto para cálculos reactivos
@@ -755,6 +770,72 @@ class SessionViewModel @Inject constructor(
 
     fun openSessionConfig() = _uiState.update { it.copy(showSessionConfig = true) }
     fun dismissSessionConfig() = _uiState.update { it.copy(showSessionConfig = false) }
+
+    fun openDeckPicker() = _uiState.update { it.copy(showDeckPicker = true) }
+    fun closeDeckPicker() = _uiState.update { it.copy(showDeckPicker = false) }
+
+    private var wasDeckPickerOpenBeforeStarterPack = false
+
+    fun openStarterPackDialog() {
+        wasDeckPickerOpenBeforeStarterPack = _uiState.value.showDeckPicker
+        viewModelScope.launch {
+            try {
+                val availableAssets = context.assets.list("starter_packs") ?: emptyArray()
+                val installed = referenceRepository.getInstalledPackNames().first()
+                val packInfos = availableAssets.filter { it.endsWith(".json") }.map { fileName ->
+                    val displayName = when (fileName) {
+                        "choir_of_flesh.json" -> "Choir of Flesh (El Coro de la Carne)"
+                        "story_engine_deck_of_worlds.json" -> "The Story Engine: Deck of Worlds"
+                        "dnd_5e_2024.json" -> "D&D 5e (2024)"
+                        "twilight_2000_4e.json" -> "Twilight 2000 4e"
+                        else -> fileName.removeSuffix(".json").replace("_", " ").split(" ")
+                            .joinToString(" ") { it.replaceFirstChar { c -> c.titlecase() } }
+                    }
+                    com.deckapp.feature.reference.StarterPackInfo(
+                        assetName = fileName,
+                        displayName = displayName,
+                        isInstalled = installed.contains(fileName)
+                    )
+                }
+                _uiState.update { it.copy(availableStarterPacks = packInfos, showStarterPackDialog = true, showDeckPicker = false) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(snackbarMessage = "Error al cargar packs: ${e.message}") }
+            }
+        }
+    }
+
+    fun closeStarterPackDialog() {
+        val shouldRestoreDeckPicker = wasDeckPickerOpenBeforeStarterPack
+        wasDeckPickerOpenBeforeStarterPack = false
+        _uiState.update { it.copy(showStarterPackDialog = false, showDeckPicker = shouldRestoreDeckPicker) }
+    }
+
+    fun installStarterPack(assetName: String) {
+        viewModelScope.launch {
+            try {
+                val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+                val jsonString = context.assets.open("starter_packs/$assetName").bufferedReader().use { it.readText() }.trimStart('\uFEFF')
+                val pack = json.decodeFromString<com.deckapp.core.model.backup.FullBackupDto>(jsonString)
+                referenceRepository.importStarterPack(pack, assetName)
+                openStarterPackDialog()
+                _uiState.update { it.copy(snackbarMessage = "Pack '$assetName' instalado con éxito") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(snackbarMessage = "Error al instalar: ${e.message}") }
+            }
+        }
+    }
+
+    fun removeStarterPack(assetName: String) {
+        viewModelScope.launch {
+            try {
+                referenceRepository.removeStarterPack(assetName)
+                openStarterPackDialog()
+                _uiState.update { it.copy(snackbarMessage = "Pack eliminado") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(snackbarMessage = "Error al eliminar: ${e.message}") }
+            }
+        }
+    }
 
     fun toggleDeckInSession(deckId: Long) = deckDelegate.toggleDeckInSession(deckId)
 
@@ -1249,6 +1330,8 @@ class SessionViewModel @Inject constructor(
         shufflePileBack(stackId)
     }
 
+    fun shuffleDeckOnly(stackId: Long) = deckDelegate.shuffleDeckOnly(stackId)
+
     // --- Board Bento Actions (Delegated to BoardDelegate) ---
 
     fun addBoardBlock(
@@ -1322,5 +1405,30 @@ class SessionViewModel @Inject constructor(
     fun addNpcToCombat(npc: Npc) = combatDelegate.addNpcToCombat(npc)
 
     fun logNpcToDiary(npc: Npc) = combatDelegate.logNpcToDiary(npc)
+
+    // --- The Story Engine: Deck of Worlds (Microsettings) ---
+
+    fun openMicrosettingBuilder(item: SessionBoardItem? = null) = microsettingDelegate.openBuilder(item)
+
+    fun closeMicrosettingBuilder() = microsettingDelegate.closeBuilder()
+
+    fun generateMicrosetting(targetItemId: Long? = null) = microsettingDelegate.generateCluster(targetItemId)
+
+    fun rotateMicrosettingSlot(slotType: com.deckapp.core.model.MicrosettingSlotType, targetItemId: Long? = null) =
+        microsettingDelegate.rotateSlot(slotType, targetItemId)
+
+    fun setMicrosettingSlotRotation(slotType: com.deckapp.core.model.MicrosettingSlotType, rotation: Int, targetItemId: Long? = null) =
+        microsettingDelegate.setSlotRotation(slotType, rotation, targetItemId)
+
+    fun redrawMicrosettingSlot(slotType: com.deckapp.core.model.MicrosettingSlotType, targetItemId: Long? = null) =
+        microsettingDelegate.redrawSlot(slotType, targetItemId)
+
+    fun copyMicrosettingToNotes(cluster: com.deckapp.core.model.MicrosettingCluster? = null) =
+        microsettingDelegate.copyToNotes(cluster)
+
+    fun saveMicrosettingToBoard(cluster: com.deckapp.core.model.MicrosettingCluster? = null, targetItemId: Long? = null) =
+        microsettingDelegate.saveToBoard(cluster, targetItemId) { type, resId ->
+            boardDelegate.addBoardBlock(type, resId)
+        }
 }
 

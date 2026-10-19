@@ -98,6 +98,9 @@ fun BoardBlockCard(
     deckBackImages: Map<Long, String?> = emptyMap(),
     onDrawCardFromDeck: (Long) -> Unit = {},
     onShuffleDeck: (Long) -> Unit = {},
+    onShuffleOnly: (Long) -> Unit = onShuffleDeck,
+    onShuffleDiscards: (Long) -> Unit = onShuffleDeck,
+    piledByDeck: Map<Long, Int> = emptyMap(),
     onResetDeck: (Long) -> Unit = {},
     onDiscardCard: (Long) -> Unit = {},
     onRevealCard: (Long) -> Unit = {},
@@ -153,7 +156,10 @@ fun BoardBlockCard(
     onRollBoardMythicFate: (ProbabilityLevel) -> Unit = {},
     onAskBoardMythicQuestion: (ProbabilityLevel, String) -> Unit = { _, _ -> },
     onRollBoardMythicEvent: () -> Unit = {},
-    onAppendToNotes: (String) -> Unit = {}
+    onAppendToNotes: (String) -> Unit = {},
+    onGenerateMicrosetting: ((Long) -> Unit)? = null,
+    onRotateMicrosettingSlot: ((Long, MicrosettingSlotType) -> Unit)? = null,
+    onRedrawMicrosettingSlot: ((Long, MicrosettingSlotType) -> Unit)? = null
 ) {
     val linkedClock = if (item.type == SessionBoardItemType.CLOCK) {
         tensionClocks.find { it.id == item.resourceId }
@@ -266,6 +272,9 @@ fun BoardBlockCard(
             deckBackImages = deckBackImages,
             onDrawCardFromDeck = onDrawCardFromDeck,
             onShuffleDeck = onShuffleDeck,
+            onShuffleOnly = onShuffleOnly,
+            onShuffleDiscards = onShuffleDiscards,
+            piledByDeck = piledByDeck,
             onResetDeck = onResetDeck,
             onDiscardCard = onDiscardCard,
             onRevealCard = onRevealCard,
@@ -300,7 +309,10 @@ fun BoardBlockCard(
             onRollBoardMythicFate = onRollBoardMythicFate,
             onAskBoardMythicQuestion = onAskBoardMythicQuestion,
             onRollBoardMythicEvent = onRollBoardMythicEvent,
-            onAppendToNotes = onAppendToNotes
+            onAppendToNotes = onAppendToNotes,
+            onGenerateMicrosetting = onGenerateMicrosetting,
+            onRotateMicrosettingSlot = onRotateMicrosettingSlot,
+            onRedrawMicrosettingSlot = onRedrawMicrosettingSlot
         )
     }
 

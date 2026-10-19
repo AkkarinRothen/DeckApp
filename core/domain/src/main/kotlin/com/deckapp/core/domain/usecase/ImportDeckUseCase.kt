@@ -91,12 +91,21 @@ class ImportDeckUseCase @Inject constructor(
                         }
 
                         val coverPath = importFromManifest(allFiles, manifest, deckId, defaultContentMode, onProgress)
+                        val backPath = manifest.backImagePath?.let { fileName ->
+                            allFiles.firstOrNull { it.second == fileName }?.let { (imageUri, name) ->
+                                fileRepository.copyImageToInternal(imageUri, deckId, name)
+                            }
+                        }
                         if (coverPath != null) {
                             cardRepository.updateStack(stack.copy(
                                 id = deckId, 
                                 coverImagePath = coverPath,
                                 description = manifest.description,
                                 drawMode = DrawMode.valueOf(manifest.drawMode),
+                                defaultContentMode = CardContentMode.valueOf(manifest.defaultContentMode),
+                                drawFaceDown = manifest.drawFaceDown,
+                                displayCount = manifest.displayCount,
+                                backImagePath = backPath,
                                 aspectRatio = CardAspectRatio.valueOf(manifest.aspectRatio)
                             ))
                         }
@@ -169,7 +178,7 @@ class ImportDeckUseCase @Inject constructor(
             onProgress = onProgress,
             saveCard = { frontPath, backFaces, index ->
                 val faces = listOf(
-                    CardFace(name = "Frente", imagePath = frontPath, contentMode = contentMode)
+                    CardFace(name = "Frente", imagePath = frontPath, contentMode = contentMode, zones = emptyZones(contentMode))
                 ) + backFaces
                 val card = Card(
                     stackId = deckId,
@@ -222,7 +231,7 @@ class ImportDeckUseCase @Inject constructor(
                             name = "Frente",
                             imagePath = internalPath,
                             contentMode = contentMode,
-                            zones = emptyList()
+                            zones = emptyZones(contentMode)
                         )
                     ),
                     sortOrder = savedCount,
@@ -265,7 +274,10 @@ class ImportDeckUseCase @Inject constructor(
                 CardFace(
                     name = faceManifest.name,
                     imagePath = internalPath,
-                    contentMode = CardContentMode.valueOf(faceManifest.contentMode)
+                    contentMode = CardContentMode.valueOf(faceManifest.contentMode),
+                    zones = faceManifest.zones.ifEmpty {
+                        emptyZones(CardContentMode.valueOf(faceManifest.contentMode))
+                    }
                 )
             }
 
@@ -288,4 +300,14 @@ class ImportDeckUseCase @Inject constructor(
 
         return coverPath
     }
+
+    private fun emptyZones(mode: CardContentMode): List<ContentZone> = List(
+        when (mode) {
+            CardContentMode.IMAGE_ONLY -> 0
+            CardContentMode.IMAGE_WITH_TEXT, CardContentMode.DOUBLE_SIDED_FULL -> 1
+            CardContentMode.REVERSIBLE, CardContentMode.TOP_BOTTOM_SPLIT,
+            CardContentMode.LEFT_RIGHT_SPLIT -> 2
+            CardContentMode.FOUR_EDGE_CUES, CardContentMode.FOUR_QUADRANT -> 4
+        }
+    ) { ContentZone() }
 }

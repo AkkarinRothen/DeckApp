@@ -159,7 +159,29 @@ fun SessionDialogsHost(
             allDecks = uiState.allDecks,
             sessionDeckRefs = uiState.deckRefs,
             onToggleDeck = viewModel::toggleDeckInSession,
+            onOpenDeckPicker = viewModel::openDeckPicker,
             onDismiss = viewModel::dismissSessionConfig
+        )
+    }
+
+    if (uiState.showDeckPicker) {
+        SessionDeckPickerSheet(
+            allDecks = uiState.allDecks,
+            activeDeckIds = uiState.deckRefs.map { it.stackId }.toSet(),
+            deckCardCounts = uiState.deckCardCounts,
+            cardsInHandByDeck = uiState.handByDeck,
+            onToggleDeck = viewModel::toggleDeckInSession,
+            onOpenStarterPacks = viewModel::openStarterPackDialog,
+            onDismiss = viewModel::closeDeckPicker
+        )
+    }
+
+    if (uiState.showStarterPackDialog) {
+        com.deckapp.feature.reference.StarterPackDialog(
+            packs = uiState.availableStarterPacks,
+            onDismiss = viewModel::closeStarterPackDialog,
+            onInstall = viewModel::installStarterPack,
+            onRemove = viewModel::removeStarterPack
         )
     }
 
@@ -242,6 +264,19 @@ fun SessionDialogsHost(
             onAddNpcToCombat = viewModel::addSpotlightNpcToCombat,
             onCopyToDiary = viewModel::copySpotlightToDiary,
             onDismiss = viewModel::closeSpotlight
+        )
+    }
+
+    if (uiState.showMicrosettingBuilder) {
+        MicrosettingBuilderDialog(
+            cluster = uiState.activeMicrosetting,
+            onDismiss = viewModel::closeMicrosettingBuilder,
+            onGenerateAll = { viewModel.generateMicrosetting(uiState.editingMicrosettingBoardItemId) },
+            onRotateSlot = { slot -> viewModel.rotateMicrosettingSlot(slot, uiState.editingMicrosettingBoardItemId) },
+            onSetSlotRotation = { slot, rot -> viewModel.setMicrosettingSlotRotation(slot, rot, uiState.editingMicrosettingBoardItemId) },
+            onRedrawSlot = { slot -> viewModel.redrawMicrosettingSlot(slot, uiState.editingMicrosettingBoardItemId) },
+            onCopyToNotes = { cluster -> viewModel.copyMicrosettingToNotes(cluster) },
+            onSaveToBoard = { cluster -> viewModel.saveMicrosettingToBoard(cluster, uiState.editingMicrosettingBoardItemId) }
         )
     }
 

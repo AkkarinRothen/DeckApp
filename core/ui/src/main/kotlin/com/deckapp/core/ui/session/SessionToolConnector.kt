@@ -36,6 +36,7 @@ data class SessionToolContext(
     val onRollDice: (String) -> Unit = {},
     val onPrepareSceneForBoard: (Long) -> Unit = {},
     val isSidebarOpen: Boolean = false,
+    val onCardClick: (Long) -> Unit = {},
 )
 
 /**

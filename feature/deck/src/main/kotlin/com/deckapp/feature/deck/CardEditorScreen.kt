@@ -291,7 +291,7 @@ private fun FaceImagePicker(
     if (imagePath != null) {
         Box(modifier = Modifier.fillMaxWidth()) {
             AsyncImage(
-                model = File(imagePath),
+                model = com.deckapp.core.ui.util.toCoilModel(imagePath),
                 contentDescription = "Imagen de la cara",
                 modifier = Modifier
                     .fillMaxWidth()

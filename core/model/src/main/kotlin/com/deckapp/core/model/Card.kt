@@ -61,6 +61,8 @@ data class Card(
                 if (isReversed) activeFace.zones.getOrNull(1) else activeFace.zones.getOrNull(0)
             CardContentMode.FOUR_EDGE_CUES ->
                 activeFace.zones.getOrNull(currentRotation / 90)
+            CardContentMode.TOP_BOTTOM_SPLIT ->
+                activeFace.zones.getOrNull(if (currentRotation == 180) 1 else 0)
             else -> activeFace.zones.firstOrNull()
         }
 }

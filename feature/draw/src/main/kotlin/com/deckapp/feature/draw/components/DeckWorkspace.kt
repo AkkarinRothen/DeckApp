@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Style
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,6 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.deckapp.core.model.Card
 import com.deckapp.core.model.CardAspectRatio
+import com.deckapp.core.ui.components.DeckButton
+import com.deckapp.core.ui.components.DeckTextButton
 import com.deckapp.feature.draw.SessionUiState
 
 @Composable
@@ -31,33 +34,95 @@ fun DeckWorkspace(
     onDiscard: (Long) -> Unit,
     onRevealCard: (Long) -> Unit,
     onRollTable: (Long) -> Unit,
+    onOpenDeckPicker: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(uiState.deckRefs, key = { it.stackId }) { ref ->
-            val cardsInCluster = uiState.handByDeck[ref.stackId] ?: emptyList()
-            DeckClusterItem(
-                deckName = uiState.deckNames[ref.stackId] ?: "Mazo",
-                cards = cardsInCluster,
-                availableCount = uiState.deckCardCounts[ref.stackId] ?: 0,
-                isCollapsed = ref.stackId in uiState.collapsedDeckIds,
-                showTitle = uiState.session?.showCardTitles ?: true,
-                aspectRatio = uiState.deckAspectRatios[ref.stackId] ?: CardAspectRatio.STANDARD,
-                backImagePath = uiState.deckBackImages[ref.stackId],
-                sessionId = uiState.session?.id ?: 0L,
-                onToggleCollapse = { onToggleCollapse(ref.stackId) },
-                onDraw = { onDraw(ref.stackId) },
-                onCardClick = onCardClick,
-                onDiscard = onDiscard,
-                onRevealCard = onRevealCard,
-                onRollTable = onRollTable
-            )
+    if (uiState.deckRefs.isEmpty()) {
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.padding(24.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Style,
+                    contentDescription = null,
+                    modifier = Modifier.size(64.dp),
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                )
+                Spacer(Modifier.height(14.dp))
+                Text(
+                    text = "No hay mazos en esta sesión",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = "Añade mazos de tu biblioteca o activa packs de inicio para comenzar a robar cartas en la mesa.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+                Spacer(Modifier.height(20.dp))
+                DeckButton(onClick = onOpenDeckPicker) {
+                    Icon(Icons.Default.Add, null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Añadir Mazos a la Mesa")
+                }
+            }
         }
-        item { Spacer(Modifier.height(80.dp)) }
+    } else {
+        LazyColumn(
+            modifier = modifier.fillMaxSize(),
+            contentPadding = PaddingValues(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp, vertical = 2.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Mazos en juego (${uiState.deckRefs.size})",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    DeckTextButton(onClick = onOpenDeckPicker) {
+                        Icon(Icons.Default.Add, null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text("Gestionar", style = MaterialTheme.typography.labelMedium)
+                    }
+                }
+            }
+
+            items(uiState.deckRefs, key = { it.stackId }) { ref ->
+                val cardsInCluster = uiState.handByDeck[ref.stackId] ?: emptyList()
+                DeckClusterItem(
+                    deckName = uiState.deckNames[ref.stackId] ?: "Mazo",
+                    cards = cardsInCluster,
+                    availableCount = uiState.deckCardCounts[ref.stackId] ?: 0,
+                    isCollapsed = ref.stackId in uiState.collapsedDeckIds,
+                    showTitle = uiState.session?.showCardTitles ?: true,
+                    aspectRatio = uiState.deckAspectRatios[ref.stackId] ?: CardAspectRatio.STANDARD,
+                    backImagePath = uiState.deckBackImages[ref.stackId],
+                    sessionId = uiState.session?.id ?: 0L,
+                    onToggleCollapse = { onToggleCollapse(ref.stackId) },
+                    onDraw = { onDraw(ref.stackId) },
+                    onCardClick = onCardClick,
+                    onDiscard = onDiscard,
+                    onRevealCard = onRevealCard,
+                    onRollTable = onRollTable
+                )
+            }
+            item { Spacer(Modifier.height(80.dp)) }
+        }
     }
 }
 

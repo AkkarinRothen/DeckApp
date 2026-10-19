@@ -46,7 +46,7 @@ fun CardItem(
             if (card.isRevealed) {
                 // Frente de la carta
                 AsyncImage(
-                    model = card.activeFace.imagePath?.let { File(it) },
+                    model = com.deckapp.core.ui.util.toCoilModel(card.activeFace.imagePath),
                     contentDescription = card.title,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
@@ -80,7 +80,7 @@ fun CardItem(
             } else {
                 // Dorso de la carta
                 AsyncImage(
-                    model = backImagePath?.let { File(it) },
+                    model = com.deckapp.core.ui.util.toCoilModel(backImagePath),
                     contentDescription = "Dorso",
                     modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.secondaryContainer),
                     contentScale = ContentScale.Crop

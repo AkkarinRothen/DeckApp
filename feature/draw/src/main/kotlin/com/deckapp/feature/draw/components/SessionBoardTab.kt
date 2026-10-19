@@ -119,10 +119,13 @@ fun SessionBoardTab(
     deckBackImages: Map<Long, String?> = emptyMap(),
     onDrawCardFromDeck: (Long) -> Unit = {},
     onShuffleDeck: (Long) -> Unit = {},
+    onShuffleOnly: (Long) -> Unit = onShuffleDeck,
+    onShuffleDiscards: (Long) -> Unit = onShuffleDeck,
     onResetDeck: (Long) -> Unit = {},
     onDiscardCard: (Long) -> Unit = {},
     onRevealCard: (Long) -> Unit = {},
-    onCardClick: ((Long, Card) -> Unit)? = null,
+    onCardClick: (Long) -> Unit = {},
+    piledByDeck: Map<Long, Int> = emptyMap(),
     pinnedTableRolls: Map<Long, TableRollResult> = emptyMap(),
     onPinTableRoll: (Long, TableRollResult) -> Unit = { _, _ -> },
     onUnpinTableRoll: (Long) -> Unit = {},
@@ -150,6 +153,9 @@ fun SessionBoardTab(
     workspaceActions: @Composable () -> Unit = {},
     soloSceneHeader: @Composable () -> Unit = {},
     onAppendToNotes: (String) -> Unit = {},
+    onGenerateMicrosetting: (Long) -> Unit = {},
+    onRotateMicrosettingSlot: (Long, MicrosettingSlotType) -> Unit = { _, _ -> },
+    onRedrawMicrosettingSlot: (Long, MicrosettingSlotType) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
     val orderedItems = remember(boardItems) {
@@ -336,6 +342,10 @@ fun SessionBoardTab(
                 deckBackImages = deckBackImages,
                 onDrawCardFromDeck = onDrawCardFromDeck,
                 onShuffleDeck = onShuffleDeck,
+                onShuffleOnly = onShuffleOnly,
+                onShuffleDiscards = onShuffleDiscards,
+                onCardClick = onCardClick,
+                piledByDeck = piledByDeck,
                 onResetDeck = onResetDeck,
                 onDiscardCard = onDiscardCard,
                 onRevealCard = onRevealCard,
@@ -404,7 +414,10 @@ fun SessionBoardTab(
                 onWorkspaceLayoutChanged = onWorkspaceLayoutChanged,
                 workspaceActions = workspaceActions,
                 soloSceneHeader = soloSceneHeader,
-                onAppendToNotes = onAppendToNotes
+                onAppendToNotes = onAppendToNotes,
+                onGenerateMicrosetting = onGenerateMicrosetting,
+                onRotateMicrosettingSlot = onRotateMicrosettingSlot,
+                onRedrawMicrosettingSlot = onRedrawMicrosettingSlot
             )
         }
 
@@ -711,6 +724,7 @@ internal fun buildBoardGroupPreviewLines(
             SessionBoardItemType.REFERENCE -> "Referencia"
             SessionBoardItemType.CLOCK -> "Reloj de progreso"
             SessionBoardItemType.DECK -> "Mazo de cartas"
+            SessionBoardItemType.MICROSETTING -> "Microsetting de mundo"
         }
     }
 }

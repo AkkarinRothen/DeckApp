@@ -110,6 +110,7 @@ val BoardCentralTool = SessionCentralConnector(
                     SessionBoardItemType.MAP -> viewModel.setMainViewMode(SessionViewMode.MAP)
                     SessionBoardItemType.WIKI_MAP -> viewModel.toggleRightSidebar(SidebarTool.PLAN)
                     SessionBoardItemType.DECK -> viewModel.toggleLeftSidebar(SidebarTool.DECKS)
+                    SessionBoardItemType.MICROSETTING -> viewModel.openMicrosettingBuilder(item)
                     else -> {}
                 }
             },
@@ -118,6 +119,7 @@ val BoardCentralTool = SessionCentralConnector(
                     SessionBoardItemType.TABLE -> item.resourceId?.let { viewModel.rollActiveTable(it) }
                     SessionBoardItemType.COMBAT -> viewModel.toggleLeftSidebar(SidebarTool.COMBAT)
                     SessionBoardItemType.NOTES -> viewModel.showQuickNote()
+                    SessionBoardItemType.MICROSETTING -> viewModel.generateMicrosetting(item.id)
                     else -> {}
                 }
             },
@@ -154,9 +156,13 @@ val BoardCentralTool = SessionCentralConnector(
             deckBackImages = uiState.deckBackImages,
             onDrawCardFromDeck = viewModel::drawCardFromDeck,
             onShuffleDeck = viewModel::shuffleSingleDeck,
+            onShuffleOnly = { deckId -> viewModel.shuffleDeckOnly(deckId) },
+            onShuffleDiscards = { deckId -> viewModel.shuffleSingleDeck(deckId) },
             onResetDeck = { deckId -> viewModel.resetSingleDeck(deckId) },
             onDiscardCard = { cardId -> viewModel.discardCard(cardId) },
             onRevealCard = { cardId -> viewModel.revealCard(cardId) },
+            onCardClick = context.onCardClick,
+            piledByDeck = uiState.pile.groupBy { it.stackId }.mapValues { it.value.size },
             sessionId = uiState.session?.id ?: 0L,
             isSidebarOpen = context.isSidebarOpen,
             boardMythicChaos = uiState.boardMythicChaos,
@@ -202,6 +208,9 @@ val BoardCentralTool = SessionCentralConnector(
                 )
             },
             onAppendToNotes = viewModel::appendToNotes,
+            onGenerateMicrosetting = { viewModel.generateMicrosetting(it) },
+            onRotateMicrosettingSlot = { itemId, slot -> viewModel.rotateMicrosettingSlot(slot, itemId) },
+            onRedrawMicrosettingSlot = { itemId, slot -> viewModel.redrawMicrosettingSlot(slot, itemId) },
             modifier = Modifier.fillMaxSize()
         )
     }

@@ -62,7 +62,7 @@ fun CardThumbnail(
         ) {
             if (imagePath != null) {
                 AsyncImage(
-                    model = File(imagePath),
+                    model = com.deckapp.core.ui.util.toCoilModel(imagePath),
                     contentDescription = card.title,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Fit

@@ -35,7 +35,8 @@ enum class SessionBoardItemType {
     REFERENCE,
     CLOCK,
     DECK,
-    WIKI_MAP
+    WIKI_MAP,
+    MICROSETTING
 }
 
 enum class SessionBoardItemSize {

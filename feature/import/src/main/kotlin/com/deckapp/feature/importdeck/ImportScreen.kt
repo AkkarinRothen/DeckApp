@@ -496,8 +496,12 @@ private fun ConfigurePhase(
         listOf(
             CardContentMode.IMAGE_ONLY to "Solo imagen" to
                 "Imagen full-screen con pinch-zoom",
-            CardContentMode.IMAGE_WITH_TEXT to "Imagen + texto" to
-                "Imagen con panel de descripción Markdown",
+            CardContentMode.IMAGE_WITH_TEXT to "1 opción (imagen + texto)" to
+                "Una pista por carta; podés completar su texto al editarla",
+            CardContentMode.TOP_BOTTOM_SPLIT to "2 opciones (arriba / abajo)" to
+                "Cada carta ofrece dos resultados; podés elegir uno o tirarlo al azar",
+            CardContentMode.FOUR_EDGE_CUES to "4 opciones (orientaciones)" to
+                "Cada carta ofrece cuatro pistas; podés elegir una o tirarla al azar",
             CardContentMode.REVERSIBLE to "Reversible (tarot / oracle)" to
                 "Misma imagen, texto derecho e invertido"
         )

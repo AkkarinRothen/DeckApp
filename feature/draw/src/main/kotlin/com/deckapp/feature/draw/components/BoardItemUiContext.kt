@@ -72,10 +72,13 @@ data class BoardItemUiContext(
     val onMapTile: (HexTile) -> Unit = {},
     val onDrawCardFromDeck: (Long) -> Unit = {},
     val onShuffleDeck: (Long) -> Unit = {},
+    val onShuffleOnly: (Long) -> Unit = onShuffleDeck,
+    val onShuffleDiscards: (Long) -> Unit = onShuffleDeck,
     val onResetDeck: (Long) -> Unit = {},
     val onDiscardCard: (Long) -> Unit = {},
     val onRevealCard: (Long) -> Unit = {},
     val onCardClick: (Long) -> Unit = {},
+    val piledByDeck: Map<Long, Int> = emptyMap(),
     val onUpdateWikiEntry: (WikiEntry) -> Unit = {},
     val onRollTable: (Long) -> Unit = {},
     val onPinTableRoll: (Long, TableRollResult) -> Unit = { _, _ -> },
@@ -105,5 +108,8 @@ data class BoardItemUiContext(
     val onRollBoardMythicFate: (ProbabilityLevel) -> Unit = {},
     val onAskBoardMythicQuestion: (ProbabilityLevel, String) -> Unit = { _, _ -> },
     val onRollBoardMythicEvent: () -> Unit = {},
-    val onAppendToNotes: (String) -> Unit = {}
+    val onAppendToNotes: (String) -> Unit = {},
+    val onGenerateMicrosetting: (Long) -> Unit = {},
+    val onRotateMicrosettingSlot: (Long, MicrosettingSlotType) -> Unit = { _, _ -> },
+    val onRedrawMicrosettingSlot: (Long, MicrosettingSlotType) -> Unit = { _, _ -> }
 )

@@ -1,0 +1,1952 @@
+{
+  "card_counts": {
+    "region": 32,
+    "landmark": 48,
+    "namesake": 48,
+    "origin": 32,
+    "attribute": 48,
+    "advent": 32
+  },
+  "backs": {
+    "region": "file:///android_asset/starter_packs/deck_of_worlds/cards/back_region.webp",
+    "landmark": "file:///android_asset/starter_packs/deck_of_worlds/cards/back_landmark.webp",
+    "namesake": "file:///android_asset/starter_packs/deck_of_worlds/cards/back_namesake.webp",
+    "origin": "file:///android_asset/starter_packs/deck_of_worlds/cards/back_origin.webp",
+    "attribute": "file:///android_asset/starter_packs/deck_of_worlds/cards/back_attribute.webp",
+    "advent": "file:///android_asset/starter_packs/deck_of_worlds/cards/back_advent.webp"
+  },
+  "cards": {
+    "region": [
+      {
+        "index": 1,
+        "filename": "region_001.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_001.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 2,
+        "filename": "region_002.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_002.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 3,
+        "filename": "region_003.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_003.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 4,
+        "filename": "region_004.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_004.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 5,
+        "filename": "region_005.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_005.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 6,
+        "filename": "region_006.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_006.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 7,
+        "filename": "region_007.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_007.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 8,
+        "filename": "region_008.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_008.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 9,
+        "filename": "region_009.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_009.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 10,
+        "filename": "region_010.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_010.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 11,
+        "filename": "region_011.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_011.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 12,
+        "filename": "region_012.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_012.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 13,
+        "filename": "region_013.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_013.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 14,
+        "filename": "region_014.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_014.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 15,
+        "filename": "region_015.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_015.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 16,
+        "filename": "region_016.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_016.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 17,
+        "filename": "region_017.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_017.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 18,
+        "filename": "region_018.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_018.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 19,
+        "filename": "region_019.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_019.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 20,
+        "filename": "region_020.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_020.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 21,
+        "filename": "region_021.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_021.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 22,
+        "filename": "region_022.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_022.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 23,
+        "filename": "region_023.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_023.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 24,
+        "filename": "region_024.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_024.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 25,
+        "filename": "region_025.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_025.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 26,
+        "filename": "region_026.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_026.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 27,
+        "filename": "region_027.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_027.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 28,
+        "filename": "region_028.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_028.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 29,
+        "filename": "region_029.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_029.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 30,
+        "filename": "region_030.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/region_030.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 1,
+        "filename": "landmark_001.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_001.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      },
+      {
+        "index": 2,
+        "filename": "landmark_002.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_002.webp",
+        "text": "",
+        "option_count": 1,
+        "content_mode": "IMAGE_WITH_TEXT"
+      }
+    ],
+    "landmark": [
+      {
+        "index": 3,
+        "filename": "landmark_003.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_003.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 4,
+        "filename": "landmark_004.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_004.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 5,
+        "filename": "landmark_005.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_005.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 6,
+        "filename": "landmark_006.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_006.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 7,
+        "filename": "landmark_007.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_007.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 8,
+        "filename": "landmark_008.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_008.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 9,
+        "filename": "landmark_009.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_009.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 10,
+        "filename": "landmark_010.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_010.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 11,
+        "filename": "landmark_011.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_011.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 12,
+        "filename": "landmark_012.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_012.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 13,
+        "filename": "landmark_013.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_013.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 14,
+        "filename": "landmark_014.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_014.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 15,
+        "filename": "landmark_015.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_015.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 16,
+        "filename": "landmark_016.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_016.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 17,
+        "filename": "landmark_017.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_017.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 18,
+        "filename": "landmark_018.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_018.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 19,
+        "filename": "landmark_019.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_019.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 20,
+        "filename": "landmark_020.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_020.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 21,
+        "filename": "landmark_021.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_021.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 22,
+        "filename": "landmark_022.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_022.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 23,
+        "filename": "landmark_023.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_023.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 24,
+        "filename": "landmark_024.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_024.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 25,
+        "filename": "landmark_025.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_025.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 26,
+        "filename": "landmark_026.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_026.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 27,
+        "filename": "landmark_027.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_027.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 28,
+        "filename": "landmark_028.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_028.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 29,
+        "filename": "landmark_029.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_029.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 30,
+        "filename": "landmark_030.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_030.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 31,
+        "filename": "landmark_031.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_031.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 32,
+        "filename": "landmark_032.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_032.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 33,
+        "filename": "landmark_033.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_033.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 34,
+        "filename": "landmark_034.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_034.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 35,
+        "filename": "landmark_035.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_035.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 36,
+        "filename": "landmark_036.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_036.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 37,
+        "filename": "landmark_037.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_037.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 38,
+        "filename": "landmark_038.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_038.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 39,
+        "filename": "landmark_039.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_039.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 40,
+        "filename": "landmark_040.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_040.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 41,
+        "filename": "landmark_041.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_041.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 42,
+        "filename": "landmark_042.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_042.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 43,
+        "filename": "landmark_043.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_043.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 44,
+        "filename": "landmark_044.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_044.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 45,
+        "filename": "landmark_045.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_045.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 46,
+        "filename": "landmark_046.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_046.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 47,
+        "filename": "landmark_047.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_047.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 48,
+        "filename": "landmark_048.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/landmark_048.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 1,
+        "filename": "namesake_001.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_001.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 2,
+        "filename": "namesake_002.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_002.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      }
+    ],
+    "namesake": [
+      {
+        "index": 3,
+        "filename": "namesake_003.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_003.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 4,
+        "filename": "namesake_004.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_004.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 5,
+        "filename": "namesake_005.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_005.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 6,
+        "filename": "namesake_006.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_006.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 7,
+        "filename": "namesake_007.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_007.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 8,
+        "filename": "namesake_008.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_008.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 9,
+        "filename": "namesake_009.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_009.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 10,
+        "filename": "namesake_010.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_010.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 11,
+        "filename": "namesake_011.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_011.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 12,
+        "filename": "namesake_012.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_012.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 13,
+        "filename": "namesake_013.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_013.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 14,
+        "filename": "namesake_014.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_014.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 15,
+        "filename": "namesake_015.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_015.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 16,
+        "filename": "namesake_016.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_016.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 17,
+        "filename": "namesake_017.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_017.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 18,
+        "filename": "namesake_018.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_018.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 19,
+        "filename": "namesake_019.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_019.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 20,
+        "filename": "namesake_020.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_020.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 21,
+        "filename": "namesake_021.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_021.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 22,
+        "filename": "namesake_022.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_022.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 23,
+        "filename": "namesake_023.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_023.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 24,
+        "filename": "namesake_024.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_024.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 25,
+        "filename": "namesake_025.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_025.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 26,
+        "filename": "namesake_026.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_026.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 27,
+        "filename": "namesake_027.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_027.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 28,
+        "filename": "namesake_028.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_028.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 29,
+        "filename": "namesake_029.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_029.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 30,
+        "filename": "namesake_030.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_030.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 31,
+        "filename": "namesake_031.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_031.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 32,
+        "filename": "namesake_032.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_032.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 33,
+        "filename": "namesake_033.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_033.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 34,
+        "filename": "namesake_034.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_034.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 35,
+        "filename": "namesake_035.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_035.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 36,
+        "filename": "namesake_036.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_036.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 37,
+        "filename": "namesake_037.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_037.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 38,
+        "filename": "namesake_038.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_038.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 39,
+        "filename": "namesake_039.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_039.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 40,
+        "filename": "namesake_040.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_040.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 41,
+        "filename": "namesake_041.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_041.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 42,
+        "filename": "namesake_042.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_042.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 43,
+        "filename": "namesake_043.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_043.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 44,
+        "filename": "namesake_044.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_044.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 45,
+        "filename": "namesake_045.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_045.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 46,
+        "filename": "namesake_046.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_046.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 47,
+        "filename": "namesake_047.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_047.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 48,
+        "filename": "namesake_048.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/namesake_048.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 1,
+        "filename": "origin_001.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_001.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 2,
+        "filename": "origin_002.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_002.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      }
+    ],
+    "origin": [
+      {
+        "index": 3,
+        "filename": "origin_003.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_003.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 4,
+        "filename": "origin_004.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_004.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 5,
+        "filename": "origin_005.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_005.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 6,
+        "filename": "origin_006.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_006.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 7,
+        "filename": "origin_007.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_007.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 8,
+        "filename": "origin_008.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_008.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 9,
+        "filename": "origin_009.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_009.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 10,
+        "filename": "origin_010.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_010.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 11,
+        "filename": "origin_011.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_011.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 12,
+        "filename": "origin_012.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_012.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 13,
+        "filename": "origin_013.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_013.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 14,
+        "filename": "origin_014.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_014.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 15,
+        "filename": "origin_015.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_015.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 16,
+        "filename": "origin_016.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_016.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 17,
+        "filename": "origin_017.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_017.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 18,
+        "filename": "origin_018.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_018.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 19,
+        "filename": "origin_019.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_019.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 20,
+        "filename": "origin_020.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_020.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 21,
+        "filename": "origin_021.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_021.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 22,
+        "filename": "origin_022.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_022.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 23,
+        "filename": "origin_023.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_023.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 24,
+        "filename": "origin_024.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_024.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 25,
+        "filename": "origin_025.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_025.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 26,
+        "filename": "origin_026.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_026.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 27,
+        "filename": "origin_027.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_027.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 28,
+        "filename": "origin_028.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_028.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 29,
+        "filename": "origin_029.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_029.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 30,
+        "filename": "origin_030.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_030.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 31,
+        "filename": "origin_031.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_031.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 32,
+        "filename": "origin_032.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_032.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 33,
+        "filename": "origin_033.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_033.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 34,
+        "filename": "origin_034.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_034.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      }
+    ],
+    "attribute": [
+      {
+        "index": 35,
+        "filename": "origin_035.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_035.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 36,
+        "filename": "origin_036.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/origin_036.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 1,
+        "filename": "attribute_001.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_001.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 2,
+        "filename": "attribute_002.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_002.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 3,
+        "filename": "attribute_003.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_003.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 4,
+        "filename": "attribute_004.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_004.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 5,
+        "filename": "attribute_005.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_005.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 6,
+        "filename": "attribute_006.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_006.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 7,
+        "filename": "attribute_007.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_007.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 8,
+        "filename": "attribute_008.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_008.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 9,
+        "filename": "attribute_009.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_009.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 10,
+        "filename": "attribute_010.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_010.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 11,
+        "filename": "attribute_011.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_011.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 12,
+        "filename": "attribute_012.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_012.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 13,
+        "filename": "attribute_013.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_013.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 14,
+        "filename": "attribute_014.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_014.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 15,
+        "filename": "attribute_015.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_015.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 16,
+        "filename": "attribute_016.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_016.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 17,
+        "filename": "attribute_017.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_017.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 18,
+        "filename": "attribute_018.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_018.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 19,
+        "filename": "attribute_019.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_019.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 20,
+        "filename": "attribute_020.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_020.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 21,
+        "filename": "attribute_021.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_021.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 22,
+        "filename": "attribute_022.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_022.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 23,
+        "filename": "attribute_023.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_023.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 24,
+        "filename": "attribute_024.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_024.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 25,
+        "filename": "attribute_025.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_025.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 26,
+        "filename": "attribute_026.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_026.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 27,
+        "filename": "attribute_027.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_027.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 28,
+        "filename": "attribute_028.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_028.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 29,
+        "filename": "attribute_029.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_029.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 30,
+        "filename": "attribute_030.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_030.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 31,
+        "filename": "attribute_031.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_031.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 32,
+        "filename": "attribute_032.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_032.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 33,
+        "filename": "attribute_033.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_033.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 34,
+        "filename": "attribute_034.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_034.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 35,
+        "filename": "attribute_035.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_035.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 36,
+        "filename": "attribute_036.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_036.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 37,
+        "filename": "attribute_037.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_037.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 38,
+        "filename": "attribute_038.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_038.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 39,
+        "filename": "attribute_039.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_039.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 40,
+        "filename": "attribute_040.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_040.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 41,
+        "filename": "attribute_041.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_041.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 42,
+        "filename": "attribute_042.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/attribute_042.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 1,
+        "filename": "advent_001.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_001.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 2,
+        "filename": "advent_002.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_002.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 3,
+        "filename": "advent_003.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_003.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      },
+      {
+        "index": 4,
+        "filename": "advent_004.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_004.webp",
+        "text": "",
+        "option_count": 4,
+        "content_mode": "FOUR_EDGE_CUES"
+      }
+    ],
+    "advent": [
+      {
+        "index": 5,
+        "filename": "advent_005.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_005.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 6,
+        "filename": "advent_006.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_006.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 7,
+        "filename": "advent_007.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_007.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 8,
+        "filename": "advent_008.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_008.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 9,
+        "filename": "advent_009.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_009.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 10,
+        "filename": "advent_010.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_010.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 11,
+        "filename": "advent_011.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_011.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 12,
+        "filename": "advent_012.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_012.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 13,
+        "filename": "advent_013.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_013.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 14,
+        "filename": "advent_014.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_014.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 15,
+        "filename": "advent_015.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_015.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 16,
+        "filename": "advent_016.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_016.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 17,
+        "filename": "advent_017.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_017.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 18,
+        "filename": "advent_018.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_018.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 19,
+        "filename": "advent_019.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_019.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 20,
+        "filename": "advent_020.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_020.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 21,
+        "filename": "advent_021.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_021.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 22,
+        "filename": "advent_022.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_022.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 23,
+        "filename": "advent_023.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_023.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 24,
+        "filename": "advent_024.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_024.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 25,
+        "filename": "advent_025.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_025.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 26,
+        "filename": "advent_026.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_026.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 27,
+        "filename": "advent_027.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_027.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 28,
+        "filename": "advent_028.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_028.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 29,
+        "filename": "advent_029.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_029.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 30,
+        "filename": "advent_030.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_030.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 31,
+        "filename": "advent_031.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_031.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 32,
+        "filename": "advent_032.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_032.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 33,
+        "filename": "advent_033.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_033.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 34,
+        "filename": "advent_034.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_034.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 35,
+        "filename": "advent_035.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_035.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      },
+      {
+        "index": 36,
+        "filename": "advent_036.webp",
+        "asset_uri": "file:///android_asset/starter_packs/deck_of_worlds/cards/advent_036.webp",
+        "text": "",
+        "option_count": 2,
+        "content_mode": "TOP_BOTTOM_SPLIT"
+      }
+    ]
+  }
+}

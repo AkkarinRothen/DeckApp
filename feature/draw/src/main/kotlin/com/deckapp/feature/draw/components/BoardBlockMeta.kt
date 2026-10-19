@@ -183,4 +183,29 @@ fun boardBlockMeta(
             ctaLabel = "Ver"
         )
     }
+    SessionBoardItemType.MICROSETTING -> {
+        val title = item.titleOverride ?: "Microsetting de Mundo"
+        val cluster = com.deckapp.core.model.MicrosettingCodec.decode(item.noteContent)
+        val subtitle = if (cluster != null && cluster.items.isNotEmpty()) {
+            val reg = cluster.slot(com.deckapp.core.model.MicrosettingSlotType.REGION)?.title
+            val ldm = cluster.slot(com.deckapp.core.model.MicrosettingSlotType.LANDMARK)?.title
+            listOfNotNull(reg, ldm).joinToString(" · ").ifBlank { "The Story Engine" }
+        } else {
+            "The Story Engine"
+        }
+        val preview = if (cluster != null && cluster.items.isNotEmpty()) {
+            "${cluster.items.size} cartas conectadas"
+        } else {
+            "Cluster sin cartas generadas"
+        }
+        BoardBlockMeta(
+            title = title,
+            subtitle = subtitle,
+            icon = Icons.Default.Public,
+            color = Color(0xFF00897B),
+            preview = preview,
+            footnote = "The Story Engine: Deck of Worlds",
+            ctaLabel = "Generar"
+        )
+    }
 }

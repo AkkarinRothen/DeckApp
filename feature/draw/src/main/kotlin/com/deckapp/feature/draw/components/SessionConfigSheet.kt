@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -13,11 +14,13 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LinkOff
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Style
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.deckapp.core.model.*
 import com.deckapp.core.ui.components.GameSystemsSelector
@@ -43,6 +46,7 @@ fun SessionConfigSheet(
     allDecks: List<CardStack> = emptyList(),
     sessionDeckRefs: List<SessionDeckRef> = emptyList(),
     onToggleDeck: (Long) -> Unit = {},
+    onOpenDeckPicker: () -> Unit = {},
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -143,6 +147,80 @@ fun SessionConfigSheet(
                                 Icon(Icons.Default.LinkOff, null, tint = MaterialTheme.colorScheme.error)
                             }
                         }
+                    }
+                }
+            }
+            HorizontalDivider()
+
+            // Sección Mazos de la Sesión
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "Mazos en la Mesa",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = "${sessionDeckRefs.size} activos",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                        )
+                    }
+                }
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "Gestiona qué mazos de tu biblioteca o expansiones están disponibles en la barra lateral para robar cartas.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(8.dp))
+                OutlinedCard(
+                    onClick = onOpenDeckPicker,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Style,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            val activeNames = sessionDeckRefs.mapNotNull { ref ->
+                                allDecks.find { it.id == ref.stackId }?.name
+                            }
+                            Text(
+                                text = if (activeNames.isNotEmpty()) activeNames.joinToString(", ") else "Ningún mazo activo",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = if (activeNames.isNotEmpty()) FontWeight.SemiBold else FontWeight.Normal,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Text(
+                                text = "Toca para agregar, quitar o cambiar mazos",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Spacer(Modifier.width(8.dp))
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Gestionar mazos",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                     }
                 }
             }
