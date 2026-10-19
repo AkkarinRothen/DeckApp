@@ -1,0 +1,1716 @@
+{
+  "schemaVersion": 1,
+  "tags": [
+    {
+      "id": 1,
+      "name": "Deck of Worlds",
+      "color": -14457476
+    },
+    {
+      "id": 2,
+      "name": "Story Engine",
+      "color": -11913386
+    },
+    {
+      "id": 3,
+      "name": "Worldbuilding",
+      "color": -7049442
+    }
+  ],
+  "decks": [
+    {
+      "id": 201,
+      "name": "New Story Engine: Potenciadores (Boosters)",
+      "type": "DECK",
+      "description": "Arquetipos, profesiones y conceptos amplificados para generar personajes y tramas.",
+      "coverImagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_001.webp",
+      "sourceFolderPath": null,
+      "defaultContentMode": "TOP_BOTTOM_SPLIT",
+      "drawMode": "RANDOM",
+      "drawFaceDown": false,
+      "backImagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_002.webp",
+      "displayCount": true,
+      "aspectRatio": "STANDARD",
+      "isArchived": false,
+      "sortOrder": 1,
+      "createdAt": 1729250201000
+    },
+    {
+      "id": 202,
+      "name": "New Story Engine: Trasfondos (Backstories)",
+      "type": "DECK",
+      "description": "Orígenes, motivaciones profundas y secretos en 4 direcciones.",
+      "coverImagePath": "file:///android_asset/starter_packs/nse_backstories/cards/nse_backstory_001.webp",
+      "sourceFolderPath": null,
+      "defaultContentMode": "FOUR_EDGE_CUES",
+      "drawMode": "RANDOM",
+      "drawFaceDown": false,
+      "backImagePath": "file:///android_asset/starter_packs/nse_backstories/cards/nse_backstory_002.webp",
+      "displayCount": true,
+      "aspectRatio": "STANDARD",
+      "isArchived": false,
+      "sortOrder": 2,
+      "createdAt": 1729250202000
+    },
+    {
+      "id": 203,
+      "name": "New Story Engine: Misterios (Mystery)",
+      "type": "DECK",
+      "description": "Sospechosos, crímenes, conspiraciones y enigmas para novelas negras o aventuras de investigación.",
+      "coverImagePath": "file:///android_asset/starter_packs/nse_mystery/cards/nse_mystery_001.webp",
+      "sourceFolderPath": null,
+      "defaultContentMode": "TOP_BOTTOM_SPLIT",
+      "drawMode": "RANDOM",
+      "drawFaceDown": false,
+      "backImagePath": "file:///android_asset/starter_packs/nse_mystery/cards/nse_mystery_002.webp",
+      "displayCount": true,
+      "aspectRatio": "STANDARD",
+      "isArchived": false,
+      "sortOrder": 3,
+      "createdAt": 1729250203000
+    },
+    {
+      "id": 204,
+      "name": "New Story Engine: Objetos Únicos (Unique Items)",
+      "type": "DECK",
+      "description": "Reliquias, artefactos con propiedades singulares y curiosidades narrativas.",
+      "coverImagePath": "file:///android_asset/starter_packs/nse_unique_items/cards/nse_item_001.webp",
+      "sourceFolderPath": null,
+      "defaultContentMode": "FOUR_EDGE_CUES",
+      "drawMode": "RANDOM",
+      "drawFaceDown": false,
+      "backImagePath": "file:///android_asset/starter_packs/nse_unique_items/cards/nse_item_002.webp",
+      "displayCount": true,
+      "aspectRatio": "STANDARD",
+      "isArchived": false,
+      "sortOrder": 4,
+      "createdAt": 1729250204000
+    }
+  ],
+  "cards": [
+    {
+      "id": 30001,
+      "stackId": 201,
+      "originDeckId": 201,
+      "title": "Potenciadores (Boosters) #01: ANALCHEMIST A DEMONIAC AN ACRO",
+      "suit": "Potenciadores (Boosters)",
+      "value": 1,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 0,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30002,
+      "stackId": 201,
+      "originDeckId": 201,
+      "title": "Potenciadores (Boosters) #02: HINER ADE A LONE A COWPOKE RAN",
+      "suit": "Potenciadores (Boosters)",
+      "value": 2,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 1,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30003,
+      "stackId": 201,
+      "originDeckId": 201,
+      "title": "Potenciadores (Boosters) #03: AN ANIMAL A FROG HELPER A FIRS",
+      "suit": "Potenciadores (Boosters)",
+      "value": 3,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 2,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30004,
+      "stackId": 201,
+      "originDeckId": 201,
+      "title": "Potenciadores (Boosters) #04: ON OPER A GRUNT A CIVILIAN ASA",
+      "suit": "Potenciadores (Boosters)",
+      "value": 4,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 3,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30005,
+      "stackId": 201,
+      "originDeckId": 201,
+      "title": "Potenciadores (Boosters) #05: bo WANTSTO WANTSTOREMOUE POSSE",
+      "suit": "Potenciadores (Boosters)",
+      "value": 5,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 4,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30006,
+      "stackId": 201,
+      "originDeckId": 201,
+      "title": "Potenciadores (Boosters) #06: bo WANTSTO PROTECTTHEIR WANTST",
+      "suit": "Potenciadores (Boosters)",
+      "value": 6,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 5,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30007,
+      "stackId": 201,
+      "originDeckId": 201,
+      "title": "Potenciadores (Boosters) #07: WANTSTO FIND THEIR WANTSTO BRE",
+      "suit": "Potenciadores (Boosters)",
+      "value": 7,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 6,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30008,
+      "stackId": 201,
+      "originDeckId": 201,
+      "title": "Potenciadores (Boosters) #08: bo WANTSTO EXTRACT WANTSTO END",
+      "suit": "Potenciadores (Boosters)",
+      "value": 8,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 7,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30009,
+      "stackId": 201,
+      "originDeckId": 201,
+      "title": "Potenciadores (Boosters) #09: HING A MANOR RADIATION ACRISIS",
+      "suit": "Potenciadores (Boosters)",
+      "value": 9,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 8,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30010,
+      "stackId": 201,
+      "originDeckId": 201,
+      "title": "Potenciadores (Boosters) #10: RING A SALOON A BOTTLE A BETRA",
+      "suit": "Potenciadores (Boosters)",
+      "value": 10,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 9,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30011,
+      "stackId": 201,
+      "originDeckId": 201,
+      "title": "Potenciadores (Boosters) #11: AN AB ABIR TMENT A CIRCLE A BE",
+      "suit": "Potenciadores (Boosters)",
+      "value": 11,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 10,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30012,
+      "stackId": 201,
+      "originDeckId": 201,
+      "title": "Potenciadores (Boosters) #12: NU HUTE A HELICOPTER A REFINER",
+      "suit": "Potenciadores (Boosters)",
+      "value": 12,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 11,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30013,
+      "stackId": 201,
+      "originDeckId": 201,
+      "title": "Potenciadores (Boosters) #13: BUT IT WILLMEAN BUTSOMETHING E",
+      "suit": "Potenciadores (Boosters)",
+      "value": 13,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 12,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30014,
+      "stackId": 201,
+      "originDeckId": 201,
+      "title": "Potenciadores (Boosters) #14: bo BUT THEY WILL BUTTHEY WILL ",
+      "suit": "Potenciadores (Boosters)",
+      "value": 14,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 13,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30015,
+      "stackId": 201,
+      "originDeckId": 201,
+      "title": "Potenciadores (Boosters) #15: Enginec BUT THEIR NIGHTS BUT B",
+      "suit": "Potenciadores (Boosters)",
+      "value": 15,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 14,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30016,
+      "stackId": 201,
+      "originDeckId": 201,
+      "title": "Potenciadores (Boosters) #16: BUTTHE ENEMY BUTTHEIR SUPERIOR",
+      "suit": "Potenciadores (Boosters)",
+      "value": 16,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 15,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30017,
+      "stackId": 201,
+      "originDeckId": 201,
+      "title": "Potenciadores (Boosters) #17: ELABORATE DREARY AUENGING MASK",
+      "suit": "Potenciadores (Boosters)",
+      "value": 17,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 16,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30018,
+      "stackId": 201,
+      "originDeckId": 201,
+      "title": "Potenciadores (Boosters) #18: THIN TRUSTY QUICK-HANDED DAPPE",
+      "suit": "Potenciadores (Boosters)",
+      "value": 18,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 17,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30019,
+      "stackId": 201,
+      "originDeckId": 201,
+      "title": "Potenciadores (Boosters) #19: ITE IRON FOUL RANCOROUS RESOUR",
+      "suit": "Potenciadores (Boosters)",
+      "value": 19,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 18,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30020,
+      "stackId": 201,
+      "originDeckId": 201,
+      "title": "Potenciadores (Boosters) #20: WAR NTED TACTICAL COMPACT OUTR",
+      "suit": "Potenciadores (Boosters)",
+      "value": 20,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 19,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30021,
+      "stackId": 202,
+      "originDeckId": 202,
+      "title": "Trasfondos (Backstories) #01: Chiykow URNING FROM ASFORBIDDE",
+      "suit": "Trasfondos (Backstories)",
+      "value": 1,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 0,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30022,
+      "stackId": 202,
+      "originDeckId": 202,
+      "title": "Trasfondos (Backstories) #02: Chiykow JAL HLI INUOLUING",
+      "suit": "Trasfondos (Backstories)",
+      "value": 2,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 1,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30023,
+      "stackId": 202,
+      "originDeckId": 202,
+      "title": "Trasfondos (Backstories) #03: Chiykow TLEADERSHIP BROUGHT RU",
+      "suit": "Trasfondos (Backstories)",
+      "value": 3,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 2,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30024,
+      "stackId": 202,
+      "originDeckId": 202,
+      "title": "Trasfondos (Backstories) #04: Chiykow",
+      "suit": "Trasfondos (Backstories)",
+      "value": 4,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 3,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30025,
+      "stackId": 202,
+      "originDeckId": 202,
+      "title": "Trasfondos (Backstories) #05: Chiykow FAILED AFTER",
+      "suit": "Trasfondos (Backstories)",
+      "value": 5,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 4,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30026,
+      "stackId": 202,
+      "originDeckId": 202,
+      "title": "Trasfondos (Backstories) #06: Chiykow PENED NEVER A RECENT D",
+      "suit": "Trasfondos (Backstories)",
+      "value": 6,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 5,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30027,
+      "stackId": 202,
+      "originDeckId": 202,
+      "title": "Trasfondos (Backstories) #07: Chiykow ACKMAILING NOWSOMEONE ",
+      "suit": "Trasfondos (Backstories)",
+      "value": 7,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 6,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30028,
+      "stackId": 202,
+      "originDeckId": 202,
+      "title": "Trasfondos (Backstories) #08: Chiykow NOTT PPEARED NOWTHEY A",
+      "suit": "Trasfondos (Backstories)",
+      "value": 8,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 7,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30029,
+      "stackId": 202,
+      "originDeckId": 202,
+      "title": "Trasfondos (Backstories) #09: NOW Chiykow THEYARE ANDTHEYJUS",
+      "suit": "Trasfondos (Backstories)",
+      "value": 9,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 8,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30030,
+      "stackId": 202,
+      "originDeckId": 202,
+      "title": "Trasfondos (Backstories) #10: Chiykow TARTING NOW THEY ARE T",
+      "suit": "Trasfondos (Backstories)",
+      "value": 10,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 9,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30031,
+      "stackId": 203,
+      "originDeckId": 203,
+      "title": "Misterios (Mystery) #01: LU NU A GUMSHOE A BUTLER A CLE",
+      "suit": "Misterios (Mystery)",
+      "value": 1,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 0,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30032,
+      "stackId": 203,
+      "originDeckId": 203,
+      "title": "Misterios (Mystery) #02: BOSS De AN ANTI CTOR A PSYCHIC",
+      "suit": "Misterios (Mystery)",
+      "value": 2,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 1,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30033,
+      "stackId": 203,
+      "originDeckId": 203,
+      "title": "Misterios (Mystery) #03: bo WANTSTOPLACE WANTSTO SECURE",
+      "suit": "Misterios (Mystery)",
+      "value": 3,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 2,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30034,
+      "stackId": 203,
+      "originDeckId": 203,
+      "title": "Misterios (Mystery) #04: WANTS IDENTIFY WANTSTO DESTROY",
+      "suit": "Misterios (Mystery)",
+      "value": 4,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 3,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30035,
+      "stackId": 203,
+      "originDeckId": 203,
+      "title": "Misterios (Mystery) #05: De GRAPH ANAUTOPSY AN INHERITA",
+      "suit": "Misterios (Mystery)",
+      "value": 5,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 4,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30036,
+      "stackId": 203,
+      "originDeckId": 203,
+      "title": "Misterios (Mystery) #06: A FIREPLACE A DRINK A CAR A CL",
+      "suit": "Misterios (Mystery)",
+      "value": 6,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 5,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30037,
+      "stackId": 203,
+      "originDeckId": 203,
+      "title": "Misterios (Mystery) #07: De BUTTHEIR AFFAIR BUT A PAST ",
+      "suit": "Misterios (Mystery)",
+      "value": 7,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 6,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30038,
+      "stackId": 203,
+      "originDeckId": 203,
+      "title": "Misterios (Mystery) #08: De bo BUT THEY WILL BUT IT WIL",
+      "suit": "Misterios (Mystery)",
+      "value": 8,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 7,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30039,
+      "stackId": 203,
+      "originDeckId": 203,
+      "title": "Misterios (Mystery) #09: De GUAL RUN DECORATIUE UINTAGE",
+      "suit": "Misterios (Mystery)",
+      "value": 9,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 8,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30040,
+      "stackId": 203,
+      "originDeckId": 203,
+      "title": "Misterios (Mystery) #10: De EARING JICATED HER INDECIPH",
+      "suit": "Misterios (Mystery)",
+      "value": 10,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 9,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30041,
+      "stackId": 204,
+      "originDeckId": 204,
+      "title": "Objetos Únicos (Unique Items) #01: Chiykow A DUNGEON APAIROF APRO",
+      "suit": "Objetos Únicos (Unique Items)",
+      "value": 1,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 0,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30042,
+      "stackId": 204,
+      "originDeckId": 204,
+      "title": "Objetos Únicos (Unique Items) #02: Chiykow AWAND AN INK AWHIP ANE",
+      "suit": "Objetos Únicos (Unique Items)",
+      "value": 2,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 1,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30043,
+      "stackId": 204,
+      "originDeckId": 204,
+      "title": "Objetos Únicos (Unique Items) #03: Chiykow THAT ONLYWORKS UNKNOWN",
+      "suit": "Objetos Únicos (Unique Items)",
+      "value": 3,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 2,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30044,
+      "stackId": 204,
+      "originDeckId": 204,
+      "title": "Objetos Únicos (Unique Items) #04: Chiykow COATED ASHES SACRIFICI",
+      "suit": "Objetos Únicos (Unique Items)",
+      "value": 4,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 3,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30045,
+      "stackId": 204,
+      "originDeckId": 204,
+      "title": "Objetos Únicos (Unique Items) #05: Chiykow OPERATED BYCOIN HUNTED",
+      "suit": "Objetos Únicos (Unique Items)",
+      "value": 5,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 4,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30046,
+      "stackId": 204,
+      "originDeckId": 204,
+      "title": "Objetos Únicos (Unique Items) #06: Chiykow INDESCRIBABLEHUE THATI",
+      "suit": "Objetos Únicos (Unique Items)",
+      "value": 6,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 5,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30047,
+      "stackId": 204,
+      "originDeckId": 204,
+      "title": "Objetos Únicos (Unique Items) #07: Chiykow INHABITEDBYA HERMIT PE",
+      "suit": "Objetos Únicos (Unique Items)",
+      "value": 7,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 6,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30048,
+      "stackId": 204,
+      "originDeckId": 204,
+      "title": "Objetos Únicos (Unique Items) #08: THATGRANTSTHE Chiykow SHREDS W",
+      "suit": "Objetos Únicos (Unique Items)",
+      "value": 8,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 7,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30049,
+      "stackId": 204,
+      "originDeckId": 204,
+      "title": "Objetos Únicos (Unique Items) #09: Chiykow MISCHIEUOUS ENTITY STE",
+      "suit": "Objetos Únicos (Unique Items)",
+      "value": 9,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 8,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 30050,
+      "stackId": 204,
+      "originDeckId": 204,
+      "title": "Objetos Únicos (Unique Items) #10: THATGRANTSTHE Chiykow USER PER",
+      "suit": "Objetos Únicos (Unique Items)",
+      "value": 10,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 9,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    }
+  ],
+  "cardFaces": [
+    {
+      "id": 40001,
+      "cardId": 30001,
+      "faceIndex": 0,
+      "name": "Potenciadores (Boosters) #01: ANALCHEMIST A DEMONIAC AN ACRO",
+      "imagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_001.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"ANALCHEMIST A DEMONIAC AN ACROBAT A CHRONOSHIFTER A BILLIONAIRE A SUPERUILLAIN A BIOLOGIST A THRILLSEEKER A SUPERHERO A CHAMPION\"}, {\"text\": \"A APHANTASM A SCRIBE APSYCHOPOMP ALIGHTHOUSE FAMILYHEAD A GARGOYLE A WRAITH COUNTESS A SAILOR A NURSE\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_002.webp"
+    },
+    {
+      "id": 40002,
+      "cardId": 30002,
+      "faceIndex": 0,
+      "name": "Potenciadores (Boosters) #02: HINER ADE A LONE A COWPOKE RAN",
+      "imagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_003.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"HINER ADE A LONE A COWPOKE RANGER WORKER OWNER A RAILROAD NOOTUSH AROBBERBARON A PROSPECTOR A POACHER DEPUTY A RANCHER A SHERIFF\"}, {\"text\": \"ADO AMO A CATTLE A JAILBIRD RUSTLER AN ARCH-NEMESIS AHENCHPERSON ANOUERLORD A SIDEKICK A MUGGER A NERD\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_004.webp"
+    },
+    {
+      "id": 40003,
+      "cardId": 30003,
+      "faceIndex": 0,
+      "name": "Potenciadores (Boosters) #03: AN ANIMAL A FROG HELPER A FIRS",
+      "imagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_005.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"AN ANIMAL A FROG HELPER A FIRST AMADSCIENTIST A NOSFERATU CASTAWAY A WHALER SNATCHER A BODY A CORSAIR A PLAYBOY\"}, {\"text\": \"A CONSORT AN EXILE A RUNAWAY AFOREST SPIRIT A MONARCH A STEPCHILD AUSURPER ASTEPPARENT A WARD\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_006.webp"
+    },
+    {
+      "id": 40004,
+      "cardId": 30004,
+      "faceIndex": 0,
+      "name": "Potenciadores (Boosters) #04: ON OPER A GRUNT A CIVILIAN ASA",
+      "imagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_007.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"ON OPER A GRUNT A CIVILIAN ASAPPER A CONTRACTOR ANINTERPRETER A TUNNEL RAT A LIEUTENANT OPERATIUE ANEXTRACTOR A SPY\"}, {\"text\": \"AWK A PARE ANEGOTIATOR A SERGEANT A GUNSLINGER ANADUENTURER APALEONTOLOGIST ANESCAPEARTIST A FOLK HERO A RIDER A JEWEL THIEF A KNIGHT\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_008.webp"
+    },
+    {
+      "id": 40005,
+      "cardId": 30005,
+      "faceIndex": 0,
+      "name": "Potenciadores (Boosters) #05: bo WANTSTO WANTSTOREMOUE POSSE",
+      "imagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_009.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"bo WANTSTO WANTSTOREMOUE POSSESS CORRUPTIONFROM CITY WITH POWERSFROMIOF WANTSTO DESTROY WANTS GAIN WANTSTOSAUETHE WANTSTO AUENGE CITYWITH/FROM THELOSS (bo · WANTSTO · WANTSTOREMOUE · POSSESS · CORRUPTIONFROM · Ciudad · WITH · POWERSFROMIOF · WANTSTO · DESTROY · WANTS · GAIN · WANTSTOSAUETHE · WANTSTO · AUENGE · CITYWITH/FROM · THELOSS)\"}, {\"text\": \"WANTSTO WANTSTO CORRUPT DISPOSSESS SOMEONE WITH) FROMOBLIUION (ORTORMENT WANTSTO RESCUE WANTSTO TORMENT WANTSTO CONSIGN WANTSTO PACIFY OR TOOBLIUION\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_010.webp"
+    },
+    {
+      "id": 40006,
+      "cardId": 30006,
+      "faceIndex": 0,
+      "name": "Potenciadores (Boosters) #06: bo WANTSTO PROTECTTHEIR WANTST",
+      "imagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_011.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"bo WANTSTO PROTECTTHEIR WANTSTO HOLD UP LANDFROM/WITH NOTORIETYFOR/WITH/IN ABULLETIN WANTS PUT WANTS EARN WANTSTO WINA APLACEIN/NEAR WAGER INUOLUING\"}, {\"text\": \"WANTS REWARD WANTSTO OBTAIN TURNING ADEEDTOIFROM A WEAPON GUARDIAN WANTS MAKE WANTSTOBECOME WANTSTO BECOMEA NEMESIS\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_012.webp"
+    },
+    {
+      "id": 40007,
+      "cardId": 30007,
+      "faceIndex": 0,
+      "name": "Potenciadores (Boosters) #07: WANTSTO FIND THEIR WANTSTO BRE",
+      "imagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_013.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"WANTSTO FIND THEIR WANTSTO BREAKA PACT PARENTS WITH WITH/INUOLUING LOSTTREASUREOF SOCIETYDEDICATEDTO WANTSTO EXPOSE WANTS FIND ASECRETSOCIETY DEDICATED\"}, {\"text\": \"WANTSTO MAKEA PACT WANTSTO CLAIM A WITH/INUOLUING BIRTHRIGHTINUOLUING MAGICREALMIN/WITH HOMEFROM/WITH WANTS SEALTHE WANTSTO RECLAIM THEIR WANTS REACH WANTS FIND MAGICREALMTHROUGH SOMEONELOST INSIDE\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_014.webp"
+    },
+    {
+      "id": 40008,
+      "cardId": 30008,
+      "faceIndex": 0,
+      "name": "Potenciadores (Boosters) #08: bo WANTSTO EXTRACT WANTSTO END",
+      "imagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_015.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"bo WANTSTO EXTRACT WANTSTO END RESOURCESFROM OCCUPATION WANTSTOTOPPLE MISSION FOCUSEDON WANTSTO SABOTAGEA WANTSTO SUCCEED ATAMISSION ALEADER WITHIOF FOCUSED ON\"}, {\"text\": \"WANTSTO EXTRACT INFORMATIONFROM SOMETHING FROM) BY/INTO TRANSFORMED (ORRECLAIM WANTS BE WANTSTO RECLAIM WANTSTO REUEAL WANTSTO STOPTHE PLANS OFIINUOLUING APPROPRIATIONOF\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_016.webp"
+    },
+    {
+      "id": 40009,
+      "cardId": 30009,
+      "faceIndex": 0,
+      "name": "Potenciadores (Boosters) #09: HING A MANOR RADIATION ACRISIS",
+      "imagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_017.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"HING A MANOR RADIATION ACRISIS ABLASTOF ATRANSFORMATION A SHOWDOWN ATRANSMITTER A LAUNCH PAD ASUPERWEAPON A LAIR (HING · A · MANOR · RADIATION · ACRISIS · ABLASTOF · ATRANSFORMATION · A · SHOWDOWN · ATRANSMITTER · A · LAUNCH · PAD · ASUPERWEAPON · A · Guarida)\"}, {\"text\": \"A BASSINET AMEMENTO ACHURCHYARD ASPIRAL GARDEN AN A VEIL URN ATTIC A SEPULCHRE ANOUBLIETTE\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_018.webp"
+    },
+    {
+      "id": 40010,
+      "cardId": 30010,
+      "faceIndex": 0,
+      "name": "Potenciadores (Boosters) #10: RING A SALOON A BOTTLE A BETRA",
+      "imagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_019.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"RING A SALOON A BOTTLE A BETRAYAL A TRAIN A STANDOFF A CANYON A LASSO TREATY A GHOST TOWN A SIX-SHOOTER (RING · A · SALOON · A · BOTTLE · A · BETRAYAL · A · TRAIN · A · STANDOFF · A · CANYON · A · LASSO · TREATY · A · GHOST · Pueblo · A · SIX-SHOOTER)\"}, {\"text\": \"A PAIR ASTAGECOACH BOOTS A MELTDOWN ASANCTUM APOWERPLANT A DETONATOR A BIRTH A SCAR A SIREN\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_020.webp"
+    },
+    {
+      "id": 40011,
+      "cardId": 30011,
+      "faceIndex": 0,
+      "name": "Potenciadores (Boosters) #11: AN AB ABIR TMENT A CIRCLE A BE",
+      "imagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_021.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"AN AB ABIR TMENT A CIRCLE A BELL mprot A COMET A CRYSTAL BALL esting AN INUASION A KINGDOM AGIZMO A BEACH A LOST CITY ATREASURE (AN · AB · ABIR · TMENT · A · CIRCLE · A · BELL · mprot · A · COMET · A · CRYSTAL · BALL · esting · AN · INUASION · A · Reino · AGIZMO · A · BEACH · A · LOST · Ciudad · ATREASURE)\"}, {\"text\": \"AN ENG ITION AMU ARK ACOTTAGE AREALM A LAMP AWONDERLAND A BOON A QUEST A ROSE A PACT A FRUIT\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_022.webp"
+    },
+    {
+      "id": 40012,
+      "cardId": 30012,
+      "faceIndex": 0,
+      "name": "Potenciadores (Boosters) #12: NU HUTE A HELICOPTER A REFINER",
+      "imagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_023.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"NU HUTE A HELICOPTER A REFINERY ADRIVE AMISSILE A TERRAFORMER A SURRENDER A REPORT A BREACH A GALAXY A TRIBUNAL\"}, {\"text\": \"ROID APA A MUTINY A D.M.Z AN OSSUARY A RAFT ALOCK HAIR AN ARCHIPELAGO AN ADUENTURE AN EXPEDITION A LABYRINTH A SPYGLASS (ROID · APA · A · MUTINY · A · D.M.Z · AN · OSSUARY · A · RAFT · ALOCK · HAIR · AN · ARCHIPELAGO · AN · ADUENTURE · AN · EXPEDITION · A · Laberinto · A · SPYGLASS)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_024.webp"
+    },
+    {
+      "id": 40013,
+      "cardId": 30013,
+      "faceIndex": 0,
+      "name": "Potenciadores (Boosters) #13: BUT IT WILLMEAN BUTSOMETHING E",
+      "imagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_025.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"BUT IT WILLMEAN BUTSOMETHING END THEIR HORRIFYING WILL FAMILY LINE BE SET THEIR GREATEST POWER THEIR SIDEKICK BUT THEY WILL LOSE BUT THEY WILL LOSE BUTIT WILL TURN BUTTHEIR SANCTUM CITY AGAINSTTHEM WILLBEDESTROYED (BUT · IT · WILLMEAN · BUTSOMETHING · END · THEIR · HORRIFYING · WILL · FAMILY · LINE · BE · SET · THEIR · GREATEST · POWER · THEIR · SIDEKICK · BUT · THEY · WILL · LOSE · BUT · THEY · WILL · LOSE · BUTIT · WILL · TURN · BUTTHEIR · SANCTUM · Ciudad · AGAINSTTHEM · WILLBEDESTROYED)\"}, {\"text\": \"BUTA FAMILYSECRET BUT THEY WILL BE WILL BECOME TRAPPEDINAPRISON OFTHEIR OWN MAKING KNOWNTO ALL HAUNTED BY SILENCE DEATH ITSELF BUT THEY WILL BE HAUETO FACE BUT THEY WILL BUT THEY WILL BE BUT THEY WILL NEUER HAUNTED BYWHISPERS BEABLETOTRULYDIE\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_026.webp"
+    },
+    {
+      "id": 40014,
+      "cardId": 30014,
+      "faceIndex": 0,
+      "name": "Potenciadores (Boosters) #14: bo BUT THEY WILL BUTTHEY WILL ",
+      "imagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_027.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"bo BUT THEY WILL BUTTHEY WILL NEUER GETTORIDEOFF HAUETO HANG INTOTHE SUNSET UP THEIR HAT PRICE ON THEIR HEAD TOTAKEABULLET BUT IT WILL PUT A BUTTHEY WILL HAUE BUT THEY WILL BUTTHEY WILLEND HAUETOTAKEA UPDEAD BROKE CHEAP SHOT\"}, {\"text\": \"BUT THEY WILL HAUE BUTIT WILL MEAN LEAUING TOTURN THEMSELFIN TOWN,NEUERTO RETURN CITY UNPROTECTED WILLESCAPE BUT IT WILL LEAUETHE BUTTHEIR NEMESIS BUTITWILL EXPOSE BUT BYSTANDERS THEIR ONE WEAKNESS WILL BE HURT (BUT · THEY · WILL · HAUE · BUTIT · WILL · MEAN · LEAUING · TOTURN · THEMSELFIN · TOWN,NEUERTO · RETURN · Ciudad · UNPROTECTED · WILLESCAPE · BUT · IT · WILL · LEAUETHE · BUTTHEIR · NEMESIS · BUTITWILL · EXPOSE · BUT · BYSTANDERS · THEIR · ONE · WEAKNESS · WILL · BE · HURT)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_028.webp"
+    },
+    {
+      "id": 40015,
+      "cardId": 30015,
+      "faceIndex": 0,
+      "name": "Potenciadores (Boosters) #15: Enginec BUT THEIR NIGHTS BUT B",
+      "imagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_029.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"Enginec BUT THEIR NIGHTS BUT BADLUCK WILL STARTTO PASS WILL FOLLOW TOOSLOWLY THEMFOREER HOMEWORLDAGAIN WILL BELOST THEY HAUE LEARNED NEVER SEETHEIR BUT ALLTHEKNOWLEDGE BUT THEY WILL BUTIT WILL BRING BUT ALL RICHES WAR THEIR THEY HAUE EARNED HOMEWORLD WILL BELOST (Enginec · BUT · THEIR · NIGHTS · BUT · BADLUCK · WILL · STARTTO · Paso de Montaña · WILL · FOLLOW · TOOSLOWLY · THEMFOREER · HOMEWORLDAGAIN · WILL · BELOST · THEY · HAUE · LEARNED · NEVER · SEETHEIR · BUT · ALLTHEKNOWLEDGE · BUT · THEY · WILL · BUTIT · WILL · BRING · BUT · ALL · RICHES · WAR · THEIR · THEY · HAUE · EARNED · HOMEWORLD · WILL · BELOST)\"}, {\"text\": \"BUT THEIR DAYS WILL BUT THEY WILL OWE A BOON AN STARTTO PASS UNPREDICTABLE ENTITY TOOQUICKLY BE REUERSED NORMALLIFE ADAY,ITWILL UNABLETO RETURN BUT THEY WILL BE BUT INA YEARAND BUT A TEMPORARY BUTTHEY WILL LOSE CHANGEWILL BECOME THEIR CONNECTION PERMANENT MAGICAND WHIMSY (BUT · THEIR · DAYS · WILL · BUT · THEY · WILL · OWE · A · BOON · AN · STARTTO · Paso de Montaña · UNPREDICTABLE · ENTITY · TOOQUICKLY · BE · REUERSED · NORMALLIFE · ADAY,ITWILL · UNABLETO · RETURN · BUT · THEY · WILL · BE · BUT · INA · YEARAND · BUT · A · TEMPORARY · BUTTHEY · WILL · LOSE · CHANGEWILL · BECOME · THEIR · CONNECTION · PERMANENT · MAGICAND · WHIMSY)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_030.webp"
+    },
+    {
+      "id": 40016,
+      "cardId": 30016,
+      "faceIndex": 0,
+      "name": "Potenciadores (Boosters) #16: BUTTHE ENEMY BUTTHEIR SUPERIOR",
+      "imagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_031.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"BUTTHE ENEMY BUTTHEIR SUPERIOR LEADER WILL ESCAPE UNSCATHED WILL COMETO LIGHT GETGREENLIT BUTA PASTATROCITY OPERATION WILL BUT A DANGEROUS BUTA PAST ATROCITYWILL BUTTHEIR COUER GO UNPUNISHED WILL BEBLOWN\"}, {\"text\": \"BUT CIVILIANS WILL BUTTHEY WILL BE GET CAUGHTIN STRIPPED OFTHEIR RANK CROSSFIRE MONSTER BEATTHEMTO IT BUTTHEIR RIUAL WILL BUT THEY WILL BUTIFTHEY SUCCEED BUT THEY WILL ENDANGER NO ONE CAN FOLLOW ARARE CREATURE INTHEIR FOOTSTEPS\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_032.webp"
+    },
+    {
+      "id": 40017,
+      "cardId": 30017,
+      "faceIndex": 0,
+      "name": "Potenciadores (Boosters) #17: ELABORATE DREARY AUENGING MASK",
+      "imagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_033.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"ELABORATE DREARY AUENGING MASKED TELEPORTING SHRINKING RIGGED X-RAY MAGNETIC GROWING\"}, {\"text\": \"TED GRANDIOSE UNCOUTH ALABASTER ENGRAUED CRUMBLING ISOLATED MORBID WEEPING INEVITABLE SANGUINE\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_034.webp"
+    },
+    {
+      "id": 40018,
+      "cardId": 30018,
+      "faceIndex": 0,
+      "name": "Potenciadores (Boosters) #18: THIN TRUSTY QUICK-HANDED DAPPE",
+      "imagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_035.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"THIN TRUSTY QUICK-HANDED DAPPER HARD-DRINKIN FAST-TALKIN DASTARDLY FRONTIER DRY DIRTY STAINED\"}, {\"text\": \"UTIN YELLOW-BELLIED ROWDY MIND-ALTERING BLAZING MIND-READING UOLCANIC FREEZING PRISMAT SUPERPOWERED FAST\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_036.webp"
+    },
+    {
+      "id": 40019,
+      "cardId": 30019,
+      "faceIndex": 0,
+      "name": "Potenciadores (Boosters) #19: ITE IRON FOUL RANCOROUS RESOUR",
+      "imagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_037.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"ITE IRON FOUL RANCOROUS RESOURCEFUL EXUBERANT STORIED WITTY VILE APPROPRIATED RIDDLE-FILLED\"}, {\"text\": \"HED AMPHIBIOUS UNSUSPECTING SPELLBOUND OUERGROWN COURTEOUS MUNDANE IDYLLIC CAPRICIOUS BORED\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_038.webp"
+    },
+    {
+      "id": 40020,
+      "cardId": 30020,
+      "faceIndex": 0,
+      "name": "Potenciadores (Boosters) #20: WAR NTED TACTICAL COMPACT OUTR",
+      "imagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_039.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"WAR NTED TACTICAL COMPACT OUTRAGED DILIGENT HAWKISH PLANNED CRAUEN MINED BURNED CLASSIFIED\"}, {\"text\": \"REGI ORN COUERT GRUFF NEBULOUS MECHANICAL COWARDLY DESOLATE STELLAR BRAUE DASHING UNCANNY\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_boosters/cards/nse_booster_040.webp"
+    },
+    {
+      "id": 40021,
+      "cardId": 30021,
+      "faceIndex": 0,
+      "name": "Trasfondos (Backstories) #01: Chiykow URNING FROM ASFORBIDDE",
+      "imagePath": "file:///android_asset/starter_packs/nse_backstories/cards/nse_backstory_001.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"Chiykow URNING FROM ASFORBIDDEN OR\"}, {\"text\": \"\"}, {\"text\": \"enginedeck.com FOUND ORSTEP NO BEEN SEARCHING FROM\"}, {\"text\": \"NVRINATED BY Backstory\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_backstories/cards/nse_backstory_002.webp"
+    },
+    {
+      "id": 40022,
+      "cardId": 30022,
+      "faceIndex": 0,
+      "name": "Trasfondos (Backstories) #02: Chiykow JAL HLI INUOLUING",
+      "imagePath": "file:///android_asset/starter_packs/nse_backstories/cards/nse_backstory_003.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"Chiykow JAL HLI INUOLUING\"}, {\"text\": \"JOLUING UBJECT\"}, {\"text\": \"enginedeck.com EAM SPENTTHEIR ASALWAYSHAD DREAM PROTECTED BECOMINGI OWNING\"}, {\"text\": \"TRAYED SSING Backstory\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_backstories/cards/nse_backstory_004.webp"
+    },
+    {
+      "id": 40023,
+      "cardId": 30023,
+      "faceIndex": 0,
+      "name": "Trasfondos (Backstories) #03: Chiykow TLEADERSHIP BROUGHT RU",
+      "imagePath": "file:///android_asset/starter_packs/nse_backstories/cards/nse_backstory_005.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"Chiykow TLEADERSHIP BROUGHT RUIN (Chiykow · TLEADERSHIP · BROUGHT · Ruina)\"}, {\"text\": \"FROM\"}, {\"text\": \"enginedeck.com HLIN NGREFUGE CEIVED THEIR ESURUIVED BY LOST\"}, {\"text\": \"EN SINCE WITERSIP WITH Backstory\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_backstories/cards/nse_backstory_006.webp"
+    },
+    {
+      "id": 40024,
+      "cardId": 30024,
+      "faceIndex": 0,
+      "name": "Trasfondos (Backstories) #04: Chiykow",
+      "imagePath": "file:///android_asset/starter_packs/nse_backstories/cards/nse_backstory_007.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"Chiykow\"}, {\"text\": \"NHERIT TANDING FROM\"}, {\"text\": \"enginedeck.com HERIT ERIT WAS BETRAYED WAS CURSED BY\"}, {\"text\": \"Backstory\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_backstories/cards/nse_backstory_008.webp"
+    },
+    {
+      "id": 40025,
+      "cardId": 30025,
+      "faceIndex": 0,
+      "name": "Trasfondos (Backstories) #05: Chiykow FAILED AFTER",
+      "imagePath": "file:///android_asset/starter_packs/nse_backstories/cards/nse_backstory_009.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"Chiykow FAILED AFTER\"}, {\"text\": \"DA ARENTS\"}, {\"text\": \"enginedeck.com SUFFEREDA CONTRACTEDA\"}, {\"text\": \"OUND STENT AILED FROM Backstory\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_backstories/cards/nse_backstory_010.webp"
+    },
+    {
+      "id": 40026,
+      "cardId": 30026,
+      "faceIndex": 0,
+      "name": "Trasfondos (Backstories) #06: Chiykow PENED NEVER A RECENT D",
+      "imagePath": "file:///android_asset/starter_packs/nse_backstories/cards/nse_backstory_011.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"Chiykow PENED NEVER A RECENT DEATH HAS LAW IS\"}, {\"text\": \"RNING WRONG RSECRET ENEMY AR ASK\"}, {\"text\": \"enginedeck.com SECRET SUHIIMON NOW AN ENEMY T.FRIEND NOWTHEY OUT BYIT\"}, {\"text\": \"ANSWERS INTHEIR STHITA THEY Backstory\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_backstories/cards/nse_backstory_012.webp"
+    },
+    {
+      "id": 40027,
+      "cardId": 30027,
+      "faceIndex": 0,
+      "name": "Trasfondos (Backstories) #07: Chiykow ACKMAILING NOWSOMEONE ",
+      "imagePath": "file:///android_asset/starter_packs/nse_backstories/cards/nse_backstory_013.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"Chiykow ACKMAILING NOWSOMEONE STARTING OUT FIND ROMANTIC PARTNER\"}, {\"text\": \"TRACES APPEARING MEONE HEIR FORM NE OLD ERASE TNER\"}, {\"text\": \"enginedeck.com NUMONQI PRESSURING NOW SOMEONE COMEDUE\"}, {\"text\": \"MISTAKE THEM Backstory\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_backstories/cards/nse_backstory_014.webp"
+    },
+    {
+      "id": 40028,
+      "cardId": 30028,
+      "faceIndex": 0,
+      "name": "Trasfondos (Backstories) #08: Chiykow NOTT PPEARED NOWTHEY A",
+      "imagePath": "file:///android_asset/starter_packs/nse_backstories/cards/nse_backstory_015.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"Chiykow NOTT PPEARED NOWTHEY ARE BREAK HAUNT HAVETO THEM\"}, {\"text\": \"JEYARE HEYARE GHOST TING\"}, {\"text\": \"enginedeck.com NOW THEY WANT VAS LOVED\"}, {\"text\": \"HINGTHEM APPARENT PPEARED FORIT Backstory yEngine\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_backstories/cards/nse_backstory_016.webp"
+    },
+    {
+      "id": 40029,
+      "cardId": 30029,
+      "faceIndex": 0,
+      "name": "Trasfondos (Backstories) #09: NOW Chiykow THEYARE ANDTHEYJUS",
+      "imagePath": "file:///android_asset/starter_packs/nse_backstories/cards/nse_backstory_017.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"NOW Chiykow THEYARE ANDTHEYJUST DISCOVERED EUERYOI KNEW\"}, {\"text\": \"TUST LANATION HEIR CIRCLE GETTING WANTS\"}, {\"text\": \"enginedeck.com WANTS EXACTLYWHAT HAPPENED\"}, {\"text\": \"PPENED FUTURE SIDE EM Backstory\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_backstories/cards/nse_backstory_018.webp"
+    },
+    {
+      "id": 40030,
+      "cardId": 30030,
+      "faceIndex": 0,
+      "name": "Trasfondos (Backstories) #10: Chiykow TARTING NOW THEY ARE T",
+      "imagePath": "file:///android_asset/starter_packs/nse_backstories/cards/nse_backstory_019.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"Chiykow TARTING NOW THEY ARE TALKTO CONNECTED ABOUTIT\"}, {\"text\": \"SITION EPTANCE EABOUT OUERIT THEIR ARECENT COULD ORIT\"}, {\"text\": \"enginedeck.com EPTANCE LIFELONG ITSELF\"}, {\"text\": \"EIRGOD HEYARE Backstory\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_backstories/cards/nse_backstory_020.webp"
+    },
+    {
+      "id": 40031,
+      "cardId": 30031,
+      "faceIndex": 0,
+      "name": "Misterios (Mystery) #01: LU NU A GUMSHOE A BUTLER A CLE",
+      "imagePath": "file:///android_asset/starter_packs/nse_mystery/cards/nse_mystery_001.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"LU NU A GUMSHOE A BUTLER A CLEANER A DUKE A RINGLEADER AN ANTIQUITIES A HUSTLER COLLECTOR FEMME AMYSTERY A FIXER WRITER\"}, {\"text\": \"ACKER DANT lystery AN EX-CON A RACKETEER A MOURNER A SOCIALITE POLYMATH A TYCOON STREET UENDOR THUG A SWINDLER AN EYEWITNESS\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_mystery/cards/nse_mystery_002.webp"
+    },
+    {
+      "id": 40032,
+      "cardId": 30032,
+      "faceIndex": 0,
+      "name": "Misterios (Mystery) #02: BOSS De AN ANTI CTOR A PSYCHIC",
+      "imagePath": "file:///android_asset/starter_packs/nse_mystery/cards/nse_mystery_003.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"BOSS De AN ANTI CTOR A PSYCHIC A LAWYER SOURCE A CARDSHARP A CONFIDENTIAL AN INSTIGATOR A ROBBER A RELATIVE CONTRACT KILLER AMOBSTER A SUSPECT\"}, {\"text\": \"ACRII RTIST lystery OLIGST AN ESTATE AGENT A POISONER A BOOKIE A WARDEN A JUROR INSPECTOR GETAWAY A POLICE A SHIP'S CAPTAIN DRIUER A CONUICT A JUDGE\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_mystery/cards/nse_mystery_004.webp"
+    },
+    {
+      "id": 40033,
+      "cardId": 30033,
+      "faceIndex": 0,
+      "name": "Misterios (Mystery) #03: bo WANTSTOPLACE WANTSTO SECURE",
+      "imagePath": "file:///android_asset/starter_packs/nse_mystery/cards/nse_mystery_005.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"bo WANTSTOPLACE WANTSTO SECURE SUSPICION ON THEINHERITANCEOF SOCIALTRAP INUOLUING WANTSTO POISON WANTS CREATE A WANTSTO ESCAPE WANTSTO PURGE SOCIALTRAPOF\"}, {\"text\": \"lystery WANTSTO DRAW WANTSTO CASTDOUBT SUSPICION AWAY FROM ON OWNERSHIP SOMEONE WITH) THEIR NAME WITH (ORINTIMIDATE WANTS CLEAR WANTS INTIMIDATE WANTSTO BRIBEOR WANTS RUIN BRIBESOMEONEWITH) REPUTATION (lystery · WANTSTO · DRAW · WANTSTO · CASTDOUBT · SUSPICION · AWAY · FROM · ON · OWNERSHIP · SOMEONE · WITH) · THEIR · NAME · WITH · (ORINTIMIDATE · WANTS · CLEAR · WANTS · INTIMIDATE · WANTSTO · BRIBEOR · WANTS · Ruina · BRIBESOMEONEWITH) · REPUTATION)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_mystery/cards/nse_mystery_006.webp"
+    },
+    {
+      "id": 40034,
+      "cardId": 30034,
+      "faceIndex": 0,
+      "name": "Misterios (Mystery) #04: WANTS IDENTIFY WANTSTO DESTROY",
+      "imagePath": "file:///android_asset/starter_packs/nse_mystery/cards/nse_mystery_007.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"WANTS IDENTIFY WANTSTO DESTROY EUIDENCEOFIFROM THEDECOYSOF SECRETIDENTITY SOMEONE WITH) WANTSTO UNCOUER A (OR HUMILIATE WANTS HUMILIATE WANTSTO EARN WANTSTO OBTAINANEW PRIDE IDENTITYAS/FROM\"}, {\"text\": \"lystery WANTSTO OBTAIN WANTSTO CREATEA CONUINCINGDOUBLEOF EUIDENCEOFIFROM ANUMBERFROM SILENT WITH) (ORKEEPSOMEONE WANTSTO OBTAIN WANTS SILENCE WANTSTO OBTAIN WANTSTOEXTRACTA A NAME FROM CONFESSIONFROM/WITH\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_mystery/cards/nse_mystery_008.webp"
+    },
+    {
+      "id": 40035,
+      "cardId": 30035,
+      "faceIndex": 0,
+      "name": "Misterios (Mystery) #05: De GRAPH ANAUTOPSY AN INHERITA",
+      "imagePath": "file:///android_asset/starter_packs/nse_mystery/cards/nse_mystery_009.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"De GRAPH ANAUTOPSY AN INHERITANCE A NOOSE A PASSAGE A CASK A PIPE A DARE A WINE A CONSERUATORY CELLAR\"}, {\"text\": \"lystery GUE A PHO A WOUND A PROMISE ADEAD END A STUDY AN ALLEY A DESK BODY AN ALARM A.ROOM\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_mystery/cards/nse_mystery_010.webp"
+    },
+    {
+      "id": 40036,
+      "cardId": 30036,
+      "faceIndex": 0,
+      "name": "Misterios (Mystery) #06: A FIREPLACE A DRINK A CAR A CL",
+      "imagePath": "file:///android_asset/starter_packs/nse_mystery/cards/nse_mystery_011.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"A FIREPLACE A DRINK A CAR A CLOSET A SMOKING GUN A FOOTPRINT A WRENCH WILL AN OFFICE A GARAGE\"}, {\"text\": \"ystery A CLIQUE A RUG A CAMERA A CLEAVER A SECURITY A SWITCH A STAIN SYSTEM KITCHEN AN ESTATE A FINGERPRINT\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_mystery/cards/nse_mystery_012.webp"
+    },
+    {
+      "id": 40037,
+      "cardId": 30037,
+      "faceIndex": 0,
+      "name": "Misterios (Mystery) #07: De BUTTHEIR AFFAIR BUT A PAST ",
+      "imagePath": "file:///android_asset/starter_packs/nse_mystery/cards/nse_mystery_013.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"De BUTTHEIR AFFAIR BUT A PAST CRIME WILLBEEXPOSED WILLBEEXPOSED THEIR INHERITANCE WILL BETARNISHED BUTTHEY WILLLOSE ADEAD PERSON BUT NAME BUT JUSTICE WILL BUTTHEY WILLLOSE COMETOOLATE THEIR FAMILY LIUING\"}, {\"text\": \"ystery BUT THEY WILL TAKETHE BUT IT WILLDRIUE RAPFORA CRIMETHEY SOMEONETHEYLOUEINTO DID NOTCOMMIT THEARMSOFANOTHER RELATIONSHIP THEM FINANCIALLY ANIMPORTANT BUT IT WILL RUIN BUTIT WILL END BUTTHEY WILL HAUE BUT THEIR FINANCIAL LIETOTHEPERSON WHO PROBLEMSWILL TRUSTSTHEMMOST BEEXPOSED (ystery · BUT · THEY · WILL · TAKETHE · BUT · IT · WILLDRIUE · RAPFORA · CRIMETHEY · SOMEONETHEYLOUEINTO · DID · NOTCOMMIT · THEARMSOFANOTHER · RELATIONSHIP · THEM · FINANCIALLY · ANIMPORTANT · BUT · IT · WILL · Ruina · BUTIT · WILL · END · BUTTHEY · WILL · HAUE · BUT · THEIR · FINANCIAL · LIETOTHEPERSON · WHO · PROBLEMSWILL · TRUSTSTHEMMOST · BEEXPOSED)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_mystery/cards/nse_mystery_014.webp"
+    },
+    {
+      "id": 40038,
+      "cardId": 30038,
+      "faceIndex": 0,
+      "name": "Misterios (Mystery) #08: De bo BUT THEY WILL BUT IT WIL",
+      "imagePath": "file:///android_asset/starter_packs/nse_mystery/cards/nse_mystery_015.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"De bo BUT THEY WILL BUT IT WILL MEAN HAUETO HURTA HIDINGPART THEIR IDENTITY LOUED ONE SOMEONE GUILTY EXCULPATORYEUIDENCE HAUETO FORGIUE HAUETODESTROY BUT THEY WILL BUT THEY WILL BUT THEY WILL BUTSOMEONE HAUETO REVEAL INNOCENT WILL BE CONDEMNED A HIDING PLACE\"}, {\"text\": \"ystery BUT THEY WILL HAUE BUTIT WILL MEAN LET AN ENEMY THEDISSECTION HURTTHEM SOMETHINGPERSONAL BEBURIED THEMAFORTUNE THEY LOUE WILL BUTITWILLCOST BUT SOMETHING BUT SOMETHING BUT SOMEONETHEY THEY LOVE WILL HATE WILL PROFIT GOUPINFLAMES IMMENSELY\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_mystery/cards/nse_mystery_016.webp"
+    },
+    {
+      "id": 40039,
+      "cardId": 30039,
+      "faceIndex": 0,
+      "name": "Misterios (Mystery) #09: De GUAL RUN DECORATIUE UINTAGE",
+      "imagePath": "file:///android_asset/starter_packs/nse_mystery/cards/nse_mystery_017.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"De GUAL RUN DECORATIUE UINTAGE GRIEUING SMOOTH-TALKING PHILOSOPHICAL IRREVERENT CROOKED UNEXPLAINED\"}, {\"text\": \"ystery MUL WN GRIM DISTANTLYRELATED BRASS INKY AFFECTIONATE OBSCURE BRIGHT ABUSIUE ORPHANED\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_mystery/cards/nse_mystery_018.webp"
+    },
+    {
+      "id": 40040,
+      "cardId": 30040,
+      "faceIndex": 0,
+      "name": "Misterios (Mystery) #10: De EARING JICATED HER INDECIPH",
+      "imagePath": "file:///android_asset/starter_packs/nse_mystery/cards/nse_mystery_019.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"De EARING JICATED HER INDECIPHERABLE VIRULENT ACCIDENT-PRONE SINCERE POMPOUS FAMILIAL STORMY MARKED INSCRIBED ILL-GOTTEN\"}, {\"text\": \"RUN ystery EXCOM ARY MESSA MUTILATED FOND FINGERPRINTED MISSING SEEKING DEMOLISHED RAMSHACKLE SUSPICIOUS THRI SELF-APPOINTED ESTRANGED\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_mystery/cards/nse_mystery_020.webp"
+    },
+    {
+      "id": 40041,
+      "cardId": 30041,
+      "faceIndex": 0,
+      "name": "Objetos Únicos (Unique Items) #01: Chiykow A DUNGEON APAIROF APRO",
+      "imagePath": "file:///android_asset/starter_packs/nse_unique_items/cards/nse_item_001.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"Chiykow A DUNGEON APAIROF APROUING BRACERS GROUND A DIE A CUBE A POLEARM\"}, {\"text\": \"PROUING ANARROW AMEDA ROUND\"}, {\"text\": \"enginedeck.com A HATCHET A MEDAL A CHARM OFCARDS A A BARRACKS A TAVERN (enginedeck.com · A · HATCHET · A · MEDAL · A · CHARM · OFCARDS · A · A · BARRACKS · A · Taberna)\"}, {\"text\": \"A TREASURY CHARM A DUNGEC Unique Items\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_unique_items/cards/nse_item_002.webp"
+    },
+    {
+      "id": 40042,
+      "cardId": 30042,
+      "faceIndex": 0,
+      "name": "Objetos Únicos (Unique Items) #02: Chiykow AWAND AN INK AWHIP ANE",
+      "imagePath": "file:///android_asset/starter_packs/nse_unique_items/cards/nse_item_003.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"Chiykow AWAND AN INK AWHIP ANET A PIECE PAPER ALOOM\"}, {\"text\": \"AWHIP ABATH ADRUM\"}, {\"text\": \"enginedeck.com A SWITCHBLADE AN ACADEMY A GATHERING A DRUM PLACE ACROSSBOW ALOCKPICK\"}, {\"text\": \"ACADEMY A BELT ANINK Unique Items\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_unique_items/cards/nse_item_004.webp"
+    },
+    {
+      "id": 40043,
+      "cardId": 30043,
+      "faceIndex": 0,
+      "name": "Objetos Únicos (Unique Items) #03: Chiykow THAT ONLYWORKS UNKNOWN",
+      "imagePath": "file:///android_asset/starter_packs/nse_unique_items/cards/nse_item_005.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"Chiykow THAT ONLYWORKS UNKNOWN GEMSTONE THATFEEDSONOTHER EXTINCT CREATURE MADEFROMAN DURING DAY POSSESSIONS MADEOFAN THATPROTECTS THAT CREATESSILENCE FROMFEAR OR DARKNESS\"}, {\"text\": \"OM DEFROMAN MADEFROM MADEBYAD TUSKORHORN NCTCREATURE MASTERARTI\"}, {\"text\": \"enginedeck.com THATONLYWORKS SCAUENGED PARTS WORKS AT NIGHT MASTER ARTISAN MADEBYADEAD DYING THAT ONLY MADE THATIMPARTS THATIMPLANTS QUESTS FALSEMEMORIES\"}, {\"text\": \"ONLY WORKS THAT ONLY THAT CAUSES RTHEDYING BLEEDING WHEN USED DURINGTHE Unique Items\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_unique_items/cards/nse_item_006.webp"
+    },
+    {
+      "id": 40044,
+      "cardId": 30044,
+      "faceIndex": 0,
+      "name": "Objetos Únicos (Unique Items) #04: Chiykow COATED ASHES SACRIFICI",
+      "imagePath": "file:///android_asset/starter_packs/nse_unique_items/cards/nse_item_007.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"Chiykow COATED ASHES SACRIFICING KEEPSAKES CELESTIALEVENTS CONTROLLED BY STRANGE BONES AN EMPIRE MADEFROM POWERED BY THAT GRANTS GOOD/BADLUCK THATPOISONS\"}, {\"text\": \"UNS ADEFROM MADEFROMTHE THATTELLSJC OLDESTTREE ANGEBONES OR FACTS\"}, {\"text\": \"enginedeck.com COUEREDINRUNESNO THAT TELLS JOKES THATONLYWORKS ONE HAS DECODED SOMEONE OR FACTS THAT GUIDES WITH THAT CAUSES PHANTOMSMELLS FORGETFULNESS\"}, {\"text\": \"ONLY WORKS POWERED BY CONTROLLE NOTNEEDED SWEAR WORDS CELESTIAL EU Unique Items\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_unique_items/cards/nse_item_008.webp"
+    },
+    {
+      "id": 40045,
+      "cardId": 30045,
+      "faceIndex": 0,
+      "name": "Objetos Únicos (Unique Items) #05: Chiykow OPERATED BYCOIN HUNTED",
+      "imagePath": "file:///android_asset/starter_packs/nse_unique_items/cards/nse_item_009.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"Chiykow OPERATED BYCOIN HUNTED BYAPOWER THAT WANTSIT BACK DECORATED WITH A STRANGEMAP WHALESONG OR THAT EMITS STTHD BIRD THATCOMMANDS THATINCREASES ICEANDSNOW TOUGHNESS\"}, {\"text\": \"THATEMITS COUEREDIN INSCRIBEDW ALESONGOR THOUSANDSOF ARIDDLE BIRD CALLS STITCHES\"}, {\"text\": \"enginedeck.com THATGRANTSTHE THAT ONLY WORKS MADE OFCORAL INSCRIBED WITH POWERED BY ARIDDLE BLOOD THATACTSASA THATGIUES HOMINGBEACON BADIDEAS\"}, {\"text\": \"OWERED BY THATLOATHES HUNTED BYAPC BLOOD BEARER THAT WANTSIT Unique Items\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_unique_items/cards/nse_item_010.webp"
+    },
+    {
+      "id": 40046,
+      "cardId": 30046,
+      "faceIndex": 0,
+      "name": "Objetos Únicos (Unique Items) #06: Chiykow INDESCRIBABLEHUE THATI",
+      "imagePath": "file:///android_asset/starter_packs/nse_unique_items/cards/nse_item_011.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"Chiykow INDESCRIBABLEHUE THATIS NEUERWHERE FOREVER STAINED A FAMILY LINE IT WAS LEFTLAST THATIS BOUND WITH BLOOD THAT PREUENTS THAT HEALING CAMOUFLAGES\"}, {\"text\": \"MADEOFEXTRA IATHASAN THATSMELLS DIMENSIONAL CRIBABLEHUE BRIMSTON COMPONENTS\"}, {\"text\": \"enginedeck.com THATTURNSWATER THATWEIGHSASMUCH THATSMELLSOF THATCANNOT BEPUT FORGOTTENGOD MARKED WITHTHE SYMBOLOFA BRIMSTONE THAT CARRIESIT THATGRANTS ENTRY THATINFLICTSRAPIDLY TOAMYTHICPLACE HEALING WOUNDS\"}, {\"text\": \"NEIGHSASMUCH POWERED BYTHE THAT IS NEUER HECONSCIENCE SOULSOFITSUICTIMS ATCARRIESIT IT WAS LEFTL Unique Items\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_unique_items/cards/nse_item_012.webp"
+    },
+    {
+      "id": 40047,
+      "cardId": 30047,
+      "faceIndex": 0,
+      "name": "Objetos Únicos (Unique Items) #07: Chiykow INHABITEDBYA HERMIT PE",
+      "imagePath": "file:///android_asset/starter_packs/nse_unique_items/cards/nse_item_013.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"Chiykow INHABITEDBYA HERMIT PEOPLETOACTIUATE THATREQUIRESTWO CRABORNESTINGBIRD FROMADYINGSTAR ACTIUATED BY FORGEDIN OR THAT GRANTS THAT MANIPULATES WISDOM TIME\"}, {\"text\": \"COATEDWIT THATWHISPERS ORGEDINOR SOMETHIN M.ADYINGSTAR WHEN TOUCHED INDESTRUCTIB\"}, {\"text\": \"enginedeck.com POWEREDBYSONG MADE OFICE INDESTRUCTIBLE SOMETHING COATED WITH RECHARGED BY PRAYER THAT CONTROLS THAT CONTAINS A PLANTGROWTH POCKETDIMENSION\"}, {\"text\": \"RECHARGED THATREQUIRES EREDBYSONG BYTEARS Unique Items\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_unique_items/cards/nse_item_014.webp"
+    },
+    {
+      "id": 40048,
+      "cardId": 30048,
+      "faceIndex": 0,
+      "name": "Objetos Únicos (Unique Items) #08: THATGRANTSTHE Chiykow SHREDS W",
+      "imagePath": "file:///android_asset/starter_packs/nse_unique_items/cards/nse_item_015.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"THATGRANTSTHE Chiykow SHREDS WHEN USED THATSHATTERSOR BROKEN HALF DEAD LANGUAGE ACTIUATED BYA THAT WAS THAT GRANTS THAT GRANTS LEVITATION SHAPE-SHIFTING\"}, {\"text\": \"DESIGNED WITH THATWAS THATBUZZ OKENIN HALF UNNERUING\"}, {\"text\": \"enginedeck.com FRAGMENT A GOD ACTIUATED BYA KEY THATTELEPORTS AWAY AFTER USE CONTAININGA UNNERUINGLY THATBUZZES THAT COMMANDS THATMAKES MOULD FUNGUS NIGHTMARES REAL\"}, {\"text\": \"THATSHATTER THATEMITSTHICK ATED BY A KEY SMOKE WHEN USED SHREDS WHEN Unique Items\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_unique_items/cards/nse_item_016.webp"
+    },
+    {
+      "id": 40049,
+      "cardId": 30049,
+      "faceIndex": 0,
+      "name": "Objetos Únicos (Unique Items) #09: Chiykow MISCHIEUOUS ENTITY STE",
+      "imagePath": "file:///android_asset/starter_packs/nse_unique_items/cards/nse_item_017.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"Chiykow MISCHIEUOUS ENTITY STENCH WHEN USED THAT UNLEASHESA WORKSONTIME INHABITED BYA THAT NEUER SCRATCHES THATCOMMANDS THAT CARRIESAN AURA SHADOWS OFFROSTORFIRE\"}, {\"text\": \"EREDINWILD INSCRIBEDW CRATCHES COUEREDINMOSS APROPHE\"}, {\"text\": \"enginedeck.com THAT ONLY WORKS LETOUTIFSTOWED THAT PLEADSTO BE INSCRIBED WITH CHILDREN A PROPHECY RECHARGED BY SEAWATER THATIMPARTS THATMANIPULATES UNDERSTANDING WEATHER\"}, {\"text\": \"THAT ONLY WORKS CHARGED BY THAT NEUE EAWATER WORKSONT Unique Items\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_unique_items/cards/nse_item_018.webp"
+    },
+    {
+      "id": 40050,
+      "cardId": 30050,
+      "faceIndex": 0,
+      "name": "Objetos Únicos (Unique Items) #10: THATGRANTSTHE Chiykow USER PER",
+      "imagePath": "file:///android_asset/starter_packs/nse_unique_items/cards/nse_item_019.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"THATGRANTSTHE Chiykow USER PERMANENTLY THATLOOKSDAMAGED THAT STAINS COVERED EYES CONFESSIONS BEYOND REPAIR POWERED BY THAT GRANTS THAT GRANTSSPEED MASTERYOFASKILL\"}, {\"text\": \"MADEOFINS THAT CONSTANTLY EREDIN EYES RIPPLESORSHIMMERS CARAPAC\"}, {\"text\": \"enginedeck.com PETRIFIES BEARER ORMUMMIFIEDFLESH MADEOF INSECT SHRINKS WHEN USED MADE FROMLIUING THATGROWSOR THAT SLOWLY CARAPACE THATGRANTS THATPRODUCES ORINFLICTS COUNTERFEITCURRENCY UENTRILOQUISM\"}, {\"text\": \"THATONLY WORKS THAT STAINS TGROWSOR RAIN IKSWHENUSED USERPERMAN Unique Items yEngine\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/nse_unique_items/cards/nse_item_020.webp"
+    }
+  ],
+  "cardStackTags": [
+    {
+      "stackId": 201,
+      "tagId": 2
+    },
+    {
+      "stackId": 201,
+      "tagId": 3
+    },
+    {
+      "stackId": 202,
+      "tagId": 2
+    },
+    {
+      "stackId": 202,
+      "tagId": 3
+    },
+    {
+      "stackId": 203,
+      "tagId": 2
+    },
+    {
+      "stackId": 203,
+      "tagId": 3
+    },
+    {
+      "stackId": 204,
+      "tagId": 2
+    },
+    {
+      "stackId": 204,
+      "tagId": 3
+    }
+  ],
+  "cardTags": [
+    {
+      "cardId": 30001,
+      "tagId": 2
+    },
+    {
+      "cardId": 30002,
+      "tagId": 2
+    },
+    {
+      "cardId": 30003,
+      "tagId": 2
+    },
+    {
+      "cardId": 30004,
+      "tagId": 2
+    },
+    {
+      "cardId": 30005,
+      "tagId": 2
+    },
+    {
+      "cardId": 30006,
+      "tagId": 2
+    },
+    {
+      "cardId": 30007,
+      "tagId": 2
+    },
+    {
+      "cardId": 30008,
+      "tagId": 2
+    },
+    {
+      "cardId": 30009,
+      "tagId": 2
+    },
+    {
+      "cardId": 30010,
+      "tagId": 2
+    },
+    {
+      "cardId": 30011,
+      "tagId": 2
+    },
+    {
+      "cardId": 30012,
+      "tagId": 2
+    },
+    {
+      "cardId": 30013,
+      "tagId": 2
+    },
+    {
+      "cardId": 30014,
+      "tagId": 2
+    },
+    {
+      "cardId": 30015,
+      "tagId": 2
+    },
+    {
+      "cardId": 30016,
+      "tagId": 2
+    },
+    {
+      "cardId": 30017,
+      "tagId": 2
+    },
+    {
+      "cardId": 30018,
+      "tagId": 2
+    },
+    {
+      "cardId": 30019,
+      "tagId": 2
+    },
+    {
+      "cardId": 30020,
+      "tagId": 2
+    },
+    {
+      "cardId": 30021,
+      "tagId": 2
+    },
+    {
+      "cardId": 30022,
+      "tagId": 2
+    },
+    {
+      "cardId": 30023,
+      "tagId": 2
+    },
+    {
+      "cardId": 30024,
+      "tagId": 2
+    },
+    {
+      "cardId": 30025,
+      "tagId": 2
+    },
+    {
+      "cardId": 30026,
+      "tagId": 2
+    },
+    {
+      "cardId": 30027,
+      "tagId": 2
+    },
+    {
+      "cardId": 30028,
+      "tagId": 2
+    },
+    {
+      "cardId": 30029,
+      "tagId": 2
+    },
+    {
+      "cardId": 30030,
+      "tagId": 2
+    },
+    {
+      "cardId": 30031,
+      "tagId": 2
+    },
+    {
+      "cardId": 30032,
+      "tagId": 2
+    },
+    {
+      "cardId": 30033,
+      "tagId": 2
+    },
+    {
+      "cardId": 30034,
+      "tagId": 2
+    },
+    {
+      "cardId": 30035,
+      "tagId": 2
+    },
+    {
+      "cardId": 30036,
+      "tagId": 2
+    },
+    {
+      "cardId": 30037,
+      "tagId": 2
+    },
+    {
+      "cardId": 30038,
+      "tagId": 2
+    },
+    {
+      "cardId": 30039,
+      "tagId": 2
+    },
+    {
+      "cardId": 30040,
+      "tagId": 2
+    },
+    {
+      "cardId": 30041,
+      "tagId": 2
+    },
+    {
+      "cardId": 30042,
+      "tagId": 2
+    },
+    {
+      "cardId": 30043,
+      "tagId": 2
+    },
+    {
+      "cardId": 30044,
+      "tagId": 2
+    },
+    {
+      "cardId": 30045,
+      "tagId": 2
+    },
+    {
+      "cardId": 30046,
+      "tagId": 2
+    },
+    {
+      "cardId": 30047,
+      "tagId": 2
+    },
+    {
+      "cardId": 30048,
+      "tagId": 2
+    },
+    {
+      "cardId": 30049,
+      "tagId": 2
+    },
+    {
+      "cardId": 30050,
+      "tagId": 2
+    }
+  ],
+  "tableBundles": [],
+  "randomTables": [],
+  "tableEntries": [],
+  "randomTableTags": [],
+  "sessions": [],
+  "sessionDeckRefs": [],
+  "sessionTableRefs": [],
+  "drawEvents": [],
+  "encounters": [],
+  "encounterCreatures": [],
+  "combatLog": [],
+  "npcs": [],
+  "npcTags": [],
+  "wikiCategories": [],
+  "wikiEntries": [],
+  "referenceTables": [],
+  "referenceRows": [],
+  "referenceTableTags": [],
+  "systemRules": [
+    {
+      "id": 201,
+      "title": "New Story Engine: Cómo Funciona el Motor de Historias",
+      "gameSystem": "Story Engine",
+      "category": "Reglas de Narrativa",
+      "content": "# New Story Engine: Motor de Historias\n\nEl **New Story Engine** es un generador dinámico de tramas, personajes y conflictos dramáticos:\n\n### Tipos de Cartas y Mazos:\n1. **Potenciadores (Boosters)**: Roles centrales, conceptos dramáticos y giros para personajes.\n2. **Trasfondos (Backstories)**: Motivaciones profundas, traumas, pasados oscuros y deudas pendientes (4 orientaciones).\n3. **Misterios (Mystery)**: Sospechosos, crímenes, móviles y secretos ocultos ideales para intriga y novelas negras.\n4. **Objetos Únicos (Unique Items)**: Artefactos con propiedades extraordinarias y ganchos que impulsan la trama.\n\n### Cómo Usar en Juego:\n- Roba una carta de cada mazo para estructurar una premisa narrativa completa: un Agente con un Trasfondo se enfrenta a un Misterio armado con un Objeto Único.",
+      "isPinned": true,
+      "sortOrder": 1,
+      "sourcePack": "The Story Engine: New Story Engine"
+    }
+  ],
+  "systemRuleTags": [],
+  "collections": [],
+  "collectionResourceRefs": [],
+  "tacticalMaps": [],
+  "tacticalTokens": [],
+  "tacticalMapPins": []
+}

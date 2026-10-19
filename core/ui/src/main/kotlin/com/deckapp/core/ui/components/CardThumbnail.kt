@@ -16,11 +16,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.deckapp.core.model.Card
 import com.deckapp.core.model.CardAspectRatio
@@ -64,7 +67,11 @@ fun CardThumbnail(
                 AsyncImage(
                     model = com.deckapp.core.ui.util.toCoilModel(imagePath),
                     contentDescription = card.title,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            rotationZ = card.currentRotation.toFloat()
+                        },
                     contentScale = ContentScale.Fit
                 )
             } else {
@@ -76,6 +83,37 @@ fun CardThumbnail(
                         text = card.title.take(2).uppercase(),
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            // ── Badge de orientación activa (FOUR_EDGE_CUES / TOP_BOTTOM_SPLIT / REVERSIBLE)
+            val orientationBadge = when (card.activeFace.contentMode) {
+                CardContentMode.FOUR_EDGE_CUES -> when (((card.currentRotation % 360) + 360) % 360) {
+                    0 -> "N"
+                    90 -> "E"
+                    180 -> "S"
+                    270 -> "O"
+                    else -> "N"
+                }
+                CardContentMode.TOP_BOTTOM_SPLIT,
+                CardContentMode.REVERSIBLE -> if (card.currentRotation == 180 || card.isReversed) "2" else "1"
+                else -> null
+            }
+            if (orientationBadge != null) {
+                Surface(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(4.dp),
+                    shape = RoundedCornerShape(4.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.85f)
+                ) {
+                    Text(
+                        text = orientationBadge,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                        fontSize = 9.sp
                     )
                 }
             }

@@ -35,6 +35,7 @@ fun DeckWorkspace(
     onRevealCard: (Long) -> Unit,
     onRollTable: (Long) -> Unit,
     onOpenDeckPicker: () -> Unit = {},
+    onRotateCard: (Long) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     if (uiState.deckRefs.isEmpty()) {
@@ -118,7 +119,8 @@ fun DeckWorkspace(
                     onCardClick = onCardClick,
                     onDiscard = onDiscard,
                     onRevealCard = onRevealCard,
-                    onRollTable = onRollTable
+                    onRollTable = onRollTable,
+                    onRotateCard = onRotateCard
                 )
             }
             item { Spacer(Modifier.height(80.dp)) }
@@ -142,6 +144,7 @@ fun DeckClusterItem(
     onDiscard: (Long) -> Unit,
     onRevealCard: (Long) -> Unit,
     onRollTable: (Long) -> Unit,
+    onRotateCard: (Long) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -209,7 +212,8 @@ fun DeckClusterItem(
                             onClick = { onCardClick(card.id, sessionId) },
                             onDiscard = { onDiscard(card.id) },
                             onReveal = { onRevealCard(card.id) },
-                            onRollTable = onRollTable
+                            onRollTable = onRollTable,
+                            onRotate = { onRotateCard(card.id) }
                         )
                     }
                 }

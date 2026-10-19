@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -47,6 +48,7 @@ fun DeckBlockContent(
     onDiscard: (Long) -> Unit,
     onRevealCard: (Long) -> Unit,
     onCardClick: (Long) -> Unit = {},
+    onRotateCard: (Long) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
@@ -286,7 +288,8 @@ fun DeckBlockContent(
                                 },
                                 onDiscard = { onDiscard(card.id) },
                                 onReveal = { onRevealCard(card.id) },
-                                onRollTable = {}
+                                onRollTable = {},
+                                onRotate = { onRotateCard(card.id) }
                             )
                         }
                     }
@@ -425,7 +428,11 @@ private fun CompactDeckBlockContent(
                         AsyncImage(
                             model = com.deckapp.core.ui.util.toCoilModel(lastCard.activeFace.imagePath),
                             contentDescription = lastCard.title,
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .graphicsLayer {
+                                    rotationZ = lastCard.currentRotation.toFloat()
+                                },
                             contentScale = ContentScale.Crop
                         )
                     } else {

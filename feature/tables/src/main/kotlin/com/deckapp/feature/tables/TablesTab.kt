@@ -235,6 +235,8 @@ fun TablesTab(
                         val tagLabel = when (tag.name) {
                             "choir_of_flesh.json" -> "Choir of Flesh"
                             "story_engine_deck_of_worlds.json" -> "Deck of Worlds"
+                            "story_engine_deck_of_worlds_expansions.json" -> "Deck of Worlds (Exp.)"
+                            "new_story_engine.json" -> "New Story Engine"
                             "dnd_5e_2024.json" -> "D&D 5e"
                             "twilight_2000_4e.json" -> "Twilight 2000"
                             else -> tag.name.removeSuffix(".json").replace("_", " ")

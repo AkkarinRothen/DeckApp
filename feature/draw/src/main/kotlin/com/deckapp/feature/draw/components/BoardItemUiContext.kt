@@ -78,6 +78,7 @@ data class BoardItemUiContext(
     val onDiscardCard: (Long) -> Unit = {},
     val onRevealCard: (Long) -> Unit = {},
     val onCardClick: (Long) -> Unit = {},
+    val onRotateCard: (Long) -> Unit = {},
     val piledByDeck: Map<Long, Int> = emptyMap(),
     val onUpdateWikiEntry: (WikiEntry) -> Unit = {},
     val onRollTable: (Long) -> Unit = {},

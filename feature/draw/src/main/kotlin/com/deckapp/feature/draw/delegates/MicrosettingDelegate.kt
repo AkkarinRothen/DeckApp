@@ -57,6 +57,7 @@ class MicrosettingDelegate(
                     val allCues = card.activeFace.zones.map { it.text }
                     val rotations = optionRotationsFor(card.activeFace.contentMode)
                     val rotation = rotations.random()
+                    cardRepository.updateCardRotation(card.id, rotation)
                     val activeCue = allCues.getOrNull(rotations.indexOf(rotation)).orEmpty()
                     items += MicrosettingCardItem(
                         slotType = slot,
@@ -102,6 +103,7 @@ class MicrosettingDelegate(
                     val rotations = item.optionRotations
                     val newRotation = rotations[(rotations.indexOf(item.rotation).coerceAtLeast(0) + 1) % rotations.size]
                     val newCue = item.cueAt(newRotation)
+                    cardRepository.updateCardRotation(item.cardId, newRotation)
                     item.copy(rotation = newRotation, activeCue = newCue)
                 } else {
                     item
@@ -126,7 +128,10 @@ class MicrosettingDelegate(
                 if (item.slotType == slotType) {
                     val normalizedRotation = (rotation % 360 + 360) % 360
                     if (normalizedRotation !in item.optionRotations) item
-                    else item.copy(rotation = normalizedRotation, activeCue = item.cueAt(normalizedRotation))
+                    else {
+                        cardRepository.updateCardRotation(item.cardId, normalizedRotation)
+                        item.copy(rotation = normalizedRotation, activeCue = item.cueAt(normalizedRotation))
+                    }
                 } else {
                     item
                 }
@@ -157,6 +162,7 @@ class MicrosettingDelegate(
             val allCues = newCard.activeFace.zones.map { it.text }
             val rotations = optionRotationsFor(newCard.activeFace.contentMode)
             val rotation = rotations.random()
+            cardRepository.updateCardRotation(newCard.id, rotation)
             val activeCue = allCues.getOrNull(rotations.indexOf(rotation)).orEmpty()
 
             val newItem = MicrosettingCardItem(

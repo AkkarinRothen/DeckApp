@@ -253,7 +253,8 @@ fun SessionScreen(
                         onDiscard = { viewModel.discardCard(it) },
                         onRevealCard = { viewModel.revealCard(it) },
                         onRollTable = viewModel::rollActiveTable,
-                        onOpenDeckPicker = viewModel::openDeckPicker
+                        onOpenDeckPicker = viewModel::openDeckPicker,
+                        onRotateCard = viewModel::rotateCard
                     )
                     SidebarTool.TABLES -> TablesTab(
                         sessionId = uiState.sessionId,

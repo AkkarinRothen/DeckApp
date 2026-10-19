@@ -106,6 +106,8 @@ class TablesViewModel @Inject constructor(
                         val displayName = when (fileName) {
                             "choir_of_flesh.json" -> "Choir of Flesh (Sistema Completo)"
                             "story_engine_deck_of_worlds.json" -> "The Story Engine: Deck of Worlds"
+                            "story_engine_deck_of_worlds_expansions.json" -> "The Story Engine: Deck of Worlds (Expansiones)"
+                            "new_story_engine.json" -> "The Story Engine: New Story Engine (Expansiones)"
                             "dnd_5e_2024.json" -> "D&D 5e (2024)"
                             "twilight_2000_4e.json" -> "Twilight 2000 4e"
                             else -> fileName.removeSuffix(".json")

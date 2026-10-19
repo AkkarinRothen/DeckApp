@@ -338,8 +338,9 @@ class ReferenceRepositoryImpl @Inject constructor(
 
                 val deckIdMap = mutableMapOf<Long, Long>()
                 val existingStacks = cardStackDao.getAllStacksSync()
-                // A Deck of Worlds reimport must retain card IDs, draws and session history.
-                val preserveStoryCards = packName == "story_engine_deck_of_worlds.json"
+                val preserveStoryCards = packName == "story_engine_deck_of_worlds.json" ||
+                    packName == "story_engine_deck_of_worlds_expansions.json" ||
+                    packName == "new_story_engine.json"
                 val existingStoryByImage = mutableMapOf<String, Pair<CardEntity, CardFaceEntity>>()
                 if (preserveStoryCards) {
                     backup.decks.mapNotNull { dto -> existingStacks.find { it.name == dto.name }?.id }
@@ -399,7 +400,7 @@ class ReferenceRepositoryImpl @Inject constructor(
                         cardDao.updateCard(oldCard.copy(
                             stackId = newStackId,
                             originDeckId = cardDto.originDeckId?.let { deckIdMap[it] } ?: newStackId,
-                            title = if (oldCard.title.matches(Regex(".*#[0-9]+"))) cardDto.title else oldCard.title,
+                            title = cardDto.title,
                             suit = cardDto.suit,
                             sortOrder = cardDto.sortOrder
                         ))
@@ -434,9 +435,9 @@ class ReferenceRepositoryImpl @Inject constructor(
                     val preservedFace = if (preserveStoryCards) faceDto.imagePath?.let(existingStoryByImage::get)?.second else null
                     if (preservedFace != null) {
                         cardFaceDao.updateFace(preservedFace.copy(
-                            name = if (preservedFace.name.matches(Regex(".*#[0-9]+"))) faceDto.name else preservedFace.name,
+                            name = faceDto.name,
                             contentMode = faceDto.contentMode,
-                            zonesJson = if (preservedFace.zonesJson == "[]") faceDto.zonesJson else preservedFace.zonesJson
+                            zonesJson = if (preservedFace.zonesJson.isBlank() || preservedFace.zonesJson == "[]" || preservedFace.zonesJson.contains("\"\"")) faceDto.zonesJson else preservedFace.zonesJson
                         ))
                         return@forEach
                     }

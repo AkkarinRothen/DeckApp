@@ -91,6 +91,7 @@ internal fun BoardBlockContent(
     onNpcClick: (Long) -> Unit,
     onWikiClick: (Long) -> Unit,
     onCardClick: (Long) -> Unit = {},
+    onRotateCard: (Long) -> Unit = {},
     notesContent: String = "",
     onUpdateNotes: (String) -> Unit = {},
     onSendToNotes: ((tableName: String, resultText: String) -> Unit)? = null,
@@ -251,7 +252,8 @@ internal fun BoardBlockContent(
                 onReset = { onResetDeck(deckId) },
                 onDiscard = onDiscardCard,
                 onRevealCard = onRevealCard,
-                onCardClick = onCardClick
+                onCardClick = onCardClick,
+                onRotateCard = onRotateCard
             )
         }
         SessionBoardItemType.NPCS -> {

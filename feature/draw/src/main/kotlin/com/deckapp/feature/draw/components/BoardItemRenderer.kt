@@ -253,6 +253,7 @@ private fun RenderBlockCardContent(
             onDiscardCard = uiContext.onDiscardCard,
             onRevealCard = uiContext.onRevealCard,
             onCardClick = uiContext.onCardClick,
+            onRotateCard = uiContext.onRotateCard,
             sessionId = uiContext.sessionId,
             onTickClock = uiContext.onTickClock,
             onUpdateClockDescriptionAndProgress = uiContext.onUpdateClockDescriptionAndProgress,

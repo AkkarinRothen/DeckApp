@@ -376,9 +376,9 @@ private fun zoneLabelsFor(mode: CardContentMode): List<String> = when (mode) {
     CardContentMode.IMAGE_ONLY        -> emptyList()
     CardContentMode.IMAGE_WITH_TEXT   -> listOf("Texto")
     CardContentMode.REVERSIBLE        -> listOf("Texto derecho", "Texto invertido")
-    CardContentMode.TOP_BOTTOM_SPLIT  -> listOf("Zona superior", "Zona inferior")
+    CardContentMode.TOP_BOTTOM_SPLIT  -> listOf("Zona inferior (0°)", "Zona superior (180°)")
     CardContentMode.LEFT_RIGHT_SPLIT  -> listOf("Zona izquierda", "Zona derecha")
-    CardContentMode.FOUR_EDGE_CUES    -> listOf("Norte", "Este", "Sur", "Oeste")
+    CardContentMode.FOUR_EDGE_CUES    -> listOf("Sur (0°)", "Oeste (90°)", "Norte (180°)", "Este (270°)")
     CardContentMode.FOUR_QUADRANT     -> listOf("Noroeste", "Noreste", "Suroeste", "Sureste")
     CardContentMode.DOUBLE_SIDED_FULL -> listOf("Contenido")
 }

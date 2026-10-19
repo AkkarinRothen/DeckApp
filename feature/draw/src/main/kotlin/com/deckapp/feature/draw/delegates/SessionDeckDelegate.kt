@@ -369,6 +369,27 @@ class SessionDeckDelegate(
         }
     }
 
+    /** Rota una carta a su siguiente orientación según su contentMode. */
+    fun rotateCard(cardId: Long) {
+        scope.launch {
+            val card = cardRepository.getCardById(cardId).first() ?: return@launch
+            val nextRotation = when (card.activeFace.contentMode) {
+                CardContentMode.FOUR_EDGE_CUES -> (card.currentRotation + 90) % 360
+                CardContentMode.TOP_BOTTOM_SPLIT, CardContentMode.REVERSIBLE -> (card.currentRotation + 180) % 360
+                else -> (card.currentRotation + 90) % 360
+            }
+            updateCardStateUseCase(cardId, UpdateCardStateUseCase.CardStateUpdate(rotation = nextRotation))
+            sessionRepository.logEvent(
+                DrawEvent(
+                    sessionId = sessionId,
+                    cardId = cardId,
+                    action = DrawAction.ROTATE,
+                    metadata = "$nextRotation"
+                )
+            )
+        }
+    }
+
     fun clearSnackbar() {
         _uiState.update { it.copy(snackbarMessage = null) }
     }

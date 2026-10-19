@@ -1,0 +1,3081 @@
+{
+  "schemaVersion": 1,
+  "tags": [
+    {
+      "id": 1,
+      "name": "Deck of Worlds",
+      "color": -14457476
+    },
+    {
+      "id": 2,
+      "name": "Story Engine",
+      "color": -11913386
+    },
+    {
+      "id": 3,
+      "name": "Worldbuilding",
+      "color": -7049442
+    }
+  ],
+  "decks": [
+    {
+      "id": 107,
+      "name": "Deck of Worlds: Exp. Cartográfica - Ártico",
+      "type": "DECK",
+      "description": "Regiones heladas, glaciares, tundras y fenómenos polares para el Deck of Worlds.",
+      "coverImagePath": "file:///android_asset/starter_packs/cartographic_arctic/cards/arctic_001.webp",
+      "sourceFolderPath": null,
+      "defaultContentMode": "TOP_BOTTOM_SPLIT",
+      "drawMode": "RANDOM",
+      "drawFaceDown": false,
+      "backImagePath": "file:///android_asset/starter_packs/cartographic_arctic/cards/arctic_002.webp",
+      "displayCount": true,
+      "aspectRatio": "SQUARE",
+      "isArchived": false,
+      "sortOrder": 7,
+      "createdAt": 1729250107000
+    },
+    {
+      "id": 108,
+      "name": "Deck of Worlds: Exp. Cartográfica - Costas",
+      "type": "DECK",
+      "description": "Penínsulas, acantilados costeros, bahías y archipiélagos.",
+      "coverImagePath": "file:///android_asset/starter_packs/cartographic_coastlines/cards/coastlines_001.webp",
+      "sourceFolderPath": null,
+      "defaultContentMode": "TOP_BOTTOM_SPLIT",
+      "drawMode": "RANDOM",
+      "drawFaceDown": false,
+      "backImagePath": "file:///android_asset/starter_packs/cartographic_coastlines/cards/coastlines_002.webp",
+      "displayCount": true,
+      "aspectRatio": "SQUARE",
+      "isArchived": false,
+      "sortOrder": 8,
+      "createdAt": 1729250108000
+    },
+    {
+      "id": 109,
+      "name": "Deck of Worlds: Exp. Cartográfica - Desiertos",
+      "type": "DECK",
+      "description": "Dunas, oasis, cañones áridos y misterios del desierto.",
+      "coverImagePath": "file:///android_asset/starter_packs/cartographic_deserts/cards/deserts_001.webp",
+      "sourceFolderPath": null,
+      "defaultContentMode": "TOP_BOTTOM_SPLIT",
+      "drawMode": "RANDOM",
+      "drawFaceDown": false,
+      "backImagePath": "file:///android_asset/starter_packs/cartographic_deserts/cards/deserts_002.webp",
+      "displayCount": true,
+      "aspectRatio": "SQUARE",
+      "isArchived": false,
+      "sortOrder": 9,
+      "createdAt": 1729250109000
+    },
+    {
+      "id": 110,
+      "name": "Deck of Worlds: Exp. Creativa - Ganchos de Aventura",
+      "type": "DECK",
+      "description": "Detonantes de misiones, crisis locales y giros dramáticos en las 4 orientaciones.",
+      "coverImagePath": "file:///android_asset/starter_packs/creative_adventure_prompts/cards/adventure_001.webp",
+      "sourceFolderPath": null,
+      "defaultContentMode": "FOUR_EDGE_CUES",
+      "drawMode": "RANDOM",
+      "drawFaceDown": false,
+      "backImagePath": "file:///android_asset/starter_packs/creative_adventure_prompts/cards/adventure_002.webp",
+      "displayCount": true,
+      "aspectRatio": "SQUARE",
+      "isArchived": false,
+      "sortOrder": 10,
+      "createdAt": 1729250110000
+    },
+    {
+      "id": 111,
+      "name": "Deck of Worlds: Exp. Creativa - Llaves de Cultura",
+      "type": "DECK",
+      "description": "Preguntas e indicios culturales, rituales y costumbres de los pueblos.",
+      "coverImagePath": "file:///android_asset/starter_packs/creative_culture_keyholes/cards/culture_001.webp",
+      "sourceFolderPath": null,
+      "defaultContentMode": "FOUR_EDGE_CUES",
+      "drawMode": "RANDOM",
+      "drawFaceDown": false,
+      "backImagePath": "file:///android_asset/starter_packs/creative_culture_keyholes/cards/culture_002.webp",
+      "displayCount": true,
+      "aspectRatio": "SQUARE",
+      "isArchived": false,
+      "sortOrder": 11,
+      "createdAt": 1729250111000
+    },
+    {
+      "id": 112,
+      "name": "Deck of Worlds: Exp. Creativa - Fragmentos de Lore",
+      "type": "DECK",
+      "description": "Mitos, cantos, rumores y fragmentos históricos del microescenario.",
+      "coverImagePath": "file:///android_asset/starter_packs/creative_lore_fragments/cards/lore_001.webp",
+      "sourceFolderPath": null,
+      "defaultContentMode": "FOUR_EDGE_CUES",
+      "drawMode": "RANDOM",
+      "drawFaceDown": false,
+      "backImagePath": "file:///android_asset/starter_packs/creative_lore_fragments/cards/lore_002.webp",
+      "displayCount": true,
+      "aspectRatio": "SQUARE",
+      "isArchived": false,
+      "sortOrder": 12,
+      "createdAt": 1729250112000
+    },
+    {
+      "id": 113,
+      "name": "Deck of Worlds: Exp. de Género - Fantasía",
+      "type": "DECK",
+      "description": "Pistas temáticas de alta fantasía: magia ancestral, monstruos y ruinas arcanas.",
+      "coverImagePath": "file:///android_asset/starter_packs/genre_fantasy/cards/fantasy_001.webp",
+      "sourceFolderPath": null,
+      "defaultContentMode": "TOP_BOTTOM_SPLIT",
+      "drawMode": "RANDOM",
+      "drawFaceDown": false,
+      "backImagePath": "file:///android_asset/starter_packs/genre_fantasy/cards/fantasy_002.webp",
+      "displayCount": true,
+      "aspectRatio": "SQUARE",
+      "isArchived": false,
+      "sortOrder": 13,
+      "createdAt": 1729250113000
+    },
+    {
+      "id": 114,
+      "name": "Deck of Worlds: Exp. de Género - Horror",
+      "type": "DECK",
+      "description": "Presagios oscuros, cultos siniestros, cementerios y pesadillas cósmicas.",
+      "coverImagePath": "file:///android_asset/starter_packs/genre_horror/cards/horror_001.webp",
+      "sourceFolderPath": null,
+      "defaultContentMode": "TOP_BOTTOM_SPLIT",
+      "drawMode": "RANDOM",
+      "drawFaceDown": false,
+      "backImagePath": "file:///android_asset/starter_packs/genre_horror/cards/horror_002.webp",
+      "displayCount": true,
+      "aspectRatio": "SQUARE",
+      "isArchived": false,
+      "sortOrder": 14,
+      "createdAt": 1729250114000
+    },
+    {
+      "id": 115,
+      "name": "Deck of Worlds: Exp. de Género - Ciencia Ficción",
+      "type": "DECK",
+      "description": "Megaciudades, puertos estelares, tecnología y mundos alienígenas.",
+      "coverImagePath": "file:///android_asset/starter_packs/genre_scifi/cards/scifi_001.webp",
+      "sourceFolderPath": null,
+      "defaultContentMode": "TOP_BOTTOM_SPLIT",
+      "drawMode": "RANDOM",
+      "drawFaceDown": false,
+      "backImagePath": "file:///android_asset/starter_packs/genre_scifi/cards/scifi_002.webp",
+      "displayCount": true,
+      "aspectRatio": "SQUARE",
+      "isArchived": false,
+      "sortOrder": 15,
+      "createdAt": 1729250115000
+    }
+  ],
+  "cards": [
+    {
+      "id": 10001,
+      "stackId": 107,
+      "originDeckId": 107,
+      "title": "Exp. Cartográfica - Ártico #01: SEA ICE (Hielo Marino)",
+      "suit": "Exp. Cartográfica - Ártico",
+      "value": 1,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 0,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10002,
+      "stackId": 107,
+      "originDeckId": 107,
+      "title": "Exp. Cartográfica - Ártico #02: GLACIER VILLAGE SHELTER RIVER ",
+      "suit": "Exp. Cartográfica - Ártico",
+      "value": 2,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 1,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10003,
+      "stackId": 107,
+      "originDeckId": 107,
+      "title": "Exp. Cartográfica - Ártico #03: AERIE SPA SPRING COPSE ROAD HA",
+      "suit": "Exp. Cartográfica - Ártico",
+      "value": 3,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 2,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10004,
+      "stackId": 107,
+      "originDeckId": 107,
+      "title": "Exp. Cartográfica - Ártico #04: REES ERS OFWOLUES CRACKS STEEP",
+      "suit": "Exp. Cartográfica - Ártico",
+      "value": 4,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 3,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10005,
+      "stackId": 107,
+      "originDeckId": 107,
+      "title": "Exp. Cartográfica - Ártico #05: FROST OFTERNS OFFOXES RESOLUTE",
+      "suit": "Exp. Cartográfica - Ártico",
+      "value": 5,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 4,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10006,
+      "stackId": 107,
+      "originDeckId": 107,
+      "title": "Exp. Cartográfica - Ártico #06: REATURE MASSIUE ORIGI FISH ORI",
+      "suit": "Exp. Cartográfica - Ártico",
+      "value": 6,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 5,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10007,
+      "stackId": 107,
+      "originDeckId": 107,
+      "title": "Exp. Cartográfica - Ártico #07: DSLIDE FORM ITENSE IVITY ENDPO",
+      "suit": "Exp. Cartográfica - Ártico",
+      "value": 7,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 6,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10008,
+      "stackId": 107,
+      "originDeckId": 107,
+      "title": "Exp. Cartográfica - Ártico #08: SONAL OR ARKNESS CHOES DISTINC",
+      "suit": "Exp. Cartográfica - Ártico",
+      "value": 8,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 7,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10009,
+      "stackId": 107,
+      "originDeckId": 107,
+      "title": "Exp. Cartográfica - Ártico #09: FROST UNIQU NOW ORTS KNOW LOCA",
+      "suit": "Exp. Cartográfica - Ártico",
+      "value": 9,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 8,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10010,
+      "stackId": 107,
+      "originDeckId": 107,
+      "title": "Exp. Cartográfica - Ártico #10: RECENTSNOWFALL HAS LEDTOANIMPR",
+      "suit": "Exp. Cartográfica - Ártico",
+      "value": 10,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 9,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10011,
+      "stackId": 108,
+      "originDeckId": 108,
+      "title": "Exp. Cartográfica - Costas #01: PENINSULA BAY (Península · Bah",
+      "suit": "Exp. Cartográfica - Costas",
+      "value": 1,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 0,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10012,
+      "stackId": 108,
+      "originDeckId": 108,
+      "title": "Exp. Cartográfica - Costas #02: ARCHIPELAGO SALTMARSH WHARF PI",
+      "suit": "Exp. Cartográfica - Costas",
+      "value": 2,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 1,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10013,
+      "stackId": 108,
+      "originDeckId": 108,
+      "title": "Exp. Cartográfica - Costas #03: TOWN DOCK ESTUARY QUAY COVE SH",
+      "suit": "Exp. Cartográfica - Costas",
+      "value": 3,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 2,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10014,
+      "stackId": 108,
+      "originDeckId": 108,
+      "title": "Exp. Cartográfica - Costas #04: END DDER OFSAILS OFREEFS WIND-",
+      "suit": "Exp. Cartográfica - Costas",
+      "value": 4,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 3,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10015,
+      "stackId": 108,
+      "originDeckId": 108,
+      "title": "Exp. Cartográfica - Costas #05: TTOM OFEELS FISH WAUEBREAKER F",
+      "suit": "Exp. Cartográfica - Costas",
+      "value": 5,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 4,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10016,
+      "stackId": 108,
+      "originDeckId": 108,
+      "title": "Exp. Cartográfica - Costas #06: FORM BEACHE SEA BUIL SITE A HI",
+      "suit": "Exp. Cartográfica - Costas",
+      "value": 6,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 5,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10017,
+      "stackId": 108,
+      "originDeckId": 108,
+      "title": "Exp. Cartográfica - Costas #07: FOUNDE I FOUNDEI LEVEL SITEOFA",
+      "suit": "Exp. Cartográfica - Costas",
+      "value": 7,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 6,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10018,
+      "stackId": 108,
+      "originDeckId": 108,
+      "title": "Exp. Cartográfica - Costas #08: OLONY FORS RINE PROVI HTINGS O",
+      "suit": "Exp. Cartográfica - Costas",
+      "value": 8,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 7,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10019,
+      "stackId": 108,
+      "originDeckId": 108,
+      "title": "Exp. Cartográfica - Costas #09: TIDAL I SITE KNOWNFOR SKILL WI",
+      "suit": "Exp. Cartográfica - Costas",
+      "value": 9,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 8,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10020,
+      "stackId": 108,
+      "originDeckId": 108,
+      "title": "Exp. Cartográfica - Costas #10: ASUDDENSUPPLYSHORTAGE HASSPIKE",
+      "suit": "Exp. Cartográfica - Costas",
+      "value": 10,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 9,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10021,
+      "stackId": 109,
+      "originDeckId": 109,
+      "title": "Exp. Cartográfica - Desiertos #01: SAND(S) MESA (Arena(s) · Meset",
+      "suit": "Exp. Cartográfica - Desiertos",
+      "value": 1,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 0,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10022,
+      "stackId": 109,
+      "originDeckId": 109,
+      "title": "Exp. Cartográfica - Desiertos #02: STEPPE GULCH MIRAGE CACTI VILL",
+      "suit": "Exp. Cartográfica - Desiertos",
+      "value": 2,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 1,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10023,
+      "stackId": 109,
+      "originDeckId": 109,
+      "title": "Exp. Cartográfica - Desiertos #03: CREEK FAULT MOUNTAIN APIARY RA",
+      "suit": "Exp. Cartográfica - Desiertos",
+      "value": 3,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 2,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10024,
+      "stackId": 109,
+      "originDeckId": 109,
+      "title": "Exp. Cartográfica - Desiertos #04: ESTDAY STS CLEAR SKIES OFSHEPH",
+      "suit": "Exp. Cartográfica - Desiertos",
+      "value": 4,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 3,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10025,
+      "stackId": 109,
+      "originDeckId": 109,
+      "title": "Exp. Cartográfica - Desiertos #05: RAGES OASIS LIGHT SNAKES BRIGH",
+      "suit": "Exp. Cartográfica - Desiertos",
+      "value": 5,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 4,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10026,
+      "stackId": 109,
+      "originDeckId": 109,
+      "title": "Exp. Cartográfica - Desiertos #06: TRADIN ORI ERT URIED ORIGIN A ",
+      "suit": "Exp. Cartográfica - Desiertos",
+      "value": 6,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 5,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10027,
+      "stackId": 109,
+      "originDeckId": 109,
+      "title": "Exp. Cartográfica - Desiertos #07: IRRIGAT ORIGINOFASCHOOL ORIGIN",
+      "suit": "Exp. Cartográfica - Desiertos",
+      "value": 7,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 6,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10028,
+      "stackId": 109,
+      "originDeckId": 109,
+      "title": "Exp. Cartográfica - Desiertos #08: HEADWRA TDEUILS CULTUR SHADO K",
+      "suit": "Exp. Cartográfica - Desiertos",
+      "value": 8,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 7,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10029,
+      "stackId": 109,
+      "originDeckId": 109,
+      "title": "Exp. Cartográfica - Desiertos #09: GRATION ELABOR ACEIN UNUSUAL S",
+      "suit": "Exp. Cartográfica - Desiertos",
+      "value": 9,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 8,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10030,
+      "stackId": 109,
+      "originDeckId": 109,
+      "title": "Exp. Cartográfica - Desiertos #10: PEOPLEREPORTHEARING HASAPPEARE",
+      "suit": "Exp. Cartográfica - Desiertos",
+      "value": 10,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 9,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10031,
+      "stackId": 110,
+      "originDeckId": 110,
+      "title": "Exp. Creativa - Ganchos de Aventura #01: WHATISTHE ORNAMENT WHO IS INTE",
+      "suit": "Exp. Creativa - Ganchos de Aventura",
+      "value": 1,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 0,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10032,
+      "stackId": 110,
+      "originDeckId": 110,
+      "title": "Exp. Creativa - Ganchos de Aventura #02: I INUENTOR?OO WHAT COULD HAPPE",
+      "suit": "Exp. Creativa - Ganchos de Aventura",
+      "value": 2,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 1,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10033,
+      "stackId": 110,
+      "originDeckId": 110,
+      "title": "Exp. Creativa - Ganchos de Aventura #03: Storyl AHIGH-PROFILE ABDUCTTHE",
+      "suit": "Exp. Creativa - Ganchos de Aventura",
+      "value": 3,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 2,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10034,
+      "stackId": 110,
+      "originDeckId": 110,
+      "title": "Exp. Creativa - Ganchos de Aventura #04: MOTIUATION KILLED VICTIM APROT",
+      "suit": "Exp. Creativa - Ganchos de Aventura",
+      "value": 4,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 3,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10035,
+      "stackId": 110,
+      "originDeckId": 110,
+      "title": "Exp. Creativa - Ganchos de Aventura #05: WHO IS HISTORICAL WHAT COULD H",
+      "suit": "Exp. Creativa - Ganchos de Aventura",
+      "value": 5,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 4,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10036,
+      "stackId": 110,
+      "originDeckId": 110,
+      "title": "Exp. Creativa - Ganchos de Aventura #06: DESCRIBETHEGOD BUILDINGISIT NE",
+      "suit": "Exp. Creativa - Ganchos de Aventura",
+      "value": 6,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 5,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10037,
+      "stackId": 110,
+      "originDeckId": 110,
+      "title": "Exp. Creativa - Ganchos de Aventura #07: CAUSED CRASH ANDWHY?O WHAT DOT",
+      "suit": "Exp. Creativa - Ganchos de Aventura",
+      "value": 7,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 6,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10038,
+      "stackId": 110,
+      "originDeckId": 110,
+      "title": "Exp. Creativa - Ganchos de Aventura #08: TOTHETRAPPER?/O WHAT COULD HAP",
+      "suit": "Exp. Creativa - Ganchos de Aventura",
+      "value": 8,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 7,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10039,
+      "stackId": 110,
+      "originDeckId": 110,
+      "title": "Exp. Creativa - Ganchos de Aventura #09: ACURSEDOBJECT ALOUINGCOUPLE OB",
+      "suit": "Exp. Creativa - Ganchos de Aventura",
+      "value": 9,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 8,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10040,
+      "stackId": 110,
+      "originDeckId": 110,
+      "title": "Exp. Creativa - Ganchos de Aventura #10: LEADER'SMOTIUATION ANANCIENT A",
+      "suit": "Exp. Creativa - Ganchos de Aventura",
+      "value": 10,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 9,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10041,
+      "stackId": 111,
+      "originDeckId": 111,
+      "title": "Exp. Creativa - Llaves de Cultura #01: WHAIKINDOE WHAT WOULDTHEYDO WH",
+      "suit": "Exp. Creativa - Llaves de Cultura",
+      "value": 1,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 0,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10042,
+      "stackId": 111,
+      "originDeckId": 111,
+      "title": "Exp. Creativa - Llaves de Cultura #02: WHATISTHEIR WHATISIMPORTANT WH",
+      "suit": "Exp. Creativa - Llaves de Cultura",
+      "value": 2,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 1,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10043,
+      "stackId": 111,
+      "originDeckId": 111,
+      "title": "Exp. Creativa - Llaves de Cultura #03: WHO DOTHEYCONSIDER PRIMARY SOU",
+      "suit": "Exp. Creativa - Llaves de Cultura",
+      "value": 3,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 2,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10044,
+      "stackId": 111,
+      "originDeckId": 111,
+      "title": "Exp. Creativa - Llaves de Cultura #04: WHATQUALITIES DOTHEY ROMANTICP",
+      "suit": "Exp. Creativa - Llaves de Cultura",
+      "value": 4,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 3,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10045,
+      "stackId": 111,
+      "originDeckId": 111,
+      "title": "Exp. Creativa - Llaves de Cultura #05: HOWDOESTHEQUALITY WHATCULTURAL",
+      "suit": "Exp. Creativa - Llaves de Cultura",
+      "value": 5,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 4,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10046,
+      "stackId": 111,
+      "originDeckId": 111,
+      "title": "Exp. Creativa - Llaves de Cultura #06: WHATARETHEIR VALUABLESAREFAMIL",
+      "suit": "Exp. Creativa - Llaves de Cultura",
+      "value": 6,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 5,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10047,
+      "stackId": 111,
+      "originDeckId": 111,
+      "title": "Exp. Creativa - Llaves de Cultura #07: WHICH OETHEIRPHYSICAL HOWDOTHE",
+      "suit": "Exp. Creativa - Llaves de Cultura",
+      "value": 7,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 6,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10048,
+      "stackId": 111,
+      "originDeckId": 111,
+      "title": "Exp. Creativa - Llaves de Cultura #08: WHATARETHEYMOST RECYCLE ORREUS",
+      "suit": "Exp. Creativa - Llaves de Cultura",
+      "value": 8,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 7,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10049,
+      "stackId": 111,
+      "originDeckId": 111,
+      "title": "Exp. Creativa - Llaves de Cultura #09: WHATATTRACTSTOURISTS WHO ARETH",
+      "suit": "Exp. Creativa - Llaves de Cultura",
+      "value": 9,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 8,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10050,
+      "stackId": 111,
+      "originDeckId": 111,
+      "title": "Exp. Creativa - Llaves de Cultura #10: WHATPROEESSIONS HOWDOTHEY COMM",
+      "suit": "Exp. Creativa - Llaves de Cultura",
+      "value": 10,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 9,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10051,
+      "stackId": 112,
+      "originDeckId": 112,
+      "title": "Exp. Creativa - Fragmentos de Lore #01: ORPERFORM DESCRIBEOR SKETCH WR",
+      "suit": "Exp. Creativa - Fragmentos de Lore",
+      "value": 1,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 0,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10052,
+      "stackId": 112,
+      "originDeckId": 112,
+      "title": "Exp. Creativa - Fragmentos de Lore #02: WRITEORPERFORM DESCRIBEORSKETC",
+      "suit": "Exp. Creativa - Fragmentos de Lore",
+      "value": 2,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 1,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10053,
+      "stackId": 112,
+      "originDeckId": 112,
+      "title": "Exp. Creativa - Fragmentos de Lore #03: WRITEANEXCERPT LOCAL'SLASTWORD",
+      "suit": "Exp. Creativa - Fragmentos de Lore",
+      "value": 3,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 2,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10054,
+      "stackId": 112,
+      "originDeckId": 112,
+      "title": "Exp. Creativa - Fragmentos de Lore #04: DESCRIBE,SKETCH,OR WRITE OR PE",
+      "suit": "Exp. Creativa - Fragmentos de Lore",
+      "value": 4,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 3,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10055,
+      "stackId": 112,
+      "originDeckId": 112,
+      "title": "Exp. Creativa - Fragmentos de Lore #05: DESCRIBE OR SKETCH A WRITEOR P",
+      "suit": "Exp. Creativa - Fragmentos de Lore",
+      "value": 5,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 4,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10056,
+      "stackId": 112,
+      "originDeckId": 112,
+      "title": "Exp. Creativa - Fragmentos de Lore #06: ANDMAKEITPOSH WITH A FOCUS ON ",
+      "suit": "Exp. Creativa - Fragmentos de Lore",
+      "value": 6,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 5,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10057,
+      "stackId": 112,
+      "originDeckId": 112,
+      "title": "Exp. Creativa - Fragmentos de Lore #07: ANDMAKEITCOMEDIC INASERIOUSTON",
+      "suit": "Exp. Creativa - Fragmentos de Lore",
+      "value": 7,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 6,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10058,
+      "stackId": 112,
+      "originDeckId": 112,
+      "title": "Exp. Creativa - Fragmentos de Lore #08: ANDMAKEITPATRIOTIC MEANT CHILD",
+      "suit": "Exp. Creativa - Fragmentos de Lore",
+      "value": 8,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 7,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10059,
+      "stackId": 112,
+      "originDeckId": 112,
+      "title": "Exp. Creativa - Fragmentos de Lore #09: A HEARTFELT STYLE A CLINICAL S",
+      "suit": "Exp. Creativa - Fragmentos de Lore",
+      "value": 9,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 8,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10060,
+      "stackId": 112,
+      "originDeckId": 112,
+      "title": "Exp. Creativa - Fragmentos de Lore #10: LESSTHAN AN HOUR A MEANDERING ",
+      "suit": "Exp. Creativa - Fragmentos de Lore",
+      "value": 10,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 9,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10061,
+      "stackId": 113,
+      "originDeckId": 113,
+      "title": "Exp. de Género - Fantasía #01: BRIAR(S) CITY (Zarzal(es) · Ci",
+      "suit": "Exp. de Género - Fantasía",
+      "value": 1,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 0,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10062,
+      "stackId": 113,
+      "originDeckId": 113,
+      "title": "Exp. de Género - Fantasía #02: PORTAL TOWN TAUERN KEEP APOTHE",
+      "suit": "Exp. de Género - Fantasía",
+      "value": 2,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 1,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10063,
+      "stackId": 113,
+      "originDeckId": 113,
+      "title": "Exp. de Género - Fantasía #03: FORT MARKET SHRINE ROAD DALE (",
+      "suit": "Exp. de Género - Fantasía",
+      "value": 3,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 2,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10064,
+      "stackId": 113,
+      "originDeckId": 113,
+      "title": "Exp. de Género - Fantasía #04: GATHER MERCHANTS OFPAUPERS ELU",
+      "suit": "Exp. de Género - Fantasía",
+      "value": 4,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 3,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10065,
+      "stackId": 113,
+      "originDeckId": 113,
+      "title": "Exp. de Género - Fantasía #05: EGE OFMONKS WINE IRON CROWNLES",
+      "suit": "Exp. de Género - Fantasía",
+      "value": 5,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 4,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10066,
+      "stackId": 113,
+      "originDeckId": 113,
+      "title": "Exp. de Género - Fantasía #06: BMA MAGES CREAT SITEOFA SITEOF",
+      "suit": "Exp. de Género - Fantasía",
+      "value": 6,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 5,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10067,
+      "stackId": 113,
+      "originDeckId": 113,
+      "title": "Exp. de Género - Fantasía #07: WEEN URE(S) NTITIES YA ROGU OR",
+      "suit": "Exp. de Género - Fantasía",
+      "value": 7,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 6,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10068,
+      "stackId": 113,
+      "originDeckId": 113,
+      "title": "Exp. de Género - Fantasía #08: OFA UNSCAL KNOWN UNIQUEMAGICSY",
+      "suit": "Exp. de Género - Fantasía",
+      "value": 8,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 7,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10069,
+      "stackId": 113,
+      "originDeckId": 113,
+      "title": "Exp. de Género - Fantasía #09: KNOW NO LUSORY FOUND YA RENOWN",
+      "suit": "Exp. de Género - Fantasía",
+      "value": 9,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 8,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10070,
+      "stackId": 113,
+      "originDeckId": 113,
+      "title": "Exp. de Género - Fantasía #10: PEOPLEARELOSING ANOBLEISBESTOW",
+      "suit": "Exp. de Género - Fantasía",
+      "value": 10,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 9,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10071,
+      "stackId": 114,
+      "originDeckId": 114,
+      "title": "Exp. de Género - Horror #01: WOOD(S) CITY (Bosque(s) Umbrío",
+      "suit": "Exp. de Género - Horror",
+      "value": 1,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 0,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10072,
+      "stackId": 114,
+      "originDeckId": 114,
+      "title": "Exp. de Género - Horror #02: TOMB BATTLEFIELD LAIR MOOR SLA",
+      "suit": "Exp. de Género - Horror",
+      "value": 2,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 1,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10073,
+      "stackId": 114,
+      "originDeckId": 114,
+      "title": "Exp. de Género - Horror #03: ARENA CABIN RIVER VILLAGE WARE",
+      "suit": "Exp. de Género - Horror",
+      "value": 3,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 2,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10074,
+      "stackId": 114,
+      "originDeckId": 114,
+      "title": "Exp. de Género - Horror #04: ot HIJO MOTHS CLAWS PALE ROTTI",
+      "suit": "Exp. de Género - Horror",
+      "value": 4,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 3,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10075,
+      "stackId": 114,
+      "originDeckId": 114,
+      "title": "Exp. de Género - Horror #05: EPS OFGALLOWS OFBONE RUINED CR",
+      "suit": "Exp. de Género - Horror",
+      "value": 5,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 4,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10076,
+      "stackId": 114,
+      "originDeckId": 114,
+      "title": "Exp. de Género - Horror #06: NTURIES TUAL FOUNDE OUGH SITE ",
+      "suit": "Exp. de Género - Horror",
+      "value": 6,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 5,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10077,
+      "stackId": 114,
+      "originDeckId": 114,
+      "title": "Exp. de Género - Horror #07: IEOFAN LE GOD EXTREN ANCIENT C",
+      "suit": "Exp. de Género - Horror",
+      "value": 7,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 6,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10078,
+      "stackId": 114,
+      "originDeckId": 114,
+      "title": "Exp. de Género - Horror #08: OLONY FREQUENTDEMONIC GOINGOUT",
+      "suit": "Exp. de Género - Horror",
+      "value": 8,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 7,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10079,
+      "stackId": 114,
+      "originDeckId": 114,
+      "title": "Exp. de Género - Horror #09: SHA NVAST HOMET BRUTA OTH(S) (",
+      "suit": "Exp. de Género - Horror",
+      "value": 9,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 8,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10080,
+      "stackId": 114,
+      "originDeckId": 114,
+      "title": "Exp. de Género - Horror #10: SOMETHINGISWRONG CEMETERIES WI",
+      "suit": "Exp. de Género - Horror",
+      "value": 10,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 9,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10081,
+      "stackId": 115,
+      "originDeckId": 115,
+      "title": "Exp. de Género - Ciencia Ficción #01: We CITY FLOE(S) (We · Ciudad ·",
+      "suit": "Exp. de Género - Ciencia Ficción",
+      "value": 1,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 0,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10082,
+      "stackId": 115,
+      "originDeckId": 115,
+      "title": "Exp. de Género - Ciencia Ficción #02: Wo LABORATORY REFINERY HANGAR ",
+      "suit": "Exp. de Género - Ciencia Ficción",
+      "value": 2,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 1,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10083,
+      "stackId": 115,
+      "originDeckId": 115,
+      "title": "Exp. de Género - Ciencia Ficción #03: Wo DISTILLERY BASE OBSERUATORY",
+      "suit": "Exp. de Género - Ciencia Ficción",
+      "value": 3,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 2,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10084,
+      "stackId": 115,
+      "originDeckId": 115,
+      "title": "Exp. de Género - Ciencia Ficción #04: Wo ATER IME INSURGENTS CAMERAS",
+      "suit": "Exp. de Género - Ciencia Ficción",
+      "value": 4,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 3,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10085,
+      "stackId": 115,
+      "originDeckId": 115,
+      "title": "Exp. de Género - Ciencia Ficción #05: Wo ITSELF MACHINES OFBULLETS L",
+      "suit": "Exp. de Género - Ciencia Ficción",
+      "value": 5,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 4,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10086,
+      "stackId": 115,
+      "originDeckId": 115,
+      "title": "Exp. de Género - Ciencia Ficción #06: Wo OR NSITE INING STAR SOUND S",
+      "suit": "Exp. de Género - Ciencia Ficción",
+      "value": 6,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 5,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10087,
+      "stackId": 115,
+      "originDeckId": 115,
+      "title": "Exp. de Género - Ciencia Ficción #07: Wo HOWERS NTURIES FROMA RIGINS",
+      "suit": "Exp. de Género - Ciencia Ficción",
+      "value": 7,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 6,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10088,
+      "stackId": 115,
+      "originDeckId": 115,
+      "title": "Exp. de Género - Ciencia Ficción #08: Wo HEAVIL VENTS KNOWNFOR MONEY",
+      "suit": "Exp. de Género - Ciencia Ficción",
+      "value": 8,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 7,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10089,
+      "stackId": 115,
+      "originDeckId": 115,
+      "title": "Exp. de Género - Ciencia Ficción #09: Wo STANT COM FAMOUS PORTAB STR",
+      "suit": "Exp. de Género - Ciencia Ficción",
+      "value": 9,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 8,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    },
+    {
+      "id": 10090,
+      "stackId": 115,
+      "originDeckId": 115,
+      "title": "Exp. de Género - Ciencia Ficción #10: Wo THESTATEIS LAUNCHING ANEWGA",
+      "suit": "Exp. de Género - Ciencia Ficción",
+      "value": 10,
+      "currentFaceIndex": 0,
+      "currentRotation": 0,
+      "isReversed": false,
+      "isDrawn": false,
+      "isRevealed": true,
+      "sortOrder": 9,
+      "linkedTableId": null,
+      "dmNotes": null,
+      "lastDrawnAt": null
+    }
+  ],
+  "cardFaces": [
+    {
+      "id": 20001,
+      "cardId": 10001,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Ártico #01: SEA ICE (Hielo Marino)",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_arctic/cards/arctic_001.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"SEA ICE (Hielo Marino)\"}, {\"text\": \"Arctic MOUNTAIN(S) (Arctic · Montaña(s))\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_arctic/cards/arctic_002.webp"
+    },
+    {
+      "id": 20002,
+      "cardId": 10002,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Ártico #02: GLACIER VILLAGE SHELTER RIVER ",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_arctic/cards/arctic_003.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"GLACIER VILLAGE SHELTER RIVER ICEBERG TOWN (Glaciar · Aldea · Refugio · Río · Iceberg · Pueblo)\"}, {\"text\": \"Arctic POLE TOWN SNOW(S) FOOTHILL(S) (Arctic · Polo · Pueblo · Nieve(s) · Colina(s) Bajas)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_arctic/cards/arctic_004.webp"
+    },
+    {
+      "id": 20003,
+      "cardId": 10003,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Ártico #03: AERIE SPA SPRING COPSE ROAD HA",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_arctic/cards/arctic_005.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"AERIE SPA SPRING COPSE ROAD HALL (Nido / Nidal · Termas · Manantial · Bosquecillo · Camino · Salón / Fortaleza)\"}, {\"text\": \"Arctic FIELD PASS CAMP MINE LAKE CHASM (Arctic · Campo · Paso de Montaña · Campamento · Mina · Lago · Abismo)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_arctic/cards/arctic_006.webp"
+    },
+    {
+      "id": 20004,
+      "cardId": 10004,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Ártico #04: REES ERS OFWOLUES CRACKS STEEP",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_arctic/cards/arctic_007.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"REES ERS OFWOLUES CRACKS STEEP LOWEST THATPROWLS GLACIERS THAT YAWNS OFDRIFTS OFFURS OFBEARS\"}, {\"text\": \"Arctic MELTWATER PORT VENT FJORD COTTAGE\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_arctic/cards/arctic_008.webp"
+    },
+    {
+      "id": 20005,
+      "cardId": 10005,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Ártico #05: FROST OFTERNS OFFOXES RESOLUTE",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_arctic/cards/arctic_009.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"FROST OFTERNS OFFOXES RESOLUTE HARROWING OFHIBERNATION UNDER THEICE SNOWFALLS HOWLS WHERE NO HEARTHS OFSTEAM\"}, {\"text\": \"Arctic AUALANCHE BONECHILL CLIMBERS ELK OFTHELASTTHAW OFBROKENICE OFRESPITE OFICICLES TRAPPER'S\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_arctic/cards/arctic_010.webp"
+    },
+    {
+      "id": 20006,
+      "cardId": 10006,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Ártico #06: REATURE MASSIUE ORIGI FISH ORI",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_arctic/cards/arctic_011.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"REATURE MASSIUE ORIGI FISH ORIGIN OLDEST CARUING LINKED AN ANCIENT TRADITION HEROICSAGA FORGOTTEN ROUTE FROZENBODY REACHED BYANOW SITE A MYSTERIOUS FOUNDED BYRAIDER(S FREEZE/THAW CYCLES CARUED OUTOFTHE SHAPED BY ANNUAL DISCOUERED BY AN MOUNTAINSIDE ANIMAL GUIDE ORIGIN AN SITE LONGEST ORIENTEERING BURNING HEARTH TECHNIQUE\"}, {\"text\": \"AMP HELTER LYA SHAPED BURROI RESTING PLACE OFA SITE OFTHE COLDEST FAMOUSEXPLORER WINTER ON RECORD OFCHASMS OFENDLESSTRACKS COLDESTNIGHT THATGRINDS OFSLEET OFTHE REGRETFUL FROZEN\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_arctic/cards/arctic_012.webp"
+    },
+    {
+      "id": 20007,
+      "cardId": 10007,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Ártico #07: DSLIDE FORM ITENSE IVITY ENDPO",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_arctic/cards/arctic_013.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"DSLIDE FORM ITENSE IVITY ENDPOINTOFA FAILED MILITARY TERMINUS A CAMPAIGN DEAD TRADE ROUTE DEEP SNOWS SACRED WILDLIFE ONLYTRAUERSABLE UNIQUE PICKLED LOCATEDONA ROPE-MAKERS THERMAL VENT ONCE A YEAR RENOWNED DELICACY KNOWN A SPECIAL BEASTOF BURDEN KNOWNFOR STEW(S)\"}, {\"text\": \"ANCIEN URIST BUR SHAPE Arctic LINKED LEGEND SITE A LEGENDARY OFAFROSTCREATURE SUPPLYCACHE AUALANCHEIN HISTORY ORICESPORT SITE WORST ORIGIN OFASNOW FOODSTORAGEUAULT FORMEDOUTOFICE SHAPED BY A TERRIBLE ORIGINALLY A VAST MINING DISASTER FOUNDEDBY TRAPPER(S) LASTSIGHTING SITE OFTHE WARMEST ANCIENTMOUNTAIN SUMMER ON RECORD GUARDIAN\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_arctic/cards/arctic_014.webp"
+    },
+    {
+      "id": 20008,
+      "cardId": 10008,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Ártico #08: SONAL OR ARKNESS CHOES DISTINC",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_arctic/cards/arctic_015.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"SONAL OR ARKNESS CHOES DISTINCTIUE SKYLINE KNOWN OR SILHOUETTE MINIMALISTCULTURE MEADOW(S) UERTICALCLIMB/DROP UAST WILDFLOWER ONLY ACCESSIBLE BY CULTURALLYSPECIFI BATHING PRACTICES USED FORRITES FROST WORSHIP TREACHEROUS KNOWN KNOWN OFPASSAGE FOOTING GOODSOURCE KNOWN FEUDING FURS\"}, {\"text\": \"PECIFIC INTERES SUNLIGHT EXTREN BRIEEGLORIOUS SNOW BLINDNESS SUMMERS HAZARD BREEDERS OR TRAINERS FEASTING CULTURE RENOWNED DOG RENOWNED SNOW HAUNTING WILDLIFE ORICEARTIST(S) HOT BEVERAGE KNOWNFORA HOTSPRING(S) KNOWN SOUNDS ORIENTEERING AUALANCHE ZONE WAYPOINT\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_arctic/cards/arctic_016.webp"
+    },
+    {
+      "id": 20009,
+      "cardId": 10009,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Ártico #09: FROST UNIQU NOW ORTS KNOW LOCA",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_arctic/cards/arctic_017.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"FROST UNIQU NOW ORTS KNOW LOCATEDON KNOWN TREE LINE SKYWORSHIP ORENORMOUSFISSURES CREVASSE,OR END OFAFROZEN WATERWAY QUAKESMELTWATER FLOODING THETOPOFAPEAKBOTTOMOFA THEFIRSTTOREACHAREMOTEAREA TWO EXPLORERSARERACINGTO BE ALLMAILAND DELIUERIES PEOPLEARESETTLINGIN INANDOUTHAUESTOPPED A HUNGRY WINTER DUETOIMPASSABLETERRAIN,AN DUETO OUERHUNTINGA LEAN EMBARGO,ORATERRIBLEINCIDENT HARUESTORAMINIICEAGE\"}, {\"text\": \"BREAD DISTIN SYRUP Arctic SITE OFASOLSTICE PERMAFROST CELEBRATION KNOWN GUIDE(S) AFFECTIONATE CULTURE PHYSICALLY SIGNATURE SALTY DISH REGIONALLYSPECIFIC DURINGSTORMS STYLE SLED SPECTACULAR IMPASSABLE SUN HALOS ONLYTRAUERSABLE BY POPULARSPOT SKI OR SNOWSHOE FORTRAPPERS\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_arctic/cards/arctic_018.webp"
+    },
+    {
+      "id": 20010,
+      "cardId": 10010,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Ártico #10: RECENTSNOWFALL HAS LEDTOANIMPR",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_arctic/cards/arctic_019.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"RECENTSNOWFALL HAS LEDTOANIMPROMPTU THEWINTER FOODSUPPLY COMPETITION HASSTARTED SPOILING OFSNOWSCULPTING,SNOWBALL DUETOFUNGUS,INSECTS FIGHTING,ORSLEDDING ORSABOTAGE ABUILDINGCREATURE,ORSCULPTURE OR BEHAVES LIKEITISALIVE THEMOUNTAINOUERNIGHT ONTHESUMMITOF ISBEHAUINGSTRANGELY SOMETHINGHASAPPEARED AMASSIUEBLIZZARD SOMEONEISLOOKINGFOR CAUSINGAMAJORPROBLEM UOLUNTEERSTOTESTANEW A FLOOD,FEEDINGFRENZY SLEDDINGINUENTION ORSECRETUNCOVERED POWERED BY BYRECEDINGSNOW WIND,ORPEDALS\"}, {\"text\": \"HIGH WINDSHAUEEXPOSED Arctic SOMETHING LONG THEMAGNETICPOLE BURIED INTHESNOW ISSHIFTINGUNEXPECTEDLY ATOMB,ARTIFACT,OR ITISJUMPINGSPLITTINGINTOMULTIPLE LOSTEXPEDITION POINTS,ORMOUINGWITH PURPOSE CURSETHEAREAORMARKA PATH ROUTECLOSURES TRAPPEDSURUIUORS,OR WITHOUTEXPLANATION HASBURIED THEAREA CAIRNSAREPOPPINGUP A HUGEAUALANCHE THESKY'SAURORAEFFECT SOMETHINGFROZENINICE IS BEHAUING STRANGELY LONGAGO HASBEGUNTOTHAW CHANGINGBRIGHTNESS,DISTURBING APLAGUETREASURE,ORCREATURE IMAGES,ORHYPNOTICPATTERNS\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_arctic/cards/arctic_020.webp"
+    },
+    {
+      "id": 20011,
+      "cardId": 10011,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Costas #01: PENINSULA BAY (Península · Bah",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_coastlines/cards/coastlines_001.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"PENINSULA BAY (Península · Bahía)\"}, {\"text\": \"Coastlines ISUO) ISLAND(S) (Coastlines · ISUO) · Isla(s))\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_coastlines/cards/coastlines_002.webp"
+    },
+    {
+      "id": 20012,
+      "cardId": 10012,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Costas #02: ARCHIPELAGO SALTMARSH WHARF PI",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_coastlines/cards/coastlines_003.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"ARCHIPELAGO SALTMARSH WHARF PIER MANGROUE ATOLL\"}, {\"text\": \"Coastlines MARINA LIGHTHOUSE\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_coastlines/cards/coastlines_004.webp"
+    },
+    {
+      "id": 20013,
+      "cardId": 10013,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Costas #03: TOWN DOCK ESTUARY QUAY COVE SH",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_coastlines/cards/coastlines_005.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"TOWN DOCK ESTUARY QUAY COVE SHOAL (Pueblo · DOCK · ESTUARY · QUAY · COVE · SHOAL)\"}, {\"text\": \"Coastlines LAGOON BLOCKADE SANDBAR STRAIT WHIRLPOOL WRECK\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_coastlines/cards/coastlines_006.webp"
+    },
+    {
+      "id": 20014,
+      "cardId": 10014,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Costas #04: END DDER OFSAILS OFREEFS WIND-",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_coastlines/cards/coastlines_007.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"END DDER OFSAILS OFREEFS WIND-TOSSED SAILOR'S OFTHEFOURWINDS AT LAND'S END OFHULLS OFSHARKS OFGULLS\"}, {\"text\": \"OST Coastlines CAPTAIN'S BRINY BRIDGE LANDING REEF CAUSEWAY\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_coastlines/cards/coastlines_008.webp"
+    },
+    {
+      "id": 20015,
+      "cardId": 10015,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Costas #05: TTOM OFEELS FISH WAUEBREAKER F",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_coastlines/cards/coastlines_009.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"TTOM OFEELS FISH WAUEBREAKER FOGGY OFGRATEFULSAILORS FLOTSAM THETIDES INTHEEYE CLAMS OFKELP\"}, {\"text\": \"WAYS WITH Coastlines SEABIRD'S UNMOORED OFLANTERNS OFSHIPS OFNO COMPASS SHANTIES OFBRIDGES BLACKPOWDER SCURUY\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_coastlines/cards/coastlines_010.webp"
+    },
+    {
+      "id": 20016,
+      "cardId": 10016,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Costas #06: FORM BEACHE SEA BUIL SITE A HI",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_coastlines/cards/coastlines_011.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"FORM BEACHE SEA BUIL SITE A HISTORIC BIRTHPLACEOFA SEA BATTLE FAMOUSPIRATE INFAMOUSMUTINY MEETING SPOT SITE OFAN HISTORICPARLEY FORMERNAUAL BASE MISSIONARYCAMP ASSEMBLEDFROM DERELICT SHIPS THEMAINLAND ONCE ATTACHED FORMER ORIGIN A WIDELY PORTOFANILL USED KNOT FATED SEAVOYAGE\"}, {\"text\": \"IATHAN PYARD Coastlines LASTKNOWN ORIGINALLY LOCATION OFA MISIDENTIFIED BY SEA MONSTER ITSDISCOUERER OFWRECKS OFSMUGGLERS OFSPLINTEREDMASTS WAUES OFTENTACLES WHALER'S DRIFTWOOD\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_coastlines/cards/coastlines_012.webp"
+    },
+    {
+      "id": 20017,
+      "cardId": 10017,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Costas #07: FOUNDE I FOUNDEI LEVEL SITEOFA",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_coastlines/cards/coastlines_013.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"FOUNDE I FOUNDEI LEVEL SITEOFA NOTORIOUS ORIGIN OFA SHIPWRECK FLOODMYTH AMPHIBIAN HABITAT SHELLED CREATURE HABITAT A MASSIUEKELPFOREST INDESTRUCTIBLE NETS EXECUTING PIRATES CLOAKEDIN FOG KNOWN KNOWNFOR CONSTANTLY RENOWNED HARSHTARIFFS SHIPWRIGHTS\"}, {\"text\": \"IRATE(S ADER(S Coastlines SITEOF A HISTORIC SITEOFA BOATRACE FAMOUSACCORD FAMOUSEXPLORER POPULAR SEA SHANTY LANDINGSITE A ORIGINOFA WEATHER CONDITIONS SMUGGLER'S HIDEOUT SHAPED BYTOURISM SHAPED BY ADUERSE ORIGINALLYA SURUIVOR(S) FOUNDEDBY SHIPWRECK LASTKNOWN LOCATIONOF SITE DEEPEST ALOSTSHIP DIUE ON RECORD\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_coastlines/cards/coastlines_014.webp"
+    },
+    {
+      "id": 20018,
+      "cardId": 10018,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Costas #08: OLONY FORS RINE PROVI HTINGS O",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_coastlines/cards/coastlines_015.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"OLONY FORS RINE PROVI HTINGS OR KNOWNASAGOOD UNUSUAL FORTIFICATION(S) TSUNAMI ZONE KNOWN USED AS AN ILLEGAL HISTORIC SHIP UNUSUAL SAND DUMPING SITE WAYFINDER(S) BERTH A RENOWNED LOCALCUSTOMS CHANGE WITH WIND OR TIDE CRUSTACEAN CUISINE\"}, {\"text\": \"YAGES MAMN MERFO STOP Coastlines UNUSUAL HUE POWERFULTIDES WATER TOURISTTRAP POWDER WEAPONRY KNOWNFOR BLACK FLOATING OR STILTED KNOWN SQUID CONSTRUCTION PIRATE HIDEOUT HABITATOFA SEA MONSTER STOPPINGPOINTIN FREQUENTHURRICANES MARINEMIGRATION\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_coastlines/cards/coastlines_016.webp"
+    },
+    {
+      "id": 20019,
+      "cardId": 10019,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Costas #09: TIDAL I SITE KNOWNFOR SKILL WI",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_coastlines/cards/coastlines_017.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"TIDAL I SITE KNOWNFOR SKILL WITHSMALLBOATS SIGNATURE WATERCRAFT MAGNETICFIELDSHIFTINGWINDS,OR FOG OR ATTRACTINGSOMETHINGHUNGRY CHOKINGSEALIFEENTANGLINGSHIPS DISRUPTINGTHEECOSYSTEM ASTRANGEPHENOMENONIS ANALGAEBLOOMIS THERE HAS BEEN A SUDDEN SPIKEINSHIPWRECKINCIDENTS PIRATES ARECONDUCTING DUETOPREDATORYSALUAGERS FREQUENTRAIDS SHIFTING COASTLINE TARGETING FARMS,ENDANGERED ORSEA CREATURES SPECIES,ORMERCHANTUESSELS\"}, {\"text\": \"RWATER Coastlines USED ASA SHARK-INFESTED NAUIGATIONAL POINT WATERS METHOD GOUERNED BYPIRATES UNUSUAL FISHING SOURCE OFPRIZED RAREALGAEOR AQUATICPETS KNOWN SEA SHELLS LLICITSTILL SITE OFAN SEA FLORA FREQUENTDOLDRUMS GOODFISHINGSPOT\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_coastlines/cards/coastlines_018.webp"
+    },
+    {
+      "id": 20020,
+      "cardId": 10020,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Costas #10: ASUDDENSUPPLYSHORTAGE HASSPIKE",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_coastlines/cards/coastlines_019.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"ASUDDENSUPPLYSHORTAGE HASSPIKEDPRICESONAN ADOCKORPORTINFESTATION EUERYDAYRESOURCE ROPEFIBER,SAILCANUAS ISGETTINGOUTOFHAND ORSHIPTIMBER CRUSTACEANS,UERMIN,ORFUNGUS ORINDIUIDUALS COUEREDINRUINS,RUNES,OR CORAL BETWEENTOWNS,COMPANIES OUERVALUABLESALUAGE THEREISADISPUTE SOMETHING SLEEPING BENEATH ASTAPLEAQUATIC THEWATERISABOUTTORISE CROPISDYINGOUT ALEUIATHAN,DROWNED SAILORS DUETO OCEAN ACIDIFICATION ORAGHOSTSHIP OUERHARUESTINGORA BLIGHT\"}, {\"text\": \"Coastlines THESTORMOFTHE SOMETHINGMYSTERIOUS HAS CENTURYISABOUTTOHIT ITISMAGICARRIUINGEARLY WASHEDUPONSHORE ORASBIGASACONTINENT ASTRANGERANARTIFACTORACREATURE FOREIGNNAUY,ORMARINELIFE ORSUNKEN SHIP BLOCKADESBYAPIRATELORD PLAGUESHIP,LONG-LOSTSHIP GOINGIN OR OUT APPEAREDJUSTOFFSHORE STOPPINGALLSUPPLIES AN UNUSUAL SHIP HAS BLOCKADESARE AHUGECOLONYOF THEWINDS OR TIDES JELLYFISHISWREAKINGHAUOC ARE BEHAUINGSTRANGELY ATTACKINGPEOPLE,DRIUINGAWAYFISH UNUSUALHIGHS/LOWS.SUDDEN OR MAKINGDISTRACTINGLIGHT SHIFTS,ORODDTIMING\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_coastlines/cards/coastlines_020.webp"
+    },
+    {
+      "id": 20021,
+      "cardId": 10021,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Desiertos #01: SAND(S) MESA (Arena(s) · Meset",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_deserts/cards/deserts_001.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"SAND(S) MESA (Arena(s) · Meseta)\"}, {\"text\": \"Deserts DUNE(S) DESERT (Deserts · Duna(s) · Desierto)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_deserts/cards/deserts_002.webp"
+    },
+    {
+      "id": 20022,
+      "cardId": 10022,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Desiertos #02: STEPPE GULCH MIRAGE CACTI VILL",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_deserts/cards/deserts_003.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"STEPPE GULCH MIRAGE CACTI VILLAGE TOWN (Estepa · Barranco · Espejismo · Cactus · Aldea · Pueblo)\"}, {\"text\": \"CAMP OASIS Deserts CITY BADLAND(S) (Campamento · Oasis · Deserts · Ciudad · Tierras Baldías)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_deserts/cards/deserts_004.webp"
+    },
+    {
+      "id": 20023,
+      "cardId": 10023,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Desiertos #03: CREEK FAULT MOUNTAIN APIARY RA",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_deserts/cards/deserts_005.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"CREEK FAULT MOUNTAIN APIARY RANCH CRAG (Arroyo · Falla Geológica · Montaña · Colmenar · Rancho · Risco)\"}, {\"text\": \"MINE ROAD Deserts CITY HOODOO(S) OUTPOST (Mina · Camino · Deserts · Ciudad · Hoodoo / Chimenea de Hada · Avanzada)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_deserts/cards/deserts_006.webp"
+    },
+    {
+      "id": 20024,
+      "cardId": 10024,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Desiertos #04: ESTDAY STS CLEAR SKIES OFSHEPH",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_deserts/cards/deserts_007.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"ESTDAY STS CLEAR SKIES OFSHEPHERDS COBBLED SHIMMERING OFSECRETWATERS INTHESHADOW FOUNDERS OFBLOOMS OFSCORPIONS OFGRAUEL\"}, {\"text\": \"OFTHE Deserts DEATH RATTLE LEEWARD RIVER AQUEDUCT CITY SILT (OFTHE · Deserts · DEATH · RATTLE · LEEWARD · Río · AQUEDUCT · Ciudad · SILT)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_deserts/cards/deserts_008.webp"
+    },
+    {
+      "id": 20025,
+      "cardId": 10025,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Desiertos #05: RAGES OASIS LIGHT SNAKES BRIGH",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_deserts/cards/deserts_009.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"RAGES OASIS LIGHT SNAKES BRIGHT SCOURED WHERE VULTURES WAIT DEEPESTSPRING HOOVES WINE OFNOMADS OFSCHOLARS (RAGES · Oasis · LIGHT · SNAKES · BRIGHT · SCOURED · WHERE · VULTURES · WAIT · DEEPESTSPRING · HOOVES · WINE · OFNOMADS · OFSCHOLARS)\"}, {\"text\": \"OFTR INGS Deserts IMPASSABLE TESSELLATED OFSCARABS REFLECTIONS WAYFARERS FOOTTREADS THATDRINKS OFCLOUDS WHERE NO WINDWARD DRIEST\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_deserts/cards/deserts_010.webp"
+    },
+    {
+      "id": 20026,
+      "cardId": 10026,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Desiertos #06: TRADIN ORI ERT URIED ORIGIN A ",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_deserts/cards/deserts_011.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"TRADIN ORI ERT URIED ORIGIN A WATER ORIGIN AN HARUESTING METHOD ICONICTEXTILE HORSERACE LOSTCONUOY SITEOF A FAMOUS SITEOF AN INFAMOUS SHAPED BY EXTINCT SAND CREATURES WAS ONCE AN ANCIENTSEA ORIGINOFASOLAR ORIGINOFA ENERGYINNOUATION GARDENINGMETHOD\"}, {\"text\": \"ER(S) YSUN TPOST WAS Deserts HAS NOT BEEN TRAUERSED SITE AN ANCIENT LIUING MEMORY UOLCANICERUPTION OFHORSES HIDDENSPRINGS WHERE WORLDSMEET BEYOND SUNSET SPINES RAIN DUSTDEUIL\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_deserts/cards/deserts_012.webp"
+    },
+    {
+      "id": 20027,
+      "cardId": 10027,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Desiertos #07: IRRIGAT ORIGINOFASCHOOL ORIGIN",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_deserts/cards/deserts_013.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"IRRIGAT ORIGINOFASCHOOL ORIGIN OFA OFPHILOSOPHY POPULARCARDGAME UNUSUAL REPTILE ENDURANCE HABITAT AN KNOWNFORTRIALS KNOWN WATER SPARSELY POPULATED KNOWN LACK BEARING PLANT(S) DISTINCTIVE HUE SHELTER OFSAND UNDERGROUND AGRICULTURAL DWELLINGS INNOUATORS (IRRIGAT · ORIGINOFASCHOOL · ORIGIN · OFA · OFPHILOSOPHY · POPULARCARDGAME · UNUSUAL · REPTILE · ENDURANCE · HABITAT · AN · KNOWNFORTRIALS · KNOWN · WATER · SPARSELY · POPULATED · KNOWN · LACK · BEARING · PLANT(S) · DISTINCTIVE · HUE · Refugio · OFSAND · UNDERGROUND · AGRICULTURAL · DWELLINGS · INNOUATORS)\"}, {\"text\": \"SHAP ROJECT BS Deserts SITE OFA SITEOFA HISTORICSTAMPEDE UANISHED CITY SEED VAULT OFMATHEMATICS SITE ANCIENT ORIGINOFASCHOOL FOUNDEDBYPOET(S) ORIGINALLY A QUARRY SHAPED BY CENTURIES OFFLASH FLOODS FORMER FOREST WAS ONCEA SITEOF A FAMOUS MERCHANTSECRET FOSSIL (SHAP · ROJECT · BS · Deserts · SITE · OFA · SITEOFA · HISTORICSTAMPEDE · UANISHED · Ciudad · SEED · Bóveda · OFMATHEMATICS · SITE · ANCIENT · ORIGINOFASCHOOL · FOUNDEDBYPOET(S) · ORIGINALLY · A · QUARRY · SHAPED · BY · CENTURIES · OFFLASH · FLOODS · FORMER · FOREST · WAS · ONCEA · SITEOF · A · FAMOUS · MERCHANTSECRET · FOSSIL)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_deserts/cards/deserts_014.webp"
+    },
+    {
+      "id": 20028,
+      "cardId": 10028,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Desiertos #08: HEADWRA TDEUILS CULTUR SHADO K",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_deserts/cards/deserts_015.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"HEADWRA TDEUILS CULTUR SHADO KNOWN SURUIUING ON KNOWN MINIMAL WATER BARBEQUE ANAQUIFER STRANGEMIRAGE(S) SOURCEOF KNOWN FORDESERT PORTABLE HOMES MILKINGVENOM MICROCLIMATE KNOWN KNOWN FLOWER(S) UNIQUE ELABORATE MOSAIC(S) VALUES RESILIENCE\"}, {\"text\": \"ORSHIP PECIFIC THOD(S POWERA Deserts FAMOUSFOR GAMERESERE SONGBIRD(S) DISTINCTIUE POTTERY CONDITIONING INNOVATIUE AIR SAND-WORM OLONY REGIONALLY SPECIFIC COOLBEVERAGE DISTINCTIUE SAND KNOWN FORA HERD ANIMAL PATTERNS HABITATOFA SITEOF A UNIQUE NOTORIOUS BIO-ADAPTATION SCAUENGER\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_deserts/cards/deserts_016.webp"
+    },
+    {
+      "id": 20029,
+      "cardId": 10029,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Desiertos #09: GRATION ELABOR ACEIN UNUSUAL S",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_deserts/cards/deserts_017.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"GRATION ELABOR ACEIN UNUSUAL SOURCE KNOWNFORCULTURE OFSHADE SUSTAINABILITY EUACUATION,ORASHPOLLUTION ASTAR,LANDMASS,OR BEACON HAS UANISHED OUERNIGHT ANIMPORTANTWAY-MARKER WILDFIRES ARE BURNING A CRUCIAL SHARED WATER THOSEBANISHEDFROM OTHERSETTLEMENTSARE SOURCEISDRYING UP STARTING ONEOFTHEIR OWN DUETODROUGHT.ANIMAL INFESTATION,OROUERUSE MOTIUATED BYREDEMPTION BYONECOMMUNITY INDEPENDENCE,ORREUENGE\"}, {\"text\": \"ING ATERWAY STOPP SEASON Deserts ONLYTRAUERSABLE NOTTRAUERSABLE WINTER ON FOOT AUOIDED BYTRADERS WITH NATURE LIFESTYLEINTEGRATED NOCTURNAL ANIMAL SUNLIGHT-WEAUING WATERINGSTOP HABITATOFA KNOWN USEDASA SOURCEOFA STUNNING SUNRISES RARESALT\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_deserts/cards/deserts_018.webp"
+    },
+    {
+      "id": 20030,
+      "cardId": 10030,
+      "faceIndex": 0,
+      "name": "Exp. Cartográfica - Desiertos #10: PEOPLEREPORTHEARING HASAPPEARE",
+      "imagePath": "file:///android_asset/starter_packs/cartographic_deserts/cards/deserts_019.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"PEOPLEREPORTHEARING HASAPPEAREDOUTIN UOICESINDUSTDEUILS THEY ARESINGING,WEEPING WILDERNESS OR WHISPERING ASCULPTURESPIREORSTONE CACTIFLOWERS,ORREPTILES ARUIN,RELICORMASSACRE INANOTHERWISEBARREN AREA SOMETHINGLONGBURIED ASANDSTORMHASUNCOUERED REPORTSOFMINERAL PEOPLEHAUE DEPOSITSHAUEBROUGHT DISCOUEREDTHEYARE APROSPECTINGRUSH LIUINGON UNSTABLEGROUND FORPRECIOUSSTONES,RARE ONTOPOFAFAULTLOOSENING ORE,ORVALUABLESALTS SAND,OR BURROWINGCREATURES\"}, {\"text\": \"Deserts TRADERSHAUESTOPPEDSUPPLYING STRANGEFAULTS ARE THEAREA NO ONEKNOWSWHY OPENINGIN EARTH SUSPECTEDTRADEEMBARGO,GEOLOGICAL CAUSED BYGEOLOGICALACTIUITY BARRIER,OR BANDITACTIUITY HUMANACTIUITYORCOLOSSALCREATURES SPELL,OR UNTOUCHED BYTIME IMMENSESANDSTORM THEYAREINADAZEUNDERA PERSECUTION,ORAN HAUEBEGUN TORETURN DUETODROUGHT AMASSEXODUSISUNDERWAY DECADESOFLOSTWAYFARERS AMASSIUEDUNEISGROWING ACULTURALSITEIS BEING DUETOSTRANGE WINDS CONTROUERSIALLYEXCAUATED MAGICORTHEADDITIONOF BYALOCALHISTORIAN,FOREIGNPOWER SOMETHINGTHATISNOTSAND ORPOLITICALINTEREST\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/cartographic_deserts/cards/deserts_020.webp"
+    },
+    {
+      "id": 20031,
+      "cardId": 10031,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Ganchos de Aventura #01: WHATISTHE ORNAMENT WHO IS INTE",
+      "imagePath": "file:///android_asset/starter_packs/creative_adventure_prompts/cards/adventure_001.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"WHATISTHE ORNAMENT WHO IS INTERFERING ANDWHY?OO/t AQUARIST WANTTHE LIKENESS ALOCAL'SPEN WHO IS PEN SHAPED WHY DOES PAL HAS GONE AN EXCITABLE PAL SILENT THEY AQUARISTNEEDS ORNAMENT SUSPECTOUTSIDE HELPTRACKING INTERFERENCE DOWN A RARE THEY NEED ORNAMENT SOMEONETO THEIRAQUARIUM CHECKONTHEM WHAT ARE WHERE IS PEN TWOPOSSIBLE SOURCES?Q\"}, {\"text\": \"HYDOESTHE THEMENTORI ARIST WANTTHE DESCRIBETHEARTIST AWEAKNESS.W AMENT ORTHEIRART.OIO ORWHAT?O\"}, {\"text\": \"ansion DESCRIBETHE PET A WEAKNESS THEMENTOR HAS THERE QUICKLY OR WHAT HAUEDONE MENTOR CAN GETTHEM WHO IS THEDAMAGETHEY OWNER ANYONE WHO TOATONEFOR WILL REWARD THEIR MENTOR UET OWNER HELPTAKINGDOWN WHO CAREATADISTANT DYING WANTS NEEDS URGENT ADREADMAGEIS ALOCALPET SWINGING UET EMERGENCY NMONIOD\"}, {\"text\": \"HM WHATARETHREE WHOISTHE POTENTIALLY HAUNTED WHOISTHEP ITEMS OWNER?OO PAL Prompts Adventure\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_adventure_prompts/cards/adventure_002.webp"
+    },
+    {
+      "id": 20032,
+      "cardId": 10032,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Ganchos de Aventura #02: I INUENTOR?OO WHAT COULD HAPPE",
+      "imagePath": "file:///android_asset/starter_packs/creative_adventure_prompts/cards/adventure_003.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"I INUENTOR?OO WHAT COULD HAPPEN PROTOTYPE ANAMBASSADOR ABOUT?O ANINUENTOR WHAT ARE ISLOCKEDINTENSE WHEREIS TRANSLATOR WHAT IS NEEDSHELP TESTING NEGOTIATIONSBUT ADANGEROUS THEIRTRANSLATOR NOW PROTOTYPEIN HASBEEN DELAYED FIELD.THEY ORABDUCTED AREOFFERING THEY NEED HELP DANGER PAY FINDINGTHEM WHO DELAYED WHY DID TRANSLATORAND INUENTOR CREATETHE WHY?OO PROTOTYPE\"}, {\"text\": \"WHOWANTST COULDHAPPEN DESCRIBETHE SPIRITEUICTED INUENTOR?O/O BOOK WHY\"}, {\"text\": \"WHO OR WHAT ansion SPIRIT COURT RESEARCHER OTHER SIDE WHO THEMSELUES HAPPEN TOT HY WHAT COULD CLOSEITFROM DESCRIBE SPIRIT WHO IS DEFENDING UENTUREIN WANTS EVICTE THEY NEED HELP PORTAL EVICTION CLOSE.THEY NEED ASWRONGFUL THEY CANNOT EXORCISMCOUNTS OPENEDAPORTAL THEIR UPCOMING ARESEARCHER HAS ASPIRITCLAIMS LAW DOOROPEN (WHO · OR · WHAT · ansion · SPIRIT · COURT · RESEARCHER · OTHER · SIDE · WHO · THEMSELUES · HAPPEN · TOT · HY · WHAT · COULD · CLOSEITFROM · DESCRIBE · SPIRIT · WHO · IS · DEFENDING · UENTUREIN · WANTS · EVICTE · THEY · NEED · HELP · Portal Mágico · EVICTION · CLOSE.THEY · NEED · ASWRONGFUL · THEY · CANNOT · EXORCISMCOUNTS · OPENEDAPORTAL · THEIR · UPCOMING · ARESEARCHER · HAS · ASPIRITCLAIMS · LAW · DOOROPEN)\"}, {\"text\": \"CH WHYDOESTHE WHAT ARETH ESCRIBETHE COMPOSERWANT NEGOTIATIOI BIRD ORTAL.O/O ABOUT?O Prompts Adventure\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_adventure_prompts/cards/adventure_004.webp"
+    },
+    {
+      "id": 20033,
+      "cardId": 10033,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Ganchos de Aventura #03: Storyl AHIGH-PROFILE ABDUCTTHE",
+      "imagePath": "file:///android_asset/starter_packs/creative_adventure_prompts/cards/adventure_005.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"Storyl AHIGH-PROFILE ABDUCTTHEMAND PRISONER TWO POSSIBLE SOURCES ARECLUSENEEDSA RECLUSE PRISONERNEEDS WHO IS WHO IS BEESCORTED RAREHERBFORA WHAT ARE WHO PLANS SPECIAL BLENDED A FACILITY TEA THEY SEEM THERE HAS BEEN WHY DESPERATETO ATIP-OFFTHAT HAUEITASSOON SOMEONE PLANS ASPOSSIBLE TOABDUCTTHEM ENROUTE WHATIS RECLUSES WHEREIS FACILITY MOTIUATION LOCATED\"}, {\"text\": \"HOPLANSTO WHATARETWO UCTTHEMAND WHYISTHERESEA IY POSSIBLECAUSES?O INTERESTED\"}, {\"text\": \"WHOHASOR ansion MOTIUATION WHAT WAS KILLER'S WHY IS RESEARCHER WHAT FORM DOESTHE INTERESTED EUIDENCETAKE UNDERWAY THESTORIES TRIALISALREADY NOTTOBELIEUE WHAT ARE RUINS LOUED AREA.THEY SAY AMURDERED RUINS ANEARBY CASE HELPMAPPINGTHE MISSINGEUIDENCE REWARD HELP LOCATING OFFERINGA BIG LOCAL NEEDS ARESEARCHERIS AGRIEUING MAPPING PAST MISSING EUIDENCE\"}, {\"text\": \"FORMDOESTHE WHO IS WHATISTHEITEM ENCETAKE?O RECLUSE?O Prompts Adventure\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_adventure_prompts/cards/adventure_006.webp"
+    },
+    {
+      "id": 20034,
+      "cardId": 10034,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Ganchos de Aventura #04: MOTIUATION KILLED VICTIM APROT",
+      "imagePath": "file:///android_asset/starter_packs/creative_adventure_prompts/cards/adventure_007.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"MOTIUATION KILLED VICTIM APROTESTER ANAMATEUR WHO WASTHE PROTESTER'S WHATCOULD UICTIM WHATIS PLANSTOGIUEA HISTORIAN THINKS ANDWHY PROTESTER SPEECH AGAINST THEYSOLUED A APOWERFUL CENTURIES-OLD PERSON MURDER.THEYJUST NEEDSTO HIRE NEEDHELPDIGGING WHOK PROTECTION UPTHE BODY WHOISTHEPROTESTER WHEREISTHEBODY SPEAKINGAGAINST BURIED\"}, {\"text\": \"WHATWOULD KILLEDTHEVICTIM MUSEUMTRADETHE WHAT ISTHE GC WHY?8O ARTIFACTFOR MOTIUATION\"}, {\"text\": \"ansion MOTIUATION COMPETITORS WHAT IS GOD'S COMPONENT WHO ARE THREE SOURCES TWO POSSIBLE POSSESSION MAGIC MOSTTREASURED WITH FORBIDDEN WHAT ARE PRIZE IS THEIR OFTENASSOCIATED DRINKINGCONTEST COMPONENT ISHOLDINGA SOURCINGASPELL CHAOS MAGENEEDSHELP AGODOFWINE A WELL-REPUTED PROBLEM BOTTOMS UP SPELLING\"}, {\"text\": \"WHATIS WHAT IS DESCRIBETHEINGREDIENT PROTESTER IPONENT ORRECIPEOIO MOTIUATION Prompts Adventure\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_adventure_prompts/cards/adventure_008.webp"
+    },
+    {
+      "id": 20035,
+      "cardId": 10035,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Ganchos de Aventura #05: WHO IS HISTORICAL WHAT COULD H",
+      "imagePath": "file:///android_asset/starter_packs/creative_adventure_prompts/cards/adventure_009.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"WHO IS HISTORICAL WHAT COULD HAPPEN TOTHELOCAL?QIO ABIOGRAPHER A LOCAL HAS FIGURE NEEDSSOMEONE LOCAL?9O BEEN RECEIUING WHO IS TOMAKEA ANONYMOUS BIOGRAPHER WHY DOES DETAILED SKETCH THREATENING SO MUCH ORDESCRIPTION LETTERS OFAHISTORICAL THEY NEED HELP FIGURE'SPRIUATE INUESTIGATING POSSESSION SOURCE WHATIS WHO ARE THREE POSSESSION SUSPECTS\"}, {\"text\": \"COULDHAPPEN WHOISTHEPARTNER WHATIS RID HELOCAL?OQ DEALINGWITH?OO ABOUT\"}, {\"text\": \"ansion LOOKINGFOR WHAT WAS CHILD WHATIS THERIDDLE KNOWS WHY ABOUT?O DESCRIBE LAST SEEN ANSWER THEIR BUTNO ONE UAGABOND WHOEUER CAN ANEARBY AREA AREWARDTO SEEN SEARCHING IS OFFERING THEY WERE LAST UAGABOND GONEMISSING AMYSTERIOUS A CHILD HAS RIDDLEMASTER MISSING CHILD\"}, {\"text\": \"EWASTHE CHILD DESCRIBETHE WHOIS THEHISTO PESTS.OI STSEEN?O FIGURE Prompts Adventure\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_adventure_prompts/cards/adventure_010.webp"
+    },
+    {
+      "id": 20036,
+      "cardId": 10036,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Ganchos de Aventura #06: DESCRIBETHEGOD BUILDINGISIT NE",
+      "imagePath": "file:///android_asset/starter_packs/creative_adventure_prompts/cards/adventure_011.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"DESCRIBETHEGOD BUILDINGISIT NECROMANCER'S ANECROMANCER ACUSTODIAN WHAT KIND WHAT DOES PYROMANCER ISGATHERINGA BELIEUES THAT MOTIUATION BAND OFHEROES AROGUE RESURRECT PYROMANCER WANT A BENEUOLENT ISPREPARING GODWHODIED ANATTACKON LONG AGO THEIR BUILDING WHATMAGICFOCUS WHEREISTHE GOD DOESTHEPYROMANCER BURIED USE\"}, {\"text\": \"HATDOESTHE WHAT DID HERO YROMANCER LOSETHEIR REPUTATION DESCRIBE THEG ANT OVER?O LEADER\"}, {\"text\": \"WHOARETHREE ansion QUIETLY WHO DESCRIBE GUILD SUSPECTS WHO ARE THREE PLUGGEDQUICKLY IMPOSTOR WANT DETERMINING WHAT DOES LEADER WHO IS NEEDSTHELEAK THEY NEED HELP GUILD LEADER IMPOSTOR INFORMATION SHIFTER OR PRIUATE PATIENT WITH A SHAPE GUILDIS LEAKING HAS BEEN REPLACED LOCAL HEALERS THATSOMEONE ASPYINTHE ALOCALCLAIMS DO NO HARM AMONG US\"}, {\"text\": \"WHOISTHE WHO IS LOCAL?O OCAL DESCRIBETHEGC Adventure Prompts\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_adventure_prompts/cards/adventure_012.webp"
+    },
+    {
+      "id": 20037,
+      "cardId": 10037,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Ganchos de Aventura #07: CAUSED CRASH ANDWHY?O WHAT DOT",
+      "imagePath": "file:///android_asset/starter_packs/creative_adventure_prompts/cards/adventure_013.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"CAUSED CRASH ANDWHY?O WHAT DOTHEY WHAT FELL RECIPIENT SOMETHING FELL WHO IS AN EXILE NEEDS FROMTHESKYAND WANT ANURGENTLETTER CRASHED NEARBY DELIVERED LOCALS CLAIMIT SOMEONEIN SITSUNDAMAGEDIN THEIR HOMELAND THEMIDDLEOFTHE IMPACTCRATER WHO WHERE IS DESCRIBETHE CRASH RECIPIENT OR CRATER.OIO\"}, {\"text\": \"WHOCAUSED CAUSEDTHECRASH CATACLYSMAND WHEREIS TH WHY?OO WHY LOVER\"}, {\"text\": \"ansion WHAT IS CULPRIT'S INUENTOR CREATE WRONGHANDS MOTIVE LOVER?O WHERE IS ENEMYLINES DESCRIBETHE WHY DID WORRY WHATIT FROMBEHIND GENERAL POWER.THEY THEIR LOVER OFINCREDIBLE RESCUE DEUICE STOLENDEUICE GENERAL WANTS RECOUERINGA AHEARTBROKEN NEEDS HELP ANINUENTOR LOUEAND WAR DEUICE\"}, {\"text\": \"WHYDID WHATDOESTHEGOD JTOR CREATETHE WHOIS UICE?O WANT RECIPIENT Adventure Prompts\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_adventure_prompts/cards/adventure_014.webp"
+    },
+    {
+      "id": 20038,
+      "cardId": 10038,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Ganchos de Aventura #08: TOTHETRAPPER?/O WHAT COULD HAP",
+      "imagePath": "file:///android_asset/starter_packs/creative_adventure_prompts/cards/adventure_015.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"TOTHETRAPPER?/O WHAT COULD HAPPEN EUERYONEIS ALOCALTRAPPER TRAPPER HAUING DREAMS DESCRIBETHE OCCULTIST.O DESCRIBE HAS ACCIDENTALLY ABOUTTHESAME WHATDOEST FIGURESEEM CAUGHTA MYSTERIOUS DANGEROUS FIGURE.AN BEAST NEEDS OCCULTIST HELP RELEASING NEEDS HELP IT SAFELY INUESTIGATINGTHE PHENOMENON DESCRIBETHE WHO IS FIGURE\"}, {\"text\": \"DR HATDOESTHE URESEEMTO WHATCOULDHAPPEN WHEREISTHES ANT TOTHEMEDIUM?O/O HOUSE\"}, {\"text\": \"ansion WHAT ISTHE CULPRIT'S WHO OR WHY WHERE IS SAFE SUSPECTS MOTIUE DEFACEMENT.O/O WHO ARE THREE THEY ARE NOTSURE HOUSE I DEFACINGGRAUES DESCRIBE THEMDEAD,BUT WHO HAS BEEN SOMEONE WANTS SOMEONE OUTSIDETHEAREA CATCHING ASAFEHOUSE NEEDS HELP HELP REACHING AGRAUEDIGGER CRIMEBOSSNEEDS AREFORMED TOWN GETOUTOF (ansion · WHAT · ISTHE · CULPRIT'S · WHO · OR · WHY · WHERE · IS · SAFE · SUSPECTS · MOTIUE · DEFACEMENT.O/O · WHO · ARE · THREE · THEY · ARE · NOTSURE · HOUSE · I · DEFACINGGRAUES · DESCRIBE · THEMDEAD,BUT · WHO · HAS · BEEN · SOMEONE · WANTS · SOMEONE · OUTSIDETHEAREA · CATCHING · ASAFEHOUSE · NEEDS · HELP · HELP · REACHING · AGRAUEDIGGER · CRIMEBOSSNEEDS · AREFORMED · Pueblo · GETOUTOF)\"}, {\"text\": \"ESCRIBETHE DESCRIBETH WHATIS THEITEM TRAPPER.?I Adventure Prompts\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_adventure_prompts/cards/adventure_016.webp"
+    },
+    {
+      "id": 20039,
+      "cardId": 10039,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Ganchos de Aventura #09: ACURSEDOBJECT ALOUINGCOUPLE OB",
+      "imagePath": "file:///android_asset/starter_packs/creative_adventure_prompts/cards/adventure_017.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"ACURSEDOBJECT ALOUINGCOUPLE OBJECT WHY TASKDOES PARENT WANT HASAPPEARED WANTS PARENTAL OBJECT COUPLE DESCRIBETHE WHAT IS INTHEMIDDLE BLESSINGTO OFTOWNAND MARRY.THEY NO ONE WILL NEED HELP TOUCH IT THEY COMPLETINGA NEEDSOMEONE TASKTOPERSUADE TOREMOUETHE ADISAPPROUING CURSEOROBJECT PARENT WHAT HAPPENSIF SOMEONETOUCHES WHO IS THEOBJECT?QIQ PARENT\"}, {\"text\": \"ATTASKDOES PARENTWANT WHATDOTHEUISITORS DESCRIBETHEPLA WANT ONE MEMORIAL\"}, {\"text\": \"ansion DESCRIBE PLANNED WHY INDUSTRIALACTIUITY WHO IS BEHIND AREA MEMORIAL.OIO DESCRIBETHE TREE OR PLANT.O/O NEEDSHELP SAUING SUPPLIESAND WHO IS PARENT CONSERUATIONIST HELP GATHERING TREEOR PLANT.A CHILD.THEY NEED AN ENDANGERED FORTHEIR LATE LASTGROUEOF MEMORIAL THREATENING ISBUILDINGA ACTIUITYIS AGRIEUINGPARENT INDUSTRIAL GRIEF RUNS DEEP LAST STAND\"}, {\"text\": \"CRIBE TREE WHO IS WHATIS WITNESS OBJECT Prompts Adventure\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_adventure_prompts/cards/adventure_018.webp"
+    },
+    {
+      "id": 20040,
+      "cardId": 10040,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Ganchos de Aventura #10: LEADER'SMOTIUATION ANANCIENT A",
+      "imagePath": "file:///android_asset/starter_packs/creative_adventure_prompts/cards/adventure_019.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"LEADER'SMOTIUATION ANANCIENT ALOCALGUARDIAN WHAT IS CULT BOMBHASBEEN GUARDIAN.O DEVICE.OIO LEADER?9O DESCRIBE DESCRIBETHE ISPREPARINGFOR DISCOUERED ANATTACKFROM ORUNDER T/O A CULT LEADER ANIMPORTANT THEY NEED HELP CULTURAL SITE LEARNING WHERE THELOCALLEADER CULT PLANS NEEDSITDEFUSED STRIKE IMMEDIATELY WHAT ARE THREE WHATIS CULTURAL POTENTIALTARGETS SITE THEATTACK\"}, {\"text\": \"ATIS CULT WHATISTHECULPRIT'S SMOTIUATION WHATMIGHTHAPP MOTIUATION THEEXPLORER\"}, {\"text\": \"ansion WHAT MIGHT HAPPEN WHATIS EXPLORER'S MOTIUATION THEEXPLORER?OIO DESTINATION ASTRONOMER'S PHENOMENON ASSEMBLINGAN LIFETIME CELESTIAL WHAT IS WHERE IS ROUTE.THEYARE AONCE-IN-A AREA A CHALLENGING AREATOOBSERUE COMPLETING ORRESTRICTED FORQUICKLY TOAREMOTE ANEW RECORD NEEDSHELP GETTING PLANSTOSET ANASTRONOMER ANEXPLORER SEEING STARS\"}, {\"text\": \"HEREISTHE DESCRIBETHE DESCRIBETH OUTLAW.O/O AREA DEVICE OIC Prompts Adventure\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_adventure_prompts/cards/adventure_020.webp"
+    },
+    {
+      "id": 20041,
+      "cardId": 10041,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Llaves de Cultura #01: WHAIKINDOE WHAT WOULDTHEYDO WH",
+      "imagePath": "file:///android_asset/starter_packs/creative_culture_keyholes/cards/culture_001.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"WHAIKINDOE WHAT WOULDTHEYDO WHATARETHEIR BELIEFS HOW DOTHEYMARK WHATDOTHEYWEAR START OR END BIGGESTTABOO ON THEIR HEADS ABOUTMAGIC WHAT ISTHEIR OFAMEAL WHATDOTHEYCONSIDER HOWDOTHEYSAY TOBRINGGOODLUCK GOODBYETOTHEIRDEAD\"}, {\"text\": \"HOWARETHE TDOTHEYWEAR WHO TEACHES HOMESDECORI THEIRHEADS THEIR YOUNG OR FURNISHE\"}, {\"text\": \"WHATDOTHEY insion CRITICIZING SOMEONE HOWDOTHEY GETRID CONSEQUENCES HOMESDECORATED WHATKINDSOF PETS THEIR WASTE OR FURNISHED HOW ARETHEIR DO THEY KEEP WHAT ARETHE POWERFUL WHATHAPPENSIF WHAT GREETINGS SOMEONEGOESBACK DO THEY USE ONTHEIRWORD (WHATDOTHEY · insion · CRITICIZING · SOMEONE · HOWDOTHEY · GETRID · CONSEQUENCES · HOMESDECORATED · WHATKINDSOF · PETS · THEIR · WASTE · OR · FURNISHED · HOW · ARETHEIR · DO · THEY · Torreón · WHAT · ARETHE · POWERFUL · WHATHAPPENSIF · WHAT · GREETINGS · SOMEONEGOESBACK · DO · THEY · USE · ONTHEIRWORD)\"}, {\"text\": \"WHATTYPESOF DOTHEYGETRID KNOWLEDGEARE WHATISTHEI THEIR WASTE FORBIDDENTOTHEM BIGGESTTABO Keyholes Culture\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_culture_keyholes/cards/culture_002.webp"
+    },
+    {
+      "id": 20042,
+      "cardId": 10042,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Llaves de Cultura #02: WHATISTHEIR WHATISIMPORTANT WH",
+      "imagePath": "file:///android_asset/starter_packs/creative_culture_keyholes/cards/culture_003.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"WHATISTHEIR WHATISIMPORTANT WHATDO THEY WEAR ON SOCIALLYSUPERIOR SPECIALOCCASIONS ARESEEN AS BEING WHY WHEN DO WHATQUALITIES THEIR LEADERS THEY DANCE WHATISTHEIR WHAT SMALL THING RELATIONSHIP DOTHEYHAUEBIG WITH NATURE OPINIONSON\"}, {\"text\": \"HOW DOTHEY OTHEYWEARON ATWHATAGEARE USEMAKEUP ALOCCASIONS EXPECTEDTORE\"}, {\"text\": \"WHATARETHEY insion LOOKFORINALEADER ATWHATAGEARETHEY EXPECTEDTO RETIRE WHATTRAITS DO THEY CONTRIBUTETOTHE HOWDO CHILDREN WHATIS UNFAIRLY DISTRIBUTED THEIR SOCIETY HOUSEHOLD WHATCOMMON HAND ORBODYGESTURES DOTHEYUSE WHO ARETHEIR RIUALS\"}, {\"text\": \"WHA WHATQUALITI TTRAITSDOTHEY HOWDOTHEIR ARESEENASBE TAXESWORK FORINALEADER SOCIALLYSUPER Culture Keyholes\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_culture_keyholes/cards/culture_004.webp"
+    },
+    {
+      "id": 20043,
+      "cardId": 10043,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Llaves de Cultura #03: WHO DOTHEYCONSIDER PRIMARY SOU",
+      "imagePath": "file:///android_asset/starter_packs/creative_culture_keyholes/cards/culture_005.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"WHO DOTHEYCONSIDER PRIMARY SOURCE HOWDOTHEYMARK ENERGY ORFUEL SHOW INTIMACY COMINGOFAGE THEIR FOUNDER WHATIS THEIR HOW DO THEY WHATISTHEIR BIGGESTSOURCEOF WHATDO THEY WRITE MISINFORMATION SONGSABOUT\"}, {\"text\": \"WHATMIGHTPUT DOTHEYMARK STRAINONDOMESTIC HOWDOTHEYPR MINGOFAGE RELATIONSHIPS THEIRPROPER\"}, {\"text\": \"HOWDOTHEYMARK insion FOODFROMSPOILING HOWDOTHEYKEEPTHEIR HOWDOTHEYPROTECT ON THEIR PROFESSION HOW DOTHEYDECIDE WHATDO THEY USE THEIR PROPERTY AS CURRENCY OR LIFE PATH WHATISTHEIR WHAT ARE THEIR MUSICLIKE IMPORTANTHOLIDAYS\"}, {\"text\": \"WHOISTHEIRMOST DOTHEYDECIDE WHATIS THEI RENOWNEDAUTHOR IEIRPROFESSION PRIMARYSOURC ORATOR,ORARTIST ORLIFEPATH ENERGYORFU Culture Keyholes\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_culture_keyholes/cards/culture_006.webp"
+    },
+    {
+      "id": 20044,
+      "cardId": 10044,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Llaves de Cultura #04: WHATQUALITIES DOTHEY ROMANTICP",
+      "imagePath": "file:///android_asset/starter_packs/creative_culture_keyholes/cards/culture_007.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"WHATQUALITIES DOTHEY ROMANTICPARTNERS THEIR HISTORY HAUE EXPECTIN A PARENT HOWDOTHEYVIEW THEYFORGOTTEN TRANSPORTATION WHATMODES HAUING MULTIPLE WHATPARTSOF DO THEY USE FORWHATREASONS WHAT ARETHEIR BELIEFS DOTHEYTRAUEL ABOUTWORKANDREST\"}, {\"text\": \"VDOTHEYUIEW HOWDOTHEYSUI UINGMULTIPLE WHATISACOMMON ORCELEBRATEPRE FASHIONITEM ANTICPARTNERS ANDPARENTALHE\"}, {\"text\": \"WHATISTHEIR insion OR CELEBRATE PREGNANCY HOWDOTHEYSUPPORT PARENTAL HEALTH WHATKINDSOFSPEECH WHATDO THEY WEAR EXILESOMEONE ON THEIR HANDS AREFORBIDDEN WHY MIGHT THEY WHATISTHEIRMOST WHAT WOULDTHEY POPULARGAME CELEBRATE WITH AFEAST\"}, {\"text\": \"WHe OND WHATPARTS KINDSOFSPEECH WHEREDOTHEYGO THEIRHISTORY EFORBIDDEN WHENTHEYTRAUEL THEYFORGOTT Culture Keyholes\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_culture_keyholes/cards/culture_008.webp"
+    },
+    {
+      "id": 20045,
+      "cardId": 10045,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Llaves de Cultura #05: HOWDOESTHEQUALITY WHATCULTURAL",
+      "imagePath": "file:///android_asset/starter_packs/creative_culture_keyholes/cards/culture_009.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"HOWDOESTHEQUALITY WHATCULTURAL BRING OUTON SPECIAL THEM CHANGE A LAW WHAT DO THEY ONLY WHATDO THEYSERUE WHATWOULDMAKE THEIR FOOD ON WHYDOPEOPLE OCCASIONS MOUEAWAY WHATDOESTHEIR LANGUAGEHAUEA WHATDOTHEYCONSIDER SPECIALWORDFOR TOBRINGBADLUCK\"}, {\"text\": \"WHATHAPPENSIF TDOTHEYSERUE SOMEONEGETS WHATACCESSO SICKORINJURED IRFOODON DOTHEY WEA\"}, {\"text\": \"WHATDOTHEY WHATISTHEIR insion WHY WOULD SOMEONE ORDEFENSIVE FORCE HOW ARE CRIMINALS HOWISTHEIRARMY COOKAMEALFOR WHATACCESSORIES ANDIORPUNISHED SOMEONEELSE TRIED SENTENCED DO THEY WEAR MAINTAINED WHATARETHE CONSEQUENCESFOR WHATARECOMMON SAYINGSOMETHING PIERCINGS,TATTOOS,OR THATCAUSESHARM BODYMODIFICATIONS\"}, {\"text\": \"PER ARECRIMINALS HOWISTHEIR ED,SENTENCED HISTORYRECORDED WHATWOULDM IORPUNISHED ORREMEMBERED THEMCHANGEA Culture Keyholes\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_culture_keyholes/cards/culture_010.webp"
+    },
+    {
+      "id": 20046,
+      "cardId": 10046,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Llaves de Cultura #06: WHATARETHEIR VALUABLESAREFAMIL",
+      "imagePath": "file:///android_asset/starter_packs/creative_culture_keyholes/cards/culture_011.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"WHATARETHEIR VALUABLESAREFAMILIES WHAT HEIRLOOMS OR WELCOME OR NOT WHEREIS RELIGION FUNCTION(S)DOES ORWEAPONSDO WHATTACTICSANDI THEY USE WAR WHAT CULTURAL LIKELY KEEP HAIRSERUE WELCOME WHO IS THEIR WHAT DO THEY BIGGESTHERO CONSIDERBEAUTIFUL (WHATARETHEIR · VALUABLESAREFAMILIES · WHAT · HEIRLOOMS · OR · WELCOME · OR · NOT · WHEREIS · RELIGION · FUNCTION(S)DOES · ORWEAPONSDO · WHATTACTICSANDI · THEY · USE · WAR · WHAT · CULTURAL · LIKELY · Torreón · HAIRSERUE · WELCOME · WHO · IS · THEIR · WHAT · DO · THEY · BIGGESTHERO · CONSIDERBEAUTIFUL)\"}, {\"text\": \"HEIRLOOMSOR BLESAREFAMILIES HOW DO THEY HOWCLOSE-KNI KELYTOKEEP CELEBRATEABIRTH THEIRCOMMUNI\"}, {\"text\": \"nsion THEIR LAW ENFORCEMENT HOWCLOSE-KNITARE WHO OR WHAT DOES THEIR COMMUNITIES HOWIMPORTANTIS PRIUACYTO THEM GREATESTALLY WHO IS THEIR ANSWERTO HOWDO THEYFEEL ABOUTLENDINGAND WHATISIMPOLITE BORROWING TODISCUSS\"}, {\"text\": \"WHATISTHEIR ORWHATDOES WHEREISRELIG AWENFORCEMENT MOSTHISTORICALLY WELCOMEOR ANSWERTO IMPORTANTCONFLICT WELCOME Culture Keyholes\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_culture_keyholes/cards/culture_012.webp"
+    },
+    {
+      "id": 20047,
+      "cardId": 10047,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Llaves de Cultura #07: WHICH OETHEIRPHYSICAL HOWDOTHE",
+      "imagePath": "file:///android_asset/starter_packs/creative_culture_keyholes/cards/culture_013.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"WHICH OETHEIRPHYSICAL HOWDOTHEYSEASON SEEN ASDISPOSABLE BECOMINGTYRANTS HOW DOTHEY STOP WHATDO THEY WEAR INTHEIR SOCIETY WHOOR WHATIS LEADERS FROM ON THEIR FEET THEIR FOOD WHATDOTHEYMAKE WHATMAKESTHEM JOKESABOUT ASHAMED\"}, {\"text\": \"HIP WHATTHREETHI WHENDOCHILDREN TDOTHEYWEAR WOULDYOUFIN THEIRFEET LEAUEHOME SOMEONESTR\"}, {\"text\": \"nsion ARESPOKENINTHEAREA HOW MANY LANGUAGES WHATINTOXICANTSDO WHATTYPESOF CHILD THEYUSEORALLOW SOMEONE'S TRASH WOULD YOU FIND CAREDOTHEYHAUE WHATTHREE THINGS WHATARECOMMON WHATISTHEIRMOST MISCONCEPTIONS POPULARSTORY ABOUTTHEIRCULTURE ORBOOK\"}, {\"text\": \"WHATISTHEIR WHO ORWHA MOSTSIGNIFICANT INTOXICANTSDO SEENASDISPOS USEORALLOW HISTORICALEUENT INTHEIRSOCIE Keyholes Worldst Culture\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_culture_keyholes/cards/culture_014.webp"
+    },
+    {
+      "id": 20048,
+      "cardId": 10048,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Llaves de Cultura #08: WHATARETHEYMOST RECYCLE ORREUS",
+      "imagePath": "file:///android_asset/starter_packs/creative_culture_keyholes/cards/culture_015.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"WHATARETHEYMOST RECYCLE ORREUSE WHATDO THEY ENUY ASHAMED FAMILY NEXT WHAT PERSONAL WHATDO THEY WEAPONS ARE THEIR HISTORY DOOR COMMON WHAT MYTHICAL CREATURESDO THEY BELIEUEIN THEIR HOMES\"}, {\"text\": \"WP TDOTHEYENUY WHICHANIMALSDO EFAMILYNEXT HOWDOTHE THEYEATORNOTEAT OORFOR DEFINE FAMIL\"}, {\"text\": \"WHO ARETHEY nsion WHATARETHREEOBJECTS YOU WOULD FIND HISTORICALEUENTS COMMEMORATE MOSTHOMES DEFINE FAMILY WHO OR WHAT HOW DOTHEY HOW DOTHEY BEFORE THEM WHICH CULTURAL PRACTICESARECLOSED WHATMATERIALSDO TOOUTSIDERS THEYSEEASPRECIOUS\"}, {\"text\": \"HOORWHAT WHATTYPESOF ON THELAND GOODSAREBANNED WHATDO EFORETHEM ORRESTRICTED RECYCLEORREU Keyholes Worldst Culture\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_culture_keyholes/cards/culture_016.webp"
+    },
+    {
+      "id": 20049,
+      "cardId": 10049,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Llaves de Cultura #09: WHATATTRACTSTOURISTS WHO ARETH",
+      "imagePath": "file:///android_asset/starter_packs/creative_culture_keyholes/cards/culture_017.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"WHATATTRACTSTOURISTS WHO ARETHEIR RIUALS WHATQUALITIESDO THEY LOOKFORIN A POTENTIALMATE COOKINGUTENSILS WHAT EATINGOR OR ENEMIES TOTHE AREA DO THEY USE WHAT CULTURAL WHATDO THEYSEEAS SIGNIFICANCEDOTHE IMPORTANTMARKERS SEASONSHAUE OFIDENTITY\"}, {\"text\": \"HATEATINGOR WHAT DO THEY OKINGUTENSILS WHATDOTHEYB OTHEY USE CONSIDERADELICACY THEIRHOMESFR\"}, {\"text\": \"nsion THEIRHOMESFROM WHAT DO THEY BUILD WHATRESOURCESDO THEY BRING FROM WHERE DO THEY GET THEIRWATERFROM OUTSIDETHEAREA WHAT DAILY MEALS DO THEY HAUE WHATARETHEIR WHEN THEYMAKEA SYMBOLSOFCULTURAL PROMISE,WHATDO PRIDEORIDENTITY THEYSWEAR ON\"}, {\"text\": \"REDOTHEYGET WHATRIGHTSDOTHEY WHOARETHEIRR SEEASINALIENABLE WATERFROM ORENEMIES Keyholes Culture\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_culture_keyholes/cards/culture_018.webp"
+    },
+    {
+      "id": 20050,
+      "cardId": 10050,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Llaves de Cultura #10: WHATPROEESSIONS HOWDOTHEY COMM",
+      "imagePath": "file:///android_asset/starter_packs/creative_culture_keyholes/cards/culture_019.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"WHATPROEESSIONS HOWDOTHEY COMMENTABOUTTHE YOUNGERGENERATION WHAT IS A COMMON COMMENTABOUTTHE WHATISACOMMON ROADSORTRAVEL OLDERGENERATION WHAT WOULD THEY BRING WITH THEM WAYS LOOK LIKE ON A JOURNEY WHAT DO THEIR WHATDOTHEYCONSIDER OFORPLANFOR OLD-FASHIONED FUTUREGENERATIONS\"}, {\"text\": \"ER ISACOMMON WHATISTHEIR MENTABOUTTHE WHAT CURSE WO COMFORTFOOD ERGENERATION DO THEY USE\"}, {\"text\": \"nsion WHATCURSEWORDS WHOISMOST LIKELI GETAWAYWITH HOWAREPEOPLE WHOCREATESOR ILLEGAL ACTIUITY DO THEY USE DECIDES LAWS NAMED WHATISTHEIR GREATEST WHATSONGDOES SHARED TRAGEDY EUERYBODYKNOW\"}, {\"text\": \"WHOISSEEN AS WHATWOULDT OCREATESOR WEAKORPOWERFUL BRING WITH TH ECIDESLAWS INTHEIRSOCIETY ONAJOURNE Keyholes Worldst Culture\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_culture_keyholes/cards/culture_020.webp"
+    },
+    {
+      "id": 20051,
+      "cardId": 10051,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Fragmentos de Lore #01: ORPERFORM DESCRIBEOR SKETCH WR",
+      "imagePath": "file:///android_asset/starter_packs/creative_lore_fragments/cards/lore_001.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"ORPERFORM DESCRIBEOR SKETCH WRITE ORPERFORM CONTENTS OR BAKEA PASTRY DESCRIBE,SKETCH A WEDDINGTOAST A STUDENT'S BAG ASERMON WRITE EXPLAIN ALOCAL WRITEA TRAUEL CARD GAME DIARY PAGE\"}, {\"text\": \"WRITEORRECITEAN EORPERFORM WRITEORRECI EDDINGTOAST OATHOFOFFICE COMMONPRI\"}, {\"text\": \"nsion WRITEORPERFORM DESCRIBEORSKETCH DESCRIBE OR SKETCH APIECEOFGRAFFITI RELIGIOUSSYMBOL COMMONPRAYER WRITE ORRECITEA A WORK SONG ACOMMON WRITETWO SPECIALS WRITESOME FORALOCAL JUICYGOSSIP EATERY'SMENU\"}, {\"text\": \"ON OM RIBEORSKETCH DESCRIBEORSK DESCRIBEORSKETCHA COMMON CONTENTS IOUSSYMBOL LOCALBUSINESS'SIGN ASTUDENT'SE\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_lore_fragments/cards/lore_002.webp"
+    },
+    {
+      "id": 20052,
+      "cardId": 10052,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Fragmentos de Lore #02: WRITEORPERFORM DESCRIBEORSKETC",
+      "imagePath": "file:///android_asset/starter_packs/creative_lore_fragments/cards/lore_003.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"WRITEORPERFORM DESCRIBEORSKETCH DESCRIBEOR SKETCH A LOCALLEADER ATYPICALHOME PERFORMANON ATRAUELSONG VERBAL GREETING OR DESCRIBE WRITE A LOUE LETTER WRITEALYRICPOEM\"}, {\"text\": \"EDY WA ESCRIBEOR WRITEORPERFORM ORMANON WRITEORRECI BALGREETING AEULOGY NURSERYRHYI\"}, {\"text\": \"nsion DESCRIBEOR SKETCH PLEDGE OFLOYALTY DESCRIBE OR SKETCH WRITEOR RECITEA WRITE OR RECITEA NURSERY RHYME AFLOORPLAN A LOCAL PLANT LISTTHEITEMSIN WRITE A DECLARATION SOMEONE'SHOME OFWAR\"}, {\"text\": \"RIBEORSKETCH DESCRIBE OR DESCRIBEORSK LOCALPLANT SKETCHASHOP ATYPICALHO Lore Fragments\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_lore_fragments/cards/lore_004.webp"
+    },
+    {
+      "id": 20053,
+      "cardId": 10053,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Fragmentos de Lore #03: WRITEANEXCERPT LOCAL'SLASTWORD",
+      "imagePath": "file:///android_asset/starter_packs/creative_lore_fragments/cards/lore_005.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"WRITEANEXCERPT LOCAL'SLASTWORDS WRITEORACTOUTA DESCRIBEORSKETCH WRITE OR PERFORM DOODLE OR WRITE NOTEBOOKPAGE ADAYDREAMER'S A FOLKSONG AN ALPHABET EXPLAINALOCAL DESCRIBEA FOLK HERO SPORT\"}, {\"text\": \"WRITEORPERFORM EORPERFORM WRITEORPERF FOLKSONG ADRINKINGSONG ALOUEBALL\"}, {\"text\": \"nsion WRITE OR PERFORM DESCRIBEOR SKETCH CONTENTS GUILDORGROUP A WORKER'S BAG ACREEDFROMA A LOVE BALLAD WRITE OR RECITE SKETCH AMURAL DESCRIBE OR WRITEA WRITE A LOCAL COMMEMORATIUE MNEMONICDEUICE PLAQUE\"}, {\"text\": \"TB DOODLEORW ESCRIBEOR DESCRIBEORSKETCH ADAYDREAME TCHAMURAL ANECCENTRICLOCAL NOTEBOOKP Worldst Lore Fragments\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_lore_fragments/cards/lore_006.webp"
+    },
+    {
+      "id": 20054,
+      "cardId": 10054,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Fragmentos de Lore #04: DESCRIBE,SKETCH,OR WRITE OR PE",
+      "imagePath": "file:///android_asset/starter_packs/creative_lore_fragments/cards/lore_007.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"DESCRIBE,SKETCH,OR WRITE OR PERFORM PREPARE A BEVERAGE WRITE ORPERFORM WRITE OR SKETCH AVENDOR'S APAGEFROM SALES BANTER A SEA SHANTY AFIELDGUIDE WRITEANAPOCRYPHAL EXPLAINA COMMENTFROMA LOCALSCAM HISTORICAL FIGURE\"}, {\"text\": \"NT'S EORPERFORM WRITEORTELL WRITEORPERF SEA SHANTY ATALL TALE APOLITICALSP\"}, {\"text\": \"WRITEANEXCERPT nsion WRITEORIMPROUISE A POLITICALSPEECH WRITEORPERFORM ABITOFGOSSIP DESCRIBE,SKETCH WRITE OR DESIGN OR PREPAREA FAMILYRECIPE A CAFE MENU WRITETHE OPENING WRITE A LOCAL'S WILL OFAMEMOIR\"}, {\"text\": \"ITEORDESIGN DESCRIBEOR DESCRIBE,SKETCI CAFEMENU SKETCHAGARDEN PREPAREA BEUE Lore Fragments\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_lore_fragments/cards/lore_008.webp"
+    },
+    {
+      "id": 20055,
+      "cardId": 10055,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Fragmentos de Lore #05: DESCRIBE OR SKETCH A WRITEOR P",
+      "imagePath": "file:///android_asset/starter_packs/creative_lore_fragments/cards/lore_009.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"DESCRIBE OR SKETCH A WRITEOR PERFORM GOODLUCKCHARM DESCRIBEOR SKETCH ANNUALTRADITION PERFORMAN DESCRIBEOR AGARMENT ADIRGE WRITE AN EXCERPT WRITEASALACIOUS FROMA HOLYTEXT NEWSSTORY\"}, {\"text\": \"ESCRIBEOR WRITEORRE WRITEORPERFORM ERFORMAN ATRADITION UALTRADITION AHISTORICSPEECH WEDDINGUO\"}, {\"text\": \"nsion WRITE ORTELLA JOKE DESCRIBE OR SKETCH DESCRIBEOR SKETCH A BULLETIN BOARD THREE PRISONERS WRITEOR RECITE A TRADITIONAL WEDDING VOW WRITESOMEONE'S WRITEAN EXCERPT DAILY SCHEDULE FROMANEPICPOEM\"}, {\"text\": \"RIBEORSKETCH DESCRIBEORSKETCH DESCRIBEORSK LLETINBOARD DOMESTICDECOR GOODLUCKCH Lore Fragments\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_lore_fragments/cards/lore_010.webp"
+    },
+    {
+      "id": 20056,
+      "cardId": 10056,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Fragmentos de Lore #06: ANDMAKEITPOSH WITH A FOCUS ON ",
+      "imagePath": "file:///android_asset/starter_packs/creative_lore_fragments/cards/lore_011.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"ANDMAKEITPOSH WITH A FOCUS ON CONTRAST WITHSARCASM PROPAGANDA MEANTAS BY OR INUOLUING SOMEONE BY OR INUOLUING PROBLEMATIC AMISANTHROPE\"}, {\"text\": \"PAS ANDMAKEI MAKEITPOSH ANDMAKEITMAGICAL COMBATIU\"}, {\"text\": \"nsion WITH MARGINAL NOTES INAPARODICSTYLE LESSTHAN MAKEIT COMBATIVE TEN MINUTES WITH REDACTIONS WITH REGIONAL SLANG\"}, {\"text\": \"BO WITHAFOCI MARGINALNOTES INASKETCHYSTYLE ONCONTRA Worldst Lore Fragments\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_lore_fragments/cards/lore_012.webp"
+    },
+    {
+      "id": 20057,
+      "cardId": 10057,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Fragmentos de Lore #07: ANDMAKEITCOMEDIC INASERIOUSTON",
+      "imagePath": "file:///android_asset/starter_packs/creative_lore_fragments/cards/lore_013.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"ANDMAKEITCOMEDIC INASERIOUSTONE IMPORTANTDETAIL FIUE MINUTES LESS THAN MISSING AN BY OR INUOLUING INUOLUING A PRANK MILITARY GONE WRONG\"}, {\"text\": \"SERIOUSTONE ANDMAKEITBAWDY INA CYNICALTO\"}, {\"text\": \"nsion A CYNICALTONE INASORROWFUL MEANTTO FLOUT WITHDOODLES A SPECIFIC LAW ALLOVER TONE WITHMISREMEMBERED IN1OO-25OWORDS DETAILS\"}, {\"text\": \"BO ANTTOFLOUT MOTIUATEDBY LESS THA SPECIFICLAW DELUSION FIUEMINUTE Lore Fragments\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_lore_fragments/cards/lore_014.webp"
+    },
+    {
+      "id": 20058,
+      "cardId": 10058,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Fragmentos de Lore #08: ANDMAKEITPATRIOTIC MEANT CHILD",
+      "imagePath": "file:///android_asset/starter_packs/creative_lore_fragments/cards/lore_015.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"ANDMAKEITPATRIOTIC MEANT CHILDREN WITHAN EYE MINIMALISM ANDMAKEIT BY OR INUOLUING BY OR INUOLUING AN OUTCAST SOMEONE CORRUPT\"}, {\"text\": \"ANDBESURE AKEITPATRIOTIC ANDMAKEITCREEPY OUERSHAR\"}, {\"text\": \"nsion MAKEITSEDUCTIUE INMONOCHROME ANDBE SURETO STYLE OVERSHARE ANADUERT WITH DIFFERENT WITH A FOCUS UERSIONS ONHYPERBOLE\"}, {\"text\": \"WITHAFOCUS ONOCHROME ONSHADING MEANTFORCHI Lore Fragments\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_lore_fragments/cards/lore_016.webp"
+    },
+    {
+      "id": 20059,
+      "cardId": 10059,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Fragmentos de Lore #09: A HEARTFELT STYLE A CLINICAL S",
+      "imagePath": "file:///android_asset/starter_packs/creative_lore_fragments/cards/lore_017.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"A HEARTFELT STYLE A CLINICAL STYLE WITHA POLITICAL WITH A FOCUS ON OUTLINES AGENDA BY OR INUOLUING BY OR INUOLUING CLERGY\"}, {\"text\": \"STAI WITH A DASH ANDMAKEI HEARTFELTSTYLE PARANOIA RELENTLESSLYPO\"}, {\"text\": \"nsion RELENTLESSLY POSITIUE AN OUTDATED STYLE INANELEUATEDSTYLE INANABSTRACTSTYLE MAKEIT INTHIRD-PERSON WITH ALLITERATION PERSPECTIUE\"}, {\"text\": \"WITHAFOCI ABSTRACTSTYLE ANDMAKEITMESSY ONOUTLING\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_lore_fragments/cards/lore_018.webp"
+    },
+    {
+      "id": 20060,
+      "cardId": 10060,
+      "faceIndex": 0,
+      "name": "Exp. Creativa - Fragmentos de Lore #10: LESSTHAN AN HOUR A MEANDERING ",
+      "imagePath": "file:///android_asset/starter_packs/creative_lore_fragments/cards/lore_019.webp",
+      "contentMode": "FOUR_EDGE_CUES",
+      "zonesJson": "[{\"text\": \"LESSTHAN AN HOUR A MEANDERING STYLE INUOLUINGDURESS A RADICAL STYLE BY OR INUOLUING BY OR INUOLUING ALIAR SOMEONESELFISH\"}, {\"text\": \"EANDERING STYLE INANINSPIRINGSTYLE INASATIRICAL\"}, {\"text\": \"nsion MOTIUATED BY REUENGE A SATIRICALSTYLE PROUOCATIUE WITHA HIDDEN MEANTTO BE WARNING WITH A FOCUS ONLY USING SIMPLE ONREPETITION LANGUAGE\"}, {\"text\": \"CUTEUERY JATEDBYREUENGE CORNERYOUCAN INUOLUINGDUP\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/creative_lore_fragments/cards/lore_020.webp"
+    },
+    {
+      "id": 20061,
+      "cardId": 10061,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Fantasía #01: BRIAR(S) CITY (Zarzal(es) · Ci",
+      "imagePath": "file:///android_asset/starter_packs/genre_fantasy/cards/fantasy_001.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"BRIAR(S) CITY (Zarzal(es) · Ciudad)\"}, {\"text\": \"KINGDOM VALE (Reino · Valle)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_fantasy/cards/fantasy_002.webp"
+    },
+    {
+      "id": 20062,
+      "cardId": 10062,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Fantasía #02: PORTAL TOWN TAUERN KEEP APOTHE",
+      "imagePath": "file:///android_asset/starter_packs/genre_fantasy/cards/fantasy_003.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"PORTAL TOWN TAUERN KEEP APOTHECARY (Portal Mágico · Pueblo · Taberna · Torreón · Boticario)\"}, {\"text\": \"Fantasy CAIRN SPRING MOUNT (Fantasy · Túmulo / Mojón · Manantial · Monte)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_fantasy/cards/fantasy_004.webp"
+    },
+    {
+      "id": 20063,
+      "cardId": 10063,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Fantasía #03: FORT MARKET SHRINE ROAD DALE (",
+      "imagePath": "file:///android_asset/starter_packs/genre_fantasy/cards/fantasy_005.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"FORT MARKET SHRINE ROAD DALE (Fuerte · Mercado · Santuario · Camino · Cañada)\"}, {\"text\": \"Fantasy CASTLE FORGE CROSSROAD STAIR CATHEDRAL OBELISK (Fantasy · Castillo · Fragua · Encrucijada · Escalinata · Catedral · Obelisco)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_fantasy/cards/fantasy_006.webp"
+    },
+    {
+      "id": 20064,
+      "cardId": 10064,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Fantasía #04: GATHER MERCHANTS OFPAUPERS ELU",
+      "imagePath": "file:///android_asset/starter_packs/genre_fantasy/cards/fantasy_007.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"GATHER MERCHANTS OFPAUPERS ELUEN DWARUEN WITHOUTMAGIC THATCHOOSES THUNDER OFSHIELDS OFSPIRES OFBARDS\"}, {\"text\": \"SNO WHERES ORCISH SUNDERED CITY MILL (SNO · WHERES · ORCISH · SUNDERED · Ciudad · MILL)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_fantasy/cards/fantasy_008.webp"
+    },
+    {
+      "id": 20065,
+      "cardId": 10065,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Fantasía #05: EGE OFMONKS WINE IRON CROWNLES",
+      "imagePath": "file:///android_asset/starter_packs/genre_fantasy/cards/fantasy_009.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"EGE OFMONKS WINE IRON CROWNLESS WHERE BLADESDANCE THATWANDERS SENTINELS OFBEASTS OFTRAITORS LEECHES\"}, {\"text\": \"UND UND TWO-PENNY CLERIC'S OFMAGES OFPROPHETS MONSTERSDWELL WITHOUTEND OFSPEARS HEARTS WHERE GNOMISH\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_fantasy/cards/fantasy_010.webp"
+    },
+    {
+      "id": 20066,
+      "cardId": 10066,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Fantasía #06: BMA MAGES CREAT SITEOFA SITEOF",
+      "imagePath": "file:///android_asset/starter_packs/genre_fantasy/cards/fantasy_011.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"BMA MAGES CREAT SITEOFA SITEOFTHEWORLD'S FAMOUSSIEGE OLDESTTAUERN LEGENDARY GEM ANOTHERWORLD USEDTOBEAPORTAL LASTKNOWN FORMEDFROMTHE BEING FORBIDDEN BODY OFAGOD MAGICAL POWER DRAINED OFALL BIRTHPLACEOF WASONCE HOMETO AN UNDEFEATED AMYTHICAL CREATURE WAR LEADER\"}, {\"text\": \"SHAPE ORIGIN OFA WAS ONCEA SACRED HOLYORDER DRUIDIC SITE OFROGUES RAGE WHEREARROWS FALL THAT HELD FAITH OFDREAMERS OFTHRONES TYRANT'S DRUNKARD'S\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_fantasy/cards/fantasy_012.webp"
+    },
+    {
+      "id": 20067,
+      "cardId": 10067,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Fantasía #07: WEEN URE(S) NTITIES YA ROGU OR",
+      "imagePath": "file:///android_asset/starter_packs/genre_fantasy/cards/fantasy_013.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"WEEN URE(S) NTITIES YA ROGU ORIGINOFA FAMOUS BIRTHPLACEOF A BARDICTRADITION RENOWNED MAGE SITEOF GREATPOWER CORONATIONS SITE HOME MARTIAL BUSTLINGTAUERNS LAIR WINGED ARTSSCHOOL LONG NAMES BEAST(S) RENOWNED SMITH(S) RULED BYTRIUMUIRATE (WEEN · URE(S) · NTITIES · YA · ROGU · ORIGINOFA · FAMOUS · BIRTHPLACEOF · A · BARDICTRADITION · RENOWNED · MAGE · SITEOF · GREATPOWER · CORONATIONS · SITE · HOME · MARTIAL · BUSTLINGTAUERNS · Guarida · WINGED · ARTSSCHOOL · LONG · NAMES · BEAST(S) · RENOWNED · SMITH(S) · RULED · BYTRIUMUIRATE)\"}, {\"text\": \"BYA NARCH POWEI SHAPO EATING Fantasy SUBJECT AN SITEOFA NOTORIOUS ANCIENTPROPHECY AMBUSH LEGENDARYGLADIATOR ORDEROFMAGES RESTING PLACE OFA ORIGIN OFAN SHAPED BY FAE CREATEDTHROUGH WROUGHT FROM MAGICALTRAP CREATED ASA REBELLION ILLUSION WAS ONCE FLOATING SITEOFANINFAMOUS ORAIRBORNE MONSTER'SSLAYING\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_fantasy/cards/fantasy_014.webp"
+    },
+    {
+      "id": 20068,
+      "cardId": 10068,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Fantasía #08: OFA UNSCAL KNOWN UNIQUEMAGICSY",
+      "imagePath": "file:///android_asset/starter_packs/genre_fantasy/cards/fantasy_015.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"OFA UNSCAL KNOWN UNIQUEMAGICSYSTEM UALUES STRENGTH EVENT SOURCEOFPOISON DURING A CELESTIAL ONLY ACCESSIBLE KNOWN EXTINCT INHABITED BY SMALL ANIMAL BONES MISCHIEUOUS KNOWNFORA KNOWNFOR RARE ALLOY CREATURES ORACLE(S) BREEDERSOFMAGICAL HARSH EXILELAWS CREATURE(S)\"}, {\"text\": \"LCHEMY ALL（S WELL NATURE KNOWN MAGIC SOMETHING AIR KNOWN KNOWNFOR SPELLCOMPONENT SOURCE RARE NON-PHYSICAL POPULARSPOT CONTROLLED FORDUELS CURRENCY BY GUILDS MADE UNKNOWN RAPID-FIRESEASONS MATERIAL\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_fantasy/cards/fantasy_016.webp"
+    },
+    {
+      "id": 20069,
+      "cardId": 10069,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Fantasía #09: KNOW NO LUSORY FOUND YA RENOWN",
+      "imagePath": "file:///android_asset/starter_packs/genre_fantasy/cards/fantasy_017.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"KNOW NO LUSORY FOUND YA RENOWNED WAND-MAKERS) DISTRUSTFUL OFMAGIC AMONSTER,CURSE,ORSPIRIT MOUING,BECOMINGAWARE,ORSPEAKING BREAKINGFREEOFITSPRISON BECOMINGTO LIFE ANANCIENTEUILIS LANDITSELFSEEMS AHOTLYCONTESTED TRIALBYCOMBATIS ABOUTTOTAKEPLACE AMAGICARTWILLSOONDIE TOSETTLEA FAMILYFEUD THEY NEED AN APPRENTICE ACCUSATION,ORDEBT SCRIBE,ORCURE\"}, {\"text\": \"DISGUISE SIEGE Fantasy INTELLIGENT WILDLIFE HEALINGSPRING(S) SIGNATURE WEAPON CONSTRUCTION CLOCKWORK HAUEN MYTHICAL SHAPE-CHANGERS UNUSUAL RAIL GOUERNED BY KNOWN TRANSPORT BUTTERFLIES CREATURES ANNUALMAGICAL SOURCE PHENOMENON CHAOTICMAGIC\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_fantasy/cards/fantasy_018.webp"
+    },
+    {
+      "id": 20070,
+      "cardId": 10070,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Fantasía #10: PEOPLEARELOSING ANOBLEISBESTOW",
+      "imagePath": "file:///android_asset/starter_packs/genre_fantasy/cards/fantasy_019.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"PEOPLEARELOSING ANOBLEISBESTOWINGTHEIR THEIRABILITYTOSPEAK FORTUNEUIAACONTEST DUETO CENSORSHIP FIND ARELIC,SOLUEA PUZZLE ILLNESS,ORMAGIC ORSLAYAMONSTER ANABILITYORCREATESAPOISON OFASET NEEDED FORA RITUAL ITCURESA DISEASEENHANCES POWERFULWEAPONORPART THELASTOFAMAGICALHERB ARELIGIOUSSYMBOL THEREIS A RACETO FIND HASRESURFACED A LEGENDARY ARTIFACT SOMEONEIS CLAIMINGTO BETHEDESCENDANTOFA ANIMPORTANTGUARDIAN'S LEGENDARYFIGURE POWERSAREFAILING AFOLKHERO,MAGE AWARRIOR,CONSTRUCT ORMONARCH ORDEMIGOD\"}, {\"text\": \"A STRANGEENCHANTMENT SEEMS HAVE FALLEN OVER LAND UILEMONSTERS HAUEINUADED MAGICGROWTH,SLEEPLESS A ONCE-SACREDSPACE CURSEORCREEPINGCOMA AGROVE,TEMPLE,ORUISION ORMONSTER ORBREAKINGTRADITION AMONARCHFOREIGNNATION DEPLETING FUNDSTOPAYANNUALTRIBUTE ITIS GOING HAYWIRE THEPOPULATIONLACKS MAGICMIGHTGETBANNED ANEWFORMOF ANIMPORTANTSOURCEOF MAGICALPOWERISDWINDLING MYSTERIOUSSYMBOLSHAUE MYSTICAL CREATURES,RARE APPEAREDALLOUERTHEAREA CRYSTALS,ORANCIENTPLANTS RUNES,TALISMANS,ORGRAFFITI\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_fantasy/cards/fantasy_020.webp"
+    },
+    {
+      "id": 20071,
+      "cardId": 10071,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Horror #01: WOOD(S) CITY (Bosque(s) Umbrío",
+      "imagePath": "file:///android_asset/starter_packs/genre_horror/cards/horror_001.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"WOOD(S) CITY (Bosque(s) Umbrío(s) · Ciudad)\"}, {\"text\": \"Horror PIT(S) NECROPOLIS (Horror · Fosa(s) · Necrópolis)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_horror/cards/horror_002.webp"
+    },
+    {
+      "id": 20072,
+      "cardId": 10072,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Horror #02: TOMB BATTLEFIELD LAIR MOOR SLA",
+      "imagePath": "file:///android_asset/starter_packs/genre_horror/cards/horror_003.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"TOMB BATTLEFIELD LAIR MOOR SLAUGHTERHOUSE CREMATORIUM (Tumba · Campo de Batalla · Guarida · Páramo · Matadero · Crematorio)\"}, {\"text\": \"lds Horror NEST TOWN ABYSS SWAMP (lds · Horror · Nido · Pueblo · Abismo · Ciénaga)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_horror/cards/horror_004.webp"
+    },
+    {
+      "id": 20073,
+      "cardId": 10073,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Horror #03: ARENA CABIN RIVER VILLAGE WARE",
+      "imagePath": "file:///android_asset/starter_packs/genre_horror/cards/horror_005.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"ARENA CABIN RIVER VILLAGE WAREHOUSE LAKE (Arena / Coliseo · Cabaña · Río · Aldea · Almacén · Lago)\"}, {\"text\": \"RUIN LABYRINTH FENCE MANSION CHAPEL CARNIUAL (Ruina · Laberinto · Valla / Cercado · Mansión · Capilla · Feria / Carnaval)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_horror/cards/horror_006.webp"
+    },
+    {
+      "id": 20074,
+      "cardId": 10074,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Horror #04: ot HIJO MOTHS CLAWS PALE ROTTI",
+      "imagePath": "file:///android_asset/starter_packs/genre_horror/cards/horror_007.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"ot HIJO MOTHS CLAWS PALE ROTTING THATSCREAMS WITH A PULSE WIDOWS EYES OFTOADS OFSCYTHES\"}, {\"text\": \"EAD lds Horror TIMES NOWHERE ABANDONED SPIRAL TOWN FARMHOUSE ORPHANAGE (EAD · lds · Horror · TIMES · NOWHERE · ABANDONED · SPIRAL · Pueblo · FARMHOUSE · ORPHANAGE)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_horror/cards/horror_008.webp"
+    },
+    {
+      "id": 20075,
+      "cardId": 10075,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Horror #05: EPS OFGALLOWS OFBONE RUINED CR",
+      "imagePath": "file:///android_asset/starter_packs/genre_horror/cards/horror_009.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"EPS OFGALLOWS OFBONE RUINED CRACKING THERETURNED WINDBLOWS OFCORPSES WHERE NO CHAINS OFFANGS OFSILENTMOUTHS\"}, {\"text\": \"RNS lds Horror DAMNED TORN WOUNDS OFFOOTPRINTS THATCRUMBLED WHERE WALLS OFDEMONS HAVE EARS OFBLOOD UNCANNY DEATHLESS\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_horror/cards/horror_010.webp"
+    },
+    {
+      "id": 20076,
+      "cardId": 10076,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Horror #06: NTURIES TUAL FOUNDE OUGH SITE ",
+      "imagePath": "file:///android_asset/starter_packs/genre_horror/cards/horror_011.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"NTURIES TUAL FOUNDE OUGH SITE OFLONG UNSOLUED SERIAL AFFECTEDBYCENTURIES MURDERS OFISOLATION A FAMOUSCRYPTID THOUSANDS YEARS CURSED SITE NUMEROUS ANCIENTTERROR SANCTUMOF AN EXTRAORDINARY ABOMINATIONS THOSEDEEMED WAS ONCETHE CORRUPTION FOUNDED BY SHAPED BY SITE WHERE MADEFAMOUSBYA SOMETHING SANK LOCALGHOSTSTORY INTOTHE EARTH\"}, {\"text\": \"CREAT ITCH(ES) USED SITEOFA NOW LASTKNOWN FORGOTTENFORM LOCATION OFWORSHIP AN EUIL ENTITY OFKNIUES OFMAGGOTS HANGED ONE SHADOWS THATWHISPERS HUNGER WASTING EXECUTIONER'S\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_horror/cards/horror_012.webp"
+    },
+    {
+      "id": 20077,
+      "cardId": 10077,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Horror #07: IEOFAN LE GOD EXTREN ANCIENT C",
+      "imagePath": "file:///android_asset/starter_packs/genre_horror/cards/horror_013.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"IEOFAN LE GOD EXTREN ANCIENT CREAT SITE AN INFAMOUS FORMER EXECUTION HEARTBREAK GROUNDS PARANORMALACTIUITY MONSTROUSFLORA FREQUENT SAIDTO BE A GATEWAY ARACHNID COLONY TORTUREMETHOD SOURCE MEAT TOIOFTHEDEAD A GRUESOME KNOWN UNUSUAL SITE BLEEDING OUERRUN BY UERMIN OR CRYING STATUE (IEOFAN · LE · GOD · EXTREN · ANCIENT · CREAT · SITE · AN · INFAMOUS · FORMER · EXECUTION · HEARTBREAK · GROUNDS · PARANORMALACTIUITY · MONSTROUSFLORA · FREQUENT · SAIDTO · BE · A · GATEWAY · ARACHNID · Colonia · TORTUREMETHOD · SOURCE · MEAT · TOIOFTHEDEAD · A · GRUESOME · KNOWN · UNUSUAL · SITE · BLEEDING · OUERRUN · BY · UERMIN · OR · CRYING · STATUE)\"}, {\"text\": \"OUGH FORMER OLENCE ACTIUITY ESTATE ORIGIN OFA SITEOFAMYSTERIOUS NURSERYRHYME DISAPPEARANCE DEAD RELIGION MASSACRE ORIGIN OFA UNEXPLAINED SITE AN FORMERSITEFOR BANISHING EXILES FORMERDUMP FOUNDEDBY A MONSTER FOUNDEDBY CULTIST(S) SITEOFA GREAT SITE AN SHATTERING INFAMOUSSCREAM\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_horror/cards/horror_014.webp"
+    },
+    {
+      "id": 20078,
+      "cardId": 10078,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Horror #08: OLONY FREQUENTDEMONIC GOINGOUT",
+      "imagePath": "file:///android_asset/starter_packs/genre_horror/cards/horror_015.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"OLONY FREQUENTDEMONIC GOINGOUTAT POSSESSIONS NIGHTIS BANNED HABITAT A PARASITE KNOWNFORTEETH ANIMAL GRAUEYARD PARTICULAR GHOST MADEOFBONES INSECTWORSHIP KNOWN FORA KNOWN KNOWNFOR DISTRUSTFUL DRINKING BLOOD OUTSIDERS\"}, {\"text\": \"FICKING MASSIU SWALL Horror SOURCEOFA LOCATEDIN A CREUASSE HALLUCINOGEN FREQUENTABDUCTIONS PAIN WORSHIP KNOWN COOKINGWITH TOXINS HIGHLY SUPERSTITIOUS SITE A RITUAL HUNT POLLUTED WATER FAMOUSFOR ATDUSKORDAWN TERRIBLESTENCH\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_horror/cards/horror_016.webp"
+    },
+    {
+      "id": 20079,
+      "cardId": 10079,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Horror #09: SHA NVAST HOMET BRUTA OTH(S) (",
+      "imagePath": "file:///android_asset/starter_packs/genre_horror/cards/horror_017.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"SHA NVAST HOMET BRUTA OTH(S) (S) KNOWNFOR KNOWN MONSTERHUNTERS DEATH WORSHIP PREDATOR,ORANIMALSWARM PLAGUE-BEARERSOR FLESH-EATERS THEYARESKIN-BURROWERS THEAREA AS A LAIR IS TAKING OUER A CREATUREHASCLAIMED ANINSECTINFESTATION PEOPLE'SNIGHTMARES APASTTRAGEDYIS AREBREAKINGTHROUGH STARTINGTO BLEED TOTHEWAKINGWORLD THROUGH TOTHE PRESENT ASGHOSTS,LIUINGDAYDREAMS AMURDER,MASSACRE,ORWAR ORMASSHALLUCINATIONS (SHA · NVAST · HOMET · BRUTA · OTH(S) · (S) · KNOWNFOR · KNOWN · MONSTERHUNTERS · DEATH · WORSHIP · PREDATOR,ORANIMALSWARM · PLAGUE-BEARERSOR · FLESH-EATERS · THEYARESKIN-BURROWERS · THEAREA · AS · A · Guarida · IS · TAKING · OUER · A · CREATUREHASCLAIMED · ANINSECTINFESTATION · PEOPLE'SNIGHTMARES · APASTTRAGEDYIS · AREBREAKINGTHROUGH · STARTINGTO · BLEED · TOTHEWAKINGWORLD · THROUGH · TOTHE · PRESENT · ASGHOSTS,LIUINGDAYDREAMS · AMURDER,MASSACRE,ORWAR · ORMASSHALLUCINATIONS)\"}, {\"text\": \"ANGERS OLONY UTION KNOWN SOURCE SITE STRANGE DARK POWER WHISPERING UIOLENCE DARKFOLKLORE FREQUENTSTREET KNOWN STRANGE BODILYMUTILATION KNOWNOSSUARY SITE A WELL NOXIOUSGASES KNOWN KNOWNFOR FOOTPRINTS KNOWN KNOWN INDUCING UISIONS HYPNOTICSOUND(S)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_horror/cards/horror_018.webp"
+    },
+    {
+      "id": 20080,
+      "cardId": 10080,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Horror #10: SOMETHINGISWRONG CEMETERIES WI",
+      "imagePath": "file:///android_asset/starter_packs/genre_horror/cards/horror_019.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"SOMETHINGISWRONG CEMETERIES WITH THEMIRRORS AREOUERFLOWING SOMETHING EMERGING WITH FRESHCORPSES,RESTLESS HORRIFYINGUISIONS,OR DEAD,ORSTRANGEPLANTS REFLECTIONSBEHAUINGSTRANGELY OR CANNIBALISTIC URGES WEATHER,OR UNNERUINGSOUNDS RELEASING CREATURES,STRANGE A TEAR HASAPPEARED THESKY PEOPLE HAUE BEEN UANISHING AHEINOUSCRIMEIS WITHOUT A TRACE SHATTERINGTHE COMMUNITY SUSPECTEDTOBEDUETOA MURDER,UANDALISMOF SERIALKILLER,ABDUCTOR SOMETHINGSACRED,OR ORMONSTER ALINKEDSERIESOFCRIMES\"}, {\"text\": \"LIUING CREATURESIN ACULTISABOUTTO AREA ARE MUTATING WAKESOMETHINGFROM WARPINGSKELETALSTRUCTURE AN ANCIENTSLUMBER DEUELOPINGPSYCHICPOWERS ALICH,SPIRITORBEHEMOTH OR EXPELLING UOLATILEFLUID KNOCKING ONDOORS SPIRITS,ORPEOPLE INDREAMS,ORSOMETHING THEYAREANIMALS STRANGELIGHTSBEING HUNTED WHAT WASTHEIRS HAS EUERYONEONEDGE RETURNED TORECLAIM A NOCTURNALPHENOMENON PASTINHABITANTS HAUE AHORRIFYINGFOLK THEAIRISGROWINGDARKWITH TALEISCOMINGTRUE SOMETHING OMINOUS ABOUTACRYPTIDDEMON UNNATURALFOG,CARRIONBIRDS ORTWISTEDTRICKSTER ORASHOFANUNKNOWNORIGIN\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_horror/cards/horror_020.webp"
+    },
+    {
+      "id": 20081,
+      "cardId": 10081,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Ciencia Ficción #01: We CITY FLOE(S) (We · Ciudad ·",
+      "imagePath": "file:///android_asset/starter_packs/genre_scifi/cards/scifi_001.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"We CITY FLOE(S) (We · Ciudad · Banquisa(s))\"}, {\"text\": \"Science Fiction METROPOLIS CAPITAL (Science · Fiction · Metrópolis · Capital Planetaria)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_scifi/cards/scifi_002.webp"
+    },
+    {
+      "id": 20082,
+      "cardId": 10082,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Ciencia Ficción #02: Wo LABORATORY REFINERY HANGAR ",
+      "imagePath": "file:///android_asset/starter_packs/genre_scifi/cards/scifi_003.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"Wo LABORATORY REFINERY HANGAR NIGHTCLUB RESTAURANT LAUNCHPAD (Wo · LABORATORY · REFINERY · Hangar · NIGHTCLUB · RESTAURANT · LAUNCHPAD)\"}, {\"text\": \"Science Fiction SKYSCRAPER UENT FALLOUT CRATER(S)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_scifi/cards/scifi_004.webp"
+    },
+    {
+      "id": 20083,
+      "cardId": 10083,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Ciencia Ficción #03: Wo DISTILLERY BASE OBSERUATORY",
+      "imagePath": "file:///android_asset/starter_packs/genre_scifi/cards/scifi_005.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"Wo DISTILLERY BASE OBSERUATORY ANOMALY FACTORY HEADQUARTERS\"}, {\"text\": \"Science Fiction CITY DEPOSIT SPACEPORT CITY FOUNDRY HIVE (Science · Fiction · Ciudad · DEPOSIT · SPACEPORT · Ciudad · FOUNDRY · HIVE)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_scifi/cards/scifi_006.webp"
+    },
+    {
+      "id": 20084,
+      "cardId": 10084,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Ciencia Ficción #04: Wo ATER IME INSURGENTS CAMERAS",
+      "imagePath": "file:///android_asset/starter_packs/genre_scifi/cards/scifi_007.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"Wo ATER IME INSURGENTS CAMERAS NEO CHRONO THATBECAMEAWARE OFBREAKTHROUGHS CHEMICALS THATSHINES OFSCREENS\"}, {\"text\": \"HINI OUT Science Fiction BIO CRYO HUB GENERATOR CISTERN COLONY (HINI · OUT · Science · Fiction · BIO · CRYO · HUB · GENERATOR · CISTERN · Colonia)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_scifi/cards/scifi_008.webp"
+    },
+    {
+      "id": 20085,
+      "cardId": 10085,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Ciencia Ficción #05: Wo ITSELF MACHINES OFBULLETS L",
+      "imagePath": "file:///android_asset/starter_packs/genre_scifi/cards/scifi_009.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"Wo ITSELF MACHINES OFBULLETS LUNAR AUTO THATREPAIRSITSELF WITHOUT PRIUACY FRACTALS KEYS OFANDROIDS OFDEBTS\"}, {\"text\": \"Science Fiction SOLAR ARACHNO OFDRILLS OFFIRSTCONTACT THATUNPLUGGED THATWARPS OFFUMES PRIME\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_scifi/cards/scifi_010.webp"
+    },
+    {
+      "id": 20086,
+      "cardId": 10086,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Ciencia Ficción #06: Wo OR NSITE INING STAR SOUND S",
+      "imagePath": "file:///android_asset/starter_packs/genre_scifi/cards/scifi_011.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"Wo OR NSITE INING STAR SOUND SITEOF A TENUOUS ORIGINOFABIO GALACTICTREATY ENGINEEREDSPECIES EXPERIMENT ORBITALSTRIKE SITE ANINFAMOUS SITEOFAN ANOTHER DIMENSION MADE WITH ANCIENT SUPPOSEDLYFROM CREATED THROUGH SITEORAIRFIELD FORMERLAUNCH TECHNOLOGY TIMETRAVEL SITE WHERE HUMANS BIRTHPLACEOFA FIRST LANDED FAMOUSSCIENTIST\"}, {\"text\": \"SHAPED Science Fiction SITE OFTHE FIRST SITEOF A REACTOR SPACE LAUNCH MELTDOWN OFMINES OFCRYSTALS THATBROADCASTS THATSCIENCE BUILT EUERYTHING OFADS SELF-SUSTAINING NUCLEAR (SHAPED · Science · Fiction · SITE · OFTHE · FIRST · SITEOF · A · Reactor · SPACE · LAUNCH · MELTDOWN · OFMINES · OFCRYSTALS · THATBROADCASTS · THATSCIENCE · BUILT · EUERYTHING · OFADS · SELF-SUSTAINING · NUCLEAR)\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_scifi/cards/scifi_012.webp"
+    },
+    {
+      "id": 20087,
+      "cardId": 10087,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Ciencia Ficción #07: Wo HOWERS NTURIES FROMA RIGINS",
+      "imagePath": "file:///android_asset/starter_packs/genre_scifi/cards/scifi_013.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"Wo HOWERS NTURIES FROMA RIGINS FOUNDE ORIGIN OFA NOTORIOUS ORIGIN OFA CORPORATION POWERFULA.I BIODIUERSEREGION ENERGYSHIELD PROTECTED BY BREEDINGGROUND STRANGE BACTERIA RECURRINGTIME AUTHORITARIAN ENTERTAINMENT ANOMALIES COMPLEX TOURIST REGIME KNOWNFOR ANTI-TECHNOLOGY INCUBATORS MINDSET\"}, {\"text\": \"EFUGEES SHAPED PLANET MET Science Fiction I SITEOFA TERRAFORMING SITE AN EPIC INCIDENT LAST STAND CRIMEBOSS ECONOMICCRASH ANINFAMOUS FROMAN BIRTHPLACEOF NEVERRECOVERED FOUNDED BY HACKER(S) CREATED BY RECKLESS INTERSTELLAR BASE EXPERIMENTATION MACHINE（S) CREATED BY FORMER SITE WHERE FIRST WAYPOINTON ANINTERSTELLAR WAR WAS FIRED TREASUREMAP\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_scifi/cards/scifi_014.webp"
+    },
+    {
+      "id": 20088,
+      "cardId": 10088,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Ciencia Ficción #08: Wo HEAVIL VENTS KNOWNFOR MONEY",
+      "imagePath": "file:///android_asset/starter_packs/genre_scifi/cards/scifi_015.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"Wo HEAVIL VENTS KNOWNFOR MONEY DATA-UAULT(S) LAUNDERING HUB IRRADIATED LANDSCAPE RAPID EUOLUTION WORLD-ENDINGTECH KNOWN BODY MODIFICATION(S) SIGNAL DEAD ZONE HIDING SPOTOF KNOWN AN UNUSUAL DRUG WIRED DIRECTLY CORRUPT INTOTHESOURCE GOUERNMENT\"}, {\"text\": \"VALLED Science Fiction SPATIALANOMALIES RESEARCH SITE MEGA-CORPORATION GOUERNMENT HEADQUARTERSOFA MILITARY-RUN HOME A PATENTED PROTECTION LAWS BLACKMARKETHUB FAMEDWEAPONS MANUFACTURERS STRICT WILDLIFE ORGANISM PLAYGROUND GREATSALUAGESPOT ULTRA-RICH\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_scifi/cards/scifi_016.webp"
+    },
+    {
+      "id": 20089,
+      "cardId": 10089,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Ciencia Ficción #09: Wo STANT COM FAMOUS PORTAB STR",
+      "imagePath": "file:///android_asset/starter_packs/genre_scifi/cards/scifi_017.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"Wo STANT COM FAMOUS PORTAB STRIAL KNOWNFOR INFORMATION HACKER HAUEN BROKERING MESSAGE,ORDISTRESSSIGNAL OR GRAUITATIONALFLUCTUATIONS TIMEANOMALIES,SPATIAL WARPING HASJUSTBEENACTIUATED BEINGREPORTED INTHEAREA AMYSTERIOUSSIGNAL SCIENTIFICIMPOSSIBILITIESARE LIFESUPPORTTECHISFAILING ANANTI-TECHMOUEMENTIS NO ONECAN FIXIT DUETO LACK OFPARTS RAPIDLY GAININGGROUND LOSTTECHNICALKNOWLEDGE DUETO ADISASTER,DATALEAK ORASABOTEUR ORFAKESTUDY\"}, {\"text\": \"UNDEI UCTURES SUR GRAFFITI Science Fiction UNUSUAL AIR SOURCEOFA POLLUTANT PRECIOUSFUEL GALACTICEMPIRE LOCALCUSTOMS CAPITALOF A BLEND ALIEN MADE ORGANIC GOVERNED BY A.I STREET RACING HOME OFTHE KNOWN MACHINERY LASTTREE IRREGULARGRAUITY UISIBLEFROMSPACE\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_scifi/cards/scifi_018.webp"
+    },
+    {
+      "id": 20090,
+      "cardId": 10090,
+      "faceIndex": 0,
+      "name": "Exp. de Género - Ciencia Ficción #10: Wo THESTATEIS LAUNCHING ANEWGA",
+      "imagePath": "file:///android_asset/starter_packs/genre_scifi/cards/scifi_019.webp",
+      "contentMode": "TOP_BOTTOM_SPLIT",
+      "zonesJson": "[{\"text\": \"Wo THESTATEIS LAUNCHING ANEWGANGISAGGRESSIUELY NEWCONTROLMEASURES STAKINGTHEIR TERRITORY ONTHEPOPULATION THROUGHCOORDINATED ATTACKS SURUEILLANCEPOLICE POWERS ANEWDRUG,ORFORCED OR PSYCHOLOGICALCONDITIONING RECRUITMENT STRIKE,ORCRASHINGSPACECRAFT ANENGINE,FUEL,ORORGANISM FROMAMETEORSHOWERORBITAL SOURCEISRUNNINGOUT THEAREAISBRACINGFORIMPACT ANIMPORTANTPOWER A SHOCKINGDATA LEAK HAS ADANGEROUSEXPERIMENT EXPOSEDPRIUATESECRETS ISMISSINGFROM ALAB OFCITIZENSCORPORATIONS AUIRUS,SUPERWEAPON,OR OR GOUERNMENTS ARTIFICIALINTELLIGENCE\"}, {\"text\": \"Science Fiction ASILOOFSOMETHING A DANGEROUS DANGEROUSISSTARTINGTOLEAK PARASITEHASBEENDISCOUERED THECONTENTS ARERADIOACTIUE AUIRUS,FUNGUS,ORINSECT CHEMICALLYUNSTABLE,ORALIUE HYBRID,ORCYBORG TECHNOLOGY,ORHUMANITY ERODINGTRUSTINGOUERNMENT ANEWFORMOFLIFE A WAR OFMISINFORMATION THEYHAUEJUSTCREATED AN ALIEN SPECIES IS RUNNING RECENTDRILLINGHASJUSTBROKEN RAMPANTTHROUGHTHEECOSYSTEM THROUGHTOSOMETHINGSHOCKING ITISPLANT-LIKE,CEPHALOPOD-LIKE ARAREORE,SECRETFACILITYOR ORBIRD-LIKE UNEXPLODEDBOMB\"}]",
+      "reversedImagePath": "file:///android_asset/starter_packs/genre_scifi/cards/scifi_020.webp"
+    }
+  ],
+  "cardStackTags": [
+    {
+      "stackId": 107,
+      "tagId": 1
+    },
+    {
+      "stackId": 107,
+      "tagId": 3
+    },
+    {
+      "stackId": 108,
+      "tagId": 1
+    },
+    {
+      "stackId": 108,
+      "tagId": 3
+    },
+    {
+      "stackId": 109,
+      "tagId": 1
+    },
+    {
+      "stackId": 109,
+      "tagId": 3
+    },
+    {
+      "stackId": 110,
+      "tagId": 1
+    },
+    {
+      "stackId": 110,
+      "tagId": 3
+    },
+    {
+      "stackId": 111,
+      "tagId": 1
+    },
+    {
+      "stackId": 111,
+      "tagId": 3
+    },
+    {
+      "stackId": 112,
+      "tagId": 1
+    },
+    {
+      "stackId": 112,
+      "tagId": 3
+    },
+    {
+      "stackId": 113,
+      "tagId": 1
+    },
+    {
+      "stackId": 113,
+      "tagId": 3
+    },
+    {
+      "stackId": 114,
+      "tagId": 1
+    },
+    {
+      "stackId": 114,
+      "tagId": 3
+    },
+    {
+      "stackId": 115,
+      "tagId": 1
+    },
+    {
+      "stackId": 115,
+      "tagId": 3
+    }
+  ],
+  "cardTags": [
+    {
+      "cardId": 10001,
+      "tagId": 1
+    },
+    {
+      "cardId": 10002,
+      "tagId": 1
+    },
+    {
+      "cardId": 10003,
+      "tagId": 1
+    },
+    {
+      "cardId": 10004,
+      "tagId": 1
+    },
+    {
+      "cardId": 10005,
+      "tagId": 1
+    },
+    {
+      "cardId": 10006,
+      "tagId": 1
+    },
+    {
+      "cardId": 10007,
+      "tagId": 1
+    },
+    {
+      "cardId": 10008,
+      "tagId": 1
+    },
+    {
+      "cardId": 10009,
+      "tagId": 1
+    },
+    {
+      "cardId": 10010,
+      "tagId": 1
+    },
+    {
+      "cardId": 10011,
+      "tagId": 1
+    },
+    {
+      "cardId": 10012,
+      "tagId": 1
+    },
+    {
+      "cardId": 10013,
+      "tagId": 1
+    },
+    {
+      "cardId": 10014,
+      "tagId": 1
+    },
+    {
+      "cardId": 10015,
+      "tagId": 1
+    },
+    {
+      "cardId": 10016,
+      "tagId": 1
+    },
+    {
+      "cardId": 10017,
+      "tagId": 1
+    },
+    {
+      "cardId": 10018,
+      "tagId": 1
+    },
+    {
+      "cardId": 10019,
+      "tagId": 1
+    },
+    {
+      "cardId": 10020,
+      "tagId": 1
+    },
+    {
+      "cardId": 10021,
+      "tagId": 1
+    },
+    {
+      "cardId": 10022,
+      "tagId": 1
+    },
+    {
+      "cardId": 10023,
+      "tagId": 1
+    },
+    {
+      "cardId": 10024,
+      "tagId": 1
+    },
+    {
+      "cardId": 10025,
+      "tagId": 1
+    },
+    {
+      "cardId": 10026,
+      "tagId": 1
+    },
+    {
+      "cardId": 10027,
+      "tagId": 1
+    },
+    {
+      "cardId": 10028,
+      "tagId": 1
+    },
+    {
+      "cardId": 10029,
+      "tagId": 1
+    },
+    {
+      "cardId": 10030,
+      "tagId": 1
+    },
+    {
+      "cardId": 10031,
+      "tagId": 1
+    },
+    {
+      "cardId": 10032,
+      "tagId": 1
+    },
+    {
+      "cardId": 10033,
+      "tagId": 1
+    },
+    {
+      "cardId": 10034,
+      "tagId": 1
+    },
+    {
+      "cardId": 10035,
+      "tagId": 1
+    },
+    {
+      "cardId": 10036,
+      "tagId": 1
+    },
+    {
+      "cardId": 10037,
+      "tagId": 1
+    },
+    {
+      "cardId": 10038,
+      "tagId": 1
+    },
+    {
+      "cardId": 10039,
+      "tagId": 1
+    },
+    {
+      "cardId": 10040,
+      "tagId": 1
+    },
+    {
+      "cardId": 10041,
+      "tagId": 1
+    },
+    {
+      "cardId": 10042,
+      "tagId": 1
+    },
+    {
+      "cardId": 10043,
+      "tagId": 1
+    },
+    {
+      "cardId": 10044,
+      "tagId": 1
+    },
+    {
+      "cardId": 10045,
+      "tagId": 1
+    },
+    {
+      "cardId": 10046,
+      "tagId": 1
+    },
+    {
+      "cardId": 10047,
+      "tagId": 1
+    },
+    {
+      "cardId": 10048,
+      "tagId": 1
+    },
+    {
+      "cardId": 10049,
+      "tagId": 1
+    },
+    {
+      "cardId": 10050,
+      "tagId": 1
+    },
+    {
+      "cardId": 10051,
+      "tagId": 1
+    },
+    {
+      "cardId": 10052,
+      "tagId": 1
+    },
+    {
+      "cardId": 10053,
+      "tagId": 1
+    },
+    {
+      "cardId": 10054,
+      "tagId": 1
+    },
+    {
+      "cardId": 10055,
+      "tagId": 1
+    },
+    {
+      "cardId": 10056,
+      "tagId": 1
+    },
+    {
+      "cardId": 10057,
+      "tagId": 1
+    },
+    {
+      "cardId": 10058,
+      "tagId": 1
+    },
+    {
+      "cardId": 10059,
+      "tagId": 1
+    },
+    {
+      "cardId": 10060,
+      "tagId": 1
+    },
+    {
+      "cardId": 10061,
+      "tagId": 1
+    },
+    {
+      "cardId": 10062,
+      "tagId": 1
+    },
+    {
+      "cardId": 10063,
+      "tagId": 1
+    },
+    {
+      "cardId": 10064,
+      "tagId": 1
+    },
+    {
+      "cardId": 10065,
+      "tagId": 1
+    },
+    {
+      "cardId": 10066,
+      "tagId": 1
+    },
+    {
+      "cardId": 10067,
+      "tagId": 1
+    },
+    {
+      "cardId": 10068,
+      "tagId": 1
+    },
+    {
+      "cardId": 10069,
+      "tagId": 1
+    },
+    {
+      "cardId": 10070,
+      "tagId": 1
+    },
+    {
+      "cardId": 10071,
+      "tagId": 1
+    },
+    {
+      "cardId": 10072,
+      "tagId": 1
+    },
+    {
+      "cardId": 10073,
+      "tagId": 1
+    },
+    {
+      "cardId": 10074,
+      "tagId": 1
+    },
+    {
+      "cardId": 10075,
+      "tagId": 1
+    },
+    {
+      "cardId": 10076,
+      "tagId": 1
+    },
+    {
+      "cardId": 10077,
+      "tagId": 1
+    },
+    {
+      "cardId": 10078,
+      "tagId": 1
+    },
+    {
+      "cardId": 10079,
+      "tagId": 1
+    },
+    {
+      "cardId": 10080,
+      "tagId": 1
+    },
+    {
+      "cardId": 10081,
+      "tagId": 1
+    },
+    {
+      "cardId": 10082,
+      "tagId": 1
+    },
+    {
+      "cardId": 10083,
+      "tagId": 1
+    },
+    {
+      "cardId": 10084,
+      "tagId": 1
+    },
+    {
+      "cardId": 10085,
+      "tagId": 1
+    },
+    {
+      "cardId": 10086,
+      "tagId": 1
+    },
+    {
+      "cardId": 10087,
+      "tagId": 1
+    },
+    {
+      "cardId": 10088,
+      "tagId": 1
+    },
+    {
+      "cardId": 10089,
+      "tagId": 1
+    },
+    {
+      "cardId": 10090,
+      "tagId": 1
+    }
+  ],
+  "tableBundles": [],
+  "randomTables": [],
+  "tableEntries": [],
+  "randomTableTags": [],
+  "sessions": [],
+  "sessionDeckRefs": [],
+  "sessionTableRefs": [],
+  "drawEvents": [],
+  "encounters": [],
+  "encounterCreatures": [],
+  "combatLog": [],
+  "npcs": [],
+  "npcTags": [],
+  "wikiCategories": [],
+  "wikiEntries": [],
+  "referenceTables": [],
+  "referenceRows": [],
+  "referenceTableTags": [],
+  "systemRules": [
+    {
+      "id": 101,
+      "title": "Deck of Worlds: Guía de Expansiones Cartográficas y de Género",
+      "gameSystem": "Story Engine",
+      "category": "Reglas de Mundo",
+      "content": "# Guía de Expansiones: Deck of Worlds\n\nLas cartas de expansión complementan la baraja básica de **Deck of Worlds** aportando biomas especializados, géneros temáticos y detonantes creativos:\n\n### 1. Expansiones Cartográficas (Ártico, Costas, Desiertos)\n- Cartas con división superior e inferior (**TOP_BOTTOM_SPLIT**).\n- Permiten sustituir o enriquecer el mazo de **Regiones** y **Puntos de Interés** con accidentes geográficos específicos (fiordos, dunas, tundras, arrecifes).\n- Al robar, puedes girar la carta 180° para alternar entre el accidente geográfico superior o inferior.\n\n### 2. Expansiones de Género (Fantasía, Horror, Ciencia Ficción)\n- Modulan el tono del microsetting hacia una atmósfera específica.\n- Introduce reinos mágicos, criaturas arcanas, portales, o bien anomalías espaciales, reactores y colonias estelares.\n\n### 3. Expansiones Creativas (Ganchos, Llaves de Cultura, Lore)\n- Cuentan con 4 pistas alrededor del marco (**FOUR_EDGE_CUES**).\n- Giran en 90° (Sur, Oeste, Norte, Este) para detonar costumbres locales, fragmentos del pasado o misiones de aventura urgentes.",
+      "isPinned": true,
+      "sortOrder": 1,
+      "sourcePack": "The Story Engine: Deck of Worlds (Expansiones)"
+    }
+  ],
+  "systemRuleTags": [],
+  "collections": [],
+  "collectionResourceRefs": [],
+  "tacticalMaps": [],
+  "tacticalTokens": [],
+  "tacticalMapPins": []
+}

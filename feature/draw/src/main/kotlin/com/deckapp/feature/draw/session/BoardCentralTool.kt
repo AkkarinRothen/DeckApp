@@ -162,6 +162,7 @@ val BoardCentralTool = SessionCentralConnector(
             onDiscardCard = { cardId -> viewModel.discardCard(cardId) },
             onRevealCard = { cardId -> viewModel.revealCard(cardId) },
             onCardClick = context.onCardClick,
+            onRotateCard = { cardId -> viewModel.rotateCard(cardId) },
             piledByDeck = uiState.pile.groupBy { it.stackId }.mapValues { it.value.size },
             sessionId = uiState.session?.id ?: 0L,
             isSidebarOpen = context.isSidebarOpen,

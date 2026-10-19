@@ -38,7 +38,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -76,12 +78,12 @@ fun CardViewScreen(
         selectedQuadrant = -1
     }
 
-    // Modo "Mostrar a jugador"
     var showPlayerView by remember { mutableStateOf(false) }
     if (showPlayerView && uiState.card != null) {
         PlayerViewOverlay(
             face = uiState.card!!.activeFace,
             cardTitle = uiState.card!!.title,
+            rotationZ = uiState.card!!.currentRotation.toFloat(),
             onDismiss = { showPlayerView = false }
         )
         return
@@ -99,7 +101,8 @@ fun CardViewScreen(
                 actions = {
                     uiState.card?.let { card ->
                         if (card.activeFace.contentMode == CardContentMode.TOP_BOTTOM_SPLIT ||
-                            card.activeFace.contentMode == CardContentMode.FOUR_EDGE_CUES) {
+                            card.activeFace.contentMode == CardContentMode.FOUR_EDGE_CUES ||
+                            card.activeFace.contentMode == CardContentMode.REVERSIBLE) {
                             IconButton(onClick = { showOptionPicker = true }) {
                                 Icon(Icons.Default.Casino, contentDescription = "Elegir o tirar una opción")
                             }
@@ -127,8 +130,13 @@ fun CardViewScreen(
                             }
                             if (!showCompass) {
                                 IconButton(onClick = { viewModel.rotate90() }) {
-                                    Icon(Icons.Default.Refresh, contentDescription = "Rotar orientación")
+                                    Icon(Icons.Default.Refresh, contentDescription = "Rotar orientación (90°)")
                                 }
+                            }
+                        } else if (card.activeFace.contentMode == CardContentMode.TOP_BOTTOM_SPLIT ||
+                            card.activeFace.contentMode == CardContentMode.REVERSIBLE) {
+                            IconButton(onClick = { viewModel.rotate90() }) {
+                                Icon(Icons.Default.Refresh, contentDescription = "Rotar orientación (180°)")
                             }
                         }
                         // Botón de Revelar/Ocultar (Sprint 26)
@@ -179,6 +187,16 @@ fun CardViewScreen(
                     label = "card-flip-rotation"
                 )
 
+                // Animación de rotación 2D sobre eje Z para cartas multi-orientación
+                val zRotation by animateFloatAsState(
+                    targetValue = card.currentRotation.toFloat(),
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioLowBouncy,
+                        stiffness = Spring.StiffnessLow
+                    ),
+                    label = "card-z-rotation"
+                )
+
                 when {
                     showAllFaces -> AllFacesView(
                         card = card,
@@ -226,30 +244,78 @@ fun CardViewScreen(
                                         modifier = Modifier.fillMaxSize(),
                                         label = "card-face-flip"
                                     ) { faceIndex ->
-                                        CardFaceImage(
-                                            face = card.faces.getOrElse(faceIndex) { card.faces.first() },
-                                            title = card.title
-                                        )
-                                    }
-                                } else {
-                                    CardFaceImage(face = face, title = card.title)
+                                    CardFaceImage(
+                                        face = card.faces.getOrElse(faceIndex) { card.faces.first() },
+                                        title = card.title,
+                                        rotationZ = zRotation
+                                    )
+                                }
+                            } else {
+                                CardFaceImage(face = face, title = card.title, rotationZ = zRotation)
 
-                                    if (face.contentMode == CardContentMode.TOP_BOTTOM_SPLIT) {
-                                        HorizontalDivider(
-                                            modifier = Modifier.align(Alignment.Center),
-                                            thickness = 2.dp,
-                                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                                        )
+                                // Chip flotante con la opción/orientación activa
+                                val orientationLabel = when (face.contentMode) {
+                                    CardContentMode.FOUR_EDGE_CUES -> when (((card.currentRotation % 360) + 360) % 360) {
+                                        0 -> "Sur (0°)"
+                                        90 -> "Oeste (90°)"
+                                        180 -> "Norte (180°)"
+                                        270 -> "Este (270°)"
+                                        else -> "Sur"
                                     }
-                                    if (face.contentMode == CardContentMode.FOUR_QUADRANT) {
-                                        FourQuadrantOverlay(
-                                            selectedQuadrant = selectedQuadrant,
-                                            onQuadrantSelected = { q ->
-                                                selectedQuadrant = if (selectedQuadrant == q) -1 else q
-                                            }
-                                        )
+                                    CardContentMode.TOP_BOTTOM_SPLIT -> if (card.currentRotation == 180) "Superior (180°)" else "Inferior (0°)"
+                                    CardContentMode.REVERSIBLE -> if (card.currentRotation == 180 || card.isReversed) "Invertida (180°)" else "Derecho (0°)"
+                                    else -> null
+                                }
+
+                                if (orientationLabel != null) {
+                                    Surface(
+                                        modifier = Modifier
+                                            .align(Alignment.TopCenter)
+                                            .padding(top = 10.dp),
+                                        shape = RoundedCornerShape(16.dp),
+                                        color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.92f),
+                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)),
+                                        shadowElevation = 4.dp
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Explore,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(14.dp)
+                                            )
+                                            Text(
+                                                text = orientationLabel + (card.activeZone?.text?.takeIf { it.isNotBlank() }?.let { " · ${it.take(24)}" } ?: ""),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onSurface,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        }
                                     }
                                 }
+
+                                if (face.contentMode == CardContentMode.TOP_BOTTOM_SPLIT) {
+                                    HorizontalDivider(
+                                        modifier = Modifier.align(Alignment.Center),
+                                        thickness = 2.dp,
+                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                                    )
+                                }
+                                if (face.contentMode == CardContentMode.FOUR_QUADRANT) {
+                                    FourQuadrantOverlay(
+                                        selectedQuadrant = selectedQuadrant,
+                                        onQuadrantSelected = { q ->
+                                            selectedQuadrant = if (selectedQuadrant == q) -1 else q
+                                        }
+                                    )
+                                }
+                            }
                             }
                         } else {
                             // Reverso de la carta (Face Down)
@@ -332,12 +398,17 @@ fun CardViewScreen(
     }
     if (showOptionPicker && uiState.card != null) {
         val card = uiState.card!!
-        val fourOptions = card.activeFace.contentMode == CardContentMode.FOUR_EDGE_CUES
-        val labels = if (fourOptions) listOf("Norte", "Este", "Sur", "Oeste")
-            else listOf("Superior", "Inferior")
+        val mode = card.activeFace.contentMode
+        val fourOptions = mode == CardContentMode.FOUR_EDGE_CUES
+        val labels = when (mode) {
+            CardContentMode.FOUR_EDGE_CUES -> listOf("Sur", "Oeste", "Norte", "Este")
+            CardContentMode.TOP_BOTTOM_SPLIT -> listOf("Inferior", "Superior")
+            CardContentMode.REVERSIBLE -> listOf("Derecho", "Invertido")
+            else -> listOf("Opción 1", "Opción 2")
+        }
         fun choose(index: Int) {
             viewModel.setRotation(if (fourOptions) index * 90 else index * 180)
-            showCompass = fourOptions
+            showCompass = false
             showOptionPicker = false
         }
         AlertDialog(
@@ -345,7 +416,7 @@ fun CardViewScreen(
             title = { Text("Opciones de la carta") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Elegí una pista o resolvela al azar. La imagen conserva el texto original de cada zona.")
+                    Text("Elegí una pista o resolvela al azar con dados. La imagen girará con animación suave a la orientación elegida.")
                     labels.forEachIndexed { index, label ->
                         OutlinedButton(onClick = { choose(index) }, modifier = Modifier.fillMaxWidth()) {
                             val text = card.activeFace.zones.getOrNull(index)?.text.orEmpty()
@@ -510,7 +581,12 @@ private fun CardNotesBottomSheet(
  * Tocar en cualquier lugar cierra el modo.
  */
 @Composable
-private fun PlayerViewOverlay(face: CardFace, cardTitle: String, onDismiss: () -> Unit) {
+private fun PlayerViewOverlay(
+    face: CardFace,
+    cardTitle: String,
+    rotationZ: Float = 0f,
+    onDismiss: () -> Unit
+) {
     val context = LocalContext.current
     val window = (context as? Activity)?.window
 
@@ -537,7 +613,9 @@ private fun PlayerViewOverlay(face: CardFace, cardTitle: String, onDismiss: () -
             AsyncImage(
                 model = com.deckapp.core.ui.util.toCoilModel(imagePath),
                 contentDescription = cardTitle,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer { this.rotationZ = rotationZ },
                 contentScale = ContentScale.Fit
             )
         } else {
@@ -697,14 +775,14 @@ private fun FourEdgeCompassView(
                 modifier = Modifier.weight(1f).fillMaxHeight()
             )
 
-            // Imagen central
+            // Imagen central con rotación activa
             Box(
                 modifier = Modifier
                     .weight(2f)
                     .fillMaxHeight()
                     .clip(RoundedCornerShape(12.dp))
             ) {
-                CardFaceImage(face = face, title = "")
+                CardFaceImage(face = face, title = "", rotationZ = activeRotation.toFloat())
             }
 
             // Este
@@ -773,21 +851,26 @@ private fun CompassZoneChip(
 // Subcomponentes privados
 // ──────────────────────────────────────────────────────────────────────────────
 
-/** Imagen de una cara de la carta. Placeholder con iniciales si no hay imagen. */
+/** Imagen de una cara de la carta con soporte para rotación física. Placeholder con iniciales si no hay imagen. */
 @Composable
-private fun CardFaceImage(face: CardFace, title: String) {
+private fun CardFaceImage(
+    face: CardFace,
+    title: String,
+    rotationZ: Float = 0f,
+    modifier: Modifier = Modifier.fillMaxSize()
+) {
     val imagePath = face.imagePath
     if (imagePath != null) {
         AsyncImage(
             model = com.deckapp.core.ui.util.toCoilModel(imagePath),
             contentDescription = title,
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier.graphicsLayer { this.rotationZ = rotationZ },
             contentScale = ContentScale.Fit
         )
     } else {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
+            modifier = modifier
+                .graphicsLayer { this.rotationZ = rotationZ }
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
@@ -903,7 +986,7 @@ private fun TopBottomZonePanel(zones: List<ContentZone>, selectedIndex: Int) {
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            val labels = listOf("Superior", "Inferior")
+            val labels = listOf("Inferior", "Superior")
             zones.take(2).forEachIndexed { i, zone ->
                     Surface(
                         modifier = Modifier.weight(1f),
@@ -977,8 +1060,8 @@ private fun GenericZonePanel(
             // FOUR_EDGE_CUES: etiqueta de dirección activa
             if (contentMode == CardContentMode.FOUR_EDGE_CUES) {
                 Text(
-                    text = when (currentRotation) {
-                        0 -> "Norte"; 90 -> "Este"; 180 -> "Sur"; else -> "Oeste"
+                    text = when (((currentRotation % 360) + 360) % 360) {
+                        0 -> "Sur"; 90 -> "Oeste"; 180 -> "Norte"; else -> "Este"
                     },
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.primary,

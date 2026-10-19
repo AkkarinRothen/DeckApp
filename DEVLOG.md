@@ -1,3 +1,70 @@
+### Incorporación de las 13 Expansiones de The Story Engine y Deck of Worlds (19 de octubre de 2026)
+
+**Categoría:** `FEATURE / STORY ENGINE / EXPANSIONS / PACKAGING / OCR PIPELINE / PARITY`
+
+- **Extracción, Rasterización y OCR de Alta Precisión para 13 Expansiones Oficiales:**
+  - Se procesaron las 13 carpetas y PDFs de expansiones originales (Print and Play HQ Cards) mediante PyMuPDF y RapidOCR ONNX.
+  - Se identificó la alternancia de páginas par/impar (páginas impares como frentes de carta con pistas, páginas pares como reversos oficiales temáticos), garantizando que las cartas se extraigan con sus reversos auténticos.
+- **Empaquetado en 2 Paquetes Maestros Oficiales (`FullBackupDto`):**
+  - **Paquete 1: `story_engine_deck_of_worlds_expansions.json` (9 Mazos, 90 Cartas, 90 Caras, 1 Regla de Mundo):**
+    - *Expansiones Cartográficas (`TOP_BOTTOM_SPLIT`)*: Ártico (10 cartas), Costas (10 cartas), Desiertos (10 cartas).
+    - *Expansiones Creativas (`FOUR_EDGE_CUES`)*: Ganchos de Aventura (10 cartas), Llaves de Cultura (10 cartas), Fragmentos de Lore (10 cartas).
+    - *Expansiones de Género (`TOP_BOTTOM_SPLIT`)*: Fantasía (10 cartas), Horror (10 cartas), Ciencia Ficción (10 cartas).
+    - Incluye regla de compendio: *Deck of Worlds: Guía de Expansiones Cartográficas y de Género*.
+  - **Paquete 2: `new_story_engine.json` (4 Mazos, 50 Cartas, 50 Caras, 1 Regla de Narrativa):**
+    - *Potenciadores / Boosters* (20 cartas, `TOP_BOTTOM_SPLIT`).
+    - *Trasfondos / Backstories* (10 cartas, `FOUR_EDGE_CUES`).
+    - *Misterios / Mystery* (10 cartas, `TOP_BOTTOM_SPLIT`).
+    - *Objetos Únicos / Unique Items* (10 cartas, `FOUR_EDGE_CUES`).
+    - Incluye regla de compendio: *New Story Engine: Cómo Funciona el Motor de Historias*.
+- **Limpieza de OCR y Traducción al Español:**
+  - Filtrado de marcas de agua, copyright, URLs y numeraciones marginales.
+  - Normalización de las pistas narrativas en `zonesJson` con traducciones al español de biomas, sitios, roles y ganchos.
+  - Corrección arquitectónica: conformación estricta de `zonesJson` a `List<ContentZone>` (`[{"text": "..."}]`) para asegurar la compatibilidad con el selector de brújula/dados y la rotación física en Compose.
+- **Sincronización en ViewModels y Mappers:**
+  - Actualizados `TablesViewModel`, `SessionViewModel`, `ReferenceTabViewModel`, `ReferenceListViewModel` y `TablesTab` para nombres de visualización limpios.
+  - En `ReferenceRepositoryImpl`, protección de estados activos (`preserveStoryCards`) extendida a ambos paquetes de expansión para no sobreescribir cartas en juego de los usuarios.
+- **Paridad con Desktop:**
+  - Actualizado `docs/planning/DESKTOP_PARITY_STORY_ENGINE.md` con la especificación completa de ambos paquetes maestros.
+
+---
+
+### Configuración Story Engine: Deck of Worlds — Traducción al Español (704 Pistas) y Orientación Activa al Borde Inferior (19 de octubre de 2026)
+
+**Categoría:** `FEATURE / STORY ENGINE / LOCALIZATION / UX / PARITY`
+
+- **Traducción Íntegra al Español de las 240 Cartas y 704 Zonas Narrativas:**
+  - Se implementó un pipeline de extracción OCR mediante red neuronal (RapidOCR ONNX) para recuperar y alinear con precisión las opciones impresas en cada cara de carta.
+  - Se tradujeron al español el 100% de las pistas y ganchos narrativos (`zonesJson`) en los 6 sub-mazos oficiales:
+    - *Regiones* (32 cartas, 32 biomas/terrenos en español).
+    - *Puntos de Interés* (48 cartas, 96 estructuras y sitios geográficos).
+    - *Nombres y Apelativos* (48 cartas, 192 epítetos, prefijos y sufijos).
+    - *Orígenes e Historia* (32 cartas, 128 mitos de creación, catástrofes y hechos históricos).
+    - *Atributos y Cultura* (48 cartas, 192 rasgos culturales, anomalías y costumbres locales).
+    - *Acontecimientos y Ganchos* (32 cartas, 64 crisis inminentes, dilemas y detonantes de aventura).
+  - Títulos enriquecidos temáticamente en formato: `Categoría #XX: [Pistas en español]` (ej: *Región #01: Bosque(s)*, *Punto de Interés #01: Taller / Árbol ancestral*, *Acontecimiento #01: Bajo asedio / Fauna anómala*).
+- **Convención de Orientación Activa al Borde Inferior (Sur / 0°):**
+  - La opción activa y seleccionada de cada carta queda orientada en posición de lectura derecha en el **borde inferior** (Sur / Abajo), facilitando la lectura directa en la mano del jugador y tapete de juego.
+  - En cartas de 4 opciones (`FOUR_EDGE_CUES`):
+    - `0°`: Sur (lectura derecha en borde inferior, badge `S`).
+    - `90°`: Oeste (rotada 90° al borde inferior, badge `O`).
+    - `180°`: Norte (rotada 180° al borde inferior, badge `N`).
+    - `270°`: Este (rotada 270° al borde inferior, badge `E`).
+  - En cartas de 2 opciones (`TOP_BOTTOM_SPLIT`):
+    - `0°`: Opción Inferior (badge `1`).
+    - `180°`: Opción Superior rotada al borde inferior (badge `2`).
+  - En cartas centradas (`IMAGE_WITH_TEXT`):
+    - `0°`: Opción central.
+- **Sincronización en UI, Modelos y Base de Datos:**
+  - Actualizado `CardViewScreen.kt`: chips de estado flotante, etiquetas del selector radial de brújula (`Sur`, `Oeste`, `Norte`, `Este` e `Inferior`, `Superior`), y paneles de zonas (`GenericZonePanel`, `TopBottomZonePanel`).
+  - Actualizado `CardItem.kt`: badges de orientación en cartas de mano/mesa ajustados a `S`, `O`, `N`, `E` y `1`, `2`.
+  - Actualizado `CardEditorScreen.kt`: nomenclatura de zonas sincronizada con los grados y orientaciones cardinales.
+  - Actualizado `ReferenceRepositoryImpl.kt`: soporte para actualización reactiva de títulos y zonas pobladas al reinstalar o refrescar el paquete de inicio sin perder estados de juego.
+- **Paridad de Escritorio (`RULE[user_global]`):**
+  - Actualizado `docs/planning/DESKTOP_PARITY_STORY_ENGINE.md` documentando la arquitectura de datos, convenciones cardinales al borde inferior y rebalanceo de sub-mazos para réplica exacta en TDAPP-desktop.
+
+---
+
 ### Mejoras de Bloques de Mazos en Mesa, Iconografía Vectorial y Validación Story Engine (18 de octubre de 2026)
 
 **Categoría:** `FEATURE / UX / VECTOR ASSETS / HARDWARE QA`
@@ -2448,3 +2515,28 @@ opcional de auto-detección cuando el usuario no conoce el layout del PDF.
 
 **INTEGRATION — Build y Estabilidad**
 - **BUILD SUCCESSFUL** — APK generado y verificado (v33). App estable en navegación y gestión de recursos.
+
+---
+
+### Sprint 19: Rotación Física Dinámica y Selección de Pistas en Cartas Multi-Opción (19 de octubre de 2026)
+
+**PROBLEM — Cartas de Engine Deck / Deck of Worlds no rotaban**
+- Al robar cartas multi-opción (`FOUR_EDGE_CUES`, `TOP_BOTTOM_SPLIT`, `REVERSIBLE`), la rotación inicial siempre se inicializaba en 0° fija.
+- En la interfaz gráfica (`CardItem`, `CardThumbnail`, `CardViewScreen`), los componentes `AsyncImage` no aplicaban transformación de rotación física en eje Z (`rotationZ`), por lo que visualmente la carta permanecía inmutable aun cambiando la opción en base de datos.
+- Falta de identificadores claros (badges/chips) de la opción o punto cardinal activo en la mano y mesa, y ausencia de control de giro rápido de 1 toque.
+
+**SOLUTION — Robo con Orientación Aleatoria**
+- Modificado `DrawCardUseCase`: al robar una carta con `FOUR_EDGE_CUES`, se elige al azar entre 0°, 90°, 180° y 270°; para `TOP_BOTTOM_SPLIT` y `REVERSIBLE`, se elige al azar entre 0° y 180°. Se persiste atómicamente en Room via `UpdateCardStateUseCase(rotation = randomRotation)`.
+
+**SOLUTION — Renderizado y Animación de Rotación Física**
+- `CardItem`: implementada rotación animada suave con `animateFloatAsState` y `graphicsLayer { rotationZ = rotationAngle }`. Añadido badge de orientación activa (`N`, `E`, `S`, `O` o `1`, `2`) y botón de giro rápido de 1 toque (`Icons.Default.Refresh`) directamente sobre la carta en mano y mesa.
+- `CardThumbnail`: agregada rotación Z y mini-chip en grillas y listas.
+- `CardViewScreen`: animada rotación Z de imagen completa con `animateFloatAsState`, chip flotante en la parte superior con orientación y texto de pista, y selector/tirada con dados (d2/d4) que orienta la carta manteniendo visible la ilustración.
+- `SessionDeckDelegate` y `SessionViewModel`: implementada función `rotateCard(cardId)` que cicla la orientación según el `contentMode` y emite evento `DrawAction.ROTATE`.
+- Conectado el pipeline de eventos en `BoardCentralTool`, `SessionBoardTab`, `SessionBoardPagerContent`, `BoardItemUiContext`, `BoardBlockCard`, `BoardBlockCardAux`, `DeckBlockContent` y `DeckWorkspace`.
+
+**INTEGRATION — Build, Paridad y Dispositivo**
+- Sincronizado `MicrosettingDelegate` con `cardRepository.updateCardRotation` para mantener consistencia entre cluster y visor.
+- Pruebas unitarias de `:core:domain`, `:feature:draw` y `:feature:deck` ejecutadas con éxito.
+- Compilado APK Release (`app-release.apk`) e instalado exitosamente en el dispositivo físico Motorola One Fusion (`ZE222B5GXX`).
+- Actualizada documentación de paridad de escritorio en `docs/planning/DESKTOP_PARITY_STORY_ENGINE.md`.
