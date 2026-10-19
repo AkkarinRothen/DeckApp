@@ -35,5 +35,7 @@ data class BoardSessionMemory(
     val focusedSceneId: Long? = null,
     val inspiration: List<BoardInspiration> = emptyList(),
     val pinnedTableResults: Map<Long, TableRollResult> = emptyMap(),
-    val choirGuide: ChoirGuideMemory = ChoirGuideMemory()
+    val choirGuide: ChoirGuideMemory = ChoirGuideMemory(),
+    val playmatSurfaces: List<PlaymatSurface> = emptyList(),
+    val activePlaymatSurfaceId: String? = null
 )

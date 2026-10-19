@@ -409,6 +409,7 @@ fun SessionScreen(
                         SessionViewMode.TACTICAL -> "tactical"
                         SessionViewMode.BOARD -> "board"
                         SessionViewMode.MYTHIC_LOG -> "mythic_log"
+                        SessionViewMode.PLAYMAT -> "playmat"
                     }
                     val centralTool = centralTools.find { it.id == toolId }
                     if (centralTool != null) {
@@ -646,6 +647,30 @@ fun SessionScreen(
                                 } else {
                                     com.deckapp.feature.draw.session.BoardCentralTool.content(ctx)
                                 }
+                            }
+                            SessionViewMode.PLAYMAT -> {
+                                com.deckapp.feature.draw.components.playmat.PlaymatCanvasView(
+                                    uiState = uiState,
+                                    onPlaceCardOnPlaymat = { cardId, x, y -> viewModel.playmatDelegate.placeCardOnPlaymat(cardId, x, y) },
+                                    onMoveCard = { cardId, x, y -> viewModel.playmatDelegate.moveCard(cardId, x, y) },
+                                    onRotateCard = { cardId, delta -> viewModel.playmatDelegate.rotateCard(cardId, delta) },
+                                    onFlipCard = { cardId -> viewModel.playmatDelegate.flipCard(cardId) },
+                                    onReturnToHand = { cardId -> viewModel.playmatDelegate.returnCardToHand(cardId) },
+                                    onDiscardCard = { cardId -> viewModel.playmatDelegate.discardCard(cardId) },
+                                    onSelectCard = { cardId -> viewModel.playmatDelegate.selectCard(cardId) },
+                                    onToggleHandTray = { viewModel.playmatDelegate.toggleHandTray() },
+                                    onSelectSurface = { surfaceId -> viewModel.playmatDelegate.switchSurface(surfaceId) },
+                                    onCreateSurface = { name, theme, template -> viewModel.playmatDelegate.createSurface(name, theme, template) },
+                                    onDeleteSurface = { surfaceId -> viewModel.playmatDelegate.deleteSurface(surfaceId) },
+                                    onSetTheme = { theme -> viewModel.playmatDelegate.setSurfaceTheme(uiState.activePlaymatSurface.id, theme) },
+                                    onSetTemplate = { template -> viewModel.playmatDelegate.setSurfaceTemplate(uiState.activePlaymatSurface.id, template) },
+                                    onUpdateCamera = { x, y, zoom -> viewModel.playmatDelegate.updateCamera(x, y, zoom) },
+                                    onQuickDraw = { stackId, x, y -> viewModel.playmatDelegate.quickDrawToPlaymat(stackId, x, y) },
+                                    onAddStickyNote = { text, x, y -> viewModel.playmatDelegate.addStickyNote(text, x, y) },
+                                    onDeleteStickyNote = { noteId -> viewModel.playmatDelegate.deleteStickyNote(noteId) },
+                                    onCardDetailClick = { cardId -> onCardClick(cardId, uiState.sessionId) },
+                                    modifier = Modifier.fillMaxSize()
+                                )
                             }
                         }
                     }

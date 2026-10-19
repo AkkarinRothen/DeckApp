@@ -129,6 +129,7 @@ fun SessionTopBar(
                     ) {
                         val (icon, label) = when (mainViewMode) {
                             SessionViewMode.BOARD -> DeckIcons.Board to "Mesa"
+                            SessionViewMode.PLAYMAT -> Icons.Default.DashboardCustomize to "Tapete"
                             SessionViewMode.TACTICAL -> DeckIcons.Tactical to "Táctico"
                             SessionViewMode.MAP -> DeckIcons.Map to "Mapa"
                             SessionViewMode.MYTHIC_LOG -> DeckIcons.Journal to "Mythic"
@@ -152,6 +153,17 @@ fun SessionTopBar(
                             onClick = {
                                 showModeMenu = false
                                 onSetMainViewMode(SessionViewMode.BOARD)
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Tapete de Cartas (Playmat)") },
+                            leadingIcon = { Icon(Icons.Default.DashboardCustomize, contentDescription = null) },
+                            trailingIcon = if (mainViewMode == SessionViewMode.PLAYMAT) {
+                                { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary) }
+                            } else null,
+                            onClick = {
+                                showModeMenu = false
+                                onSetMainViewMode(SessionViewMode.PLAYMAT)
                             }
                         )
                         DropdownMenuItem(
@@ -192,7 +204,7 @@ fun SessionTopBar(
                     }
                 }
             } else {
-                // Switcher de 4 iconos para pantallas amplias y horizontal
+                // Switcher de 5 iconos para pantallas amplias y horizontal
                 Row(
                     modifier = Modifier
                         .padding(end = 4.dp)
@@ -210,6 +222,14 @@ fun SessionTopBar(
                             contentColor = if (mainViewMode == SessionViewMode.BOARD) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     ) { Icon(DeckIcons.Board, contentDescription = "Mesa de Juego", modifier = Modifier.size(18.dp)) }
+
+                    IconButton(
+                        onClick = { onSetMainViewMode(SessionViewMode.PLAYMAT) },
+                        modifier = Modifier.size(32.dp),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            contentColor = if (mainViewMode == SessionViewMode.PLAYMAT) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    ) { Icon(Icons.Default.DashboardCustomize, contentDescription = "Tapete de Cartas", modifier = Modifier.size(18.dp)) }
 
                     IconButton(
                         onClick = { onSetMainViewMode(SessionViewMode.TACTICAL) },

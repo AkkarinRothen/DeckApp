@@ -1,3 +1,35 @@
+### Vista Principal de Tapete de Cartas Espacial 2D — Playmat (19 de octubre de 2026)
+
+**Categoría:** `FEATURE / PLAYMAT / WORKSPACE / 2D CANVAS / UX / STORY ENGINE / SESSION`
+
+- **Nueva Vista Central Dedicada (`SessionViewMode.PLAYMAT`):**
+  - Añadido el modo "Tapete" al selector de vistas principales en `SessionTopBar` (junto a *Mesa*, *Táctico*, *Mapa* y *Mythic*), disponible tanto en el menú desplegable móvil como en el conmutador de iconos en pantallas anchas.
+  - Implementado `PlaymatCanvasView` con Pan & Zoom continuo 2D multitáctil (pellizco con 2 dedos y arrastre de fondo) con límites de escala ergonómicos (0.4x a 2.5x).
+- **Mesa de Juego 2D Interactiva con Arrastre y Orientación Física:**
+  - Las cartas se colocan sobre la superficie con coordenadas libres `(x, y)`, elevación, sombra y rotación (`rotationDegrees: 0°, 90°, 180°, 270°`).
+  - Detección táctil individual: arrastre directo de cartas sobre el lienzo con actualización reactiva en `SessionUiState`.
+  - Soporte de cara visible (`isFaceUp`): renderizado del arte/zonas frontales o dorso temático oficial de mazo.
+- **Menú Radial Contextual (`PlaymatRadialMenu`):**
+  - Al tocar cualquier carta en el tapete, se despliega una rueda de micro-acciones flotante:
+    - 🔄 **Girar 90°**: Rota la orientación activa al siguiente borde.
+    - 👁️ **Voltear**: Alterna entre frente y dorso de la carta.
+    - 📥 **Mandar a Mano**: Devuelve la carta a la reserva privada del jugador.
+    - 🗑️ **Descartar**: Envía la carta a la pila de descarte con feedback visual.
+    - 🔍 **Detalle**: Abre el visor ampliado a pantalla completa.
+- **Bandeja Inferior Desplegable de la Mano (`PlaymatHandTray`):**
+  - Dock inferior acoplable que filtra automáticamente las cartas que están en mano y aún no han sido bajadas a la mesa.
+  - Permite desplegar cartas al tapete mediante el botón "A la Mesa" con auto-posicionamiento en el centro de visión actual.
+- **Barra de Herramientas Flotante (`PlaymatToolbar`):**
+  - Selector y gestor de múltiples mesas/superficies por sesión (`PlaymatSurface`).
+  - Selector de temas visuales de fondo: *Fieltro Verde*, *Fieltro Rojo*, *Madera Rústica*, *Pergamino Antiguo* y *Dark Mode Minimal* con microrejilla de puntos.
+  - Selector de plantillas y moldes temáticos (`PlaymatTemplateType`): *Mesa Libre*, *Deck of Worlds: Microsetting (1+5)* con ranuras cardinales punteadas (*Región, Hito, Nombres, Orígenes, Atributos, Crisis*), *Story Engine: Premisa (4 cartas)*, *Tarot (3 cartas)* y *Oráculo en Cruz*.
+  - Acciones rápidas: Notas adhesivas (*Sticky Notes*), centrado de cámara y robo directo al tapete (*Quick Draw*).
+- **Delegado y Persistencia Reactiva (`PlaymatDelegate`):**
+  - Lógica desacoplada en `PlaymatDelegate` con integración a `BoardSessionMemory` en `SettingsRepository`, garantizando guardado persistente entre sesiones sin necesidad de migraciones destructivas de base de datos.
+  - Cobertura completa de pruebas unitarias en `PlaymatDelegateTest` (100% aprobadas).
+
+---
+
 ### Guía Interactiva y Asistente de Procedimiento de Story Engine y Deck of Worlds en Sesión (19 de octubre de 2026)
 
 **Categoría:** `FEATURE / STORY ENGINE / SESSION / UX / WORKFLOW / PARITY`

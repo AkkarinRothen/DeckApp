@@ -149,15 +149,24 @@ data class SessionUiState(
     val editingMicrosettingBoardItemId: Long? = null,
     val showStoryEngineGuide: Boolean = false,
     val storyEngineGuideTab: com.deckapp.feature.draw.model.StoryEngineGuideTab = com.deckapp.feature.draw.model.StoryEngineGuideTab.DECK_OF_WORLDS,
-    val storyEngineGuideStepIndex: Int = 0
-)
+    val storyEngineGuideStepIndex: Int = 0,
+    val selectedPlaymatCardId: Long? = null,
+    val showPlaymatHandTray: Boolean = true
+) {
+    val activePlaymatSurface: com.deckapp.core.model.PlaymatSurface
+        get() {
+            val surfaces = boardMemory.playmatSurfaces
+            if (surfaces.isEmpty()) return com.deckapp.core.model.PlaymatSurface()
+            return surfaces.find { it.id == boardMemory.activePlaymatSurfaceId } ?: surfaces.first()
+        }
+}
 
 enum class SidebarTool {
     NONE, TABLES, DECKS, COMBAT, NOTES, JOURNAL, MYTHIC_CONTEXT, WIKI, NPCS, PLAN, REFERENCES
 }
 
 enum class SessionViewMode {
-    BOARD, MAP, TACTICAL, MYTHIC_LOG
+    BOARD, MAP, TACTICAL, MYTHIC_LOG, PLAYMAT
 }
 
 enum class SessionBoardTemplatePreset {
@@ -343,6 +352,14 @@ class SessionViewModel @Inject constructor(
         sessionRepository = sessionRepository,
         deckDelegate = deckDelegate,
         openMicrosettingBuilder = { openMicrosettingBuilder() }
+    )
+
+    val playmatDelegate = com.deckapp.feature.draw.delegates.PlaymatDelegate(
+        sessionId = sessionId,
+        _uiState = _uiState,
+        scope = viewModelScope,
+        updateBoardMemory = { updateBoardMemory(it) },
+        deckDelegate = deckDelegate
     )
 
     // Un flujo que emite la hora actual cada minuto para cálculos reactivos
@@ -643,6 +660,9 @@ class SessionViewModel @Inject constructor(
     }
 
     fun setMainViewMode(mode: SessionViewMode) {
+        if (mode == SessionViewMode.PLAYMAT) {
+            playmatDelegate.ensureInitialSurface()
+        }
         _uiState.update { it.copy(mainViewMode = mode) }
     }
 
