@@ -5,6 +5,7 @@ import com.deckapp.core.domain.repository.SessionRepository
 import com.deckapp.core.domain.usecase.*
 import com.deckapp.core.model.*
 import com.deckapp.feature.draw.SessionUiState
+import com.deckapp.feature.draw.model.state.DecksUiState
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,9 +37,11 @@ class SessionDeckDelegateTest {
     private val uiState = MutableStateFlow(
         SessionUiState(
             sessionId = sessionId,
-            selectedDeckId = deckId,
-            deckRefs = listOf(SessionDeckRef(sessionId, deckId)),
-            deckNames = mapOf(deckId to "Mazo de Pruebas")
+            decks = DecksUiState(
+                selectedDeckId = deckId,
+                deckRefs = listOf(SessionDeckRef(sessionId, deckId)),
+                deckNames = mapOf(deckId to "Mazo de Pruebas")
+            )
         )
     )
 
@@ -49,9 +52,11 @@ class SessionDeckDelegateTest {
         peekCardIdValue = null
         uiState.value = SessionUiState(
             sessionId = sessionId,
-            selectedDeckId = deckId,
-            deckRefs = listOf(SessionDeckRef(sessionId, deckId)),
-            deckNames = mapOf(deckId to "Mazo de Pruebas")
+            decks = DecksUiState(
+                selectedDeckId = deckId,
+                deckRefs = listOf(SessionDeckRef(sessionId, deckId)),
+                deckNames = mapOf(deckId to "Mazo de Pruebas")
+            )
         )
         clearMocks(drawCardUseCase, discardCardUseCase, resetDeckUseCase, shuffleDeckUseCase, updateCardStateUseCase, undoLastActionUseCase)
         delegate = SessionDeckDelegate(
@@ -159,5 +164,26 @@ class SessionDeckDelegateTest {
 
         coVerify { resetDeckUseCase(sessionId, deckId) }
         assertEquals("\"Mazo de Pruebas\" reseteado", uiState.value.snackbarMessage)
+    }
+
+    @Test
+    fun `decksUiState encapsulation and synchronization with legacy getters`() {
+        // 1. Verificar estado inicial por getters y por objeto sub-estado
+        assertEquals(deckId, uiState.value.decks.selectedDeckId)
+        assertEquals(deckId, uiState.value.selectedDeckId)
+        assertEquals(1, uiState.value.decks.deckRefs.size)
+        assertEquals(1, uiState.value.deckRefs.size)
+
+        // 2. Modificar con helper updateDeckState
+        delegate.setLastInteractedDeck(999L)
+        assertEquals(999L, uiState.value.decks.selectedDeckId)
+        assertEquals(999L, uiState.value.selectedDeckId)
+
+        // 3. Modificar lista de mano
+        val dummyCard = Card(id = 555L, stackId = 999L, originDeckId = 999L, title = "Carta Test", faces = listOf(CardFace(name = "Frente")))
+        delegate.updateDeckState { it.copy(hand = listOf(dummyCard)) }
+        assertEquals(1, uiState.value.decks.hand.size)
+        assertEquals(1, uiState.value.hand.size)
+        assertEquals(555L, uiState.value.hand.first().id)
     }
 }

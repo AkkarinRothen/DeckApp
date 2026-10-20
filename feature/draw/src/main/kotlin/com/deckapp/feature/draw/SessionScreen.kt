@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.deckapp.feature.draw.components.PlanTab
+import com.deckapp.feature.draw.model.state.toActions
 import com.deckapp.feature.draw.components.WikiTab
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -649,59 +650,22 @@ fun SessionScreen(
                                 }
                             }
                             SessionViewMode.PLAYMAT -> {
+                                val playmatActions = remember(viewModel.playmatDelegate, uiState.sessionId) {
+                                    viewModel.playmatDelegate.toActions(
+                                        activeSurfaceIdProvider = { viewModel.uiState.value.activePlaymatSurface.id },
+                                        onCardDetailClick = { cardId -> onCardClick(cardId, uiState.sessionId) },
+                                        onSendCardToTacticalMap = { card, isToken ->
+                                            if (isToken) {
+                                                viewModel.tacticalMapDelegate.addTokenFromCard(card)
+                                            } else {
+                                                viewModel.tacticalMapDelegate.addPinForCard(card)
+                                            }
+                                        }
+                                    )
+                                }
                                 com.deckapp.feature.draw.components.playmat.PlaymatCanvasView(
                                     uiState = uiState,
-                                    onPlaceCardOnPlaymat = { cardId, x, y -> viewModel.playmatDelegate.placeCardOnPlaymat(cardId, x, y) },
-                                    onMoveCard = { cardId, x, y, slotTag -> viewModel.playmatDelegate.moveCard(cardId, x, y, slotTag) },
-                                    onRotateCard = { cardId, delta -> viewModel.playmatDelegate.rotateCard(cardId, delta) },
-                                    onFlipCard = { cardId -> viewModel.playmatDelegate.flipCard(cardId) },
-                                    onReturnToHand = { cardId -> viewModel.playmatDelegate.returnCardToHand(cardId) },
-                                    onDiscardCard = { cardId -> viewModel.playmatDelegate.discardCard(cardId) },
-                                    onSelectCard = { cardId -> viewModel.playmatDelegate.selectCard(cardId) },
-                                    onToggleHandTray = { viewModel.playmatDelegate.toggleHandTray() },
-                                    onSelectSurface = { surfaceId -> viewModel.playmatDelegate.switchSurface(surfaceId) },
-                                    onCreateSurface = { name, theme, template -> viewModel.playmatDelegate.createSurface(name, theme, template) },
-                                    onDeleteSurface = { surfaceId -> viewModel.playmatDelegate.deleteSurface(surfaceId) },
-                                    onSetTheme = { theme -> viewModel.playmatDelegate.setSurfaceTheme(uiState.activePlaymatSurface.id, theme) },
-                                    onSetTemplate = { template -> viewModel.playmatDelegate.setSurfaceTemplate(uiState.activePlaymatSurface.id, template) },
-                                    onUpdateCamera = { x, y, zoom -> viewModel.playmatDelegate.updateCamera(x, y, zoom) },
-                                    onQuickDraw = { stackId, x, y -> viewModel.playmatDelegate.quickDrawToPlaymat(stackId, x, y) },
-                                    onAddStickyNote = { text, x, y -> viewModel.playmatDelegate.addStickyNote(text, x, y) },
-                                    onMoveStickyNote = { noteId, x, y -> viewModel.playmatDelegate.moveStickyNote(noteId, x, y) },
-                                    onDeleteStickyNote = { noteId -> viewModel.playmatDelegate.deleteStickyNote(noteId) },
-                                    onCardDetailClick = { cardId -> onCardClick(cardId, uiState.sessionId) },
-                                    onSendCardToTacticalMap = { card, isToken ->
-                                        if (isToken) {
-                                            viewModel.tacticalMapDelegate.addTokenFromCard(card)
-                                        } else {
-                                            viewModel.tacticalMapDelegate.addPinForCard(card)
-                                        }
-                                    },
-                                    onMoveDeck = { stackId, x, y -> viewModel.playmatDelegate.moveDeck(stackId, x, y) },
-                                    onMoveDiscardPile = { stackId, x, y -> viewModel.playmatDelegate.moveDiscardPile(stackId, x, y) },
-                                    onDrawFromDeck = { stackId, x, y, slotTag -> viewModel.playmatDelegate.drawFromPhysicalDeck(stackId, x, y, true, slotTag) },
-                                    onReshuffleDeck = { stackId -> viewModel.playmatDelegate.reshuffleDeck(stackId) },
-                                    onAddTableChip = { tableId, name, resultText, x, y -> viewModel.playmatDelegate.addTableChip(tableId, name, resultText, x, y) },
-                                    onCreateConnection = { fromId, toId -> viewModel.playmatDelegate.createConnection(fromId, toId) },
-                                    onUpdateConnection = { id, label, color -> viewModel.playmatDelegate.updateConnection(id, label, color) },
-                                    onRemoveConnection = { id -> viewModel.playmatDelegate.removeConnection(id) },
-                                    onAddToken = { name, imagePath, npcId, x, y, maxHp, currentHp, tokenType, ringColor ->
-                                        viewModel.playmatDelegate.addTokenToPlaymat(name, imagePath, npcId, x, y, maxHp, currentHp, tokenType, ringColor)
-                                    },
-                                    onMoveToken = { tokenId, x, y -> viewModel.playmatDelegate.moveToken(tokenId, x, y) },
-                                    onUpdateTokenHp = { tokenId, hp -> viewModel.playmatDelegate.updateTokenHp(tokenId, hp) },
-                                    onUpdateTokenType = { tokenId, type -> viewModel.playmatDelegate.updateTokenType(tokenId, type) },
-                                    onRemoveToken = { tokenId -> viewModel.playmatDelegate.removeToken(tokenId) },
-                                    onAddClock = { title, segments, colorHex, x, y -> viewModel.playmatDelegate.addClockToPlaymat(title, segments, x, y, colorHex) },
-                                    onUpdateClockProgress = { clockId, progress -> viewModel.playmatDelegate.updateClockProgress(clockId, progress) },
-                                    onMoveClock = { clockId, x, y -> viewModel.playmatDelegate.moveClock(clockId, x, y) },
-                                    onRemoveClock = { clockId -> viewModel.playmatDelegate.removeClock(clockId) },
-                                    onSetBackgroundMap = { uri, preset -> viewModel.playmatDelegate.setBackgroundMap(uri, preset) },
-                                    onSetBackgroundTransform = { opacity, scale -> viewModel.playmatDelegate.setBackgroundTransform(opacity = opacity, scale = scale) },
-                                    onToggleBackgroundLock = { viewModel.playmatDelegate.toggleBackgroundLock() },
-                                    onSetGridConfig = { gridType, gridStyle, cellSizeDp, snapToGrid ->
-                                        viewModel.playmatDelegate.setGridConfig(gridType, gridStyle, cellSizeDp, snapToGrid)
-                                    },
+                                    actions = playmatActions,
                                     modifier = Modifier.fillMaxSize()
                                 )
                             }

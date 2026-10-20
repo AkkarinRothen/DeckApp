@@ -35,8 +35,10 @@ class SessionMythicDelegateTest {
     private val uiState = MutableStateFlow(
         SessionUiState(
             sessionId = sessionId,
-            boardMythicChaos = 5,
-            boardMythicProbability = ProbabilityLevel.FIFTY_FIFTY,
+            soloMythic = com.deckapp.feature.draw.model.state.SoloMythicUiState(
+                chaos = 5,
+                probability = ProbabilityLevel.FIFTY_FIFTY
+            ),
             dmNotes = "Diario inicial"
         )
     )
@@ -165,4 +167,31 @@ class SessionMythicDelegateTest {
         delegate.selectThreadsTab(ThreadsOverlayTab.CHARACTERS)
         assertEquals(ThreadsOverlayTab.CHARACTERS, uiState.value.selectedThreadsTab)
     }
+
+    @Test
+    fun `soloMythicUiState encapsulation and synchronization with legacy getters`() {
+        delegate.updateMythicState {
+            it.copy(
+                chaos = 8,
+                probability = ProbabilityLevel.UNLIKELY,
+                lastEvent = "Evento de prueba",
+                isSoloSceneBusy = true,
+                isSendingInspiration = true,
+                lastRandomMythicPick = "Pick 123"
+            )
+        }
+
+        // Verificar que los getters legacy sincronizan directamente con el sub-estado
+        assertEquals(8, uiState.value.boardMythicChaos)
+        assertEquals(ProbabilityLevel.UNLIKELY, uiState.value.boardMythicProbability)
+        assertEquals("Evento de prueba", uiState.value.boardMythicLastEvent)
+        assertTrue(uiState.value.isSoloSceneBusy)
+        assertTrue(uiState.value.isSendingInspiration)
+        assertEquals("Pick 123", uiState.value.lastRandomMythicPick)
+
+        // Verificar acceso directo al sub-estado modular
+        assertEquals(8, uiState.value.soloMythic.chaos)
+        assertEquals("Evento de prueba", uiState.value.soloMythic.lastEvent)
+    }
 }
+

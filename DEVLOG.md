@@ -1,3 +1,57 @@
+### Refactorización Arquitectónica de Sesión: Extracción de SoloMythicUiState y SessionMythicDelegate (20 de octubre de 2026)
+
+**Categoría:** `REFACTOR / ARCHITECTURE / SESSION / MYTHIC / SOLO JOURNALING / STATE MANAGEMENT / CLEAN CODE`
+
+- **Extracción y Desacoplamiento de Estado Mítico y Solitario (`SoloMythicUiState`):**
+  - Creado `com.deckapp.feature.draw.model.state.SoloMythicUiState` para aislar las variables del Oráculo de Mítica y el flujo Solo Journaling (`chaos`, `probability`, `lastResult`, `history`, `lastEvent`, `isSoloSceneBusy`, `isSendingInspiration`, `lastRandomMythicPick`).
+  - Incorporado `val soloMythic: SoloMythicUiState = SoloMythicUiState()` en `SessionUiState`.
+  - Preservados getters delegados retrocompatibles (`boardMythicChaos`, `boardMythicProbability`, `boardMythicLastResult`, `boardMythicHistory`, `boardMythicLastEvent`, `isSoloSceneBusy`, `isSendingInspiration`, `lastRandomMythicPick`) para paridad sin roturas con UI y vistas de Bento Board (`SessionBoardPagerContent`, `BoardCentralTool`, etc.).
+- **Helper Atómico de Mutación en Delegado (`SessionMythicDelegate.updateMythicState`):**
+  - Implementado helper `updateMythicState { transform(it.soloMythic) }` en `SessionMythicDelegate`.
+  - Migradas las mutaciones de tiradas de destino (Fate Checks), eventos aleatorios, bloqueos de escenas en solitario, sorteo aleatorio de hilos/personajes e inspiración en el diario.
+- **Verificación Técnica:**
+  - 100% de tests unitarios aprobados en `:feature:draw:testDebugUnitTest` (`SessionMythicDelegateTest` con nuevo test de sincronización y encapsulamiento `soloMythicUiState encapsulation and synchronization with legacy getters`).
+
+---
+
+### Refactorización Arquitectónica de Sesión: Extracción de DecksUiState y SessionDeckDelegate (20 de octubre de 2026)
+
+
+**Categoría:** `REFACTOR / ARCHITECTURE / SESSION / DECKS / STATE MANAGEMENT / CLEAN CODE`
+
+- **Extracción y Desacoplamiento de Estado de Mazos (`DecksUiState`):**
+  - Creado `com.deckapp.feature.draw.model.state.DecksUiState` para encapsular las 14 variables de mazos, manos, descartes y previsualización (`deckRefs`, `deckNames`, `deckCardCounts`, `selectedDeckId`, `hand`, `pile`, `peekCard`, `deckAspectRatios`, `deckBackImages`, `collapsedDeckIds`, `handByDeck`, `allDecks`, `isShuffling`, `showDrawBySuitSheet`, `availableSuitsForDraw`).
+  - Incorporado `val decks: DecksUiState = DecksUiState()` en `SessionUiState`.
+  - Preservados getters delegados retrocompatibles (`hand`, `pile`, `selectedDeckId`, `allDecks`, `handByDeck`, etc.) para garantizar paridad y cero roturas con llamadas o extensiones existentes.
+- **Helper Atómico de Mutación en Delegado (`SessionDeckDelegate.updateDeckState`):**
+  - Implementado helper `updateDeckState { transform(it.decks) }` en `SessionDeckDelegate`, unificando la mutación de estado de cartas, selección de mazos, visibilidad de hojas de palos y colapso de mazos.
+- **Verificación Técnica:**
+  - 100% de tests unitarios aprobados en `:feature:draw:testDebugUnitTest` (`PlaymatDelegateTest`, `SessionDeckDelegateTest`, `StoryEngineGuideDelegateTest`).
+  - Compilación exitosa en `:app:assembleDebug`.
+
+---
+
+### Refactorización Arquitectónica de Sesión: Extracción de PlaymatUiState y Contrato PlaymatActions (20 de octubre de 2026)
+
+
+**Categoría:** `REFACTOR / ARCHITECTURE / SESSION / PLAYMAT / STATE MANAGEMENT / CLEAN CODE / COMPOSABLE`
+
+- **Extracción y Desacoplamiento de Estado (`PlaymatUiState`):**
+  - Creado `com.deckapp.feature.draw.model.state.PlaymatUiState` para aislar las variables del Tapete 2D (`selectedCardId`, `showHandTray`, `isRulerActive`).
+  - Incorporado `val playmat: PlaymatUiState = PlaymatUiState()` dentro del estado global de sesión (`SessionUiState`).
+  - Preservados getters delegados retrocompatibles (`selectedPlaymatCardId`, `showPlaymatHandTray`, `activePlaymatSurface`) para garantizar cero roturas en código existente y tests heredados.
+- **Helper Atómico de Mutación en Delegado (`PlaymatDelegate.updatePlaymatState`):**
+  - Implementado helper `updatePlaymatState { transform(it.playmat) }` en `PlaymatDelegate`, simplificando operaciones de selección y visibilidad de bandejas.
+- **Eliminación del Prop-Drilling de 40+ Callbacks (`PlaymatActions`):**
+  - Creado el contrato unificado `PlaymatActions` en `model.state` agrupando todas las acciones de cartas, superficies, cámaras, físicas de mazos, tokens, relojes, hilos y battlemaps.
+  - Creada la función de extensión `PlaymatDelegate.toActions(...)` que mapea de forma limpia y tipada todas las llamadas al delegado.
+  - Reducción en `SessionScreen.kt` de más de 55 líneas de paso manual de lambdas sueltas a un bloque conciso y memoizado `remember(viewModel.playmatDelegate) { viewModel.playmatDelegate.toActions(...) }`.
+  - Mantenida sobrecarga `@Deprecated` en `PlaymatCanvasView` para retrocompatibilidad total con llamadas o previews existentes.
+- **Verificación Técnica:**
+  - 100% de tests unitarios aprobados en `PlaymatDelegateTest` incluyendo la nueva prueba `playmatUiState_encapsulationAndToActionsBridge`.
+
+---
+
 ### Fondos de Escena, Battlemaps y Cuadrícula Táctica con Snap y Regla en el Tapete (Playmat Fase 7) (20 de octubre de 2026)
 
 **Categoría:** `FEATURE / PLAYMAT / BATTLEMAPS / TACTICAL GRID / MAGNETIC SNAP / DUAL RULER / UX / COMPOSABLE`

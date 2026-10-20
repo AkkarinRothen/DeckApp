@@ -2,6 +2,7 @@ package com.deckapp.feature.draw.delegates
 
 import com.deckapp.core.model.*
 import com.deckapp.feature.draw.SessionUiState
+import com.deckapp.feature.draw.model.state.toActions
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,9 +27,11 @@ class PlaymatDelegateTest {
             SessionUiState(
                 sessionId = 42,
                 session = Session(id = 42, name = "Campaña Test"),
-                hand = listOf(
-                    Card(id = 1001, stackId = 1, originDeckId = 1, title = "Espada Sagrada", faces = listOf(CardFace(name = "Frente"))),
-                    Card(id = 1002, stackId = 1, originDeckId = 1, title = "Escudo Antiguo", faces = listOf(CardFace(name = "Frente")))
+                decks = com.deckapp.feature.draw.model.state.DecksUiState(
+                    hand = listOf(
+                        Card(id = 1001, stackId = 1, originDeckId = 1, title = "Espada Sagrada", faces = listOf(CardFace(name = "Frente"))),
+                        Card(id = 1002, stackId = 1, originDeckId = 1, title = "Escudo Antiguo", faces = listOf(CardFace(name = "Frente")))
+                    )
                 ),
                 boardMemory = currentMemory
             )
@@ -415,6 +418,37 @@ class PlaymatDelegateTest {
         delegate.toggleSnapToGrid()
         assertFalse(uiState.value.activePlaymatSurface.snapToGrid)
     }
+
+    @Test
+    fun playmatUiState_encapsulationAndToActionsBridge() {
+        delegate.ensureInitialSurface()
+
+        // 1. Verificar estado inicial por defecto
+        assertNull(uiState.value.playmat.selectedCardId)
+        assertNull(uiState.value.selectedPlaymatCardId)
+        assertTrue(uiState.value.playmat.showHandTray)
+        assertTrue(uiState.value.showPlaymatHandTray)
+
+        // 2. Modificar a través del delegado y verificar tanto sub-estado como accesor legado
+        delegate.selectCard(1050L)
+        assertEquals(1050L, uiState.value.playmat.selectedCardId)
+        assertEquals(1050L, uiState.value.selectedPlaymatCardId)
+
+        delegate.toggleHandTray()
+        assertFalse(uiState.value.playmat.showHandTray)
+        assertFalse(uiState.value.showPlaymatHandTray)
+
+        // 3. Verificar el puente PlaymatActions (toActions)
+        val actions = delegate.toActions(activeSurfaceIdProvider = { "default_surface" })
+        actions.onSelectCard(2050L)
+        assertEquals(2050L, uiState.value.playmat.selectedCardId)
+        assertEquals(2050L, uiState.value.selectedPlaymatCardId)
+
+        actions.onToggleHandTray()
+        assertTrue(uiState.value.playmat.showHandTray)
+        assertTrue(uiState.value.showPlaymatHandTray)
+    }
 }
+
 
 

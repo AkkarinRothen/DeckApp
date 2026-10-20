@@ -2,6 +2,7 @@ package com.deckapp.feature.draw.delegates
 
 import com.deckapp.core.model.*
 import com.deckapp.feature.draw.SessionUiState
+import com.deckapp.feature.draw.model.state.PlaymatUiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -20,6 +21,13 @@ class PlaymatDelegate(
     private val updateBoardMemory: ((BoardSessionMemory) -> BoardSessionMemory) -> Unit,
     private val deckDelegate: SessionDeckDelegate
 ) {
+
+    /**
+     * Helper para mutaciones atómicas del sub-estado [PlaymatUiState].
+     */
+    fun updatePlaymatState(transform: (PlaymatUiState) -> PlaymatUiState) {
+        _uiState.update { it.copy(playmat = transform(it.playmat)) }
+    }
 
     /**
      * Asegura que exista al menos una superficie de tapete activa.
@@ -52,15 +60,15 @@ class PlaymatDelegate(
     }
 
     fun selectCard(cardId: Long?) {
-        _uiState.update { it.copy(selectedPlaymatCardId = cardId) }
+        updatePlaymatState { it.copy(selectedCardId = cardId) }
     }
 
     fun toggleHandTray() {
-        _uiState.update { it.copy(showPlaymatHandTray = !it.showPlaymatHandTray) }
+        updatePlaymatState { it.copy(showHandTray = !it.showHandTray) }
     }
 
     fun setHandTrayVisible(visible: Boolean) {
-        _uiState.update { it.copy(showPlaymatHandTray = visible) }
+        updatePlaymatState { it.copy(showHandTray = visible) }
     }
 
     fun switchSurface(surfaceId: String) {

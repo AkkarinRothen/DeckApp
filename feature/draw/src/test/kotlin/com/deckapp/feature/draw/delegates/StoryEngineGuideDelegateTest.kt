@@ -31,11 +31,13 @@ class StoryEngineGuideDelegateTest {
         SessionUiState(
             sessionId = 1,
             session = Session(id = 1, name = "Mundo Fantasía", gameSystems = listOf("Story Engine", "Deck of Worlds")),
-            allDecks = listOf(regionDeck, landmarkDeck),
-            deckRefs = listOf(SessionDeckRef(sessionId = 1, stackId = 101)),
-            hand = listOf(
-                Card(id = 501, stackId = 101, originDeckId = 101, title = "Pantano Brumoso", faces = listOf(CardFace(name = "Frente"))),
-                Card(id = 502, stackId = 102, originDeckId = 102, title = "Torre en Ruinas", faces = listOf(CardFace(name = "Frente")))
+            decks = com.deckapp.feature.draw.model.state.DecksUiState(
+                allDecks = listOf(regionDeck, landmarkDeck),
+                deckRefs = listOf(SessionDeckRef(sessionId = 1, stackId = 101)),
+                hand = listOf(
+                    Card(id = 501, stackId = 101, originDeckId = 101, title = "Pantano Brumoso", faces = listOf(CardFace(name = "Frente"))),
+                    Card(id = 502, stackId = 102, originDeckId = 102, title = "Torre en Ruinas", faces = listOf(CardFace(name = "Frente")))
+                )
             )
         )
     )
@@ -88,7 +90,7 @@ class StoryEngineGuideDelegateTest {
         val landmarkStep = StoryEngineProcedureCatalog.deckOfWorldsSteps[1] // Landmark step
 
         // Landmark deck (102) is in allDecks but not yet in deckRefs in session
-        ui.value = ui.value.copy(deckRefs = listOf(SessionDeckRef(sessionId = 1, stackId = 101)))
+        ui.value = ui.value.copy(decks = ui.value.decks.copy(deckRefs = listOf(SessionDeckRef(sessionId = 1, stackId = 101))))
 
         delegate.drawStepCard(landmarkStep)
         testScheduler.advanceUntilIdle()

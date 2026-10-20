@@ -5,6 +5,7 @@ import com.deckapp.core.domain.repository.SessionRepository
 import com.deckapp.core.domain.usecase.*
 import com.deckapp.core.model.*
 import com.deckapp.feature.draw.SessionUiState
+import com.deckapp.feature.draw.model.state.DecksUiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,10 +34,17 @@ class SessionDeckDelegate(
 ) {
 
     /**
+     * Helper para mutaciones atómicas del sub-estado [DecksUiState].
+     */
+    fun updateDeckState(transform: (DecksUiState) -> DecksUiState) {
+        _uiState.update { it.copy(decks = transform(it.decks)) }
+    }
+
+    /**
      * Selecciona un mazo y roba una carta de él.
      */
     fun drawCardFromDeck(stackId: Long) {
-        _uiState.update { it.copy(selectedDeckId = stackId) }
+        updateDeckState { it.copy(selectedDeckId = stackId) }
         scope.launch {
             val deckRef = _uiState.value.deckRefs.find { it.stackId == stackId } ?: return@launch
             val card = drawCardUseCase(
@@ -82,7 +90,7 @@ class SessionDeckDelegate(
     /** Regresa todas las cartas de la pila al mazo (Shuffle back). Activa animación C-5. */
     fun shufflePileBack(stackId: Long? = null) {
         scope.launch {
-            _uiState.update { it.copy(isShuffling = true) }
+            updateDeckState { it.copy(isShuffling = true) }
 
             val piledCards = cardRepository.getPiledCards(sessionId).first()
             val cardsToReturn = if (stackId != null) {
@@ -119,11 +127,9 @@ class SessionDeckDelegate(
 
             // Tiempo mínimo de animación: 900ms
             delay(900)
-            _uiState.update {
-                it.copy(
-                    isShuffling = false,
-                    snackbarMessage = if (cardsToReturn.isNotEmpty()) "Pila barajada de vuelta al mazo" else null
-                )
+            updateDeckState { it.copy(isShuffling = false) }
+            if (cardsToReturn.isNotEmpty()) {
+                _uiState.update { it.copy(snackbarMessage = "Pila barajada de vuelta al mazo") }
             }
         }
     }
@@ -137,14 +143,14 @@ class SessionDeckDelegate(
                 .mapNotNull { it.suit }
                 .distinct()
                 .sorted()
-            _uiState.update { it.copy(showDrawBySuitSheet = true, availableSuitsForDraw = suits) }
+            updateDeckState { it.copy(showDrawBySuitSheet = true, availableSuitsForDraw = suits) }
         }
     }
 
     /** Roba una carta aleatoria del palo indicado en el mazo activo. */
     fun drawCardBySuit(suit: String) {
         val deckId = _uiState.value.selectedDeckId ?: return
-        _uiState.update { it.copy(showDrawBySuitSheet = false) }
+        updateDeckState { it.copy(showDrawBySuitSheet = false) }
         scope.launch {
             val available = cardRepository.getCardsForStack(deckId).first()
                 .filter { !it.isDrawn && it.suit == suit }
@@ -172,7 +178,7 @@ class SessionDeckDelegate(
     }
 
     fun closeDrawBySuitSheet() {
-        _uiState.update { it.copy(showDrawBySuitSheet = false) }
+        updateDeckState { it.copy(showDrawBySuitSheet = false) }
     }
 
     /** Mueve una carta específica de la pila a la mano. */
@@ -247,7 +253,7 @@ class SessionDeckDelegate(
     /** Ordena la mano actual por valor de carta (Iniciativa). */
     fun sortByValue() {
         val sortedHand = _uiState.value.hand.sortedBy { it.value ?: Int.MAX_VALUE }
-        _uiState.update { it.copy(hand = sortedHand) }
+        updateDeckState { it.copy(hand = sortedHand) }
     }
 
     /** Muestra la primera carta disponible del mazo sin modificar su estado (Peek). */
@@ -258,14 +264,14 @@ class SessionDeckDelegate(
             if (card == null) {
                 _uiState.update { it.copy(snackbarMessage = "No hay cartas disponibles") }
             } else {
-                _uiState.update { it.copy(peekCard = card) }
+                updateDeckState { it.copy(peekCard = card) }
                 setPeekCardId(card.id)
             }
         }
     }
 
     fun clearPeek() {
-        _uiState.update { it.copy(peekCard = null) }
+        updateDeckState { it.copy(peekCard = null) }
         setPeekCardId(null)
     }
 
@@ -326,7 +332,7 @@ class SessionDeckDelegate(
      * El estado de colapso es efímero (no se persiste en Room).
      */
     fun toggleDeckCollapse(stackId: Long) {
-        _uiState.update { state ->
+        updateDeckState { state ->
             val current = state.collapsedDeckIds
             val updated = if (stackId in current) current - stackId else current + stackId
             state.copy(collapsedDeckIds = updated)
@@ -338,7 +344,7 @@ class SessionDeckDelegate(
      * El FAB usa esta información para saber de qué mazo robar.
      */
     fun setLastInteractedDeck(stackId: Long) {
-        _uiState.update { it.copy(selectedDeckId = stackId) }
+        updateDeckState { it.copy(selectedDeckId = stackId) }
     }
 
     fun shuffleSingleDeck(stackId: Long) {
@@ -348,7 +354,7 @@ class SessionDeckDelegate(
     /** Baraja las cartas disponibles en el mazo sin alterar descartes ni mano. */
     fun shuffleDeckOnly(stackId: Long) {
         scope.launch {
-            _uiState.update { it.copy(isShuffling = true) }
+            updateDeckState { it.copy(isShuffling = true) }
             shuffleDeckUseCase(stackId, onlyAvailable = true)
             val name = _uiState.value.deckNames[stackId] ?: "Mazo"
             sessionRepository.logEvent(
@@ -360,12 +366,8 @@ class SessionDeckDelegate(
                 )
             )
             delay(500)
-            _uiState.update {
-                it.copy(
-                    isShuffling = false,
-                    snackbarMessage = "\"$name\" barajado"
-                )
-            }
+            updateDeckState { it.copy(isShuffling = false) }
+            _uiState.update { it.copy(snackbarMessage = "\"$name\" barajado") }
         }
     }
 

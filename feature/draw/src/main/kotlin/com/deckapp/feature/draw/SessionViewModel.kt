@@ -28,18 +28,12 @@ import javax.inject.Inject
 
 data class SessionUiState(
     val session: Session? = null,
-    val deckRefs: List<SessionDeckRef> = emptyList(),
-    val deckNames: Map<Long, String> = emptyMap(),       // stackId → nombre del mazo
-    val deckCardCounts: Map<Long, Int> = emptyMap(),     // stackId → cartas disponibles
-    val selectedDeckId: Long? = null,                    // mazo activo para ROBAR
-    val hand: List<Card> = emptyList(),
-    val pile: List<Card> = emptyList(),
+    val decks: com.deckapp.feature.draw.model.state.DecksUiState = com.deckapp.feature.draw.model.state.DecksUiState(),
     val isLoading: Boolean = true,
     val canUndo: Boolean = false,
     val snackbarMessage: String? = null,
     val nightMode: Boolean = false,
     val errorMessage: String? = null,
-    val peekCard: Card? = null,    // carta visible en modo Peek (no robada)
     val sessionEnded: Boolean = false,
     val activeTab: Int = 0,                  // 0=Mazos, 1=Pilas, 2=Tablas, 3=Ref, 4=Notas, 5=Combate
     val hasActiveEncounter: Boolean = false, // habilita tab Combate (Sprint 7)
@@ -47,15 +41,9 @@ data class SessionUiState(
     val dmNotes: String = "",
     val showQuickNoteDialog: Boolean = false,
     val sessionElapsedMinutes: Long = 0,
-    val deckAspectRatios: Map<Long, CardAspectRatio> = emptyMap(), // stackId → aspectRatio
-    val deckBackImages: Map<Long, String?> = emptyMap(),           // stackId → backImagePath
-    // Sprint 14.5 — Workspace Bento
-    val collapsedDeckIds: Set<Long> = emptySet(),   // clusters colapsados manualmente por el DM
-    val handByDeck: Map<Long, List<Card>> = emptyMap(), // hand agrupada por stackId (derivada)
     // Combat Log
     val combatLog: List<CombatLogEntry> = emptyList(),
     // Sprint 17 — Resource Management
-    val allDecks: List<CardStack> = emptyList(),
     val allTables: List<RandomTable> = emptyList(),
     val tablesInSession: List<RandomTable> = emptyList(),
     val showResourceManager: Boolean = false,
@@ -64,11 +52,6 @@ data class SessionUiState(
     val showStarterPackDialog: Boolean = false,
     val availableStarterPacks: List<com.deckapp.feature.reference.StarterPackInfo> = emptyList(),
     val availableSystems: List<String> = emptyList(),
-    // C-5 — Animación de barajar
-    val isShuffling: Boolean = false,
-    // D-2 — Robar por palo
-    val showDrawBySuitSheet: Boolean = false,
-    val availableSuitsForDraw: List<String> = emptyList(),
     // Sprint 15 — UX de Notas
     val isSavingNotes: Boolean = false,
     // Sprint 17 — Participantes temporales (PJs)
@@ -109,14 +92,8 @@ data class SessionUiState(
     val spreadResultsByDeck: Map<Long, CardSpreadResult> = emptyMap(),
     val showQuickSearch: Boolean = false,
     // Sprint 56 — Bento Solo Journaling & Interactive Mythic Oracle
-    val boardMythicChaos: Int = 5,
-    val boardMythicProbability: ProbabilityLevel = ProbabilityLevel.FIFTY_FIFTY,
-    val boardMythicLastResult: BoardMythicFateResult? = null,
-    val boardMythicHistory: List<BoardMythicFateResult> = emptyList(),
-    val boardMythicLastEvent: String? = null,
-    val isSoloSceneBusy: Boolean = false,
+    val soloMythic: com.deckapp.feature.draw.model.state.SoloMythicUiState = com.deckapp.feature.draw.model.state.SoloMythicUiState(),
     val boardMemory: BoardSessionMemory = BoardSessionMemory(),
-    val isSendingInspiration: Boolean = false,
     val isHotbarExpanded: Boolean = false,
     val showHotbarActionDialog: Boolean = false,
     val editingHotbarAction: SessionHotbarAction? = null,
@@ -127,7 +104,7 @@ data class SessionUiState(
     val clockImpactAlert: TensionClock? = null,
     val isThreadsOverlayExpanded: Boolean = false,
     val selectedThreadsTab: ThreadsOverlayTab = ThreadsOverlayTab.THREADS,
-    val lastRandomMythicPick: String? = null,
+
     val showThreadEditDialog: Boolean = false,
     val showMythicCharacterEditDialog: Boolean = false,
     val editingMythicThread: MythicThread? = null,
@@ -150,9 +127,40 @@ data class SessionUiState(
     val showStoryEngineGuide: Boolean = false,
     val storyEngineGuideTab: com.deckapp.feature.draw.model.StoryEngineGuideTab = com.deckapp.feature.draw.model.StoryEngineGuideTab.DECK_OF_WORLDS,
     val storyEngineGuideStepIndex: Int = 0,
-    val selectedPlaymatCardId: Long? = null,
-    val showPlaymatHandTray: Boolean = true
+    val playmat: com.deckapp.feature.draw.model.state.PlaymatUiState = com.deckapp.feature.draw.model.state.PlaymatUiState()
 ) {
+    // Retrocompatibilidad con accesores planos delegados a playmat
+    val selectedPlaymatCardId: Long? get() = playmat.selectedCardId
+    val showPlaymatHandTray: Boolean get() = playmat.showHandTray
+
+    // Retrocompatibilidad con accesores planos delegados a decks
+    val deckRefs: List<SessionDeckRef> get() = decks.deckRefs
+    val deckNames: Map<Long, String> get() = decks.deckNames
+    val deckCardCounts: Map<Long, Int> get() = decks.deckCardCounts
+    val selectedDeckId: Long? get() = decks.selectedDeckId
+    val hand: List<Card> get() = decks.hand
+    val pile: List<Card> get() = decks.pile
+    val peekCard: Card? get() = decks.peekCard
+    val deckAspectRatios: Map<Long, CardAspectRatio> get() = decks.deckAspectRatios
+    val deckBackImages: Map<Long, String?> get() = decks.deckBackImages
+    val collapsedDeckIds: Set<Long> get() = decks.collapsedDeckIds
+    val handByDeck: Map<Long, List<Card>> get() = decks.handByDeck
+    val allDecks: List<CardStack> get() = decks.allDecks
+    val isShuffling: Boolean get() = decks.isShuffling
+    val showDrawBySuitSheet: Boolean get() = decks.showDrawBySuitSheet
+    val availableSuitsForDraw: List<String> get() = decks.availableSuitsForDraw
+
+    // Retrocompatibilidad con accesores planos delegados a soloMythic
+    val boardMythicChaos: Int get() = soloMythic.chaos
+    val boardMythicProbability: com.deckapp.core.model.ProbabilityLevel get() = soloMythic.probability
+    val boardMythicLastResult: com.deckapp.core.model.BoardMythicFateResult? get() = soloMythic.lastResult
+    val boardMythicHistory: List<com.deckapp.core.model.BoardMythicFateResult> get() = soloMythic.history
+    val boardMythicLastEvent: String? get() = soloMythic.lastEvent
+    val isSoloSceneBusy: Boolean get() = soloMythic.isSoloSceneBusy
+    val isSendingInspiration: Boolean get() = soloMythic.isSendingInspiration
+    val lastRandomMythicPick: String? get() = soloMythic.lastRandomMythicPick
+
+
     val activePlaymatSurface: com.deckapp.core.model.PlaymatSurface
         get() {
             val surfaces = boardMemory.playmatSurfaces
@@ -378,7 +386,7 @@ class SessionViewModel @Inject constructor(
         peekCardId?.let { id ->
             viewModelScope.launch {
                 cardRepository.getCardById(id).first()?.let { card ->
-                    _uiState.update { it.copy(peekCard = card) }
+                    _uiState.update { it.copy(decks = it.decks.copy(peekCard = card)) }
                 }
             }
         }
@@ -415,11 +423,13 @@ class SessionViewModel @Inject constructor(
                 
                 _uiState.update { state ->
                     state.copy(
-                        deckRefs = refs,
-                        deckNames = names,
-                        deckAspectRatios = ratios,
-                        deckBackImages = backImages,
-                        selectedDeckId = state.selectedDeckId ?: refs.firstOrNull()?.stackId
+                        decks = state.decks.copy(
+                            deckRefs = refs,
+                            deckNames = names,
+                            deckAspectRatios = ratios,
+                            deckBackImages = backImages,
+                            selectedDeckId = state.selectedDeckId ?: refs.firstOrNull()?.stackId
+                        )
                     )
                 }
             }.collect()
@@ -438,7 +448,7 @@ class SessionViewModel @Inject constructor(
                     ) { pairs -> pairs.toMap() }
                 }
                 .collect { counts ->
-                    _uiState.update { it.copy(deckCardCounts = counts, isLoading = false) }
+                    _uiState.update { it.copy(decks = it.decks.copy(deckCardCounts = counts), isLoading = false) }
                 }
         }
 
@@ -448,8 +458,10 @@ class SessionViewModel @Inject constructor(
                 .collect { drawn ->
                     _uiState.update {
                         it.copy(
-                            hand = drawn,
-                            handByDeck = drawn.groupBy { card -> card.stackId }
+                            decks = it.decks.copy(
+                                hand = drawn,
+                                handByDeck = drawn.groupBy { card -> card.stackId }
+                            )
                         )
                     }
                 }
@@ -458,7 +470,7 @@ class SessionViewModel @Inject constructor(
         // Pila de descarte
         viewModelScope.launch {
             cardRepository.getPiledCards(sessionId)
-                .collect { pile -> _uiState.update { it.copy(pile = pile) } }
+                .collect { pile -> _uiState.update { it.copy(decks = it.decks.copy(pile = pile)) } }
         }
 
         // canUndo reactivo
@@ -507,7 +519,7 @@ class SessionViewModel @Inject constructor(
                 Triple(decks, tables, systems)
             }.collect { (decks, tables, systems) ->
                 _uiState.update { it.copy(
-                    allDecks = decks,
+                    decks = it.decks.copy(allDecks = decks),
                     allTables = tables,
                     availableSystems = systems
                 ) }
@@ -638,7 +650,7 @@ class SessionViewModel @Inject constructor(
 
     /** Selecciona el mazo activo para la siguiente acción ROBAR. */
     fun selectDeck(stackId: Long) {
-        _uiState.update { it.copy(selectedDeckId = stackId) }
+        _uiState.update { it.copy(decks = it.decks.copy(selectedDeckId = stackId)) }
     }
 
     /** Actualiza el tab activo del workspace de sesión. */

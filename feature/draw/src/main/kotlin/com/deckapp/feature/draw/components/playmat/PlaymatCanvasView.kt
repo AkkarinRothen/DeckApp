@@ -103,49 +103,51 @@ fun getTemplateSlots(template: PlaymatTemplateType): List<TemplateSlotDef> {
 @Composable
 fun PlaymatCanvasView(
     uiState: SessionUiState,
-    onPlaceCardOnPlaymat: (Long, Float, Float) -> Unit,
-    onMoveCard: (Long, Float, Float, String?) -> Unit,
-    onRotateCard: (Long, Int) -> Unit,
-    onFlipCard: (Long) -> Unit,
-    onReturnToHand: (Long) -> Unit,
-    onDiscardCard: (Long) -> Unit,
-    onSelectCard: (Long?) -> Unit,
-    onToggleHandTray: () -> Unit,
-    onSelectSurface: (String) -> Unit,
-    onCreateSurface: (String, PlaymatTheme, PlaymatTemplateType) -> Unit,
-    onDeleteSurface: (String) -> Unit,
-    onSetTheme: (PlaymatTheme) -> Unit,
-    onSetTemplate: (PlaymatTemplateType) -> Unit,
-    onUpdateCamera: (Float, Float, Float) -> Unit,
-    onQuickDraw: (Long, Float, Float) -> Unit,
-    onAddStickyNote: (String, Float, Float) -> Unit,
-    onMoveStickyNote: (String, Float, Float) -> Unit = { _, _, _ -> },
-    onDeleteStickyNote: (String) -> Unit,
-    onCardDetailClick: (Long) -> Unit,
-    onSendCardToTacticalMap: (Card, Boolean) -> Unit = { _, _ -> },
-    onMoveDeck: (Long, Float, Float) -> Unit = { _, _, _ -> },
-    onMoveDiscardPile: (Long, Float, Float) -> Unit = { _, _, _ -> },
-    onDrawFromDeck: (Long, Float, Float, String?) -> Unit = { _, _, _, _ -> },
-    onReshuffleDeck: (Long) -> Unit = {},
-    onAddTableChip: (Long, String, String, Float, Float) -> Unit = { _, _, _, _, _ -> },
-    onCreateConnection: (String, String) -> Unit = { _, _ -> },
-    onUpdateConnection: (String, String, String) -> Unit = { _, _, _ -> },
-    onRemoveConnection: (String) -> Unit = {},
-    onAddToken: (name: String, imagePath: String?, npcId: Long?, x: Float, y: Float, maxHp: Int, currentHp: Int, tokenType: PlaymatTokenType, ringColorHex: String) -> Unit = { _, _, _, _, _, _, _, _, _ -> },
-    onMoveToken: (String, Float, Float) -> Unit = { _, _, _ -> },
-    onUpdateTokenHp: (String, Int) -> Unit = { _, _ -> },
-    onUpdateTokenType: (String, PlaymatTokenType) -> Unit = { _, _ -> },
-    onRemoveToken: (String) -> Unit = {},
-    onAddClock: (title: String, segments: Int, colorHex: String, x: Float, y: Float) -> Unit = { _, _, _, _, _ -> },
-    onUpdateClockProgress: (clockId: String, filledSegments: Int) -> Unit = { _, _ -> },
-    onMoveClock: (clockId: String, x: Float, y: Float) -> Unit = { _, _, _ -> },
-    onRemoveClock: (clockId: String) -> Unit = {},
-    onSetBackgroundMap: (uri: String?, preset: PlaymatAtmosphericPreset) -> Unit = { _, _ -> },
-    onSetBackgroundTransform: (opacity: Float, scale: Float) -> Unit = { _, _ -> },
-    onToggleBackgroundLock: () -> Unit = {},
-    onSetGridConfig: (gridType: PlaymatGridType, gridStyle: PlaymatGridStyle, cellSizeDp: Float, snapToGrid: Boolean) -> Unit = { _, _, _, _ -> },
+    actions: com.deckapp.feature.draw.model.state.PlaymatActions,
     modifier: Modifier = Modifier
 ) {
+    val onPlaceCardOnPlaymat = actions.onPlaceCardOnPlaymat
+    val onMoveCard = actions.onMoveCard
+    val onRotateCard = actions.onRotateCard
+    val onFlipCard = actions.onFlipCard
+    val onReturnToHand = actions.onReturnToHand
+    val onDiscardCard = actions.onDiscardCard
+    val onSelectCard = actions.onSelectCard
+    val onToggleHandTray = actions.onToggleHandTray
+    val onSelectSurface = actions.onSelectSurface
+    val onCreateSurface = actions.onCreateSurface
+    val onDeleteSurface = actions.onDeleteSurface
+    val onSetTheme = actions.onSetTheme
+    val onSetTemplate = actions.onSetTemplate
+    val onUpdateCamera = actions.onUpdateCamera
+    val onQuickDraw = actions.onQuickDraw
+    val onAddStickyNote = actions.onAddStickyNote
+    val onMoveStickyNote = actions.onMoveStickyNote
+    val onDeleteStickyNote = actions.onDeleteStickyNote
+    val onCardDetailClick = actions.onCardDetailClick
+    val onSendCardToTacticalMap = actions.onSendCardToTacticalMap
+    val onMoveDeck = actions.onMoveDeck
+    val onMoveDiscardPile = actions.onMoveDiscardPile
+    val onDrawFromDeck = actions.onDrawFromDeck
+    val onReshuffleDeck = actions.onReshuffleDeck
+    val onAddTableChip = actions.onAddTableChip
+    val onCreateConnection = actions.onCreateConnection
+    val onUpdateConnection = actions.onUpdateConnection
+    val onRemoveConnection = actions.onRemoveConnection
+    val onAddToken = actions.onAddToken
+    val onMoveToken = actions.onMoveToken
+    val onUpdateTokenHp = actions.onUpdateTokenHp
+    val onUpdateTokenType = actions.onUpdateTokenType
+    val onRemoveToken = actions.onRemoveToken
+    val onAddClock = actions.onAddClock
+    val onUpdateClockProgress = actions.onUpdateClockProgress
+    val onMoveClock = actions.onMoveClock
+    val onRemoveClock = actions.onRemoveClock
+    val onSetBackgroundMap = actions.onSetBackgroundMap
+    val onSetBackgroundTransform = actions.onSetBackgroundTransform
+    val onToggleBackgroundLock = actions.onToggleBackgroundLock
+    val onSetGridConfig = actions.onSetGridConfig
+
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val activeSurface = uiState.activePlaymatSurface
@@ -1532,3 +1534,103 @@ private fun PlaymatTableChipItem(
         }
     }
 }
+
+/**
+ * Sobrecarga retrocompatible de [PlaymatCanvasView] para preservar compatibilidad con código existente.
+ */
+@Deprecated(
+    message = "Usar la sobrecarga principal que recibe PlaymatActions",
+    replaceWith = ReplaceWith("PlaymatCanvasView(uiState = uiState, actions = actions, modifier = modifier)")
+)
+@Composable
+fun PlaymatCanvasView(
+    uiState: SessionUiState,
+    onPlaceCardOnPlaymat: (Long, Float, Float) -> Unit,
+    onMoveCard: (Long, Float, Float, String?) -> Unit,
+    onRotateCard: (Long, Int) -> Unit,
+    onFlipCard: (Long) -> Unit,
+    onReturnToHand: (Long) -> Unit,
+    onDiscardCard: (Long) -> Unit,
+    onSelectCard: (Long?) -> Unit,
+    onToggleHandTray: () -> Unit,
+    onSelectSurface: (String) -> Unit,
+    onCreateSurface: (String, PlaymatTheme, PlaymatTemplateType) -> Unit,
+    onDeleteSurface: (String) -> Unit,
+    onSetTheme: (PlaymatTheme) -> Unit,
+    onSetTemplate: (PlaymatTemplateType) -> Unit,
+    onUpdateCamera: (Float, Float, Float) -> Unit,
+    onQuickDraw: (Long, Float, Float) -> Unit,
+    onAddStickyNote: (String, Float, Float) -> Unit,
+    onMoveStickyNote: (String, Float, Float) -> Unit = { _, _, _ -> },
+    onDeleteStickyNote: (String) -> Unit,
+    onCardDetailClick: (Long) -> Unit,
+    onSendCardToTacticalMap: (Card, Boolean) -> Unit = { _, _ -> },
+    onMoveDeck: (Long, Float, Float) -> Unit = { _, _, _ -> },
+    onMoveDiscardPile: (Long, Float, Float) -> Unit = { _, _, _ -> },
+    onDrawFromDeck: (Long, Float, Float, String?) -> Unit = { _, _, _, _ -> },
+    onReshuffleDeck: (Long) -> Unit = {},
+    onAddTableChip: (Long, String, String, Float, Float) -> Unit = { _, _, _, _, _ -> },
+    onCreateConnection: (String, String) -> Unit = { _, _ -> },
+    onUpdateConnection: (String, String, String) -> Unit = { _, _, _ -> },
+    onRemoveConnection: (String) -> Unit = {},
+    onAddToken: (name: String, imagePath: String?, npcId: Long?, x: Float, y: Float, maxHp: Int, currentHp: Int, tokenType: PlaymatTokenType, ringColorHex: String) -> Unit = { _, _, _, _, _, _, _, _, _ -> },
+    onMoveToken: (String, Float, Float) -> Unit = { _, _, _ -> },
+    onUpdateTokenHp: (String, Int) -> Unit = { _, _ -> },
+    onUpdateTokenType: (String, PlaymatTokenType) -> Unit = { _, _ -> },
+    onRemoveToken: (String) -> Unit = {},
+    onAddClock: (title: String, segments: Int, colorHex: String, x: Float, y: Float) -> Unit = { _, _, _, _, _ -> },
+    onUpdateClockProgress: (clockId: String, filledSegments: Int) -> Unit = { _, _ -> },
+    onMoveClock: (clockId: String, x: Float, y: Float) -> Unit = { _, _, _ -> },
+    onRemoveClock: (clockId: String) -> Unit = {},
+    onSetBackgroundMap: (uri: String?, preset: PlaymatAtmosphericPreset) -> Unit = { _, _ -> },
+    onSetBackgroundTransform: (opacity: Float, scale: Float) -> Unit = { _, _ -> },
+    onToggleBackgroundLock: () -> Unit = {},
+    onSetGridConfig: (gridType: PlaymatGridType, gridStyle: PlaymatGridStyle, cellSizeDp: Float, snapToGrid: Boolean) -> Unit = { _, _, _, _ -> },
+    modifier: Modifier = Modifier
+) = PlaymatCanvasView(
+    uiState = uiState,
+    actions = com.deckapp.feature.draw.model.state.PlaymatActions(
+        onPlaceCardOnPlaymat = onPlaceCardOnPlaymat,
+        onMoveCard = onMoveCard,
+        onRotateCard = onRotateCard,
+        onFlipCard = onFlipCard,
+        onReturnToHand = onReturnToHand,
+        onDiscardCard = onDiscardCard,
+        onSelectCard = onSelectCard,
+        onToggleHandTray = onToggleHandTray,
+        onSelectSurface = onSelectSurface,
+        onCreateSurface = onCreateSurface,
+        onDeleteSurface = onDeleteSurface,
+        onSetTheme = onSetTheme,
+        onSetTemplate = onSetTemplate,
+        onUpdateCamera = onUpdateCamera,
+        onQuickDraw = onQuickDraw,
+        onAddStickyNote = onAddStickyNote,
+        onMoveStickyNote = onMoveStickyNote,
+        onDeleteStickyNote = onDeleteStickyNote,
+        onCardDetailClick = onCardDetailClick,
+        onSendCardToTacticalMap = onSendCardToTacticalMap,
+        onMoveDeck = onMoveDeck,
+        onMoveDiscardPile = onMoveDiscardPile,
+        onDrawFromDeck = onDrawFromDeck,
+        onReshuffleDeck = onReshuffleDeck,
+        onAddTableChip = onAddTableChip,
+        onCreateConnection = onCreateConnection,
+        onUpdateConnection = onUpdateConnection,
+        onRemoveConnection = onRemoveConnection,
+        onAddToken = onAddToken,
+        onMoveToken = onMoveToken,
+        onUpdateTokenHp = onUpdateTokenHp,
+        onUpdateTokenType = onUpdateTokenType,
+        onRemoveToken = onRemoveToken,
+        onAddClock = onAddClock,
+        onUpdateClockProgress = onUpdateClockProgress,
+        onMoveClock = onMoveClock,
+        onRemoveClock = onRemoveClock,
+        onSetBackgroundMap = onSetBackgroundMap,
+        onSetBackgroundTransform = onSetBackgroundTransform,
+        onToggleBackgroundLock = onToggleBackgroundLock,
+        onSetGridConfig = onSetGridConfig
+    ),
+    modifier = modifier
+)

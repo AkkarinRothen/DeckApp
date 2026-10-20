@@ -43,6 +43,10 @@ class SessionMythicDelegate(
 
     fun quickMythicCheck() = performMythicFateCheck("Consulta rápida", ProbabilityLevel.FIFTY_FIFTY)
 
+    fun updateMythicState(transform: (com.deckapp.feature.draw.model.state.SoloMythicUiState) -> com.deckapp.feature.draw.model.state.SoloMythicUiState) {
+        _uiState.update { it.copy(soloMythic = transform(it.soloMythic)) }
+    }
+
     fun updateMythicChaos(delta: Int) {
         val session = _uiState.value.linkedMythicSession ?: return
         val next = (session.chaosFactor + delta).coerceIn(1, 9)
@@ -52,13 +56,13 @@ class SessionMythicDelegate(
     }
 
     fun setBoardMythicProbability(prob: ProbabilityLevel) {
-        _uiState.update { it.copy(boardMythicProbability = prob) }
+        updateMythicState { it.copy(probability = prob) }
     }
 
     fun updateBoardMythicChaos(delta: Int) {
         val currentChaos = _uiState.value.linkedMythicSession?.chaosFactor ?: _uiState.value.boardMythicChaos
         val next = (currentChaos + delta).coerceIn(1, 9)
-        _uiState.update { it.copy(boardMythicChaos = next) }
+        updateMythicState { it.copy(chaos = next) }
         _uiState.value.linkedMythicSession?.let { session ->
             scope.launch {
                 mythicRepository.updateChaosFactor(session.id, next)
@@ -108,12 +112,12 @@ class SessionMythicDelegate(
             sceneId = activeSoloScene()?.id
         )
 
-        _uiState.update { state ->
+        updateMythicState { state ->
             state.copy(
-                boardMythicProbability = probability,
-                boardMythicChaos = chaos,
-                boardMythicLastResult = fateItem,
-                boardMythicHistory = (listOf(fateItem) + state.boardMythicHistory).take(10)
+                probability = probability,
+                chaos = chaos,
+                lastResult = fateItem,
+                history = (listOf(fateItem) + state.history).take(10)
             )
         }
 
@@ -140,7 +144,7 @@ class SessionMythicDelegate(
         val action = MythicReferenceData.actionKeywords.random()
         val subject = MythicReferenceData.subjectKeywords.random()
         val eventText = "$action · $subject"
-        _uiState.update { it.copy(boardMythicLastEvent = eventText) }
+        updateMythicState { it.copy(lastEvent = eventText) }
         return eventText
     }
 
@@ -157,7 +161,7 @@ class SessionMythicDelegate(
 
     fun saveSoloScene(scene: Scene, onSuccess: () -> Unit) {
         if (_uiState.value.isSoloSceneBusy || scene.title.isBlank() || scene.sessionId != sessionId) return
-        _uiState.update { it.copy(isSoloSceneBusy = true) }
+        updateMythicState { it.copy(isSoloSceneBusy = true) }
         scope.launch {
             try {
                 val id = sessionRepository.upsertScene(scene)
@@ -167,14 +171,14 @@ class SessionMythicDelegate(
                 if (error is kotlinx.coroutines.CancellationException) throw error
                 _uiState.update { it.copy(snackbarMessage = "No se pudo guardar la escena: ${error.message}") }
             } finally {
-                _uiState.update { it.copy(isSoloSceneBusy = false) }
+                updateMythicState { it.copy(isSoloSceneBusy = false) }
             }
         }
     }
 
     fun closeSoloScene(scene: Scene, closure: SoloSceneClosure, onSuccess: () -> Unit) {
         if (_uiState.value.isSoloSceneBusy || scene.sessionId != sessionId) return
-        _uiState.update { it.copy(isSoloSceneBusy = true) }
+        updateMythicState { it.copy(isSoloSceneBusy = true) }
         scope.launch {
             try {
                 notesMutex.withLock {
@@ -198,7 +202,7 @@ class SessionMythicDelegate(
                 if (error is kotlinx.coroutines.CancellationException) throw error
                 _uiState.update { it.copy(snackbarMessage = "No se pudo cerrar la escena: ${error.message}") }
             } finally {
-                _uiState.update { it.copy(isSoloSceneBusy = false) }
+                updateMythicState { it.copy(isSoloSceneBusy = false) }
             }
         }
     }
@@ -300,25 +304,25 @@ class SessionMythicDelegate(
         if (tab == ThreadsOverlayTab.THREADS) {
             val activeThreads = _uiState.value.mythicState?.threads?.filterNot { it.isResolved } ?: emptyList()
             if (activeThreads.isEmpty()) {
-                _uiState.update { it.copy(lastRandomMythicPick = "🎲 [d100: $roll] No hay hilos activos registrados para sortear.") }
+                updateMythicState { it.copy(lastRandomMythicPick = "🎲 [d100: $roll] No hay hilos activos registrados para sortear.") }
             } else {
                 val picked = activeThreads.random()
-                _uiState.update { it.copy(lastRandomMythicPick = "🎲 [d100: $roll] Hilo Sorteado: \"${picked.description}\"") }
+                updateMythicState { it.copy(lastRandomMythicPick = "🎲 [d100: $roll] Hilo Sorteado: \"${picked.description}\"") }
             }
         } else {
             val characters = _uiState.value.mythicState?.characters ?: emptyList()
             if (characters.isEmpty()) {
-                _uiState.update { it.copy(lastRandomMythicPick = "🎲 [d100: $roll] No hay PNJs registrados en la lista de Mythic.") }
+                updateMythicState { it.copy(lastRandomMythicPick = "🎲 [d100: $roll] No hay PNJs registrados en la lista de Mythic.") }
             } else {
                 val picked = characters.random()
                 val notesSnippet = if (picked.notes.isNotBlank()) " (${picked.notes})" else ""
-                _uiState.update { it.copy(lastRandomMythicPick = "🎲 [d100: $roll] PNJ Sorteado: \"${picked.name}\"$notesSnippet") }
+                updateMythicState { it.copy(lastRandomMythicPick = "🎲 [d100: $roll] PNJ Sorteado: \"${picked.name}\"$notesSnippet") }
             }
         }
     }
 
     fun clearRandomMythicPick() {
-        _uiState.update { it.copy(lastRandomMythicPick = null) }
+        updateMythicState { it.copy(lastRandomMythicPick = null) }
     }
 
     fun copyLastRandomPickToDiary() {
@@ -327,7 +331,7 @@ class SessionMythicDelegate(
             val currentNotes = _uiState.value.dmNotes
             val addition = "\n\n> **Oráculo de Trama / Evento:** $pick\n"
             val newNotes = currentNotes + addition
-            _uiState.update { it.copy(dmNotes = newNotes, lastRandomMythicPick = null) }
+            _uiState.update { it.copy(dmNotes = newNotes, soloMythic = it.soloMythic.copy(lastRandomMythicPick = null)) }
             sessionRepository.updateDmNotes(sessionId, newNotes)
         }
     }
@@ -456,7 +460,8 @@ class SessionMythicDelegate(
         if (_uiState.value.isSendingInspiration || _uiState.value.isSoloSceneBusy) return
         val item = _uiState.value.boardMemory.inspiration.firstOrNull { it.id == id } ?: return
         if (item.status == InspirationStatus.USED) return
-        _uiState.update { it.copy(isSendingInspiration = true, isSavingNotes = true) }
+        updateMythicState { it.copy(isSendingInspiration = true) }
+        _uiState.update { it.copy(isSavingNotes = true) }
         scope.launch {
             var savedNotes: String? = null
             try {
@@ -476,7 +481,8 @@ class SessionMythicDelegate(
                 if (error is kotlinx.coroutines.CancellationException) throw error
                 _uiState.update { it.copy(snackbarMessage = "No se pudo guardar: ${error.message}") }
             } finally {
-                _uiState.update { it.copy(isSendingInspiration = false,
+                updateMythicState { it.copy(isSendingInspiration = false) }
+                _uiState.update { it.copy(
                     isSavingNotes = if (it.dmNotes == savedNotes || savedNotes == null) false else it.isSavingNotes) }
             }
         }
