@@ -1,3 +1,90 @@
+### Fondos de Escena, Battlemaps y Cuadrícula Táctica con Snap y Regla en el Tapete (Playmat Fase 7) (20 de octubre de 2026)
+
+**Categoría:** `FEATURE / PLAYMAT / BATTLEMAPS / TACTICAL GRID / MAGNETIC SNAP / DUAL RULER / UX / COMPOSABLE`
+
+- **Soporte Dual de Battlemaps y Fondos de Escena (`PlaymatBattlemapLayer`):**
+  - **Texturas atmosféricas procedurales sin peso añadido**: Implementación de 4 presets geométricos y degradados vectoriales en Canvas:
+    - *Mazmorra de Piedra (`DUNGEON_STONE`)*: Losas de roca fría, relieve y juntas oscuras con viñeta.
+    - *Taberna Medieval (`MEDIEVAL_TAVERN`)*: Tablones de roble cálido y vetas de madera rústica.
+    - *Bosque Místico (`MYSTIC_FOREST`)*: Fondo musgoso y motas de polen/esporas mágicas luminiscentes.
+    - *Mapa de Pergamino Antiguo (`PARCHMENT_MAP`)*: Tinte sepia envejecido con manchas sutiles y rosa de los vientos estilizada.
+  - **Importación de Battlemaps personalizados**: Selector nativo de galería (`GetContent` / `image/*`) con renderizado eficiente vía Coil (`AsyncImage`), persistencia de URI y escalado/posicionamiento 2D continuo.
+  - **Panel de control de escena (`PlaymatTacticalSettingsDialog`)**:
+    - Ajuste de opacidad (20% a 100%) para balancear visibilidad de cartas/tokens con el mapa.
+    - Factor de escala de fondo (0.5x a 3.0x).
+    - Bloqueo de mapa (`isBackgroundLocked`) para evitar desplazamientos accidentales al manipular miniaturas.
+- **Cuadrícula Táctica Híbrida (`PlaymatGridLayer`):**
+  - Renderizado de alta fidelidad acoplado al Pan & Zoom de la cámara 2D en tiempo real.
+  - **Modos de celda**:
+    - *Cuadrada clásica D&D/Pathfinder*: Escala estándar de 5 pies por casilla.
+    - *Hexagonal táctica*: Para hexploración, wargames o movimiento diagonal orgánico.
+  - **Estilo visual**: *Líneas tenues* o *Puntos minimalistas* con tinte semitransparente que no interfiere con el arte del mapa.
+  - **Calibrador de celda**: Slider táctil de 32dp a 96dp (por defecto 48dp) con previsualización en vivo.
+- **Snapping Magnético Universal a Casilla (`PlaymatDelegate.calculateSnappedPosition`):**
+  - Al soltar tokens de personajes (`PlaymatTokenItem`), relojes de progreso (`PlaymatClockItem`) o cartas, las coordenadas se alinean con precisión matemática al centro de la casilla o hexágono más cercano cuando el snap está activado.
+  - Prioridad inteligente: respeta ranuras de plantillas temáticas (*Deck of Worlds*, *Story Engine*) si el elemento se suelta dentro de su radio magnético prioritario, aplicando el snap de cuadrícula táctica en el espacio restante.
+- **Doble Regla de Medición Táctica (`PlaymatMeasurementRuler`):**
+  - **Cinta elástica automática en arrastre de tokens**: Al mover cualquier token en el tapete, se despliega una línea elástica punteada en color cian neón (`#00E5FF`) desde el punto de origen hasta la posición actual del dedo, con halos de origen y destino y una píldora flotante con la distancia en tiempo real: ej. `"30 ft (6 c)"` calculada a razón de 5 pies por casilla.
+  - **Herramienta de Regla Libre**: Nuevo botón de regla (`Straighten`) en `PlaymatToolbar`. Al activarse, despliega un banner guía en la parte superior y permite medir cualquier distancia y línea de visión (LoS) entre dos puntos del tapete mediante un trazo táctil sin mover las piezas de la mesa.
+- **Verificación Técnica:**
+  - 100% de tests unitarios aprobados en `PlaymatDelegateTest` (`battlemap_setPresetAndCustomImageTransform` y `tacticalGrid_configurationAndSnapping`).
+  - Compilación e integración verificada en `:app:assembleDebug`.
+
+---
+
+### Volteo 3D de Cartas Boca Abajo y Relojes de Progreso en el Tapete (Playmat Fase 6) (20 de octubre de 2026)
+
+**Categoría:** `FEATURE / PLAYMAT / PROGRESS CLOCKS / 3D CARD FLIP / NARRATIVE THREADS / BLADES IN THE DARK / UX / COMPOSABLE`
+
+- **Volteo Físico 3D de Cartas Boca Abajo (`PlaymatCardItem`):**
+  - Implementación de animación tridimensional sobre el eje Y (`rotationY`) a 120 FPS con resorte elástico (`Spring.StiffnessMediumLow`) y perspectiva de cámara (`cameraDistance = 14f * density`).
+  - Al voltear una carta mediante el menú radial contextual o cambio de estado, la carta rota suavemente de 0° a 180°, alternando en el ecuador de los 90° entre su anverso ilustrado y su reverso físico (con contra-rotación interna de 180° para prevenir efecto espejo).
+  - Permite preparar encuentros misteriosos, trampas, tesoros ocultos o tiradas de oráculo sin revelar antes del momento dramático.
+- **Relojes de Progreso Interactivos (`PlaymatClockItem`):**
+  - Nuevo elemento espacial en el tapete inspirado en *Blades in the Dark*, PBTA y TTRPGs modernos.
+  - Renderizado geométrico vectorial mediante Canvas con cuñas radiales en 4, 6 u 8 segmentos de tensión, eje central metálico y disco de cuarzo oscuro.
+  - Interacción táctil fluida a 120 FPS:
+    - *Toque directo*: cicla y avanza el progreso del reloj.
+    - *Menú contextual flotante*: acciones rápidas para `+1 Progreso`, `-1 Progreso`, `Vaciar Reloj`, `Conectar Hilo`, `Retirar` y `Cerrar`.
+    - *Física de arrastre*: movimiento desacoplado a 120 FPS sin fricción ni lag.
+- **Diálogo Creador de Relojes (`PlaymatClockCreationDialog`):**
+  - Botón directo en la barra flotante del tapete (`PlaymatToolbar`) con icono temático de reloj de arena.
+  - Selección de título con sugerencias rápidas (*Alerta de Guardias*, *Tiempo de Escape*, *Ritual Oscuro*, *Detección Sigilosa*).
+  - Selector de complejidad (4, 6 u 8 cuñas) y paleta de 6 tintes semánticos (Peligro rojo, Alerta ámbar, Magia violeta, Tiempo azul, Progreso verde, Neutral).
+- **Conectividad Universal Total de Hilos:**
+  - Los relojes se integran transparentemente al sistema de conectores elásticos con el endpoint `"clock_$id"`.
+  - Permite enlazar: **Carta ↔ Reloj** (ej. pista que avanza una cuenta regresiva), **Token ↔ Reloj** (ej. guardia que activa una alarma) y **Reloj ↔ Reloj**.
+  - Poda automática de hilos si se retira el reloj de la mesa.
+- **Verificación Técnica:**
+  - 100% de tests unitarios aprobados en `PlaymatDelegateTest` (`cardFlip_toggleIsFaceUp` y `progressClocks_crudAndUniversalConnections`).
+  - APK debug generado y compilado con éxito.
+
+---
+
+### Tokens de Personajes (PJ / PNJ) y Conexiones Universales en el Tapete (Playmat Fase 5) (20 de octubre de 2026)
+
+**Categoría:** `FEATURE / PLAYMAT / CHARACTER TOKENS / NPCS / NARRATIVE THREADS / UNIVERSAL CONNECTORS / UX / COMPOSABLE`
+
+- **Tokens Circulares de Personajes TTRPG (`PlaymatTokenItem`):**
+  - Cada token representa a un personaje (PJ o PNJ) sobre el tapete con disco circular de 64dp, sombreado dinámico, anillo de facción en relieve (Verde Aliado `#4CAF50`, Ámbar Neutral `#FFB300`, Rojo Enemigo `#E53935`), avatar fotográfico o inicial tipográfica, micro-barra de PV de 2 colores y etiqueta inferior con nombre y valor numérico de vida.
+  - Arrastre desacoplado ultra fluido a 120 FPS sin bloqueos ni lag.
+  - Menú radial contextual con acceso directo a: *Conectar Hilo*, *Ajustar PV*, *Cambiar Facción*, *Retirar de la Mesa* y *Cerrar*.
+- **Selector de Tokens Mixto (`PlaymatTokenPickerDialog`):**
+  - Botón directo `+ Token` en la barra de herramientas del tapete (`PlaymatToolbar`).
+  - Pestaña de **NPCs de Campaña**: despliega la lista de personajes registrados en la sesión (`uiState.npcs`) para colocarlos en la mesa con un toque preservando sus PV y avatar.
+  - Pestaña de **Token Rápido**: formulario ligero para crear tokens ad-hoc (nombre, PV máx, facción) al vuelo.
+- **Micro-Gestión de Salud (`PlaymatTokenHpDialog`):**
+  - Diálogo rápido con modificadores numéricos (`-5`, `-1`, `+1`, `+5`) para reflejar daño y curación al instante en combate o narrativa.
+- **Conectividad Universal de Hilos Narrativos:**
+  - `PlaymatConnection` generalizado mediante `fromEndpointId` y `toEndpointId` con soporte de prefijos universales (`"card_"` y `"token_"`).
+  - Permite trazar hilos entre cualquier combinación de elementos: **Carta ↔ Carta**, **Carta ↔ Token**, **Token ↔ Token** o **Token ↔ Carta**.
+  - Poda automática de hilos si se retira un token o se descarta/devuelve una carta de la mesa.
+- **Verificación Técnica:**
+  - 100% de tests unitarios aprobados en `PlaymatDelegateTest` (`characterTokens_crudAndUniversalConnections`).
+  - Desplegado y verificado en dispositivo físico Motorola One Fusion (`ZE222B5GXX`).
+
+---
+
 ### Hilos Narrativos y Conectores de Investigación en el Tapete (Playmat Fase 4) (19 de octubre de 2026)
 
 **Categoría:** `FEATURE / PLAYMAT / NARRATIVE THREADS / CONNECTORS / INVESTIGATION BOARD / UX / COMPOSABLE`

@@ -557,6 +557,64 @@ class PlaymatDelegate(
         _uiState.update { it.copy(snackbarMessage = "Token retirado de la mesa") }
     }
 
+    // --- Relojes de Progreso (Progress Clocks) ---
+
+    fun addClockToPlaymat(
+        title: String,
+        totalSegments: Int,
+        x: Float,
+        y: Float,
+        colorHex: String = "#E53935"
+    ) {
+        val clock = PlaymatClockPlacement(
+            title = title.ifBlank { "Reloj de Tensión" },
+            totalSegments = totalSegments.coerceIn(4, 8),
+            filledSegments = 0,
+            x = x,
+            y = y,
+            colorHex = colorHex
+        )
+        updateCurrentActiveSurface { surface ->
+            surface.copy(clocks = surface.clocks + clock)
+        }
+        _uiState.update { it.copy(snackbarMessage = "Reloj '${clock.title}' añadido") }
+    }
+
+    fun updateClockProgress(clockId: String, filledSegments: Int) {
+        updateCurrentActiveSurface { surface ->
+            val updated = surface.clocks.map { clock ->
+                if (clock.id == clockId) {
+                    val clamped = filledSegments.coerceIn(0, clock.totalSegments)
+                    clock.copy(filledSegments = clamped)
+                } else clock
+            }
+            surface.copy(clocks = updated)
+        }
+    }
+
+    fun moveClock(clockId: String, newX: Float, newY: Float) {
+        updateCurrentActiveSurface { surface ->
+            val updated = surface.clocks.map { clock ->
+                if (clock.id == clockId) clock.copy(x = newX, y = newY) else clock
+            }
+            surface.copy(clocks = updated)
+        }
+    }
+
+    fun removeClock(clockId: String) {
+        updateCurrentActiveSurface { surface ->
+            val clockKey = "clock_$clockId"
+            surface.copy(
+                clocks = surface.clocks.filterNot { it.id == clockId },
+                connections = surface.connections.filterNot {
+                    it.effectiveFromId == clockKey || it.effectiveToId == clockKey ||
+                    it.fromEndpointId == clockKey || it.toEndpointId == clockKey
+                }
+            )
+        }
+        _uiState.update { it.copy(snackbarMessage = "Reloj retirado de la mesa") }
+    }
+
     // --- Hilos Narrativos / Conexiones de Investigación ---
 
     fun createConnection(
@@ -628,6 +686,89 @@ class PlaymatDelegate(
             surface.copy(connections = surface.connections.filterNot { it.id == connectionId })
         }
         _uiState.update { it.copy(snackbarMessage = "Conexión eliminada") }
+    }
+
+    // --- Fondos de Escena, Battlemaps y Cuadrícula Táctica (Fase 7) ---
+
+    fun setBackgroundMap(
+        uri: String?,
+        preset: PlaymatAtmosphericPreset = PlaymatAtmosphericPreset.NONE
+    ) {
+        updateCurrentActiveSurface { surface ->
+            surface.copy(
+                customImageUri = uri,
+                backgroundPreset = preset
+            )
+        }
+        val msg = if (preset != PlaymatAtmosphericPreset.NONE) "Preset atmosférico aplicado" else if (uri != null) "Battlemap cargado" else "Fondo restablecido"
+        _uiState.update { it.copy(snackbarMessage = msg) }
+    }
+
+    fun setBackgroundTransform(
+        opacity: Float? = null,
+        scale: Float? = null,
+        x: Float? = null,
+        y: Float? = null
+    ) {
+        updateCurrentActiveSurface { surface ->
+            surface.copy(
+                backgroundOpacity = opacity?.coerceIn(0.1f, 1.0f) ?: surface.backgroundOpacity,
+                backgroundScale = scale?.coerceIn(0.2f, 5.0f) ?: surface.backgroundScale,
+                backgroundX = x ?: surface.backgroundX,
+                backgroundY = y ?: surface.backgroundY
+            )
+        }
+    }
+
+    fun toggleBackgroundLock() {
+        updateCurrentActiveSurface { surface ->
+            surface.copy(isBackgroundLocked = !surface.isBackgroundLocked)
+        }
+    }
+
+    fun setGridConfig(
+        gridType: PlaymatGridType,
+        gridStyle: PlaymatGridStyle = PlaymatGridStyle.LINES,
+        cellSizeDp: Float = 48f,
+        snapToGrid: Boolean = false
+    ) {
+        updateCurrentActiveSurface { surface ->
+            surface.copy(
+                gridType = gridType,
+                gridStyle = gridStyle,
+                cellSizeDp = cellSizeDp.coerceIn(24f, 128f),
+                snapToGrid = snapToGrid
+            )
+        }
+    }
+
+    fun toggleSnapToGrid() {
+        updateCurrentActiveSurface { surface ->
+            surface.copy(snapToGrid = !surface.snapToGrid)
+        }
+    }
+
+    /**
+     * Calcula la posición con snap magnético más cercana según el tipo de cuadrícula.
+     */
+    fun calculateSnappedPosition(x: Float, y: Float, gridType: PlaymatGridType, cellSize: Float): Pair<Float, Float> {
+        if (gridType == PlaymatGridType.NONE || cellSize <= 0f) return Pair(x, y)
+        return when (gridType) {
+            PlaymatGridType.SQUARE -> {
+                val snappedX = (kotlin.math.round(x / cellSize)) * cellSize
+                val snappedY = (kotlin.math.round(y / cellSize)) * cellSize
+                Pair(snappedX, snappedY)
+            }
+            PlaymatGridType.HEXAGONAL -> {
+                val hexWidth = cellSize * 1.5f
+                val hexHeight = cellSize * kotlin.math.sqrt(3.0).toFloat()
+                val col = kotlin.math.round(x / hexWidth)
+                val rowOffset = if ((col.toInt() % 2) != 0) hexHeight / 2f else 0f
+                val row = kotlin.math.round((y - rowOffset) / hexHeight)
+                Pair(col * hexWidth, (row * hexHeight) + rowOffset)
+            }
+            PlaymatGridType.NONE -> Pair(x, y)
+        }
     }
 
     // --- Helpers privados ---

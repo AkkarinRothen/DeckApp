@@ -692,6 +692,16 @@ fun SessionScreen(
                                     onUpdateTokenHp = { tokenId, hp -> viewModel.playmatDelegate.updateTokenHp(tokenId, hp) },
                                     onUpdateTokenType = { tokenId, type -> viewModel.playmatDelegate.updateTokenType(tokenId, type) },
                                     onRemoveToken = { tokenId -> viewModel.playmatDelegate.removeToken(tokenId) },
+                                    onAddClock = { title, segments, colorHex, x, y -> viewModel.playmatDelegate.addClockToPlaymat(title, segments, x, y, colorHex) },
+                                    onUpdateClockProgress = { clockId, progress -> viewModel.playmatDelegate.updateClockProgress(clockId, progress) },
+                                    onMoveClock = { clockId, x, y -> viewModel.playmatDelegate.moveClock(clockId, x, y) },
+                                    onRemoveClock = { clockId -> viewModel.playmatDelegate.removeClock(clockId) },
+                                    onSetBackgroundMap = { uri, preset -> viewModel.playmatDelegate.setBackgroundMap(uri, preset) },
+                                    onSetBackgroundTransform = { opacity, scale -> viewModel.playmatDelegate.setBackgroundTransform(opacity = opacity, scale = scale) },
+                                    onToggleBackgroundLock = { viewModel.playmatDelegate.toggleBackgroundLock() },
+                                    onSetGridConfig = { gridType, gridStyle, cellSizeDp, snapToGrid ->
+                                        viewModel.playmatDelegate.setGridConfig(gridType, gridStyle, cellSizeDp, snapToGrid)
+                                    },
                                     modifier = Modifier.fillMaxSize()
                                 )
                             }

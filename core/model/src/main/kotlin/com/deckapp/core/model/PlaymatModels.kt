@@ -21,7 +21,18 @@ data class PlaymatSurface(
     val tableChips: List<PlaymatTableChip> = emptyList(),
     val decks: List<PlaymatDeckPlacement> = emptyList(),
     val connections: List<PlaymatConnection> = emptyList(),
-    val tokens: List<PlaymatTokenPlacement> = emptyList()
+    val tokens: List<PlaymatTokenPlacement> = emptyList(),
+    val clocks: List<PlaymatClockPlacement> = emptyList(),
+    val backgroundPreset: PlaymatAtmosphericPreset = PlaymatAtmosphericPreset.NONE,
+    val backgroundOpacity: Float = 1.0f,
+    val backgroundScale: Float = 1.0f,
+    val backgroundX: Float = 0f,
+    val backgroundY: Float = 0f,
+    val isBackgroundLocked: Boolean = true,
+    val gridType: PlaymatGridType = PlaymatGridType.NONE,
+    val gridStyle: PlaymatGridStyle = PlaymatGridStyle.LINES,
+    val cellSizeDp: Float = 48f,
+    val snapToGrid: Boolean = false
 )
 
 /**
@@ -34,6 +45,37 @@ enum class PlaymatTheme {
     RUSTIC_WOOD,
     PARCHMENT_LEATHER,
     DARK_MINIMAL
+}
+
+/**
+ * Presets atmosféricos de escenas y mapas para el tapete.
+ */
+@Serializable
+enum class PlaymatAtmosphericPreset {
+    NONE,
+    DUNGEON_STONE,
+    MEDIEVAL_TAVERN,
+    MYSTIC_FOREST,
+    PARCHMENT_MAP
+}
+
+/**
+ * Tipo o forma geométrica de la cuadrícula táctica.
+ */
+@Serializable
+enum class PlaymatGridType {
+    NONE,
+    SQUARE,
+    HEXAGONAL
+}
+
+/**
+ * Estilo visual de la cuadrícula sobre la mesa.
+ */
+@Serializable
+enum class PlaymatGridStyle {
+    LINES,
+    DOTS
 }
 
 /**
@@ -129,6 +171,21 @@ data class PlaymatTokenPlacement(
     val tokenType: PlaymatTokenType = PlaymatTokenType.ALLY,
     val ringColorHex: String = "#4CAF50",
     val notes: String = ""
+)
+
+/**
+ * Reloj de progreso interactivo (estilo Blades in the Dark / PBTA / TTRPG).
+ * Permite seguir tensión, sigilo, cuenta regresiva o proyectos en 4, 6 u 8 segmentos.
+ */
+@Serializable
+data class PlaymatClockPlacement(
+    val id: String = UUID.randomUUID().toString(),
+    val title: String = "Reloj de Tensión",
+    val totalSegments: Int = 4, // 4, 6 u 8
+    val filledSegments: Int = 0,
+    val x: Float,
+    val y: Float,
+    val colorHex: String = "#E53935"
 )
 
 /**

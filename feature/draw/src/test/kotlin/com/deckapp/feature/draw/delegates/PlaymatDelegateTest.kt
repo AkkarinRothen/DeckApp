@@ -275,6 +275,146 @@ class PlaymatDelegateTest {
         assertEquals(1, surface.tokens.size)
         assertTrue(surface.connections.isEmpty())
     }
+
+    @Test
+    fun cardFlip_toggleIsFaceUp() {
+        delegate.ensureInitialSurface()
+        delegate.placeCardOnPlaymat(cardId = 2001, x = 120f, y = 140f)
+
+        var cardPlacement = uiState.value.activePlaymatSurface.cards.find { it.cardId == 2001L }
+        assertNotNull(cardPlacement)
+        assertTrue(cardPlacement!!.isFaceUp)
+
+        // Voltear boca abajo
+        delegate.flipCard(2001L)
+        cardPlacement = uiState.value.activePlaymatSurface.cards.find { it.cardId == 2001L }
+        assertFalse(cardPlacement!!.isFaceUp)
+
+        // Voltear boca arriba de nuevo
+        delegate.flipCard(2001L)
+        cardPlacement = uiState.value.activePlaymatSurface.cards.find { it.cardId == 2001L }
+        assertTrue(cardPlacement!!.isFaceUp)
+    }
+
+    @Test
+    fun progressClocks_crudAndUniversalConnections() {
+        delegate.ensureInitialSurface()
+        delegate.placeCardOnPlaymat(cardId = 3001, x = 100f, y = 100f)
+
+        // 1. Añadir Reloj de Tensión
+        delegate.addClockToPlaymat(
+            title = "Alerta del Castillo",
+            totalSegments = 6,
+            x = 220f,
+            y = 180f,
+            colorHex = "#E53935"
+        )
+
+        var surface = uiState.value.activePlaymatSurface
+        assertEquals(1, surface.clocks.size)
+        val clock = surface.clocks.first()
+        assertEquals("Alerta del Castillo", clock.title)
+        assertEquals(6, clock.totalSegments)
+        assertEquals(0, clock.filledSegments)
+        assertEquals("#E53935", clock.colorHex)
+
+        // 2. Mover Reloj
+        delegate.moveClock(clock.id, newX = 260f, newY = 200f)
+        assertEquals(260f, uiState.value.activePlaymatSurface.clocks.first().x, 0.01f)
+
+        // 3. Modificar Progreso con clamping
+        delegate.updateClockProgress(clock.id, filledSegments = 4)
+        assertEquals(4, uiState.value.activePlaymatSurface.clocks.first().filledSegments)
+
+        // Clamping superior
+        delegate.updateClockProgress(clock.id, filledSegments = 10)
+        assertEquals(6, uiState.value.activePlaymatSurface.clocks.first().filledSegments)
+
+        // Clamping inferior
+        delegate.updateClockProgress(clock.id, filledSegments = -3)
+        assertEquals(0, uiState.value.activePlaymatSurface.clocks.first().filledSegments)
+
+        // 4. Conexión Universal: Carta ↔ Reloj
+        delegate.createConnection(
+            fromEndpointId = "card_3001",
+            toEndpointId = "clock_${clock.id}",
+            label = "Aumenta tensión",
+            colorHex = "#E53935"
+        )
+        surface = uiState.value.activePlaymatSurface
+        assertEquals(1, surface.connections.size)
+        val conn = surface.connections.first()
+        assertEquals("card_3001", conn.effectiveFromId)
+        assertEquals("clock_${clock.id}", conn.effectiveToId)
+
+        // 5. Retirar Reloj poda automáticamente los hilos conectados a él
+        delegate.removeClock(clock.id)
+        surface = uiState.value.activePlaymatSurface
+        assertTrue(surface.clocks.isEmpty())
+        assertTrue(surface.connections.isEmpty())
+    }
+
+    @Test
+    fun battlemap_setPresetAndCustomImageTransform() {
+        delegate.ensureInitialSurface()
+
+        // 1. Cargar imagen de battlemap
+        delegate.setBackgroundMap(uri = "content://media/battlemap_dungeon.jpg", preset = PlaymatAtmosphericPreset.NONE)
+        var surface = uiState.value.activePlaymatSurface
+        assertEquals("content://media/battlemap_dungeon.jpg", surface.customImageUri)
+        assertEquals(PlaymatAtmosphericPreset.NONE, surface.backgroundPreset)
+
+        // 2. Modificar opacidad y escala
+        delegate.setBackgroundTransform(opacity = 0.65f, scale = 1.8f, x = 100f, y = -50f)
+        surface = uiState.value.activePlaymatSurface
+        assertEquals(0.65f, surface.backgroundOpacity, 0.01f)
+        assertEquals(1.8f, surface.backgroundScale, 0.01f)
+        assertEquals(100f, surface.backgroundX, 0.01f)
+        assertEquals(-50f, surface.backgroundY, 0.01f)
+
+        // 3. Alternar bloqueo
+        assertTrue(surface.isBackgroundLocked)
+        delegate.toggleBackgroundLock()
+        assertFalse(uiState.value.activePlaymatSurface.isBackgroundLocked)
+
+        // 4. Cambiar a preset atmosférico
+        delegate.setBackgroundMap(uri = null, preset = PlaymatAtmosphericPreset.DUNGEON_STONE)
+        surface = uiState.value.activePlaymatSurface
+        assertNull(surface.customImageUri)
+        assertEquals(PlaymatAtmosphericPreset.DUNGEON_STONE, surface.backgroundPreset)
+    }
+
+    @Test
+    fun tacticalGrid_configurationAndSnapping() {
+        delegate.ensureInitialSurface()
+
+        // 1. Configurar cuadrícula de cuadrados de 50dp con snap activado
+        delegate.setGridConfig(
+            gridType = PlaymatGridType.SQUARE,
+            gridStyle = PlaymatGridStyle.DOTS,
+            cellSizeDp = 50f,
+            snapToGrid = true
+        )
+        var surface = uiState.value.activePlaymatSurface
+        assertEquals(PlaymatGridType.SQUARE, surface.gridType)
+        assertEquals(PlaymatGridStyle.DOTS, surface.gridStyle)
+        assertEquals(50f, surface.cellSizeDp, 0.01f)
+        assertTrue(surface.snapToGrid)
+
+        // 2. Probar snapping matemático
+        val snapped = delegate.calculateSnappedPosition(53f, 98f, PlaymatGridType.SQUARE, 50f)
+        assertEquals(50f, snapped.first, 0.01f)
+        assertEquals(100f, snapped.second, 0.01f)
+
+        // 3. Sin cuadrícula (NONE) no debe alterar coordenadas
+        val noSnap = delegate.calculateSnappedPosition(53f, 98f, PlaymatGridType.NONE, 50f)
+        assertEquals(53f, noSnap.first, 0.01f)
+        assertEquals(98f, noSnap.second, 0.01f)
+
+        // 4. Toggle snap
+        delegate.toggleSnapToGrid()
+        assertFalse(uiState.value.activePlaymatSurface.snapToGrid)
+    }
 }
 
 

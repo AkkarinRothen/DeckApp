@@ -30,6 +30,10 @@ fun PlaymatToolbar(
     onAddStickyNote: () -> Unit,
     onOpenQuickDraw: () -> Unit,
     onOpenTokenPicker: (() -> Unit)? = null,
+    onOpenClockCreator: (() -> Unit)? = null,
+    onOpenTacticalSettings: (() -> Unit)? = null,
+    onToggleRuler: (() -> Unit)? = null,
+    isRulerActive: Boolean = false,
     onToggleDiceRoller: (() -> Unit)? = null,
     onExportSnapshot: (() -> Unit)? = null,
     modifier: Modifier = Modifier
@@ -244,6 +248,55 @@ fun PlaymatToolbar(
                         contentDescription = "Añadir Token",
                         modifier = Modifier.size(16.dp),
                         tint = MaterialTheme.colorScheme.secondary
+                    )
+                }
+            }
+
+            // Botón Añadir Reloj de Progreso (Blades in the Dark)
+            if (onOpenClockCreator != null) {
+                IconButton(
+                    onClick = onOpenClockCreator,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.HourglassTop,
+                        contentDescription = "Añadir Reloj",
+                        modifier = Modifier.size(16.dp),
+                        tint = Color(0xFFFFB300)
+                    )
+                }
+            }
+
+            // Botón Cuadrícula y Battlemaps Tácticos
+            if (onOpenTacticalSettings != null) {
+                IconButton(
+                    onClick = onOpenTacticalSettings,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.GridOn,
+                        contentDescription = "Fondo y Cuadrícula",
+                        modifier = Modifier.size(16.dp),
+                        tint = if (activeSurface.gridType != PlaymatGridType.NONE || activeSurface.customImageUri != null) {
+                            Color(0xFF00E5FF)
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    )
+                }
+            }
+
+            // Botón Herramienta de Regla Táctica
+            if (onToggleRuler != null) {
+                IconButton(
+                    onClick = onToggleRuler,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Straighten,
+                        contentDescription = "Regla de Distancia",
+                        modifier = Modifier.size(16.dp),
+                        tint = if (isRulerActive) Color(0xFF00E5FF) else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

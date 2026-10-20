@@ -136,6 +136,14 @@ fun PlaymatCanvasView(
     onUpdateTokenHp: (String, Int) -> Unit = { _, _ -> },
     onUpdateTokenType: (String, PlaymatTokenType) -> Unit = { _, _ -> },
     onRemoveToken: (String) -> Unit = {},
+    onAddClock: (title: String, segments: Int, colorHex: String, x: Float, y: Float) -> Unit = { _, _, _, _, _ -> },
+    onUpdateClockProgress: (clockId: String, filledSegments: Int) -> Unit = { _, _ -> },
+    onMoveClock: (clockId: String, x: Float, y: Float) -> Unit = { _, _, _ -> },
+    onRemoveClock: (clockId: String) -> Unit = {},
+    onSetBackgroundMap: (uri: String?, preset: PlaymatAtmosphericPreset) -> Unit = { _, _ -> },
+    onSetBackgroundTransform: (opacity: Float, scale: Float) -> Unit = { _, _ -> },
+    onToggleBackgroundLock: () -> Unit = {},
+    onSetGridConfig: (gridType: PlaymatGridType, gridStyle: PlaymatGridStyle, cellSizeDp: Float, snapToGrid: Boolean) -> Unit = { _, _, _, _ -> },
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -152,8 +160,16 @@ fun PlaymatCanvasView(
     var showSendToTacticalDialog by remember { mutableStateOf(false) }
     var showDiceOverlay by remember { mutableStateOf(false) }
     var showTokenPickerDialog by remember { mutableStateOf(false) }
+    var showClockCreationDialog by remember { mutableStateOf(false) }
+    var showTacticalSettingsDialog by remember { mutableStateOf(false) }
+    var isRulerActive by remember { mutableStateOf(false) }
+    var rulerStartPos by remember { mutableStateOf<Offset?>(null) }
+    var rulerCurrentPos by remember { mutableStateOf<Offset?>(null) }
+    var tokenDragStartPos by remember { mutableStateOf<Offset?>(null) }
+    var tokenDragCurrentPos by remember { mutableStateOf<Offset?>(null) }
     var editingHpToken by remember { mutableStateOf<PlaymatTokenPlacement?>(null) }
     var selectedTokenId by remember { mutableStateOf<String?>(null) }
+    var selectedClockId by remember { mutableStateOf<String?>(null) }
     var stickyNoteText by remember { mutableStateOf("") }
     var hoveredSlotTag by remember { mutableStateOf<String?>(null) }
     var connectingSourceEndpointId by remember { mutableStateOf<String?>(null) }
@@ -167,13 +183,16 @@ fun PlaymatCanvasView(
         activeSurface.cards.associateBy { it.cardId }
     }
 
-    val endpointPositions = remember(activeSurface.cards, activeSurface.tokens) {
+    val endpointPositions = remember(activeSurface.cards, activeSurface.tokens, activeSurface.clocks) {
         val map = mutableMapOf<String, Offset>()
         activeSurface.cards.forEach { card ->
             map["card_${card.cardId}"] = Offset(card.x + 60f, card.y + 18f)
         }
         activeSurface.tokens.forEach { token ->
             map["token_${token.id}"] = Offset(token.x + 32f, token.y + 32f)
+        }
+        activeSurface.clocks.forEach { clock ->
+            map["clock_${clock.id}"] = Offset(clock.x + 38f, clock.y + 38f)
         }
         map
     }
@@ -202,22 +221,51 @@ fun PlaymatCanvasView(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .pointerInput(activeSurface.id) {
-                detectTransformGestures { _, pan, zoom, _ ->
-                    cameraZoom = (cameraZoom * zoom).coerceIn(0.4f, 2.5f)
-                    cameraX += pan.x
-                    cameraY += pan.y
-                    onUpdateCamera(cameraX, cameraY, cameraZoom)
+            .pointerInput(isRulerActive, activeSurface.id) {
+                if (isRulerActive) {
+                    detectDragGestures(
+                        onDragStart = { offset ->
+                            val canvasX = (offset.x - cameraX) / cameraZoom
+                            val canvasY = (offset.y - cameraY) / cameraZoom
+                            rulerStartPos = Offset(canvasX, canvasY)
+                            rulerCurrentPos = Offset(canvasX, canvasY)
+                        },
+                        onDrag = { change, _ ->
+                            change.consume()
+                            val canvasX = (change.position.x - cameraX) / cameraZoom
+                            val canvasY = (change.position.y - cameraY) / cameraZoom
+                            rulerCurrentPos = Offset(canvasX, canvasY)
+                        },
+                        onDragEnd = { },
+                        onDragCancel = {
+                            rulerStartPos = null
+                            rulerCurrentPos = null
+                        }
+                    )
+                }
+            }
+            .pointerInput(isRulerActive, activeSurface.id) {
+                if (!isRulerActive) {
+                    detectTransformGestures { _, pan, zoom, _ ->
+                        cameraZoom = (cameraZoom * zoom).coerceIn(0.4f, 2.5f)
+                        cameraX += pan.x
+                        cameraY += pan.y
+                        onUpdateCamera(cameraX, cameraY, cameraZoom)
+                    }
                 }
             }
             .pointerInput(activeSurface.id) {
                 detectTapGestures(
                     onTap = {
-                        if (connectingSourceEndpointId != null) {
+                        if (rulerStartPos != null) {
+                            rulerStartPos = null
+                            rulerCurrentPos = null
+                        } else if (connectingSourceEndpointId != null) {
                             connectingSourceEndpointId = null
                         } else {
                             onSelectCard(null)
                             selectedTokenId = null
+                            selectedClockId = null
                         }
                     }
                 )
@@ -236,6 +284,27 @@ fun PlaymatCanvasView(
         ) {
             // Fondo Texturizado / Tapete
             PlaymatBackground(theme = activeSurface.backgroundTheme)
+
+            // Capa de Battlemap y Preset Atmosférico
+            PlaymatBattlemapLayer(
+                customImageUri = activeSurface.customImageUri,
+                preset = activeSurface.backgroundPreset,
+                opacity = activeSurface.backgroundOpacity,
+                scale = activeSurface.backgroundScale,
+                offsetX = activeSurface.backgroundX,
+                offsetY = activeSurface.backgroundY,
+                zoom = cameraZoom
+            )
+
+            // Capa de Cuadrícula Táctica (Squares / Hexes / Dots)
+            PlaymatGridLayer(
+                gridType = activeSurface.gridType,
+                gridStyle = activeSurface.gridStyle,
+                cellSizeDp = activeSurface.cellSizeDp,
+                cameraX = cameraX,
+                cameraY = cameraY,
+                zoom = cameraZoom
+            )
 
             // Contenido Espacial 2D Transformado (Plantillas, Cartas, Notas)
             Box(
@@ -367,11 +436,18 @@ fun PlaymatCanvasView(
                                         connectingSourceEndpointId = null
                                     } else {
                                         selectedTokenId = null
+                                        selectedClockId = null
                                         onSelectCard(if (isSelected) null else placement.cardId)
                                     }
                                 },
                                 onMove = { cardId, finalX, finalY, slotTag ->
-                                    onMoveCard(cardId, finalX, finalY, slotTag)
+                                    val finalXWithSnap = if (activeSurface.snapToGrid && slotTag == null && activeSurface.gridType != PlaymatGridType.NONE) {
+                                        (kotlin.math.round(finalX / activeSurface.cellSizeDp)) * activeSurface.cellSizeDp
+                                    } else finalX
+                                    val finalYWithSnap = if (activeSurface.snapToGrid && slotTag == null && activeSurface.gridType != PlaymatGridType.NONE) {
+                                        (kotlin.math.round(finalY / activeSurface.cellSizeDp)) * activeSurface.cellSizeDp
+                                    } else finalY
+                                    onMoveCard(cardId, finalXWithSnap, finalYWithSnap, slotTag)
                                 },
                                 onHoverSlotChanged = { tag ->
                                     hoveredSlotTag = tag
@@ -400,11 +476,20 @@ fun PlaymatCanvasView(
                                     connectingSourceEndpointId = null
                                 } else {
                                     selectedTokenId = if (isTokenSelected) null else token.id
+                                    selectedClockId = null
                                     onSelectCard(null)
                                 }
                             },
+                            onDragProgress = { start, current ->
+                                tokenDragStartPos = start
+                                tokenDragCurrentPos = current
+                            },
                             onMove = { tokenId, finalX, finalY ->
-                                onMoveToken(tokenId, finalX, finalY)
+                                val (snappedX, snappedY) = if (activeSurface.snapToGrid && activeSurface.gridType != PlaymatGridType.NONE) {
+                                    val cell = activeSurface.cellSizeDp
+                                    Pair((kotlin.math.round(finalX / cell)) * cell, (kotlin.math.round(finalY / cell)) * cell)
+                                } else Pair(finalX, finalY)
+                                onMoveToken(tokenId, snappedX, snappedY)
                             },
                             onStartConnection = {
                                 connectingSourceEndpointId = "token_${token.id}"
@@ -428,6 +513,62 @@ fun PlaymatCanvasView(
                             },
                             onDismissMenu = {
                                 selectedTokenId = null
+                            }
+                        )
+                    }
+                }
+
+                // Relojes de Progreso (Progress Clocks estilo Blades in the Dark)
+                activeSurface.clocks.forEach { clock ->
+                    val isClockSelected = selectedClockId == clock.id
+                    val isClockConnectingSource = connectingSourceEndpointId == "clock_${clock.id}"
+                    key("clock_${clock.id}") {
+                        PlaymatClockItem(
+                            clock = clock,
+                            isSelected = isClockSelected,
+                            isConnectingSource = isClockConnectingSource,
+                            zoom = cameraZoom,
+                            onClockClick = {
+                                if (connectingSourceEndpointId != null) {
+                                    val targetEndpoint = "clock_${clock.id}"
+                                    if (connectingSourceEndpointId != targetEndpoint) {
+                                        onCreateConnection(connectingSourceEndpointId!!, targetEndpoint)
+                                    }
+                                    connectingSourceEndpointId = null
+                                } else {
+                                    selectedClockId = if (isClockSelected) null else clock.id
+                                    selectedTokenId = null
+                                    onSelectCard(null)
+                                }
+                            },
+                            onMove = { clockId, finalX, finalY ->
+                                val (snappedX, snappedY) = if (activeSurface.snapToGrid && activeSurface.gridType != PlaymatGridType.NONE) {
+                                    val cell = activeSurface.cellSizeDp
+                                    Pair((kotlin.math.round(finalX / cell)) * cell, (kotlin.math.round(finalY / cell)) * cell)
+                                } else Pair(finalX, finalY)
+                                onMoveClock(clockId, snappedX, snappedY)
+                            },
+                            onAdvanceProgress = {
+                                val nextProgress = (clock.filledSegments + 1).coerceAtMost(clock.totalSegments)
+                                onUpdateClockProgress(clock.id, nextProgress)
+                            },
+                            onReduceProgress = {
+                                val prevProgress = (clock.filledSegments - 1).coerceAtLeast(0)
+                                onUpdateClockProgress(clock.id, prevProgress)
+                            },
+                            onResetProgress = {
+                                onUpdateClockProgress(clock.id, 0)
+                            },
+                            onStartConnection = {
+                                connectingSourceEndpointId = "clock_${clock.id}"
+                                selectedClockId = null
+                            },
+                            onRemove = {
+                                onRemoveClock(clock.id)
+                                selectedClockId = null
+                            },
+                            onDismissMenu = {
+                                selectedClockId = null
                             }
                         )
                     }
@@ -487,6 +628,14 @@ fun PlaymatCanvasView(
             },
             onOpenQuickDraw = { showQuickDrawDialog = true },
             onOpenTokenPicker = { showTokenPickerDialog = true },
+            onOpenClockCreator = { showClockCreationDialog = true },
+            onOpenTacticalSettings = { showTacticalSettingsDialog = true },
+            onToggleRuler = {
+                isRulerActive = !isRulerActive
+                rulerStartPos = null
+                rulerCurrentPos = null
+            },
+            isRulerActive = isRulerActive,
             onToggleDiceRoller = { showDiceOverlay = !showDiceOverlay },
             onExportSnapshot = {
                 coroutineScope.launch {
@@ -575,6 +724,71 @@ fun PlaymatCanvasView(
                         colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                     ) {
                         Text("Cancelar")
+                    }
+                }
+            }
+        }
+
+        // 6. Cinta métrica táctica y herramienta de Regla Libre
+        PlaymatMeasurementRuler(
+            startPos = tokenDragStartPos,
+            currentPos = tokenDragCurrentPos,
+            cellSizeDp = activeSurface.cellSizeDp,
+            zoom = cameraZoom,
+            cameraX = cameraX,
+            cameraY = cameraY
+        )
+
+        PlaymatMeasurementRuler(
+            startPos = rulerStartPos,
+            currentPos = rulerCurrentPos,
+            cellSizeDp = activeSurface.cellSizeDp,
+            zoom = cameraZoom,
+            cameraX = cameraX,
+            cameraY = cameraY
+        )
+
+        // Banner indicador de modo Regla
+        AnimatedVisibility(
+            visible = isRulerActive,
+            enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
+            exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 76.dp)
+        ) {
+            Surface(
+                shape = RoundedCornerShape(24.dp),
+                color = MaterialTheme.colorScheme.tertiaryContainer,
+                shadowElevation = 8.dp,
+                border = androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFF00E5FF)),
+                modifier = Modifier.padding(horizontal = 16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Straighten,
+                        contentDescription = null,
+                        tint = Color(0xFF00E5FF),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Text(
+                        text = "Modo Regla activo: arrastra sobre la mesa para medir distancias",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer
+                    )
+                    TextButton(
+                        onClick = {
+                            isRulerActive = false
+                            rulerStartPos = null
+                            rulerCurrentPos = null
+                        }
+                    ) {
+                        Text("Cerrar")
                     }
                 }
             }
@@ -824,6 +1038,31 @@ fun PlaymatCanvasView(
             }
         )
     }
+
+    // Diálogo de Creación de Reloj de Progreso (Blades in the Dark)
+    if (showClockCreationDialog) {
+        PlaymatClockCreationDialog(
+            onDismissRequest = { showClockCreationDialog = false },
+            onConfirm = { title, segments, colorHex ->
+                val centerX = (-cameraX + 300) / cameraZoom
+                val centerY = (-cameraY + 300) / cameraZoom
+                onAddClock(title, segments, colorHex, centerX, centerY)
+                showClockCreationDialog = false
+            }
+        )
+    }
+
+    // Diálogo de Fondo, Battlemaps y Cuadrícula Táctica
+    if (showTacticalSettingsDialog) {
+        PlaymatTacticalSettingsDialog(
+            surface = activeSurface,
+            onDismissRequest = { showTacticalSettingsDialog = false },
+            onSetBackgroundMap = onSetBackgroundMap,
+            onSetBackgroundTransform = onSetBackgroundTransform,
+            onToggleBackgroundLock = onToggleBackgroundLock,
+            onSetGridConfig = onSetGridConfig
+        )
+    }
 }
 
 /**
@@ -861,6 +1100,14 @@ private fun PlaymatCardItem(
         animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
         label = "cardRotation"
     )
+
+    val animatedFlipRotation by animateFloatAsState(
+        targetValue = if (placement.isFaceUp) 0f else 180f,
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+        label = "cardFlipRotation"
+    )
+
+    val density = LocalDensity.current
 
     val currentNearestSlot = remember(localX, localY, isDragging, templateSlots) {
         if (!isDragging || templateSlots.isEmpty()) null
@@ -906,6 +1153,8 @@ private fun PlaymatCardItem(
                 scaleX = scale
                 scaleY = scale
                 rotationZ = animatedRotation
+                rotationY = animatedFlipRotation
+                cameraDistance = 14f * density.density
             }
             .pointerInput(placement.cardId, zoom, templateSlots) {
                 awaitEachGesture {
@@ -972,82 +1221,93 @@ private fun PlaymatCardItem(
                 shape = RoundedCornerShape(8.dp)
             )
     ) {
-        if (placement.isFaceUp) {
-            // Frente de la carta
-            val frontImage = card.faces.firstOrNull()?.imagePath ?: card.faces.firstOrNull()?.reversedImagePath
-            if (frontImage != null) {
-                AsyncImage(
-                    model = frontImage.toCoilModel(),
-                    contentDescription = card.title,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(8.dp),
-                    verticalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = card.title,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = card.faces.firstOrNull()?.name ?: "Frente",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+        val isShowingBack = animatedFlipRotation > 90f
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    if (isShowingBack) {
+                        rotationY = 180f // Compensar reflejo para que la imagen o texto del reverso no se inviertan
+                    }
                 }
-            }
+        ) {
+            if (!isShowingBack) {
+                // Frente de la carta
+                val frontImage = card.faces.firstOrNull()?.imagePath ?: card.faces.firstOrNull()?.reversedImagePath
+                if (frontImage != null) {
+                    AsyncImage(
+                        model = frontImage.toCoilModel(),
+                        contentDescription = card.title,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(8.dp),
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = card.title,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = card.faces.firstOrNull()?.name ?: "Frente",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
 
-            // Banner inferior translúcido para lectura rápida de la pista activa
-            if (!cueText.isNullOrBlank()) {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter),
-                    color = Color.Black.copy(alpha = 0.75f)
-                ) {
-                    Text(
-                        text = cueText,
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontSize = (9 * zoom.coerceIn(0.7f, 1.3f)).sp,
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        color = Color.White,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
-                    )
+                // Banner inferior translúcido para lectura rápida de la pista activa
+                if (!cueText.isNullOrBlank()) {
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.BottomCenter),
+                        color = Color.Black.copy(alpha = 0.75f)
+                    ) {
+                        Text(
+                            text = cueText,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontSize = (9 * zoom.coerceIn(0.7f, 1.3f)).sp,
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            color = Color.White,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                        )
+                    }
                 }
-            }
-        } else {
-            // Reverso de la carta
-            if (backImage != null) {
-                AsyncImage(
-                    model = backImage.toCoilModel(),
-                    contentDescription = "Reverso",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
             } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Style,
+                // Reverso de la carta
+                if (backImage != null) {
+                    AsyncImage(
+                        model = backImage.toCoilModel(),
                         contentDescription = "Reverso",
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.5f),
-                        modifier = Modifier.size(36.dp)
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
                     )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.primaryContainer),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Style,
+                            contentDescription = "Reverso",
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.5f),
+                            modifier = Modifier.size(36.dp)
+                        )
+                    }
                 }
             }
         }

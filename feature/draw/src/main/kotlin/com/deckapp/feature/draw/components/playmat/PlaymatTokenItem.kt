@@ -51,6 +51,7 @@ fun PlaymatTokenItem(
     zoom: Float,
     onTokenClick: () -> Unit,
     onMove: (tokenId: String, finalX: Float, finalY: Float) -> Unit,
+    onDragProgress: (start: androidx.compose.ui.geometry.Offset?, current: androidx.compose.ui.geometry.Offset?) -> Unit = { _, _ -> },
     onStartConnection: () -> Unit,
     onEditHp: () -> Unit,
     onToggleFaction: () -> Unit,
@@ -119,6 +120,8 @@ fun PlaymatTokenItem(
 
                             if (drag != null || dragDetected) {
                                 isDragging = true
+                                val startOffset = androidx.compose.ui.geometry.Offset(localX + 32f, localY + 32f)
+                                onDragProgress(startOffset, androidx.compose.ui.geometry.Offset(localX + 32f, localY + 32f))
                                 val currentPointerId = down.id
                                 while (true) {
                                     val event = awaitPointerEvent()
@@ -128,8 +131,10 @@ fun PlaymatTokenItem(
                                     localX += delta.x / zoom
                                     localY += delta.y / zoom
                                     dragChange.consume()
+                                    onDragProgress(startOffset, androidx.compose.ui.geometry.Offset(localX + 32f, localY + 32f))
                                 }
                                 isDragging = false
+                                onDragProgress(null, null)
                                 onMove(token.id, localX, localY)
                             } else {
                                 // Toque limpio
