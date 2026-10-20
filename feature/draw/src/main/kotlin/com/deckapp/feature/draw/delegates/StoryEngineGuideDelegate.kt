@@ -24,7 +24,8 @@ class StoryEngineGuideDelegate(
     private val scope: CoroutineScope,
     private val sessionRepository: SessionRepository,
     private val deckDelegate: SessionDeckDelegate,
-    private val openMicrosettingBuilder: () -> Unit
+    private val openMicrosettingBuilder: () -> Unit,
+    private val onCardDrawnForStep: ((StoryEngineGuideTab, Int, Long) -> Unit)? = null
 ) {
     fun open(tab: StoryEngineGuideTab = ui.value.storyEngineGuideTab) {
         ui.update { it.copy(showStoryEngineGuide = true, storyEngineGuideTab = tab) }
@@ -83,12 +84,18 @@ class StoryEngineGuideDelegate(
                 ui.update { it.copy(snackbarMessage = "No se encontró mazo para \"${step.title}\". Importa el pack en Ajustes.") }
                 return@launch
             }
+            val handBefore = ui.value.hand.map { it.id }.toSet()
             val isPresentInSession = ui.value.deckRefs.any { it.stackId == targetDeck.id }
             if (!isPresentInSession) {
                 sessionRepository.addDeckToSession(SessionDeckRef(sessionId, targetDeck.id))
             }
             deckDelegate.drawCardFromDeck(targetDeck.id)
-            ui.update { it.copy(snackbarMessage = "Carta robada de ${targetDeck.name}") }
+            val newHand = ui.value.hand
+            val drawnCard = newHand.firstOrNull { it.id !in handBefore }
+            if (drawnCard != null && onCardDrawnForStep != null) {
+                onCardDrawnForStep.invoke(ui.value.storyEngineGuideTab, step.stepIndex, drawnCard.id)
+            }
+            ui.update { it.copy(snackbarMessage = "Carta robada de ${targetDeck.name} y colocada en el tapete") }
         }
     }
 

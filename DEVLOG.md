@@ -1,3 +1,84 @@
+### Hilos Narrativos y Conectores de Investigación en el Tapete (Playmat Fase 4) (19 de octubre de 2026)
+
+**Categoría:** `FEATURE / PLAYMAT / NARRATIVE THREADS / CONNECTORS / INVESTIGATION BOARD / UX / COMPOSABLE`
+
+- **Hilos Narrativos y Conectores Físicos entre Cartas (`PlaymatConnectionLine`):**
+  - Permite enlazar cualquier par de cartas en el tapete 2D con un estilo visual de tablón de investigación / pistas detectivescas o relaciones causa-efecto de *The Story Engine*.
+  - Renderizado de cuerda elástica con curvatura Bézier (`quadraticTo`) y ligera comba por gravedad que se tensa, estira y reposiciona suavemente en tiempo real a 120 FPS al arrastrar cualquiera de las dos cartas.
+  - Sombra proyectada sobre el fieltro/madera de la mesa para dar sensación de profundidad física.
+  - Chinchetas/pins en ambos extremos con textura metálica, relieve de color temático y brillo especular.
+- **Flujo de Conexión Táctil Ergonómico:**
+  - Acción rápida **"Conectar Hilo"** en el menú contextual radial de la carta seleccionada.
+  - Al activarse, la carta origen se ilumina con un halo/borde distintivo en rojo (`#E53935`) y se despliega un banner inferior con la indicación *"Toca la segunda carta para tender el hilo"* y opción de cancelación.
+  - Tocar la carta destino traza la conexión de inmediato.
+- **Píldora Interactiva y Diálogo de Edición (`PlaymatConnectionEditorDialog`):**
+  - Cada hilo cuenta con una píldora flotante en su punto central medio que muestra la relación (ej. *"Sospechoso de"*, *"Antagonista"*, *"Causa / Origen"*, *"Ubicado en"*, *"Aliado con"*, *"Pista de"*).
+  - Tocar la píldora abre un diálogo para modificar la etiqueta de texto con un toque, seleccionar entre una paleta de 6 colores semánticos (Rojo, Oro, Cian, Púrpura, Verde, Neutral) o cortar el hilo con el botón de papelera.
+- **Limpieza y Poda Automática del Ciclo de Vida:**
+  - Al descartar o devolver cualquiera de las cartas conectadas a la mano privada, los hilos asociados se eliminan automáticamente para evitar referencias huérfanas en la mesa.
+  - Prevención de duplicados en ambas direcciones.
+- **Verificación Técnica:**
+  - 100% de tests unitarios aprobados en `PlaymatDelegateTest` (`narrativeConnections_createUpdateAndAutoPruneOnDiscard`).
+  - Compilado e instalado en el dispositivo físico Motorola (`ZE222B5GXX`) con ejecución activa.
+
+---
+
+### Mazos Físicos 3D, Pilas de Descarte y Lanzador de Dados en el Tapete (Playmat Fase 3) (19 de octubre de 2026)
+
+**Categoría:** `FEATURE / PLAYMAT / PHYSICAL DECKS / DICE ROLLER / GESTURES / UX / COMPOSABLE`
+
+- **Mazos Físicos 3D en el Tapete (`PlaymatDeckItem`):**
+  - Cada mazo activo en la sesión se representa físicamente sobre la superficie con efecto de volumen 3D escalonado (1 a 4 capas de sombras y bordes según cartas restantes).
+  - Píldora superior con el nombre del mazo y badge con el conteo de cartas disponibles.
+  - Textura auténtica del reverso del mazo o degradado táctil de cuero si no posee imagen.
+  - **Interacción Dual de Robo con Feedback Háptico:**
+    - *Toque directo*: roba una carta de forma inmediata y la coloca boca arriba al lado del mazo.
+    - *Arrastre táctil desde el mazo*: arrastrar el dedo desde el mazo extrae una carta flotante con vibración háptica (`HapticFeedbackConstants.LONG_PRESS` / `performHapticFeedback`) y permite soltarla en cualquier coordenada del tapete o acoplarla por snapping magnético a una ranura de plantilla.
+  - Mazos completamente reposicionables en el espacio 2D mediante arrastre de su cabecera.
+- **Pilas de Descarte Físicas con Retorno Rápido (`PlaymatDiscardPileItem`):**
+  - Cada mazo cuenta con su correspondiente pila de descarte sobre el tapete.
+  - Estado vacío representado con ranura punteada tenue y botón de retorno inactivo.
+  - Al descartar cartas, muestra la última carta descartada boca arriba con una inclinación física natural (-2.5°), badge numérico de cartas descartadas y botón rápido de barajado (🔄 *Reshuffle*) que devuelve todas las cartas al mazo principal y registra el evento en el log.
+  - Coordenadas de descarte reposicionables libremente en la mesa.
+- **Lanzador Flotante de Dados Integrado (`PlaymatDiceOverlay`):**
+  - Nuevo botón de dados (`Casino`) en la barra de herramientas del tapete que despliega una botonera flotante compacta y ergonómica.
+  - Soporte instantáneo de dados poliédricos estándar de rol: `d4`, `d6`, `d8`, `d10`, `d12`, `d20`, `d100`.
+  - Animación de tirada y muestra de fórmula y resultado.
+  - Botón **"Fijar a Mesa"**: materializa el resultado numérico del dado directamente sobre el tapete como una ficha circular (`PlaymatTableChip`) con color temático según el dado.
+- **Persistencia de Superficie (`PlaymatDeckPlacement`):**
+  - Estructura `PlaymatDeckPlacement(stackId, x, y, discardX, discardY, isLocked)` guardada en cada `PlaymatSurface`.
+  - Disposición automática inteligente al margen izquierdo para sesiones existentes o nuevos mazos añadidos a la mesa.
+- **Verificación Técnica:**
+  - Nuevas pruebas unitarias en `PlaymatDelegateTest` verificando movimiento y persistencia de mazos y descartes (100% de tests aprobados).
+  - Compilación e instalación directa en dispositivo físico Motorola con verificación visual.
+
+---
+
+### Optimización de Arrastre Ultrarrápido, Snapping Magnético y Exportación en el Tapete (Playmat Fase 2) (19 de octubre de 2026)
+
+**Categoría:** `PERFORMANCE / PLAYMAT / GESTURES / UX / COMPOSABLE / ANIMATIONS / EXPORT`
+
+- **Arrastre Desacoplado y Ultrafluido a 120 FPS (`PlaymatCardItem`):**
+  - **Diagnóstico y solución del stuttering:** Se identificó que la llamada a `onMoveCard` en cada micro-delta del puntero disparaba la codificación JSON y escritura síncrona en disco (`SharedPreferences.apply()`) en el hilo de UI, provocando que las cartas se congelaran o apenas se movieran.
+  - **Decoupling gesture engine:** Se implementó `localX` y `localY` gestionados localmente durante el gesto, delegando la persistencia a `onMove` únicamente al liberar el dedo (`onDragEnd`).
+  - **Eliminación de colisión de eventos táctiles:** Se sustituyó `.clickable` por `awaitEachGesture` / `awaitTouchSlopOrCancellation` en un único bloque de puntero, permitiendo detección inmediata y sin retrasos de toques limpios para selección y arrastre instantáneo sin conflicto de touch slop.
+- **Snapping Magnético a Plantillas Temáticas (`TemplateSlotDef`):**
+  - Al arrastrar una carta cerca de una ranura de plantilla (*Deck of Worlds*, *Story Engine*, *Tarot*, *Oráculo*) a menos de 60dp, la carta proyecta un halo de acoplamiento magnético en color cian neón (`#00E5FF`) y la silueta de la ranura se ilumina.
+  - Al soltar la carta dentro del radio magnético, se ajusta con precisión matemática a las coordenadas de la ranura y asocia su `slotTag`.
+- **Banner de Lectura Rápida de Pistas Activas (`Active Cue Quick-Read`):**
+  - Renderizado automático de una barra inferior translúcida con el texto de la pista activa (`activeZone.text`) o título, permitiendo leer el significado narrativo inmediatamente al rotar sin tener que hacer zoom excesivo ni abrir el visor de detalles.
+- **Rotación Física Suave con Elasticidad (`Spring`):**
+  - Se sustituyó la rotación instantánea por `animateFloatAsState` con `spring(stiffness = Spring.StiffnessMediumLow)` renderizada vía GPU en `graphicsLayer`, otorgando una sensación táctil de carta física sobre paño.
+- **Acción Radial "A Mapa Táctico" con Diálogo de Conversión:**
+  - En la rueda contextual radial se añadió la acción *A Mapa Táctico*: despliega un diálogo selector para convertir la carta seleccionada en un **Token / Miniatura de Combate** (con la ilustración, PV y CA en la grilla) o en un **Pin de Exploración / PDI** (chincheta de mapa con las pistas y notas de la carta).
+- **Exportación y Compartido de Snapshot del Tapete (`PlaymatSnapshotHelper`):**
+  - Integrado botón de cámara/compartir en `PlaymatToolbar` que captura la superficie de la mesa mediante `rememberGraphicsLayer()` y lanza el selector nativo de compartir de Android (`Intent.ACTION_SEND`) utilizando `FileProvider` (`${applicationId}.fileprovider`).
+- **Verificación Técnica:**
+  - Compilación limpia de todos los módulos y 100% de tests unitarios aprobados en `:feature:draw:testDebugUnitTest`.
+  - Instalado y ejecutado con éxito en dispositivo físico Motorola conectado vía ADB.
+
+---
+
 ### Vista Principal de Tapete de Cartas Espacial 2D — Playmat (19 de octubre de 2026)
 
 **Categoría:** `FEATURE / PLAYMAT / WORKSPACE / 2D CANVAS / UX / STORY ENGINE / SESSION`

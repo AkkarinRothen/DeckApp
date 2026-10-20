@@ -345,21 +345,24 @@ class SessionViewModel @Inject constructor(
         onAppendToNotes = { appendToNotes(it) }
     )
 
-    val storyEngineGuideDelegate = com.deckapp.feature.draw.delegates.StoryEngineGuideDelegate(
-        sessionId = sessionId,
-        ui = _uiState,
-        scope = viewModelScope,
-        sessionRepository = sessionRepository,
-        deckDelegate = deckDelegate,
-        openMicrosettingBuilder = { openMicrosettingBuilder() }
-    )
-
     val playmatDelegate = com.deckapp.feature.draw.delegates.PlaymatDelegate(
         sessionId = sessionId,
         _uiState = _uiState,
         scope = viewModelScope,
         updateBoardMemory = { updateBoardMemory(it) },
         deckDelegate = deckDelegate
+    )
+
+    val storyEngineGuideDelegate = com.deckapp.feature.draw.delegates.StoryEngineGuideDelegate(
+        sessionId = sessionId,
+        ui = _uiState,
+        scope = viewModelScope,
+        sessionRepository = sessionRepository,
+        deckDelegate = deckDelegate,
+        openMicrosettingBuilder = { openMicrosettingBuilder() },
+        onCardDrawnForStep = { tab, stepIndex, cardId ->
+            playmatDelegate.placeStepCardOnPlaymat(tab, stepIndex, cardId)
+        }
     )
 
     // Un flujo que emite la hora actual cada minuto para cálculos reactivos

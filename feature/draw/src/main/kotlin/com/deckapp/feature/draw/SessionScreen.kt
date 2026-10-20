@@ -652,7 +652,7 @@ fun SessionScreen(
                                 com.deckapp.feature.draw.components.playmat.PlaymatCanvasView(
                                     uiState = uiState,
                                     onPlaceCardOnPlaymat = { cardId, x, y -> viewModel.playmatDelegate.placeCardOnPlaymat(cardId, x, y) },
-                                    onMoveCard = { cardId, x, y -> viewModel.playmatDelegate.moveCard(cardId, x, y) },
+                                    onMoveCard = { cardId, x, y, slotTag -> viewModel.playmatDelegate.moveCard(cardId, x, y, slotTag) },
                                     onRotateCard = { cardId, delta -> viewModel.playmatDelegate.rotateCard(cardId, delta) },
                                     onFlipCard = { cardId -> viewModel.playmatDelegate.flipCard(cardId) },
                                     onReturnToHand = { cardId -> viewModel.playmatDelegate.returnCardToHand(cardId) },
@@ -667,8 +667,31 @@ fun SessionScreen(
                                     onUpdateCamera = { x, y, zoom -> viewModel.playmatDelegate.updateCamera(x, y, zoom) },
                                     onQuickDraw = { stackId, x, y -> viewModel.playmatDelegate.quickDrawToPlaymat(stackId, x, y) },
                                     onAddStickyNote = { text, x, y -> viewModel.playmatDelegate.addStickyNote(text, x, y) },
+                                    onMoveStickyNote = { noteId, x, y -> viewModel.playmatDelegate.moveStickyNote(noteId, x, y) },
                                     onDeleteStickyNote = { noteId -> viewModel.playmatDelegate.deleteStickyNote(noteId) },
                                     onCardDetailClick = { cardId -> onCardClick(cardId, uiState.sessionId) },
+                                    onSendCardToTacticalMap = { card, isToken ->
+                                        if (isToken) {
+                                            viewModel.tacticalMapDelegate.addTokenFromCard(card)
+                                        } else {
+                                            viewModel.tacticalMapDelegate.addPinForCard(card)
+                                        }
+                                    },
+                                    onMoveDeck = { stackId, x, y -> viewModel.playmatDelegate.moveDeck(stackId, x, y) },
+                                    onMoveDiscardPile = { stackId, x, y -> viewModel.playmatDelegate.moveDiscardPile(stackId, x, y) },
+                                    onDrawFromDeck = { stackId, x, y, slotTag -> viewModel.playmatDelegate.drawFromPhysicalDeck(stackId, x, y, true, slotTag) },
+                                    onReshuffleDeck = { stackId -> viewModel.playmatDelegate.reshuffleDeck(stackId) },
+                                    onAddTableChip = { tableId, name, resultText, x, y -> viewModel.playmatDelegate.addTableChip(tableId, name, resultText, x, y) },
+                                    onCreateConnection = { fromId, toId -> viewModel.playmatDelegate.createConnection(fromId, toId) },
+                                    onUpdateConnection = { id, label, color -> viewModel.playmatDelegate.updateConnection(id, label, color) },
+                                    onRemoveConnection = { id -> viewModel.playmatDelegate.removeConnection(id) },
+                                    onAddToken = { name, imagePath, npcId, x, y, maxHp, currentHp, tokenType, ringColor ->
+                                        viewModel.playmatDelegate.addTokenToPlaymat(name, imagePath, npcId, x, y, maxHp, currentHp, tokenType, ringColor)
+                                    },
+                                    onMoveToken = { tokenId, x, y -> viewModel.playmatDelegate.moveToken(tokenId, x, y) },
+                                    onUpdateTokenHp = { tokenId, hp -> viewModel.playmatDelegate.updateTokenHp(tokenId, hp) },
+                                    onUpdateTokenType = { tokenId, type -> viewModel.playmatDelegate.updateTokenType(tokenId, type) },
+                                    onRemoveToken = { tokenId -> viewModel.playmatDelegate.removeToken(tokenId) },
                                     modifier = Modifier.fillMaxSize()
                                 )
                             }

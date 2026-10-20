@@ -697,6 +697,61 @@ class TacticalMapDelegate(
         }
     }
 
+    fun addTokenFromCard(card: Card) {
+        val map = _uiState.value.tacticalState.map
+        if (map == null) {
+            _uiState.update { it.copy(snackbarMessage = "No hay mapa táctico activo en la sesión") }
+            return
+        }
+        val currentTokenCount = _uiState.value.tacticalState.tokens.size
+        val cellX = 3f + (currentTokenCount % 5) * 1.5f
+        val cellY = 3f + (currentTokenCount / 5) * 1.5f
+        val cueText = card.activeZone?.text ?: card.faces.firstOrNull()?.name ?: ""
+
+        val newToken = TacticalToken(
+            mapId = map.id,
+            name = card.title,
+            avatarUri = card.faces.firstOrNull()?.imagePath,
+            faction = TokenFaction.NEUTRAL,
+            sizeInCells = 1f,
+            cellX = cellX,
+            cellY = cellY,
+            currentHp = 10,
+            maxHp = 10,
+            armorClass = 10,
+            notes = cueText
+        )
+
+        scope.launch {
+            tacticalMapRepository.upsertToken(newToken)
+            _uiState.update { it.copy(snackbarMessage = "Token creado en Mapa Táctico: \"${card.title}\"") }
+        }
+    }
+
+    fun addPinForCard(card: Card, cellX: Float = 4f, cellY: Float = 4f) {
+        val map = _uiState.value.tacticalState.map
+        if (map == null) {
+            _uiState.update { it.copy(snackbarMessage = "No hay mapa táctico activo en la sesión") }
+            return
+        }
+        val cueText = card.activeZone?.text ?: card.faces.firstOrNull()?.name ?: ""
+        val newPin = TacticalMapPin(
+            mapId = map.id,
+            cellX = cellX,
+            cellY = cellY,
+            title = card.title,
+            description = cueText,
+            iconName = "place",
+            colorHex = 0xFFFFC107L,
+            isSecret = false,
+            explorationState = MapPinExplorationState.UNKNOWN
+        )
+        scope.launch {
+            tacticalMapRepository.upsertPin(newPin)
+            _uiState.update { it.copy(snackbarMessage = "Pin colocado en Mapa Táctico: \"${card.title}\"") }
+        }
+    }
+
     fun updateGridCalibration(cellSize: Float, offsetX: Float, offsetY: Float) {
         val map = _uiState.value.tacticalState.map ?: return
         scope.launch {

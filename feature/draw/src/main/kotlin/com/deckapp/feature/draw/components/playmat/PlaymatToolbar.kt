@@ -29,6 +29,9 @@ fun PlaymatToolbar(
     onResetCamera: () -> Unit,
     onAddStickyNote: () -> Unit,
     onOpenQuickDraw: () -> Unit,
+    onOpenTokenPicker: (() -> Unit)? = null,
+    onToggleDiceRoller: (() -> Unit)? = null,
+    onExportSnapshot: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var showSurfaceMenu by remember { mutableStateOf(false) }
@@ -230,6 +233,36 @@ fun PlaymatToolbar(
                 )
             }
 
+            // Botón Añadir Token de Personaje
+            if (onOpenTokenPicker != null) {
+                IconButton(
+                    onClick = onOpenTokenPicker,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PersonAdd,
+                        contentDescription = "Añadir Token",
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.secondary
+                    )
+                }
+            }
+
+            // Botón Lanzador de Dados en el Tapete
+            if (onToggleDiceRoller != null) {
+                IconButton(
+                    onClick = onToggleDiceRoller,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Casino,
+                        contentDescription = "Lanzar Dados",
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.tertiary
+                    )
+                }
+            }
+
             // Reset Cámara
             IconButton(
                 onClick = onResetCamera,
@@ -240,6 +273,21 @@ fun PlaymatToolbar(
                     contentDescription = "Centrar Mesa",
                     modifier = Modifier.size(16.dp)
                 )
+            }
+
+            // Exportar Captura PNG
+            if (onExportSnapshot != null) {
+                IconButton(
+                    onClick = onExportSnapshot,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Share,
+                        contentDescription = "Compartir Tapete",
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
     }

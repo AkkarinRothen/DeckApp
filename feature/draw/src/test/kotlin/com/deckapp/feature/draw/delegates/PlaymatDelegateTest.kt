@@ -139,4 +139,142 @@ class PlaymatDelegateTest {
         delegate.switchSurface(firstSurfaceId)
         assertEquals("Mesa Principal", uiState.value.activePlaymatSurface.name)
     }
+
+    @Test
+    fun physicalDecks_moveDeckAndDiscardPile() {
+        delegate.ensureInitialSurface()
+        delegate.addDeckToPlaymat(stackId = 1L, x = 100f, y = 150f)
+
+        val active = uiState.value.activePlaymatSurface
+        val deckPlacement = active.decks.find { it.stackId == 1L }
+        assertNotNull(deckPlacement)
+        assertEquals(100f, deckPlacement!!.x, 0.01f)
+        assertEquals(150f, deckPlacement.y, 0.01f)
+
+        // Mover mazo
+        delegate.moveDeck(stackId = 1L, newX = 250f, newY = 300f)
+        val movedDeck = uiState.value.activePlaymatSurface.decks.find { it.stackId == 1L }
+        assertEquals(250f, movedDeck!!.x, 0.01f)
+        assertEquals(300f, movedDeck.y, 0.01f)
+
+        // Mover pila de descarte
+        delegate.moveDiscardPile(stackId = 1L, newX = 400f, newY = 300f)
+        val movedDiscard = uiState.value.activePlaymatSurface.decks.find { it.stackId == 1L }
+        assertEquals(400f, movedDiscard!!.discardX ?: 0f, 0.01f)
+        assertEquals(300f, movedDiscard.discardY ?: 0f, 0.01f)
+
+        // Re-barajar
+        delegate.reshuffleDeck(stackId = 1L)
+        verify { deckDelegate.shufflePileBack(1L) }
+    }
+
+    @Test
+    fun narrativeConnections_createUpdateAndAutoPruneOnDiscard() {
+        delegate.ensureInitialSurface()
+        delegate.placeCardOnPlaymat(cardId = 1001, x = 100f, y = 100f)
+        delegate.placeCardOnPlaymat(cardId = 1002, x = 300f, y = 200f)
+
+        // Crear conexión
+        delegate.createConnection(fromCardId = 1001, toCardId = 1002, label = "Sospechoso de", colorHex = "#E53935")
+        var surface = uiState.value.activePlaymatSurface
+        assertEquals(1, surface.connections.size)
+        val conn = surface.connections.first()
+        assertEquals(1001L, conn.fromCardId)
+        assertEquals(1002L, conn.toCardId)
+        assertEquals("Sospechoso de", conn.label)
+        assertEquals("#E53935", conn.colorHex)
+
+        // Evitar duplicados
+        delegate.createConnection(fromCardId = 1001, toCardId = 1002)
+        assertEquals(1, uiState.value.activePlaymatSurface.connections.size)
+        delegate.createConnection(fromCardId = 1002, toCardId = 1001)
+        assertEquals(1, uiState.value.activePlaymatSurface.connections.size)
+
+        // Actualizar etiqueta y color
+        delegate.updateConnection(connectionId = conn.id, label = "Aliado con", colorHex = "#FFB300")
+        surface = uiState.value.activePlaymatSurface
+        assertEquals("Aliado con", surface.connections.first().label)
+        assertEquals("#FFB300", surface.connections.first().colorHex)
+
+        // Al descartar o devolver una de las dos cartas a la mano, el hilo se poda automáticamente
+        delegate.returnCardToHand(1001)
+        surface = uiState.value.activePlaymatSurface
+        assertTrue(surface.connections.isEmpty())
+    }
+
+    @Test
+    fun characterTokens_crudAndUniversalConnections() {
+        delegate.ensureInitialSurface()
+        delegate.placeCardOnPlaymat(cardId = 1001, x = 100f, y = 100f)
+
+        // 1. Añadir token de personaje
+        delegate.addTokenToPlaymat(
+            name = "Detective Vance",
+            npcId = 77L,
+            x = 250f,
+            y = 150f,
+            maxHp = 15,
+            currentHp = 15,
+            tokenType = PlaymatTokenType.ALLY,
+            ringColorHex = "#4CAF50"
+        )
+
+        var surface = uiState.value.activePlaymatSurface
+        assertEquals(1, surface.tokens.size)
+        val token = surface.tokens.first()
+        assertEquals("Detective Vance", token.name)
+        assertEquals(15, token.maxHp)
+        assertEquals(15, token.currentHp)
+        assertEquals(PlaymatTokenType.ALLY, token.tokenType)
+
+        // 2. Mover token
+        delegate.moveToken(token.id, newX = 280f, newY = 180f)
+        assertEquals(280f, uiState.value.activePlaymatSurface.tokens.first().x, 0.01f)
+
+        // 3. Modificar PV y Facción
+        delegate.updateTokenHp(token.id, newHp = 10)
+        assertEquals(10, uiState.value.activePlaymatSurface.tokens.first().currentHp)
+
+        delegate.updateTokenType(token.id, PlaymatTokenType.ENEMY)
+        assertEquals(PlaymatTokenType.ENEMY, uiState.value.activePlaymatSurface.tokens.first().tokenType)
+        assertEquals("#E53935", uiState.value.activePlaymatSurface.tokens.first().ringColorHex)
+
+        // 4. Conexión Universal: Carta ↔ Token
+        delegate.createConnection(
+            fromEndpointId = "card_1001",
+            toEndpointId = "token_${token.id}",
+            label = "Sospechoso de",
+            colorHex = "#E53935"
+        )
+        surface = uiState.value.activePlaymatSurface
+        assertEquals(1, surface.connections.size)
+        val conn = surface.connections.first()
+        assertEquals("card_1001", conn.effectiveFromId)
+        assertEquals("token_${token.id}", conn.effectiveToId)
+
+        // 5. Añadir segundo token y conexión Token ↔ Token
+        delegate.addTokenToPlaymat(
+            name = "Guardia Nocturno",
+            x = 400f,
+            y = 300f,
+            maxHp = 10,
+            tokenType = PlaymatTokenType.NEUTRAL
+        )
+        val secondToken = uiState.value.activePlaymatSurface.tokens.find { it.name == "Guardia Nocturno" }!!
+        delegate.createConnection(
+            fromEndpointId = "token_${token.id}",
+            toEndpointId = "token_${secondToken.id}",
+            label = "Sobornado por",
+            colorHex = "#FFB300"
+        )
+        assertEquals(2, uiState.value.activePlaymatSurface.connections.size)
+
+        // 6. Eliminar token poda automáticamente sus hilos asociados
+        delegate.removeToken(token.id)
+        surface = uiState.value.activePlaymatSurface
+        assertEquals(1, surface.tokens.size)
+        assertTrue(surface.connections.isEmpty())
+    }
 }
+
+

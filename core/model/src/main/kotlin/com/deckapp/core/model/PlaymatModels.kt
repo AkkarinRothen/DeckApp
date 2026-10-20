@@ -18,7 +18,10 @@ data class PlaymatSurface(
     val cameraZoom: Float = 1f,
     val cards: List<PlaymatCardPlacement> = emptyList(),
     val stickyNotes: List<PlaymatStickyNote> = emptyList(),
-    val tableChips: List<PlaymatTableChip> = emptyList()
+    val tableChips: List<PlaymatTableChip> = emptyList(),
+    val decks: List<PlaymatDeckPlacement> = emptyList(),
+    val connections: List<PlaymatConnection> = emptyList(),
+    val tokens: List<PlaymatTokenPlacement> = emptyList()
 )
 
 /**
@@ -86,3 +89,66 @@ data class PlaymatTableChip(
     val x: Float,
     val y: Float
 )
+
+/**
+ * Posición espacial 2D de un mazo físico y su pila de descarte asociada en el tapete.
+ */
+@Serializable
+data class PlaymatDeckPlacement(
+    val stackId: Long,
+    val x: Float,
+    val y: Float,
+    val discardX: Float? = null,
+    val discardY: Float? = null,
+    val isLocked: Boolean = false
+)
+
+/**
+ * Tipo o facción del token en el tapete.
+ */
+@Serializable
+enum class PlaymatTokenType {
+    ALLY,
+    NEUTRAL,
+    ENEMY
+}
+
+/**
+ * Posición espacial 2D, estadísticas y apariencia de un token de personaje (PJ/PNJ) sobre el tapete.
+ */
+@Serializable
+data class PlaymatTokenPlacement(
+    val id: String = UUID.randomUUID().toString(),
+    val npcId: Long? = null,
+    val name: String,
+    val imagePath: String? = null,
+    val x: Float,
+    val y: Float,
+    val currentHp: Int = 10,
+    val maxHp: Int = 10,
+    val tokenType: PlaymatTokenType = PlaymatTokenType.ALLY,
+    val ringColorHex: String = "#4CAF50",
+    val notes: String = ""
+)
+
+/**
+ * Conexión o hilo narrativo entre elementos del tapete (cartas y/o tokens de personajes).
+ */
+@Serializable
+data class PlaymatConnection(
+    val id: String = UUID.randomUUID().toString(),
+    val fromCardId: Long = 0L,
+    val toCardId: Long = 0L,
+    val fromEndpointId: String = "",
+    val toEndpointId: String = "",
+    val label: String = "",
+    val colorHex: String = "#E53935", // Rojo investigación por defecto
+    val isBidirectional: Boolean = false
+) {
+    val effectiveFromId: String
+        get() = fromEndpointId.ifBlank { if (fromCardId != 0L) "card_$fromCardId" else "" }
+
+    val effectiveToId: String
+        get() = toEndpointId.ifBlank { if (toCardId != 0L) "card_$toCardId" else "" }
+}
+

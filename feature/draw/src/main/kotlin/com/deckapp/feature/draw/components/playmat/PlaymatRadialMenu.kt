@@ -29,6 +29,8 @@ fun PlaymatRadialMenu(
     onReturnToHand: () -> Unit,
     onDiscard: () -> Unit,
     onInspect: () -> Unit,
+    onSendToTacticalMap: () -> Unit,
+    onStartConnection: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -61,9 +63,19 @@ fun PlaymatRadialMenu(
                     onClick = onFlip
                 )
                 RadialActionButton(
+                    icon = Icons.Default.Share,
+                    description = "Conectar Hilo",
+                    onClick = onStartConnection
+                )
+                RadialActionButton(
                     icon = Icons.Default.PanTool,
                     description = "Mandar a Mano",
                     onClick = onReturnToHand
+                )
+                RadialActionButton(
+                    icon = Icons.Default.Explore,
+                    description = "A Mapa Táctico",
+                    onClick = onSendToTacticalMap
                 )
                 RadialActionButton(
                     icon = Icons.Default.DeleteOutline,
