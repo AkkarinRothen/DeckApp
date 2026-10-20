@@ -240,28 +240,32 @@ class SessionMythicDelegate(
         _uiState.update { it.copy(selectedThreadsTab = tab) }
     }
 
+    fun updateModalsState(transform: (com.deckapp.feature.draw.model.state.SessionModalsUiState) -> com.deckapp.feature.draw.model.state.SessionModalsUiState) {
+        _uiState.update { it.copy(modals = transform(it.modals)) }
+    }
+
     fun openCreateThreadDialog() {
-        _uiState.update { it.copy(showThreadEditDialog = true, editingMythicThread = null) }
+        updateModalsState { it.copy(showThreadEditDialog = true, editingMythicThread = null) }
     }
 
     fun openEditThreadDialog(thread: MythicThread) {
-        _uiState.update { it.copy(showThreadEditDialog = true, editingMythicThread = thread) }
+        updateModalsState { it.copy(showThreadEditDialog = true, editingMythicThread = thread) }
     }
 
     fun closeThreadDialog() {
-        _uiState.update { it.copy(showThreadEditDialog = false, editingMythicThread = null) }
+        updateModalsState { it.copy(showThreadEditDialog = false, editingMythicThread = null) }
     }
 
     fun openCreateCharacterDialog() {
-        _uiState.update { it.copy(showMythicCharacterEditDialog = true, editingMythicCharacter = null) }
+        updateModalsState { it.copy(showMythicCharacterEditDialog = true, editingMythicCharacter = null) }
     }
 
     fun openEditCharacterDialog(character: MythicCharacter) {
-        _uiState.update { it.copy(showMythicCharacterEditDialog = true, editingMythicCharacter = character) }
+        updateModalsState { it.copy(showMythicCharacterEditDialog = true, editingMythicCharacter = character) }
     }
 
     fun closeCharacterDialog() {
-        _uiState.update { it.copy(showMythicCharacterEditDialog = false, editingMythicCharacter = null) }
+        updateModalsState { it.copy(showMythicCharacterEditDialog = false, editingMythicCharacter = null) }
     }
 
     fun saveMythicThread(id: Long, description: String) {
@@ -277,7 +281,7 @@ class SessionMythicDelegate(
                         ?: MythicThread(id = id, sessionId = mythicId, description = description.trim())
                 )
             }
-            _uiState.update { it.copy(showThreadEditDialog = false, editingMythicThread = null) }
+            updateModalsState { it.copy(showThreadEditDialog = false, editingMythicThread = null) }
         }
     }
 
@@ -294,9 +298,10 @@ class SessionMythicDelegate(
                         ?: MythicCharacter(id = id, sessionId = mythicId, name = name.trim(), notes = notes.trim())
                 )
             }
-            _uiState.update { it.copy(showMythicCharacterEditDialog = false, editingMythicCharacter = null) }
+            updateModalsState { it.copy(showMythicCharacterEditDialog = false, editingMythicCharacter = null) }
         }
     }
+
 
     fun rollRandomThreadOrCharacter() {
         val tab = _uiState.value.selectedThreadsTab

@@ -71,10 +71,11 @@ class SessionSpotlightDelegateTest {
 
     @Test
     fun `closeSpotlight hides dialog`() {
-        uiState.value = uiState.value.copy(showSpotlightDialog = true)
+        uiState.value = uiState.value.copy(spotlight = uiState.value.spotlight.copy(showDialog = true))
         delegate.closeSpotlight()
         assertFalse(uiState.value.showSpotlightDialog)
     }
+
 
     @Test
     fun `updateSpotlightQuery searches after debounce`() = testScope.runTest {
@@ -155,4 +156,30 @@ class SessionSpotlightDelegateTest {
         assertTrue(uiState.value.dmNotes.contains("Pista encontrada: Huellas en el lodo"))
         coVerify { sessionRepository.updateDmNotes(sessionId, any()) }
     }
+
+    @Test
+    fun `spotlightUiState encapsulation and synchronization with legacy getters`() {
+        assertFalse(uiState.value.showSpotlightDialog)
+        assertFalse(uiState.value.spotlight.showDialog)
+
+        delegate.updateSpotlightState {
+            it.copy(
+                showDialog = true,
+                query = "Reglas de sigilo",
+                selectedCategory = SpotlightCategory.RULES,
+                isSearching = true
+            )
+        }
+
+        // Verificar sincronización de getters heredados
+        assertTrue(uiState.value.showSpotlightDialog)
+        assertEquals("Reglas de sigilo", uiState.value.spotlightQuery)
+        assertEquals(SpotlightCategory.RULES, uiState.value.selectedSpotlightCategory)
+        assertTrue(uiState.value.isSpotlightSearching)
+
+        // Verificar acceso directo a sub-estado modular
+        assertEquals("Reglas de sigilo", uiState.value.spotlight.query)
+        assertEquals(SpotlightCategory.RULES, uiState.value.spotlight.selectedCategory)
+    }
 }
+

@@ -122,8 +122,9 @@ class SessionMythicDelegateTest {
 
     @Test
     fun `saveMythicThread adds thread and closes dialog`() = testScope.runTest {
-        uiState.value = uiState.value.copy(showThreadEditDialog = true)
+        uiState.value = uiState.value.copy(modals = uiState.value.modals.copy(showThreadEditDialog = true))
         coEvery { mythicRepository.saveSession(any()) } returns 10L
+
 
         delegate.saveMythicThread(0L, "Encontrar la llave de plata")
         testDispatcher.scheduler.advanceUntilIdle()

@@ -39,17 +39,12 @@ data class SessionUiState(
     val hasActiveEncounter: Boolean = false, // habilita tab Combate (Sprint 7)
     val activeEncounter: Encounter? = null,  // datos del combate en curso
     val dmNotes: String = "",
-    val showQuickNoteDialog: Boolean = false,
     val sessionElapsedMinutes: Long = 0,
     // Combat Log
     val combatLog: List<CombatLogEntry> = emptyList(),
     // Sprint 17 — Resource Management
     val allTables: List<RandomTable> = emptyList(),
     val tablesInSession: List<RandomTable> = emptyList(),
-    val showResourceManager: Boolean = false,
-    val showSessionConfig: Boolean = false,
-    val showDeckPicker: Boolean = false,
-    val showStarterPackDialog: Boolean = false,
     val availableStarterPacks: List<com.deckapp.feature.reference.StarterPackInfo> = emptyList(),
     val availableSystems: List<String> = emptyList(),
     // Sprint 15 — UX de Notas
@@ -90,43 +85,24 @@ data class SessionUiState(
     val permanentPlayers: List<Npc> = emptyList(),
     val pinnedTableRolls: Map<Long, TableRollResult> = emptyMap(),
     val spreadResultsByDeck: Map<Long, CardSpreadResult> = emptyMap(),
-    val showQuickSearch: Boolean = false,
     // Sprint 56 — Bento Solo Journaling & Interactive Mythic Oracle
     val soloMythic: com.deckapp.feature.draw.model.state.SoloMythicUiState = com.deckapp.feature.draw.model.state.SoloMythicUiState(),
     val boardMemory: BoardSessionMemory = BoardSessionMemory(),
     val isHotbarExpanded: Boolean = false,
-    val showHotbarActionDialog: Boolean = false,
-    val editingHotbarAction: SessionHotbarAction? = null,
-    val showSceneFramingDialog: Boolean = false,
     val isClocksOverlayExpanded: Boolean = false,
-    val showClockEditDialog: Boolean = false,
-    val editingClock: TensionClock? = null,
-    val clockImpactAlert: TensionClock? = null,
     val isThreadsOverlayExpanded: Boolean = false,
     val selectedThreadsTab: ThreadsOverlayTab = ThreadsOverlayTab.THREADS,
-
-    val showThreadEditDialog: Boolean = false,
-    val showMythicCharacterEditDialog: Boolean = false,
-    val editingMythicThread: MythicThread? = null,
-    val editingMythicCharacter: MythicCharacter? = null,
     val isCombatHudExpanded: Boolean = false,
-    val showSpotlightDialog: Boolean = false,
-    val spotlightQuery: String = "",
-    val selectedSpotlightCategory: SpotlightCategory = SpotlightCategory.ALL,
-    val spotlightResults: List<SpotlightItem> = emptyList(),
-    val selectedSpotlightItem: SpotlightItem? = null,
-    val lastSpotlightRollResult: TableRollResult? = null,
-    val isSpotlightSearching: Boolean = false,
-    val showChoirGuide: Boolean = false,
+    val spotlight: com.deckapp.feature.draw.model.state.SpotlightUiState = com.deckapp.feature.draw.model.state.SpotlightUiState(),
     val choirGuideSourcePage: Int? = null,
+
     val choirGuideTableId: Long? = null,
     val choirGuideError: String? = null,
-    val showMicrosettingBuilder: Boolean = false,
     val activeMicrosetting: com.deckapp.core.model.MicrosettingCluster? = null,
     val editingMicrosettingBoardItemId: Long? = null,
-    val showStoryEngineGuide: Boolean = false,
     val storyEngineGuideTab: com.deckapp.feature.draw.model.StoryEngineGuideTab = com.deckapp.feature.draw.model.StoryEngineGuideTab.DECK_OF_WORLDS,
     val storyEngineGuideStepIndex: Int = 0,
+    val modals: com.deckapp.feature.draw.model.state.SessionModalsUiState = com.deckapp.feature.draw.model.state.SessionModalsUiState(),
     val playmat: com.deckapp.feature.draw.model.state.PlaymatUiState = com.deckapp.feature.draw.model.state.PlaymatUiState()
 ) {
     // Retrocompatibilidad con accesores planos delegados a playmat
@@ -159,6 +135,39 @@ data class SessionUiState(
     val isSoloSceneBusy: Boolean get() = soloMythic.isSoloSceneBusy
     val isSendingInspiration: Boolean get() = soloMythic.isSendingInspiration
     val lastRandomMythicPick: String? get() = soloMythic.lastRandomMythicPick
+
+
+    // Retrocompatibilidad con accesores planos delegados a modals
+    val showQuickNoteDialog: Boolean get() = modals.showQuickNoteDialog
+    val showResourceManager: Boolean get() = modals.showResourceManager
+    val showSessionConfig: Boolean get() = modals.showSessionConfig
+    val showDeckPicker: Boolean get() = modals.showDeckPicker
+    val showStarterPackDialog: Boolean get() = modals.showStarterPackDialog
+    val showQuickSearch: Boolean get() = modals.showQuickSearch
+    val showHotbarActionDialog: Boolean get() = modals.showHotbarActionDialog
+    val editingHotbarAction: com.deckapp.core.model.SessionHotbarAction? get() = modals.editingHotbarAction
+    val showSceneFramingDialog: Boolean get() = modals.showSceneFramingDialog
+    val showClockEditDialog: Boolean get() = modals.showClockEditDialog
+    val editingClock: com.deckapp.core.model.TensionClock? get() = modals.editingClock
+    val clockImpactAlert: com.deckapp.core.model.TensionClock? get() = modals.clockImpactAlert
+    val showThreadEditDialog: Boolean get() = modals.showThreadEditDialog
+    val showMythicCharacterEditDialog: Boolean get() = modals.showMythicCharacterEditDialog
+    val editingMythicThread: com.deckapp.core.model.MythicThread? get() = modals.editingMythicThread
+    val editingMythicCharacter: com.deckapp.core.model.MythicCharacter? get() = modals.editingMythicCharacter
+    val showChoirGuide: Boolean get() = modals.showChoirGuide
+    val showMicrosettingBuilder: Boolean get() = modals.showMicrosettingBuilder
+    val showStoryEngineGuide: Boolean get() = modals.showStoryEngineGuide
+
+    // Retrocompatibilidad con accesores planos delegados a spotlight
+    val showSpotlightDialog: Boolean get() = spotlight.showDialog
+    val spotlightQuery: String get() = spotlight.query
+    val selectedSpotlightCategory: SpotlightCategory get() = spotlight.selectedCategory
+    val spotlightResults: List<SpotlightItem> get() = spotlight.results
+    val selectedSpotlightItem: SpotlightItem? get() = spotlight.selectedItem
+    val lastSpotlightRollResult: TableRollResult? get() = spotlight.lastRollResult
+    val isSpotlightSearching: Boolean get() = spotlight.isSearching
+
+
 
 
     val activePlaymatSurface: com.deckapp.core.model.PlaymatSurface
@@ -237,8 +246,11 @@ class SessionViewModel @Inject constructor(
         sessionId = sessionId, boardMemory = initialBoardMemory,
         focusedSceneId = initialBoardMemory.focusedSceneId,
         pinnedTableRolls = initialBoardMemory.pinnedTableResults,
-        showChoirGuide = initialBoardMemory.choirGuide.anguishChecks.isNotEmpty()
+        modals = com.deckapp.feature.draw.model.state.SessionModalsUiState(
+            showChoirGuide = initialBoardMemory.choirGuide.anguishChecks.isNotEmpty()
+        )
     ))
+
     val uiState: StateFlow<SessionUiState> = _uiState.asStateFlow()
 
     val choirGuideDelegate = com.deckapp.feature.draw.delegates.ChoirGuideDelegate(
@@ -812,14 +824,14 @@ class SessionViewModel @Inject constructor(
         }
     }
 
-    fun openResourceManager() = _uiState.update { it.copy(showResourceManager = true) }
-    fun dismissResourceManager() = _uiState.update { it.copy(showResourceManager = false) }
+    fun openResourceManager() = _uiState.update { it.copy(modals = it.modals.copy(showResourceManager = true)) }
+    fun dismissResourceManager() = _uiState.update { it.copy(modals = it.modals.copy(showResourceManager = false)) }
 
-    fun openSessionConfig() = _uiState.update { it.copy(showSessionConfig = true) }
-    fun dismissSessionConfig() = _uiState.update { it.copy(showSessionConfig = false) }
+    fun openSessionConfig() = _uiState.update { it.copy(modals = it.modals.copy(showSessionConfig = true)) }
+    fun dismissSessionConfig() = _uiState.update { it.copy(modals = it.modals.copy(showSessionConfig = false)) }
 
-    fun openDeckPicker() = _uiState.update { it.copy(showDeckPicker = true) }
-    fun closeDeckPicker() = _uiState.update { it.copy(showDeckPicker = false) }
+    fun openDeckPicker() = _uiState.update { it.copy(modals = it.modals.copy(showDeckPicker = true)) }
+    fun closeDeckPicker() = _uiState.update { it.copy(modals = it.modals.copy(showDeckPicker = false)) }
 
     private var wasDeckPickerOpenBeforeStarterPack = false
 
@@ -846,7 +858,7 @@ class SessionViewModel @Inject constructor(
                         isInstalled = installed.contains(fileName)
                     )
                 }
-                _uiState.update { it.copy(availableStarterPacks = packInfos, showStarterPackDialog = true, showDeckPicker = false) }
+                _uiState.update { it.copy(availableStarterPacks = packInfos, modals = it.modals.copy(showStarterPackDialog = true, showDeckPicker = false)) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(snackbarMessage = "Error al cargar packs: ${e.message}") }
             }
@@ -856,7 +868,7 @@ class SessionViewModel @Inject constructor(
     fun closeStarterPackDialog() {
         val shouldRestoreDeckPicker = wasDeckPickerOpenBeforeStarterPack
         wasDeckPickerOpenBeforeStarterPack = false
-        _uiState.update { it.copy(showStarterPackDialog = false, showDeckPicker = shouldRestoreDeckPicker) }
+        _uiState.update { it.copy(modals = it.modals.copy(showStarterPackDialog = false, showDeckPicker = shouldRestoreDeckPicker)) }
     }
 
     fun installStarterPack(assetName: String) {
@@ -952,12 +964,12 @@ class SessionViewModel @Inject constructor(
 
     /** Abre el dialog de nota rápida. */
     fun showQuickNote() {
-        _uiState.update { it.copy(showQuickNoteDialog = true) }
+        _uiState.update { it.copy(modals = it.modals.copy(showQuickNoteDialog = true)) }
     }
 
     /** Cierra el dialog de nota rápida sin guardar. */
     fun dismissQuickNote() {
-        _uiState.update { it.copy(showQuickNoteDialog = false) }
+        _uiState.update { it.copy(modals = it.modals.copy(showQuickNoteDialog = false)) }
     }
 
     /**
@@ -966,7 +978,7 @@ class SessionViewModel @Inject constructor(
      */
     fun addQuickNote(text: String) {
         if (text.isBlank()) {
-            _uiState.update { it.copy(showQuickNoteDialog = false) }
+            _uiState.update { it.copy(modals = it.modals.copy(showQuickNoteDialog = false)) }
             return
         }
         val time = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
@@ -974,7 +986,7 @@ class SessionViewModel @Inject constructor(
         val entry = "[$time] $text"
         val current = _uiState.value.dmNotes
         val updated = if (current.isBlank()) entry else "$current\n$entry"
-        _uiState.update { it.copy(dmNotes = updated, showQuickNoteDialog = false, activeTab = 4) }
+        _uiState.update { it.copy(dmNotes = updated, modals = it.modals.copy(showQuickNoteDialog = false), activeTab = 4) }
         viewModelScope.launch {
             notesMutex.withLock {
                 if (_uiState.value.dmNotes == updated) sessionRepository.updateDmNotes(sessionId, updated)

@@ -30,7 +30,7 @@ class MicrosettingDelegate(
         val existingCluster = item?.noteContent?.let { MicrosettingCodec.decode(it) }
         ui.update { state ->
             state.copy(
-                showMicrosettingBuilder = true,
+                modals = state.modals.copy(showMicrosettingBuilder = true),
                 activeMicrosetting = existingCluster ?: state.activeMicrosetting,
                 editingMicrosettingBoardItemId = item?.id
             )
@@ -41,8 +41,9 @@ class MicrosettingDelegate(
     }
 
     fun closeBuilder() {
-        ui.update { it.copy(showMicrosettingBuilder = false, editingMicrosettingBoardItemId = null) }
+        ui.update { it.copy(modals = it.modals.copy(showMicrosettingBuilder = false), editingMicrosettingBoardItemId = null) }
     }
+
 
     fun generateCluster(targetItemId: Long? = ui.value.editingMicrosettingBoardItemId) = scope.launch {
         mutex.withLock {

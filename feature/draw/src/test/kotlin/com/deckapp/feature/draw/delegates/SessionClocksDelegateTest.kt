@@ -130,7 +130,7 @@ class SessionClocksDelegateTest {
     @Test
     fun `copyClockImpactToDiary appends consequence and clears alert`() = testScope.runTest {
         val completedClock = clock1.copy(progress = 4, isCompleted = true)
-        uiState.value = uiState.value.copy(clockImpactAlert = completedClock)
+        uiState.value = uiState.value.copy(modals = uiState.value.modals.copy(clockImpactAlert = completedClock))
 
         delegate.copyClockImpactToDiary(completedClock)
         testDispatcher.scheduler.advanceUntilIdle()
@@ -139,6 +139,7 @@ class SessionClocksDelegateTest {
         assertNull(uiState.value.clockImpactAlert)
         coVerify { sessionRepository.updateDmNotes(sessionId, any()) }
     }
+
 
     @Test
     fun `createClockAndAddToBoard adds clock and triggers board item creation`() = testScope.runTest {
@@ -202,4 +203,36 @@ class SessionClocksDelegateTest {
         coVerify { sessionRepository.upsertScene(any()) }
         coVerify { sessionRepository.updateDmNotes(sessionId, any()) }
     }
+
+    @Test
+    fun `sessionModalsUiState encapsulation and synchronization with legacy getters`() {
+        assertFalse(uiState.value.showClockEditDialog)
+        assertFalse(uiState.value.showHotbarActionDialog)
+        assertFalse(uiState.value.showSceneFramingDialog)
+
+        delegate.openCreateClockDialog()
+        assertTrue(uiState.value.showClockEditDialog)
+        assertTrue(uiState.value.modals.showClockEditDialog)
+
+        delegate.closeClockEditDialog()
+        assertFalse(uiState.value.showClockEditDialog)
+        assertFalse(uiState.value.modals.showClockEditDialog)
+
+        delegate.openCreateHotbarAction()
+        assertTrue(uiState.value.showHotbarActionDialog)
+        assertTrue(uiState.value.modals.showHotbarActionDialog)
+
+        delegate.dismissHotbarActionDialog()
+        assertFalse(uiState.value.showHotbarActionDialog)
+        assertFalse(uiState.value.modals.showHotbarActionDialog)
+
+        delegate.openSceneFraming()
+        assertTrue(uiState.value.showSceneFramingDialog)
+        assertTrue(uiState.value.modals.showSceneFramingDialog)
+
+        delegate.dismissSceneFraming()
+        assertFalse(uiState.value.showSceneFramingDialog)
+        assertFalse(uiState.value.modals.showSceneFramingDialog)
+    }
 }
+

@@ -28,11 +28,11 @@ class StoryEngineGuideDelegate(
     private val onCardDrawnForStep: ((StoryEngineGuideTab, Int, Long) -> Unit)? = null
 ) {
     fun open(tab: StoryEngineGuideTab = ui.value.storyEngineGuideTab) {
-        ui.update { it.copy(showStoryEngineGuide = true, storyEngineGuideTab = tab) }
+        ui.update { it.copy(modals = it.modals.copy(showStoryEngineGuide = true), storyEngineGuideTab = tab) }
     }
 
     fun close() {
-        ui.update { it.copy(showStoryEngineGuide = false) }
+        ui.update { it.copy(modals = it.modals.copy(showStoryEngineGuide = false)) }
     }
 
     fun selectTab(tab: StoryEngineGuideTab) {

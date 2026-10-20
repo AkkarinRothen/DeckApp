@@ -32,8 +32,8 @@ class ChoirGuideDelegate(
     private fun id() = UUID.randomUUID().toString()
     private fun failure(t: Throwable) { ui.update { it.copy(choirGuideError = t.message ?: "No se pudo guardar el procedimiento.") } }
 
-    fun open() { ui.update { it.copy(showChoirGuide = true, choirGuideError = null) } }
-    fun close() { ui.update { it.copy(showChoirGuide = false) } }
+    fun open() { ui.update { it.copy(modals = it.modals.copy(showChoirGuide = true), choirGuideError = null) } }
+    fun close() { ui.update { it.copy(modals = it.modals.copy(showChoirGuide = false)) } }
     fun source(page: Int?) { ui.update { it.copy(choirGuideSourcePage = page) } }
 
     fun select(procedure: ChoirProcedure) = scope.launch {
@@ -120,10 +120,10 @@ class ChoirGuideDelegate(
         val table = findTable(ui.value, title)
         if (table == null) {
             ui.update { it.copy(choirGuideError = "La tabla «$title» no está integrada. Consulta la referencia del manual; puedes resolver este paso manualmente.") }
-        } else ui.update { it.copy(choirGuideTableId = table.id, showChoirGuide = false) }
+        } else ui.update { it.copy(choirGuideTableId = table.id, modals = it.modals.copy(showChoirGuide = false)) }
     }
 
-    fun closeTable() { ui.update { it.copy(choirGuideTableId = null, showChoirGuide = true) } }
+    fun closeTable() { ui.update { it.copy(choirGuideTableId = null, modals = it.modals.copy(showChoirGuide = true)) } }
     fun retryJournal() = scope.launch {
         mutex.withLock {
             ui.update { it.copy(choirGuideError = null) }

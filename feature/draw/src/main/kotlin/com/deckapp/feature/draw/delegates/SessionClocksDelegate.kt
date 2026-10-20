@@ -37,24 +37,28 @@ class SessionClocksDelegate(
 
     // --- Tension Clocks & Overlay (Sprint 61) ---
 
+    fun updateModalsState(transform: (com.deckapp.feature.draw.model.state.SessionModalsUiState) -> com.deckapp.feature.draw.model.state.SessionModalsUiState) {
+        _uiState.update { it.copy(modals = transform(it.modals)) }
+    }
+
     fun toggleClocksOverlayExpanded() {
         _uiState.update { it.copy(isClocksOverlayExpanded = !it.isClocksOverlayExpanded) }
     }
 
     fun openCreateClockDialog() {
-        _uiState.update { it.copy(showClockEditDialog = true, editingClock = null) }
+        updateModalsState { it.copy(showClockEditDialog = true, editingClock = null) }
     }
 
     fun openEditClockDialog(clock: TensionClock) {
-        _uiState.update { it.copy(showClockEditDialog = true, editingClock = clock) }
+        updateModalsState { it.copy(showClockEditDialog = true, editingClock = clock) }
     }
 
     fun closeClockEditDialog() {
-        _uiState.update { it.copy(showClockEditDialog = false, editingClock = null) }
+        updateModalsState { it.copy(showClockEditDialog = false, editingClock = null) }
     }
 
     fun dismissClockImpactAlert() {
-        _uiState.update { it.copy(clockImpactAlert = null) }
+        updateModalsState { it.copy(clockImpactAlert = null) }
     }
 
     fun saveClock(clock: TensionClock) {
@@ -69,9 +73,11 @@ class SessionClocksDelegate(
         _uiState.update { state ->
             state.copy(
                 tensionClocks = updatedClocks,
-                showClockEditDialog = false,
-                editingClock = null,
-                clockImpactAlert = if (isNowCompleted && !clock.isCompleted) clock else state.clockImpactAlert
+                modals = state.modals.copy(
+                    showClockEditDialog = false,
+                    editingClock = null,
+                    clockImpactAlert = if (isNowCompleted && !clock.isCompleted) clock else state.modals.clockImpactAlert
+                )
             )
         }
         scope.launch {
@@ -96,7 +102,9 @@ class SessionClocksDelegate(
         _uiState.update { state ->
             state.copy(
                 tensionClocks = updatedClocks,
-                clockImpactAlert = completedClock ?: state.clockImpactAlert
+                modals = state.modals.copy(
+                    clockImpactAlert = completedClock ?: state.modals.clockImpactAlert
+                )
             )
         }
         scope.launch {
@@ -114,7 +122,9 @@ class SessionClocksDelegate(
         _uiState.update { state ->
             state.copy(
                 tensionClocks = updatedClocks,
-                clockImpactAlert = if (state.clockImpactAlert?.id == clockId) null else state.clockImpactAlert
+                modals = state.modals.copy(
+                    clockImpactAlert = if (state.modals.clockImpactAlert?.id == clockId) null else state.modals.clockImpactAlert
+                )
             )
         }
         scope.launch {
@@ -128,7 +138,9 @@ class SessionClocksDelegate(
         _uiState.update { state ->
             state.copy(
                 tensionClocks = updatedClocks,
-                clockImpactAlert = if (state.clockImpactAlert?.id == clockId) null else state.clockImpactAlert
+                modals = state.modals.copy(
+                    clockImpactAlert = if (state.modals.clockImpactAlert?.id == clockId) null else state.modals.clockImpactAlert
+                )
             )
         }
         scope.launch {
@@ -139,7 +151,7 @@ class SessionClocksDelegate(
     fun triggerClockNow(clock: TensionClock) {
         val updated = clock.copy(progress = clock.segments, isCompleted = true)
         saveClock(updated)
-        _uiState.update { it.copy(clockImpactAlert = updated) }
+        updateModalsState { it.copy(clockImpactAlert = updated) }
     }
 
     fun copyClockImpactToDiary(clock: TensionClock) {
@@ -147,7 +159,7 @@ class SessionClocksDelegate(
         val diaryEntry = "\n\n### ⏰ Detonación de Reloj: ${clock.name}\n> **Consecuencia:** $consequenceText\n*Progreso alcanzado: ${clock.segments}/${clock.segments}*\n"
         val currentNotes = _uiState.value.dmNotes
         val updatedNotes = currentNotes + diaryEntry
-        _uiState.update { it.copy(dmNotes = updatedNotes, clockImpactAlert = null) }
+        _uiState.update { it.copy(dmNotes = updatedNotes, modals = it.modals.copy(clockImpactAlert = null)) }
         scope.launch {
             sessionRepository.updateDmNotes(sessionId, updatedNotes)
         }
@@ -209,15 +221,15 @@ class SessionClocksDelegate(
     }
 
     fun openCreateHotbarAction() {
-        _uiState.update { it.copy(showHotbarActionDialog = true, editingHotbarAction = null) }
+        updateModalsState { it.copy(showHotbarActionDialog = true, editingHotbarAction = null) }
     }
 
     fun openEditHotbarAction(action: SessionHotbarAction) {
-        _uiState.update { it.copy(showHotbarActionDialog = true, editingHotbarAction = action) }
+        updateModalsState { it.copy(showHotbarActionDialog = true, editingHotbarAction = action) }
     }
 
     fun dismissHotbarActionDialog() {
-        _uiState.update { it.copy(showHotbarActionDialog = false, editingHotbarAction = null) }
+        updateModalsState { it.copy(showHotbarActionDialog = false, editingHotbarAction = null) }
     }
 
     fun saveHotbarAction(action: SessionHotbarAction) {
@@ -231,8 +243,10 @@ class SessionClocksDelegate(
         _uiState.update { state ->
             state.copy(
                 session = state.session?.copy(hotbarActions = updatedActions),
-                showHotbarActionDialog = false,
-                editingHotbarAction = null
+                modals = state.modals.copy(
+                    showHotbarActionDialog = false,
+                    editingHotbarAction = null
+                )
             )
         }
         scope.launch {
@@ -246,8 +260,10 @@ class SessionClocksDelegate(
         _uiState.update { state ->
             state.copy(
                 session = state.session?.copy(hotbarActions = updatedActions),
-                showHotbarActionDialog = false,
-                editingHotbarAction = null
+                modals = state.modals.copy(
+                    showHotbarActionDialog = false,
+                    editingHotbarAction = null
+                )
             )
         }
         scope.launch {
@@ -296,11 +312,11 @@ class SessionClocksDelegate(
     // --- Scene Framing Assistant (Sprint 60) ---
 
     fun openSceneFraming() {
-        _uiState.update { it.copy(showSceneFramingDialog = true) }
+        updateModalsState { it.copy(showSceneFramingDialog = true) }
     }
 
     fun dismissSceneFraming() {
-        _uiState.update { it.copy(showSceneFramingDialog = false) }
+        updateModalsState { it.copy(showSceneFramingDialog = false) }
     }
 
     fun confirmSceneFraming(
@@ -356,7 +372,7 @@ class SessionClocksDelegate(
                 notesMutex.withLock {
                     val currentNotes = _uiState.value.dmNotes
                     val updatedNotes = if (currentNotes.isBlank()) journalEntry else "$currentNotes\n\n$journalEntry"
-                    _uiState.update { it.copy(dmNotes = updatedNotes, showSceneFramingDialog = false) }
+                    _uiState.update { it.copy(dmNotes = updatedNotes, modals = it.modals.copy(showSceneFramingDialog = false)) }
                     sessionRepository.updateDmNotes(sessionId, updatedNotes)
                 }
 
@@ -369,7 +385,7 @@ class SessionClocksDelegate(
 
             } catch (e: Exception) {
                 if (e is kotlinx.coroutines.CancellationException) throw e
-                _uiState.update { it.copy(snackbarMessage = "Error al encuadrar escena: ${e.message}", showSceneFramingDialog = false) }
+                _uiState.update { it.copy(snackbarMessage = "Error al encuadrar escena: ${e.message}", modals = it.modals.copy(showSceneFramingDialog = false)) }
             }
         }
     }

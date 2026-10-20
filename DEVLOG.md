@@ -1,4 +1,22 @@
+### Refactorización Arquitectónica de Sesión: Extracción de SessionModalsUiState (20 de octubre de 2026)
+
+**Categoría:** `REFACTOR / ARCHITECTURE / SESSION / MODALS / DIALOGS / STATE MANAGEMENT / CLEAN CODE`
+
+- **Extracción y Desacoplamiento de Estado de Diálogos (`SessionModalsUiState`):**
+  - Creado `com.deckapp.feature.draw.model.state.SessionModalsUiState` para encapsular la visibilidad y datos transitorios de las 19 ventanas modales, diálogos y alertas de la sesión (`showQuickNoteDialog`, `showResourceManager`, `showSessionConfig`, `showDeckPicker`, `showStarterPackDialog`, `showQuickSearch`, `showHotbarActionDialog`, `editingHotbarAction`, `showSceneFramingDialog`, `showClockEditDialog`, `editingClock`, `clockImpactAlert`, `showThreadEditDialog`, `showMythicCharacterEditDialog`, `editingMythicThread`, `editingMythicCharacter`, `showChoirGuide`, `showMicrosettingBuilder`, `showStoryEngineGuide`).
+  - Incorporado `val modals: SessionModalsUiState = SessionModalsUiState()` dentro del estado global `SessionUiState`.
+  - Preservados getters delegados retrocompatibles para las 19 propiedades, garantizando compatibilidad absoluta con `SessionDialogsHost`, componentes de UI y tests unitarios sin rotura alguna.
+- **Helpers y Sincronización en Delegados:**
+  - Implementado helper `updateModalsState` en `SessionClocksDelegate` y `SessionMythicDelegate`.
+  - Migradas las mutaciones de apertura, edición y cierre de diálogos en `SessionViewModel`, `SessionClocksDelegate`, `SessionMythicDelegate`, `ChoirGuideDelegate`, `MicrosettingDelegate` y `StoryEngineGuideDelegate`.
+- **Verificación Técnica:**
+  - 100% de tests unitarios aprobados en `:feature:draw:testDebugUnitTest` (`SessionClocksDelegateTest` con nuevo test de sincronización y encapsulamiento `sessionModalsUiState encapsulation and synchronization with legacy getters`, `SessionMythicDelegateTest`, `ChoirGuideDelegateTest`, etc.).
+  - Compilación e integración verificada en `:app:assembleDebug`.
+
+---
+
 ### Refactorización Arquitectónica de Sesión: Extracción de SoloMythicUiState y SessionMythicDelegate (20 de octubre de 2026)
+
 
 **Categoría:** `REFACTOR / ARCHITECTURE / SESSION / MYTHIC / SOLO JOURNALING / STATE MANAGEMENT / CLEAN CODE`
 

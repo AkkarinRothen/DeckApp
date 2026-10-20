@@ -38,28 +38,32 @@ class SessionSpotlightDelegate(
 ) {
     private var spotlightJob: Job? = null
 
+    fun updateSpotlightState(transform: (com.deckapp.feature.draw.model.state.SpotlightUiState) -> com.deckapp.feature.draw.model.state.SpotlightUiState) {
+        _uiState.update { it.copy(spotlight = transform(it.spotlight)) }
+    }
+
     fun openGlobalSearch() {
         openSpotlight()
     }
 
     fun openSpotlight() {
-        _uiState.update { 
+        updateSpotlightState { 
             it.copy(
-                showSpotlightDialog = true,
-                spotlightQuery = "",
-                selectedSpotlightItem = null,
-                lastSpotlightRollResult = null
+                showDialog = true,
+                query = "",
+                selectedItem = null,
+                lastRollResult = null
             ) 
         }
         performSpotlightSearch("", _uiState.value.selectedSpotlightCategory)
     }
 
     fun closeSpotlight() {
-        _uiState.update { it.copy(showSpotlightDialog = false) }
+        updateSpotlightState { it.copy(showDialog = false) }
     }
 
     fun updateSpotlightQuery(query: String) {
-        _uiState.update { it.copy(spotlightQuery = query, isSpotlightSearching = true) }
+        updateSpotlightState { it.copy(query = query, isSearching = true) }
         spotlightJob?.cancel()
         spotlightJob = scope.launch {
             delay(150)
@@ -68,7 +72,7 @@ class SessionSpotlightDelegate(
     }
 
     fun selectSpotlightCategory(category: SpotlightCategory) {
-        _uiState.update { it.copy(selectedSpotlightCategory = category, isSpotlightSearching = true) }
+        updateSpotlightState { it.copy(selectedCategory = category, isSearching = true) }
         spotlightJob?.cancel()
         spotlightJob = scope.launch {
             performSpotlightSearch(_uiState.value.spotlightQuery, category)
@@ -76,10 +80,10 @@ class SessionSpotlightDelegate(
     }
 
     fun selectSpotlightItem(item: SpotlightItem) {
-        _uiState.update { 
+        updateSpotlightState { 
             it.copy(
-                selectedSpotlightItem = item,
-                lastSpotlightRollResult = null
+                selectedItem = item,
+                lastRollResult = null
             ) 
         }
     }
@@ -87,7 +91,7 @@ class SessionSpotlightDelegate(
     fun rollSpotlightTable(tableId: Long) {
         scope.launch {
             val result = rollTableUseCase(tableId, sessionId, persistResult = true)
-            _uiState.update { it.copy(lastSpotlightRollResult = result) }
+            updateSpotlightState { it.copy(lastRollResult = result) }
         }
     }
 
@@ -280,11 +284,11 @@ class SessionSpotlightDelegate(
 
             val finalResults = results.take(35)
             val autoSelected = finalResults.firstOrNull()
-            _uiState.update { 
+            updateSpotlightState { 
                 it.copy(
-                    spotlightResults = finalResults,
-                    selectedSpotlightItem = if (it.selectedSpotlightItem != null && finalResults.any { r -> r.id == it.selectedSpotlightItem.id }) it.selectedSpotlightItem else autoSelected,
-                    isSpotlightSearching = false
+                    results = finalResults,
+                    selectedItem = if (it.selectedItem != null && finalResults.any { r -> r.id == it.selectedItem.id }) it.selectedItem else autoSelected,
+                    isSearching = false
                 ) 
             }
         }
