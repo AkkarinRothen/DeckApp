@@ -1,7 +1,5 @@
 package com.deckapp.feature.draw.components
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
@@ -35,12 +34,21 @@ enum class TopHudSection {
 }
 
 /**
- * Cápsula Unificada Superior (Unified Top HUD) para la mesa de juego.
- * Agrupa Combate, Relojes de Tensión e Hilos/PNJs en una única pastilla compacta
- * con expansión mutuamente exclusiva para eliminar colisiones visuales en móviles.
+ * Franja Slim Adaptativa de Contexto de Sesión (~36dp).
+ * No flota sobre el contenido ni tapa los controles centrales.
+ * Muestra chips compactos dinámicos solo cuando hay eventos activos:
+ * - 🎭 Escena Actual (con acceso rápido al selector de escenas)
+ * - ⚔️ Combate Activo (Ronda y turno actual)
+ * - ⏰ Relojes de Tensión (Alertas y progreso)
+ * - 🧵 Hilos y Personajes Mythic
+ * Al tocar un chip, el detalle se abre en un ModalBottomSheet limpio sin invadir el layout.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SessionTopHudCapsule(
+    // Escena actual
+    currentSceneTitle: String? = null,
+    onOpenScenePicker: (() -> Unit)? = null,
     // Combate
     encounter: Encounter?,
     players: List<PlayerInitiativeParticipant>,
@@ -98,127 +106,143 @@ fun SessionTopHudCapsule(
 
     val hasActiveThreads = activeThreadsCount > 0 || characters.isNotEmpty()
     val hasClocks = clocks.isNotEmpty()
+    val hasScene = !currentSceneTitle.isNullOrBlank()
 
-    if (!hasActiveCombat && !hasClockAlert && !hasActiveThreads && !hasClocks) {
+    // Si no hay ningún contexto activo, no ocupa espacio
+    if (!hasActiveCombat && !hasClockAlert && !hasActiveThreads && !hasClocks && !hasScene) {
         return
     }
 
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = 34.dp, max = 38.dp)
+            .padding(horizontal = 8.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        // Barra / Pastilla Superior Unificada
-        Surface(
-            shape = RoundedCornerShape(22.dp),
-            color = Color(0xEB161920),
-            border = BorderStroke(1.dp, Color(0x33FFFFFF)),
-            shadowElevation = 8.dp,
-            modifier = Modifier.padding(horizontal = 8.dp)
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+        // 1. Chip: Escena Actual (si existe)
+        if (hasScene) {
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.9f),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable(enabled = onOpenScenePicker != null) {
+                        onOpenScenePicker?.invoke()
+                    }
             ) {
-                // Chip: Combate (si está activo)
-                if (hasActiveCombat && encounter != null) {
-                    val combatBorderColor = if (isPlayerTurn) Color(0xFF4FC3F7) else Color(0xFFFF5252)
-                    TopHudChip(
-                        isSelected = activeSection == TopHudSection.COMBAT,
-                        icon = Icons.Default.Shield,
-                        iconTint = combatBorderColor,
-                        label = "R${encounter.currentRound} · ${currentParticipant?.name ?: "Combate"}",
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            activeSection = if (activeSection == TopHudSection.COMBAT) TopHudSection.NONE else TopHudSection.COMBAT
-                        },
-                        trailingContent = {
-                            Surface(
-                                shape = CircleShape,
-                                color = combatBorderColor.copy(alpha = 0.25f),
-                                modifier = Modifier
-                                    .size(22.dp)
-                                    .clip(CircleShape)
-                                    .clickable {
-                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                        onNextTurn()
-                                    }
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(
-                                        imageVector = Icons.Default.PlayArrow,
-                                        contentDescription = "Siguiente Turno",
-                                        tint = Color.White,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                }
-                            }
-                        }
+                Row(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MovieCreation,
+                        contentDescription = "Escena",
+                        modifier = Modifier.size(13.dp),
+                        tint = MaterialTheme.colorScheme.primary
                     )
-                }
-
-                // Chip: Hilos y PNJs (solo si hay hilos activos o personajes)
-                if (hasActiveThreads) {
-                    if (hasActiveCombat && encounter != null) {
-                        Box(
-                            modifier = Modifier
-                                .width(1.dp)
-                                .height(18.dp)
-                                .background(Color(0x33FFFFFF))
+                    Text(
+                        text = currentSceneTitle ?: "Escena",
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp, fontWeight = FontWeight.Medium),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    if (onOpenScenePicker != null) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowDropDown,
+                            contentDescription = null,
+                            modifier = Modifier.size(13.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-
-                    TopHudChip(
-                        isSelected = activeSection == TopHudSection.THREADS,
-                        icon = Icons.Default.Bookmark,
-                        iconTint = MaterialTheme.colorScheme.secondary,
-                        label = "Hilos",
-                        badge = activeThreadsCount.takeIf { it > 0 }?.toString(),
-                        badgeColor = MaterialTheme.colorScheme.secondary,
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            activeSection = if (activeSection == TopHudSection.THREADS) TopHudSection.NONE else TopHudSection.THREADS
-                        }
-                    )
-                }
-
-                // Chip: Relojes de Tensión (solo si hay relojes)
-                if (hasClocks) {
-                    if ((hasActiveCombat && encounter != null) || hasActiveThreads) {
-                        Box(
-                            modifier = Modifier
-                                .width(1.dp)
-                                .height(18.dp)
-                                .background(Color(0x33FFFFFF))
-                        )
-                    }
-
-                    TopHudChip(
-                        isSelected = activeSection == TopHudSection.CLOCKS,
-                        icon = Icons.Default.Schedule,
-                        iconTint = if (hasClockAlert) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-                        label = "Relojes",
-                        badge = clocks.size.takeIf { it > 0 }?.toString(),
-                        badgeColor = if (hasClockAlert) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            activeSection = if (activeSection == TopHudSection.CLOCKS) TopHudSection.NONE else TopHudSection.CLOCKS
-                        }
-                    )
                 }
             }
         }
 
-        // Panel Expandido Exclusivo debajo de la barra
-        AnimatedVisibility(
-            visible = activeSection != TopHudSection.NONE,
-            enter = slideInVertically(initialOffsetY = { -it / 3 }, animationSpec = tween(220)) + fadeIn(),
-            exit = slideOutVertically(targetOffsetY = { -it / 3 }, animationSpec = tween(180)) + fadeOut()
+        // 2. Chip: Combate Activo (solo si hay combate)
+        if (hasActiveCombat && encounter != null) {
+            val combatBorderColor = if (isPlayerTurn) Color(0xFF4FC3F7) else Color(0xFFFF5252)
+            TopHudChip(
+                isSelected = activeSection == TopHudSection.COMBAT,
+                icon = Icons.Default.Shield,
+                iconTint = combatBorderColor,
+                label = "R${encounter.currentRound} · ${currentParticipant?.name ?: "Combate"}",
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    activeSection = TopHudSection.COMBAT
+                },
+                trailingContent = {
+                    Surface(
+                        shape = CircleShape,
+                        color = combatBorderColor.copy(alpha = 0.25f),
+                        modifier = Modifier
+                            .size(20.dp)
+                            .clip(CircleShape)
+                            .clickable {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                onNextTurn()
+                            }
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.PlayArrow,
+                                contentDescription = "Siguiente Turno",
+                                tint = Color.White,
+                                modifier = Modifier.size(12.dp)
+                            )
+                        }
+                    }
+                }
+            )
+        }
+
+        // 3. Chip: Relojes de Tensión (solo si hay relojes)
+        if (hasClocks) {
+            TopHudChip(
+                isSelected = activeSection == TopHudSection.CLOCKS,
+                icon = Icons.Default.Schedule,
+                iconTint = if (hasClockAlert) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                label = "Relojes",
+                badge = clocks.size.toString(),
+                badgeColor = if (hasClockAlert) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    activeSection = TopHudSection.CLOCKS
+                }
+            )
+        }
+
+        // 4. Chip: Hilos y PNJs (solo si hay hilos activos)
+        if (hasActiveThreads) {
+            TopHudChip(
+                isSelected = activeSection == TopHudSection.THREADS,
+                icon = Icons.Default.Bookmark,
+                iconTint = MaterialTheme.colorScheme.secondary,
+                label = "Hilos",
+                badge = activeThreadsCount.takeIf { it > 0 }?.toString(),
+                badgeColor = MaterialTheme.colorScheme.secondary,
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    activeSection = TopHudSection.THREADS
+                }
+            )
+        }
+    }
+
+    // ModalBottomSheet Detalle: Se abre hacia arriba sin tapar ni superponer el canvas permanentemente
+    if (activeSection != TopHudSection.NONE) {
+        ModalBottomSheet(
+            onDismissRequest = { activeSection = TopHudSection.NONE },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         ) {
             Box(
                 modifier = Modifier
-                    .padding(top = 4.dp)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
                 contentAlignment = Alignment.TopCenter
             ) {
                 when (activeSection) {
@@ -292,7 +316,7 @@ fun SessionTopHudCapsule(
 @Composable
 private fun TopHudChip(
     isSelected: Boolean,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     iconTint: Color,
     label: String,
     badge: String? = null,
@@ -301,28 +325,32 @@ private fun TopHudChip(
     trailingContent: (@Composable () -> Unit)? = null
 ) {
     Surface(
-        onClick = onClick,
         shape = RoundedCornerShape(16.dp),
-        color = if (isSelected) Color(0x44FFFFFF) else Color.Transparent,
-        modifier = Modifier.height(34.dp)
+        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.9f),
+        border = BorderStroke(
+            1.dp,
+            if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+        ),
+        modifier = Modifier
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Icon(
                 imageVector = icon,
-                contentDescription = null,
+                contentDescription = label,
                 tint = iconTint,
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(13.dp)
             )
 
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.SemiBold,
-                color = Color.White,
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp, fontWeight = FontWeight.Medium),
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -330,29 +358,21 @@ private fun TopHudChip(
             if (badge != null) {
                 Surface(
                     shape = CircleShape,
-                    color = badgeColor.copy(alpha = 0.25f),
-                    modifier = Modifier.size(18.dp)
+                    color = badgeColor,
+                    modifier = Modifier.size(16.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Text(
                             text = badge,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Black,
-                            color = badgeColor,
-                            fontSize = 9.sp
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
                         )
                     }
                 }
             }
 
             trailingContent?.invoke()
-
-            Icon(
-                imageVector = if (isSelected) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                contentDescription = null,
-                tint = Color.White.copy(alpha = 0.5f),
-                modifier = Modifier.size(14.dp)
-            )
         }
     }
 }

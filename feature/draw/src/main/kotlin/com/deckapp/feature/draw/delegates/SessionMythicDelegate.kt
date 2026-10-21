@@ -31,13 +31,16 @@ class SessionMythicDelegate(
     private val notesMutex: Mutex,
     private val onUpdateNotes: (String) -> Unit,
     private val updateBoardMemory: ((BoardSessionMemory) -> BoardSessionMemory) -> Unit,
-    private val focusScene: (Long?) -> Unit
+    private val focusScene: (Long?) -> Unit,
+    private val onLogOracle: ((question: String, answer: String, chaos: Int) -> Unit)? = null
 ) {
 
     fun performMythicFateCheck(question: String, prob: ProbabilityLevel) {
         val mythicId = _uiState.value.linkedMythicSession?.id ?: return
+        val chaos = _uiState.value.linkedMythicSession?.chaosFactor ?: 5
         scope.launch {
-            rollMythicFateUseCase(mythicId, question, prob)
+            val roll = rollMythicFateUseCase(mythicId, question, prob)
+            onLogOracle?.invoke(question, roll.result.name, chaos)
         }
     }
 
@@ -120,6 +123,8 @@ class SessionMythicDelegate(
                 history = (listOf(fateItem) + state.history).take(10)
             )
         }
+
+        onLogOracle?.invoke(question.ifBlank { "Pregunta al Destino" }, result.name, chaos)
 
         _uiState.value.linkedMythicSession?.let { session ->
             scope.launch {

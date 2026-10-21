@@ -19,7 +19,10 @@ class PlaymatDelegate(
     private val _uiState: MutableStateFlow<SessionUiState>,
     private val scope: CoroutineScope,
     private val updateBoardMemory: ((BoardSessionMemory) -> BoardSessionMemory) -> Unit,
-    private val deckDelegate: SessionDeckDelegate
+    private val deckDelegate: SessionDeckDelegate,
+    private val onLogTokenHp: ((tokenName: String, delta: Int, newHp: Int, maxHp: Int) -> Unit)? = null,
+    private val onLogClockProgress: ((title: String, current: Int, max: Int) -> Unit)? = null,
+    private val onLogCardAction: ((cardTitle: String, action: String) -> Unit)? = null
 ) {
 
     /**
@@ -255,14 +258,19 @@ class PlaymatDelegate(
      * Alterna la cara visible (frente / dorso).
      */
     fun flipCard(cardId: Long) {
+        var isNowFaceUp = true
         updateCurrentActiveSurface { surface ->
             val updatedCards = surface.cards.map { placement ->
                 if (placement.cardId == cardId) {
-                    placement.copy(isFaceUp = !placement.isFaceUp)
+                    val next = !placement.isFaceUp
+                    isNowFaceUp = next
+                    placement.copy(isFaceUp = next)
                 } else placement
             }
             surface.copy(cards = updatedCards)
         }
+        val cardName = _uiState.value.hand.find { it.id == cardId }?.title ?: "Carta #$cardId"
+        onLogCardAction?.invoke(cardName, if (isNowFaceUp) "Revelada boca arriba" else "Volteada boca abajo")
     }
 
     /**
@@ -289,8 +297,10 @@ class PlaymatDelegate(
      * Descarta una carta directamente desde el tapete.
      */
     fun discardCard(cardId: Long) {
+        val cardName = _uiState.value.hand.find { it.id == cardId }?.title ?: "Carta #$cardId"
         returnCardToHand(cardId)
         deckDelegate.discardCard(cardId)
+        onLogCardAction?.invoke(cardName, "Descartada al cementerio")
     }
 
     /**
@@ -383,7 +393,11 @@ class PlaymatDelegate(
      * Asegura que los mazos activos en sesión tengan colocación inicial en la mesa si no existen aún.
      */
     fun ensureDecksPlaced() {
-        val activeSurface = _uiState.value.activePlaymatSurface
+        val memory = _uiState.value.boardMemory
+        val surfaces = memory.playmatSurfaces
+        if (surfaces.isEmpty()) return
+        val activeId = memory.activePlaymatSurfaceId ?: surfaces.first().id
+        val activeSurface = surfaces.find { it.id == activeId } ?: surfaces.first()
         val deckRefs = _uiState.value.deckRefs
         if (deckRefs.isEmpty()) return
 
@@ -406,7 +420,9 @@ class PlaymatDelegate(
         }
 
         if (changed) {
-            updateCurrentActiveSurface { it.copy(decks = newPlacements) }
+            updateActiveSurface { surface ->
+                if (surface.id == activeId) surface.copy(decks = newPlacements) else surface
+            }
         }
     }
 
@@ -524,14 +540,25 @@ class PlaymatDelegate(
     }
 
     fun updateTokenHp(tokenId: String, newHp: Int) {
+        var tokenFound: PlaymatTokenPlacement? = null
+        var oldHp = 0
         updateCurrentActiveSurface { surface ->
             val updated = surface.tokens.map { token ->
                 if (token.id == tokenId) {
+                    tokenFound = token
+                    oldHp = token.currentHp
                     val clampedHp = newHp.coerceIn(0, token.maxHp)
                     token.copy(currentHp = clampedHp)
                 } else token
             }
             surface.copy(tokens = updated)
+        }
+        tokenFound?.let { token ->
+            val clampedHp = newHp.coerceIn(0, token.maxHp)
+            val delta = clampedHp - oldHp
+            if (delta != 0) {
+                onLogTokenHp?.invoke(token.name, delta, clampedHp, token.maxHp)
+            }
         }
     }
 
@@ -589,14 +616,22 @@ class PlaymatDelegate(
     }
 
     fun updateClockProgress(clockId: String, filledSegments: Int) {
+        var clockFound: PlaymatClockPlacement? = null
         updateCurrentActiveSurface { surface ->
             val updated = surface.clocks.map { clock ->
                 if (clock.id == clockId) {
+                    clockFound = clock
                     val clamped = filledSegments.coerceIn(0, clock.totalSegments)
                     clock.copy(filledSegments = clamped)
                 } else clock
             }
             surface.copy(clocks = updated)
+        }
+        clockFound?.let { clock ->
+            val clamped = filledSegments.coerceIn(0, clock.totalSegments)
+            if (clamped != clock.filledSegments) {
+                onLogClockProgress?.invoke(clock.title, clamped, clock.totalSegments)
+            }
         }
     }
 
@@ -782,10 +817,29 @@ class PlaymatDelegate(
     // --- Helpers privados ---
 
     private fun updateCurrentActiveSurface(transform: (PlaymatSurface) -> PlaymatSurface) {
-        ensureInitialSurface()
-        val activeId = _uiState.value.boardMemory.activePlaymatSurfaceId
-            ?: _uiState.value.boardMemory.playmatSurfaces.firstOrNull()?.id
-            ?: return
+        val memory = _uiState.value.boardMemory
+        val activeId = memory.activePlaymatSurfaceId
+            ?: memory.playmatSurfaces.firstOrNull()?.id
+
+        if (activeId == null) {
+            val defaultSurface = PlaymatSurface(
+                id = "surface_default_$sessionId",
+                name = "Mesa Principal",
+                backgroundTheme = PlaymatTheme.FELT_GREEN,
+                template = PlaymatTemplateType.FREEFORM,
+                cameraX = 0f,
+                cameraY = 0f,
+                cameraZoom = 1f
+            )
+            val updated = transform(defaultSurface)
+            updateBoardMemory {
+                it.copy(
+                    playmatSurfaces = listOf(updated),
+                    activePlaymatSurfaceId = updated.id
+                )
+            }
+            return
+        }
 
         updateActiveSurface { surface ->
             if (surface.id == activeId) transform(surface) else surface

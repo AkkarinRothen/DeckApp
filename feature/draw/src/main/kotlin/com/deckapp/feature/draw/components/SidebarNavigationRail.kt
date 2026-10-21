@@ -10,6 +10,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.deckapp.feature.draw.SidebarTool
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+
 @Composable
 fun SidebarNavigationRail(
     tools: List<Pair<SidebarTool, ImageVector>>,
@@ -19,13 +22,15 @@ fun SidebarNavigationRail(
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-        modifier = modifier.fillMaxHeight().width(64.dp),
+        modifier = modifier.fillMaxHeight().width(56.dp),
         tonalElevation = 1.dp
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.padding(vertical = 16.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             tools.forEach { (tool, icon) ->
                 val isActive = tool == activeTool

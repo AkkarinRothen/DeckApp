@@ -14,6 +14,7 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -57,7 +58,6 @@ import com.deckapp.feature.encounters.CombatTab
 import com.deckapp.core.ui.components.BentoSidebar
 import com.deckapp.core.ui.session.SessionToolContext
 import com.deckapp.core.ui.session.SessionCentralConnector
-import com.deckapp.core.ui.components.EdgeTab
 import com.deckapp.feature.hexploration.components.HexcrawlView
 import com.deckapp.feature.mythic.components.MythicCenterView
 import com.deckapp.feature.mythic.components.MythicContextTab
@@ -133,6 +133,23 @@ fun SessionScreen(
             }
             add(SidebarTool.NPCS to Icons.Default.Groups)
             add(SidebarTool.PLAN to Icons.Default.HistoryEdu)
+        }
+    }
+
+    val allLandscapeTools = remember(uiState.hasActiveEncounter, uiState.linkedMythicSession) {
+        buildList {
+            add(SidebarTool.DECKS to Icons.Default.Style)
+            add(SidebarTool.TABLES to Icons.Default.Casino)
+            add(SidebarTool.COMBAT to if (uiState.hasActiveEncounter) Icons.Default.CrisisAlert else Icons.Default.SportsKabaddi)
+            add(SidebarTool.NOTES to Icons.Default.EditNote)
+            add(SidebarTool.JOURNAL to Icons.AutoMirrored.Filled.LibraryBooks)
+            add(SidebarTool.NPCS to Icons.Default.Groups)
+            add(SidebarTool.WIKI to Icons.Default.Book)
+            add(SidebarTool.PLAN to Icons.Default.HistoryEdu)
+            add(SidebarTool.REFERENCES to Icons.AutoMirrored.Filled.MenuBook)
+            if (uiState.linkedMythicSession != null) {
+                add(SidebarTool.MYTHIC_CONTEXT to Icons.Default.AutoAwesome)
+            }
         }
     }
 
@@ -292,7 +309,9 @@ fun SessionScreen(
                             )
                         } else {
                             CombatEmptyState(
-                                onStartQuickCombat = { viewModel.startQuickCombat() }
+                                onStartQuickCombat = { viewModel.startQuickCombat() },
+                                availableEncounters = uiState.combat.availableEncounters,
+                                onLoadEncounter = { viewModel.loadAndStartEncounter(it) }
                             )
                         }
                     }
@@ -566,7 +585,9 @@ fun SessionScreen(
                                     )
                                 } ?: Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                     Column(
-                                        modifier = Modifier.padding(24.dp),
+                                        modifier = Modifier
+                                            .padding(24.dp)
+                                            .verticalScroll(rememberScrollState()),
                                         horizontalAlignment = Alignment.CenterHorizontally,
                                         verticalArrangement = Arrangement.spacedBy(12.dp)
                                     ) {
@@ -578,10 +599,42 @@ fun SessionScreen(
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
                                         )
-                                        Button(onClick = viewModel::openSessionConfig) {
-                                            Icon(Icons.Default.Settings, contentDescription = null)
-                                            Spacer(Modifier.width(8.dp))
-                                            Text("Vincular Mapa en Ajustes")
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Button(onClick = { viewModel.createQuickHexMap() }) {
+                                                Icon(Icons.Default.AddLocationAlt, contentDescription = null)
+                                                Spacer(Modifier.width(6.dp))
+                                                Text("Crear Mapa")
+                                            }
+                                            OutlinedButton(onClick = viewModel::openSessionConfig) {
+                                                Icon(Icons.Default.Settings, contentDescription = null)
+                                                Spacer(Modifier.width(6.dp))
+                                                Text("Ajustes")
+                                            }
+                                        }
+
+                                        if (uiState.allHexMaps.isNotEmpty()) {
+                                            Spacer(Modifier.height(4.dp))
+                                            Text(
+                                                "O vincular mapa existente:",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                            Row(
+                                                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                uiState.allHexMaps.take(6).forEach { map ->
+                                                    SuggestionChip(
+                                                        onClick = { viewModel.linkHexMap(map.id) },
+                                                        label = { Text(map.name) },
+                                                        icon = { Icon(Icons.Default.Map, null, modifier = Modifier.size(16.dp)) }
+                                                    )
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -680,6 +733,9 @@ fun SessionScreen(
             val characters = uiState.mythicState?.characters ?: emptyList()
             val topHudCapsuleContent = @Composable {
                 SessionTopHudCapsule(
+                    currentSceneTitle = uiState.scenes.find { it.id == uiState.focusedSceneId }?.title
+                        ?: uiState.scenes.firstOrNull()?.title,
+                    onOpenScenePicker = { viewModel.toggleRightSidebar(SidebarTool.PLAN) },
                     encounter = topHudEncounter,
                     players = uiState.playerParticipants,
                     onNextTurn = viewModel::nextTurn,
@@ -714,7 +770,7 @@ fun SessionScreen(
                     onDeleteCharacter = viewModel::deleteMythicCharacter,
                     onCopySummaryToDiary = viewModel::copyThreadsSummaryToDiary,
                     onSendItemToNotes = viewModel::sendRawToNotes,
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)
                 )
             }
 
@@ -723,53 +779,7 @@ fun SessionScreen(
                     modifier = Modifier.fillMaxSize(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (isLeftSidebarOpen) {
-                        Row(modifier = Modifier.fillMaxHeight().widthIn(min = 260.dp, max = 320.dp)) {
-                            SidebarNavigationRail(
-                                tools = leftTools,
-                                activeTool = uiState.activeLeftSidebar,
-                                onToolClick = { viewModel.toggleLeftSidebar(it) }
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .width(1.dp)
-                                    .background(MaterialTheme.colorScheme.outlineVariant)
-                            )
-                            BentoSidebar(
-                                isVisible = true,
-                                alignment = Alignment.CenterStart,
-                                title = leftTitle,
-                                onClose = { viewModel.toggleLeftSidebar(SidebarTool.NONE) },
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                leftSidebarContent()
-                            }
-                        }
-                    } else {
-                        Column(
-                            modifier = Modifier.fillMaxHeight().padding(start = 0.dp),
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            leftTools.forEach { (tool, icon) ->
-                                val label = when(tool) {
-                                    SidebarTool.DECKS -> "Mazos"
-                                    SidebarTool.TABLES -> "Tablas"
-                                    SidebarTool.COMBAT -> "Combate"
-                                    else -> ""
-                                }
-                                EdgeTab(
-                                    icon = icon,
-                                    label = label,
-                                    isActive = false,
-                                    alignment = Alignment.CenterStart,
-                                    onClick = { viewModel.toggleLeftSidebar(tool) }
-                                )
-                                Spacer(Modifier.height(8.dp))
-                            }
-                        }
-                    }
-
+                    // 1. Contenido central a la izquierda, completamente despejado
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -783,56 +793,50 @@ fun SessionScreen(
                         }
                     }
 
-                    if (isRightSidebarOpen) {
-                        Row(modifier = Modifier.fillMaxHeight().widthIn(min = 260.dp, max = 320.dp)) {
-                            BentoSidebar(
-                                isVisible = true,
-                                alignment = Alignment.CenterEnd,
-                                title = rightTitle,
-                                onClose = { viewModel.toggleRightSidebar(SidebarTool.NONE) },
-                                modifier = Modifier.weight(1f)
-                            ) {
+                    // 2. Si alguna herramienta está abierta, panel Bento a la derecha
+                    val isAnyToolOpen = isLeftSidebarOpen || isRightSidebarOpen
+                    val currentActiveTool = if (isLeftSidebarOpen) uiState.activeLeftSidebar else uiState.activeRightSidebar
+                    val currentTitle = if (isLeftSidebarOpen) leftTitle else rightTitle
+
+                    if (isAnyToolOpen) {
+                        BentoSidebar(
+                            isVisible = true,
+                            alignment = Alignment.CenterEnd,
+                            title = currentTitle,
+                            onClose = {
+                                if (isLeftSidebarOpen) viewModel.toggleLeftSidebar(SidebarTool.NONE)
+                                if (isRightSidebarOpen) viewModel.toggleRightSidebar(SidebarTool.NONE)
+                            },
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .widthIn(min = 280.dp, max = 340.dp)
+                        ) {
+                            if (isLeftSidebarOpen) {
+                                leftSidebarContent()
+                            } else {
                                 rightSidebarContent()
                             }
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .width(1.dp)
-                                    .background(MaterialTheme.colorScheme.outlineVariant)
-                            )
-                            SidebarNavigationRail(
-                                tools = rightTools,
-                                activeTool = uiState.activeRightSidebar,
-                                onToolClick = { viewModel.toggleRightSidebar(it) }
-                            )
                         }
-                    } else {
-                        Column(
-                            modifier = Modifier.fillMaxHeight().padding(end = 0.dp),
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            rightTools.forEach { (tool, icon) ->
-                                val label = when(tool) {
-                                    SidebarTool.NOTES -> "Notas"
-                                    SidebarTool.REFERENCES -> "Reglas"
-                                    SidebarTool.WIKI -> "Wiki"
-                                    SidebarTool.JOURNAL -> "Diario"
-                                    SidebarTool.MYTHIC_CONTEXT -> "Mythic"
-                                    SidebarTool.NPCS -> "NPCs"
-                                    SidebarTool.PLAN -> "Plan"
-                                    else -> ""
-                                }
-                                EdgeTab(
-                                    icon = icon,
-                                    label = label,
-                                    isActive = false,
-                                    alignment = Alignment.CenterEnd,
-                                    onClick = { viewModel.toggleRightSidebar(tool) }
-                                )
-                                Spacer(Modifier.height(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .width(1.dp)
+                                .background(MaterialTheme.colorScheme.outlineVariant)
+                        )
+                    }
+
+                    // 3. Riel lateral unificado en el extremo derecho
+                    SidebarNavigationRail(
+                        tools = allLandscapeTools,
+                        activeTool = currentActiveTool,
+                        onToolClick = { tool ->
+                            if (tool in listOf(SidebarTool.DECKS, SidebarTool.TABLES, SidebarTool.COMBAT)) {
+                                viewModel.toggleLeftSidebar(tool)
+                            } else {
+                                viewModel.toggleRightSidebar(tool)
                             }
                         }
-                    }
+                    )
                 } // end Row
             } // end if (isLandscape)
             if (!isLandscape) {
@@ -976,12 +980,15 @@ fun SessionScreen(
 @Composable
 fun CombatEmptyState(
     onStartQuickCombat: () -> Unit,
+    availableEncounters: List<Encounter> = emptyList(),
+    onLoadEncounter: (Long) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -999,7 +1006,7 @@ fun CombatEmptyState(
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "Inicia un combate rápido para añadir participantes, seguir turnos y gestionar iniciativa y puntos de golpe.",
+            text = "Inicia un combate rápido para añadir participantes, seguir turnos y gestionar iniciativa y puntos de golpe, o carga un encuentro preparado.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -1012,6 +1019,45 @@ fun CombatEmptyState(
             Icon(Icons.Default.FlashOn, contentDescription = null)
             Spacer(Modifier.width(8.dp))
             Text("Iniciar Combate Rápido")
+        }
+
+        if (availableEncounters.isNotEmpty()) {
+            Spacer(Modifier.height(20.dp))
+            HorizontalDivider()
+            Spacer(Modifier.height(16.dp))
+            Text(
+                text = "O cargar encuentro preparado:",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(Modifier.height(8.dp))
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                availableEncounters.take(5).forEach { enc ->
+                    OutlinedCard(
+                        onClick = { onLoadEncounter(enc.id) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(enc.name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                                Text("${enc.creatures.size} criaturas preparadas", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            FilledTonalIconButton(onClick = { onLoadEncounter(enc.id) }) {
+                                Icon(Icons.Default.PlayArrow, contentDescription = "Cargar")
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

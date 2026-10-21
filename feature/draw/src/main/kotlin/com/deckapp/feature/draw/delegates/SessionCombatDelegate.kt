@@ -258,7 +258,11 @@ class SessionCombatDelegate(
         sb.append("--- ACTIVIDAD DE CARTAS ---\n")
         events.forEach { event ->
             val time = java.text.SimpleDateFormat("HH:mm:ss").format(java.util.Date(event.timestamp))
-            sb.append("[$time] ${event.action}: Carta ${event.cardId} ${event.metadata}\n")
+            val cId = event.cardId
+            val cardInfo = if (cId != null && cId > 0) "Carta #$cId" else null
+            val metaInfo = event.metadata?.takeIf { it.isNotBlank() }
+            val detail = listOfNotNull(cardInfo, metaInfo).joinToString(" ")
+            sb.append("[$time] ${event.action}${if (detail.isNotBlank()) ": $detail" else ""}\n")
         }
 
         val encounters = encounterRepository.getAllEncounters().first()

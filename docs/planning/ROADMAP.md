@@ -8,37 +8,24 @@
 
 ---
 
-## Estado actual del proyecto (15 de abril de 2026)
+## Estado actual del proyecto (21 de octubre de 2026)
 
-### ✅ Implementado y funcional
-- Import desde carpeta SAF (imágenes → cartas, auto-detect de metadata de filename)
-- Import desde ZIP y Export a ZIP
-- PDF import con **PdfiumAndroid** (migrado en Sprint 11 — 4 modos de layout, grilla configurable, auto-trim)
-- 8 modos de contenido de carta completos (renderizado + edición)
-- CardEditorScreen multi-cara con picker de imagen y zonas editables
-- SessionScreen: workspace multi-tab (`HorizontalPager`) — Mazos / Tablas / Notas / Combate (dinámico)
-- Robo, descarte, undo, night mode, haptic, wake lock, multi-mazo
-- Peek (ver tope sin robar), Browse mode desde sesión
-- Tags en mazos + búsqueda y filtro en Biblioteca
-- **Duplicar mazo** (Sprint 12 — `DuplicateDeckUseCase`)
-- **Fusionar mazos** (Sprint 12 — `MergeDecksUseCase` + dialog de selección de destino)
-- **Archivar/restaurar mazos** (Sprint 13 — toggle en Biblioteca con chip "Archivados")
-- Borrar y renombrar sesiones
-- `:feature:settings` con uso de almacenamiento por mazo + **calidad JPEG configurable** (Sprint 11)
-- Room: **migraciones escritas** v1→v8 — sin `fallbackToDestructiveMigration` en prod (Sprint 11)
-- Tags cross-ref: **índices en `card_tags` y `card_stack_tags`** (Sprint 11)
-- **Sistema de Tablas Aleatorias completo** — `:feature:tables`, 9 tablas bundled, modos RANGE/WEIGHTED
-- **Import de tablas** — OCR (ML Kit), CSV, JSON (Foundry VTT), texto plano; flujo de 5 pasos
-- **Homografía + auto-detección de bordes** en import OCR; stitching multi-página (Sprint 8)
-- **Export de tablas** a JSON compatible con formato DeckApp / Foundry VTT
-- `RangeParser`, `CsvTableParser`, `JsonTableParser`, `PlainTextTableParser` — motor de parsing robusto
+### ✅ Implementado y funcional (Actualizado Octubre 2026)
+- **Playmat 2D Híbrido:** Superficies múltiples, colocación/rotación/volteo de cartas, tokens con HP y anillos de color, relojes de progreso, hilos narrativos, cuadrículas tácticas y battlemaps.
+- **Bitácora de Sesión en Vivo (`SessionLogEntry`) & Notas Rápidas (`SessionNote`):** Room v49 con persistencia reactiva, captura automática de eventos de dados, cartas, tokens, oráculos y relojes; drawer lateral con editor Markdown y atajos de un toque.
+- **Ergonomía de Mesa:** Modo Zen inmersivo (1-tap toggle) y Toolbar superior categórica (Mundo, Entidades, Mesa).
+- Import desde carpeta SAF (imágenes → cartas, auto-detect de metadata de filename), ZIP (import/export), y PDF import con **PdfiumAndroid** (4 modos de layout, grilla configurable, auto-trim).
+- 8 modos de contenido de carta completos (renderizado + edición), CardEditorScreen multi-cara.
+- SessionScreen multi-tab con dados 3D, oráculos Mythic y generador Choir.
+- Room con migraciones blindadas sin pérdida destructiva (v1 → v49).
+- Búsqueda global de sesión y biblioteca, catálogo de tablas bundled e importación OCR/CSV/JSON.
 
-### ⚠️ Incompleto o con deuda técnica
-- `SessionHistoryScreen` — implementada la navegación, pendiente el contenido real (timeline de DrawEvents)
-- Notas de DM — `Session.dmNotes` existe en el modelo, la UI está pendiente (ver `DM_NOTES.md`)
-- Tab "Notas" en SessionScreen — stub vacío (sprint pendiente)
-- `Card.dmNotes` — no existe todavía en el modelo
-- Exportar resumen de sesión (notas + tiradas + cartas) — Fase 2
+### 🎯 Plan Priorizado de UX y Mesa (Auditoría 17/10/2026 - En Ejecución)
+- **Fase 1 (P0):** Hacer usable la mesa en todos los tamaños (Layout adaptable vertical/horizontal, franja Slim adaptativa de contexto ~36dp sin solapar contenido, y selector de herramientas unificado por categorías).
+- **Fase 2 (P0):** Cerrar rutas incompletas y estados vacíos (Combate sin encuentro con acciones rápidas inline, Hexploración sin mapa con vínculo directo, limpieza de referencias 'null' en historial).
+- **Fase 3 (P1):** Unificar consulta y registro (Ficha de PNJ Bento con combate interactivo arriba y lore renderizado abajo, visores consistentes).
+- **Fase 4 (P1):** Preparación y protección de datos (Export ZIP de mazo desde detalle, rango de páginas en importador PDF, validación de backup/restauración).
+- **Fase 5 (P2):** Expansiones opcionales (VTT compartido local, exportación a Foundry, tiradas avanzadas).
 
 ---
 

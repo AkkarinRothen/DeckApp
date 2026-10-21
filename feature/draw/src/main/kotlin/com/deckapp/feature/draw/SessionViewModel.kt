@@ -327,6 +327,13 @@ class SessionViewModel @Inject constructor(
         onUpdateNotes = { updateNotes(it) }
     )
 
+    val sessionLogDelegate = com.deckapp.feature.draw.delegates.SessionLogDelegate(
+        sessionId = sessionId,
+        _uiState = _uiState,
+        scope = viewModelScope,
+        sessionLogRepository = sessionLogRepository
+    )
+
     val mythicDelegate = com.deckapp.feature.draw.delegates.SessionMythicDelegate(
         sessionId = sessionId,
         _uiState = _uiState,
@@ -337,7 +344,10 @@ class SessionViewModel @Inject constructor(
         notesMutex = notesMutex,
         onUpdateNotes = { updateNotes(it) },
         updateBoardMemory = { updateBoardMemory(it) },
-        focusScene = { focusScene(it) }
+        focusScene = { focusScene(it) },
+        onLogOracle = { question, answer, chaos ->
+            sessionLogDelegate.logOracleRoll(question, answer, chaos)
+        }
     )
 
     val spotlightDelegate = com.deckapp.feature.draw.delegates.SessionSpotlightDelegate(
@@ -384,14 +394,16 @@ class SessionViewModel @Inject constructor(
         _uiState = _uiState,
         scope = viewModelScope,
         updateBoardMemory = { updateBoardMemory(it) },
-        deckDelegate = deckDelegate
-    )
-
-    val sessionLogDelegate = com.deckapp.feature.draw.delegates.SessionLogDelegate(
-        sessionId = sessionId,
-        _uiState = _uiState,
-        scope = viewModelScope,
-        sessionLogRepository = sessionLogRepository
+        deckDelegate = deckDelegate,
+        onLogTokenHp = { name, delta, newHp, maxHp ->
+            sessionLogDelegate.logTokenHpChange(name, delta, newHp, maxHp)
+        },
+        onLogClockProgress = { title, cur, max ->
+            sessionLogDelegate.logClockStep(title, cur, max)
+        },
+        onLogCardAction = { title, action ->
+            sessionLogDelegate.logCardAction(title, action)
+        }
     )
 
     val storyEngineGuideDelegate = com.deckapp.feature.draw.delegates.StoryEngineGuideDelegate(
@@ -530,6 +542,16 @@ class SessionViewModel @Inject constructor(
                         )
                     ) }
                 }
+        }
+
+        viewModelScope.launch {
+            encounterRepository.getAllEncounters().collect { encounters ->
+                _uiState.update { it.copy(
+                    combat = it.combat.copy(
+                        availableEncounters = encounters.filter { enc -> !enc.isActive }
+                    )
+                ) }
+            }
         }
 
         syncSessionSystemTables(sessionId)
@@ -1227,7 +1249,33 @@ class SessionViewModel @Inject constructor(
     // --- Hex Map Exploration Actions ---
 
     fun linkHexMap(mapId: Long?) {
-        _uiState.update { it.copy(linkedHexMapId = mapId) }
+        viewModelScope.launch {
+            if (mapId != null) {
+                hexRepository.getHexMap(mapId).firstOrNull()?.let { map ->
+                    hexRepository.upsertHexMap(map.copy(sessionId = sessionId))
+                    _uiState.update { it.copy(snackbarMessage = "Mapa vinculado: ${map.name}") }
+                }
+            } else {
+                _uiState.value.linkedHexMapId?.let { currentId ->
+                    hexRepository.getHexMap(currentId).firstOrNull()?.let { map ->
+                        hexRepository.upsertHexMap(map.copy(sessionId = null))
+                    }
+                }
+            }
+        }
+    }
+
+    fun createQuickHexMap(name: String = "Mapa de la Región") {
+        viewModelScope.launch {
+            val newMap = com.deckapp.core.model.HexMap(
+                name = name,
+                sessionId = sessionId,
+                rows = 10,
+                cols = 10
+            )
+            hexRepository.upsertHexMap(newMap)
+            _uiState.update { it.copy(snackbarMessage = "Nuevo mapa creado y vinculado") }
+        }
     }
 
     fun moveParty(q: Int, r: Int) {
@@ -1325,6 +1373,16 @@ class SessionViewModel @Inject constructor(
         }
     }
 
+    fun loadAndStartEncounter(encounterId: Long) {
+        viewModelScope.launch {
+            encounterRepository.getEncounterById(encounterId).firstOrNull()?.let { encounter ->
+                encounterRepository.saveEncounter(encounter.copy(linkedSessionId = sessionId, isActive = true))
+                setActiveBoardView(SessionBoardView.COMBAT)
+                _uiState.update { it.copy(snackbarMessage = "Encuentro iniciado: ${encounter.name}") }
+            }
+        }
+    }
+
     // --- NPCs & Wiki Updates ---
 
     fun updateNpcHp(npcId: Long, hp: Int) = combatDelegate.updateNpcHp(npcId, hp)
@@ -1386,6 +1444,11 @@ class SessionViewModel @Inject constructor(
                         recentDiceRolls = updatedRolls
                     )
                 }
+                sessionLogDelegate.logDiceRoll(
+                    formula = displayFormula,
+                    total = total,
+                    details = fullDesc
+                )
             } catch (e: Exception) {
                 _uiState.update { it.copy(snackbarMessage = "Fórmula incorrecta: $formula") }
             }
@@ -1405,6 +1468,11 @@ class SessionViewModel @Inject constructor(
                         recentDiceRolls = updatedRolls
                     )
                 }
+                sessionLogDelegate.logDiceRoll(
+                    formula = formula,
+                    total = total,
+                    details = description
+                )
             } catch (e: Exception) {
                 _uiState.update { it.copy(snackbarMessage = "Fórmula incorrecta: $formula") }
             }

@@ -67,6 +67,17 @@ class WikiViewModel @Inject constructor(
         }
     }
 
+    fun saveEntry(title: String, content: String, categoryId: Long? = null) {
+        viewModelScope.launch {
+            val entry = WikiEntry(
+                title = title.trim(),
+                content = content.trim(),
+                categoryId = categoryId ?: _selectedCategoryId.value ?: 0L
+            )
+            wikiRepository.saveEntry(entry)
+        }
+    }
+
     fun deleteEntry(entry: WikiEntry) {
         viewModelScope.launch {
             wikiRepository.deleteEntry(entry)

@@ -1,3 +1,27 @@
+### Implementación Plan Priorizado de Mejoras UX: Fases 1 y 2 (21 de octubre de 2026)
+
+**Categoría:** `UX / LAYOUT / LANDSCAPE / HUD / EMPTY STATES / COMBAT / HEXPLORATION / WIKI / LOGGING / RELEASE`
+
+- **Fase 1 — Layout Adaptable y Despeje de Canvas en Móvil y Tablet:**
+  - *Landscape sin obstáculos:* Se eliminaron los dos rieles laterales que asfixiaban la pantalla y comprimían el área de juego. El margen izquierdo quedó 100% despejado para el lienzo central (`centralWorkspaceContent`).
+  - *Riel Unificado a la Derecha (`SidebarNavigationRail.kt`):* Se unificaron todas las herramientas (Mesa, Tablas, Combate, Notas, Diario, PNJs, Wiki, Plan, Reglas, Mythic) en un único riel scrollable de 56dp anclado al margen derecho con espaciado optimizado para pantallas bajas de teléfonos.
+  - *BentoSidebar Unificado:* Al abrir cualquier herramienta (proceda de herramientas primarias o de lore), se abre un único panel lateral a la derecha con ancho elástico (`280.dp - 340.dp`), alternando sin fricción ni superposiciones y cerrándose limpiamente con un solo toque.
+  - *Franja Slim Adaptativa de Contexto (`SessionTopHudCapsule.kt`):* Altura fija no invasiva de ~36dp con chips dinámicos de contexto activo (Escena actual con acceso directo a selector, Combate con indicador de turno, Relojes de tensión en alerta, Hilos de Mythic). El detalle extendido se abre en un `ModalBottomSheet` para no tapar los bloques ni el canvas central.
+  - *Selector Categorizado en Portrait (`SessionBottomBar.kt`):* Sustituida la barra horizontal desbordante por 3 categorías limpias: `Mesa`, `Lore` y `Combate` con menús desplegables e indicadores visuales de estado activo.
+
+- **Fase 2 — Estados Vacíos Accionables y Corrección de Referencias:**
+  - *Combate sin encuentro activo (`CombatEmptyState.kt`):* Permite iniciar Combate Rápido inmediato con 1 toque O cargar de forma directa cualquiera de los encuentros preparados de la campaña con badge de criaturas y botón de inicio.
+  - *Hexploración sin mapa (`SessionScreen.kt`):* Incorporadas dos acciones directas sin requerir salir a ajustes: `[🗺️ Crear Mapa]` (genera e inicializa un mapa 10x10 vinculado al instante) y chips desplazables horizontalmente para vincular mapas preexistentes con 1 toque.
+  - *Wiki y Lore (`WikiTab.kt` y `WikiViewModel.kt`):* Añadido botón de acción directa `[➕ Crear Primer Artículo]` en el estado vacío y botón '+' persistente en la barra de búsqueda para redactar nuevos artículos con soporte de hipervínculos `[[Título]]` mediante un diálogo modal ágil.
+  - *Historial y Exportación de Log (`SessionHistoryScreen.kt` y `SessionCombatDelegate.kt`):* Corregido el bug de presentación donde eventos sin carta imprimían `Carta #null` o `Carta null`. Ahora se formatea de manera limpia omitiendo campos nulos o vacíos.
+
+- **Verificación Técnica y Despliegue:**
+  - 100% de tests unitarios aprobados en `:feature:draw:testDebugUnitTest`.
+  - Compilación Release no-dev (`:app:assembleRelease`) completada con éxito (`BUILD SUCCESSFUL`).
+  - Instalación y despliegue exitoso vía ADB WiFi en el dispositivo físico (`com.deckapp.ttrpg` PID activo 13532).
+
+---
+
 ### Refactorización Arquitectónica de Sesión: Extracción de NpcSessionUiState (20 de octubre de 2026)
 
 **Categoría:** `REFACTOR / ARCHITECTURE / SESSION / NPCS / VOICES / PERMANENT PLAYERS / STATE MANAGEMENT / CLEAN CODE`

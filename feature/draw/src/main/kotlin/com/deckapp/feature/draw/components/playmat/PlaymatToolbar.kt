@@ -15,7 +15,12 @@ import androidx.compose.ui.unit.dp
 import com.deckapp.core.model.*
 
 /**
- * Barra de herramientas superior flotante para el Tapete de Cartas (Playmat).
+ * Barra de herramientas superior flotante organizada por categorías para el Tapete (Playmat).
+ * Agrupa las opciones en:
+ * 1. 🌍 Mundo & Entorno (Mesas, Fondos, Moldes, Cuadrícula, Regla, Centrar)
+ * 2. 🎭 Entidades (Cartas, Tokens, Relojes, Notas Adhesivas)
+ * 3. 🎲 Mecánicas (Dados, Bitácora/Notas, Snapshot)
+ * Incluye accesos directos de 1-toque para Robo rápido, Bitácora y Modo Zen.
  */
 @Composable
 fun PlaymatToolbar(
@@ -42,14 +47,19 @@ fun PlaymatToolbar(
     modifier: Modifier = Modifier
 ) {
     var showSurfaceMenu by remember { mutableStateOf(false) }
-    var showThemeMenu by remember { mutableStateOf(false) }
-    var showTemplateMenu by remember { mutableStateOf(false) }
+    var showWorldMenu by remember { mutableStateOf(false) }
+    var showEntitiesMenu by remember { mutableStateOf(false) }
+    var showMechanicsMenu by remember { mutableStateOf(false) }
     var showNewSurfaceDialog by remember { mutableStateOf(false) }
     var newSurfaceName by remember { mutableStateOf("") }
 
+    // Submenús dentro de Mundo
+    var showThemeSubmenu by remember { mutableStateOf(false) }
+    var showTemplateSubmenu by remember { mutableStateOf(false) }
+
     Surface(
-        modifier = modifier.padding(12.dp),
-        shape = RoundedCornerShape(20.dp),
+        modifier = modifier.padding(8.dp),
+        shape = RoundedCornerShape(22.dp),
         color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.94f),
         tonalElevation = 6.dp,
         shadowElevation = 8.dp
@@ -59,7 +69,7 @@ fun PlaymatToolbar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            // Selector de Superficie / Mesa
+            // --- Selector de Mesa Activa ---
             Box {
                 FilledTonalButton(
                     onClick = { showSurfaceMenu = true },
@@ -68,7 +78,11 @@ fun PlaymatToolbar(
                 ) {
                     Icon(Icons.Default.Layers, contentDescription = null, modifier = Modifier.size(14.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text(activeSurface.name, style = MaterialTheme.typography.labelSmall)
+                    Text(
+                        text = activeSurface.name,
+                        style = MaterialTheme.typography.labelSmall,
+                        maxLines = 1
+                    )
                     Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(14.dp))
                 }
 
@@ -118,116 +132,296 @@ fun PlaymatToolbar(
                 }
             }
 
-            // Selector de Plantilla Temática
+            VerticalDivider(
+                modifier = Modifier
+                    .height(20.dp)
+                    .padding(horizontal = 2.dp),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+            )
+
+            // --- 🌍 CATEGORÍA 1: MUNDO & ENTORNO ---
             Box {
-                IconButton(
-                    onClick = { showTemplateMenu = true },
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.GridGoldenratio,
-                        contentDescription = "Plantilla",
-                        modifier = Modifier.size(16.dp)
+                OutlinedButton(
+                    onClick = { showWorldMenu = true },
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                    modifier = Modifier.height(32.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = if (activeSurface.gridType != PlaymatGridType.NONE || activeSurface.customImageUri != null) {
+                            Color(0xFF00E5FF)
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        }
                     )
+                ) {
+                    Icon(Icons.Default.Public, contentDescription = null, modifier = Modifier.size(15.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text("Mundo", style = MaterialTheme.typography.labelSmall)
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(14.dp))
                 }
 
                 DropdownMenu(
-                    expanded = showTemplateMenu,
-                    onDismissRequest = { showTemplateMenu = false }
-                ) {
-                    Text(
-                        text = "Moldes y Disposición",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
-                    )
-                    PlaymatTemplateType.entries.forEach { template ->
-                        val label = when (template) {
-                            PlaymatTemplateType.FREEFORM -> "Mesa Libre (Sin molde)"
-                            PlaymatTemplateType.DECK_OF_WORLDS_MICROSETTING -> "Deck of Worlds: Microsetting (1+5)"
-                            PlaymatTemplateType.STORY_ENGINE_PREMISE -> "Story Engine: Premisa (4 cartas)"
-                            PlaymatTemplateType.TAROT_THREE_CARDS -> "Tirada 3 Cartas (Pasado/Presente/Futuro)"
-                            PlaymatTemplateType.ORACLE_CROSS -> "Oráculo en Cruz (5 cartas)"
-                        }
-                        DropdownMenuItem(
-                            text = { Text(label) },
-                            trailingIcon = if (activeSurface.template == template) {
-                                { Icon(Icons.Default.Check, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary) }
-                            } else null,
-                            onClick = {
-                                showTemplateMenu = false
-                                onSetTemplate(template)
-                            }
-                        )
+                    expanded = showWorldMenu,
+                    onDismissRequest = {
+                        showWorldMenu = false
+                        showThemeSubmenu = false
+                        showTemplateSubmenu = false
                     }
-                }
-            }
-
-            // Selector de Fondo / Textura
-            Box {
-                IconButton(
-                    onClick = { showThemeMenu = true },
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Palette,
-                        contentDescription = "Fondo",
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-
-                DropdownMenu(
-                    expanded = showThemeMenu,
-                    onDismissRequest = { showThemeMenu = false }
                 ) {
                     Text(
-                        text = "Fondo del Tapete",
+                        text = "🌍 Entorno y Atmósfera",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                     )
-                    PlaymatTheme.entries.forEach { theme ->
-                        val (label, color) = when (theme) {
-                            PlaymatTheme.FELT_GREEN -> "Fieltro Verde" to Color(0xFF1B4D3E)
-                            PlaymatTheme.FELT_RED -> "Fieltro Rojo" to Color(0xFF6B1D2F)
-                            PlaymatTheme.RUSTIC_WOOD -> "Madera Rústica" to Color(0xFF3E2723)
-                            PlaymatTheme.PARCHMENT_LEATHER -> "Pergamino Antiguo" to Color(0xFFD7CCC8)
-                            PlaymatTheme.DARK_MINIMAL -> "Dark Mode Minimal" to Color(0xFF1E1E24)
-                        }
+
+                    // Cuadrícula y Battlemaps
+                    if (onOpenTacticalSettings != null) {
                         DropdownMenuItem(
-                            text = { Text(label) },
+                            text = { Text("Cuadrícula y Battlemap") },
                             leadingIcon = {
-                                Box(
-                                    modifier = Modifier
-                                        .size(16.dp)
-                                        .background(color, CircleShape)
+                                Icon(
+                                    Icons.Default.GridOn,
+                                    contentDescription = null,
+                                    tint = if (activeSurface.gridType != PlaymatGridType.NONE) Color(0xFF00E5FF) else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             },
-                            trailingIcon = if (activeSurface.backgroundTheme == theme) {
-                                { Icon(Icons.Default.Check, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary) }
-                            } else null,
                             onClick = {
-                                showThemeMenu = false
-                                onSetTheme(theme)
+                                showWorldMenu = false
+                                onOpenTacticalSettings()
+                            }
+                        )
+                    }
+
+                    // Fondo del Tapete
+                    DropdownMenuItem(
+                        text = { Text("Fondo del Tapete (${activeSurface.backgroundTheme.name.replace('_', ' ')})") },
+                        leadingIcon = { Icon(Icons.Default.Palette, contentDescription = null) },
+                        trailingIcon = { Icon(Icons.Default.ChevronRight, null) },
+                        onClick = { showThemeSubmenu = !showThemeSubmenu }
+                    )
+                    if (showThemeSubmenu) {
+                        PlaymatTheme.entries.forEach { theme ->
+                            val (label, color) = when (theme) {
+                                PlaymatTheme.FELT_GREEN -> "Fieltro Verde" to Color(0xFF1B4D3E)
+                                PlaymatTheme.FELT_RED -> "Fieltro Rojo" to Color(0xFF6B1D2F)
+                                PlaymatTheme.RUSTIC_WOOD -> "Madera Rústica" to Color(0xFF3E2723)
+                                PlaymatTheme.PARCHMENT_LEATHER -> "Pergamino Antiguo" to Color(0xFFD7CCC8)
+                                PlaymatTheme.DARK_MINIMAL -> "Dark Mode Minimal" to Color(0xFF1E1E24)
+                            }
+                            DropdownMenuItem(
+                                modifier = Modifier.padding(start = 16.dp),
+                                text = { Text(label, style = MaterialTheme.typography.bodySmall) },
+                                leadingIcon = {
+                                    Box(modifier = Modifier.size(12.dp).background(color, CircleShape))
+                                },
+                                trailingIcon = if (activeSurface.backgroundTheme == theme) {
+                                    { Icon(Icons.Default.Check, null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary) }
+                                } else null,
+                                onClick = {
+                                    showWorldMenu = false
+                                    showThemeSubmenu = false
+                                    onSetTheme(theme)
+                                }
+                            )
+                        }
+                    }
+
+                    // Moldes y Plantillas
+                    DropdownMenuItem(
+                        text = { Text("Molde Temático") },
+                        leadingIcon = { Icon(Icons.Default.GridGoldenratio, contentDescription = null) },
+                        trailingIcon = { Icon(Icons.Default.ChevronRight, null) },
+                        onClick = { showTemplateSubmenu = !showTemplateSubmenu }
+                    )
+                    if (showTemplateSubmenu) {
+                        PlaymatTemplateType.entries.forEach { template ->
+                            val label = when (template) {
+                                PlaymatTemplateType.FREEFORM -> "Mesa Libre"
+                                PlaymatTemplateType.DECK_OF_WORLDS_MICROSETTING -> "Deck of Worlds"
+                                PlaymatTemplateType.STORY_ENGINE_PREMISE -> "Story Engine"
+                                PlaymatTemplateType.TAROT_THREE_CARDS -> "Tarot 3 Cartas"
+                                PlaymatTemplateType.ORACLE_CROSS -> "Oráculo en Cruz"
+                            }
+                            DropdownMenuItem(
+                                modifier = Modifier.padding(start = 16.dp),
+                                text = { Text(label, style = MaterialTheme.typography.bodySmall) },
+                                trailingIcon = if (activeSurface.template == template) {
+                                    { Icon(Icons.Default.Check, null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary) }
+                                } else null,
+                                onClick = {
+                                    showWorldMenu = false
+                                    showTemplateSubmenu = false
+                                    onSetTemplate(template)
+                                }
+                            )
+                        }
+                    }
+
+                    // Regla de Medición
+                    if (onToggleRuler != null) {
+                        DropdownMenuItem(
+                            text = { Text(if (isRulerActive) "Desactivar Regla" else "Regla de Distancia") },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Straighten,
+                                    null,
+                                    tint = if (isRulerActive) Color(0xFF00E5FF) else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            },
+                            onClick = {
+                                showWorldMenu = false
+                                onToggleRuler()
+                            }
+                        )
+                    }
+
+                    // Centrar Cámara
+                    DropdownMenuItem(
+                        text = { Text("Centrar Cámara") },
+                        leadingIcon = { Icon(Icons.Default.CenterFocusStrong, null) },
+                        onClick = {
+                            showWorldMenu = false
+                            onResetCamera()
+                        }
+                    )
+                }
+            }
+
+            // --- 🎭 CATEGORÍA 2: ENTIDADES DEL TAPETE ---
+            Box {
+                OutlinedButton(
+                    onClick = { showEntitiesMenu = true },
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                    modifier = Modifier.height(32.dp)
+                ) {
+                    Icon(Icons.Default.Widgets, contentDescription = null, modifier = Modifier.size(15.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text("Entidades", style = MaterialTheme.typography.labelSmall)
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(14.dp))
+                }
+
+                DropdownMenu(
+                    expanded = showEntitiesMenu,
+                    onDismissRequest = { showEntitiesMenu = false }
+                ) {
+                    Text(
+                        text = "🎭 Elementos en Mesa",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                    )
+
+                    DropdownMenuItem(
+                        text = { Text("Robar Carta al Tapete") },
+                        leadingIcon = { Icon(Icons.Default.AddCard, null, tint = MaterialTheme.colorScheme.primary) },
+                        onClick = {
+                            showEntitiesMenu = false
+                            onOpenQuickDraw()
+                        }
+                    )
+
+                    if (onOpenTokenPicker != null) {
+                        DropdownMenuItem(
+                            text = { Text("Añadir Token (PJ / PNJ)") },
+                            leadingIcon = { Icon(Icons.Default.PersonAdd, null, tint = MaterialTheme.colorScheme.secondary) },
+                            onClick = {
+                                showEntitiesMenu = false
+                                onOpenTokenPicker()
+                            }
+                        )
+                    }
+
+                    if (onOpenClockCreator != null) {
+                        DropdownMenuItem(
+                            text = { Text("Añadir Reloj de Tensión") },
+                            leadingIcon = { Icon(Icons.Default.HourglassTop, null, tint = Color(0xFFFFB300)) },
+                            onClick = {
+                                showEntitiesMenu = false
+                                onOpenClockCreator()
+                            }
+                        )
+                    }
+
+                    DropdownMenuItem(
+                        text = { Text("Añadir Nota Adhesiva") },
+                        leadingIcon = { Icon(Icons.Default.NoteAdd, null) },
+                        onClick = {
+                            showEntitiesMenu = false
+                            onAddStickyNote()
+                        }
+                    )
+                }
+            }
+
+            // --- 🎲 CATEGORÍA 3: MECÁNICAS & MESA ---
+            Box {
+                OutlinedButton(
+                    onClick = { showMechanicsMenu = true },
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                    modifier = Modifier.height(32.dp)
+                ) {
+                    Icon(Icons.Default.Casino, contentDescription = null, modifier = Modifier.size(15.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text("Mesa", style = MaterialTheme.typography.labelSmall)
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(14.dp))
+                }
+
+                DropdownMenu(
+                    expanded = showMechanicsMenu,
+                    onDismissRequest = { showMechanicsMenu = false }
+                ) {
+                    Text(
+                        text = "🎲 Mecánicas de Juego",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                    )
+
+                    if (onToggleDiceRoller != null) {
+                        DropdownMenuItem(
+                            text = { Text("Lanzador de Dados") },
+                            leadingIcon = { Icon(Icons.Default.Casino, null, tint = MaterialTheme.colorScheme.tertiary) },
+                            onClick = {
+                                showMechanicsMenu = false
+                                onToggleDiceRoller()
+                            }
+                        )
+                    }
+
+                    if (onToggleSessionDrawer != null) {
+                        DropdownMenuItem(
+                            text = { Text(if (isSessionDrawerOpen) "Cerrar Bitácora / Notas" else "Bitácora en Vivo & Notas") },
+                            leadingIcon = { Icon(Icons.Default.AutoStories, null, tint = if (isSessionDrawerOpen) Color(0xFF00E5FF) else MaterialTheme.colorScheme.primary) },
+                            onClick = {
+                                showMechanicsMenu = false
+                                onToggleSessionDrawer()
+                            }
+                        )
+                    }
+
+                    if (onExportSnapshot != null) {
+                        DropdownMenuItem(
+                            text = { Text("Exportar Captura del Tapete") },
+                            leadingIcon = { Icon(Icons.Default.Share, null, tint = MaterialTheme.colorScheme.primary) },
+                            onClick = {
+                                showMechanicsMenu = false
+                                onExportSnapshot()
                             }
                         )
                     }
                 }
             }
 
-            // Botón Añadir Nota Adhesiva
-            IconButton(
-                onClick = onAddStickyNote,
-                modifier = Modifier.size(32.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.NoteAdd,
-                    contentDescription = "Añadir Nota",
-                    modifier = Modifier.size(16.dp)
-                )
-            }
+            VerticalDivider(
+                modifier = Modifier
+                    .height(20.dp)
+                    .padding(horizontal = 2.dp),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+            )
 
-            // Botón Robar Directo al Tapete
+            // --- ACCIONES DIRECTAS DE UN TOQUE (FAST ACTIONS) ---
+
+            // 1. Robar Directo
             IconButton(
                 onClick = onOpenQuickDraw,
                 modifier = Modifier.size(32.dp)
@@ -240,98 +434,7 @@ fun PlaymatToolbar(
                 )
             }
 
-            // Botón Añadir Token de Personaje
-            if (onOpenTokenPicker != null) {
-                IconButton(
-                    onClick = onOpenTokenPicker,
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.PersonAdd,
-                        contentDescription = "Añadir Token",
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.secondary
-                    )
-                }
-            }
-
-            // Botón Añadir Reloj de Progreso (Blades in the Dark)
-            if (onOpenClockCreator != null) {
-                IconButton(
-                    onClick = onOpenClockCreator,
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.HourglassTop,
-                        contentDescription = "Añadir Reloj",
-                        modifier = Modifier.size(16.dp),
-                        tint = Color(0xFFFFB300)
-                    )
-                }
-            }
-
-            // Botón Cuadrícula y Battlemaps Tácticos
-            if (onOpenTacticalSettings != null) {
-                IconButton(
-                    onClick = onOpenTacticalSettings,
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.GridOn,
-                        contentDescription = "Fondo y Cuadrícula",
-                        modifier = Modifier.size(16.dp),
-                        tint = if (activeSurface.gridType != PlaymatGridType.NONE || activeSurface.customImageUri != null) {
-                            Color(0xFF00E5FF)
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        }
-                    )
-                }
-            }
-
-            // Botón Herramienta de Regla Táctica
-            if (onToggleRuler != null) {
-                IconButton(
-                    onClick = onToggleRuler,
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Straighten,
-                        contentDescription = "Regla de Distancia",
-                        modifier = Modifier.size(16.dp),
-                        tint = if (isRulerActive) Color(0xFF00E5FF) else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            // Botón Lanzador de Dados en el Tapete
-            if (onToggleDiceRoller != null) {
-                IconButton(
-                    onClick = onToggleDiceRoller,
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Casino,
-                        contentDescription = "Lanzar Dados",
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.tertiary
-                    )
-                }
-            }
-
-            // Reset Cámara
-            IconButton(
-                onClick = onResetCamera,
-                modifier = Modifier.size(32.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.CenterFocusStrong,
-                    contentDescription = "Centrar Mesa",
-                    modifier = Modifier.size(16.dp)
-                )
-            }
-
-            // Bitácora en Vivo y Notas de la Mesa
+            // 2. Bitácora / Notas de Mesa
             if (onToggleSessionDrawer != null) {
                 IconButton(
                     onClick = onToggleSessionDrawer,
@@ -346,7 +449,7 @@ fun PlaymatToolbar(
                 }
             }
 
-            // Modo Zen (Despejar pantalla al 100%)
+            // 3. Modo Zen Inmersivo
             if (onToggleZenMode != null) {
                 IconButton(
                     onClick = onToggleZenMode,
@@ -357,21 +460,6 @@ fun PlaymatToolbar(
                         contentDescription = "Modo Zen",
                         modifier = Modifier.size(16.dp),
                         tint = Color(0xFF81C784)
-                    )
-                }
-            }
-
-            // Exportar Captura PNG
-            if (onExportSnapshot != null) {
-                IconButton(
-                    onClick = onExportSnapshot,
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = "Compartir Tapete",
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }

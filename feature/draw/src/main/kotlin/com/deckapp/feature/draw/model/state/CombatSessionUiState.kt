@@ -15,5 +15,6 @@ data class CombatSessionUiState(
     val activeEncounter: Encounter? = null,
     val combatLog: List<CombatLogEntry> = emptyList(),
     val playerParticipants: List<PlayerInitiativeParticipant> = emptyList(),
-    val isCombatHudExpanded: Boolean = false
+    val isCombatHudExpanded: Boolean = false,
+    val availableEncounters: List<Encounter> = emptyList()
 )

@@ -36,6 +36,9 @@ fun WikiTab(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var selectedEntry by remember { mutableStateOf<WikiEntry?>(null) }
     var searchQuery by remember { mutableStateOf("") }
+    var showCreateDialog by remember { mutableStateOf(false) }
+    var newTitle by remember { mutableStateOf("") }
+    var newContent by remember { mutableStateOf("") }
 
     Box(modifier = Modifier.fillMaxSize()) {
         AnimatedContent(
@@ -62,23 +65,32 @@ fun WikiTab(
                 )
             } else {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    // Search Bar
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
+                    // Search Bar and Add Action
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
-                        placeholder = { Text("Buscar Lore...") },
-                        leadingIcon = { Icon(Icons.Default.Search, null) },
-                        trailingIcon = { 
-                            if (searchQuery.isNotEmpty()) {
-                                IconButton(onClick = { searchQuery = "" }) { Icon(Icons.Default.Close, null) }
-                            }
-                        },
-                        shape = MaterialTheme.shapes.medium,
-                        singleLine = true
-                    )
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            modifier = Modifier.weight(1f),
+                            placeholder = { Text("Buscar Lore...") },
+                            leadingIcon = { Icon(Icons.Default.Search, null) },
+                            trailingIcon = { 
+                                if (searchQuery.isNotEmpty()) {
+                                    IconButton(onClick = { searchQuery = "" }) { Icon(Icons.Default.Close, null) }
+                                }
+                            },
+                            shape = MaterialTheme.shapes.medium,
+                            singleLine = true
+                        )
+                        FilledTonalIconButton(onClick = { showCreateDialog = true }) {
+                            Icon(Icons.Default.Add, contentDescription = "Nueva entrada")
+                        }
+                    }
 
                     val filteredEntries = uiState.entries.filter { 
                         it.title.contains(searchQuery, ignoreCase = true) || 
@@ -122,11 +134,19 @@ fun WikiTab(
                                             fontWeight = FontWeight.Bold
                                         )
                                         Text(
-                                            "Crea artículos de lore, facciones, lugares y conceptos del mundo de juego con el botón '+' inferior.",
+                                            "Crea artículos de lore, facciones, lugares y conceptos del mundo de juego. Puedes vincular artículos entre sí usando [[Título]].",
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
                                         )
+                                        Button(
+                                            onClick = { showCreateDialog = true },
+                                            modifier = Modifier.padding(top = 8.dp)
+                                        ) {
+                                            Icon(Icons.Default.Add, contentDescription = null)
+                                            Spacer(Modifier.width(8.dp))
+                                            Text("Crear Primer Artículo")
+                                        }
                                     }
                                 }
                             }
@@ -135,6 +155,61 @@ fun WikiTab(
                 }
             }
         }
+    }
+
+    if (showCreateDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showCreateDialog = false
+                newTitle = ""
+                newContent = ""
+            },
+            title = { Text("Nuevo Artículo de Lore") },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedTextField(
+                        value = newTitle,
+                        onValueChange = { newTitle = it },
+                        label = { Text("Título (ej: Ciudadela Gris)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = newContent,
+                        onValueChange = { newContent = it },
+                        label = { Text("Descripción o notas (admite [[Vínculos]])") },
+                        modifier = Modifier.fillMaxWidth().height(140.dp)
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (newTitle.isNotBlank()) {
+                            viewModel.saveEntry(newTitle, newContent)
+                            showCreateDialog = false
+                            newTitle = ""
+                            newContent = ""
+                        }
+                    },
+                    enabled = newTitle.isNotBlank()
+                ) {
+                    Text("Crear")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showCreateDialog = false
+                    newTitle = ""
+                    newContent = ""
+                }) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }
 

@@ -402,7 +402,9 @@ private fun CardEventContent(event: TimelineEvent.CardEvent) {
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            val cardText = event.card?.title ?: event.event.cardId?.let { "Carta #$it" }
+            val cardText = event.card?.title
+                ?: event.event.cardId?.takeIf { it > 0 }?.let { "Carta #$it" }
+                ?: event.event.metadata?.takeIf { it.isNotBlank() }
             if (cardText != null) {
                 Text(
                     text = cardText,
