@@ -77,7 +77,38 @@ class ChoirGuideDelegateTest {
         val wrong = RandomTable(id = 1, name = "Hitos en Ruinas", sourcePack = "Otro sistema")
         val similar = RandomTable(id = 2, name = "Hitos en Ruinas extra", sourcePack = "Choir of Flesh")
         val correct = RandomTable(id = 3, name = "Hitos en Ruinas", sourcePack = "Choir of Flesh")
-        assertNull(ChoirGuideDelegate.findTable(ui.value.copy(allTables = listOf(wrong, similar)), "Hitos en Ruinas"))
-        assertEquals(3L, ChoirGuideDelegate.findTable(ui.value.copy(allTables = listOf(wrong, correct)), "Hitos en Ruinas")?.id)
+        assertNull(ChoirGuideDelegate.findTable(ui.value.copy(resources = ui.value.resources.copy(allTables = listOf(wrong, similar))), "Hitos en Ruinas"))
+        assertEquals(3L, ChoirGuideDelegate.findTable(ui.value.copy(resources = ui.value.resources.copy(allTables = listOf(wrong, correct))), "Hitos en Ruinas")?.id)
+    }
+
+    @Test fun `resources substate encapsulation and getter synchronization`() {
+        val testTables = listOf(RandomTable(id = 10, name = "Tabla de Encuentros"))
+        val testSystems = listOf("D&D 5e", "Choir of Flesh")
+        ui.value = ui.value.copy(resources = ui.value.resources.copy(allTables = testTables, availableSystems = testSystems))
+
+        assertEquals(1, ui.value.resources.allTables.size)
+        assertEquals(ui.value.resources.allTables, ui.value.allTables)
+        assertEquals(2, ui.value.resources.availableSystems.size)
+        assertEquals(ui.value.resources.availableSystems, ui.value.availableSystems)
+    }
+
+    @Test fun `npc substate encapsulation and getter synchronization`() {
+        val testNpcs = listOf(Npc(id = 21, name = "Guía Encapuchado"))
+        val testPlayers = listOf(Npc(id = 22, name = "Héroe"))
+        ui.value = ui.value.copy(npc = ui.value.npc.copy(
+            npcs = testNpcs,
+            npcCount = testNpcs.size,
+            playingNpcVoicePath = "/voices/21.mp3",
+            permanentPlayers = testPlayers
+        ))
+
+        assertEquals(1, ui.value.npc.npcs.size)
+        assertEquals(ui.value.npc.npcs, ui.value.npcs)
+        assertEquals(1, ui.value.npc.npcCount)
+        assertEquals(ui.value.npc.npcCount, ui.value.npcCount)
+        assertEquals("/voices/21.mp3", ui.value.npc.playingNpcVoicePath)
+        assertEquals(ui.value.npc.playingNpcVoicePath, ui.value.playingNpcVoicePath)
+        assertEquals(1, ui.value.npc.permanentPlayers.size)
+        assertEquals(ui.value.npc.permanentPlayers, ui.value.permanentPlayers)
     }
 }

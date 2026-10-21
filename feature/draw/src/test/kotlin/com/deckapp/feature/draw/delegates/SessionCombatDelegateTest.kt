@@ -6,6 +6,7 @@ import com.deckapp.core.domain.repository.SessionRepository
 import com.deckapp.core.domain.usecase.*
 import com.deckapp.core.model.*
 import com.deckapp.feature.draw.SessionUiState
+import com.deckapp.feature.draw.model.state.CombatSessionUiState
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,8 +55,10 @@ class SessionCombatDelegateTest {
     private val uiState = MutableStateFlow(
         SessionUiState(
             sessionId = sessionId,
-            activeEncounter = activeEncounter,
-            hasActiveEncounter = true
+            combat = CombatSessionUiState(
+                activeEncounter = activeEncounter,
+                hasActiveEncounter = true
+            )
         )
     )
 
@@ -157,7 +160,9 @@ class SessionCombatDelegateTest {
 
         // Simular que el encounter se actualizó en uiState
         uiState.value = uiState.value.copy(
-            activeEncounter = activeEncounter.copy(currentTurnIndex = 1, currentRound = 1)
+            combat = uiState.value.combat.copy(
+                activeEncounter = activeEncounter.copy(currentTurnIndex = 1, currentRound = 1)
+            )
         )
 
         delegate.nextTurn()
@@ -180,5 +185,28 @@ class SessionCombatDelegateTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         coVerify { npcRepository.saveNpc(match { it.id == 7L && it.currentHp == 6 }) }
+    }
+
+    @Test
+    fun `combatSessionUiState encapsulation and synchronization with legacy getters`() {
+        val customEncounter = Encounter(id = 99L, name = "Boss Fight", linkedSessionId = sessionId)
+        val logEntry = CombatLogEntry(encounterId = 99L, message = "Round 1", type = CombatLogType.ROUND_START)
+        val player = PlayerInitiativeParticipant(name = "Aragorn", initiativeTotal = 18)
+
+        uiState.value = uiState.value.copy(
+            combat = CombatSessionUiState(
+                hasActiveEncounter = true,
+                activeEncounter = customEncounter,
+                combatLog = listOf(logEntry),
+                playerParticipants = listOf(player),
+                isCombatHudExpanded = true
+            )
+        )
+
+        assertTrue(uiState.value.hasActiveEncounter)
+        assertEquals(customEncounter, uiState.value.activeEncounter)
+        assertEquals(listOf(logEntry), uiState.value.combatLog)
+        assertEquals(listOf(player), uiState.value.playerParticipants)
+        assertTrue(uiState.value.isCombatHudExpanded)
     }
 }

@@ -1,3 +1,69 @@
+### Refactorización Arquitectónica de Sesión: Extracción de ResourcesSessionUiState (20 de octubre de 2026)
+
+**Categoría:** `REFACTOR / ARCHITECTURE / SESSION / RESOURCES / RANDOM TABLES / STARTER PACKS / STATE MANAGEMENT / CLEAN CODE`
+
+- **Extracción y Desacoplamiento de Recursos y Tablas de Sesión (`ResourcesSessionUiState`):**
+  - Creado `com.deckapp.feature.draw.model.state.ResourcesSessionUiState` para encapsular las 4 variables de gestión de tablas y catálogo (`allTables`, `tablesInSession`, `availableStarterPacks`, `availableSystems`).
+  - Incorporado `val resources: ResourcesSessionUiState = ResourcesSessionUiState()` en `SessionUiState`.
+  - Preservados getters delegados retrocompatibles (`allTables`, `tablesInSession`, `availableStarterPacks`, `availableSystems`) para garantizar paridad y cero roturas en los 30+ composables y selectores (`ResourceManagerDialog`, `SessionBoardTab`, `SessionBoardBlockPickerSheet`, `SessionDialogsHost`, etc.).
+  - Actualizados los flujos de inicialización y recolección reactiva en `SessionViewModel` (asignación de tablas del sistema, tablas de sesión y paquetes iniciales).
+- **Verificación Técnica:**
+  - 100% de tests unitarios aprobados en `:feature:draw:testDebugUnitTest` (`ChoirGuideDelegateTest` con nuevo test de sincronización `resources substate encapsulation and getter synchronization`).
+  - Compilación e integración verificada con éxito en `:app:assembleDebug` (`BUILD SUCCESSFUL` en 3m 1s).
+
+---
+
+### Refactorización Arquitectónica de Sesión: Extracción de GuidesSessionUiState (20 de octubre de 2026)
+
+**Categoría:** `REFACTOR / ARCHITECTURE / SESSION / GUIDES / CHOIR / STORY ENGINE / MICROSETTINGS / STATE MANAGEMENT / CLEAN CODE`
+
+- **Extracción y Desacoplamiento de Asistentes y Guías de Sesión (`GuidesSessionUiState`):**
+  - Creado `com.deckapp.feature.draw.model.state.GuidesSessionUiState` para encapsular las 7 variables de guías interactivas y asistentes de creación:
+    - Guía de procedimientos Choir (`choirGuideSourcePage`, `choirGuideTableId`, `choirGuideError`).
+    - Diseñador de microsettings y clúster de Deck of Worlds (`activeMicrosetting`, `editingMicrosettingBoardItemId`).
+    - Guía interactiva paso a paso The Story Engine & Deck of Worlds (`storyEngineGuideTab`, `storyEngineGuideStepIndex`).
+  - Incorporado `val guides: GuidesSessionUiState = GuidesSessionUiState()` dentro del estado global `SessionUiState`.
+  - Preservados getters delegados retrocompatibles (`choirGuideSourcePage`, `choirGuideTableId`, `choirGuideError`, `activeMicrosetting`, `editingMicrosettingBoardItemId`, `storyEngineGuideTab`, `storyEngineGuideStepIndex`) para asegurar cero roturas y paridad absoluta en composables y pantallas.
+  - Corregido el smart-cast de `choirGuideError` en `ChoirProcedureGuide.kt` mediante acceso seguro (`?.let`).
+- **Helpers Atómicos de Mutación en Delegados (`updateGuidesState`):**
+  - Implementado helper `updateGuidesState` en `ChoirGuideDelegate`, `MicrosettingDelegate` y `StoryEngineGuideDelegate`.
+- **Verificación Técnica:**
+  - 100% de tests unitarios aprobados en `:feature:draw:testDebugUnitTest` (`StoryEngineGuideDelegateTest` con nuevo test de sincronización `guides substate encapsulation and getter synchronization`, `ChoirGuideDelegateTest`, etc.).
+  - Compilación e integración completa verificada con éxito en `:app:assembleDebug` (`BUILD SUCCESSFUL` en 2m 55s).
+
+---
+
+### Refactorización Arquitectónica de Sesión: Extracción de CombatSessionUiState y SessionCombatDelegate (20 de octubre de 2026)
+
+**Categoría:** `REFACTOR / ARCHITECTURE / SESSION / COMBAT / INITIATIVE / ENCOUNTERS / STATE MANAGEMENT / CLEAN CODE`
+
+- **Extracción y Desacoplamiento de Estado de Combate e Iniciativa (`CombatSessionUiState`):**
+  - Creado `com.deckapp.feature.draw.model.state.CombatSessionUiState` para encapsular las 5 variables del sistema táctico y tracker de encuentros (`hasActiveEncounter`, `activeEncounter`, `combatLog`, `playerParticipants`, `isCombatHudExpanded`).
+  - Incorporado `val combat: CombatSessionUiState = CombatSessionUiState()` dentro del estado global `SessionUiState`.
+  - Preservados getters delegados retrocompatibles (`hasActiveEncounter`, `activeEncounter`, `combatLog`, `playerParticipants`, `isCombatHudExpanded`) para garantizar cero roturas en llamadas de UI, paneles tácticos (`TacticalSidePanel`, `CombatBlockContent`, `SessionScreen`) y tests.
+- **Helper Atómico de Mutación en Delegado (`SessionCombatDelegate.updateCombatState`):**
+  - Implementado helper `updateCombatState { transform(it.combat) }` en `SessionCombatDelegate`, aislando las transiciones de participantes de iniciativa, expansión del HUD y cierre de encuentros.
+- **Verificación Técnica:**
+  - 100% de tests unitarios aprobados en `:feature:draw:testDebugUnitTest` (`SessionCombatDelegateTest` con nuevo test de sincronización y encapsulamiento `combatSessionUiState encapsulation and synchronization with legacy getters`).
+
+---
+
+### Refactorización Arquitectónica de Sesión: Extracción de SpotlightUiState y SessionSpotlightDelegate (20 de octubre de 2026)
+
+**Categoría:** `REFACTOR / ARCHITECTURE / SESSION / SPOTLIGHT / OMNIBAR / STATE MANAGEMENT / CLEAN CODE`
+
+- **Extracción y Desacoplamiento de Estado de Búsqueda Omnibar (`SpotlightUiState`):**
+  - Creado `com.deckapp.feature.draw.model.state.SpotlightUiState` para encapsular las 7 variables del Omnibar / Spotlight (`showDialog`, `query`, `selectedCategory`, `results`, `selectedItem`, `lastRollResult`, `isSearching`).
+  - Incorporado `val spotlight: SpotlightUiState = SpotlightUiState()` en `SessionUiState`.
+  - Preservados getters delegados retrocompatibles (`showSpotlightDialog`, `spotlightQuery`, `spotlightCategory`, `spotlightResults`, `selectedSpotlightItem`, `spotlightLastRollResult`, `isSearchingSpotlight`) para garantizar compatibilidad total sin roturas en composables ni en llamadas externas.
+- **Helper Atómico de Mutación en Delegado (`SessionSpotlightDelegate.updateSpotlightState`):**
+  - Implementado helper `updateSpotlightState { transform(it.spotlight) }` en `SessionSpotlightDelegate`, unificando las transiciones de apertura, cierre, ejecución de query y selección de resultados en el Omnibar.
+- **Verificación Técnica:**
+  - 100% de tests unitarios aprobados en `:feature:draw:testDebugUnitTest` (`SessionSpotlightDelegateTest` con nuevo test de sincronización y encapsulamiento `spotlightUiState encapsulation and synchronization with legacy getters`).
+  - Compilación e integración completa verificada con éxito en `:app:assembleDebug` (`BUILD SUCCESSFUL`).
+
+---
+
 ### Refactorización Arquitectónica de Sesión: Extracción de SessionModalsUiState (20 de octubre de 2026)
 
 **Categoría:** `REFACTOR / ARCHITECTURE / SESSION / MODALS / DIALOGS / STATE MANAGEMENT / CLEAN CODE`

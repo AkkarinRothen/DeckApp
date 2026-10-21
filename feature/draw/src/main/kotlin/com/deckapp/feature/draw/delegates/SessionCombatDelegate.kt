@@ -8,6 +8,7 @@ import com.deckapp.core.domain.repository.SessionRepository
 import com.deckapp.core.domain.usecase.*
 import com.deckapp.core.model.*
 import com.deckapp.feature.draw.SessionUiState
+import com.deckapp.feature.draw.model.state.CombatSessionUiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -38,6 +39,12 @@ class SessionCombatDelegate(
     private val notesMutex: Mutex,
     private val onUpdateNotes: (String) -> Unit
 ) {
+
+    private inline fun updateCombatState(crossinline transform: (CombatSessionUiState) -> CombatSessionUiState) {
+        _uiState.update { current ->
+            current.copy(combat = transform(current.combat))
+        }
+    }
 
     fun updateChoirCharacter(creatureId: Long, command: ChoirCharacterCommand) {
         scope.launch { updateChoirCharacterUseCase(creatureId, command) }
@@ -98,7 +105,7 @@ class SessionCombatDelegate(
     }
 
     fun toggleCombatHudExpanded() {
-        _uiState.update { it.copy(isCombatHudExpanded = !it.isCombatHudExpanded) }
+        updateCombatState { it.copy(isCombatHudExpanded = !it.isCombatHudExpanded) }
     }
 
     fun copyCombatRoundToDiary() {
@@ -191,7 +198,7 @@ class SessionCombatDelegate(
     }
 
     fun addPlayerParticipant(name: String, initiative: Int) {
-        _uiState.update {
+        updateCombatState {
             it.copy(
                 playerParticipants = it.playerParticipants + PlayerInitiativeParticipant(
                     name = name,
@@ -202,7 +209,7 @@ class SessionCombatDelegate(
     }
 
     fun removePlayerParticipant(id: String) {
-        _uiState.update {
+        updateCombatState {
             it.copy(
                 playerParticipants = it.playerParticipants.filter { p -> p.id != id }
             )
@@ -233,7 +240,7 @@ class SessionCombatDelegate(
                     it.copy(
                         activeTab = 0,
                         snackbarMessage = "Combate finalizado y resumido en notas",
-                        playerParticipants = emptyList()
+                        combat = it.combat.copy(playerParticipants = emptyList())
                     )
                 }
             }

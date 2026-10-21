@@ -30,11 +30,16 @@ class ChoirGuideDelegate(
     private fun memory() = ui.value.boardMemory.choirGuide
     private fun save(value: ChoirGuideMemory) = updateMemory { it.copy(choirGuide = value) }
     private fun id() = UUID.randomUUID().toString()
-    private fun failure(t: Throwable) { ui.update { it.copy(choirGuideError = t.message ?: "No se pudo guardar el procedimiento.") } }
 
-    fun open() { ui.update { it.copy(modals = it.modals.copy(showChoirGuide = true), choirGuideError = null) } }
+    private inline fun updateGuidesState(crossinline transform: (com.deckapp.feature.draw.model.state.GuidesSessionUiState) -> com.deckapp.feature.draw.model.state.GuidesSessionUiState) {
+        ui.update { it.copy(guides = transform(it.guides)) }
+    }
+
+    private fun failure(t: Throwable) { updateGuidesState { it.copy(choirGuideError = t.message ?: "No se pudo guardar el procedimiento.") } }
+
+    fun open() { ui.update { it.copy(modals = it.modals.copy(showChoirGuide = true), guides = it.guides.copy(choirGuideError = null)) } }
     fun close() { ui.update { it.copy(modals = it.modals.copy(showChoirGuide = false)) } }
-    fun source(page: Int?) { ui.update { it.copy(choirGuideSourcePage = page) } }
+    fun source(page: Int?) { updateGuidesState { it.copy(choirGuideSourcePage = page) } }
 
     fun select(procedure: ChoirProcedure) = scope.launch {
         mutex.withLock { runCatching { save(ChoirGuideRules.select(memory(), procedure)) }.onFailure(::failure) }
@@ -75,7 +80,7 @@ class ChoirGuideDelegate(
     fun draft(roll: String? = null, note: String? = null) = scope.launch {
         mutex.withLock {
             val before = memory()
-            ui.update { it.copy(choirGuideError = null) }
+            updateGuidesState { it.copy(choirGuideError = null) }
             save(before.copy(draftRoll = roll ?: before.draftRoll, draftNote = note ?: before.draftNote,
                 draftMethod = if (roll != null) "dado físico / resolución manual" else before.draftMethod))
         }
@@ -94,7 +99,7 @@ class ChoirGuideDelegate(
         mutex.withLock {
             val before = memory()
             if (before.revision != revision) return@withLock // stale/double tap
-            ui.update { it.copy(choirGuideError = null) }
+            updateGuidesState { it.copy(choirGuideError = null) }
             runCatching {
                 save(ChoirGuideRules.resolve(before, action, before.draftRoll.toIntOrNull(), before.draftNote, id(), System.currentTimeMillis()).getOrThrow())
                 flushUnlocked()
@@ -119,14 +124,14 @@ class ChoirGuideDelegate(
     fun openTable(title: String) {
         val table = findTable(ui.value, title)
         if (table == null) {
-            ui.update { it.copy(choirGuideError = "La tabla «$title» no está integrada. Consulta la referencia del manual; puedes resolver este paso manualmente.") }
-        } else ui.update { it.copy(choirGuideTableId = table.id, modals = it.modals.copy(showChoirGuide = false)) }
+            updateGuidesState { it.copy(choirGuideError = "La tabla «$title» no está integrada. Consulta la referencia del manual; puedes resolver este paso manualmente.") }
+        } else ui.update { it.copy(guides = it.guides.copy(choirGuideTableId = table.id), modals = it.modals.copy(showChoirGuide = false)) }
     }
 
-    fun closeTable() { ui.update { it.copy(choirGuideTableId = null, modals = it.modals.copy(showChoirGuide = true)) } }
+    fun closeTable() { ui.update { it.copy(guides = it.guides.copy(choirGuideTableId = null), modals = it.modals.copy(showChoirGuide = true)) } }
     fun retryJournal() = scope.launch {
         mutex.withLock {
-            ui.update { it.copy(choirGuideError = null) }
+            updateGuidesState { it.copy(choirGuideError = null) }
             runCatching { flushUnlocked() }.onFailure(::failure)
         }
     }

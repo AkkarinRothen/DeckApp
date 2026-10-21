@@ -36,21 +36,12 @@ data class SessionUiState(
     val errorMessage: String? = null,
     val sessionEnded: Boolean = false,
     val activeTab: Int = 0,                  // 0=Mazos, 1=Pilas, 2=Tablas, 3=Ref, 4=Notas, 5=Combate
-    val hasActiveEncounter: Boolean = false, // habilita tab Combate (Sprint 7)
-    val activeEncounter: Encounter? = null,  // datos del combate en curso
     val dmNotes: String = "",
     val sessionElapsedMinutes: Long = 0,
-    // Combat Log
-    val combatLog: List<CombatLogEntry> = emptyList(),
     // Sprint 17 — Resource Management
-    val allTables: List<RandomTable> = emptyList(),
-    val tablesInSession: List<RandomTable> = emptyList(),
-    val availableStarterPacks: List<com.deckapp.feature.reference.StarterPackInfo> = emptyList(),
-    val availableSystems: List<String> = emptyList(),
+    val resources: com.deckapp.feature.draw.model.state.ResourcesSessionUiState = com.deckapp.feature.draw.model.state.ResourcesSessionUiState(),
     // Sprint 15 — UX de Notas
     val isSavingNotes: Boolean = false,
-    // Sprint 17 — Participantes temporales (PJs)
-    val playerParticipants: List<PlayerInitiativeParticipant> = emptyList(),
     val isSimplifiedMode: Boolean = false,
     val linkedMythicSession: MythicSession? = null,
     val allMythicSessions: List<MythicSession> = emptyList(),
@@ -64,8 +55,7 @@ data class SessionUiState(
     val hplState: HexMapSessionUiState? = null,
     val mythicState: MythicSessionUiState? = null,
     // Sprint 18 — NPCs & Voice
-    val npcs: List<Npc> = emptyList(),
-    val playingNpcVoicePath: String? = null,
+    val npc: com.deckapp.feature.draw.model.state.NpcSessionUiState = com.deckapp.feature.draw.model.state.NpcSessionUiState(),
     // Session Planner
     val scenes: List<Scene> = emptyList(),
     val focusedSceneId: Long? = null,
@@ -81,8 +71,6 @@ data class SessionUiState(
     val allHexMaps: List<HexMap> = emptyList(),
     val recentDiceRolls: List<DiceRollResult> = emptyList(),
     val recentTableRolls: List<TableRollResult> = emptyList(),
-    val npcCount: Int = 0,
-    val permanentPlayers: List<Npc> = emptyList(),
     val pinnedTableRolls: Map<Long, TableRollResult> = emptyMap(),
     val spreadResultsByDeck: Map<Long, CardSpreadResult> = emptyMap(),
     // Sprint 56 — Bento Solo Journaling & Interactive Mythic Oracle
@@ -92,16 +80,9 @@ data class SessionUiState(
     val isClocksOverlayExpanded: Boolean = false,
     val isThreadsOverlayExpanded: Boolean = false,
     val selectedThreadsTab: ThreadsOverlayTab = ThreadsOverlayTab.THREADS,
-    val isCombatHudExpanded: Boolean = false,
+    val combat: com.deckapp.feature.draw.model.state.CombatSessionUiState = com.deckapp.feature.draw.model.state.CombatSessionUiState(),
     val spotlight: com.deckapp.feature.draw.model.state.SpotlightUiState = com.deckapp.feature.draw.model.state.SpotlightUiState(),
-    val choirGuideSourcePage: Int? = null,
-
-    val choirGuideTableId: Long? = null,
-    val choirGuideError: String? = null,
-    val activeMicrosetting: com.deckapp.core.model.MicrosettingCluster? = null,
-    val editingMicrosettingBoardItemId: Long? = null,
-    val storyEngineGuideTab: com.deckapp.feature.draw.model.StoryEngineGuideTab = com.deckapp.feature.draw.model.StoryEngineGuideTab.DECK_OF_WORLDS,
-    val storyEngineGuideStepIndex: Int = 0,
+    val guides: com.deckapp.feature.draw.model.state.GuidesSessionUiState = com.deckapp.feature.draw.model.state.GuidesSessionUiState(),
     val modals: com.deckapp.feature.draw.model.state.SessionModalsUiState = com.deckapp.feature.draw.model.state.SessionModalsUiState(),
     val playmat: com.deckapp.feature.draw.model.state.PlaymatUiState = com.deckapp.feature.draw.model.state.PlaymatUiState()
 ) {
@@ -166,6 +147,34 @@ data class SessionUiState(
     val selectedSpotlightItem: SpotlightItem? get() = spotlight.selectedItem
     val lastSpotlightRollResult: TableRollResult? get() = spotlight.lastRollResult
     val isSpotlightSearching: Boolean get() = spotlight.isSearching
+
+    // Retrocompatibilidad con accesores planos delegados a combat
+    val hasActiveEncounter: Boolean get() = combat.hasActiveEncounter
+    val activeEncounter: Encounter? get() = combat.activeEncounter
+    val combatLog: List<CombatLogEntry> get() = combat.combatLog
+    val playerParticipants: List<PlayerInitiativeParticipant> get() = combat.playerParticipants
+    val isCombatHudExpanded: Boolean get() = combat.isCombatHudExpanded
+
+    // Retrocompatibilidad con accesores planos delegados a guides
+    val choirGuideSourcePage: Int? get() = guides.choirGuideSourcePage
+    val choirGuideTableId: Long? get() = guides.choirGuideTableId
+    val choirGuideError: String? get() = guides.choirGuideError
+    val activeMicrosetting: com.deckapp.core.model.MicrosettingCluster? get() = guides.activeMicrosetting
+    val editingMicrosettingBoardItemId: Long? get() = guides.editingMicrosettingBoardItemId
+    val storyEngineGuideTab: com.deckapp.feature.draw.model.StoryEngineGuideTab get() = guides.storyEngineGuideTab
+    val storyEngineGuideStepIndex: Int get() = guides.storyEngineGuideStepIndex
+
+    // Retrocompatibilidad con accesores planos delegados a resources
+    val allTables: List<RandomTable> get() = resources.allTables
+    val tablesInSession: List<RandomTable> get() = resources.tablesInSession
+    val availableStarterPacks: List<com.deckapp.feature.reference.StarterPackInfo> get() = resources.availableStarterPacks
+    val availableSystems: List<String> get() = resources.availableSystems
+
+    // Retrocompatibilidad con accesores planos delegados a npc
+    val npcs: List<Npc> get() = npc.npcs
+    val playingNpcVoicePath: String? get() = npc.playingNpcVoicePath
+    val npcCount: Int get() = npc.npcCount
+    val permanentPlayers: List<Npc> get() = npc.permanentPlayers
 
 
 
@@ -502,9 +511,11 @@ class SessionViewModel @Inject constructor(
                 }
                 .collect { (encounter, log) ->
                     _uiState.update { it.copy(
-                        activeEncounter = encounter,
-                        hasActiveEncounter = encounter != null,
-                        combatLog = log
+                        combat = it.combat.copy(
+                            activeEncounter = encounter,
+                            hasActiveEncounter = encounter != null,
+                            combatLog = log
+                        )
                     ) }
                 }
         }
@@ -517,7 +528,7 @@ class SessionViewModel @Inject constructor(
         viewModelScope.launch {
             sessionRepository.getTablesForSession(sessionId)
                 .collect { tables ->
-                    _uiState.update { it.copy(tablesInSession = tables) }
+                    _uiState.update { it.copy(resources = it.resources.copy(tablesInSession = tables)) }
                 }
         }
 
@@ -532,8 +543,10 @@ class SessionViewModel @Inject constructor(
             }.collect { (decks, tables, systems) ->
                 _uiState.update { it.copy(
                     decks = it.decks.copy(allDecks = decks),
-                    allTables = tables,
-                    availableSystems = systems
+                    resources = it.resources.copy(
+                        allTables = tables,
+                        availableSystems = systems
+                    )
                 ) }
             }
         }
@@ -634,7 +647,7 @@ class SessionViewModel @Inject constructor(
         // Recuperar NPCs de la biblioteca
         viewModelScope.launch {
             npcRepository.getAllNpcs().collect { npcs ->
-                _uiState.update { it.copy(npcs = npcs, npcCount = npcs.size) }
+                _uiState.update { it.copy(npc = it.npc.copy(npcs = npcs, npcCount = npcs.size)) }
                 choirGuideDelegate.observeCharacters(npcs)
             }
         }
@@ -858,7 +871,10 @@ class SessionViewModel @Inject constructor(
                         isInstalled = installed.contains(fileName)
                     )
                 }
-                _uiState.update { it.copy(availableStarterPacks = packInfos, modals = it.modals.copy(showStarterPackDialog = true, showDeckPicker = false)) }
+                _uiState.update { it.copy(
+                    resources = it.resources.copy(availableStarterPacks = packInfos),
+                    modals = it.modals.copy(showStarterPackDialog = true, showDeckPicker = false)
+                ) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(snackbarMessage = "Error al cargar packs: ${e.message}") }
             }
@@ -1093,15 +1109,15 @@ class SessionViewModel @Inject constructor(
         }
         
         stopNpcVoice()
-        _uiState.update { it.copy(playingNpcVoicePath = path) }
+        _uiState.update { it.copy(npc = it.npc.copy(playingNpcVoicePath = path)) }
         voicePlayer.playPath(path) {
-            _uiState.update { it.copy(playingNpcVoicePath = null) }
+            _uiState.update { it.copy(npc = it.npc.copy(playingNpcVoicePath = null)) }
         }
     }
 
     fun stopNpcVoice() {
         voicePlayer.stop()
-        _uiState.update { it.copy(playingNpcVoicePath = null) }
+        _uiState.update { it.copy(npc = it.npc.copy(playingNpcVoicePath = null)) }
     }
 
     override fun onCleared() {
@@ -1181,7 +1197,7 @@ class SessionViewModel @Inject constructor(
             npcRepository.saveNpc(player)
             _uiState.update { state ->
                 val updated = state.permanentPlayers.filter { it.id != player.id } + player
-                state.copy(permanentPlayers = updated)
+                state.copy(npc = state.npc.copy(permanentPlayers = updated))
             }
         }
     }
@@ -1190,7 +1206,7 @@ class SessionViewModel @Inject constructor(
         viewModelScope.launch {
             npcRepository.deleteNpc(player.id)
             _uiState.update { state ->
-                state.copy(permanentPlayers = state.permanentPlayers.filter { it.id != player.id })
+                state.copy(npc = state.npc.copy(permanentPlayers = state.permanentPlayers.filter { it.id != player.id }))
             }
         }
     }

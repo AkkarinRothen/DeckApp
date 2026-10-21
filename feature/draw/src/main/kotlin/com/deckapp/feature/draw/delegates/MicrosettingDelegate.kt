@@ -26,13 +26,19 @@ class MicrosettingDelegate(
 ) {
     private val mutex = Mutex()
 
+    private inline fun updateGuidesState(crossinline transform: (com.deckapp.feature.draw.model.state.GuidesSessionUiState) -> com.deckapp.feature.draw.model.state.GuidesSessionUiState) {
+        ui.update { it.copy(guides = transform(it.guides)) }
+    }
+
     fun openBuilder(item: SessionBoardItem? = null) {
         val existingCluster = item?.noteContent?.let { MicrosettingCodec.decode(it) }
         ui.update { state ->
             state.copy(
                 modals = state.modals.copy(showMicrosettingBuilder = true),
-                activeMicrosetting = existingCluster ?: state.activeMicrosetting,
-                editingMicrosettingBoardItemId = item?.id
+                guides = state.guides.copy(
+                    activeMicrosetting = existingCluster ?: state.activeMicrosetting,
+                    editingMicrosettingBoardItemId = item?.id
+                )
             )
         }
         if (ui.value.activeMicrosetting == null && existingCluster == null) {
@@ -41,7 +47,10 @@ class MicrosettingDelegate(
     }
 
     fun closeBuilder() {
-        ui.update { it.copy(modals = it.modals.copy(showMicrosettingBuilder = false), editingMicrosettingBoardItemId = null) }
+        ui.update { it.copy(
+            modals = it.modals.copy(showMicrosettingBuilder = false),
+            guides = it.guides.copy(editingMicrosettingBoardItemId = null)
+        ) }
     }
 
 
@@ -84,7 +93,7 @@ class MicrosettingDelegate(
                 updatedAt = System.currentTimeMillis()
             )
 
-            ui.update { it.copy(activeMicrosetting = cluster) }
+            updateGuidesState { it.copy(activeMicrosetting = cluster) }
 
             // Si hay un bloque del tablero en edición o target, actualizarlo
             if (targetItemId != null) {
@@ -111,7 +120,7 @@ class MicrosettingDelegate(
                 }
             }
             val updatedCluster = current.copy(items = updatedItems, updatedAt = System.currentTimeMillis())
-            ui.update { it.copy(activeMicrosetting = updatedCluster) }
+            updateGuidesState { it.copy(activeMicrosetting = updatedCluster) }
             if (targetItemId != null) {
                 updateBoardItemNote(targetItemId, updatedCluster)
             }
@@ -138,7 +147,7 @@ class MicrosettingDelegate(
                 }
             }
             val updatedCluster = current.copy(items = updatedItems, updatedAt = System.currentTimeMillis())
-            ui.update { it.copy(activeMicrosetting = updatedCluster) }
+            updateGuidesState { it.copy(activeMicrosetting = updatedCluster) }
             if (targetItemId != null) {
                 updateBoardItemNote(targetItemId, updatedCluster)
             }
@@ -183,7 +192,7 @@ class MicrosettingDelegate(
                 updatedAt = System.currentTimeMillis()
             )
 
-            ui.update { it.copy(activeMicrosetting = updatedCluster) }
+            updateGuidesState { it.copy(activeMicrosetting = updatedCluster) }
             if (targetItemId != null) {
                 updateBoardItemNote(targetItemId, updatedCluster)
             }

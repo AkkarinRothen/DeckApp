@@ -85,8 +85,8 @@ fun ChoirProcedureGuide(state: SessionUiState, delegate: ChoirGuideDelegate, onO
                 FilterChip(selected = !showIndex && reference == null, onClick = { showIndex = false; reference = null }, label = { Text("Guía actual") })
                 FilterChip(selected = showIndex || reference != null, onClick = { showIndex = true; reference = null }, label = { Text("Índice y hojas") })
             }
-            if (state.choirGuideError != null) {
-                Text(state.choirGuideError, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall,
+            state.choirGuideError?.let { error ->
+                Text(error, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(vertical = 6.dp).semantics { liveRegion = LiveRegionMode.Polite })
             }
             if (memory.journalOutbox.isNotEmpty()) {

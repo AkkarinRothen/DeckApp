@@ -119,4 +119,17 @@ class StoryEngineGuideDelegateTest {
         delegate.launchMicrosettingBuilder()
         assertTrue(microsettingBuilderOpened)
     }
+
+    @Test
+    fun `guides substate encapsulation and getter synchronization`() = runTest {
+        val delegate = createDelegate(this)
+
+        delegate.open(StoryEngineGuideTab.NEW_STORY_ENGINE)
+        assertEquals(StoryEngineGuideTab.NEW_STORY_ENGINE, ui.value.guides.storyEngineGuideTab)
+        assertEquals(ui.value.guides.storyEngineGuideTab, ui.value.storyEngineGuideTab)
+
+        delegate.selectStep(3)
+        assertEquals(3, ui.value.guides.storyEngineGuideStepIndex)
+        assertEquals(ui.value.guides.storyEngineGuideStepIndex, ui.value.storyEngineGuideStepIndex)
+    }
 }

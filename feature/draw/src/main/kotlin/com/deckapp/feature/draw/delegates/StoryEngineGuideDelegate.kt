@@ -27,8 +27,15 @@ class StoryEngineGuideDelegate(
     private val openMicrosettingBuilder: () -> Unit,
     private val onCardDrawnForStep: ((StoryEngineGuideTab, Int, Long) -> Unit)? = null
 ) {
+    private inline fun updateGuidesState(crossinline transform: (com.deckapp.feature.draw.model.state.GuidesSessionUiState) -> com.deckapp.feature.draw.model.state.GuidesSessionUiState) {
+        ui.update { it.copy(guides = transform(it.guides)) }
+    }
+
     fun open(tab: StoryEngineGuideTab = ui.value.storyEngineGuideTab) {
-        ui.update { it.copy(modals = it.modals.copy(showStoryEngineGuide = true), storyEngineGuideTab = tab) }
+        ui.update { it.copy(
+            modals = it.modals.copy(showStoryEngineGuide = true),
+            guides = it.guides.copy(storyEngineGuideTab = tab)
+        ) }
     }
 
     fun close() {
@@ -36,11 +43,11 @@ class StoryEngineGuideDelegate(
     }
 
     fun selectTab(tab: StoryEngineGuideTab) {
-        ui.update { it.copy(storyEngineGuideTab = tab, storyEngineGuideStepIndex = 0) }
+        updateGuidesState { it.copy(storyEngineGuideTab = tab, storyEngineGuideStepIndex = 0) }
     }
 
     fun selectStep(index: Int) {
-        ui.update { it.copy(storyEngineGuideStepIndex = index) }
+        updateGuidesState { it.copy(storyEngineGuideStepIndex = index) }
     }
 
     fun nextStep() {
@@ -50,14 +57,14 @@ class StoryEngineGuideDelegate(
             StoryEngineGuideTab.NEW_STORY_ENGINE -> StoryEngineProcedureCatalog.newStoryEngineSteps.size - 1
             StoryEngineGuideTab.EXPANSIONS -> 0
         }
-        ui.update { state ->
+        updateGuidesState { state ->
             val next = (state.storyEngineGuideStepIndex + 1).coerceAtMost(maxIndex)
             state.copy(storyEngineGuideStepIndex = next)
         }
     }
 
     fun prevStep() {
-        ui.update { state ->
+        updateGuidesState { state ->
             val prev = (state.storyEngineGuideStepIndex - 1).coerceAtLeast(0)
             state.copy(storyEngineGuideStepIndex = prev)
         }
