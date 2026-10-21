@@ -574,3 +574,37 @@ interface SceneDao {
     @Query("UPDATE scenes SET isCompleted = :completed WHERE id = :id")
     suspend fun updateCompletion(id: Long, completed: Boolean)
 }
+
+@Dao
+interface SessionLogDao {
+    @Query("SELECT * FROM session_logs WHERE sessionId = :sessionId ORDER BY timestamp DESC")
+    fun getLogsForSession(sessionId: Long): Flow<List<SessionLogEntryEntity>>
+
+    @Query("SELECT * FROM session_logs WHERE sessionId = :sessionId AND sceneId = :sceneId ORDER BY timestamp DESC")
+    fun getLogsForScene(sessionId: Long, sceneId: Long): Flow<List<SessionLogEntryEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertLog(entry: SessionLogEntryEntity): Long
+
+    @Query("DELETE FROM session_logs WHERE id = :logId")
+    suspend fun deleteLog(logId: Long)
+
+    @Query("DELETE FROM session_logs WHERE sessionId = :sessionId")
+    suspend fun clearLogsForSession(sessionId: Long)
+
+    @Query("SELECT * FROM session_notes WHERE sessionId = :sessionId")
+    fun getAllNotesForSession(sessionId: Long): Flow<List<SessionNoteEntity>>
+
+    @Query("SELECT * FROM session_notes WHERE sessionId = :sessionId AND sceneId IS :sceneId LIMIT 1")
+    fun getNoteForScene(sessionId: Long, sceneId: Long?): Flow<SessionNoteEntity?>
+
+    @Query("SELECT * FROM session_notes WHERE sessionId = :sessionId AND sceneId IS :sceneId LIMIT 1")
+    suspend fun getNoteForSceneOnce(sessionId: Long, sceneId: Long?): SessionNoteEntity?
+
+    @Upsert
+    suspend fun upsertNote(note: SessionNoteEntity)
+
+    @Query("DELETE FROM session_notes WHERE sessionId = :sessionId AND sceneId IS :sceneId")
+    suspend fun deleteNoteForScene(sessionId: Long, sceneId: Long?)
+}
+

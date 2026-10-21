@@ -161,18 +161,14 @@ fun PlaymatDeckItem(
                             val currentPointerId = down.id
                             while (true) {
                                 val event = awaitPointerEvent()
-                                val change = event.changes.firstOrNull { it.id == currentPointerId } ?: break
-                                if (change.isConsumed) break
-                                if (!change.pressed) {
-                                    change.consume()
-                                    break
-                                }
-                                val delta = change.positionChange()
-                                change.consume()
+                                val dragChange = event.changes.firstOrNull { it.id == currentPointerId }
+                                if (dragChange == null || !dragChange.pressed) break
+                                val delta = dragChange.position - dragChange.previousPosition
                                 currentDragX += delta.x / zoom
                                 currentDragY += delta.y / zoom
                                 draggedCardX = currentDragX
                                 draggedCardY = currentDragY
+                                dragChange.consume()
                             }
 
                             isDraggingCardOut = false

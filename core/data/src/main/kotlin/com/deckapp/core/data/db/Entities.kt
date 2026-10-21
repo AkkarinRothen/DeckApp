@@ -657,3 +657,56 @@ data class SceneEntity(
     val imagePath: String? = null,
     val isAlternative: Boolean = false
 )
+
+// ── Session Log & Notes ─────────────────────────────────────────────────────
+
+@Entity(
+    tableName = "session_logs",
+    foreignKeys = [
+        ForeignKey(
+            entity = SessionEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["sessionId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [
+        Index("sessionId"),
+        Index("sceneId"),
+        Index("timestamp")
+    ]
+)
+data class SessionLogEntryEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val sessionId: Long,
+    val sceneId: Long? = null,
+    val eventType: String,
+    val title: String,
+    val details: String = "",
+    val payloadJson: String = "{}",
+    val timestamp: Long = System.currentTimeMillis()
+)
+
+@Entity(
+    tableName = "session_notes",
+    foreignKeys = [
+        ForeignKey(
+            entity = SessionEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["sessionId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [
+        Index("sessionId"),
+        Index(value = ["sessionId", "sceneId"], unique = true)
+    ]
+)
+data class SessionNoteEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val sessionId: Long,
+    val sceneId: Long? = null,
+    val contentMarkdown: String = "",
+    val updatedAt: Long = System.currentTimeMillis()
+)
+

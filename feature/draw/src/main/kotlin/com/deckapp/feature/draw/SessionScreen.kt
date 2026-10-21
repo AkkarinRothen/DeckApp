@@ -650,9 +650,10 @@ fun SessionScreen(
                                 }
                             }
                             SessionViewMode.PLAYMAT -> {
-                                val playmatActions = remember(viewModel.playmatDelegate, uiState.sessionId) {
+                                val playmatActions = remember(viewModel.playmatDelegate, viewModel.sessionLogDelegate, uiState.sessionId) {
                                     viewModel.playmatDelegate.toActions(
                                         activeSurfaceIdProvider = { viewModel.uiState.value.activePlaymatSurface.id },
+                                        sessionLogDelegate = viewModel.sessionLogDelegate,
                                         onCardDetailClick = { cardId -> onCardClick(cardId, uiState.sessionId) },
                                         onSendCardToTacticalMap = { card, isToken ->
                                             if (isToken) {

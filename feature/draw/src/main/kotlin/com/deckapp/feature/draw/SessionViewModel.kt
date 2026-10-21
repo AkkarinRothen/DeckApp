@@ -84,11 +84,15 @@ data class SessionUiState(
     val spotlight: com.deckapp.feature.draw.model.state.SpotlightUiState = com.deckapp.feature.draw.model.state.SpotlightUiState(),
     val guides: com.deckapp.feature.draw.model.state.GuidesSessionUiState = com.deckapp.feature.draw.model.state.GuidesSessionUiState(),
     val modals: com.deckapp.feature.draw.model.state.SessionModalsUiState = com.deckapp.feature.draw.model.state.SessionModalsUiState(),
-    val playmat: com.deckapp.feature.draw.model.state.PlaymatUiState = com.deckapp.feature.draw.model.state.PlaymatUiState()
+    val playmat: com.deckapp.feature.draw.model.state.PlaymatUiState = com.deckapp.feature.draw.model.state.PlaymatUiState(),
+    val sessionLog: com.deckapp.feature.draw.model.state.SessionLogUiState = com.deckapp.feature.draw.model.state.SessionLogUiState()
 ) {
     // Retrocompatibilidad con accesores planos delegados a playmat
     val selectedPlaymatCardId: Long? get() = playmat.selectedCardId
     val showPlaymatHandTray: Boolean get() = playmat.showHandTray
+    val isZenMode: Boolean get() = playmat.isZenMode
+    val isSessionDrawerOpen: Boolean get() = playmat.isSessionDrawerOpen
+    val sessionDrawerTab: Int get() = playmat.sessionDrawerTab
 
     // Retrocompatibilidad con accesores planos delegados a decks
     val deckRefs: List<SessionDeckRef> get() = decks.deckRefs
@@ -238,6 +242,7 @@ class SessionViewModel @Inject constructor(
     private val tacticalMapRepository: com.deckapp.core.domain.repository.TacticalMapRepository,
     private val calculateTacticalDistanceUseCase: com.deckapp.core.domain.usecase.CalculateTacticalDistanceUseCase,
     private val fileRepository: com.deckapp.core.domain.repository.FileRepository,
+    private val sessionLogRepository: com.deckapp.core.domain.repository.SessionLogRepository,
     @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -380,6 +385,13 @@ class SessionViewModel @Inject constructor(
         scope = viewModelScope,
         updateBoardMemory = { updateBoardMemory(it) },
         deckDelegate = deckDelegate
+    )
+
+    val sessionLogDelegate = com.deckapp.feature.draw.delegates.SessionLogDelegate(
+        sessionId = sessionId,
+        _uiState = _uiState,
+        scope = viewModelScope,
+        sessionLogRepository = sessionLogRepository
     )
 
     val storyEngineGuideDelegate = com.deckapp.feature.draw.delegates.StoryEngineGuideDelegate(
@@ -791,6 +803,7 @@ class SessionViewModel @Inject constructor(
 
     fun focusScene(sceneId: Long?) {
         updateBoardMemory { it.copy(focusedSceneId = sceneId) }
+        sessionLogDelegate.onSceneChanged(sceneId)
     }
 
     private fun updateBoardMemory(transform: (BoardSessionMemory) -> BoardSessionMemory) {

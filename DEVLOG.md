@@ -1,3 +1,18 @@
+### Refactorización Arquitectónica de Sesión: Extracción de NpcSessionUiState (20 de octubre de 2026)
+
+**Categoría:** `REFACTOR / ARCHITECTURE / SESSION / NPCS / VOICES / PERMANENT PLAYERS / STATE MANAGEMENT / CLEAN CODE`
+
+- **Extracción y Desacoplamiento de Personajes No Jugadores y Jugadores Permanentes (`NpcSessionUiState`):**
+  - Creado `com.deckapp.feature.draw.model.state.NpcSessionUiState` para encapsular las 4 variables de NPCs, audio de voz y jugadores permanentes en el tablero (`npcs`, `playingNpcVoicePath`, `npcCount`, `permanentPlayers`).
+  - Incorporado `val npc: NpcSessionUiState = NpcSessionUiState()` en `SessionUiState`.
+  - Preservados getters delegados retrocompatibles (`npcs`, `playingNpcVoicePath`, `npcCount`, `permanentPlayers`) para garantizar cero roturas en llamadas de UI (`SessionScreen`, `BoardItemRenderer`, `CombatBlockContent`, `BoardBlockCard`, `PlanTab`, etc.).
+  - Actualizadas las mutaciones de recuperación de biblioteca de NPCs, reproducción/detención de audio de voz y guardado/borrado de jugadores permanentes en `SessionViewModel`.
+- **Verificación Técnica:**
+  - 100% de tests unitarios aprobados en `:feature:draw:testDebugUnitTest` (`ChoirGuideDelegateTest` con nuevo test de sincronización `npc substate encapsulation and getter synchronization`).
+  - Compilación e integración verificada con éxito en `:app:assembleDebug` (`BUILD SUCCESSFUL` en 5m 34s).
+
+---
+
 ### Refactorización Arquitectónica de Sesión: Extracción de ResourcesSessionUiState (20 de octubre de 2026)
 
 **Categoría:** `REFACTOR / ARCHITECTURE / SESSION / RESOURCES / RANDOM TABLES / STARTER PACKS / STATE MANAGEMENT / CLEAN CODE`

@@ -48,7 +48,14 @@ data class PlaymatActions(
     val onSetBackgroundMap: (uri: String?, preset: PlaymatAtmosphericPreset) -> Unit = { _, _ -> },
     val onSetBackgroundTransform: (opacity: Float, scale: Float) -> Unit = { _, _ -> },
     val onToggleBackgroundLock: () -> Unit = {},
-    val onSetGridConfig: (gridType: PlaymatGridType, gridStyle: PlaymatGridStyle, cellSizeDp: Float, snapToGrid: Boolean) -> Unit = { _, _, _, _ -> }
+    val onSetGridConfig: (gridType: PlaymatGridType, gridStyle: PlaymatGridStyle, cellSizeDp: Float, snapToGrid: Boolean) -> Unit = { _, _, _, _ -> },
+    val onToggleZenMode: () -> Unit = {},
+    val onToggleSessionDrawer: () -> Unit = {},
+    val onSetSessionDrawerTab: (Int) -> Unit = {},
+    val onAddManualLog: (String) -> Unit = {},
+    val onSaveNotes: (String) -> Unit = {},
+    val onClearLogs: () -> Unit = {},
+    val onToggleFilterCurrentScene: () -> Unit = {}
 )
 
 /**
@@ -56,15 +63,28 @@ data class PlaymatActions(
  */
 fun PlaymatDelegate.toActions(
     activeSurfaceIdProvider: () -> String,
+    sessionLogDelegate: com.deckapp.feature.draw.delegates.SessionLogDelegate? = null,
     onCardDetailClick: (Long) -> Unit = {},
     onSendCardToTacticalMap: (Card, Boolean) -> Unit = { _, _ -> }
 ): PlaymatActions = PlaymatActions(
     onPlaceCardOnPlaymat = { cardId, x, y -> placeCardOnPlaymat(cardId, x, y) },
     onMoveCard = { cardId, x, y, slotTag -> moveCard(cardId, x, y, slotTag) },
-    onRotateCard = { cardId, delta -> rotateCard(cardId, delta) },
-    onFlipCard = { cardId -> flipCard(cardId) },
-    onReturnToHand = { cardId -> returnCardToHand(cardId) },
-    onDiscardCard = { cardId -> discardCard(cardId) },
+    onRotateCard = { cardId, delta ->
+        rotateCard(cardId, delta)
+        sessionLogDelegate?.logCardAction("Carta", "Rotada $delta°")
+    },
+    onFlipCard = { cardId ->
+        flipCard(cardId)
+        sessionLogDelegate?.logCardAction("Carta", "Volteada")
+    },
+    onReturnToHand = { cardId ->
+        returnCardToHand(cardId)
+        sessionLogDelegate?.logCardAction("Carta", "Devuelta a la mano")
+    },
+    onDiscardCard = { cardId ->
+        discardCard(cardId)
+        sessionLogDelegate?.logCardAction("Carta", "Descartada")
+    },
     onSelectCard = { cardId -> selectCard(cardId) },
     onToggleHandTray = { toggleHandTray() },
     onSelectSurface = { surfaceId -> switchSurface(surfaceId) },
@@ -73,7 +93,10 @@ fun PlaymatDelegate.toActions(
     onSetTheme = { theme -> setSurfaceTheme(activeSurfaceIdProvider(), theme) },
     onSetTemplate = { template -> setSurfaceTemplate(activeSurfaceIdProvider(), template) },
     onUpdateCamera = { x, y, zoom -> updateCamera(x, y, zoom) },
-    onQuickDraw = { stackId, x, y -> quickDrawToPlaymat(stackId, x, y) },
+    onQuickDraw = { stackId, x, y ->
+        quickDrawToPlaymat(stackId, x, y)
+        sessionLogDelegate?.logCardAction("Mazo", "Robo rápido al tapete")
+    },
     onAddStickyNote = { text, x, y -> addStickyNote(text, x, y) },
     onMoveStickyNote = { noteId, x, y -> moveStickyNote(noteId, x, y) },
     onDeleteStickyNote = { noteId -> deleteStickyNote(noteId) },
@@ -81,21 +104,34 @@ fun PlaymatDelegate.toActions(
     onSendCardToTacticalMap = onSendCardToTacticalMap,
     onMoveDeck = { stackId, x, y -> moveDeck(stackId, x, y) },
     onMoveDiscardPile = { stackId, x, y -> moveDiscardPile(stackId, x, y) },
-    onDrawFromDeck = { stackId, x, y, slotTag -> drawFromPhysicalDeck(stackId, x, y, true, slotTag) },
-    onReshuffleDeck = { stackId -> reshuffleDeck(stackId) },
+    onDrawFromDeck = { stackId, x, y, slotTag ->
+        drawFromPhysicalDeck(stackId, x, y, true, slotTag)
+        sessionLogDelegate?.logCardAction("Mazo", "Carta colocada en mesa")
+    },
+    onReshuffleDeck = { stackId ->
+        reshuffleDeck(stackId)
+        sessionLogDelegate?.logCardAction("Mazo", "Mazo barajado")
+    },
     onAddTableChip = { tableId, name, resultText, x, y -> addTableChip(tableId, name, resultText, x, y) },
     onCreateConnection = { fromId, toId -> createConnection(fromId, toId) },
     onUpdateConnection = { id, label, color -> updateConnection(id, label, color) },
     onRemoveConnection = { id -> removeConnection(id) },
     onAddToken = { name, imagePath, npcId, x, y, maxHp, currentHp, tokenType, ringColor ->
         addTokenToPlaymat(name, imagePath, npcId, x, y, maxHp, currentHp, tokenType, ringColor)
+        sessionLogDelegate?.logTokenHpChange(name, 0, currentHp, maxHp)
     },
     onMoveToken = { tokenId, x, y -> moveToken(tokenId, x, y) },
-    onUpdateTokenHp = { tokenId, hp -> updateTokenHp(tokenId, hp) },
+    onUpdateTokenHp = { tokenId, hp ->
+        updateTokenHp(tokenId, hp)
+        sessionLogDelegate?.logTokenHpChange("Token", 0, hp, hp)
+    },
     onUpdateTokenType = { tokenId, type -> updateTokenType(tokenId, type) },
     onRemoveToken = { tokenId -> removeToken(tokenId) },
     onAddClock = { title, segments, colorHex, x, y -> addClockToPlaymat(title, segments, x, y, colorHex) },
-    onUpdateClockProgress = { clockId, progress -> updateClockProgress(clockId, progress) },
+    onUpdateClockProgress = { clockId, progress ->
+        updateClockProgress(clockId, progress)
+        sessionLogDelegate?.logClockStep("Reloj", progress, progress)
+    },
     onMoveClock = { clockId, x, y -> moveClock(clockId, x, y) },
     onRemoveClock = { clockId -> removeClock(clockId) },
     onSetBackgroundMap = { uri, preset -> setBackgroundMap(uri, preset) },
@@ -103,5 +139,12 @@ fun PlaymatDelegate.toActions(
     onToggleBackgroundLock = { toggleBackgroundLock() },
     onSetGridConfig = { gridType, gridStyle, cellSizeDp, snapToGrid ->
         setGridConfig(gridType, gridStyle, cellSizeDp, snapToGrid)
-    }
+    },
+    onToggleZenMode = { sessionLogDelegate?.toggleZenMode() },
+    onToggleSessionDrawer = { sessionLogDelegate?.toggleDrawer() },
+    onSetSessionDrawerTab = { tab -> sessionLogDelegate?.setDrawerTab(tab) },
+    onAddManualLog = { text -> sessionLogDelegate?.addManualNote(text) },
+    onSaveNotes = { md -> sessionLogDelegate?.saveSceneNote(md) },
+    onClearLogs = { sessionLogDelegate?.clearLogs() },
+    onToggleFilterCurrentScene = { sessionLogDelegate?.toggleFilterCurrentScene() }
 )

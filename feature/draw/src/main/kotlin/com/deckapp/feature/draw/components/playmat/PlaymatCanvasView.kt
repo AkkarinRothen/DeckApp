@@ -16,6 +16,7 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -609,49 +610,83 @@ fun PlaymatCanvasView(
             }
         }
 
-        // 3. Barra Superior Flotante del Tapete
-        PlaymatToolbar(
-            activeSurface = activeSurface,
-            allSurfaces = allSurfaces,
-            onSelectSurface = onSelectSurface,
-            onCreateSurface = onCreateSurface,
-            onDeleteSurface = onDeleteSurface,
-            onSetTheme = onSetTheme,
-            onSetTemplate = onSetTemplate,
-            onResetCamera = {
-                cameraX = 0f
-                cameraY = 0f
-                cameraZoom = 1f
-                onUpdateCamera(0f, 0f, 1f)
-            },
-            onAddStickyNote = {
-                stickyNoteText = ""
-                showStickyNoteDialog = true
-            },
-            onOpenQuickDraw = { showQuickDrawDialog = true },
-            onOpenTokenPicker = { showTokenPickerDialog = true },
-            onOpenClockCreator = { showClockCreationDialog = true },
-            onOpenTacticalSettings = { showTacticalSettingsDialog = true },
-            onToggleRuler = {
-                isRulerActive = !isRulerActive
-                rulerStartPos = null
-                rulerCurrentPos = null
-            },
-            isRulerActive = isRulerActive,
-            onToggleDiceRoller = { showDiceOverlay = !showDiceOverlay },
-            onExportSnapshot = {
-                coroutineScope.launch {
-                    try {
-                        val imageBitmap = graphicsLayer.toImageBitmap()
-                        val bitmap = imageBitmap.asAndroidBitmap()
-                        PlaymatSnapshotHelper.shareBitmap(context, bitmap)
-                    } catch (e: Exception) {
-                        android.util.Log.e("PlaymatCanvasView", "Fallo al capturar snapshot de tapete", e)
-                    }
-                }
-            },
+        // 3. Barra Superior Flotante del Tapete (Ocultable en Modo Zen)
+        AnimatedVisibility(
+            visible = !uiState.isZenMode,
+            enter = fadeIn() + slideInVertically(initialOffsetY = { -it }),
+            exit = fadeOut() + slideOutVertically(targetOffsetY = { -it }),
             modifier = Modifier.align(Alignment.TopStart)
-        )
+        ) {
+            PlaymatToolbar(
+                activeSurface = activeSurface,
+                allSurfaces = allSurfaces,
+                onSelectSurface = onSelectSurface,
+                onCreateSurface = onCreateSurface,
+                onDeleteSurface = onDeleteSurface,
+                onSetTheme = onSetTheme,
+                onSetTemplate = onSetTemplate,
+                onResetCamera = {
+                    cameraX = 0f
+                    cameraY = 0f
+                    cameraZoom = 1f
+                    onUpdateCamera(0f, 0f, 1f)
+                },
+                onAddStickyNote = {
+                    stickyNoteText = ""
+                    showStickyNoteDialog = true
+                },
+                onOpenQuickDraw = { showQuickDrawDialog = true },
+                onOpenTokenPicker = { showTokenPickerDialog = true },
+                onOpenClockCreator = { showClockCreationDialog = true },
+                onOpenTacticalSettings = { showTacticalSettingsDialog = true },
+                onToggleRuler = {
+                    isRulerActive = !isRulerActive
+                    rulerStartPos = null
+                    rulerCurrentPos = null
+                },
+                isRulerActive = isRulerActive,
+                onToggleDiceRoller = { showDiceOverlay = !showDiceOverlay },
+                onExportSnapshot = {
+                    coroutineScope.launch {
+                        try {
+                            val imageBitmap = graphicsLayer.toImageBitmap()
+                            val bitmap = imageBitmap.asAndroidBitmap()
+                            PlaymatSnapshotHelper.shareBitmap(context, bitmap)
+                        } catch (e: Exception) {
+                            android.util.Log.e("PlaymatCanvasView", "Fallo al capturar snapshot de tapete", e)
+                        }
+                    }
+                },
+                onToggleZenMode = actions.onToggleZenMode,
+                onToggleSessionDrawer = actions.onToggleSessionDrawer,
+                isSessionDrawerOpen = uiState.isSessionDrawerOpen
+            )
+        }
+
+        // Botón Minimalista para Salir del Modo Zen (Solo visible en Zen Mode)
+        if (uiState.isZenMode) {
+            Surface(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(16.dp),
+                shape = CircleShape,
+                color = Color(0xFF14151B).copy(alpha = 0.85f),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF81C784).copy(alpha = 0.6f)),
+                shadowElevation = 6.dp
+            ) {
+                IconButton(
+                    onClick = actions.onToggleZenMode,
+                    modifier = Modifier.size(42.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.FullscreenExit,
+                        contentDescription = "Salir de Modo Zen",
+                        tint = Color(0xFF81C784),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        }
 
         // Lanzador de Dados Flotante en el Tapete
         PlaymatDiceOverlay(
@@ -667,9 +702,9 @@ fun PlaymatCanvasView(
                 .padding(top = 64.dp, end = 12.dp)
         )
 
-        // 4. Bandeja Inferior Acoplable de la Mano
+        // 4. Bandeja Inferior Acoplable de la Mano (Ocultable en Modo Zen)
         PlaymatHandTray(
-            visible = uiState.showPlaymatHandTray,
+            visible = !uiState.isZenMode && uiState.showPlaymatHandTray,
             hand = uiState.hand,
             placedCardIds = placedCardIds,
             deckNames = uiState.deckNames,
@@ -795,6 +830,23 @@ fun PlaymatCanvasView(
                 }
             }
         }
+
+        // 7. Panel Lateral / Bottom Sheet de Bitácora y Notas Rápidas
+        PlaymatSessionDrawer(
+            isOpen = uiState.isSessionDrawerOpen,
+            selectedTab = uiState.sessionDrawerTab,
+            logs = uiState.sessionLog.logs,
+            notesMarkdown = uiState.sessionLog.noteDraftMarkdown,
+            isFilterCurrentScene = uiState.sessionLog.isFilterCurrentScene,
+            currentSceneTitle = uiState.scenes.find { it.id == uiState.focusedSceneId }?.title,
+            onClose = actions.onToggleSessionDrawer,
+            onTabSelected = actions.onSetSessionDrawerTab,
+            onToggleFilterCurrentScene = actions.onToggleFilterCurrentScene,
+            onAddManualLog = actions.onAddManualLog,
+            onSaveNotes = actions.onSaveNotes,
+            onClearLogs = actions.onClearLogs,
+            modifier = Modifier.align(Alignment.CenterEnd)
+        )
     }
 
     // Diálogo "A Mapa Táctico": Selector de Token o Pin
@@ -1174,18 +1226,12 @@ private fun PlaymatCardItem(
                         val currentPointerId = down.id
                         while (true) {
                             val event = awaitPointerEvent()
-                            val change = event.changes.firstOrNull { it.id == currentPointerId } ?: break
-                            if (change.isConsumed) {
-                                break
-                            }
-                            if (!change.pressed) {
-                                change.consume()
-                                break
-                            }
-                            val delta = change.positionChange()
-                            change.consume()
+                            val dragChange = event.changes.firstOrNull { it.id == currentPointerId }
+                            if (dragChange == null || !dragChange.pressed) break
+                            val delta = dragChange.position - dragChange.previousPosition
                             localX += delta.x / zoom
                             localY += delta.y / zoom
+                            dragChange.consume()
                         }
 
                         isDragging = false

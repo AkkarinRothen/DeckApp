@@ -95,11 +95,16 @@ object DatabaseModule {
     @Provides fun provideManualDao(db: DeckAppDatabase) = db.manualDao()
     @Provides fun provideSceneDao(db: DeckAppDatabase) = db.sceneDao()
     @Provides fun provideTacticalMapDao(db: DeckAppDatabase) = db.tacticalMapDao()
+    @Provides fun provideSessionLogDao(db: DeckAppDatabase) = db.sessionLogDao()
 }
 
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindSessionLogRepository(impl: SessionLogRepositoryImpl): com.deckapp.core.domain.repository.SessionLogRepository
 
     @Binds
     @Singleton

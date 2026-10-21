@@ -7,5 +7,8 @@ package com.deckapp.feature.draw.model.state
 data class PlaymatUiState(
     val selectedCardId: Long? = null,
     val showHandTray: Boolean = true,
-    val isRulerActive: Boolean = false
+    val isRulerActive: Boolean = false,
+    val isZenMode: Boolean = false,
+    val isSessionDrawerOpen: Boolean = false,
+    val sessionDrawerTab: Int = 0 // 0: Bitácora en vivo, 1: Notas rápidas
 )

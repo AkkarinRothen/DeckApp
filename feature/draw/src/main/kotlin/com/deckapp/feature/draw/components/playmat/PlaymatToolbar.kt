@@ -36,6 +36,9 @@ fun PlaymatToolbar(
     isRulerActive: Boolean = false,
     onToggleDiceRoller: (() -> Unit)? = null,
     onExportSnapshot: (() -> Unit)? = null,
+    onToggleZenMode: (() -> Unit)? = null,
+    onToggleSessionDrawer: (() -> Unit)? = null,
+    isSessionDrawerOpen: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     var showSurfaceMenu by remember { mutableStateOf(false) }
@@ -326,6 +329,36 @@ fun PlaymatToolbar(
                     contentDescription = "Centrar Mesa",
                     modifier = Modifier.size(16.dp)
                 )
+            }
+
+            // Bitácora en Vivo y Notas de la Mesa
+            if (onToggleSessionDrawer != null) {
+                IconButton(
+                    onClick = onToggleSessionDrawer,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AutoStories,
+                        contentDescription = "Bitácora y Notas",
+                        modifier = Modifier.size(16.dp),
+                        tint = if (isSessionDrawerOpen) Color(0xFF00E5FF) else MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            // Modo Zen (Despejar pantalla al 100%)
+            if (onToggleZenMode != null) {
+                IconButton(
+                    onClick = onToggleZenMode,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Spa,
+                        contentDescription = "Modo Zen",
+                        modifier = Modifier.size(16.dp),
+                        tint = Color(0xFF81C784)
+                    )
+                }
             }
 
             // Exportar Captura PNG

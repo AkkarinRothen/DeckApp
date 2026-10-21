@@ -55,12 +55,15 @@ import androidx.room.RoomDatabase
         SceneEntity::class,
         TacticalMapEntity::class,
         TacticalTokenEntity::class,
-        TacticalMapPinEntity::class
+        TacticalMapPinEntity::class,
+        SessionLogEntryEntity::class,
+        SessionNoteEntity::class
     ],
-    version = 48,
+    version = 49,
     exportSchema = true
 )
 abstract class DeckAppDatabase : RoomDatabase() {
+    abstract fun sessionLogDao(): SessionLogDao
     abstract fun cardStackDao(): CardStackDao
     abstract fun cardDao(): CardDao
     abstract fun cardFaceDao(): CardFaceDao

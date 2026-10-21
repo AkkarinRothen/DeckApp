@@ -1017,3 +1017,38 @@ val MIGRATION_47_48 = object : Migration(47, 48) {
     }
 }
 
+val MIGRATION_48_49 = object : Migration(48, 49) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `session_logs` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `sessionId` INTEGER NOT NULL,
+                `sceneId` INTEGER,
+                `eventType` TEXT NOT NULL,
+                `title` TEXT NOT NULL,
+                `details` TEXT NOT NULL,
+                `payloadJson` TEXT NOT NULL,
+                `timestamp` INTEGER NOT NULL,
+                FOREIGN KEY(`sessionId`) REFERENCES `sessions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+            )
+        """.trimIndent())
+        database.execSQL("CREATE INDEX IF NOT EXISTS `index_session_logs_sessionId` ON `session_logs` (`sessionId`)")
+        database.execSQL("CREATE INDEX IF NOT EXISTS `index_session_logs_sceneId` ON `session_logs` (`sceneId`)")
+        database.execSQL("CREATE INDEX IF NOT EXISTS `index_session_logs_timestamp` ON `session_logs` (`timestamp`)")
+
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS `session_notes` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `sessionId` INTEGER NOT NULL,
+                `sceneId` INTEGER,
+                `contentMarkdown` TEXT NOT NULL,
+                `updatedAt` INTEGER NOT NULL,
+                FOREIGN KEY(`sessionId`) REFERENCES `sessions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+            )
+        """.trimIndent())
+        database.execSQL("CREATE INDEX IF NOT EXISTS `index_session_notes_sessionId` ON `session_notes` (`sessionId`)")
+        database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_session_notes_sessionId_sceneId` ON `session_notes` (`sessionId`, `sceneId`)")
+    }
+}
+
+

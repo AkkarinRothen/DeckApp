@@ -132,16 +132,12 @@ fun PlaymatClockItem(
                                 val currentPointerId = down.id
                                 while (true) {
                                     val event = awaitPointerEvent()
-                                    val change = event.changes.firstOrNull { it.id == currentPointerId } ?: break
-                                    if (change.isConsumed) break
-                                    if (!change.pressed) {
-                                        change.consume()
-                                        break
-                                    }
-                                    val delta = change.positionChange()
-                                    change.consume()
+                                    val dragChange = event.changes.firstOrNull { it.id == currentPointerId }
+                                    if (dragChange == null || !dragChange.pressed) break
+                                    val delta = dragChange.position - dragChange.previousPosition
                                     localX += delta.x / zoom
                                     localY += delta.y / zoom
+                                    dragChange.consume()
                                 }
                                 isDragging = false
                                 onMove(clock.id, localX, localY)
