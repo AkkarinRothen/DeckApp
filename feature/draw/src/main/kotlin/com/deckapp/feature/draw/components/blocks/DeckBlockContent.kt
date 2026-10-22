@@ -143,107 +143,80 @@ fun DeckBlockContent(
                 .animateContentSize(),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // Zona 1 & 2: Cabecera con Estado y Acciones de Robo
+            // Estado y acciones quedan en filas separadas para evitar que compitan por ancho.
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                DeckCountPill(
+                    count = cards.size,
+                    label = "En mano",
+                    color = meta.color,
+                    modifier = Modifier.weight(1f)
+                )
+                DeckCountPill(
+                    count = availableCount,
+                    label = "En mazo",
+                    modifier = Modifier.weight(1f)
+                )
+                DeckCountPill(
+                    count = discardCount,
+                    label = "Descarte",
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                // Zona 1: Chips de Estado
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                Button(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onDraw()
+                    },
+                    enabled = availableCount > 0,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = meta.color,
+                        disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                    ),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                    modifier = Modifier.weight(1f).height(38.dp)
                 ) {
-                    Surface(
-                        shape = RoundedCornerShape(6.dp),
-                        color = meta.color.copy(alpha = 0.15f)
-                    ) {
-                        Text(
-                            text = "${cards.size} en mano",
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = meta.color,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                        )
-                    }
-
-                    Text(
-                        text = "· $availableCount en mazo",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    if (discardCount > 0) {
-                        Text(
-                            text = "· $discardCount desc.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                        )
-                    }
+                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(5.dp))
+                    Text(if (availableCount > 0) "Robar carta" else "Agotado", style = MaterialTheme.typography.labelLarge)
                 }
 
-                // Zona 2: Acciones directas (Revelar todas / Descartar mano / Robar)
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    if (cards.isNotEmpty()) {
-                        val unrevealedCount = cards.count { !it.isRevealed }
-                        if (unrevealedCount > 0) {
-                            IconButton(
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    cards.filter { !it.isRevealed }.forEach { onRevealCard(it.id) }
-                                },
-                                modifier = Modifier.size(34.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Visibility,
-                                    contentDescription = "Revelar todas",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
-                        }
-
+                if (cards.isNotEmpty()) {
+                    val unrevealedCount = cards.count { !it.isRevealed }
+                    if (unrevealedCount > 0) {
                         IconButton(
                             onClick = {
-                                showDiscardHandConfirm = true
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                cards.filter { !it.isRevealed }.forEach { onRevealCard(it.id) }
                             },
-                            modifier = Modifier.size(34.dp)
+                            modifier = Modifier.size(38.dp)
                         ) {
                             Icon(
-                                imageVector = Icons.Default.DeleteSweep,
-                                contentDescription = "Descartar mano",
-                                tint = MaterialTheme.colorScheme.error.copy(alpha = 0.85f),
-                                modifier = Modifier.size(18.dp)
+                                imageVector = Icons.Default.Visibility,
+                                contentDescription = "Revelar todas las cartas",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
                             )
                         }
                     }
 
-                    // Botón Primario de Robo
-                    Button(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onDraw()
-                        },
-                        enabled = availableCount > 0,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = meta.color,
-                            disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-                        ),
-                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
-                        modifier = Modifier.height(34.dp)
+                    IconButton(
+                        onClick = { showDiscardHandConfirm = true },
+                        modifier = Modifier.size(38.dp)
                     ) {
                         Icon(
-                            Icons.Default.Add,
-                            contentDescription = if (availableCount > 0) "Robar" else "Agotado",
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text(
-                            if (availableCount > 0) "Robar" else "Agotado",
-                            style = MaterialTheme.typography.labelLarge
+                            imageVector = Icons.Default.DeleteSweep,
+                            contentDescription = "Descartar toda la mano",
+                            tint = MaterialTheme.colorScheme.error.copy(alpha = 0.85f),
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }
@@ -258,24 +231,9 @@ fun DeckBlockContent(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(cards, key = { it.id }) { card ->
-                        val dismissState = rememberSwipeToDismissBoxState(
-                            confirmValueChange = {
-                                if (it != SwipeToDismissBoxValue.Settled) {
-                                    onDiscard(card.id)
-                                    true
-                                } else false
-                            }
-                        )
-
-                        SwipeToDismissBox(
-                            state = dismissState,
-                            backgroundContent = {
-                                Box(
-                                    Modifier
-                                        .fillMaxSize()
-                                        .background(Color.Red.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
-                                )
-                            }
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(2.dp)
                         ) {
                             CardItem(
                                 card = card,
@@ -291,6 +249,22 @@ fun DeckBlockContent(
                                 onRollTable = {},
                                 onRotate = { onRotateCard(card.id) }
                             )
+
+                            TextButton(
+                                onClick = { onDiscard(card.id) },
+                                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp),
+                                colors = ButtonDefaults.textButtonColors(
+                                    contentColor = MaterialTheme.colorScheme.error
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.DeleteOutline,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(Modifier.width(3.dp))
+                                Text("Descartar", style = MaterialTheme.typography.labelSmall)
+                            }
                         }
                     }
                 }
@@ -384,6 +358,40 @@ fun DeckBlockContent(
 }
 
 @Composable
+private fun DeckCountPill(
+    count: Int,
+    label: String,
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.onSurfaceVariant
+) {
+    Surface(
+        modifier = modifier,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp)
+        ) {
+            Text(
+                text = count.toString(),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = color
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
 private fun CompactDeckBlockContent(
     item: SessionBoardItem,
     meta: BoardBlockMeta,
@@ -402,181 +410,188 @@ private fun CompactDeckBlockContent(
 
     if (cards.isNotEmpty()) {
         val lastCard = cards.last()
-        Row(
+        Column(
             modifier = modifier
                 .fillMaxWidth()
                 .animateContentSize(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            // Miniatura de la última carta robada (clickable para inspección)
-            Surface(
-                modifier = Modifier
-                    .width(36.dp)
-                    .aspectRatio(aspectRatio.ratio.coerceIn(0.6f, 1.4f))
-                    .clip(RoundedCornerShape(6.dp))
-                    .clickable {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        onCardClick(lastCard.id)
-                    },
-                shape = RoundedCornerShape(6.dp),
-                border = BorderStroke(1.dp, meta.color.copy(alpha = 0.4f)),
-                shadowElevation = 2.dp
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Box(Modifier.fillMaxSize()) {
-                    if (lastCard.isRevealed) {
-                        AsyncImage(
-                            model = com.deckapp.core.ui.util.toCoilModel(lastCard.activeFace.imagePath),
-                            contentDescription = lastCard.title,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .graphicsLayer {
-                                    rotationZ = lastCard.currentRotation.toFloat()
-                                },
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
-                        AsyncImage(
-                            model = com.deckapp.core.ui.util.toCoilModel(backImagePath),
-                            contentDescription = "Dorso",
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(MaterialTheme.colorScheme.secondaryContainer),
-                            contentScale = ContentScale.Crop
-                        )
-                        Icon(
-                            imageVector = Icons.Default.Visibility,
-                            contentDescription = null,
-                            tint = Color.White.copy(alpha = 0.8f),
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .size(14.dp)
-                        )
-                    }
-
-                    if (cards.size > 1) {
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .background(meta.color, RoundedCornerShape(topStart = 4.dp))
-                                .padding(horizontal = 3.dp, vertical = 1.dp)
-                        ) {
-                            Text(
-                                text = "${cards.size}",
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
+                // Miniatura de la última carta robada (clickable para inspección)
+                Surface(
+                    modifier = Modifier
+                        .width(36.dp)
+                        .aspectRatio(aspectRatio.ratio.coerceIn(0.6f, 1.4f))
+                        .clip(RoundedCornerShape(6.dp))
+                        .clickable {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onCardClick(lastCard.id)
+                        },
+                    shape = RoundedCornerShape(6.dp),
+                    border = BorderStroke(1.dp, meta.color.copy(alpha = 0.4f)),
+                    shadowElevation = 2.dp
+                ) {
+                    Box(Modifier.fillMaxSize()) {
+                        if (lastCard.isRevealed) {
+                            AsyncImage(
+                                model = com.deckapp.core.ui.util.toCoilModel(lastCard.activeFace.imagePath),
+                                contentDescription = lastCard.title,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                                    .graphicsLayer {
+                                        rotationZ = lastCard.currentRotation.toFloat()
+                                    },
+                                contentScale = ContentScale.Fit
                             )
+                        } else {
+                            AsyncImage(
+                                model = com.deckapp.core.ui.util.toCoilModel(backImagePath),
+                                contentDescription = "Dorso",
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(MaterialTheme.colorScheme.secondaryContainer),
+                                contentScale = ContentScale.Fit
+                            )
+                            Icon(
+                                imageVector = Icons.Default.Visibility,
+                                contentDescription = null,
+                                tint = Color.White.copy(alpha = 0.8f),
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .size(14.dp)
+                            )
+                        }
+
+                        if (cards.size > 1) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .background(meta.color, RoundedCornerShape(topStart = 4.dp))
+                                    .padding(horizontal = 3.dp, vertical = 1.dp)
+                            ) {
+                                Text(
+                                    text = "${cards.size}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            }
                         }
                     }
                 }
+
+                // Info de la carta y mazo
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onCardClick(lastCard.id)
+                        }
+                ) {
+                    Text(
+                        text = if (lastCard.isRevealed) lastCard.title else "Carta oculta",
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = "${cards.size} en mano · $availableCount en mazo · $discardCount desc.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = meta.color,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
 
-            // Info de la carta y mazo
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        onCardClick(lastCard.id)
-                    }
-            ) {
-                Text(
-                    text = if (lastCard.isRevealed) lastCard.title else "Carta oculta",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                val descText = if (discardCount > 0) " · $discardCount desc." else ""
-                Text(
-                    text = "${cards.size} en mano · $availableCount mazo$descText",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = meta.color,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-            // Acciones rápidas
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 if (!lastCard.isRevealed) {
-                    IconButton(
+                    OutlinedButton(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             onRevealCard(lastCard.id)
                         },
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.weight(1f).height(36.dp),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Visibility,
-                            contentDescription = "Revelar",
+                            contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(15.dp)
                         )
+                        Spacer(Modifier.width(4.dp))
+                        Text("Revelar", style = MaterialTheme.typography.labelMedium)
                     }
                 }
 
-                FilledIconButton(
-                    onClick = onDraw,
+                Button(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onDraw()
+                    },
                     enabled = availableCount > 0,
-                    colors = IconButtonDefaults.filledIconButtonColors(
+                    colors = ButtonDefaults.buttonColors(
                         containerColor = meta.color,
                         disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
                     ),
-                    modifier = Modifier.size(34.dp)
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(36.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Robar",
-                        tint = if (availableCount > 0) Color.White else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                        modifier = Modifier.size(18.dp)
-                    )
+                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text(if (availableCount > 0) "Robar" else "Agotado", style = MaterialTheme.typography.labelMedium)
                 }
             }
         }
     } else {
-        // Mano vacía: layout S original enriquecido
-        Row(
+        // La acción queda rotulada también cuando la mano está vacía.
+        Column(
             modifier = modifier
                 .fillMaxWidth()
                 .animateContentSize(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Column(modifier = Modifier.weight(1f)) {
+            Column {
+                Text("Mano vacía", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text(
-                    text = "0 en mano",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = if (availableCount > 0) "$availableCount restantes" else "Agotado",
-                    style = MaterialTheme.typography.titleMedium,
+                    text = if (availableCount > 0) "$availableCount cartas disponibles" else "Mazo agotado",
+                    style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = if (availableCount > 0) meta.color else MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
                 )
             }
 
-            FilledIconButton(
-                onClick = onDraw,
+            Button(
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onDraw()
+                },
                 enabled = availableCount > 0,
-                colors = IconButtonDefaults.filledIconButtonColors(
+                colors = ButtonDefaults.buttonColors(
                     containerColor = meta.color,
                     disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
                 ),
-                modifier = Modifier.size(38.dp)
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(36.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Robar",
-                    tint = if (availableCount > 0) Color.White else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                    modifier = Modifier.size(20.dp)
-                )
+                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(4.dp))
+                Text(if (availableCount > 0) "Robar" else "Agotado", style = MaterialTheme.typography.labelMedium)
             }
         }
     }

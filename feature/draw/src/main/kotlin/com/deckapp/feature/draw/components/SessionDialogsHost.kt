@@ -115,6 +115,8 @@ fun SessionDialogsHost(
             onDismiss = onDismissNpcPreview,
             onAddToCombat = viewModel::addNpcToCombat,
             onLogToDiary = viewModel::logNpcToDiary,
+            onUpdateHp = { targetNpc, newHp -> viewModel.updateNpcHp(targetNpc.id, newHp) },
+            onRollAction = { label, formula -> viewModel.rollSmartDiceWithDescription(formula, label) },
             isPlayingVoice = uiState.playingNpcVoicePath == npc.voiceSamplePath,
             onPlayVoice = viewModel::playNpcVoice
         )
@@ -123,7 +125,10 @@ fun SessionDialogsHost(
     peekingWikiEntry?.let { wiki ->
         WikiQuickPreviewDialog(
             wikiEntry = wiki,
-            onDismiss = onDismissWikiPreview
+            onDismiss = onDismissWikiPreview,
+            onSendToNotes = { title, content ->
+                viewModel.appendToNotes("### [$title]\n$content")
+            }
         )
     }
 

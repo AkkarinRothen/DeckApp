@@ -42,6 +42,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Inventory2
+import androidx.compose.material.icons.filled.Description
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -95,6 +99,11 @@ fun DeckDetailScreen(
     val createZipLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/zip")
     ) { uri -> uri?.let { viewModel.exportToZip(it) } }
+
+    // Launcher para guardar el JSON ligero
+    val createJsonLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json")
+    ) { uri -> uri?.let { viewModel.exportToJson(it) } }
 
     // Launcher para elegir imagen de dorso
     val backImageLauncher = rememberLauncherForActivityResult(
@@ -176,6 +185,75 @@ fun DeckDetailScreen(
         )
     }
 
+    if (uiState.showExportDialog && uiState.deck != null) {
+        val currentDeck = uiState.deck!!
+        AlertDialog(
+            onDismissRequest = { viewModel.showExportDialog(false) },
+            icon = { Icon(Icons.Default.Share, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+            title = { Text("Exportar Mazo", fontWeight = FontWeight.Bold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(
+                        text = "Elige el formato de exportación para \"${currentDeck.name}\":",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                viewModel.showExportDialog(false)
+                                createZipLauncher.launch("${currentDeck.name}.zip")
+                            }
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(14.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(Icons.Default.Inventory2, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("ZIP Completo", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
+                                Text("Empaqueta todas las imágenes, anversos, reversos y metadatos.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                    }
+
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                viewModel.showExportDialog(false)
+                                createJsonLauncher.launch("${currentDeck.name}.json")
+                            }
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(14.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(Icons.Default.Description, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("JSON Ligero", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
+                                Text("Exporta cartas, textos, valores, etiquetas y configuración sin arte.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = { viewModel.showExportDialog(false) }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -210,6 +288,16 @@ fun DeckDetailScreen(
                                            else MaterialTheme.colorScheme.onSurface
                                 )
                             }
+                        }
+                    }
+                    IconButton(
+                        onClick = { viewModel.showExportDialog(true) },
+                        enabled = !uiState.isExporting
+                    ) {
+                        if (uiState.isExporting) {
+                            CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                        } else {
+                            Icon(Icons.Default.Share, contentDescription = "Exportar mazo")
                         }
                     }
                     IconButton(
@@ -275,27 +363,10 @@ fun DeckDetailScreen(
                             )
 
                             DropdownMenuItem(
-                                text = {
-                                    if (uiState.isExporting) {
-                                        Row(
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            CircularProgressIndicator(
-                                                modifier = Modifier.size(16.dp),
-                                                strokeWidth = 2.dp
-                                            )
-                                            Text("Exportando…")
-                                        }
-                                    } else {
-                                        Text("Exportar ZIP")
-                                    }
-                                },
+                                text = { Text("Exportar mazo (ZIP / JSON)") },
                                 onClick = {
                                     showOverflow = false
-                                    uiState.deck?.let {
-                                        createZipLauncher.launch("${it.name}.zip")
-                                    }
+                                    viewModel.showExportDialog(true)
                                 },
                                 enabled = !uiState.isExporting
                             )

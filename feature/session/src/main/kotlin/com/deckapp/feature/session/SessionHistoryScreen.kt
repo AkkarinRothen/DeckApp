@@ -1,11 +1,11 @@
 package com.deckapp.feature.session
 
-import com.deckapp.core.ui.components.DeckCard
-
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -27,6 +27,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.deckapp.core.model.DrawAction
+import com.deckapp.core.model.SessionLogEventType
+import com.deckapp.core.ui.components.DeckCard
 import com.deckapp.core.ui.components.MarkdownText
 import java.io.File
 import java.text.SimpleDateFormat
@@ -70,27 +72,26 @@ fun SessionHistoryScreen(
 
                 item {
                     Text(
-                        text = "Actividad",
+                        text = "Actividad y Registro",
                         style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(vertical = 8.dp)
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(vertical = 4.dp)
                     )
                 }
 
-                if (uiState.timeline.isNotEmpty()) {
-                    item {
-                        FilterSection(
-                            uiState = uiState,
-                            onDeckFilterChange = viewModel::setDeckFilter,
-                            onActionFilterChange = viewModel::setActionFilter,
-                            onSearchChange = viewModel::setSearchQuery
-                        )
-                    }
+                item {
+                    HistoryFilterBar(
+                        searchQuery = uiState.searchQuery,
+                        selectedCategory = uiState.categoryFilter,
+                        onCategorySelected = viewModel::setCategoryFilter,
+                        onSearchChange = viewModel::setSearchQuery
+                    )
                 }
 
                 if (uiState.filteredTimeline.isEmpty()) {
                     item {
                         Text(
-                            "No hay eventos que coincidan con los filtros.",
+                            "No hay eventos que coincidan con los filtros seleccionados.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.fillMaxWidth().padding(32.dp),
@@ -100,8 +101,9 @@ fun SessionHistoryScreen(
                 } else {
                     items(uiState.filteredTimeline, key = { event ->
                         when (event) {
-                            is TimelineEvent.CardEvent -> "card_${event.event.id}"
-                            is TimelineEvent.TableEvent -> "table_${event.result.id}"
+                            is TimelineEvent.CardEvent -> "card_${event.event.id}_${event.timestamp}"
+                            is TimelineEvent.TableEvent -> "table_${event.result.id}_${event.timestamp}"
+                            is TimelineEvent.LogEvent -> "log_${event.entry.id}_${event.timestamp}"
                         }
                     }) { event ->
                         TimelineItem(event)
@@ -114,6 +116,7 @@ fun SessionHistoryScreen(
                         Text(
                             text = "Notas del DM",
                             style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(vertical = 8.dp)
                         )
                         Surface(
@@ -207,9 +210,9 @@ private fun SessionHeader(uiState: SessionHistoryUiState) {
                 HorizontalDivider(Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        Icons.Default.TrendingUp, 
-                        null, 
-                        modifier = Modifier.size(16.dp), 
+                        Icons.Default.TrendingUp,
+                        null,
+                        modifier = Modifier.size(16.dp),
                         tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                     )
                     Spacer(Modifier.width(8.dp))
@@ -250,78 +253,62 @@ private fun StatItem(label: String, value: String, icon: ImageVector, modifier: 
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun FilterSection(
-    uiState: SessionHistoryUiState,
-    onDeckFilterChange: (Long?) -> Unit,
-    onActionFilterChange: (com.deckapp.core.model.DrawAction?) -> Unit,
+private fun HistoryFilterBar(
+    searchQuery: String,
+    selectedCategory: HistoryCategoryFilter,
+    onCategorySelected: (HistoryCategoryFilter) -> Unit,
     onSearchChange: (String) -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
         OutlinedTextField(
-            value = uiState.searchQuery,
+            value = searchQuery,
             onValueChange = onSearchChange,
-            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-            placeholder = { Text("Buscar en el historial...") },
+            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+            placeholder = { Text("Buscar evento, carta, tabla...") },
             leadingIcon = { Icon(Icons.Default.Search, null) },
-            trailingIcon = if (uiState.searchQuery.isNotEmpty()) {
+            trailingIcon = if (searchQuery.isNotEmpty()) {
                 { IconButton(onClick = { onSearchChange("") }) { Icon(Icons.Default.Close, null) } }
             } else null,
             shape = RoundedCornerShape(12.dp),
             singleLine = true
         )
 
-        Text("Filtrar por mazo", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        FlowRow(
-            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+        // Fila horizontal de chips rápidos (Todos | Dados y Tablas | Cartas | Combate | Relojes)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             FilterChip(
-                selected = uiState.deckFilter == null,
-                onClick = { onDeckFilterChange(null) },
+                selected = selectedCategory == HistoryCategoryFilter.ALL,
+                onClick = { onCategorySelected(HistoryCategoryFilter.ALL) },
                 label = { Text("Todos") }
             )
-            uiState.availableDecks.forEach { (id, name) ->
-                FilterChip(
-                    selected = uiState.deckFilter == id,
-                    onClick = { onDeckFilterChange(id) },
-                    label = { Text(name) }
-                )
-            }
-        }
-
-        Spacer(Modifier.height(8.dp))
-
-        Text("Filtrar por acción", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        FlowRow(
-            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
             FilterChip(
-                selected = uiState.actionFilter == null,
-                onClick = { onActionFilterChange(null) },
-                label = { Text("Todas") }
+                selected = selectedCategory == HistoryCategoryFilter.DICE_AND_TABLES,
+                onClick = { onCategorySelected(HistoryCategoryFilter.DICE_AND_TABLES) },
+                label = { Text("🎲 Dados y Tablas") }
             )
-            uiState.availableActions.forEach { action ->
-                FilterChip(
-                    selected = uiState.actionFilter == action,
-                    onClick = { onActionFilterChange(action) },
-                    label = { 
-                        Text(when(action) {
-                            com.deckapp.core.model.DrawAction.DRAW -> "Robar"
-                            com.deckapp.core.model.DrawAction.DISCARD -> "Descartar"
-                            com.deckapp.core.model.DrawAction.FLIP -> "Girar"
-                            com.deckapp.core.model.DrawAction.RESET -> "Reset"
-                            com.deckapp.core.model.DrawAction.PEEK -> "Peek"
-                            else -> action.name
-                        })
-                    }
-                )
-            }
+            FilterChip(
+                selected = selectedCategory == HistoryCategoryFilter.CARDS,
+                onClick = { onCategorySelected(HistoryCategoryFilter.CARDS) },
+                label = { Text("🃏 Cartas") }
+            )
+            FilterChip(
+                selected = selectedCategory == HistoryCategoryFilter.COMBAT,
+                onClick = { onCategorySelected(HistoryCategoryFilter.COMBAT) },
+                label = { Text("⚔️ Combate") }
+            )
+            FilterChip(
+                selected = selectedCategory == HistoryCategoryFilter.CLOCKS,
+                onClick = { onCategorySelected(HistoryCategoryFilter.CLOCKS) },
+                label = { Text("⏰ Relojes") }
+            )
         }
-        
-        HorizontalDivider(modifier = Modifier.padding(top = 12.dp))
+
+        HorizontalDivider(modifier = Modifier.padding(top = 10.dp))
     }
 }
 
@@ -347,7 +334,19 @@ private fun TimelineItem(event: TimelineEvent) {
             Box(
                 modifier = Modifier
                     .size(8.dp)
-                    .background(MaterialTheme.colorScheme.primary, CircleShape)
+                    .background(
+                        when (event) {
+                            is TimelineEvent.CardEvent -> MaterialTheme.colorScheme.secondary
+                            is TimelineEvent.TableEvent -> MaterialTheme.colorScheme.tertiary
+                            is TimelineEvent.LogEvent -> when (event.entry.eventType) {
+                                SessionLogEventType.DICE -> Color(0xFFFFB74D)
+                                SessionLogEventType.CLOCK -> Color(0xFF42A5F5)
+                                SessionLogEventType.TOKEN -> Color(0xFFEF5350)
+                                else -> MaterialTheme.colorScheme.primary
+                            }
+                        },
+                        CircleShape
+                    )
             )
         }
 
@@ -361,6 +360,7 @@ private fun TimelineItem(event: TimelineEvent) {
             when (event) {
                 is TimelineEvent.CardEvent -> CardEventContent(event)
                 is TimelineEvent.TableEvent -> TableEventContent(event)
+                is TimelineEvent.LogEvent -> LogEventContent(event)
             }
         }
     }
@@ -464,6 +464,46 @@ private fun TableEventContent(event: TimelineEvent.TableEvent) {
                 color = MaterialTheme.colorScheme.onTertiary,
                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
             )
+        }
+    }
+}
+
+@Composable
+private fun LogEventContent(event: TimelineEvent.LogEvent) {
+    val entry = event.entry
+    val (icon, tint) = when (entry.eventType) {
+        SessionLogEventType.DICE -> Icons.Default.Casino to Color(0xFFFFB74D)
+        SessionLogEventType.CLOCK -> Icons.Default.Schedule to Color(0xFF42A5F5)
+        SessionLogEventType.TOKEN -> Icons.Default.SportsKabaddi to Color(0xFFEF5350)
+        SessionLogEventType.ORACLE -> Icons.Default.AutoAwesome to Color(0xFFAB47BC)
+        SessionLogEventType.CARD -> Icons.Default.Style to MaterialTheme.colorScheme.secondary
+        SessionLogEventType.MANUAL -> Icons.Default.EditNote to MaterialTheme.colorScheme.primary
+    }
+
+    Row(
+        modifier = Modifier.padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = tint
+        )
+        Spacer(Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = entry.title,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            if (entry.details.isNotBlank()) {
+                Text(
+                    text = entry.details,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
     }
 }

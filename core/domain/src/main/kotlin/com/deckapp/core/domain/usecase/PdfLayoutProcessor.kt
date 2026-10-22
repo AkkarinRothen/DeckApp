@@ -19,6 +19,8 @@ class PdfLayoutProcessor @Inject constructor(
 
     /**
      * Procesa el PDF y extrae las cartas según el layout indicado.
+     * @param startPage Página inicial (0-indexed). Si no se especifica, toma skipPages.
+     * @param endPage Página final inclusiva (0-indexed). Si es null, procesa hasta la última página.
      * @param saveCard Callback para persistir cada carta detectada.
      */
     suspend fun process(
@@ -28,21 +30,29 @@ class PdfLayoutProcessor @Inject constructor(
         layoutMode: PdfLayoutMode,
         gridCols: Int,
         gridRows: Int,
-        skipPages: Int,
+        skipPages: Int = 0,
+        startPage: Int = 0,
+        endPage: Int? = null,
         autoTrimCells: Boolean,
         splitRatio: Float,
         onProgress: (progress: Float, count: Int) -> Unit,
         saveCard: suspend (frontPath: String, backFaces: List<CardFace>, index: Int) -> Unit
     ) = withContext(Dispatchers.IO) {
         val pageCount = fileRepository.getPdfPageCount(pdfUri)
-        if (pageCount <= skipPages) return@withContext
+        if (pageCount <= 0) return@withContext
+
+        val effectiveStart = (if (startPage > 0) startPage else skipPages).coerceAtLeast(0)
+        val requestedEnd = endPage ?: (pageCount - 1)
+        if (requestedEnd < effectiveStart || effectiveStart >= pageCount) return@withContext
+        val effectiveEnd = requestedEnd.coerceAtMost(pageCount - 1)
+        val totalRangePages = effectiveEnd - effectiveStart + 1
 
         var cardIndex = 0
 
         when (layoutMode) {
             PdfLayoutMode.ALTERNATING_PAGES -> {
-                var pageIndex = skipPages
-                while (pageIndex < pageCount) {
+                var pageIndex = effectiveStart
+                while (pageIndex <= effectiveEnd) {
                     for (row in 0 until gridRows) {
                         for (col in 0 until gridCols) {
                             val frontPath = fileRepository.renderPdfGridCellAndSave(
@@ -52,7 +62,7 @@ class PdfLayoutProcessor @Inject constructor(
                                 pageRenderWidth = 1800, autoTrimCell = autoTrimCells
                             )
                             if (frontPath != null) {
-                                val backFaces = if (pageIndex + 1 < pageCount) {
+                                val backFaces = if (pageIndex + 1 <= effectiveEnd) {
                                     val backPath = fileRepository.renderPdfGridCellAndSave(
                                         uri = pdfUri, pageIndex = pageIndex + 1,
                                         col = col, row = row, totalCols = gridCols, totalRows = gridRows,
@@ -67,13 +77,13 @@ class PdfLayoutProcessor @Inject constructor(
                         }
                     }
                     pageIndex += 2
-                    onProgress(pageIndex.toFloat() / pageCount, cardIndex)
+                    onProgress(minOf(1f, (pageIndex - effectiveStart).toFloat() / totalRangePages), cardIndex)
                 }
             }
 
             PdfLayoutMode.SIDE_BY_SIDE -> {
                 val totalCols = gridCols * 2
-                for (pageIndex in skipPages until pageCount) {
+                for (pageIndex in effectiveStart..effectiveEnd) {
                     for (row in 0 until gridRows) {
                         for (col in 0 until gridCols) {
                             val frontPath = fileRepository.renderPdfGridCellAndSave(
@@ -98,12 +108,12 @@ class PdfLayoutProcessor @Inject constructor(
                             }
                         }
                     }
-                    onProgress((pageIndex + 1).toFloat() / pageCount, cardIndex)
+                    onProgress((pageIndex - effectiveStart + 1).toFloat() / totalRangePages, cardIndex)
                 }
             }
 
             PdfLayoutMode.GRID -> {
-                for (pageIndex in skipPages until pageCount) {
+                for (pageIndex in effectiveStart..effectiveEnd) {
                     for (row in 0 until gridRows) {
                         for (col in 0 until gridCols) {
                             val path = fileRepository.renderPdfGridCellAndSave(
@@ -117,15 +127,15 @@ class PdfLayoutProcessor @Inject constructor(
                             }
                         }
                     }
-                    onProgress((pageIndex + 1).toFloat() / pageCount, cardIndex)
+                    onProgress((pageIndex - effectiveStart + 1).toFloat() / totalRangePages, cardIndex)
                 }
             }
 
             PdfLayoutMode.FIRST_HALF_FRONTS -> {
-                val remainingPages = pageCount - skipPages
-                val halfCount = remainingPages / 2
+                val halfCount = totalRangePages / 2
+                if (halfCount <= 0) return@withContext
                 for (pageOffset in 0 until halfCount) {
-                    val pageIndex = skipPages + pageOffset
+                    val pageIndex = effectiveStart + pageOffset
                     for (row in 0 until gridRows) {
                         for (col in 0 until gridCols) {
                             val frontPath = fileRepository.renderPdfGridCellAndSave(
@@ -135,8 +145,8 @@ class PdfLayoutProcessor @Inject constructor(
                                 pageRenderWidth = 1800, autoTrimCell = autoTrimCells
                             )
                             if (frontPath != null) {
-                                val backIndex = skipPages + halfCount + pageOffset
-                                val backPath = if (backIndex < pageCount) {
+                                val backIndex = effectiveStart + halfCount + pageOffset
+                                val backPath = if (backIndex <= effectiveEnd) {
                                     fileRepository.renderPdfGridCellAndSave(
                                         uri = pdfUri, pageIndex = backIndex,
                                         col = col, row = row, totalCols = gridCols, totalRows = gridRows,

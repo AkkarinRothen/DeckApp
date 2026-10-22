@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -18,6 +19,7 @@ import com.deckapp.core.model.*
 import com.deckapp.feature.draw.SessionBoardTemplatePreset
 import com.deckapp.feature.mythic.MythicSessionUiState
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun SessionBoardTab(
@@ -113,6 +115,7 @@ fun SessionBoardTab(
     onMergeItems: (Long, Long, (SessionBoardGroup) -> Unit) -> Unit = { _, _, _ -> },
     deckRefs: List<SessionDeckRef> = emptyList(),
     deckNames: Map<Long, String> = emptyMap(),
+    allDecks: List<CardStack> = emptyList(),
     handByDeck: Map<Long, List<Card>> = emptyMap(),
     deckCardCounts: Map<Long, Int> = emptyMap(),
     deckAspectRatios: Map<Long, CardAspectRatio> = emptyMap(),
@@ -191,6 +194,7 @@ fun SessionBoardTab(
         initialPage = orderedViews.indexOf(activeBoardView).coerceAtLeast(0),
         pageCount = { orderedViews.size }
     )
+    val boardNavigationScope = rememberCoroutineScope()
 
     LaunchedEffect(activeBoardView) {
         val targetPage = orderedViews.indexOf(activeBoardView)
@@ -434,6 +438,26 @@ fun SessionBoardTab(
                 tensionClocks = tensionClocks,
                 deckRefs = deckRefs,
                 deckNames = deckNames,
+                allDecks = allDecks,
+                deckCardCounts = deckCardCounts,
+                allBoardItems = fullBoardItems,
+                boardGroups = boardGroups,
+                viewLabels = viewLabels,
+                targetGroupId = pickerTargetGroupId,
+                targetGroups = boardGroups.filter { it.boardView == activeBoardView },
+                onTargetGroupChange = { pickerTargetGroupId = it },
+                onRemoveBoardItem = onRemoveBlock,
+                onAssignBoardItemsToGroup = { itemIds, groupId -> itemIds.forEach { onAssignToGroup(it, groupId) } },
+                onShowOnBoard = { item ->
+                    val page = orderedViews.indexOf(item.boardView).coerceAtLeast(0)
+                    focusedGroupId = item.groupId
+                    boardNavigationScope.launch {
+                        pagerState.animateScrollToPage(page)
+                        onSetActiveBoardView(item.boardView)
+                    }
+                    pickerTargetGroupId = null
+                    showPicker = false
+                },
                 wikiEntries = wikiEntries,
                 onDismiss = {
                     pickerTargetGroupId = null
@@ -444,9 +468,12 @@ fun SessionBoardTab(
                     pickerTargetGroupId = null
                     showPicker = false
                 },
-                onPickMultipleTables = { tableIds ->
+                onPickMultipleResources = { tableIds, deckIds ->
                     tableIds.forEach { tableId ->
                         onAddBlock(SessionBoardItemType.TABLE, tableId, pickerTargetGroupId)
+                    }
+                    deckIds.forEach { deckId ->
+                        onAddBlock(SessionBoardItemType.DECK, deckId, pickerTargetGroupId)
                     }
                     pickerTargetGroupId = null
                     showPicker = false

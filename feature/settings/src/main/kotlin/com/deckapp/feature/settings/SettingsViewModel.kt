@@ -54,7 +54,9 @@ data class SettingsUiState(
     val isRestoring: Boolean = false,
     val backupMessage: String? = null,
     val systemTotalBytes: Long = 0L,
-    val systemFreeBytes: Long = 0L
+    val systemFreeBytes: Long = 0L,
+    val pendingBackupInspection: com.deckapp.core.domain.repository.BackupInspectionData? = null,
+    val pendingRestoreUri: android.net.Uri? = null
 )
 
 @HiltViewModel
@@ -241,6 +243,31 @@ class SettingsViewModel @Inject constructor(
                 ) 
             }
         }
+    }
+
+    fun inspectBackup(uri: Uri) {
+        _uiState.update { it.copy(isRestoring = true, backupMessage = "Analizando archivo de copia de seguridad...") }
+        viewModelScope.launch {
+            val result = fileRepository.inspectBackupZip(uri)
+            _uiState.update { state ->
+                state.copy(
+                    isRestoring = false,
+                    pendingBackupInspection = result.getOrNull(),
+                    pendingRestoreUri = if (result.isSuccess) uri else null,
+                    backupMessage = if (result.isFailure) "Error al inspeccionar backup: ${result.exceptionOrNull()?.message}" else null
+                )
+            }
+        }
+    }
+
+    fun dismissBackupInspection() {
+        _uiState.update { it.copy(pendingBackupInspection = null, pendingRestoreUri = null) }
+    }
+
+    fun confirmRestore() {
+        val uri = _uiState.value.pendingRestoreUri ?: return
+        dismissBackupInspection()
+        restoreBackup(uri)
     }
 
     fun restoreBackup(zipUri: Uri) {

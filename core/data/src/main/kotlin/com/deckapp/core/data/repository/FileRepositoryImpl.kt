@@ -628,4 +628,67 @@ class FileRepositoryImpl @Inject constructor(
 
         outputFile.absolutePath
     }
+
+    override suspend fun writeTextToUri(uri: Uri, content: String): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            context.contentResolver.openOutputStream(uri)?.use { output ->
+                output.bufferedWriter().use { writer ->
+                    writer.write(content)
+                }
+            } ?: error("No se pudo abrir stream de salida para $uri")
+        }
+    }
+
+    override suspend fun inspectBackupZip(zipUri: Uri): Result<com.deckapp.core.domain.repository.BackupInspectionData> = withContext(Dispatchers.IO) {
+        runCatching {
+            var manifest: com.deckapp.core.model.backup.BackupManifest? = null
+            var totalUncompressedSize = 0L
+
+            context.contentResolver.openInputStream(zipUri)?.use { stream ->
+                java.util.zip.ZipInputStream(java.io.BufferedInputStream(stream)).use { zis ->
+                    var entry = zis.nextEntry
+                    while (entry != null) {
+                        if (entry.size > 0) {
+                            totalUncompressedSize += entry.size
+                        }
+                        if (entry.name == "manifest.json" || entry.name.endsWith("/manifest.json")) {
+                            val jsonStr = zis.bufferedReader().readText()
+                            manifest = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }.decodeFromString(jsonStr)
+                        }
+                        zis.closeEntry()
+                        entry = zis.nextEntry
+                    }
+                }
+            } ?: error("No se pudo abrir el archivo ZIP")
+
+            val foundManifest = manifest ?: error("El archivo seleccionado no contiene un manifest.json válido de DeckApp.")
+
+            var fileSizeBytes = 0L
+            context.contentResolver.query(zipUri, arrayOf(android.provider.OpenableColumns.SIZE), null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val sizeIndex = cursor.getColumnIndex(android.provider.OpenableColumns.SIZE)
+                    if (sizeIndex != -1) {
+                        fileSizeBytes = cursor.getLong(sizeIndex)
+                    }
+                }
+            }
+
+            val statFs = android.os.StatFs(context.filesDir.absolutePath)
+            val availableSizeBytes = statFs.availableBlocksLong * statFs.blockSizeLong
+            val requiredSizeBytes = if (totalUncompressedSize > 0) totalUncompressedSize else (fileSizeBytes * 2)
+
+            com.deckapp.core.domain.repository.BackupInspectionData(
+                manifest = foundManifest,
+                fileSizeBytes = fileSizeBytes,
+                requiredSizeBytes = requiredSizeBytes,
+                availableSizeBytes = availableSizeBytes
+            )
+        }
+    }
+
+    override suspend fun getAvailableStorageBytes(): Long = withContext(Dispatchers.IO) {
+        val statFs = android.os.StatFs(context.filesDir.absolutePath)
+        statFs.availableBlocksLong * statFs.blockSizeLong
+    }
 }
+

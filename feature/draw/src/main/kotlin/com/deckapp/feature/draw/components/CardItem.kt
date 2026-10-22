@@ -88,10 +88,11 @@ fun CardItem(
                     contentDescription = card.title,
                     modifier = Modifier
                         .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceContainerLow)
                         .graphicsLayer {
                             rotationZ = rotationAngle
                         },
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Fit
                 )
 
                 // Chip / Badge de orientación / opción activa
@@ -163,8 +164,10 @@ fun CardItem(
                 AsyncImage(
                     model = com.deckapp.core.ui.util.toCoilModel(backImagePath),
                     contentDescription = "Dorso",
-                    modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.secondaryContainer),
-                    contentScale = ContentScale.Crop
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceContainerLow),
+                    contentScale = ContentScale.Fit
                 )
                 
                 IconButton(

@@ -19,6 +19,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.filled.Inventory2
+import androidx.compose.ui.graphics.Color
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Refresh
@@ -55,32 +59,88 @@ fun SettingsScreen(
 
     val restoreBackupLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
-    ) { uri -> uri?.let { viewModel.restoreBackup(it) } }
+    ) { uri -> uri?.let { viewModel.inspectBackup(it) } }
 
     var category by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf("General") }
 
     val listState = androidx.compose.foundation.lazy.rememberLazyListState()
     LaunchedEffect(category) { listState.scrollToItem(0) }
 
-    var showRestoreConfirm by remember { mutableStateOf(false) }
+    // Diálogo de Inspección Previa y Verificación de Integridad
+    uiState.pendingBackupInspection?.let { inspection ->
+        val counts = inspection.manifest.counts
+        val requiredMb = inspection.requiredSizeBytes / (1024 * 1024)
+        val availableMb = inspection.availableSizeBytes / (1024 * 1024)
+        val hasEnoughSpace = inspection.availableSizeBytes > inspection.requiredSizeBytes
+        val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()) }
+        val dateText = dateFormat.format(Date(inspection.manifest.createdAt))
 
-    if (showRestoreConfirm) {
         AlertDialog(
-            onDismissRequest = { showRestoreConfirm = false },
-            title = { Text("Restaurar biblioteca") },
-            text = { Text("Esta acción BORRARÁ todos tus mazos, tablas y notas actuales para reemplazarlos por los del backup. ¿Deseas continuar?") },
-            confirmButton = {
-                DeckTextButton(
-                    onClick = {
-                        showRestoreConfirm = false
-                        restoreBackupLauncher.launch("application/zip")
-                    }
+            onDismissRequest = { viewModel.dismissBackupInspection() },
+            icon = { Icon(Icons.Default.Inventory2, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+            title = { Text("Inspección de Backup", fontWeight = FontWeight.Bold) },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Text("Restaurar y Reemplazar", color = MaterialTheme.colorScheme.error)
+                    Text(
+                        text = "Copia generada el $dateText (v${inspection.manifest.appVersion})",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text("Contenido detectado:", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelMedium)
+                            Text("• Mazos: ${counts.decks}  |  Cartas: ${counts.cards}", style = MaterialTheme.typography.bodySmall)
+                            Text("• Tablas aleatorias: ${counts.randomTables}", style = MaterialTheme.typography.bodySmall)
+                            Text("• PNJs: ${counts.npcs}  |  Artículos Wiki: ${counts.wikiEntries}", style = MaterialTheme.typography.bodySmall)
+                            Text("• Sesiones: ${counts.sessions}  |  Mapas tácticos: ${counts.tacticalMaps}", style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
+                        color = if (hasEnoughSpace) MaterialTheme.colorScheme.surfaceContainer else MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("Espacio libre en disco:", style = MaterialTheme.typography.bodySmall)
+                            Text(
+                                "$availableMb MB disp. (req. ~$requiredMb MB)",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = if (hasEnoughSpace) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+
+                    Text(
+                        text = "⚠️ Advertencia: La restauración reemplazará tu base de datos actual con la del archivo seleccionado.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = { viewModel.confirmRestore() },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Restaurar y Reemplazar", color = Color.White)
                 }
             },
             dismissButton = {
-                DeckTextButton(onClick = { showRestoreConfirm = false }) {
+                TextButton(onClick = { viewModel.dismissBackupInspection() }) {
                     Text("Cancelar")
                 }
             }
@@ -254,7 +314,7 @@ fun SettingsScreen(
                                 createBackupLauncher.launch("deckapp_backup_$dateStr.zip")
                             },
                             onRestoreBackup = {
-                                showRestoreConfirm = true
+                                restoreBackupLauncher.launch("application/zip")
                             }
                         )
                     }

@@ -56,11 +56,33 @@ fun PlaymatSessionDrawer(
     if (!isOpen) return
 
     val context = LocalContext.current
+    val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
+    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+
     var manualLogInput by remember { mutableStateOf("") }
     var notesText by remember(notesMarkdown) { mutableStateOf(notesMarkdown) }
+    var isSavingNotes by remember { mutableStateOf(false) }
     var showClearConfirmDialog by remember { mutableStateOf(false) }
 
     val timeFormatter = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
+
+    // Debounce continuo de guardado automático (400ms tras dejar de escribir)
+    LaunchedEffect(notesText) {
+        if (notesText != notesMarkdown) {
+            isSavingNotes = true
+            kotlinx.coroutines.delay(400)
+            onSaveNotes(notesText)
+            isSavingNotes = false
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            if (notesText != notesMarkdown) {
+                onSaveNotes(notesText)
+            }
+        }
+    }
 
     Box(
         modifier = modifier
@@ -99,12 +121,55 @@ fun PlaymatSessionDrawer(
                     )
                 }
 
-                IconButton(onClick = onClose) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Cerrar panel",
-                        tint = Color.White.copy(alpha = 0.7f)
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (selectedTab == 1) {
+                        if (isSavingNotes) {
+                            Text(
+                                text = "Guardando...",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        } else {
+                            Text(
+                                text = "Guardado ✓",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = Color(0xFF4CAF50)
+                            )
+                        }
+                        Spacer(Modifier.width(4.dp))
+                        IconButton(
+                            onClick = {
+                                keyboardController?.hide()
+                                focusManager.clearFocus()
+                            },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.KeyboardHide,
+                                contentDescription = "Ocultar teclado",
+                                tint = Color.White.copy(alpha = 0.7f),
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                        Spacer(Modifier.width(4.dp))
+                    }
+
+                    IconButton(
+                        onClick = {
+                            if (notesText != notesMarkdown) {
+                                onSaveNotes(notesText)
+                            }
+                            onClose()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Cerrar panel",
+                            tint = Color.White.copy(alpha = 0.7f)
+                        )
+                    }
                 }
             }
 
@@ -307,7 +372,6 @@ fun PlaymatSessionDrawer(
                         value = notesText,
                         onValueChange = {
                             notesText = it
-                            onSaveNotes(it)
                         },
                         placeholder = {
                             Text(

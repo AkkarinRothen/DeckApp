@@ -1498,8 +1498,9 @@ class SessionViewModel @Inject constructor(
         size: SessionBoardItemSize = SessionBoardItemSize.M,
         displayMode: String? = null,
         titleOverride: String? = null,
-        resourceId: Long? = null
-    ) = boardDelegate.addBoardBlock(type, resourceId)
+        resourceId: Long? = null,
+        targetGroupId: Long? = null
+    ) = boardDelegate.addBoardBlock(type, resourceId, targetGroupId)
 
     fun removeBoardBlock(itemId: Long) = boardDelegate.removeBoardBlock(itemId)
     fun moveBoardBlock(itemId: Long, direction: Int) = boardDelegate.moveBoardBlock(itemId, direction)

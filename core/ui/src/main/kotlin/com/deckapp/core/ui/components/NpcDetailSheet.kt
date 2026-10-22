@@ -1,5 +1,6 @@
 package com.deckapp.core.ui.components
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,12 +9,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Casino
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.HistoryEdu
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.SportsKabaddi
 import androidx.compose.material.icons.filled.ZoomIn
@@ -42,12 +46,15 @@ fun NpcDetailSheet(
     onAddToCombat: ((Npc) -> Unit)? = null,
     onLogToDiary: ((Npc) -> Unit)? = null,
     onEdit: (() -> Unit)? = null,
+    onUpdateHp: ((Npc, Int) -> Unit)? = null,
+    onRollAction: ((label: String, formula: String) -> Unit)? = null,
     isPlayingVoice: Boolean = false,
     onPlayVoice: ((String) -> Unit)? = null
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showFullImage by remember { mutableStateOf(false) }
     var selectedTab by remember { mutableIntStateOf(0) }
+    var localCurrentHp by remember(npc.id, npc.currentHp) { mutableIntStateOf(npc.currentHp) }
 
     val choirProfile = remember(npc.notes) { ChoirProfile.fromNotes(npc.notes) }
     val choirCharacter = remember(npc.notes) { ChoirCharacterCodec.read(npc.notes) }
@@ -210,9 +217,101 @@ fun NpcDetailSheet(
                 }
             }
 
-            // 3. Resumen Mecánico Prioritario (Estadísticas al frente, no desplazadas por descripción)
+            // 3. Bloque Bento: Salud Interactiva (HP / Vigor)
+            if (choirProfile == null && npc.maxHp > 0) {
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(14.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        val hpPercent = (localCurrentHp.toFloat() / npc.maxHp.coerceAtLeast(1).toFloat()).coerceIn(0f, 1f)
+                        val hpColor by animateColorAsState(
+                            targetValue = when {
+                                hpPercent > 0.5f -> Color(0xFF4CAF50)
+                                hpPercent > 0.2f -> Color(0xFFFFB74D)
+                                else -> Color(0xFFEF5350)
+                            },
+                            label = "hpColor"
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    Icons.Default.Favorite,
+                                    contentDescription = null,
+                                    tint = hpColor,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(Modifier.width(6.dp))
+                                Text(
+                                    text = "Puntos de Golpe",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            Text(
+                                text = "$localCurrentHp / ${npc.maxHp}",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Black,
+                                color = hpColor
+                            )
+                        }
+
+                        LinearProgressIndicator(
+                            progress = { hpPercent },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                                .clip(RoundedCornerShape(4.dp)),
+                            color = hpColor,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+
+                        // Botones de ajuste interactivo
+                        if (onUpdateHp != null) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                HpAdjustButton("-5") {
+                                    val newHp = (localCurrentHp - 5).coerceAtLeast(0)
+                                    localCurrentHp = newHp
+                                    onUpdateHp(npc, newHp)
+                                }
+                                HpAdjustButton("-1") {
+                                    val newHp = (localCurrentHp - 1).coerceAtLeast(0)
+                                    localCurrentHp = newHp
+                                    onUpdateHp(npc, newHp)
+                                }
+                                Spacer(Modifier.weight(1f))
+                                HpAdjustButton("+1") {
+                                    val newHp = (localCurrentHp + 1).coerceAtMost(npc.maxHp)
+                                    localCurrentHp = newHp
+                                    onUpdateHp(npc, newHp)
+                                }
+                                HpAdjustButton("+5") {
+                                    val newHp = (localCurrentHp + 5).coerceAtMost(npc.maxHp)
+                                    localCurrentHp = newHp
+                                    onUpdateHp(npc, newHp)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 4. Resumen Mecánico Bento (Estadísticas y tiradas al frente)
             Surface(
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(14.dp),
                 color = MaterialTheme.colorScheme.surfaceContainer,
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -235,12 +334,12 @@ fun NpcDetailSheet(
                                 horizontalArrangement = Arrangement.SpaceAround
                             ) {
                                 val attr = choirCharacter.attributes
-                                AttrBadge("FUE", attr.strength)
-                                AttrBadge("DES", attr.dexterity)
-                                AttrBadge("CON", attr.constitution)
-                                AttrBadge("INT", attr.intelligence)
-                                AttrBadge("VOL", attr.willpower)
-                                AttrBadge("PRE", attr.presence)
+                                InteractiveAttrBadge("FUE", attr.strength, onRollAction)
+                                InteractiveAttrBadge("DES", attr.dexterity, onRollAction)
+                                InteractiveAttrBadge("CON", attr.constitution, onRollAction)
+                                InteractiveAttrBadge("INT", attr.intelligence, onRollAction)
+                                InteractiveAttrBadge("VOL", attr.willpower, onRollAction)
+                                InteractiveAttrBadge("PRE", attr.presence, onRollAction)
                             }
                         }
                         choirProfile != null -> {
@@ -258,16 +357,77 @@ fun NpcDetailSheet(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceAround
                             ) {
-                                StatPill("HP", "${npc.currentHp}/${npc.maxHp}", Color(0xFFEF5350))
-                                StatPill("CA", npc.armorClass.toString(), Color(0xFF42A5F5))
-                                StatPill("INICIATIVA", if (npc.initiativeBonus >= 0) "+${npc.initiativeBonus}" else npc.initiativeBonus.toString(), Color(0xFFFFB74D))
+                                StatPill("CA / DEFENSA", npc.armorClass.toString(), Color(0xFF42A5F5))
+                                val initLabel = if (npc.initiativeBonus >= 0) "+${npc.initiativeBonus}" else npc.initiativeBonus.toString()
+                                StatPill("INICIATIVA", initLabel, Color(0xFFFFB74D))
+                                if (onRollAction != null) {
+                                    FilledTonalButton(
+                                        onClick = {
+                                            val sign = if (npc.initiativeBonus >= 0) "+" else ""
+                                            onRollAction("Iniciativa de ${npc.name}", "1d20$sign${npc.initiativeBonus}")
+                                        },
+                                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                                        shape = RoundedCornerShape(8.dp)
+                                    ) {
+                                        Icon(Icons.Default.Casino, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Spacer(Modifier.width(4.dp))
+                                        Text("Tirar Inic", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
 
-            // 4. Pestañas de Detalle (Ficha/Acciones, Descripción, Notas)
+            // 5. Acciones de Choque / Ataques (Si es criatura Choir o tiene acciones)
+            if (choirProfile != null) {
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(14.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "Acciones y Ataques de Criatura",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+
+                        if (choirProfile.standard.isNotBlank()) {
+                            ChoirActionRow(
+                                title = "Ataque Estándar",
+                                description = choirProfile.standard,
+                                onRoll = onRollAction?.let { roll ->
+                                    { roll("Ataque Estándar (${npc.name})", "1d20") }
+                                }
+                            )
+                        }
+                        if (choirProfile.special.isNotBlank()) {
+                            ChoirActionRow(
+                                title = "Ataque Especial",
+                                description = choirProfile.special,
+                                onRoll = onRollAction?.let { roll ->
+                                    { roll("Ataque Especial (${npc.name})", "1d20") }
+                                }
+                            )
+                        }
+                        if (choirProfile.support.isNotBlank()) {
+                            ChoirActionRow(
+                                title = "Acción de Apoyo",
+                                description = choirProfile.support,
+                                onRoll = null
+                            )
+                        }
+                    }
+                }
+            }
+
+            // 6. Pestañas de Detalle (Descripción, Notas y Reglas)
             TabRow(
                 selectedTabIndex = selectedTab,
                 containerColor = Color.Transparent,
@@ -325,6 +485,62 @@ fun NpcDetailSheet(
     }
 }
 
+@Composable
+private fun HpAdjustButton(text: String, onClick: () -> Unit) {
+    FilledTonalButton(
+        onClick = onClick,
+        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+        modifier = Modifier.height(30.dp),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Text(text, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+    }
+}
+
+@Composable
+private fun ChoirActionRow(
+    title: String,
+    description: String,
+    onRoll: (() -> Unit)?
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        if (onRoll != null) {
+            Spacer(Modifier.width(8.dp))
+            FilledTonalIconButton(
+                onClick = onRoll,
+                modifier = Modifier.size(36.dp)
+            ) {
+                Icon(
+                    Icons.Default.Casino,
+                    contentDescription = "Tirar $title",
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+    }
+}
+
 private fun cleanMarkdownDirectives(raw: String): String {
     return raw
         .lines()
@@ -352,10 +568,22 @@ private fun StatPill(label: String, value: String, color: Color) {
 }
 
 @Composable
-private fun AttrBadge(name: String, score: Int) {
+private fun InteractiveAttrBadge(
+    name: String,
+    score: Int,
+    onRollAction: ((String, String) -> Unit)?
+) {
     val mod = ChoirCharacterRules.modifier(score)
     val modStr = if (mod >= 0) "+$mod" else "$mod"
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .clip(RoundedCornerShape(6.dp))
+            .clickable(enabled = onRollAction != null) {
+                onRollAction?.invoke("Tirada de $name", "1d20$modStr")
+            }
+            .padding(horizontal = 4.dp, vertical = 2.dp)
+    ) {
         Text(name, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text("$score ($modStr)", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
     }

@@ -276,6 +276,7 @@ fun SessionScreen(
                         uiState = uiState,
                         onToggleCollapse = { viewModel.toggleDeckCollapse(it) },
                         onDraw = { viewModel.drawCardFromDeck(it) },
+                        onRecoverDiscards = { viewModel.shufflePileBack(it) },
                         onCardClick = onCardClick,
                         onDiscard = { viewModel.discardCard(it) },
                         onRevealCard = { viewModel.revealCard(it) },

@@ -37,6 +37,7 @@ data class DeckDetailUiState(
     val errorMessage: String? = null,
     val exportSuccessMessage: String? = null,
     val showConfigSheet: Boolean = false,
+    val showExportDialog: Boolean = false,
     val isReorderMode: Boolean = false
 )
 
@@ -46,6 +47,7 @@ class DeckDetailViewModel @Inject constructor(
     private val duplicateDeckUseCase: DuplicateDeckUseCase,
     private val mergeDecksUseCase: MergeDecksUseCase,
     private val exportDeckToZipUseCase: ExportDeckToZipUseCase,
+    private val exportDeckToJsonUseCase: com.deckapp.core.domain.usecase.ExportDeckToJsonUseCase,
     private val getOrCreateTagUseCase: com.deckapp.core.domain.usecase.GetOrCreateTagUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -59,6 +61,7 @@ class DeckDetailViewModel @Inject constructor(
         val isExporting: Boolean = false,
         val isMerging: Boolean = false,
         val showMergeDialog: Boolean = false,
+        val showExportDialog: Boolean = false,
         val errorMessage: String? = null,
         val exportSuccessMessage: String? = null,
         val showConfigSheet: Boolean = false,
@@ -88,6 +91,7 @@ class DeckDetailViewModel @Inject constructor(
             isExporting = extras.isExporting,
             isMerging = extras.isMerging,
             showMergeDialog = extras.showMergeDialog,
+            showExportDialog = extras.showExportDialog,
             availableDecks = allDecks.filter { it.id != deckId },
             errorMessage = extras.errorMessage,
             exportSuccessMessage = extras.exportSuccessMessage,
@@ -120,6 +124,10 @@ class DeckDetailViewModel @Inject constructor(
         _extras.update { it.copy(showMergeDialog = show) }
     }
 
+    fun showExportDialog(show: Boolean) {
+        _extras.update { it.copy(showExportDialog = show) }
+    }
+
     fun mergeWithDeck(sourceDeckId: Long) {
         val targetId = deckId
         _extras.update { it.copy(isMerging = true, showMergeDialog = false) }
@@ -137,13 +145,28 @@ class DeckDetailViewModel @Inject constructor(
 
     fun exportToZip(outputUri: Uri) {
         val id = deckId
-        _extras.update { it.copy(isExporting = true, errorMessage = null, exportSuccessMessage = null) }
+        _extras.update { it.copy(isExporting = true, showExportDialog = false, errorMessage = null, exportSuccessMessage = null) }
         viewModelScope.launch {
             val result = exportDeckToZipUseCase(id, outputUri)
             _extras.update {
                 it.copy(
                     isExporting = false,
-                    exportSuccessMessage = if (result.isSuccess) "Mazo exportado correctamente" else null,
+                    exportSuccessMessage = if (result.isSuccess) "Mazo exportado a ZIP correctamente" else null,
+                    errorMessage = result.exceptionOrNull()?.message
+                )
+            }
+        }
+    }
+
+    fun exportToJson(outputUri: Uri) {
+        val id = deckId
+        _extras.update { it.copy(isExporting = true, showExportDialog = false, errorMessage = null, exportSuccessMessage = null) }
+        viewModelScope.launch {
+            val result = exportDeckToJsonUseCase(id, outputUri)
+            _extras.update {
+                it.copy(
+                    isExporting = false,
+                    exportSuccessMessage = if (result.isSuccess) "Mazo exportado a JSON correctamente" else null,
                     errorMessage = result.exceptionOrNull()?.message
                 )
             }

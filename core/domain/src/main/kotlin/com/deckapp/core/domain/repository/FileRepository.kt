@@ -140,4 +140,27 @@ interface FileRepository {
      * Usa el ContentResolver del sistema para acceder a archivos SAF.
      */
     suspend fun readTextFromUri(uri: Uri): String
+
+    /**
+     * Escribe una cadena de texto en un URI de SAF (JSON, CSV, etc.).
+     */
+    suspend fun writeTextToUri(uri: Uri, content: String): Result<Unit>
+
+    /**
+     * Inspecciona un archivo de backup ZIP sin descomprimirlo en la base de datos,
+     * extrayendo el manifiesto y verificando el espacio libre disponible.
+     */
+    suspend fun inspectBackupZip(zipUri: Uri): Result<BackupInspectionData>
+
+    /**
+     * Retorna el espacio disponible en bytes en el almacenamiento interno de la app.
+     */
+    suspend fun getAvailableStorageBytes(): Long
 }
+
+data class BackupInspectionData(
+    val manifest: com.deckapp.core.model.backup.BackupManifest,
+    val fileSizeBytes: Long,
+    val requiredSizeBytes: Long,
+    val availableSizeBytes: Long
+)

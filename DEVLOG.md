@@ -1,3 +1,85 @@
+### Mejora de mesa: bloques de cartas y mazos de sesión (21 de octubre de 2026)
+
+**Categoría:** `FEATURE / UX`
+
+- Los bloques de cartas muestran mano, mazo y descarte por separado; el robo y la revelación tienen acciones visibles en tamaños compactos y grandes.
+- Cada carta en mano ofrece un control explícito para descartarla. El carrusel ya no descarta al deslizar horizontalmente.
+- Las imágenes de frente y dorso se ajustan al espacio de la carta sin recortar sus bordes.
+- La vista de mazos muestra los nombres completos al expandir, un estado de mano vacía, el recuento de descartes y la acción de recuperarlos cuando corresponde.
+- Verificación: `:feature:draw:compileDebugKotlin --offline` completó correctamente.
+
+### Implementación Plan Priorizado de Mejoras UX: Fase 4 — Preparación, Biblioteca y Protección de Datos (21 de octubre de 2026)
+
+**Categoría:** `BACKUP / EXPORT / IMPORT / PDF / TEMPLATES / STORAGE INTEGRITY / RELEASE`
+
+- **Exportador Ligero y Completo de Mazos (`DeckDetailScreen.kt`, `DeckDetailViewModel.kt`, `ExportDeckToJsonUseCase.kt`):**
+  - Incorporado botón directo de compartir en la `TopAppBar` del detalle del mazo que despliega un diálogo modal de exportación (`DeckExportDialog`).
+  - Opciones de exportación:
+    - `[📦 ZIP Completo (con arte)]`: Archivo ZIP autónomo que incluye todas las imágenes y un manifiesto `deck_manifest.json` completo con tags, valores, palos y notas del director.
+    - `[📄 JSON Ligero (solo datos)]`: Manifiesto ligero en JSON exportable por SAF (`writeTextToUri`), ideal para compartir configuraciones de mazo por mensajería o respaldo rápido sin duplicar megabytes de imágenes.
+
+- **Inspección Previa de Backup e Integridad (`SettingsScreen.kt`, `SettingsViewModel.kt`, `FileRepositoryImpl.kt`):**
+  - Creado `inspectBackupZip` en `FileRepositoryImpl`: lee y parsea `manifest.json` en stream (`ZipInputStream`) sin necesidad de descomprimir archivos en disco.
+  - Diálogo modal de inspección previa en `SettingsScreen`: muestra versión del backup, fecha de creación, tamaño comprimido y un desglose de entidades (mazos, cartas, tablas, PNJs, wiki, sesiones, mapas).
+  - Verificación de almacenamiento: consulta `usableSpace` vía `StatFs` y compara el espacio disponible frente al requerido, impidiendo restauraciones incompletas si el almacenamiento es insuficiente.
+
+- **Importador de PDF Potenciado con Rango de Páginas y Plantillas (`PdfLayoutProcessor.kt`, `ImportDeckUseCase.kt`, `ImportViewModel.kt`, `ImportScreen.kt`):**
+  - *Rango de Páginas Ergonómico:* Selector `Desde pág.` a `Hasta pág.` con botón `[Todas]` para restablecer a `1..total` y validación de rangos inválidos (`start > end`). El procesamiento acota la extracción únicamente a las páginas deseadas en los 4 modos de layout.
+  - *Plantillas Rápidas de Rejilla:* Chips horizontales de 1 toque con preconfiguraciones listas:
+    - `3×3 Alternado`: Print & play estándar (páginas impares frentes, pares dorsos).
+    - `3×3 Solo Frente`: 9 cartas por página, 1 cara.
+    - `Side-by-Side PNJ`: 50/50 mitad izquierda arte y mitad derecha texto.
+    - `1×1 Página Completa`: 1 carta grande por página.
+    - `1ra Mitad / 2da Mitad`: Primera mitad frentes, segunda mitad dorsos.
+  - *Estimación Dinámica y Chequeo de Espacio:* Cálculo en tiempo real de cartas estimadas y advertencia visual si el espacio libre en el dispositivo es bajo.
+  - *Suite de Pruebas Unitarias:* Creada la suite `PdfLayoutProcessorTest` en `:core:domain`, validando al 100% la extracción por rangos y bordes seguros.
+
+- **Verificación Técnica y Compilación Release:**
+  - 100% de tests unitarios aprobados en `:core:domain:testDebugUnitTest` y `:feature:draw:testDebugUnitTest`.
+  - Compilación Release completada (`:app:assembleRelease`, APK de 154.9 MB).
+
+---
+
+### Implementación Plan Priorizado de Mejoras UX: Fase 3 — Unificar Consulta y Registro en Partida (21 de octubre de 2026)
+
+**Categoría:** `UX / NPC / BENTO / DICE / SESSION HISTORY / AUTOSAVE / DEBOUNCE / MODAL BOTTOMSHEET / RELEASE`
+
+- **Ficha de PNJ Interactiva Bento (`NpcDetailSheet.kt`):**
+  - *Bloque Bento de Salud Dinámica:* Barra visual de vida reactiva animada con cambio de color según el estado (verde > 50%, ámbar > 20%, rojo ≤ 20%).
+  - *Ajuste rápido de HP con 1 toque:* Controles táctiles `-5`, `-1`, `+1`, `+5` con persistencia automática en base de datos vía `onUpdateHp` (`viewModel.updateNpcHp`).
+  - *Tiradas de 1 toque integradas a la sesión:*
+    - PNJ d20 / Genérico: Botón directo `[Tirar Inic]` que evalúa `1d20 + iniciativa` y lo envía al registro de tiradas de la sesión.
+    - Choir of Flesh Criatura: Tarjetas Bento para Ataque Estándar y Ataque Especial con botón directo de dado `[Tirar 🎲]` que evalúa la tirada en la mesa.
+    - Choir of Flesh Inquebrantable: Insignias de atributos interactivas (`FUE`, `DES`, `CON`, `INT`, `VOL`, `PRE`) táctiles que tiran `1d20 + mod` al tocarlas.
+  - *Pestañas limpias:* Separación fluida entre estadísticas mecánicas inmediatas, Descripción libre de marcas internas y Notas / Reglas.
+
+- **Visor Consistente de Reglas y Tablas en ModalBottomSheet (`WikiQuickPreviewDialog.kt`):**
+  - Transformado el diálogo flotante clásico en un `ModalBottomSheet` interactivo deslizable, homogéneo con `TableDetailSheet` y `NpcDetailSheet`.
+  - Botón de 1 toque `[Enviar al Diario / Notas de Sesión]` (`onSendToNotes`) que inserta la regla o artículo directamente en la bitácora activa sin abandonar el contexto de la mesa.
+  - Soporte de copia rápida con feedback visual y vista de imagen táctil ampliable.
+
+- **Historial de Sesión Reorganizado con Filtros Rápidos (`SessionHistoryScreen.kt` & `SessionHistoryViewModel.kt`):**
+  - Sustituida la sobrecarga de menús desplegables por una barra horizontal compacta de chips de filtro: `[Todos | 🎲 Dados y Tablas | 🃏 Cartas | ⚔️ Combate | ⏰ Relojes]`.
+  - Integración de `SessionLogRepository`: el historial unifica ahora eventos de cartas (`DrawEvent`), tablas aleatorias (`TableRollResult`) y eventos de bitácora (`SessionLogEntry`: dados, oráculos/Mythic, relojes y combate).
+  - Algoritmo de desduplicación inteligente: descarta eventos redundantes o duplicados concurrentes (<500ms) entre tiradas de tablas y entradas de log.
+  - Eliminadas por completo las etiquetas con valores `null`.
+
+- **Recursos de Sesión Priorizados (`SessionBoardBlockPickerSheet.kt`):**
+  - Las tablas y recursos vinculados a la sesión aparecen arriba en la lista con insignia visual distintiva `⭐ En sesión`, seguidos por el resto de la biblioteca clasificada.
+
+- **Notas de Sesión con Autoguardado Continuo y Control de Teclado (`PlaymatSessionDrawer.kt`):**
+  - Implementado debounce de 400ms con coroutines para autoguardado suave y reactivo, eliminando escrituras innecesarias en base de datos en cada tecla.
+  - Indicador visual dinámico en la cabecera: `Guardando...` / `Guardado ✓` para máxima tranquilidad del director de juego.
+  - Botón de cierre rápido de teclado (`KeyboardHide`) para despejar la vista táctil en orientación vertical u horizontal.
+  - Guardado forzado garantizado en `DisposableEffect.onDispose` ante rotación o cierre del cajón.
+
+- **Verificación Técnica y Despliegue:**
+  - 100% de tests unitarios aprobados en `:feature:draw:testDebugUnitTest`.
+  - Compilación Release completada (`:app:assembleRelease`, APK de 154 MB).
+  - Instalación y despliegue exitoso vía ADB en el dispositivo físico `ZE222B5GXX` (`com.deckapp.ttrpg` ejecutando con éxito, PID 26044).
+
+---
+
 ### Implementación Plan Priorizado de Mejoras UX: Fases 1 y 2 (21 de octubre de 2026)
 
 **Categoría:** `UX / LAYOUT / LANDSCAPE / HUD / EMPTY STATES / COMBAT / HEXPLORATION / WIKI / LOGGING / RELEASE`
@@ -2945,3 +3027,37 @@ opcional de auto-detección cuando el usuario no conoce el layout del PDF.
 - Pruebas unitarias de `:core:domain`, `:feature:draw` y `:feature:deck` ejecutadas con éxito.
 - Compilado APK Release (`app-release.apk`) e instalado exitosamente en el dispositivo físico Motorola One Fusion (`ZE222B5GXX`).
 - Actualizada documentación de paridad de escritorio en `docs/planning/DESKTOP_PARITY_STORY_ENGINE.md`.
+
+### Selector de recursos de la mesa (21 de octubre de 2026)
+
+- Reorganizado el selector de bloques con búsqueda visible, filtros por tipo en una sola fila y resultados desplazables desde la primera vista.
+- Separadas las tablas de la sesión y la biblioteca; se abre en biblioteca para permitir buscar todos los recursos, con las tablas de sesión destacadas.
+- Movidas las acciones de creación a un menú compacto; la selección múltiple de tablas mantiene su confirmación fija en la parte inferior.
+- Añadido filtro de mazos y acciones explícitas para añadir otros bloques. Corregidos textos visibles del selector.
+- Compilación de `:feature:draw:compileDebugKotlin --offline`: correcta.
+
+### Selector de recursos para colecciones grandes (22 de octubre de 2026)
+
+- Incorporados accesos a favoritos y recientes. Los favoritos y los bloques agregados recientemente se guardan localmente; las tiradas recientes también alimentan la vista de tablas recientes.
+- Incorporado filtro de colección para tablas y de etiqueta para mazos, usando los metadatos existentes. La lista muestra el total de resultados del tipo elegido y prioriza favoritos y tablas de la sesión.
+- Agregada selección múltiple mixta de tablas y mazos con una única barra de confirmación fija. Los mazos ya presentes en la vista se mantienen fuera de los resultados.
+- Compilación de `:feature:draw:compileDebugKotlin --offline`: correcta.
+
+### Revisión en dispositivo del selector (22 de octubre de 2026)
+
+- Instalado el APK de depuración en Motorola One Fusion y revisado el selector con la sesión Deckofworlds y 258 recursos disponibles.
+- La revisión en pantalla mostró que los filtros de tipo y los accesos Favoritos/Recientes ocupaban demasiado alto. Se compactaron en una sola fila y el alcance/categoría/colección de tablas ahora comparte una fila horizontal desplazable.
+- Reinstalación final y apertura de selector verificadas en el teléfono. Para empaquetar se reutilizó la salida compilada de Ajustes porque su recompilación normal falla con referencias no resueltas en `SettingsScreen.kt`.
+
+### Contexto y escala del selector de recursos (22 de octubre de 2026)
+
+- El selector recuerda búsqueda, filtros, alcance de tablas y criterio de orden entre aperturas.
+- Añadidos criterios de orden por nombre, recientes y favoritos, combinables con tipo, categoría, colección y búsqueda.
+- Los bloques que ya están en la mesa siguen visibles con su vista y carpeta; “Ver” navega a su ubicación. Si hay varias ubicaciones, se indica cuántas.
+- Los mazos muestran cuántas cartas quedan disponibles. Los resultados se muestran en tandas de 50 con carga progresiva y el texto de búsqueda se prepara al crear cada entrada.
+- Compilación de `:feature:draw:compileDebugKotlin --offline`: correcta.
+- Agregado un control para marcar o desmarcar de una vez los recursos seleccionables que están visibles en la lista; excluye los que ya están ubicados en la mesa.
+- Añadidos filtros guardados con nombre, etiquetas locales editables, previsualización de tablas/mazos y resultados de ejemplo de tablas.
+- La selección múltiple puede abarcar todos los resultados filtrados, marcar recursos como favoritos y elegir la carpeta de destino. Los bloques ya colocados pueden seleccionarse para moverlos a una carpeta, marcarlos favoritos o quitarlos de la vista sin borrar el recurso.
+- `SessionViewModel` ahora transmite el grupo destino al delegado del tablero para que las altas en lote respeten la carpeta elegida.
+- Compilación de `:feature:draw:compileDebugKotlin --offline` correcta e instalación de depuración completada en Motorola One Fusion.

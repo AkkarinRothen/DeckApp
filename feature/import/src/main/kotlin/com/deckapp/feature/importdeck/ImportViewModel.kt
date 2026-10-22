@@ -14,6 +14,67 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+data class PdfGridTemplate(
+    val id: String,
+    val name: String,
+    val subtitle: String,
+    val layoutMode: PdfLayoutMode,
+    val gridCols: Int,
+    val gridRows: Int,
+    val contentMode: CardContentMode,
+    val autoTrim: Boolean = true,
+    val splitRatio: Float = 0.5f
+)
+
+val PDF_PRESET_TEMPLATES = listOf(
+    PdfGridTemplate(
+        id = "3x3_alt",
+        name = "3×3 Alternado",
+        subtitle = "P&P Estándar (frente/dorso seguidos)",
+        layoutMode = PdfLayoutMode.ALTERNATING_PAGES,
+        gridCols = 3,
+        gridRows = 3,
+        contentMode = CardContentMode.DOUBLE_SIDED_FULL
+    ),
+    PdfGridTemplate(
+        id = "3x3_single",
+        name = "3×3 Solo Frente",
+        subtitle = "9 cartas por página, 1 cara",
+        layoutMode = PdfLayoutMode.GRID,
+        gridCols = 3,
+        gridRows = 3,
+        contentMode = CardContentMode.IMAGE_ONLY
+    ),
+    PdfGridTemplate(
+        id = "side_by_side_npc",
+        name = "Side-by-Side PNJ",
+        subtitle = "Mitad izq=arte, mitad der=texto",
+        layoutMode = PdfLayoutMode.SIDE_BY_SIDE,
+        gridCols = 1,
+        gridRows = 1,
+        contentMode = CardContentMode.DOUBLE_SIDED_FULL,
+        splitRatio = 0.5f
+    ),
+    PdfGridTemplate(
+        id = "1x1_full",
+        name = "1×1 Página Completa",
+        subtitle = "1 carta por página",
+        layoutMode = PdfLayoutMode.GRID,
+        gridCols = 1,
+        gridRows = 1,
+        contentMode = CardContentMode.IMAGE_ONLY
+    ),
+    PdfGridTemplate(
+        id = "first_half_backs",
+        name = "1ra Mitad / 2da Mitad",
+        subtitle = "Mitad frentes, mitad dorsos",
+        layoutMode = PdfLayoutMode.FIRST_HALF_FRONTS,
+        gridCols = 3,
+        gridRows = 3,
+        contentMode = CardContentMode.DOUBLE_SIDED_FULL
+    )
+)
+
 data class DeckImportUiState(
     val phase: DeckImportPhase = DeckImportPhase.SELECT_SOURCE,
     val source: DeckImportSource? = null,
@@ -25,8 +86,14 @@ data class DeckImportUiState(
     val pdfGridCols: Int = 3,
     val pdfGridRows: Int = 3,
     val pdfSkipPages: Int = 0,
+    val pdfStartPage: Int = 1,
+    val pdfEndPage: Int? = null,
+    val selectedTemplateId: String? = "3x3_alt",
     val pdfPreviewBitmap: android.graphics.Bitmap? = null,
     val pdfPageCount: Int = 0,
+    // Almacenamiento
+    val availableStorageBytes: Long? = null,
+    val storageWarning: String? = null,
     // Vista previa de cartas (máx 6 bitmaps en memoria)
     val previewCardBitmaps: List<android.graphics.Bitmap> = emptyList(),
     val isGeneratingPreview: Boolean = false,
@@ -143,7 +210,14 @@ class DeckImportViewModel @Inject constructor(
         // Obtener conteo de páginas en background
         viewModelScope.launch(Dispatchers.IO) {
             val count = fileRepository.getPdfPageCount(uri)
-            _uiState.update { it.copy(pdfPageCount = count) }
+            _uiState.update {
+                it.copy(
+                    pdfPageCount = count,
+                    pdfStartPage = 1,
+                    pdfEndPage = if (count > 0) count else null
+                )
+            }
+            checkStorage()
         }
     }
 
@@ -197,17 +271,28 @@ class DeckImportViewModel @Inject constructor(
                     ?: fileRepository.getPdfPageCount(uri)
                 val bitmaps = mutableListOf<android.graphics.Bitmap>()
                 val maxPreview = 6
-
                 val cols = state.pdfGridCols
                 val rows = state.pdfGridRows
-                val skip = state.pdfSkipPages
+                val startIdx = (state.pdfStartPage - 1).coerceAtLeast(0)
+                val requestedEnd = state.pdfEndPage?.let { it - 1 } ?: (pageCount - 1)
+                if (requestedEnd < startIdx || startIdx >= pageCount) {
+                    _uiState.update {
+                        it.copy(
+                            previewCardBitmaps = emptyList(),
+                            isGeneratingPreview = false,
+                            phase = DeckImportPhase.PREVIEW
+                        )
+                    }
+                    return@launch
+                }
+                val endIdx = requestedEnd.coerceAtMost(pageCount - 1)
                 val autoTrim = state.pdfAutoTrimCells
                 val splitRatio = state.pdfSideBySideSplitRatio
 
                 when (state.pdfLayoutMode) {
                     PdfLayoutMode.ALTERNATING_PAGES -> {
-                        // Mostrar frentes (páginas pares) con la grilla configurada
-                        outer@ for (page in skip until pageCount step 2) {
+                        // Mostrar frentes con la grilla configurada
+                        outer@ for (page in startIdx..endIdx step 2) {
                             for (row in 0 until rows) {
                                 for (col in 0 until cols) {
                                     if (bitmaps.size >= maxPreview) break@outer
@@ -222,7 +307,7 @@ class DeckImportViewModel @Inject constructor(
                     PdfLayoutMode.SIDE_BY_SIDE -> {
                         // Mostrar pares frente/dorso: izq = cols 0..cols-1, der = cols cols..2*cols-1
                         val totalCols = cols * 2
-                        outer@ for (page in skip until pageCount) {
+                        outer@ for (page in startIdx..endIdx) {
                             for (row in 0 until rows) {
                                 for (col in 0 until cols) {
                                     if (bitmaps.size >= maxPreview) break@outer
@@ -243,7 +328,7 @@ class DeckImportViewModel @Inject constructor(
                         }
                     }
                     PdfLayoutMode.GRID -> {
-                        outer@ for (page in skip until pageCount) {
+                        outer@ for (page in startIdx..endIdx) {
                             for (row in 0 until rows) {
                                 for (col in 0 until cols) {
                                     if (bitmaps.size >= maxPreview) break@outer
@@ -256,10 +341,10 @@ class DeckImportViewModel @Inject constructor(
                         }
                     }
                     PdfLayoutMode.FIRST_HALF_FRONTS -> {
-                        val remainingPages = pageCount - skip
-                        val half = remainingPages / 2
+                        val totalRange = endIdx - startIdx + 1
+                        val half = totalRange / 2
                         outer@ for (pageOffset in 0 until half) {
-                            val page = skip + pageOffset
+                            val page = startIdx + pageOffset
                             for (row in 0 until rows) {
                                 for (col in 0 until cols) {
                                     if (bitmaps.size >= maxPreview) break@outer
@@ -317,16 +402,89 @@ class DeckImportViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 pdfLayoutMode = mode,
-                defaultContentMode = if (shouldAutoChange) suggestedContent else currentContent
+                defaultContentMode = if (shouldAutoChange) suggestedContent else currentContent,
+                selectedTemplateId = null
             )
+        }
+        checkStorage()
+    }
+
+    fun updatePdfGridCols(cols: Int) {
+        _uiState.update { it.copy(pdfGridCols = cols.coerceAtLeast(1), selectedTemplateId = null) }
+        checkStorage()
+    }
+
+    fun updatePdfGridRows(rows: Int) {
+        _uiState.update { it.copy(pdfGridRows = rows.coerceAtLeast(1), selectedTemplateId = null) }
+        checkStorage()
+    }
+
+    fun updatePdfSkipPages(skip: Int) = _uiState.update { it.copy(pdfSkipPages = skip.coerceAtLeast(0)) }
+
+    fun updatePdfStartPage(page: Int) {
+        _uiState.update { it.copy(pdfStartPage = page.coerceAtLeast(1)) }
+        checkStorage()
+    }
+
+    fun updatePdfEndPage(page: Int?) {
+        _uiState.update { it.copy(pdfEndPage = page?.coerceAtLeast(1)) }
+        checkStorage()
+    }
+
+    fun resetPdfPageRange() {
+        val total = _uiState.value.pdfPageCount
+        _uiState.update { it.copy(pdfStartPage = 1, pdfEndPage = if (total > 0) total else null) }
+        checkStorage()
+    }
+
+    fun applyPdfTemplate(template: PdfGridTemplate) {
+        _uiState.update {
+            it.copy(
+                selectedTemplateId = template.id,
+                pdfLayoutMode = template.layoutMode,
+                pdfGridCols = template.gridCols,
+                pdfGridRows = template.gridRows,
+                defaultContentMode = template.contentMode,
+                pdfAutoTrimCells = template.autoTrim,
+                pdfSideBySideSplitRatio = template.splitRatio
+            )
+        }
+        checkStorage()
+    }
+
+    fun updatePdfAutoTrimCells(autoTrim: Boolean) = _uiState.update { it.copy(pdfAutoTrimCells = autoTrim) }
+    fun updatePdfSplitRatio(ratio: Float) = _uiState.update { it.copy(pdfSideBySideSplitRatio = ratio) }
+
+    fun checkStorage() {
+        viewModelScope.launch {
+            val available = fileRepository.getAvailableStorageBytes()
+            val state = _uiState.value
+            val estimatedCount = calculateEstimatedCards(state)
+            val estimatedBytes = estimatedCount * 350_000L
+            val warning = if (available < estimatedBytes && available < 150 * 1024 * 1024L) {
+                val availableMb = available / (1024 * 1024)
+                val requiredMb = (estimatedBytes / (1024 * 1024)).coerceAtLeast(1)
+                "Espacio de almacenamiento bajo: tienes ${availableMb} MB libres y se estiman ~${requiredMb} MB requeridos."
+            } else null
+            _uiState.update { it.copy(availableStorageBytes = available, storageWarning = warning) }
         }
     }
 
-    fun updatePdfGridCols(cols: Int) = _uiState.update { it.copy(pdfGridCols = cols.coerceAtLeast(1)) }
-    fun updatePdfGridRows(rows: Int) = _uiState.update { it.copy(pdfGridRows = rows.coerceAtLeast(1)) }
-    fun updatePdfSkipPages(skip: Int) = _uiState.update { it.copy(pdfSkipPages = skip.coerceAtLeast(0)) }
-    fun updatePdfAutoTrimCells(autoTrim: Boolean) = _uiState.update { it.copy(pdfAutoTrimCells = autoTrim) }
-    fun updatePdfSplitRatio(ratio: Float) = _uiState.update { it.copy(pdfSideBySideSplitRatio = ratio) }
+    fun calculateEstimatedCards(state: DeckImportUiState): Int {
+        if (state.source != DeckImportSource.PDF) return 0
+        val pageCount = state.pdfPageCount
+        if (pageCount <= 0) return 0
+        val startIdx = (state.pdfStartPage - 1).coerceAtLeast(0)
+        val requestedEnd = state.pdfEndPage?.let { it - 1 } ?: (pageCount - 1)
+        if (requestedEnd < startIdx || startIdx >= pageCount) return 0
+        val endIdx = requestedEnd.coerceAtMost(pageCount - 1)
+        val rangePages = endIdx - startIdx + 1
+        val effectivePages = when (state.pdfLayoutMode) {
+            PdfLayoutMode.ALTERNATING_PAGES, PdfLayoutMode.FIRST_HALF_FRONTS -> rangePages / 2
+            else -> rangePages
+        }
+        return effectivePages.coerceAtLeast(0) * state.pdfGridCols * state.pdfGridRows
+    }
 
     fun startImport() {
         val state = _uiState.value
@@ -339,19 +497,15 @@ class DeckImportViewModel @Inject constructor(
             // Calculate total items for better progress reporting
             val total = when (state.source) {
                 DeckImportSource.FOLDER -> fileRepository.listImagesInFolder(uri).size
-                DeckImportSource.PDF -> {
-                    val pages = if (state.pdfPageCount > 0) state.pdfPageCount else fileRepository.getPdfPageCount(uri)
-                    val effectivePages = when (state.pdfLayoutMode) {
-                        PdfLayoutMode.ALTERNATING_PAGES, PdfLayoutMode.FIRST_HALF_FRONTS -> (pages - state.pdfSkipPages) / 2
-                        else -> pages - state.pdfSkipPages
-                    }
-                    effectivePages.coerceAtLeast(0) * state.pdfGridCols * state.pdfGridRows
-                }
+                DeckImportSource.PDF -> calculateEstimatedCards(state)
                 else -> 0
             }
             _uiState.update { it.copy(totalItemsToImport = total) }
 
             val failedFiles = mutableListOf<String>()
+            val startIdx = (state.pdfStartPage - 1).coerceAtLeast(0)
+            val endIdx = state.pdfEndPage?.let { (it - 1).coerceAtLeast(0) }
+
             importDeckUseCase(
                 uri = uri,
                 deckName = state.deckName,
@@ -361,6 +515,8 @@ class DeckImportViewModel @Inject constructor(
                 pdfGridCols = state.pdfGridCols,
                 pdfGridRows = state.pdfGridRows,
                 pdfSkipPages = state.pdfSkipPages,
+                pdfStartPage = startIdx,
+                pdfEndPage = endIdx,
                 pdfAutoTrimCells = state.pdfAutoTrimCells,
                 pdfSplitRatio = state.pdfSideBySideSplitRatio,
                 onProgress = { progress, count ->

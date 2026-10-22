@@ -94,7 +94,7 @@ val BoardCentralTool = SessionCentralConnector(
             isEditing = isBoardEditMode,
             onToggleEditing = { isBoardEditMode = !isBoardEditMode },
             onAddBlock = { type, resourceId, targetGroupId ->
-                viewModel.addBoardBlock(type = type, resourceId = resourceId)
+                viewModel.addBoardBlock(type = type, resourceId = resourceId, targetGroupId = targetGroupId)
             },
             onCreateClock = viewModel::createClockAndAddToBoard,
             onTickClock = viewModel::tickClock,
@@ -150,6 +150,7 @@ val BoardCentralTool = SessionCentralConnector(
             onMergeItems = viewModel::mergeBoardItems,
             deckRefs = uiState.deckRefs,
             deckNames = uiState.deckNames,
+            allDecks = uiState.allDecks,
             handByDeck = uiState.handByDeck,
             deckCardCounts = uiState.deckCardCounts,
             deckAspectRatios = uiState.deckAspectRatios,

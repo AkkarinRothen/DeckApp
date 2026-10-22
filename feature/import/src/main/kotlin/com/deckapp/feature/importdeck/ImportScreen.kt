@@ -18,6 +18,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.Inventory2
@@ -126,6 +130,10 @@ fun ImportScreen(
                     onPdfGridColsChange = { viewModel.updatePdfGridCols(it) },
                     onPdfGridRowsChange = { viewModel.updatePdfGridRows(it) },
                     onPdfSkipPagesChange = { viewModel.updatePdfSkipPages(it) },
+                    onPdfStartPageChange = { viewModel.updatePdfStartPage(it) },
+                    onPdfEndPageChange = { viewModel.updatePdfEndPage(it) },
+                    onResetPdfPageRange = { viewModel.resetPdfPageRange() },
+                    onApplyPdfTemplate = { viewModel.applyPdfTemplate(it) },
                     onPdfAutoTrimCellsChange = { viewModel.updatePdfAutoTrimCells(it) },
                     onPdfSplitRatioChange = { viewModel.updatePdfSplitRatio(it) },
                     // Para PDF → vista previa antes de importar
@@ -138,10 +146,12 @@ fun ImportScreen(
                     bitmaps = uiState.previewCardBitmaps,
                     isLoading = uiState.isGeneratingPreview,
                     pageCount = uiState.pdfPageCount,
-                    skipPages = uiState.pdfSkipPages,
+                    startPage = uiState.pdfStartPage,
+                    endPage = uiState.pdfEndPage ?: (if (uiState.pdfPageCount > 0) uiState.pdfPageCount else 1),
                     gridCols = uiState.pdfGridCols,
                     gridRows = uiState.pdfGridRows,
                     layoutMode = uiState.pdfLayoutMode,
+                    estimatedCards = viewModel.calculateEstimatedCards(uiState),
                     onConfirm = { viewModel.startImport() },
                     onBack = { viewModel.backToConfigure() }
                 )
@@ -247,6 +257,10 @@ private fun ConfigurePhase(
     onPdfGridColsChange: (Int) -> Unit,
     onPdfGridRowsChange: (Int) -> Unit,
     onPdfSkipPagesChange: (Int) -> Unit,
+    onPdfStartPageChange: (Int) -> Unit,
+    onPdfEndPageChange: (Int?) -> Unit,
+    onResetPdfPageRange: () -> Unit,
+    onApplyPdfTemplate: (PdfGridTemplate) -> Unit,
     onPdfAutoTrimCellsChange: (Boolean) -> Unit,
     onPdfSplitRatioChange: (Float) -> Unit,
     onPreview: () -> Unit,
@@ -281,6 +295,71 @@ private fun ConfigurePhase(
     // PDF layout config
     if (uiState.source == DeckImportSource.PDF) {
         HorizontalDivider()
+
+        // Advertencia de almacenamiento si queda poco espacio
+        uiState.storageWarning?.let { warning ->
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Warning,
+                        contentDescription = "Alerta",
+                        tint = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                    Text(
+                        warning,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
+            }
+        }
+
+        // Plantillas rápidas de rejilla
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Icon(
+                    Icons.Default.AutoAwesome,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    "Plantillas rápidas de rejilla",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(vertical = 4.dp)
+            ) {
+                items(PDF_PRESET_TEMPLATES) { template ->
+                    val isSelected = uiState.selectedTemplateId == template.id
+                    FilterChip(
+                        selected = isSelected,
+                        onClick = { onApplyPdfTemplate(template) },
+                        label = { Text(template.name) },
+                        leadingIcon = if (isSelected) {
+                            { Icon(Icons.Default.AutoAwesome, null, modifier = Modifier.size(14.dp)) }
+                        } else null
+                    )
+                }
+            }
+        }
+
         Text("Layout del PDF", style = MaterialTheme.typography.labelLarge)
 
         uiState.pdfPreviewBitmap?.let { bitmap ->
@@ -404,24 +483,69 @@ private fun ConfigurePhase(
         )
 
         Spacer(Modifier.height(8.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+
+        // Selector de rango de páginas ergonómico
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            ),
+            modifier = Modifier.fillMaxWidth()
         ) {
-            NumberField(
-                value = uiState.pdfSkipPages,
-                onValueChange = onPdfSkipPagesChange,
-                label = "Saltar páginas",
-                modifier = Modifier.weight(0.5f),
-                min = 0
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(
-                "Utilidad para saltear portadas o índices al inicio del PDF.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.weight(0.5f)
-            )
+            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        "Rango de páginas a procesar",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    if (uiState.pdfPageCount > 0) {
+                        TextButton(
+                            onClick = onResetPdfPageRange,
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                        ) {
+                            Text("Todas (1..${uiState.pdfPageCount})", style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
+
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    NumberField(
+                        value = uiState.pdfStartPage,
+                        onValueChange = onPdfStartPageChange,
+                        label = "Desde pág.",
+                        modifier = Modifier.weight(1f),
+                        min = 1
+                    )
+                    NumberField(
+                        value = uiState.pdfEndPage ?: (if (uiState.pdfPageCount > 0) uiState.pdfPageCount else 1),
+                        onValueChange = onPdfEndPageChange,
+                        label = "Hasta pág.",
+                        modifier = Modifier.weight(1f),
+                        min = 1
+                    )
+                }
+
+                val start = uiState.pdfStartPage
+                val end = uiState.pdfEndPage ?: uiState.pdfPageCount
+                if (end > 0 && start > end) {
+                    Text(
+                        "La página inicial no puede ser mayor que la página final.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                } else {
+                    val totalRange = if (end > 0) (end - start + 1).coerceAtLeast(0) else 0
+                    Text(
+                        "Páginas $start a $end ($totalRange pág${if (totalRange != 1) "s" else ""}) seleccionadas para extracción.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
 
         Spacer(Modifier.height(4.dp))
@@ -553,31 +677,25 @@ private fun PreviewPhase(
     bitmaps: List<android.graphics.Bitmap>,
     isLoading: Boolean,
     pageCount: Int,
-    skipPages: Int,
+    startPage: Int,
+    endPage: Int,
     gridCols: Int,
     gridRows: Int,
     layoutMode: PdfLayoutMode,
+    estimatedCards: Int,
     onConfirm: () -> Unit,
     onBack: () -> Unit
 ) {
-    val effectivePageCount = (pageCount - skipPages).coerceAtLeast(0)
+    val totalRange = (endPage - startPage + 1).coerceAtLeast(0)
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("Vista previa de cartas", style = MaterialTheme.typography.titleMedium)
 
-        // Estimado de cartas totales (todas las grillas usan gridCols×gridRows)
-        val cardsPerPage = gridCols * gridRows
-        val estimatedTotal = when (layoutMode) {
-            PdfLayoutMode.ALTERNATING_PAGES -> ((effectivePageCount + 1) / 2) * cardsPerPage
-            PdfLayoutMode.SIDE_BY_SIDE      -> effectivePageCount * cardsPerPage
-            PdfLayoutMode.GRID              -> effectivePageCount * cardsPerPage
-            PdfLayoutMode.FIRST_HALF_FRONTS -> (effectivePageCount / 2) * cardsPerPage
-        }
         val previewNote = when {
             layoutMode == PdfLayoutMode.SIDE_BY_SIDE ->
-                "Pares: imagen (frente) + descripción (dorso). ~$estimatedTotal cartas estimadas."
+                "Páginas $startPage a $endPage ($totalRange pág${if (totalRange != 1) "s" else ""}). Pares frente/dorso. ~$estimatedCards cartas estimadas."
             else ->
-                "Mostrando las primeras ${bitmaps.size} de ~$estimatedTotal cartas estimadas."
+                "Páginas $startPage a $endPage ($totalRange pág${if (totalRange != 1) "s" else ""}). Mostrando las primeras ${bitmaps.size} de ~$estimatedCards cartas estimadas."
         }
         Text(
             previewNote,
@@ -627,7 +745,7 @@ private fun PreviewPhase(
             modifier = Modifier.fillMaxWidth(),
             enabled = !isLoading
         ) {
-            Text("Importar ($estimatedTotal cartas aprox.)")
+            Text("Importar ($estimatedCards cartas aprox.)")
         }
         DeckOutlinedButton(
             onClick = onBack,
