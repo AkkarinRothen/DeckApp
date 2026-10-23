@@ -49,6 +49,7 @@ import com.deckapp.core.domain.usecase.GlobalSearchResultType
 @Composable
 fun DeckAppNavHost(
     startPage: StartPage = StartPage.LIBRARY,
+    startSessionId: Long? = null,
     quickNoteViewModel: QuickNoteViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
@@ -82,6 +83,7 @@ fun DeckAppNavHost(
             GlobalSearchOverlay(
                 onNavigateToResult = { result ->
                     when (result.type) {
+                        GlobalSearchResultType.CARD -> navController.navigate(CardViewRoute(cardId = result.id))
                         GlobalSearchResultType.TABLE -> navController.navigate(ReferenceTableEditorRoute(tableId = result.id))
                         GlobalSearchResultType.RULE -> navController.navigate(RuleEditorRoute(ruleId = result.id))
                         GlobalSearchResultType.MANUAL -> navController.navigate(ManualViewerRoute(manualId = result.id))
@@ -155,7 +157,7 @@ fun DeckAppNavHost(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = when (startPage) {
+            startDestination = startSessionId?.let(::SessionRoute) ?: when (startPage) {
                 StartPage.LIBRARY -> LibraryRoute
                 StartPage.SESSIONS -> SessionListRoute
                 StartPage.REFERENCES -> ReferenceListRoute
@@ -166,8 +168,8 @@ fun DeckAppNavHost(
                 LibraryScreen(
                     onDeckClick = { id -> navController.navigate(DeckDetailRoute(deckId = id)) },
                     onImportClick = { navController.navigate(ImportRoute) },
-                    onManageTags = { /* TODO */ },
-                    onAddToSession = { id -> /* TODO */ },
+                    onManageTags = { navController.navigate(TagManagerRoute) },
+                    onAddToSession = { id -> navController.navigate(SessionSetupRoute(preselectedDeckId = id)) },
                     onEncounterLibrary = { navController.navigate(EncounterListRoute) },
                     onNpcLibrary = { navController.navigate(NpcListRoute) },
                     onWikiClick = { navController.navigate(WikiRoute) },
@@ -182,6 +184,10 @@ fun DeckAppNavHost(
                     onBack = { navController.popBackStack() },
                     onImportSuccess = { id -> navController.navigate(DeckDetailRoute(id)) }
                 )
+            }
+
+            composable<TagManagerRoute> {
+                TagManagerScreen(onBack = { navController.popBackStack() })
             }
 
             composable<DeckDetailRoute> {

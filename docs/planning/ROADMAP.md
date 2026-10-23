@@ -8,10 +8,12 @@
 
 ---
 
-## Estado actual del proyecto (21 de octubre de 2026)
+## Estado actual del proyecto (22 de octubre de 2026)
 
 ### ✅ Implementado y funcional (Actualizado Octubre 2026)
 - **Playmat 2D Híbrido:** Superficies múltiples, colocación/rotación/volteo de cartas, tokens con HP y anillos de color, relojes de progreso, hilos narrativos, cuadrículas tácticas y battlemaps.
+- **Mesa de sesión adaptable:** El layout se organiza por ancho disponible para ventanas compactas, medianas y expandidas; paneles y navegación se ajustan sin cambiar el estado del tablero.
+- **Widget de sesión:** Glance permite vincular cada instancia a una sesión activa y abrirla directamente. Si no hay sesión activa, el widget puede quedar instalado y enlaza con la lista de sesiones.
 - **Bitácora de Sesión en Vivo (`SessionLogEntry`) & Notas Rápidas (`SessionNote`):** Room v49 con persistencia reactiva, captura automática de eventos de dados, cartas, tokens, oráculos y relojes; drawer lateral con editor Markdown y atajos de un toque.
 - **Ergonomía de Mesa:** Modo Zen inmersivo (1-tap toggle) y Toolbar superior categórica (Mundo, Entidades, Mesa).
 - Import desde carpeta SAF (imágenes → cartas, auto-detect de metadata de filename), ZIP (import/export), y PDF import con **PdfiumAndroid** (4 modos de layout, grilla configurable, auto-trim).
@@ -19,6 +21,8 @@
 - SessionScreen multi-tab con dados 3D, oráculos Mythic y generador Choir.
 - Room con migraciones blindadas sin pérdida destructiva (v1 → v49).
 - Búsqueda global de sesión y biblioteca, catálogo de tablas bundled e importación OCR/CSV/JSON.
+- **Biblioteca de NPCs:** búsqueda por nombre/descripción y filtros por NPC/monstruo y etiquetas, con estado sin coincidencias y limpieza de filtros.
+- **Actualizador Android:** consulta opcional de GitHub Releases, descarga con progreso y apertura del instalador del sistema; la publicación aún requiere un release APK con firma estable.
 
 ### 🎯 Plan Priorizado de UX y Mesa (Auditoría 17/10/2026 - En Ejecución)
 - **Fase 1 (P0):** Hacer usable la mesa en todos los tamaños (Layout adaptable vertical/horizontal, franja Slim adaptativa de contexto ~36dp sin solapar contenido, y selector de herramientas unificado por categorías).
@@ -38,16 +42,15 @@
 | A-3 | Índices en tablas cross-ref de tags (`card_tags`, `card_stack_tags`) | 🟡 | ★ | ✅ Hecho (Sprint 11) |
 | A-4 | Compresión de imagen configurable en import | 🟡 | ★ | ✅ Hecho (Sprint 11) — Settings: Alta/Media/Baja |
 | A-5 | Manejo de errores visible en Import (fallo de archivo individual) | 🟡 | ★ | ✅ Hecho (Sprint 11) — `failedFiles` en `ImportUiState` |
-| A-6 | Export ZIP de mazo desde `DeckDetailScreen` overflow | 🟡 | ★ | ⏳ UseCase existe, falta el botón en la UI |
-| A-7 | Progress bar de almacenamiento por mazo en `SettingsScreen` | 🟢 | ★ | ⏳ Pendiente |
+| A-6 | Export ZIP de mazo desde `DeckDetailScreen` overflow | 🟡 | ★ | ✅ Hecho — exportación de ZIP/JSON desde el menú de detalle |
+| A-7 | Progress bar de almacenamiento por mazo en `SettingsScreen` | 🟢 | ★ | ✅ Hecho — desglose de almacenamiento por mazo en Ajustes |
 
 ---
 
 ## B — Features Pendientes del Plan Original
 
-### B-1 — Historial de sesión (SessionHistoryScreen) 🔴 ★★
-La pantalla `SessionHistoryScreen` existe en el módulo pero es un stub. El `DrawEvent` log
-ya contiene toda la información necesaria.
+### B-1 — Historial de sesión (SessionHistoryScreen) ✅ Hecho
+La pantalla implementa una línea de tiempo de eventos, filtros y estadísticas; se registran acciones de juego y eventos adicionales de sesión.
 
 **Comportamiento esperado:**
 - Accesible desde el listado de sesiones → tap en sesión finalizada
@@ -58,7 +61,7 @@ ya contiene toda la información necesaria.
 
 ---
 
-### B-2 — Modo boca abajo al robar (Face Down Draw) 🔴 ★
+### B-2 — Modo boca abajo al robar (Face Down Draw) ✅ Hecho
 Robar una carta pero mostrarla tapada (se ve el dorso) hasta que el DM la toca para revelarla.
 Muy común en mecánicas de sorpresa/misterio.
 
@@ -77,7 +80,7 @@ Muy común en mecánicas de sorpresa/misterio.
 
 ---
 
-### B-3 — Imagen de dorso por mazo 🔴 ★
+### B-3 — Imagen de dorso por mazo ✅ Hecho
 Actualmente no hay forma de asignar una imagen de dorso global a un mazo.
 Es esencial para el modo Face Down y para la presentación visual general.
 
@@ -99,7 +102,7 @@ Es esencial para el modo Face Down y para la presentación visual general.
 
 ---
 
-### B-5 — Spread layout Tarokka (posiciones nombradas) 🟡 ★★★
+### B-5 — Spread layout Tarokka (posiciones nombradas) ✅ Hecho (octubre 2026)
 Layout visual de una tirada de Tarokka (Cruz de 5 posiciones) en `SessionScreen`.
 
 **Comportamiento esperado:**
@@ -109,11 +112,11 @@ Layout visual de una tirada de Tarokka (Cruz de 5 posiciones) en `SessionScreen`
 - Cada posición tiene etiqueta y puede mostrarse boca abajo (revelar individualmente)
 - Vista de resumen de la tirada completa
 
-**Alcance Fase 3** — requiere diseño UI propio.
+**Hecho:** el bloque de mazo Tarokka muestra las cinco posiciones, permite robar una carta por vez, revelar individualmente y empezar otra tirada con confirmación. La asignación se conserva en la memoria de la sesión.
 
 ---
 
-### B-6 — Clonar sesión (reusar configuración) 🟡 ★
+### B-6 — Clonar sesión (reusar configuración) ✅ Hecho
 Crear una nueva sesión con los mismos mazos que una sesión anterior.
 Muy útil para campañas con sesiones recurrentes.
 
@@ -143,13 +146,12 @@ Actualmente las cartas se muestran en orden `sortOrder`.
 
 **Estado:**
 - [x] **Biblioteca (Mazos y Tablas)**: Implementado reordenamiento persistente (Sprint 26).
-- [ ] **DeckDetail (Cartas individuales)**: Pendiente (Sprint 27).
+- [x] **DeckDetail (Cartas individuales)**: Reordenamiento persistente con arrastre y controles de paso; modo dedicado para evitar movimientos accidentales.
 
 ---
 
-### C-2 — Panel de configuración del mazo en DeckDetail 🔴 ★★
-Actualmente no hay forma de cambiar el `DrawMode`, el `defaultContentMode`, ni la imagen de dorso
-de un mazo existente desde la UI.
+### C-2 — Panel de configuración del mazo en DeckDetail ✅ Hecho
+La `DeckConfigSheet` permite configurar el modo de robo, el contenido predeterminado, el dorso y otros ajustes del mazo.
 
 **Comportamiento esperado:**
 - Nuevo ítem "Configurar mazo" en el DropdownMenu de DeckDetailScreen
@@ -174,18 +176,22 @@ Paul Weber donde hay categorías (Monsters, Items, Spells).
 - Tap en chip → filtra la cuadrícula al palo seleccionado
 - Chip "Todos" siempre presente
 
+✅ **Hecho** — DeckDetail genera los filtros desde los palos presentes y permite volver a “Todos”. El reordenamiento se desactiva mientras hay un filtro aplicado.
+
 ---
 
 ### C-4 — Snackbar con opción "Deshacer borrado" de mazo/carta 🟡 ★
-Actualmente el borrado es inmediato e irreversible (con confirmación, pero sin recuperación).
+El borrado requiere confirmación y ahora ofrece una ventana breve para recuperarlo.
 
 **Comportamiento esperado:**
 - Al borrar un mazo: mostrar Snackbar con botón "Deshacer" (5 segundos)
-- Si el DM toca "Deshacer" antes del timeout: restaurar el mazo y sus imágenes
+- Si el DM toca "Deshacer" antes del timeout: cancelar la eliminación y conservar el mazo, sus cartas e imágenes
 - Si el timeout expira: confirmar la eliminación definitiva
 
 **Implementación:** diferir la eliminación real al cierre del Snackbar, cancelar el Job si
 el DM pulsa deshacer.
+
+✅ **Hecho** — Carta o mazo queda pendiente durante cinco segundos; el borrado de archivos y datos solo se ejecuta al vencer el plazo. “Deshacer” cancela la operación.
 
 ---
 
@@ -195,6 +201,8 @@ Visual feedback cuando el DM baraja el mazo (shuffle).
 **Comportamiento esperado:**
 - Al llamar a "Barajar mazo": animación de 2-3 cartas del mazo superpuestas que se mezclan
 - Opcional: sonido de barajar (AudioManager o SoundPool, silenciable)
+
+✅ **Hecho** — Los controles grandes del bloque de mazo animan tres cartas durante el barajado, la recuperación del descarte y el reinicio. El sonido queda opcional y no se incorporó.
 
 ---
 
@@ -206,27 +214,34 @@ Desde `CardViewScreen`, opción de compartir la imagen de la cara activa como JP
 - Usa `FileProvider` + `Intent.ACTION_SEND` con `image/jpeg`
 - Comparte la imagen sin metadata del DM
 
+✅ **Hecho** — CardView comparte la imagen de la cara activa como JPEG rasterizado mediante el selector del sistema. La opción se desactiva con la carta oculta o si la cara no tiene imagen.
+
+### C-7 — Búsqueda y filtros en biblioteca de NPCs ✅ Hecho (octubre 2026)
+La biblioteca permite buscar por nombre o descripción y filtrar entre NPCs y monstruos, además de filtrar por etiquetas presentes. Cuando no hay coincidencias, ofrece limpiar los filtros.
+
+### C-8 — Búsqueda global de cartas ✅ Hecho (octubre 2026)
+El buscador global consulta cartas mediante el índice FTS existente, abre el resultado directamente y aplica debounce/cancelación para evitar consultas repetidas mientras se escribe. Los resultados están limitados para mantener fluida la vista.
+
+### C-9 — Importación por lotes de PDFs ✅ Hecho (octubre 2026)
+Permite seleccionar varios PDFs, revisar una previsualización del primero y aplicar el mismo layout a todos. Cada archivo crea su propio mazo; se procesa secuencialmente, limita el rango de páginas al tamaño de cada PDF y reporta fallos individuales.
+
 ---
 
 ## D — Features Nuevas (no estaban en el plan original)
 
-### D-1 — Notas de DM 🔴 ★★★
-`Session.dmNotes: String?` existe en el modelo. Plan completo en `DM_NOTES.md`.
-Roadmap en 3 fases: notas por sesión → notas por carta + Quick Notes → diario de campaña completo.
+### D-1 — Notas de DM ✅ Hecho
+Notas por sesión, notas por carta, Quick Notes y diario de campaña están implementados.
 
 ---
 
-### D-2 — Modo "Carta aleatoria" con filtro de palo 🟡 ★
+### D-2 — Modo "Carta aleatoria" con filtro de palo ✅ Hecho (octubre 2026)
 Robar una carta aleatoria de un palo específico sin cambiar el DrawMode global.
 
-**Comportamiento esperado:**
-- En el overflow del mazo en `SessionScreen`: "Robar al azar por palo…"
-- BottomSheet con chips de palos disponibles en el mazo seleccionado
-- Roba una carta aleatoria del palo elegido que esté disponible
+**Hecho:** acción "Robar por palo" en el bloque de cada mazo y selector con los palos que aún tienen cartas. El robo comparte la lógica normal de orientación, estado boca abajo e historial, y no altera el modo de robo del mazo.
 
 ---
 
-### D-3 — Timer de sesión 🟡 ★
+### D-3 — Timer de sesión ✅ Hecho
 Mostrar el tiempo transcurrido desde el inicio de la sesión activa.
 
 **Comportamiento esperado:**
@@ -236,7 +251,7 @@ Mostrar el tiempo transcurrido desde el inicio de la sesión activa.
 
 ---
 
-### D-4 — Backup y restauración de la biblioteca 🔴 ★★
+### D-4 — Backup y restauración de la biblioteca ✅ Hecho
 Crear una copia de seguridad completa de todos los mazos importados.
 
 **Comportamiento esperado:**
@@ -248,16 +263,18 @@ Crear una copia de seguridad completa de todos los mazos importados.
 
 ---
 
-### D-5 — Widget de Android para sesión activa 🟢 ★★★
-Glance widget (API de widgets de Compose para Android) en la pantalla de inicio.
+### D-5 — Widget de Android para sesión activa ✅ Hecho (octubre 2026)
+Glance widget configurable por instancia, con acceso a la sesión elegida y actualización del nombre/estado mientras la app está abierta.
 
 **Contenido del widget:**
 - Nombre de la sesión activa
-- Contadores de cartas disponibles
-- Botón "ROBAR" que abre la app directamente en `SessionScreen`
-- Se oculta cuando no hay sesión activa
+- Tap para abrir la sesión enlazada y acción para cambiarla
+- Estado vacío que permite abrir la lista de sesiones
 
-**Aplica a Fase 3.** Requiere `androidx.glance:glance-appwidget`.
+**Hecho:** cada widget permite elegir una sesión activa. Si la sesión termina o se elimina, ofrece vincular otra; si se configura sin sesiones activas, puede abrir la lista de sesiones.
+
+### D-6 — Layout adaptable de la mesa por ancho ✅ Hecho (octubre 2026)
+La pantalla de sesión distingue ventanas compactas, medianas y expandidas por ancho disponible. Los layouts medianos usan una columna de herramientas más estrecha y los paneles compactos aprovechan mejor ventanas de poca altura.
 
 ---
 
@@ -268,7 +285,7 @@ Glance widget (API de widgets de Compose para Android) en la pantalla de inicio.
 | E-1 | **¿Sincronización en la nube?** | Supabase ya conocido del proyecto TDAPP. Permitiría continuar en tableta + teléfono. | (a) No, storage local siempre. (b) Supabase opt-in en Fase 3. (c) Backup/restore manual (D-4) como sustituto. |
 | E-2 | **¿Nombre definitivo de la app?** | "DeckApp" es genérico. El package es `com.deckapp.ttrpg`. | Opciones a considerar: *Arcana*, *Vault* (TTRPG Vault), *TableDeck*, *Grimoire*, *Spellbook*... |
 | E-3 | **¿Target mínimo API 26 o subir a API 28?** | API 26 = Android 8.0 (2017). API 28 = Android 9.0 (2018). | Subir a 28 permite `NotificationChannel` simplificado y mejoras de seguridad en file access. |
-| E-4 | **¿Soporte de orientación horizontal en SessionScreen?** | En tablets o teléfonos en landscape, la mano horizontal queda muy estrecha verticalmente. | (a) Forzar portrait siempre (simple). (b) Layout adaptativo (complejo). (c) Config por sesión. |
+| E-4 | **¿Soporte de orientación horizontal en SessionScreen?** | ✅ Resuelto con layout adaptable por ancho disponible, sin guardar una disposición distinta por orientación. |
 | E-5 | **¿Procesamiento de PDF en foreground Worker o en coroutine?** | Actualmente el import se describe como WorkManager pero el codigo usa coroutines directas. | Resolver antes de mazos grandes (>100 páginas) donde el import puede tardar varios minutos. |
 
 ---
@@ -298,7 +315,9 @@ Glance widget (API de widgets de Compose para Android) en la pantalla de inicio.
 
 ---
 
-## Próximos Sprints
+## Planes de sprint originales (histórico; revisar antes de reutilizar)
+
+> La planificación que sigue se redactó en abril de 2026 y contiene funciones que desde entonces se completaron. El backlog vigente es el estado por sección de este documento y `docs/planning/IDEAS_MEJORAS.md`.
 
 Sprint 17 — Encuentros y Combat Tracker (17 de abril de 2026) ✅
   · Modelo Encounter + EncounterCreature en :core:model
@@ -350,4 +369,4 @@ Sprint 25 — Mecánicas Narrativas 🟢 ★★★
 
 ---
 
-*Última actualización: 17 de abril de 2026*
+*Última actualización: 22 de octubre de 2026*

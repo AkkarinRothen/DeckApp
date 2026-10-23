@@ -52,7 +52,7 @@ fun BoardGroupCard(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(if (isEditing) 110.dp else 126.dp)
+        .height(if (isEditing) 110.dp else 126.dp)
             .onGloballyPositioned { onBoundsChanged(it.boundsInRoot()) },
         shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surface,

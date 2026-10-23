@@ -24,6 +24,7 @@ data class Session(
     val tensionClocks: List<TensionClock> = emptyList()
 )
 
+@kotlinx.serialization.Serializable
 enum class SessionBoardItemType {
     TABLE,
     NOTES,
@@ -39,15 +40,18 @@ enum class SessionBoardItemType {
     MICROSETTING
 }
 
+@kotlinx.serialization.Serializable
 enum class SessionBoardItemSize {
     S, M, L
 }
 
+@kotlinx.serialization.Serializable
 enum class SessionBoardLayoutMode {
     GRID,
     LIST
 }
 
+@kotlinx.serialization.Serializable
 enum class SessionBoardView {
     MAIN,
     EXPLORATION,
@@ -99,6 +103,7 @@ fun SessionBoardView.defaultLabel(): String = when (this) {
     SessionBoardView.COMBAT -> "Combate"
 }
 
+@kotlinx.serialization.Serializable
 data class SessionBoardGroup(
     val id: Long = 0,
     val sessionId: Long,
@@ -113,6 +118,7 @@ data class SessionBoardGroup(
     val createdAt: Long = System.currentTimeMillis()
 )
 
+@kotlinx.serialization.Serializable
 data class SessionBoardItem(
     val id: Long = 0,
     val sessionId: Long,

@@ -470,7 +470,7 @@ class HexMapSessionViewModel @Inject constructor(
                 GlobalSearchResultType.TABLE -> {
                     autoRoll(result.id, "Tabla en hex ($q,$r)")
                 }
-                GlobalSearchResultType.MANUAL, GlobalSearchResultType.RULE, GlobalSearchResultType.WIKI -> {
+                GlobalSearchResultType.CARD, GlobalSearchResultType.MANUAL, GlobalSearchResultType.RULE, GlobalSearchResultType.WIKI -> {
                     // Crear un POI Landmark que sirva de acceso directo
                     val poi = HexPoi(
                         mapId = mapId,

@@ -45,6 +45,8 @@ import com.deckapp.core.model.SessionBoardItemType
 import com.deckapp.core.model.SessionBoardView
 import com.deckapp.core.model.SessionBoardViewLabels
 import com.deckapp.core.model.SessionDeckRef
+import com.deckapp.core.model.CardSpread
+import com.deckapp.core.model.CardSpreadResult
 import com.deckapp.core.model.TableRollResult
 import com.deckapp.core.model.TensionClock
 import com.deckapp.core.model.WikiEntry
@@ -114,6 +116,11 @@ internal fun SessionBoardPagerContent(
     deckAspectRatios: Map<Long, CardAspectRatio>,
     deckBackImages: Map<Long, String?>,
     onDrawCardFromDeck: (Long) -> Unit,
+    onOpenDrawBySuit: (Long) -> Unit,
+    spreadResultsByDeck: Map<Long, CardSpreadResult>,
+    onDrawSpread: (Long, CardSpread) -> Unit,
+    onClearSpread: (Long) -> Unit,
+    onSaveSpreadToNotes: (CardSpreadResult) -> Unit,
     onShuffleDeck: (Long) -> Unit,
     onShuffleOnly: (Long) -> Unit = onShuffleDeck,
     onShuffleDiscards: (Long) -> Unit = onShuffleDeck,
@@ -297,6 +304,11 @@ internal fun SessionBoardPagerContent(
             onReconnoiterTile = onReconnoiterTile,
             onMapTile = onMapTile,
             onDrawCardFromDeck = onDrawCardFromDeck,
+            onOpenDrawBySuit = onOpenDrawBySuit,
+            spreadResultsByDeck = spreadResultsByDeck,
+            onDrawSpread = onDrawSpread,
+            onClearSpread = onClearSpread,
+            onSaveSpreadToNotes = onSaveSpreadToNotes,
             onShuffleDeck = onShuffleDeck,
             onShuffleOnly = onShuffleOnly,
             onShuffleDiscards = onShuffleDiscards,

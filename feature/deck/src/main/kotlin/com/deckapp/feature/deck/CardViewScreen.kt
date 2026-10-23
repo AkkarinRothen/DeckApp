@@ -1,6 +1,8 @@
 package com.deckapp.feature.deck
 
 import android.app.Activity
+import android.content.ClipData
+import android.content.Intent
 import android.view.WindowManager
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -25,6 +27,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.ViewStream
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -53,6 +56,7 @@ import com.deckapp.core.ui.components.MarkdownToolbar
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.material.icons.filled.Check
 import java.io.File
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -62,6 +66,10 @@ fun CardViewScreen(
     viewModel: CardViewViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    var isSharingImage by remember { mutableStateOf(false) }
 
     // Estado local: cuadrante seleccionado en modo FOUR_QUADRANT
     var selectedQuadrant by remember { mutableIntStateOf(-1) }
@@ -90,6 +98,7 @@ fun CardViewScreen(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(uiState.card?.title ?: "") },
@@ -146,6 +155,45 @@ fun CardViewScreen(
                                 contentDescription = if (card.isRevealed) "Ocultar a jugadores" else "Revelar a jugadores",
                                 tint = if (card.isRevealed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
                             )
+                        }
+
+                        IconButton(
+                            enabled = card.isRevealed && !card.activeFace.imagePath.isNullOrBlank() && !isSharingImage,
+                            onClick = {
+                                coroutineScope.launch {
+                                    isSharingImage = true
+                                    runCatching { createCardFaceShareUri(context, card) }
+                                        .onSuccess { imageUri ->
+                                            val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                                                type = "image/jpeg"
+                                                putExtra(Intent.EXTRA_STREAM, imageUri)
+                                                clipData = ClipData.newUri(context.contentResolver, card.title, imageUri)
+                                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                            }
+                                            runCatching {
+                                                context.startActivity(
+                                                    Intent.createChooser(sendIntent, "Compartir imagen de carta")
+                                                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                                )
+                                            }.onFailure {
+                                                snackbarHostState.showSnackbar("No se pudo abrir una aplicación para compartir.")
+                                            }
+                                        }
+                                        .onFailure {
+                                            snackbarHostState.showSnackbar("No se pudo preparar la imagen de la carta.")
+                                        }
+                                    isSharingImage = false
+                                }
+                            }
+                        ) {
+                            if (isSharingImage) {
+                                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                            } else {
+                                Icon(
+                                    Icons.Default.Share,
+                                    contentDescription = if (card.isRevealed) "Compartir imagen de la cara activa" else "Revela la carta para compartirla"
+                                )
+                            }
                         }
 
                         // Botón de Notas (Sprint 15)

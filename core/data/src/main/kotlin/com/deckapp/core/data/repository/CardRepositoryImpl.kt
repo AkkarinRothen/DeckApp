@@ -203,11 +203,18 @@ class CardRepositoryImpl @Inject constructor(
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     override fun searchCards(query: String): Flow<List<Card>> {
         if (query.isBlank()) return kotlinx.coroutines.flow.flowOf(emptyList())
-        val ftsQuery = "$query*"
+        val ftsQuery = query.split(Regex("\\s+"))
+            .mapNotNull { token ->
+                token.filter { it.isLetterOrDigit() || it == '_' }
+                    .takeIf { it.isNotEmpty() }
+                    ?.plus("*")
+            }
+            .joinToString(" ")
+        if (ftsQuery.isBlank()) return kotlinx.coroutines.flow.flowOf(emptyList())
         
         return combine(
             searchDao.searchCardIds(ftsQuery),
-            searchDao.searchCardFaceIds(ftsQuery)
+            searchDao.searchCardIdsByFace(ftsQuery)
         ) { cardIds, faceIds ->
             (cardIds.map { it.rowid } + faceIds.map { it.rowid }).distinct()
         }.flatMapLatest { ids: List<Long> ->

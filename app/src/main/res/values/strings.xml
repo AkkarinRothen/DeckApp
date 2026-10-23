@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">DeckApp</string>
+    <string name="session_widget_description">Acceso directo a una sesión activa de DeckApp</string>
 </resources>

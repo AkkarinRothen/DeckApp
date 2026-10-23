@@ -85,6 +85,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.*
 
+private enum class SessionWindowWidthClass { COMPACT, MEDIUM, EXPANDED }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SessionScreen(
@@ -245,9 +247,18 @@ fun SessionScreen(
             }
         }
     ) { padding ->
-        Box(modifier = Modifier.padding(padding).fillMaxSize()) {
-            val configuration = androidx.compose.ui.platform.LocalConfiguration.current
-            val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+        BoxWithConstraints(modifier = Modifier.padding(padding).fillMaxSize()) {
+            val windowWidthClass = when {
+                maxWidth < 600.dp -> SessionWindowWidthClass.COMPACT
+                maxWidth < 840.dp -> SessionWindowWidthClass.MEDIUM
+                else -> SessionWindowWidthClass.EXPANDED
+            }
+            // Use a split workspace only when the window has enough room for both the
+            // central table and its tools. This also supports tablet portrait and
+            // resizable/freeform windows instead of relying on orientation alone.
+            val usesSideRailLayout = windowWidthClass != SessionWindowWidthClass.COMPACT
+            val isExpandedWindow = windowWidthClass == SessionWindowWidthClass.EXPANDED
+            val isShortWindow = maxHeight < 430.dp
             val isLeftSidebarOpen = uiState.activeLeftSidebar != SidebarTool.NONE
             val isRightSidebarOpen = uiState.activeRightSidebar != SidebarTool.NONE
             val isAnySidebarOpen = isLeftSidebarOpen || isRightSidebarOpen
@@ -775,7 +786,7 @@ fun SessionScreen(
                 )
             }
 
-            if (isLandscape) {
+            if (usesSideRailLayout) {
                 Row(
                     modifier = Modifier.fillMaxSize(),
                     verticalAlignment = Alignment.CenterVertically
@@ -810,7 +821,10 @@ fun SessionScreen(
                             },
                             modifier = Modifier
                                 .fillMaxHeight()
-                                .widthIn(min = 280.dp, max = 340.dp)
+                                .widthIn(
+                                    min = if (isExpandedWindow) 280.dp else 220.dp,
+                                    max = if (isExpandedWindow) 340.dp else 280.dp
+                                )
                         ) {
                             if (isLeftSidebarOpen) {
                                 leftSidebarContent()
@@ -839,8 +853,8 @@ fun SessionScreen(
                         }
                     )
                 } // end Row
-            } // end if (isLandscape)
-            if (!isLandscape) {
+            } // end side-rail layout
+            if (!usesSideRailLayout) {
                 // Portrait: central content with top capsule in normal layout flow and tools bar at bottom
                 Column(modifier = Modifier.fillMaxSize()) {
                     topHudCapsuleContent()
@@ -883,7 +897,7 @@ fun SessionScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .fillMaxHeight(0.72f)
+                                .fillMaxHeight(if (isShortWindow) 0.9f else 0.72f)
                         ) {
                             leftSidebarContent()
                         }
@@ -914,7 +928,7 @@ fun SessionScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .fillMaxHeight(if (isNotesOrJournal) 0.92f else 0.72f)
+                                .fillMaxHeight(if (isNotesOrJournal || isShortWindow) 0.92f else 0.72f)
                         ) {
                             rightSidebarContent()
                         }
@@ -931,7 +945,7 @@ fun SessionScreen(
 
             // Action Hotbar / Quick Roll Dock (Sprint 59)
             val hotbarActions = uiState.session?.hotbarActions ?: defaultHotbarActions()
-            val hotbarBottomPadding = if (!isLandscape) {
+            val hotbarBottomPadding = if (!usesSideRailLayout) {
                 if (uiState.isHotbarExpanded) 60.dp else 64.dp
             } else if (uiState.mainViewMode == SessionViewMode.TACTICAL) {
                 if (uiState.isHotbarExpanded) 12.dp else 80.dp

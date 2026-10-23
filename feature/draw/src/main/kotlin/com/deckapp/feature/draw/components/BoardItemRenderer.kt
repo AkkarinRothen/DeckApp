@@ -245,6 +245,7 @@ private fun RenderBlockCardContent(
             deckAspectRatios = uiContext.deckAspectRatios,
             deckBackImages = uiContext.deckBackImages,
             onDrawCardFromDeck = uiContext.onDrawCardFromDeck,
+            onOpenDrawBySuit = uiContext.onOpenDrawBySuit,
             onShuffleDeck = uiContext.onShuffleDeck,
             onShuffleOnly = uiContext.onShuffleOnly,
             onShuffleDiscards = uiContext.onShuffleDiscards,

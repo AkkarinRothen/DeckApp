@@ -26,6 +26,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.SystemUpdateAlt
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -65,6 +67,9 @@ fun SettingsScreen(
 
     val listState = androidx.compose.foundation.lazy.rememberLazyListState()
     LaunchedEffect(category) { listState.scrollToItem(0) }
+    LaunchedEffect(category, uiState.autoCheckUpdates) {
+        if (category == "Acerca de" && uiState.autoCheckUpdates) viewModel.checkForUpdates()
+    }
 
     // Diálogo de Inspección Previa y Verificación de Integridad
     uiState.pendingBackupInspection?.let { inspection ->
@@ -360,6 +365,16 @@ fun SettingsScreen(
                     }
                 }
                 "Acerca de" -> {
+                    item {
+                        AppUpdateCard(
+                            uiState = uiState,
+                            onAutoCheckChanged = viewModel::setAutoCheckUpdates,
+                            onCheck = viewModel::checkForUpdates,
+                            onDownload = viewModel::downloadUpdate,
+                            onInstall = viewModel::installDownloadedUpdate
+                        )
+                    }
+
                     // ── Librerías ───────────────────────────────────────────────
                     item { HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp)) }
 
@@ -407,6 +422,93 @@ fun SettingsScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun AppUpdateCard(
+    uiState: SettingsUiState,
+    onAutoCheckChanged: (Boolean) -> Unit,
+    onCheck: () -> Unit,
+    onDownload: () -> Unit,
+    onInstall: () -> Unit
+) {
+    DeckCard(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Icon(Icons.Default.SystemUpdateAlt, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Actualizaciones", style = MaterialTheme.typography.titleMedium)
+                    Text("Versiones publicadas en GitHub Releases", style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Buscar al abrir esta sección", modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+                Switch(checked = uiState.autoCheckUpdates, onCheckedChange = onAutoCheckChanged)
+            }
+
+            uiState.appUpdateMessage?.let { message ->
+                Text(message, style = MaterialTheme.typography.bodyMedium)
+            }
+
+            if (uiState.appUpdateStatus == AppUpdateStatus.DOWNLOADING) {
+                val progress = uiState.appUpdateProgress
+                if (progress == null) {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                } else {
+                    LinearProgressIndicator(progress = { progress / 100f }, modifier = Modifier.fillMaxWidth())
+                    Text("$progress%", style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+
+            uiState.appUpdateInfo?.let { update ->
+                if (update.releaseNotes.isNotBlank()) {
+                    Text(update.releaseNotes, style = MaterialTheme.typography.bodySmall,
+                        maxLines = 5, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                if (uiState.appUpdateStatus == AppUpdateStatus.AVAILABLE) {
+                    Button(onClick = onDownload, modifier = Modifier.fillMaxWidth()) {
+                        Icon(Icons.Default.Download, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Descargar ${update.version}")
+                    }
+                }
+            }
+
+            uiState.downloadedUpdateFile?.let {
+                Button(onClick = onInstall, modifier = Modifier.fillMaxWidth()) {
+                    Icon(Icons.Default.SystemUpdateAlt, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text(if (uiState.installPermissionRequired) "Permitir e instalar" else "Instalar actualización")
+                }
+            }
+
+            OutlinedButton(
+                onClick = onCheck,
+                enabled = uiState.appUpdateStatus != AppUpdateStatus.CHECKING &&
+                    uiState.appUpdateStatus != AppUpdateStatus.DOWNLOADING,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if (uiState.appUpdateStatus == AppUpdateStatus.CHECKING) {
+                    CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                    Spacer(Modifier.width(8.dp))
+                }
+                Text("Buscar actualizaciones")
+            }
+
+            Text(
+                "La instalación la confirma Android. Las versiones deben estar firmadas con la misma clave que la app instalada.",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

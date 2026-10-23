@@ -150,16 +150,18 @@ class LibraryViewModel @Inject constructor(
                     globalSearchUseCase(query)
                 }
                 .collect { matches ->
-                    val mappedMatches = matches.map { result ->
+                    val mappedMatches = matches.mapNotNull { result ->
+                        val resultType = when (result.type) {
+                            GlobalSearchResultType.CARD -> com.deckapp.core.model.SearchResultType.CARD
+                            GlobalSearchResultType.TABLE -> com.deckapp.core.model.SearchResultType.TABLE
+                            else -> return@mapNotNull null
+                        }
                         SearchMatch(
                             id = result.id,
-                            type = when (result.type) {
-                                GlobalSearchResultType.TABLE -> com.deckapp.core.model.SearchResultType.TABLE
-                                GlobalSearchResultType.NPC -> com.deckapp.core.model.SearchResultType.CARD // TODO: Mapear mejor
-                                else -> com.deckapp.core.model.SearchResultType.BAUL
-                            },
+                            type = resultType,
                             title = result.title,
-                            subtitle = result.subtitle
+                            subtitle = result.subtitle,
+                            parentId = result.parentId
                         )
                     }
                     _uiState.update { it.copy(searchResults = mappedMatches) }

@@ -7,6 +7,8 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -17,6 +19,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -50,6 +53,9 @@ fun NpcListScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var searchQuery by remember { mutableStateOf("") }
+    var searchVisible by remember { mutableStateOf(false) }
+    var selectedType by remember { mutableStateOf<String?>(null) }
+    var selectedTag by remember { mutableStateOf<String?>(null) }
     
     var peekedNpc by remember { mutableStateOf<Npc?>(null) }
     var showChoirDialog by remember { mutableStateOf(false) }
@@ -98,8 +104,14 @@ fun NpcListScreen(
                             tint = Color(0xFFD4AF37)
                         )
                     }
-                    IconButton(onClick = { /* TODO: Filtros */ }) {
-                        Icon(Icons.Default.Search, contentDescription = "Buscar")
+                    IconButton(onClick = {
+                        searchVisible = !searchVisible
+                        if (!searchVisible) searchQuery = ""
+                    }) {
+                        Icon(
+                            if (searchVisible) Icons.Default.Close else Icons.Default.Search,
+                            contentDescription = if (searchVisible) "Cerrar búsqueda" else "Buscar NPCs"
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -141,14 +153,97 @@ fun NpcListScreen(
                     if (state.npcs.isEmpty()) {
                         EmptyNpcsMessage()
                     } else {
+                        val tagNames = remember(state.npcs) {
+                            state.npcs.flatMap { npc -> npc.tags.map { it.name } }
+                                .distinct().sortedBy { it.lowercase() }
+                        }
+                        Column(Modifier.fillMaxSize()) {
+                            if (searchVisible) {
+                                OutlinedTextField(
+                                    value = searchQuery,
+                                    onValueChange = { searchQuery = it },
+                                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                                    singleLine = true,
+                                    label = { Text("Nombre o descripción") },
+                                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                                    trailingIcon = if (searchQuery.isNotEmpty()) ({
+                                        IconButton(onClick = { searchQuery = "" }) {
+                                            Icon(Icons.Default.Close, contentDescription = "Limpiar búsqueda")
+                                        }
+                                    }) else null
+                                )
+                            }
+                            Row(
+                                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 4.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                FilterChip(
+                                    selected = selectedType == null,
+                                    onClick = { selectedType = null },
+                                    label = { Text("Todos") }
+                                )
+                                FilterChip(
+                                    selected = selectedType == "npc",
+                                    onClick = { selectedType = if (selectedType == "npc") null else "npc" },
+                                    label = { Text("NPCs") }
+                                )
+                                FilterChip(
+                                    selected = selectedType == "monster",
+                                    onClick = { selectedType = if (selectedType == "monster") null else "monster" },
+                                    label = { Text("Monstruos") }
+                                )
+                            }
+                            if (tagNames.isNotEmpty()) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    tagNames.forEach { tag ->
+                                        FilterChip(
+                                            selected = selectedTag == tag,
+                                            onClick = { selectedTag = if (selectedTag == tag) null else tag },
+                                            label = { Text(tag, maxLines = 1) }
+                                        )
+                                    }
+                                }
+                            }
+                            val filteredNpcs = remember(state.npcs, searchQuery, selectedType, selectedTag) {
+                                state.npcs.filter { npc ->
+                                    val matchesQuery = searchQuery.isBlank() ||
+                                        npc.name.contains(searchQuery.trim(), ignoreCase = true) ||
+                                        npc.description.contains(searchQuery.trim(), ignoreCase = true)
+                                    val matchesType = when (selectedType) {
+                                        "npc" -> !npc.isMonster
+                                        "monster" -> npc.isMonster
+                                        else -> true
+                                    }
+                                    val matchesTag = selectedTag == null || npc.tags.any { it.name == selectedTag }
+                                    matchesQuery && matchesType && matchesTag
+                                }
+                            }
+                            if (filteredNpcs.isEmpty()) {
+                                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text("No hay NPCs que coincidan", style = MaterialTheme.typography.titleMedium)
+                                        Text("Prueba otro nombre o cambia los filtros.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        TextButton(onClick = {
+                                            searchQuery = ""
+                                            selectedType = null
+                                            selectedTag = null
+                                        }) { Text("Limpiar filtros") }
+                                    }
+                                }
+                            } else {
                         NpcGrid(
-                            npcs = state.npcs,
+                            npcs = filteredNpcs,
                             onEditNpc = onEditNpc,
                             onLongPressNpc = { npc ->
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 peekedNpc = npc
                             }
                         )
+                            }
+                        }
                     }
                 }
             }

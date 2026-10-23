@@ -71,6 +71,7 @@ data class BoardItemUiContext(
     val onReconnoiterTile: (HexTile) -> Unit = {},
     val onMapTile: (HexTile) -> Unit = {},
     val onDrawCardFromDeck: (Long) -> Unit = {},
+    val onOpenDrawBySuit: (Long) -> Unit = {},
     val onShuffleDeck: (Long) -> Unit = {},
     val onShuffleOnly: (Long) -> Unit = onShuffleDeck,
     val onShuffleDiscards: (Long) -> Unit = onShuffleDeck,

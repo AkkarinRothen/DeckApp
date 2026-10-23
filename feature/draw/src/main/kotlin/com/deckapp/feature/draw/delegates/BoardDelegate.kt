@@ -17,7 +17,8 @@ class BoardDelegate(
     private val sessionId: Long,
     private val _uiState: MutableStateFlow<SessionUiState>,
     private val scope: CoroutineScope,
-    private val sessionRepository: SessionRepository
+    private val sessionRepository: SessionRepository,
+    private val updateBoardMemory: ((BoardSessionMemory) -> BoardSessionMemory) -> Unit
 ) {
     private val noteWriteMutex = Mutex()
 
@@ -71,14 +72,64 @@ class BoardDelegate(
                     displayMode = "live",
                     boardView = SessionBoardView.MAIN
                 )
-            )
+            ).mapIndexed { index, item -> item.copy(id = -(index + 1L)) }
             _uiState.update { state ->
                 state.copy(
                     fullBoardItems = defaultItems,
                     sessionBoardItems = defaultItems.forActiveBoardView(state.activeBoardView)
                 )
             }
+            updateBoardMemory { it.copy(boardItems = defaultItems, boardGroups = emptyList()) }
         }
+    }
+
+    private fun commitBoardState(
+        items: List<SessionBoardItem>,
+        groups: List<SessionBoardGroup> = _uiState.value.boardGroups,
+        undoLabel: String? = null,
+        snackbar: String? = null
+    ) {
+        val before = _uiState.value
+        val history = if (undoLabel == null) before.boardMemory.boardUndoHistory else
+            (before.boardMemory.boardUndoHistory + BoardUndoSnapshot(undoLabel, before.fullBoardItems, before.boardGroups)).takeLast(20)
+        updateBoardMemory {
+            it.copy(boardItems = items, boardGroups = groups, boardUndoHistory = history)
+        }
+        _uiState.update { state ->
+            state.copy(
+                fullBoardItems = items,
+                sessionBoardItems = items.forActiveBoardView(state.activeBoardView),
+                boardGroups = groups,
+                snackbarMessage = snackbar ?: state.snackbarMessage
+            )
+        }
+    }
+
+    fun undoBoardChange() {
+        val snapshot = _uiState.value.boardMemory.boardUndoHistory.lastOrNull() ?: return
+        val history = _uiState.value.boardMemory.boardUndoHistory.dropLast(1)
+        updateBoardMemory { it.copy(boardItems = snapshot.items, boardGroups = snapshot.groups, boardUndoHistory = history) }
+        _uiState.update { state ->
+            state.copy(
+                fullBoardItems = snapshot.items,
+                sessionBoardItems = snapshot.items.forActiveBoardView(state.activeBoardView),
+                boardGroups = snapshot.groups,
+                snackbarMessage = "Se deshizo: ${snapshot.label}"
+            )
+        }
+    }
+
+    fun moveBoardGroup(groupId: Long, direction: Int) {
+        val groups = _uiState.value.boardGroups.filter { it.boardView == currentBoardView() }.sortedBy { it.position }.toMutableList()
+        val index = groups.indexOfFirst { it.id == groupId }
+        if (index < 0) return
+        val target = (index + direction).coerceIn(0, groups.lastIndex)
+        if (target == index) return
+        val item = groups.removeAt(index)
+        groups.add(target, item)
+        val normalized = groups.mapIndexed { position, group -> group.copy(position = position) }
+        val all = _uiState.value.boardGroups.filterNot { it.boardView == currentBoardView() } + normalized
+        commitBoardState(_uiState.value.fullBoardItems, all, "reordenar grupos")
     }
 
     fun updateBlockNote(itemId: Long, content: String) {
@@ -90,7 +141,7 @@ class BoardDelegate(
                 val updated = _uiState.value.fullBoardItems.map {
                     if (it.id == itemId) it.copy(noteContent = content, updatedAt = System.currentTimeMillis()) else it
                 }
-                _uiState.update { it.copy(fullBoardItems = updated, sessionBoardItems = updated.forActiveBoardView(it.activeBoardView)) }
+                commitBoardState(updated)
             } catch (cancelled: kotlinx.coroutines.CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
@@ -161,12 +212,7 @@ class BoardDelegate(
                 groupId = targetGroupId
             )
             val updated = _uiState.value.fullBoardItems + item
-            _uiState.update { state ->
-                state.copy(
-                    fullBoardItems = updated,
-                    sessionBoardItems = updated.forActiveBoardView(state.activeBoardView)
-                )
-            }
+            commitBoardState(updated, undoLabel = "agregar bloque")
         }
     }
 
@@ -241,6 +287,7 @@ class BoardDelegate(
                 fullBoardItems = updatedList
             )
         }
+        updateBoardMemory { it.copy(boardItems = updatedList) }
     }
 
     fun toggleCollapseBlock(itemId: Long, allBoardItems: List<SessionBoardItem> = _uiState.value.fullBoardItems) {
@@ -253,6 +300,7 @@ class BoardDelegate(
                 fullBoardItems = updatedList
             )
         }
+        updateBoardMemory { it.copy(boardItems = updatedList) }
     }
 
     fun setAllBlocksCollapsedInView(
@@ -270,17 +318,13 @@ class BoardDelegate(
                 fullBoardItems = updatedList
             )
         }
+        updateBoardMemory { it.copy(boardItems = updatedList) }
     }
 
     fun removeBoardBlock(itemId: Long) {
         scope.launch {
             val updated = _uiState.value.fullBoardItems.filterNot { it.id == itemId }
-            _uiState.update { state ->
-                state.copy(
-                    fullBoardItems = updated,
-                    sessionBoardItems = updated.forActiveBoardView(state.activeBoardView)
-                )
-            }
+            commitBoardState(updated, undoLabel = "quitar bloque")
             normalizeBoardPositions()
         }
     }
@@ -294,7 +338,7 @@ class BoardDelegate(
             if (index == targetIndex) return@launch
             val item = viewItems.removeAt(index)
             viewItems.add(targetIndex, item)
-            replaceCurrentBoardViewItems(viewItems)
+            replaceCurrentBoardViewItems(viewItems, undoLabel = "reordenar bloques")
         }
     }
 
@@ -306,7 +350,7 @@ class BoardDelegate(
             if (fromIndex == -1 || toIndex == -1 || fromIndex == toIndex) return@launch
             val item = viewItems.removeAt(fromIndex)
             viewItems.add(toIndex, item)
-            replaceCurrentBoardViewItems(viewItems)
+            replaceCurrentBoardViewItems(viewItems, undoLabel = "reordenar bloques")
         }
     }
 
@@ -315,12 +359,7 @@ class BoardDelegate(
             val updated = _uiState.value.fullBoardItems.map {
                 if (it.id == itemId) it.copy(size = size, updatedAt = System.currentTimeMillis()) else it
             }
-            _uiState.update { state ->
-                state.copy(
-                    fullBoardItems = updated,
-                    sessionBoardItems = updated.forActiveBoardView(state.activeBoardView)
-                )
-            }
+            commitBoardState(updated, undoLabel = "cambiar tamaño del bloque")
         }
     }
 
@@ -329,12 +368,7 @@ class BoardDelegate(
             val updated = _uiState.value.fullBoardItems.map {
                 if (it.id == itemId) it.copy(displayMode = displayMode, updatedAt = System.currentTimeMillis()) else it
             }
-            _uiState.update { state ->
-                state.copy(
-                    fullBoardItems = updated,
-                    sessionBoardItems = updated.forActiveBoardView(state.activeBoardView)
-                )
-            }
+            commitBoardState(updated, undoLabel = "cambiar vista del bloque")
         }
     }
 
@@ -343,12 +377,7 @@ class BoardDelegate(
             val updated = _uiState.value.fullBoardItems.map {
                 if (it.id == itemId) it.copy(titleOverride = titleOverride, updatedAt = System.currentTimeMillis()) else it
             }
-            _uiState.update { state ->
-                state.copy(
-                    fullBoardItems = updated,
-                    sessionBoardItems = updated.forActiveBoardView(state.activeBoardView)
-                )
-            }
+            commitBoardState(updated, undoLabel = "renombrar bloque")
         }
     }
 
@@ -357,12 +386,7 @@ class BoardDelegate(
             val updated = _uiState.value.fullBoardItems.map {
                 if (it.id == itemId) it.copy(resourceId = resourceId, updatedAt = System.currentTimeMillis()) else it
             }
-            _uiState.update { state ->
-                state.copy(
-                    fullBoardItems = updated,
-                    sessionBoardItems = updated.forActiveBoardView(state.activeBoardView)
-                )
-            }
+            commitBoardState(updated, undoLabel = "cambiar recurso del bloque")
         }
     }
 
@@ -388,13 +412,7 @@ class BoardDelegate(
             }
             val filtered = _uiState.value.fullBoardItems.filterNot { it.boardView == targetView }
             val merged = filtered + duplicated
-            _uiState.update { state ->
-                state.copy(
-                    fullBoardItems = merged,
-                    sessionBoardItems = merged.forActiveBoardView(state.activeBoardView),
-                    snackbarMessage = "Vista duplicada a ${boardViewLabel(targetView)}"
-                )
-            }
+            commitBoardState(merged, undoLabel = "duplicar vista", snackbar = "Vista duplicada a ${boardViewLabel(targetView)}")
         }
     }
 
@@ -414,13 +432,8 @@ class BoardDelegate(
     fun clearBoardView(boardView: SessionBoardView) {
         scope.launch {
             val filtered = _uiState.value.fullBoardItems.filterNot { it.boardView == boardView }
-            _uiState.update { state ->
-                state.copy(
-                    fullBoardItems = filtered,
-                    sessionBoardItems = filtered.forActiveBoardView(state.activeBoardView),
-                    snackbarMessage = "Vista ${boardViewLabel(boardView)} limpiada"
-                )
-            }
+            val groups = _uiState.value.boardGroups.filterNot { it.boardView == boardView }
+            commitBoardState(filtered, groups, "limpiar vista", "Vista ${boardViewLabel(boardView)} limpiada")
         }
     }
 
@@ -441,13 +454,46 @@ class BoardDelegate(
             }
             val filtered = _uiState.value.fullBoardItems.filterNot { it.boardView == currentView }
             val merged = filtered + newItems
-            _uiState.update { state ->
-                state.copy(
-                    fullBoardItems = merged,
-                    sessionBoardItems = newItems,
-                    snackbarMessage = "Plantilla ${template.name} aplicada"
+            commitBoardState(merged, undoLabel = "aplicar plantilla ${template.name}", snackbar = "Plantilla ${template.name} aplicada")
+        }
+    }
+
+    fun applySavedBoardTemplate(template: SavedBoardTemplate) {
+        scope.launch {
+            val view = currentBoardView()
+            val now = System.currentTimeMillis()
+            val oldGroups = _uiState.value.boardGroups.filterNot { it.boardView == view }
+            val newGroups = template.groups.sortedBy { it.position }.mapIndexed { index, group ->
+                SessionBoardGroup(
+                    id = now + 10_000L + index,
+                    sessionId = sessionId,
+                    boardView = view,
+                    name = group.name,
+                    accentColorHex = group.accentColorHex,
+                    iconName = group.iconName,
+                    preferredLayoutMode = group.preferredLayoutMode,
+                    position = index,
+                    autoFilterType = group.autoFilterType
                 )
             }
+            val itemGroupIds = newGroups
+            val newItems = template.items.sortedBy { it.position }.mapIndexed { index, item ->
+                SessionBoardItem(
+                    id = now + 20_000L + index,
+                    sessionId = sessionId,
+                    type = item.type,
+                    resourceId = item.resourceId,
+                    titleOverride = item.titleOverride,
+                    position = index,
+                    size = item.size,
+                    displayMode = item.displayMode,
+                    boardView = view,
+                    groupId = item.groupIndex?.let { itemGroupIds.getOrNull(it)?.id }
+                )
+            }
+            val mergedItems = _uiState.value.fullBoardItems.filterNot { it.boardView == view } + newItems
+            val mergedGroups = oldGroups + newGroups
+            commitBoardState(mergedItems, mergedGroups, "aplicar plantilla ${template.name}", "Plantilla ${template.name} aplicada")
         }
     }
 
@@ -462,9 +508,7 @@ class BoardDelegate(
                 iconName = iconName,
                 position = _uiState.value.boardGroups.size
             )
-            _uiState.update { state ->
-                state.copy(boardGroups = state.boardGroups + newGroup)
-            }
+            commitBoardState(_uiState.value.fullBoardItems, _uiState.value.boardGroups + newGroup, "crear grupo")
         }
     }
 
@@ -473,9 +517,7 @@ class BoardDelegate(
             val updated = _uiState.value.boardGroups.map {
                 if (it.id == groupId) it.copy(name = name, accentColorHex = colorHex, iconName = iconName) else it
             }
-            _uiState.update { state ->
-                state.copy(boardGroups = updated)
-            }
+            commitBoardState(_uiState.value.fullBoardItems, updated, "editar grupo")
         }
     }
 
@@ -485,13 +527,7 @@ class BoardDelegate(
             val updatedItems = _uiState.value.fullBoardItems.map {
                 if (it.groupId == groupId) it.copy(groupId = null) else it
             }
-            _uiState.update { state ->
-                state.copy(
-                    boardGroups = updatedGroups,
-                    fullBoardItems = updatedItems,
-                    sessionBoardItems = updatedItems.forActiveBoardView(state.activeBoardView)
-                )
-            }
+            commitBoardState(updatedItems, updatedGroups, "eliminar grupo")
         }
     }
 
@@ -502,6 +538,7 @@ class BoardDelegate(
         _uiState.update { state ->
             state.copy(boardGroups = updated)
         }
+        updateBoardMemory { it.copy(boardGroups = updated) }
     }
 
     fun assignItemToGroup(itemId: Long, groupId: Long?) {
@@ -509,12 +546,7 @@ class BoardDelegate(
             val updated = _uiState.value.fullBoardItems.map {
                 if (it.id == itemId) it.copy(groupId = groupId, updatedAt = System.currentTimeMillis()) else it
             }
-            _uiState.update { state ->
-                state.copy(
-                    fullBoardItems = updated,
-                    sessionBoardItems = updated.forActiveBoardView(state.activeBoardView)
-                )
-            }
+            commitBoardState(updated, undoLabel = "mover bloque de grupo")
         }
     }
 
@@ -533,13 +565,7 @@ class BoardDelegate(
             val updatedItems = _uiState.value.fullBoardItems.map {
                 if (it.id == sourceId || it.id == targetId) it.copy(groupId = newGroupId, updatedAt = System.currentTimeMillis()) else it
             }
-            _uiState.update { state ->
-                state.copy(
-                    boardGroups = updatedGroups,
-                    fullBoardItems = updatedItems,
-                    sessionBoardItems = updatedItems.forActiveBoardView(state.activeBoardView)
-                )
-            }
+            commitBoardState(updatedItems, updatedGroups, "agrupar bloques")
             normalizeBoardPositions()
             onGroupCreated(createdGroup)
         }
@@ -561,7 +587,8 @@ class BoardDelegate(
 
     private suspend fun replaceCurrentBoardViewItems(
         items: List<SessionBoardItem>,
-        timestamp: Long = System.currentTimeMillis()
+        timestamp: Long = System.currentTimeMillis(),
+        undoLabel: String? = null
     ) {
         val activeView = currentBoardView()
         val merged = _uiState.value.fullBoardItems
@@ -575,7 +602,7 @@ class BoardDelegate(
                     )
                 }
             )
-        _uiState.update { it.copy(fullBoardItems = merged, sessionBoardItems = items) }
+        commitBoardState(merged, undoLabel = undoLabel)
     }
 
     private fun boardViewLabel(boardView: SessionBoardView): String = when (boardView) {

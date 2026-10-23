@@ -1,3 +1,51 @@
+### Widget de sesión y mesa adaptable (22 de octubre de 2026)
+
+**Categoría:** `FEATURE / UX / ANDROID WIDGET / RESPONSIVE`
+
+- Añadido widget Android con Glance configurable por instancia: el usuario vincula cada widget con una sesión activa y puede mantener widgets distintos para campañas distintas.
+- El widget abre la sesión vinculada; no ejecuta tiradas ni altera la partida. Si la sesión termina o se elimina, permite elegir otra. Si se configura sin sesiones activas, queda instalado en estado vacío y ofrece abrir la lista de sesiones.
+- El estado de cada instancia se guarda en preferencias de Glance, no requiere migración de Room. La app actualiza los widgets cuando el flujo de sesiones cambia.
+- `SessionScreen` ahora calcula layout compacto, mediano o expandido con el ancho disponible. Las ventanas medianas usan herramientas laterales de menor ancho; las hojas compactas aprovechan ventanas bajas.
+- Actualizado `docs/planning/ROADMAP.md` para corregir estados ya completados y registrar esta tanda.
+- Verificación: `:app:compileDebugKotlin` completó correctamente. Revisión visual e instalación en dispositivo quedan pendientes hasta que un Android/AVD esté conectado.
+
+### Robo por palo y tirada Tarokka (22 de octubre de 2026)
+
+**Categoría:** `FEATURE / UX / SESSION / DECKS / TAROKKA`
+
+- Añadido el selector "Robar por palo" a los bloques de mazo. Solo muestra palos con cartas disponibles; el robo conserva la lógica normal de carta boca abajo y orientación, registra el evento y no modifica el modo global del mazo.
+- Añadida la tirada Tarokka de cinco posiciones (Pasado, Presente, Futuro, Obstáculo y Resultado), con robo individual secuencial, revelado individual y reinicio confirmado. La asignación de cartas se conserva en la memoria persistente del tablero.
+- Actualizado el roadmap para marcar como hechos Tarokka, clonación de sesión, notas de DM, temporizador y backup/restauración.
+- Verificación: `:feature:draw:compileDebugKotlin`, `:feature:draw:testDebugUnitTest`, pruebas específicas de `DrawCardBySuitTest` y `BoardMemoryCodecTest`, y `:app:assembleDebug` finalizaron correctamente. Se revisó en el Motorola conectado una sesión existente, que no tenía bloques de mazo. El dispositivo se desconectó antes de poder instalar la compilación final y revisar los controles de cartas en pantalla.
+
+### Feedback de barajado y compartir imágenes de cartas (22 de octubre de 2026)
+
+**Categoría:** `FEATURE / UX / DECKS / SHARING / ANIMATION`
+
+- El bloque grande de mazo muestra tres cartas animadas al barajar, recuperar descartes o confirmar un reinicio.
+- CardView agrega compartir para la cara activa. Rasteriza la imagen a JPEG en caché y usa FileProvider con el selector del sistema; no incluye notas ni metadatos originales. Se desactiva si la carta está oculta o la cara no tiene imagen.
+- `:feature:draw:compileDebugKotlin` y `:feature:deck:compileDebugKotlin` compilaron correctamente con fallback del compilador Kotlin tras la desconexión de su daemon; `:app:assembleDebug` finalizó correctamente.
+
+### Recuperación de borrado de cartas y mazos (22 de octubre de 2026)
+
+**Categoría:** `FEATURE / UX / DECKS / UNDO`
+
+- El borrado de cartas y mazos queda pendiente durante cinco segundos y se ofrece la acción “Deshacer” en una notificación visible.
+- Si se deshace, los datos e imágenes se conservan; al vencer el plazo se completa la eliminación. El mazo solo vuelve al listado al cancelar antes de eliminarlo.
+- Confirmado que el reordenamiento persistente de cartas y el filtro por palo ya estaban disponibles; se actualizaron sus estados en el roadmap.
+- `:feature:deck:compileDebugKotlin --offline --no-configuration-cache --max-workers=1` y `:app:assembleDebug --offline --no-configuration-cache --max-workers=1`: compilaciones correctas.
+
+### Organización y navegación del tablero de sesión (22 de octubre de 2026)
+
+**Categoría:** `FEATURE / UX / SESSION / BOARD MEMORY`
+
+- Añadido un resumen del tablero con conteos por grupo, aviso para grupos vacíos y navegación directa entre vistas y carpetas.
+- Añadidas sugerencias para revisar bloques duplicados, sin recurso vinculado o sin uso registrado durante 30 días. Quitar un bloque desde las sugerencias requiere confirmación y no elimina el recurso de la biblioteca.
+- Persistidos los bloques, grupos, actividad y modo del tablero por sesión; se conservan los valores predeterminados al leer memorias antiguas.
+- Añadidas plantillas personalizadas reutilizables entre sesiones y un historial de hasta 20 cambios del tablero con acción para deshacer.
+- Incorporados los modos Preparar y Partida; el modo Partida oculta los controles de edición y conserva la disposición del tablero.
+- Verificación: `:feature:draw:compileDebugKotlin --offline`, `:feature:draw:testDebugUnitTest --offline` y `:app:assembleDebug --offline` completaron correctamente. Las tres pruebas nuevas de `BoardMemoryCodecTest` pasaron; la suite completa de `:core:data:testDebugUnitTest` tuvo una falla en `ChoirOfFleshPackGenerator` por un archivo no encontrado. Se limpió y recompiló `feature:settings` tras detectar artefactos incrementales obsoletos. Instalado en el dispositivo conectado y revisados el resumen, el acceso a la sesión y el modo Partida; la fila de controles se desplaza horizontalmente en móvil.
+
 ### Mejora de mesa: bloques de cartas y mazos de sesión (21 de octubre de 2026)
 
 **Categoría:** `FEATURE / UX`
@@ -3061,3 +3109,21 @@ opcional de auto-detección cuando el usuario no conoce el layout del PDF.
 - La selección múltiple puede abarcar todos los resultados filtrados, marcar recursos como favoritos y elegir la carpeta de destino. Los bloques ya colocados pueden seleccionarse para moverlos a una carpeta, marcarlos favoritos o quitarlos de la vista sin borrar el recurso.
 - `SessionViewModel` ahora transmite el grupo destino al delegado del tablero para que las altas en lote respeten la carpeta elegida.
 - Compilación de `:feature:draw:compileDebugKotlin --offline` correcta e instalación de depuración completada en Motorola One Fusion.
+### Búsqueda y filtros de la biblioteca de NPCs (22 de octubre de 2026)
+
+**Categoría:** `FEATURE / UX / NPCS / SEARCH`
+
+- Se conectó el botón de búsqueda de la biblioteca de NPCs a un campo por nombre y descripción.
+- Se agregaron filtros por NPC/monstruo y etiquetas detectadas en los registros existentes, con chips desplazables horizontalmente para pantallas pequeñas.
+- Se añadió un estado sin coincidencias con acción para limpiar búsqueda y filtros.
+- Verificación: `:feature:npcs:compileDebugKotlin` compiló correctamente.
+
+### Búsqueda global de cartas e importación por lotes de PDF (22 de octubre de 2026)
+
+**Categoría:** `FEATURE / SEARCH / FTS / IMPORT / BATCH`
+
+- El buscador global ahora encuentra cartas por título, notas o texto de caras usando el índice FTS existente y permite abrir la carta encontrada.
+- La consulta se cancela y reinicia con debounce al seguir escribiendo; se limpian caracteres de sintaxis FTS y se limita la lista a 100 resultados.
+- Se añadió selección múltiple de PDFs. La vista previa usa el primero y la configuración se comparte para la cola; cada PDF genera un mazo, se procesa en secuencia y limita el rango al número de páginas disponible.
+- Los errores de importación se presentan por archivo y el resumen informa los mazos/cartas creados.
+- Verificación: `:app:compileDebugKotlin --configuration-cache --max-workers=2` completó correctamente. No se probó manualmente la selección múltiple con archivos reales en un dispositivo.

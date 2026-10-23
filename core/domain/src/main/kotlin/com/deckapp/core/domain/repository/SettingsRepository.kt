@@ -13,6 +13,8 @@ interface SettingsRepository {
     fun observeGeneralPreferences(): Flow<GeneralPreferences>
     fun getBoardSessionMemory(sessionId: Long): com.deckapp.core.model.BoardSessionMemory
     fun setBoardSessionMemory(sessionId: Long, memory: com.deckapp.core.model.BoardSessionMemory)
+    fun getSavedBoardTemplates(): List<com.deckapp.core.model.SavedBoardTemplate>
+    fun setSavedBoardTemplates(templates: List<com.deckapp.core.model.SavedBoardTemplate>)
     fun getGeminiApiKey(): String
     fun setGeminiApiKey(key: String)
     fun getJpegQuality(): Int

@@ -67,12 +67,12 @@ data class SessionUiState(
     val sessionBoardItems: List<SessionBoardItem> = emptyList(),
     val fullBoardItems: List<SessionBoardItem> = emptyList(),
     val boardGroups: List<SessionBoardGroup> = emptyList(),
+    val savedBoardTemplates: List<SavedBoardTemplate> = emptyList(),
     val tensionClocks: List<TensionClock> = emptyList(),
     val allHexMaps: List<HexMap> = emptyList(),
     val recentDiceRolls: List<DiceRollResult> = emptyList(),
     val recentTableRolls: List<TableRollResult> = emptyList(),
     val pinnedTableRolls: Map<Long, TableRollResult> = emptyMap(),
-    val spreadResultsByDeck: Map<Long, CardSpreadResult> = emptyMap(),
     // Sprint 56 — Bento Solo Journaling & Interactive Mythic Oracle
     val soloMythic: com.deckapp.feature.draw.model.state.SoloMythicUiState = com.deckapp.feature.draw.model.state.SoloMythicUiState(),
     val boardMemory: BoardSessionMemory = BoardSessionMemory(),
@@ -87,6 +87,13 @@ data class SessionUiState(
     val playmat: com.deckapp.feature.draw.model.state.PlaymatUiState = com.deckapp.feature.draw.model.state.PlaymatUiState(),
     val sessionLog: com.deckapp.feature.draw.model.state.SessionLogUiState = com.deckapp.feature.draw.model.state.SessionLogUiState()
 ) {
+    val spreadResultsByDeck: Map<Long, CardSpreadResult>
+        get() = boardMemory.tarokkaCardsByDeck.mapNotNull { (deckId, ids) ->
+            val byId = (decks.handByDeck[deckId].orEmpty() + decks.pile.filter { it.stackId == deckId })
+                .associateBy { it.id }
+            val cards = ids.mapNotNull(byId::get)
+            if (cards.isEmpty()) null else deckId to CardSpreadResult(CardSpread.TAROKKA_CROSS, cards)
+        }.toMap()
     // Retrocompatibilidad con accesores planos delegados a playmat
     val selectedPlaymatCardId: Long? get() = playmat.selectedCardId
     val showPlaymatHandTray: Boolean get() = playmat.showHandTray
@@ -251,6 +258,7 @@ class SessionViewModel @Inject constructor(
 
     private val sessionId: Long = checkNotNull(savedStateHandle["sessionId"])
     private val notesMutex = Mutex()
+    private val tarokkaMutex = Mutex()
     private var peekCardId: Long?
         get() = savedStateHandle.get<Long>("peekCardId")
         set(value) { savedStateHandle["peekCardId"] = value }
@@ -258,6 +266,11 @@ class SessionViewModel @Inject constructor(
     private val initialBoardMemory = settingsRepository.getBoardSessionMemory(sessionId)
     private val _uiState = MutableStateFlow(SessionUiState(
         sessionId = sessionId, boardMemory = initialBoardMemory,
+        fullBoardItems = initialBoardMemory.boardItems,
+        sessionBoardItems = initialBoardMemory.boardItems.filter { it.boardView == SessionBoardView.MAIN },
+        boardGroups = initialBoardMemory.boardGroups,
+        savedBoardTemplates = settingsRepository.getSavedBoardTemplates(),
+        activeBoardView = SessionBoardView.MAIN,
         focusedSceneId = initialBoardMemory.focusedSceneId,
         pinnedTableRolls = initialBoardMemory.pinnedTableResults,
         modals = com.deckapp.feature.draw.model.state.SessionModalsUiState(
@@ -290,7 +303,8 @@ class SessionViewModel @Inject constructor(
         sessionId = sessionId,
         _uiState = _uiState,
         scope = viewModelScope,
-        sessionRepository = sessionRepository
+        sessionRepository = sessionRepository,
+        updateBoardMemory = { updateBoardMemory(it) }
     )
 
     val deckDelegate = com.deckapp.feature.draw.delegates.SessionDeckDelegate(
@@ -830,13 +844,51 @@ class SessionViewModel @Inject constructor(
 
     private fun updateBoardMemory(transform: (BoardSessionMemory) -> BoardSessionMemory) {
         val memory = transform(_uiState.value.boardMemory)
-        settingsRepository.setBoardSessionMemory(sessionId, memory)
-        _uiState.update { it.copy(boardMemory = memory, focusedSceneId = memory.focusedSceneId,
-            pinnedTableRolls = memory.pinnedTableResults) }
+        val normalizedMemory = if (memory.activityTrackingStartedAt == 0L) memory.copy(activityTrackingStartedAt = System.currentTimeMillis()) else memory
+        settingsRepository.setBoardSessionMemory(sessionId, normalizedMemory)
+        _uiState.update { it.copy(boardMemory = normalizedMemory, focusedSceneId = normalizedMemory.focusedSceneId,
+            pinnedTableRolls = normalizedMemory.pinnedTableResults) }
     }
 
     fun setWorkspaceLayout(view: SessionBoardView, layout: BoardViewMemory) {
         updateBoardMemory { it.copy(views = it.views + (view.name to layout)) }
+    }
+
+    fun markBoardBlockUsed(itemId: Long) {
+        updateBoardMemory { it.copy(blockLastUsedAt = it.blockLastUsedAt + (itemId to System.currentTimeMillis())) }
+    }
+
+    fun setBoardPlayMode(mode: BoardPlayMode) {
+        updateBoardMemory { it.copy(boardMode = mode) }
+    }
+
+    fun undoBoardChange() = boardDelegate.undoBoardChange()
+
+    fun moveBoardGroup(groupId: Long, direction: Int) = boardDelegate.moveBoardGroup(groupId, direction)
+
+    fun saveCurrentBoardTemplate(name: String) {
+        val trimmed = name.trim().take(48)
+        if (trimmed.isEmpty()) return
+        val items = _uiState.value.sessionBoardItems.sortedBy { it.position }
+        val groups = _uiState.value.boardGroups.filter { it.boardView == _uiState.value.activeBoardView }.sortedBy { it.position }
+        val groupIndexes = groups.mapIndexed { index, group -> group.id to index }.toMap()
+        val template = SavedBoardTemplate(
+            id = java.util.UUID.randomUUID().toString(),
+            name = trimmed,
+            groups = groups.map { BoardTemplateGroup(it.name, it.accentColorHex, it.iconName, it.preferredLayoutMode, it.position, it.autoFilterType) },
+            items = items.map { BoardTemplateItem(it.type, it.resourceId, it.titleOverride, it.position, it.size, it.displayMode, it.groupId?.let(groupIndexes::get)) }
+        )
+        val updated = (_uiState.value.savedBoardTemplates.filterNot { it.name.equals(trimmed, true) } + template).takeLast(20)
+        settingsRepository.setSavedBoardTemplates(updated)
+        _uiState.update { it.copy(savedBoardTemplates = updated, snackbarMessage = "Plantilla guardada") }
+    }
+
+    fun applySavedBoardTemplate(template: SavedBoardTemplate) = boardDelegate.applySavedBoardTemplate(template)
+
+    fun deleteSavedBoardTemplate(templateId: String) {
+        val updated = _uiState.value.savedBoardTemplates.filterNot { it.id == templateId }
+        settingsRepository.setSavedBoardTemplates(updated)
+        _uiState.update { it.copy(savedBoardTemplates = updated) }
     }
 
     fun captureBoardInspiration(item: BoardInspiration) = mythicDelegate.captureBoardInspiration(item)
@@ -1079,8 +1131,14 @@ class SessionViewModel @Inject constructor(
     fun closeDrawBySuitSheet() = deckDelegate.closeDrawBySuitSheet()
     fun returnToHand(cardId: Long) = deckDelegate.returnToHand(cardId)
     fun returnToDeck(cardId: Long) = deckDelegate.returnToDeck(cardId)
-    fun resetDeck() = deckDelegate.resetDeck()
-    fun resetSingleDeck(stackId: Long) = deckDelegate.resetSingleDeck(stackId)
+    fun resetDeck() {
+        deckDelegate.resetDeck()
+        updateBoardMemory { it.copy(tarokkaCardsByDeck = emptyMap()) }
+    }
+    fun resetSingleDeck(stackId: Long) {
+        deckDelegate.resetSingleDeck(stackId)
+        updateBoardMemory { it.copy(tarokkaCardsByDeck = it.tarokkaCardsByDeck - stackId) }
+    }
     fun undo() = deckDelegate.undo()
     fun undoLastDraw() = deckDelegate.undoLastDraw()
     fun endSession() {
@@ -1224,6 +1282,38 @@ class SessionViewModel @Inject constructor(
     fun drawSceneCard(deckId: Long) {
         drawCardFromDeck(deckId)
     }
+
+    fun drawTarokkaCard(deckId: Long) {
+        viewModelScope.launch {
+            tarokkaMutex.withLock {
+                val current = _uiState.value.boardMemory.tarokkaCardsByDeck[deckId].orEmpty()
+                if (current.size >= TAROKKA_POSITIONS.size) return@withLock
+                val ref = _uiState.value.deckRefs.firstOrNull { it.stackId == deckId } ?: return@withLock
+                val card = drawCardUseCase(
+                    sessionId = sessionId,
+                    deckId = deckId,
+                    drawMode = ref.drawModeOverride ?: DrawMode.RANDOM
+                )
+                if (card == null) {
+                    _uiState.update { it.copy(snackbarMessage = "No hay más cartas disponibles para completar la tirada") }
+                    return@withLock
+                }
+                updateBoardMemory { memory ->
+                    val cards = memory.tarokkaCardsByDeck[deckId].orEmpty()
+                    if (cards.size >= TAROKKA_POSITIONS.size) memory
+                    else memory.copy(tarokkaCardsByDeck = memory.tarokkaCardsByDeck + (deckId to (cards + card.id)))
+                }
+            }
+        }
+    }
+
+    fun clearTarokkaSpread(deckId: Long) {
+        updateBoardMemory { memory ->
+            memory.copy(tarokkaCardsByDeck = memory.tarokkaCardsByDeck - deckId)
+        }
+    }
+
+    fun openDrawBySuitForDeck(deckId: Long) = deckDelegate.openDrawBySuit(deckId)
 
     // --- Permanent Players ---
 

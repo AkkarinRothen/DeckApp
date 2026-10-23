@@ -25,10 +25,12 @@ class DrawCardUseCase @Inject constructor(
     suspend operator fun invoke(
         sessionId: Long,
         deckId: Long,
-        drawMode: DrawMode
+        drawMode: DrawMode,
+        suit: String? = null
     ): Card? {
         val availableCards = cardRepository.getCardsForStack(deckId).first()
             .filter { !it.isDrawn }
+            .filter { suit == null || it.suit == suit }
             .sortedBy { it.sortOrder }
 
         if (availableCards.isEmpty()) return null
@@ -66,7 +68,10 @@ class DrawCardUseCase @Inject constructor(
                 sessionId = sessionId,
                 cardId = card.id,
                 action = DrawAction.DRAW,
-                metadata = if (randomRotation != 0) "rotation:$randomRotation" else ""
+                metadata = buildList {
+                    suit?.let { add("suit:$it") }
+                    if (randomRotation != 0) add("rotation:$randomRotation")
+                }.joinToString(";")
             )
         )
 

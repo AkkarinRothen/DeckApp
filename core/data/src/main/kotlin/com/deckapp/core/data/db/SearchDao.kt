@@ -34,6 +34,14 @@ interface SearchDao {
     fun searchCardFaceIds(query: String): Flow<List<SearchResultId>>
 
     @Query("""
+        SELECT DISTINCT f.cardId AS rowid
+        FROM card_faces f
+        INNER JOIN card_faces_fts ON card_faces_fts.rowid = f.id
+        WHERE card_faces_fts MATCH :query
+    """)
+    fun searchCardIdsByFace(query: String): Flow<List<SearchResultId>>
+
+    @Query("""
         SELECT rowid FROM random_tables_fts 
         WHERE random_tables_fts MATCH :query
     """)

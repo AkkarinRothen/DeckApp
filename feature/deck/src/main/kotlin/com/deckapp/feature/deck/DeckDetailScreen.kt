@@ -67,6 +67,8 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.shape.RoundedCornerShape
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -84,6 +86,50 @@ fun DeckDetailScreen(
     var confirmDeleteCard by remember { mutableStateOf<Card?>(null) }
     var showAddTagDialog by remember { mutableStateOf(false) }
     var showOverflow by remember { mutableStateOf(false) }
+
+    LaunchedEffect(uiState.pendingCardDeletion?.id) {
+        val card = uiState.pendingCardDeletion ?: return@LaunchedEffect
+        snackbarHostState.currentSnackbarData?.dismiss()
+        val timeout = launch {
+            delay(5_000)
+            snackbarHostState.currentSnackbarData?.dismiss()
+        }
+        val result = snackbarHostState.showSnackbar(
+            message = "Carta «${card.title}» eliminada",
+            actionLabel = "Deshacer",
+            withDismissAction = true,
+            duration = SnackbarDuration.Indefinite
+        )
+        timeout.cancel()
+        if (result == SnackbarResult.ActionPerformed) {
+            viewModel.cancelPendingCardDeletion()
+        } else {
+            viewModel.confirmPendingCardDeletion()
+        }
+    }
+
+    LaunchedEffect(uiState.pendingDeckDeletion) {
+        if (!uiState.pendingDeckDeletion) return@LaunchedEffect
+        val deckName = uiState.deck?.name ?: "Mazo"
+        snackbarHostState.currentSnackbarData?.dismiss()
+        val timeout = launch {
+            delay(5_000)
+            snackbarHostState.currentSnackbarData?.dismiss()
+        }
+        val result = snackbarHostState.showSnackbar(
+            message = "Mazo «$deckName» eliminado",
+            actionLabel = "Deshacer",
+            withDismissAction = true,
+            duration = SnackbarDuration.Indefinite
+        )
+        timeout.cancel()
+        if (result == SnackbarResult.ActionPerformed) {
+            viewModel.cancelPendingDeckDeletion()
+        } else {
+            viewModel.confirmPendingDeckDeletion()
+            onBack()
+        }
+    }
 
     // Lista local mutable para el drag & drop — se sincroniza desde el ViewModel cuando
     // NO estamos en modo reordenamiento (cambios externos: borrar, añadir carta).
@@ -156,11 +202,11 @@ fun DeckDetailScreen(
         AlertDialog(
             onDismissRequest = { confirmDeleteCard = null },
             title = { Text("Eliminar carta") },
-            text = { Text("¿Eliminar \"${card.title}\"? Esta acción no se puede deshacer.") },
+            text = { Text("¿Eliminar \"${card.title}\"? Podrás deshacerlo durante 5 segundos.") },
             confirmButton = {
                 DeckTextButton(
                     onClick = {
-                        viewModel.deleteCard(card.id)
+                        viewModel.requestDeleteCard(card)
                         confirmDeleteCard = null
                     }
                 ) {
@@ -674,9 +720,8 @@ fun DeckDetailScreen(
                 onBack() // Navegar atrás si se archiva (opcional)
             },
             onDeleteDeck = {
-                viewModel.deleteDeck()
+                viewModel.requestDeleteDeck()
                 viewModel.showConfigSheet(false)
-                onBack()
             }
         )
     }
@@ -906,7 +951,7 @@ private fun DeckConfigSheet(
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
             title = { Text("¿Eliminar mazo?") },
-            text = { Text("Esto borrará el mazo \"${deck.name}\" y todas sus cartas. Esta acción es irreversible.") },
+            text = { Text("Esto eliminará el mazo \"${deck.name}\" y todas sus cartas. Podrás deshacerlo durante 5 segundos.") },
             confirmButton = {
                 DeckTextButton(onClick = onDeleteDeck) {
                     Text("Eliminar todo", color = MaterialTheme.colorScheme.error)

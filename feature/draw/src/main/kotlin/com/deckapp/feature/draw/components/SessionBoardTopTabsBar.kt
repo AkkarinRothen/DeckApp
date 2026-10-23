@@ -61,7 +61,8 @@ internal fun SessionBoardTopTabsBar(
     onClearViewRequested: (SessionBoardView) -> Unit,
     onApplyBoardTemplate: (SessionBoardTemplatePreset) -> Unit,
     onToggleEditing: () -> Unit,
-    onConfigureViews: () -> Unit
+    onConfigureViews: () -> Unit,
+    editingAllowed: Boolean = true
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -241,7 +242,7 @@ internal fun SessionBoardTopTabsBar(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.padding(end = 16.dp)
         ) {
-            if (isEditing) {
+            if (isEditing && editingAllowed) {
                 IconButton(onClick = onConfigureViews) {
                     Icon(
                         imageVector = Icons.Default.Settings,
@@ -251,17 +252,19 @@ internal fun SessionBoardTopTabsBar(
                 }
             }
 
-            TextButton(
-                onClick = onToggleEditing,
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-            ) {
-                Icon(
-                    imageVector = if (isEditing) Icons.Default.Check else Icons.Default.Edit,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(Modifier.width(4.dp))
-                Text(if (isEditing) "Hecho" else "Editar")
+            if (editingAllowed) {
+                TextButton(
+                    onClick = onToggleEditing,
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Icon(
+                        imageVector = if (isEditing) Icons.Default.Check else Icons.Default.Edit,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(if (isEditing) "Hecho" else "Editar")
+                }
             }
         }
     }

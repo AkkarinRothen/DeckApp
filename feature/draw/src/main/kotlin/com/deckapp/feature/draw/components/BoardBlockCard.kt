@@ -97,6 +97,7 @@ fun BoardBlockCard(
     deckAspectRatios: Map<Long, CardAspectRatio> = emptyMap(),
     deckBackImages: Map<Long, String?> = emptyMap(),
     onDrawCardFromDeck: (Long) -> Unit = {},
+    onOpenDrawBySuit: (Long) -> Unit = {},
     onShuffleDeck: (Long) -> Unit = {},
     onShuffleOnly: (Long) -> Unit = onShuffleDeck,
     onShuffleDiscards: (Long) -> Unit = onShuffleDeck,
@@ -272,6 +273,7 @@ fun BoardBlockCard(
             deckAspectRatios = deckAspectRatios,
             deckBackImages = deckBackImages,
             onDrawCardFromDeck = onDrawCardFromDeck,
+            onOpenDrawBySuit = onOpenDrawBySuit,
             onShuffleDeck = onShuffleDeck,
             onShuffleOnly = onShuffleOnly,
             onShuffleDiscards = onShuffleDiscards,
@@ -314,7 +316,10 @@ fun BoardBlockCard(
             onAppendToNotes = onAppendToNotes,
             onGenerateMicrosetting = onGenerateMicrosetting,
             onRotateMicrosettingSlot = onRotateMicrosettingSlot,
-            onRedrawMicrosettingSlot = onRedrawMicrosettingSlot
+            onRedrawMicrosettingSlot = onRedrawMicrosettingSlot,
+            spreadResult = spreadResult,
+            onDrawSpread = onDrawSpread,
+            onClearSpread = onClearSpread
         )
     }
 

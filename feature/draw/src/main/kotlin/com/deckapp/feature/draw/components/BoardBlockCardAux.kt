@@ -67,6 +67,7 @@ internal fun BoardBlockContent(
     deckAspectRatios: Map<Long, CardAspectRatio>,
     deckBackImages: Map<Long, String?>,
     onDrawCardFromDeck: (Long) -> Unit,
+    onOpenDrawBySuit: (Long) -> Unit = {},
     onShuffleDeck: (Long) -> Unit,
     onShuffleOnly: (Long) -> Unit = onShuffleDeck,
     onShuffleDiscards: (Long) -> Unit = onShuffleDeck,
@@ -92,6 +93,9 @@ internal fun BoardBlockContent(
     onWikiClick: (Long) -> Unit,
     onCardClick: (Long) -> Unit = {},
     onRotateCard: (Long) -> Unit = {},
+    spreadResult: CardSpreadResult? = null,
+    onDrawSpread: ((CardSpread) -> Unit)? = null,
+    onClearSpread: (() -> Unit)? = null,
     notesContent: String = "",
     onUpdateNotes: (String) -> Unit = {},
     onSendToNotes: ((tableName: String, resultText: String) -> Unit)? = null,
@@ -247,13 +251,17 @@ internal fun BoardBlockContent(
                 sessionId = sessionId,
                 compactInFolder = compactInFolder,
                 onDraw = { onDrawCardFromDeck(deckId) },
+                onDrawBySuit = { onOpenDrawBySuit(deckId) },
                 onShuffle = { onShuffleOnly(deckId) },
                 onShuffleDiscards = { onShuffleDiscards(deckId) },
                 onReset = { onResetDeck(deckId) },
                 onDiscard = onDiscardCard,
                 onRevealCard = onRevealCard,
                 onCardClick = onCardClick,
-                onRotateCard = onRotateCard
+                onRotateCard = onRotateCard,
+                spreadResult = spreadResult,
+                onDrawSpread = onDrawSpread,
+                onClearSpread = onClearSpread
             )
         }
         SessionBoardItemType.NPCS -> {

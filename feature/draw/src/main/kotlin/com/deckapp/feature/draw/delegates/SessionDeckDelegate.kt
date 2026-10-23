@@ -136,9 +136,14 @@ class SessionDeckDelegate(
 
     /** Abre el sheet de "Robar por palo" cargando los palos disponibles del mazo activo. */
     fun openDrawBySuit() {
-        val deckId = _uiState.value.selectedDeckId ?: return
+        val deckId = _uiState.value.selectedDeckId ?: _uiState.value.deckRefs.firstOrNull()?.stackId ?: return
+        openDrawBySuit(deckId)
+    }
+
+    fun openDrawBySuit(stackId: Long) {
+        updateDeckState { it.copy(selectedDeckId = stackId) }
         scope.launch {
-            val suits = cardRepository.getCardsForStack(deckId).first()
+            val suits = cardRepository.getCardsForStack(stackId).first()
                 .filter { !it.isDrawn }
                 .mapNotNull { it.suit }
                 .distinct()
@@ -152,28 +157,16 @@ class SessionDeckDelegate(
         val deckId = _uiState.value.selectedDeckId ?: return
         updateDeckState { it.copy(showDrawBySuitSheet = false) }
         scope.launch {
-            val available = cardRepository.getCardsForStack(deckId).first()
-                .filter { !it.isDrawn && it.suit == suit }
-            if (available.isEmpty()) {
+            val deckRef = _uiState.value.deckRefs.find { it.stackId == deckId } ?: return@launch
+            val card = drawCardUseCase(
+                sessionId = sessionId,
+                deckId = deckId,
+                drawMode = DrawMode.RANDOM,
+                suit = suit
+            )
+            if (card == null) {
                 _uiState.update { it.copy(snackbarMessage = "No quedan cartas del palo \"$suit\"") }
-                return@launch
             }
-            val card = available.random()
-            val deck = cardRepository.getDeckById(deckId).first()
-            val faceDown = deck?.drawFaceDown == true
-
-            updateCardStateUseCase(
-                cardId = card.id,
-                update = UpdateCardStateUseCase.CardStateUpdate(
-                    isDrawn = true,
-                    lastDrawnAt = System.currentTimeMillis(),
-                    isRevealed = !faceDown
-                )
-            )
-
-            sessionRepository.logEvent(
-                DrawEvent(sessionId = sessionId, cardId = card.id, action = DrawAction.DRAW)
-            )
         }
     }
 

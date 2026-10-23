@@ -3,8 +3,11 @@ package com.deckapp.feature.draw.components.playmat
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -55,6 +58,7 @@ fun PlaymatDiscardPileItem(
     var localX by remember(stackId, x) { mutableFloatStateOf(x) }
     var localY by remember(stackId, y) { mutableFloatStateOf(y) }
     var isDragging by remember { mutableStateOf(false) }
+    var showDiscardHistory by remember(stackId) { mutableStateOf(false) }
 
     LaunchedEffect(x, y) {
         if (!isDragging) {
@@ -74,6 +78,7 @@ fun PlaymatDiscardPileItem(
                 )
             }
             .size(width, height)
+            .clickable(enabled = piledCards.isNotEmpty()) { showDiscardHistory = true }
             .pointerInput(stackId, zoom) {
                 detectDragGestures(
                     onDragStart = { isDragging = true },
@@ -207,6 +212,52 @@ fun PlaymatDiscardPileItem(
                     }
                 }
             }
+        }
+
+        if (showDiscardHistory) {
+            AlertDialog(
+                onDismissRequest = { showDiscardHistory = false },
+                title = { Text("Descarte · ${piledCards.size} cartas") },
+                text = {
+                    LazyColumn(
+                        modifier = Modifier.heightIn(max = 420.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        items(piledCards.asReversed(), key = { it.id }) { card ->
+                            val imagePath = card.activeFace.imagePath
+                                ?: card.activeFace.reversedImagePath
+                            ListItem(
+                                headlineContent = {
+                                    Text(card.title, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                },
+                                supportingContent = {
+                                    Text("Tocá para ver la carta")
+                                },
+                                leadingContent = if (imagePath != null) {
+                                    {
+                                        AsyncImage(
+                                            model = imagePath.toCoilModel(),
+                                            contentDescription = null,
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier.size(48.dp, 64.dp).clip(RoundedCornerShape(4.dp))
+                                        )
+                                    }
+                                } else null,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable {
+                                        showDiscardHistory = false
+                                        onInspectCard(card.id)
+                                    }
+                            )
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showDiscardHistory = false }) { Text("Cerrar") }
+                }
+            )
         }
     }
 }

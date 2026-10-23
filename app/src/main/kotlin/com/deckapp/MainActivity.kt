@@ -9,9 +9,15 @@ import androidx.compose.runtime.SideEffect
 import androidx.core.view.WindowCompat
 import com.deckapp.core.model.AppTheme
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.glance.appwidget.updateAll
 import com.deckapp.core.domain.repository.SettingsRepository
+import com.deckapp.core.domain.repository.SessionRepository
+import com.deckapp.core.model.StartPage
 import com.deckapp.core.ui.theme.DeckAppTheme
 import com.deckapp.navigation.DeckAppNavHost
+import com.deckapp.widget.EXTRA_OPEN_SESSIONS
+import com.deckapp.widget.EXTRA_WIDGET_SESSION_ID
+import com.deckapp.widget.SessionGlanceWidget
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -20,11 +26,18 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var settingsRepository: SettingsRepository
+    @Inject
+    lateinit var sessionRepository: SessionRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            androidx.compose.runtime.LaunchedEffect(Unit) {
+                sessionRepository.getAllSessions().collect {
+                    SessionGlanceWidget().updateAll(this@MainActivity)
+                }
+            }
             val appTheme by settingsRepository.observeAppTheme()
                 .collectAsStateWithLifecycle(initialValue = settingsRepository.getAppTheme())
             val tableAppearance by settingsRepository.observeTableAppearance()
@@ -42,7 +55,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
             // Keep the start destination stable while preferences change in this activity.
-            val startPage = androidx.compose.runtime.saveable.rememberSaveable { preferences.startPage }
+            val startPage = androidx.compose.runtime.saveable.rememberSaveable {
+                if (intent?.getBooleanExtra(EXTRA_OPEN_SESSIONS, false) == true) StartPage.SESSIONS
+                else preferences.startPage
+            }
+            val widgetSessionId = intent?.getLongExtra(EXTRA_WIDGET_SESSION_ID, -1L)
+                ?.takeIf { it > 0L }
 
             SideEffect {
                 val light = appTheme == AppTheme.LIGHT || appTheme == AppTheme.PARCHMENT
@@ -60,7 +78,7 @@ class MainActivity : ComponentActivity() {
                     ),
                     androidx.compose.ui.platform.LocalHapticFeedback provides haptics
                 ) {
-                    DeckAppNavHost(startPage = startPage)
+                    DeckAppNavHost(startPage = startPage, startSessionId = widgetSessionId)
                 }
             }
         }

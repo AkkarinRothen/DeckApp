@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Consulta de lanzamientos y descarga manual del APK oficial. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
     <!-- Acceso a almacenamiento para importar imágenes y PDFs.
          SAF (ACTION_OPEN_DOCUMENT_TREE) no requiere permisos en tiempo de ejecución.
          READ_EXTERNAL_STORAGE cubre acceso directo (no-SAF) hasta API 32. -->
@@ -43,6 +47,27 @@
                 <data android:scheme="deckapp" android:host="import" android:path="/table" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".widget.SessionWidgetConfigureActivity"
+            android:exported="true"
+            android:label="Configurar widget de sesión"
+            android:theme="@style/Theme.DeckApp">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+        <receiver
+            android:name=".widget.SessionGlanceWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/session_widget_info" />
+        </receiver>
 
         <provider
             android:name="androidx.core.content.FileProvider"

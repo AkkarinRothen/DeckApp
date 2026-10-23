@@ -1,11 +1,14 @@
 package com.deckapp.feature.draw.session
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.deckapp.core.model.SessionBoardItemType
@@ -20,6 +23,7 @@ import com.deckapp.feature.draw.components.BoardInspirationTray
 import com.deckapp.feature.draw.components.SoloScenePanel
 import com.deckapp.feature.draw.components.SessionBoardTab
 
+@OptIn(ExperimentalMaterial3Api::class)
 val BoardCentralTool = SessionCentralConnector(
     id = "board",
     label = "Mesa de Juego",
@@ -136,7 +140,11 @@ val BoardCentralTool = SessionCentralConnector(
             onClearBoardView = viewModel::clearBoardView,
             onUpdateBoardViewLabels = viewModel::updateBoardViewLabels,
             onApplyBoardTemplate = viewModel::applyBoardTemplate,
-            onRollTable = viewModel::rollActiveTable,
+            onRollTable = { tableId ->
+                uiState.sessionBoardItems.filter { it.type == SessionBoardItemType.TABLE && it.resourceId == tableId }
+                    .forEach { viewModel.markBoardBlockUsed(it.id) }
+                viewModel.rollActiveTable(tableId)
+            },
             onTogglePinBlock = viewModel::togglePinBlock,
             onToggleCollapseBlock = viewModel::toggleCollapseBlock,
             onSetAllBlocksCollapsedInView = { _, collapsed -> viewModel.setAllBlocksCollapsedInView(collapsed) },
@@ -146,6 +154,7 @@ val BoardCentralTool = SessionCentralConnector(
             onRenameGroup = { groupId, name, _, _, _ -> viewModel.renameBoardGroup(groupId, name) },
             onDeleteGroup = viewModel::deleteBoardGroup,
             onToggleGroupCollapsed = { groupId, _ -> viewModel.toggleBoardGroupCollapsed(groupId) },
+            onMoveBoardGroup = viewModel::moveBoardGroup,
             onAssignToGroup = viewModel::assignItemToGroup,
             onMergeItems = viewModel::mergeBoardItems,
             deckRefs = uiState.deckRefs,
@@ -155,7 +164,25 @@ val BoardCentralTool = SessionCentralConnector(
             deckCardCounts = uiState.deckCardCounts,
             deckAspectRatios = uiState.deckAspectRatios,
             deckBackImages = uiState.deckBackImages,
-            onDrawCardFromDeck = viewModel::drawCardFromDeck,
+            onDrawCardFromDeck = { deckId ->
+                uiState.sessionBoardItems.filter { it.type == SessionBoardItemType.DECK && it.resourceId == deckId }
+                    .forEach { viewModel.markBoardBlockUsed(it.id) }
+                viewModel.drawCardFromDeck(deckId)
+            },
+            onOpenDrawBySuit = { deckId ->
+                uiState.sessionBoardItems.filter { it.type == SessionBoardItemType.DECK && it.resourceId == deckId }
+                    .forEach { viewModel.markBoardBlockUsed(it.id) }
+                viewModel.openDrawBySuitForDeck(deckId)
+            },
+            spreadResultsByDeck = uiState.spreadResultsByDeck,
+            onDrawSpread = { deckId, spread ->
+                if (spread == com.deckapp.core.model.CardSpread.TAROKKA_CROSS) {
+                    uiState.sessionBoardItems.filter { it.type == SessionBoardItemType.DECK && it.resourceId == deckId }
+                        .forEach { viewModel.markBoardBlockUsed(it.id) }
+                    viewModel.drawTarokkaCard(deckId)
+                }
+            },
+            onClearSpread = viewModel::clearTarokkaSpread,
             onShuffleDeck = viewModel::shuffleSingleDeck,
             onShuffleOnly = { deckId -> viewModel.shuffleDeckOnly(deckId) },
             onShuffleDiscards = { deckId -> viewModel.shuffleSingleDeck(deckId) },
@@ -178,6 +205,13 @@ val BoardCentralTool = SessionCentralConnector(
             onRollBoardMythicEvent = { viewModel.rollBoardMythicRandomEvent() },
             onAskBoardMythicQuestion = { probability, question -> viewModel.rollBoardMythicFate(probability, question = question) },
             workspaceMemory = uiState.boardMemory,
+            savedBoardTemplates = uiState.savedBoardTemplates,
+            onSetBoardPlayMode = viewModel::setBoardPlayMode,
+            onUndoBoardChange = viewModel::undoBoardChange,
+            onSaveBoardTemplate = viewModel::saveCurrentBoardTemplate,
+            onApplySavedBoardTemplate = viewModel::applySavedBoardTemplate,
+            onDeleteSavedBoardTemplate = viewModel::deleteSavedBoardTemplate,
+            onMarkBoardBlockUsed = viewModel::markBoardBlockUsed,
             onWorkspaceLayoutChanged = viewModel::setWorkspaceLayout,
             workspaceActions = {
                 val candidates = remember(uiState.recentTableRolls, uiState.boardMythicHistory, uiState.handByDeck, uiState.deckNames, uiState.scenes, uiState.focusedSceneId) {
@@ -215,5 +249,31 @@ val BoardCentralTool = SessionCentralConnector(
             onRedrawMicrosettingSlot = { itemId, slot -> viewModel.redrawMicrosettingSlot(slot, itemId) },
             modifier = Modifier.fillMaxSize()
         )
+
+        if (uiState.showDrawBySuitSheet) {
+            ModalBottomSheet(onDismissRequest = viewModel::closeDrawBySuitSheet) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text("Robar por palo", style = MaterialTheme.typography.titleLarge,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                    Text(uiState.deckNames[uiState.selectedDeckId] ?: "Mazo",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    if (uiState.availableSuitsForDraw.isEmpty()) {
+                        Text("No quedan cartas con palo disponible.", modifier = Modifier.padding(vertical = 12.dp))
+                    } else {
+                        uiState.availableSuitsForDraw.forEach { suit ->
+                            FilledTonalButton(
+                                onClick = { viewModel.drawCardBySuit(suit) },
+                                modifier = Modifier.fillMaxWidth()
+                            ) { Text(suit) }
+                        }
+                    }
+                    Spacer(Modifier.height(18.dp))
+                }
+            }
+        }
     }
 )

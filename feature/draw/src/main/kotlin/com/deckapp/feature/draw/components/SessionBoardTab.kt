@@ -2,8 +2,10 @@
 package com.deckapp.feature.draw.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -121,6 +123,7 @@ fun SessionBoardTab(
     deckAspectRatios: Map<Long, CardAspectRatio> = emptyMap(),
     deckBackImages: Map<Long, String?> = emptyMap(),
     onDrawCardFromDeck: (Long) -> Unit = {},
+    onOpenDrawBySuit: (Long) -> Unit = {},
     onShuffleDeck: (Long) -> Unit = {},
     onShuffleOnly: (Long) -> Unit = onShuffleDeck,
     onShuffleDiscards: (Long) -> Unit = onShuffleDeck,
@@ -153,6 +156,14 @@ fun SessionBoardTab(
     onAskBoardMythicQuestion: (ProbabilityLevel, String) -> Unit = { _, _ -> },
     onRollBoardMythicEvent: () -> Unit = {},
     workspaceMemory: com.deckapp.core.model.BoardSessionMemory = com.deckapp.core.model.BoardSessionMemory(),
+    savedBoardTemplates: List<SavedBoardTemplate> = emptyList(),
+    onSetBoardPlayMode: (BoardPlayMode) -> Unit = {},
+    onUndoBoardChange: () -> Unit = {},
+    onMoveBoardGroup: (Long, Int) -> Unit = { _, _ -> },
+    onSaveBoardTemplate: (String) -> Unit = {},
+    onApplySavedBoardTemplate: (SavedBoardTemplate) -> Unit = {},
+    onDeleteSavedBoardTemplate: (String) -> Unit = {},
+    onMarkBoardBlockUsed: (Long) -> Unit = {},
     onWorkspaceLayoutChanged: (SessionBoardView, com.deckapp.core.model.BoardViewMemory) -> Unit = { _, _ -> },
     workspaceActions: @Composable () -> Unit = {},
     soloSceneHeader: @Composable () -> Unit = {},
@@ -181,6 +192,11 @@ fun SessionBoardTab(
     var newViewLabelInput by remember { mutableStateOf("") }
     var showConfigureWorkspacesDialog by rememberSaveable { mutableStateOf(false) }
     var showConfirmClearDialog by remember { mutableStateOf<SessionBoardView?>(null) }
+    var showOverview by rememberSaveable { mutableStateOf(false) }
+    var saveTemplateDialog by remember { mutableStateOf(false) }
+    var templateName by remember { mutableStateOf("") }
+    var showSavedTemplatesMenu by remember { mutableStateOf(false) }
+    val effectiveEditing = isEditing && workspaceMemory.boardMode == BoardPlayMode.PREPARATION
 
     fun resetGroupEditor() {
         groupNameInput = ""
@@ -267,7 +283,7 @@ fun SessionBoardTab(
                     currentPage = pagerState.currentPage,
                     viewLabels = viewLabels,
                     boardItems = boardItems,
-                    isEditing = isEditing,
+                    isEditing = effectiveEditing,
                     onSelectView = onSetActiveBoardView,
                     onRenameViewRequested = { view, label ->
                         newViewLabelInput = label
@@ -279,8 +295,50 @@ fun SessionBoardTab(
                     },
                     onApplyBoardTemplate = onApplyBoardTemplate,
                     onToggleEditing = onToggleEditing,
-                    onConfigureViews = { showConfigureWorkspacesDialog = true }
+                    onConfigureViews = { showConfigureWorkspacesDialog = true },
+                    editingAllowed = workspaceMemory.boardMode == BoardPlayMode.PREPARATION
                 )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                FilterChip(workspaceMemory.boardMode == BoardPlayMode.PREPARATION,
+                    onClick = { onSetBoardPlayMode(BoardPlayMode.PREPARATION) }, label = { Text("Preparar") })
+                FilterChip(workspaceMemory.boardMode == BoardPlayMode.PLAY,
+                    onClick = { onSetBoardPlayMode(BoardPlayMode.PLAY) }, label = { Text("Partida") })
+                TextButton(onClick = { showOverview = true }) { Text("Resumen (${boardGroups.size})") }
+                IconButton(onClick = onUndoBoardChange, enabled = workspaceMemory.boardUndoHistory.isNotEmpty()) {
+                    Icon(Icons.Default.Undo, contentDescription = workspaceMemory.boardUndoHistory.lastOrNull()?.let { "Deshacer ${it.label}" } ?: "Deshacer")
+                }
+                Box {
+                    TextButton(onClick = { showSavedTemplatesMenu = true }) { Text("Plantillas") }
+                    DropdownMenu(expanded = showSavedTemplatesMenu, onDismissRequest = { showSavedTemplatesMenu = false }) {
+                        if (savedBoardTemplates.isEmpty()) {
+                            DropdownMenuItem(text = { Text("Sin plantillas guardadas") }, onClick = { showSavedTemplatesMenu = false }, enabled = false)
+                        } else savedBoardTemplates.forEach { template ->
+                            DropdownMenuItem(
+                                text = { Text(template.name) },
+                                onClick = { showSavedTemplatesMenu = false; onApplySavedBoardTemplate(template) },
+                                trailingIcon = {
+                                    IconButton(onClick = { onDeleteSavedBoardTemplate(template.id) }) {
+                                        Icon(Icons.Default.DeleteOutline, contentDescription = "Eliminar plantilla")
+                                    }
+                                }
+                            )
+                        }
+                        if (effectiveEditing) {
+                            HorizontalDivider()
+                            DropdownMenuItem(text = { Text("Guardar vista actual…") }, onClick = {
+                                showSavedTemplatesMenu = false
+                                templateName = ""
+                                saveTemplateDialog = true
+                            })
+                        }
+                    }
+                }
             }
 
             SessionBoardPagerContent(
@@ -346,6 +404,11 @@ fun SessionBoardTab(
                 deckAspectRatios = deckAspectRatios,
                 deckBackImages = deckBackImages,
                 onDrawCardFromDeck = onDrawCardFromDeck,
+                onOpenDrawBySuit = onOpenDrawBySuit,
+                spreadResultsByDeck = spreadResultsByDeck,
+                onDrawSpread = onDrawSpread,
+                onClearSpread = onClearSpread,
+                onSaveSpreadToNotes = onSaveSpreadToNotes,
                 onShuffleDeck = onShuffleDeck,
                 onShuffleOnly = onShuffleOnly,
                 onShuffleDiscards = onShuffleDiscards,
@@ -356,7 +419,7 @@ fun SessionBoardTab(
                 onRevealCard = onRevealCard,
                 onRotateCard = onRotateCard,
                 sessionId = sessionId,
-                isEditing = isEditing,
+                isEditing = effectiveEditing,
                 focusedGroupId = focusedGroupId,
                 isFocusedGroupListMode = isFocusedGroupListMode,
                 folderSearchQuery = folderSearchQuery,
@@ -378,8 +441,8 @@ fun SessionBoardTab(
                 },
                 onToggleGroupCollapsed = onToggleGroupCollapsed,
                 onConfigClick = { showConfigItem = it },
-                onQuickAction = onQuickAction,
-                onOpenBlock = onOpenBlock,
+                onQuickAction = { item -> onMarkBoardBlockUsed(item.id); onQuickAction(item) },
+                onOpenBlock = { item -> onMarkBoardBlockUsed(item.id); onOpenBlock(item) },
                 onRemoveBlock = onRemoveBlock,
                 onMoveUp = onMoveUp,
                 onMoveDown = onMoveDown,
@@ -424,6 +487,52 @@ fun SessionBoardTab(
                 onGenerateMicrosetting = onGenerateMicrosetting,
                 onRotateMicrosettingSlot = onRotateMicrosettingSlot,
                 onRedrawMicrosettingSlot = onRedrawMicrosettingSlot
+            )
+        }
+
+        if (showOverview) {
+            BoardOverviewDialog(
+                groups = boardGroups.filter { it.boardView in orderedViews },
+                boardItems = fullBoardItems,
+                activityStartedAt = workspaceMemory.activityTrackingStartedAt,
+                lastUsedAt = workspaceMemory.blockLastUsedAt,
+                itemTitle = { boardItemTitle(it, tablesInSession, allTables, deckNames, wikiEntries) },
+                viewLabel = viewLabels::labelFor,
+                isEditing = effectiveEditing,
+                onMoveGroup = onMoveBoardGroup,
+                onJumpToGroup = { group ->
+                    showOverview = false
+                    focusedGroupId = group.id
+                    val page = orderedViews.indexOf(group.boardView).coerceAtLeast(0)
+                    boardNavigationScope.launch {
+                        pagerState.animateScrollToPage(page)
+                        onSetActiveBoardView(group.boardView)
+                    }
+                },
+                onRemoveItem = { onRemoveBlock(it.id) },
+                onDismiss = { showOverview = false }
+            )
+        }
+
+        if (saveTemplateDialog) {
+            AlertDialog(
+                onDismissRequest = { saveTemplateDialog = false },
+                title = { Text("Guardar plantilla") },
+                text = {
+                    OutlinedTextField(
+                        value = templateName,
+                        onValueChange = { templateName = it.take(48) },
+                        label = { Text("Nombre") },
+                        singleLine = true
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        onSaveBoardTemplate(templateName)
+                        saveTemplateDialog = false
+                    }, enabled = templateName.isNotBlank()) { Text("Guardar") }
+                },
+                dismissButton = { TextButton(onClick = { saveTemplateDialog = false }) { Text("Cancelar") } }
             )
         }
 
@@ -605,6 +714,27 @@ fun SessionBoardTab(
             )
         }
     }
+}
+
+private fun boardItemTitle(
+    item: SessionBoardItem,
+    tablesInSession: List<RandomTable>,
+    allTables: List<RandomTable>,
+    deckNames: Map<Long, String>,
+    wikiEntries: List<WikiEntry>
+): String = when (item.type) {
+    SessionBoardItemType.TABLE -> item.titleOverride ?: (tablesInSession + allTables).firstOrNull { it.id == item.resourceId }?.name ?: "Tabla"
+    SessionBoardItemType.DECK -> item.titleOverride ?: deckNames[item.resourceId] ?: "Mazo"
+    SessionBoardItemType.WIKI_MAP -> item.titleOverride ?: wikiEntries.firstOrNull { it.id == item.resourceId }?.title ?: "Mapa de wiki"
+    SessionBoardItemType.NOTES -> "Notas"
+    SessionBoardItemType.NPCS -> "PNJ"
+    SessionBoardItemType.COMBAT -> "Combate"
+    SessionBoardItemType.MAP -> "Mapa"
+    SessionBoardItemType.DICE -> "Dados"
+    SessionBoardItemType.MYTHIC -> "Mythic"
+    SessionBoardItemType.CLOCK -> item.titleOverride ?: "Reloj"
+    SessionBoardItemType.REFERENCE -> "Referencias"
+    SessionBoardItemType.MICROSETTING -> item.titleOverride ?: "Microescenario"
 }
 
 @Composable

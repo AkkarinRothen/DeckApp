@@ -48,7 +48,7 @@ fun GlobalSearchOverlay(
             TextField(
                 value = uiState.query,
                 onValueChange = viewModel::onQueryChanged,
-                placeholder = { Text("Buscar reglas, tablas, NPCs...") },
+                placeholder = { Text("Buscar cartas, reglas, tablas, NPCs...") },
                 modifier = Modifier.weight(1f),
                 singleLine = true,
                 colors = TextFieldDefaults.colors(
@@ -97,6 +97,7 @@ fun GlobalSearchOverlay(
 @Composable
 private fun SearchResultItem(result: SearchResult, onClick: () -> Unit) {
     val icon = when (result.type) {
+        GlobalSearchResultType.CARD -> Icons.Default.Style
         GlobalSearchResultType.TABLE -> Icons.Default.Casino
         GlobalSearchResultType.RULE -> Icons.Default.Description
         GlobalSearchResultType.MANUAL -> Icons.Default.PictureAsPdf
@@ -105,6 +106,7 @@ private fun SearchResultItem(result: SearchResult, onClick: () -> Unit) {
     }
 
     val typeLabel = when (result.type) {
+        GlobalSearchResultType.CARD -> "Carta"
         GlobalSearchResultType.TABLE -> "Tabla"
         GlobalSearchResultType.RULE -> "Regla"
         GlobalSearchResultType.MANUAL -> "Manual"

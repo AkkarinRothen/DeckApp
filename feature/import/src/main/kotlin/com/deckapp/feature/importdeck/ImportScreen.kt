@@ -73,6 +73,10 @@ fun ImportScreen(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? -> uri?.let { viewModel.onPdfSelected(it) } }
 
+    val multiplePdfPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenMultipleDocuments()
+    ) { uris -> viewModel.onPdfsSelected(uris) }
+
     val zipPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? -> uri?.let { viewModel.onZipSelected(it) } }
@@ -109,6 +113,10 @@ fun ImportScreen(
                     onSelectPdf = {
                         viewModel.selectSource(DeckImportSource.PDF)
                         pdfPickerLauncher.launch(arrayOf("application/pdf"))
+                    },
+                    onSelectMultiplePdfs = {
+                        viewModel.selectSource(DeckImportSource.PDF)
+                        multiplePdfPickerLauncher.launch(arrayOf("application/pdf"))
                     },
                     onSelectZip = {
                         viewModel.selectSource(DeckImportSource.ZIP)
@@ -152,6 +160,7 @@ fun ImportScreen(
                     gridRows = uiState.pdfGridRows,
                     layoutMode = uiState.pdfLayoutMode,
                     estimatedCards = viewModel.calculateEstimatedCards(uiState),
+                    batchCount = uiState.batchPdfUris.size,
                     onConfirm = { viewModel.startImport() },
                     onBack = { viewModel.backToConfigure() }
                 )
@@ -165,6 +174,7 @@ fun ImportScreen(
                 DeckImportPhase.SUCCESS -> SuccessPhase(
                     cardCount = uiState.importedCardCount,
                     deckName = uiState.deckName,
+                    deckCount = uiState.importedDeckCount,
                     failedFiles = uiState.failedFiles
                 )
             }
@@ -187,6 +197,7 @@ private fun SourceSelectionPhase(
     onRenderThumbnail: suspend (Uri) -> Bitmap?,
     onSelectFolder: () -> Unit,
     onSelectPdf: () -> Unit,
+    onSelectMultiplePdfs: () -> Unit,
     onSelectZip: () -> Unit,
     onOpenFolder: () -> Unit,
     onPdfSelectedFromBrowser: (Uri) -> Unit
@@ -238,6 +249,12 @@ private fun SourceSelectionPhase(
             }
         }
 
+        DeckOutlinedButton(onClick = onSelectMultiplePdfs, modifier = Modifier.fillMaxWidth()) {
+            Icon(Icons.Default.PictureAsPdf, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text("Importar varios PDFs con la misma plantilla")
+        }
+
         PdfThumbnailBrowser(
             recentPdfs = recentPdfs,
             browsedPdfs = browsedPdfs,
@@ -273,22 +290,29 @@ private fun ConfigurePhase(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                "Paso final: Nombre del mazo",
+                if (uiState.batchPdfUris.size > 1) "Importación por lote" else "Paso final: Nombre del mazo",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(8.dp))
-            OutlinedTextField(
-                value = uiState.deckName,
-                onValueChange = onDeckNameChange,
-                label = { Text("Nombre del mazo") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary
+            if (uiState.batchPdfUris.size > 1) {
+                Text(
+                    "Se crearán ${uiState.batchPdfUris.size} mazos, uno por archivo, usando los mismos ajustes de importación.",
+                    style = MaterialTheme.typography.bodyMedium
                 )
-            )
+            } else {
+                OutlinedTextField(
+                    value = uiState.deckName,
+                    onValueChange = onDeckNameChange,
+                    label = { Text("Nombre del mazo") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary
+                    )
+                )
+            }
         }
     }
 
@@ -656,16 +680,16 @@ private fun ConfigurePhase(
         DeckButton(
             onClick = onPreview,
             modifier = Modifier.fillMaxWidth(),
-            enabled = uiState.deckName.isNotBlank()
+            enabled = uiState.deckName.isNotBlank() || uiState.batchPdfUris.isNotEmpty()
         ) {
-            Text("Vista previa")
+            Text(if (uiState.batchPdfUris.size > 1) "Vista previa del primero" else "Vista previa")
         }
     } else {
         // Carpeta: importar directamente
         DeckButton(
             onClick = onStartImport,
             modifier = Modifier.fillMaxWidth(),
-            enabled = uiState.deckName.isNotBlank()
+            enabled = uiState.deckName.isNotBlank() || uiState.batchPdfUris.isNotEmpty()
         ) {
             Text("Importar")
         }
@@ -683,6 +707,7 @@ private fun PreviewPhase(
     gridRows: Int,
     layoutMode: PdfLayoutMode,
     estimatedCards: Int,
+    batchCount: Int,
     onConfirm: () -> Unit,
     onBack: () -> Unit
 ) {
@@ -692,6 +717,7 @@ private fun PreviewPhase(
         Text("Vista previa de cartas", style = MaterialTheme.typography.titleMedium)
 
         val previewNote = when {
+            batchCount > 1 -> "La vista previa corresponde al primer PDF. Se importarán $batchCount archivos con esta misma configuración; el rango de páginas se ajustará a cada documento."
             layoutMode == PdfLayoutMode.SIDE_BY_SIDE ->
                 "Páginas $startPage a $endPage ($totalRange pág${if (totalRange != 1) "s" else ""}). Pares frente/dorso. ~$estimatedCards cartas estimadas."
             else ->
@@ -745,7 +771,7 @@ private fun PreviewPhase(
             modifier = Modifier.fillMaxWidth(),
             enabled = !isLoading
         ) {
-            Text("Importar ($estimatedCards cartas aprox.)")
+            Text(if (batchCount > 1) "Importar $batchCount PDFs" else "Importar ($estimatedCards cartas aprox.)")
         }
         DeckOutlinedButton(
             onClick = onBack,
@@ -852,15 +878,15 @@ private fun ImportingPhase(progress: Float, cardCount: Int, totalCount: Int) {
 }
 
 @Composable
-private fun SuccessPhase(cardCount: Int, deckName: String, failedFiles: List<String> = emptyList()) {
+private fun SuccessPhase(cardCount: Int, deckName: String, deckCount: Int = 1, failedFiles: List<String> = emptyList()) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("Mazo importado", style = MaterialTheme.typography.headlineSmall)
+        Text(if (deckCount > 1) "$deckCount mazos importados" else "Mazo importado", style = MaterialTheme.typography.headlineSmall)
         Text(
-            "\"$deckName\" — $cardCount cartas",
+            if (deckCount > 1) "$cardCount cartas en total" else "\"$deckName\" — $cardCount cartas",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.primary
         )

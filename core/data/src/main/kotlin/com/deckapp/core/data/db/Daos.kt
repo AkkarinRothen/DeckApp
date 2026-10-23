@@ -132,7 +132,12 @@ interface CardDao {
               )
         )
         AND c.isDrawn = 0
-        ORDER BY c.id ASC
+        ORDER BY (
+            SELECT MAX(de3.timestamp) FROM draw_events de3
+            WHERE de3.sessionId = :sessionId
+              AND de3.cardId = c.id
+              AND de3.action = 'DISCARD'
+        ) ASC
     """)
     fun getPiledCards(sessionId: Long): Flow<List<CardEntity>>
 }

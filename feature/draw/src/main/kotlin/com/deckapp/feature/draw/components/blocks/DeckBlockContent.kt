@@ -1,6 +1,17 @@
 package com.deckapp.feature.draw.components.blocks
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,6 +26,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -23,6 +35,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import coil.compose.AsyncImage
 import com.deckapp.core.model.*
 import com.deckapp.feature.draw.components.BoardBlockMeta
@@ -49,12 +62,27 @@ fun DeckBlockContent(
     onRevealCard: (Long) -> Unit,
     onCardClick: (Long) -> Unit = {},
     onRotateCard: (Long) -> Unit = {},
+    onDrawBySuit: () -> Unit = {},
+    spreadResult: CardSpreadResult? = null,
+    onDrawSpread: ((CardSpread) -> Unit)? = null,
+    onClearSpread: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
 
     var showDiscardHandConfirm by remember { mutableStateOf(false) }
     var showResetConfirm by remember { mutableStateOf(false) }
+    var shuffleAnimationRun by remember { mutableIntStateOf(0) }
+    var isShuffling by remember { mutableStateOf(false) }
+    var confirmNewTarokka by remember { mutableStateOf(false) }
+
+    LaunchedEffect(shuffleAnimationRun) {
+        if (shuffleAnimationRun > 0) {
+            isShuffling = true
+            delay(1_300)
+            isShuffling = false
+        }
+    }
 
     if (showDiscardHandConfirm) {
         AlertDialog(
@@ -99,6 +127,7 @@ fun DeckBlockContent(
                     onClick = {
                         showResetConfirm = false
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        shuffleAnimationRun++
                         onReset()
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
@@ -110,6 +139,23 @@ fun DeckBlockContent(
                 TextButton(onClick = { showResetConfirm = false }) {
                     Text("Cancelar")
                 }
+            }
+        )
+    }
+
+    if (confirmNewTarokka) {
+        AlertDialog(
+            onDismissRequest = { confirmNewTarokka = false },
+            title = { Text("¿Empezar otra tirada?") },
+            text = { Text("Las cartas actuales seguirán en la mano. Se limpiarán las cinco posiciones para la nueva tirada.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmNewTarokka = false
+                    onClearSpread?.invoke()
+                }) { Text("Empezar otra") }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmNewTarokka = false }) { Text("Cancelar") }
             }
         )
     }
@@ -133,6 +179,10 @@ fun DeckBlockContent(
             onDiscard = onDiscard,
             onRevealCard = onRevealCard,
             onCardClick = onCardClick,
+            onDrawBySuit = onDrawBySuit,
+            spreadResult = spreadResult,
+            onDrawSpread = onDrawSpread,
+            onClearSpread = { confirmNewTarokka = true },
             modifier = modifier
         )
     } else {
@@ -164,6 +214,36 @@ fun DeckBlockContent(
                     label = "Descarte",
                     modifier = Modifier.weight(1f)
                 )
+            }
+
+            TextButton(
+                onClick = onDrawBySuit,
+                enabled = availableCount > 0,
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+            ) {
+                Icon(Icons.Default.FilterList, contentDescription = null, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(4.dp))
+                Text("Robar por palo")
+            }
+
+            if (meta.title.contains("tarokka", ignoreCase = true)) {
+                TarokkaSpreadPanel(
+                    result = spreadResult,
+                    cardsInHand = cards,
+                    aspectRatio = aspectRatio,
+                    backImagePath = backImagePath,
+                    onDrawNext = { onDrawSpread?.invoke(CardSpread.TAROKKA_CROSS) },
+                    onClear = { confirmNewTarokka = true },
+                    onReveal = onRevealCard
+                )
+            }
+
+            AnimatedVisibility(
+                visible = isShuffling,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                ShuffleCardsMotion(color = meta.color, modifier = Modifier.fillMaxWidth())
             }
 
             Row(
@@ -306,6 +386,7 @@ fun DeckBlockContent(
                     OutlinedButton(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            shuffleAnimationRun++
                             onShuffle()
                         },
                         border = BorderStroke(1.dp, meta.color.copy(alpha = 0.5f)),
@@ -323,6 +404,7 @@ fun DeckBlockContent(
                         OutlinedButton(
                             onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                shuffleAnimationRun++
                                 onShuffleDiscards()
                             },
                             border = BorderStroke(1.dp, meta.color.copy(alpha = 0.5f)),
@@ -354,6 +436,61 @@ fun DeckBlockContent(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ShuffleCardsMotion(color: Color, modifier: Modifier = Modifier) {
+    val transition = rememberInfiniteTransition(label = "shuffle-cards")
+    val progress by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 300, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "shuffle-progress"
+    )
+
+    Row(
+        modifier = modifier.height(42.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(Modifier.width(62.dp).height(38.dp)) {
+            val positions = listOf(
+                Triple((-16f + progress * 12f), (5f - progress * 9f), (-16f + progress * 30f)),
+                Triple(0f, (-3f + progress * 6f), 0f),
+                Triple((16f - progress * 12f), (-5f + progress * 9f), (16f - progress * 30f))
+            )
+            positions.forEachIndexed { index, (x, y, rotation) ->
+                Surface(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .offset(x = x.dp, y = y.dp)
+                        .rotate(rotation)
+                        .size(width = 23.dp, height = 32.dp),
+                    shape = RoundedCornerShape(5.dp),
+                    color = if (index == 1) color.copy(alpha = 0.9f) else color.copy(alpha = 0.65f),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)),
+                    shadowElevation = 2.dp
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Default.Style,
+                            contentDescription = null,
+                            modifier = Modifier.size(12.dp),
+                            tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f)
+                        )
+                    }
+                }
+            }
+        }
+        Text(
+            text = "Barajando…",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -404,6 +541,10 @@ private fun CompactDeckBlockContent(
     onDiscard: (Long) -> Unit,
     onRevealCard: (Long) -> Unit,
     onCardClick: (Long) -> Unit,
+    onDrawBySuit: () -> Unit,
+    spreadResult: CardSpreadResult?,
+    onDrawSpread: ((CardSpread) -> Unit)?,
+    onClearSpread: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
@@ -555,6 +696,11 @@ private fun CompactDeckBlockContent(
                     Text(if (availableCount > 0) "Robar" else "Agotado", style = MaterialTheme.typography.labelMedium)
                 }
             }
+            TextButton(onClick = onDrawBySuit, enabled = availableCount > 0) { Text("Robar por palo") }
+            if (meta.title.contains("tarokka", ignoreCase = true)) {
+                TarokkaSpreadPanel(spreadResult, cards, aspectRatio, backImagePath,
+                    { onDrawSpread?.invoke(CardSpread.TAROKKA_CROSS) }, onClearSpread, onRevealCard)
+            }
         }
     } else {
         // La acción queda rotulada también cuando la mano está vacía.
@@ -593,6 +739,91 @@ private fun CompactDeckBlockContent(
                 Spacer(Modifier.width(4.dp))
                 Text(if (availableCount > 0) "Robar" else "Agotado", style = MaterialTheme.typography.labelMedium)
             }
+            TextButton(onClick = onDrawBySuit, enabled = availableCount > 0) { Text("Robar por palo") }
+            if (meta.title.contains("tarokka", ignoreCase = true)) {
+                TarokkaSpreadPanel(spreadResult, cards, aspectRatio, backImagePath,
+                    { onDrawSpread?.invoke(CardSpread.TAROKKA_CROSS) }, onClearSpread, onRevealCard)
+            }
+        }
+    }
+}
+
+@Composable
+private fun TarokkaSpreadPanel(
+    result: CardSpreadResult?,
+    cardsInHand: List<Card>,
+    aspectRatio: CardAspectRatio,
+    backImagePath: String?,
+    onDrawNext: () -> Unit,
+    onClear: () -> Unit,
+    onReveal: (Long) -> Unit
+) {
+    val ids = result?.takeIf { it.spread == CardSpread.TAROKKA_CROSS }?.cards.orEmpty().map { it.id }
+    val byId = cardsInHand.associateBy { it.id }
+    val assigned = ids.mapNotNull(byId::get)
+    Column(
+        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh).padding(10.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text("Tirada Tarokka", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                Text("${assigned.size}/5 posiciones", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            if (assigned.size < TAROKKA_POSITIONS.size) {
+                FilledTonalButton(onClick = onDrawNext) {
+                    Icon(Icons.Default.Add, null, Modifier.size(16.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text(if (assigned.isEmpty()) "Iniciar" else "Siguiente")
+                }
+            } else TextButton(onClick = onClear) { Text("Nueva tirada") }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            TAROKKA_POSITIONS.forEachIndexed { index, label ->
+                val card = assigned.getOrNull(index)
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
+                    Text(label, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    if (card == null) {
+                        Surface(
+                            modifier = Modifier.width(48.dp).aspectRatio(aspectRatio.ratio),
+                            shape = RoundedCornerShape(7.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                        ) { Box(contentAlignment = Alignment.Center) { Text("${index + 1}") } }
+                    } else {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth().aspectRatio(aspectRatio.ratio)
+                                .clip(RoundedCornerShape(7.dp)).clickable {
+                                    if (!card.isRevealed) onReveal(card.id)
+                                },
+                            shape = RoundedCornerShape(7.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                            shadowElevation = 2.dp
+                        ) {
+                            val imagePath = if (card.isRevealed) card.activeFace.imagePath else backImagePath
+                            if (imagePath != null) {
+                                AsyncImage(
+                                    model = com.deckapp.core.ui.util.toCoilModel(imagePath),
+                                    contentDescription = if (card.isRevealed) card.title else "Dorso de carta",
+                                    modifier = Modifier.fillMaxSize().graphicsLayer {
+                                        rotationZ = if (card.isRevealed) card.currentRotation.toFloat() else 0f
+                                    },
+                                    contentScale = ContentScale.Fit
+                                )
+                            } else {
+                                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    Text(if (card.isRevealed) card.title.take(1) else "?")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (assigned.any { !it.isRevealed }) {
+            Text("Toca una carta boca abajo para revelarla.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

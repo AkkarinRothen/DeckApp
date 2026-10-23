@@ -2,6 +2,7 @@ package com.deckapp.feature.importdeck
 
 import android.content.Context
 import android.net.Uri
+import android.provider.OpenableColumns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.deckapp.core.domain.repository.FileRepository
@@ -79,6 +80,7 @@ data class DeckImportUiState(
     val phase: DeckImportPhase = DeckImportPhase.SELECT_SOURCE,
     val source: DeckImportSource? = null,
     val selectedUri: Uri? = null,
+    val batchPdfUris: List<Uri> = emptyList(),
     val deckName: String = "",
     val defaultContentMode: CardContentMode = CardContentMode.IMAGE_ONLY,
     // PDF-specific
@@ -107,6 +109,7 @@ data class DeckImportUiState(
     val importedCardCount: Int = 0,
     val isImporting: Boolean = false,
     val importedDeckId: Long? = null,
+    val importedDeckCount: Int = 0,
     val errorMessage: String? = null,
     val failedFiles: List<String> = emptyList()
 )
@@ -190,11 +193,12 @@ class DeckImportViewModel @Inject constructor(
             // Si el URI proviene de un listado de carpeta (tree URI), no se puede tomar persistencia individual
             // pero ya tenemos la persistencia sobre la carpeta madre.
         }
-        val fileName = uri.lastPathSegment?.substringAfterLast('/') ?: "Nuevo mazo"
+        val fileName = displayName(uri)
         val deckName = fileName.removeSuffix(".pdf")
         _uiState.update {
             it.copy(
                 selectedUri = uri,
+                batchPdfUris = emptyList(),
                 deckName = deckName,
                 phase = DeckImportPhase.CONFIGURE,
                 source = DeckImportSource.PDF
@@ -219,6 +223,40 @@ class DeckImportViewModel @Inject constructor(
             }
             checkStorage()
         }
+    }
+
+    fun onPdfsSelected(uris: List<Uri>) {
+        val pdfs = uris.distinct()
+        if (pdfs.isEmpty()) return
+        pdfs.forEach { uri ->
+            runCatching {
+                context.contentResolver.takePersistableUriPermission(
+                    uri,
+                    android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            }
+        }
+        onPdfSelected(pdfs.first())
+        _uiState.update { it.copy(batchPdfUris = pdfs) }
+        viewModelScope.launch {
+            pdfs.drop(1).forEach { pdfUri ->
+                recentFileRepository.addRecentFile(
+                    pdfUri,
+                    displayName(pdfUri),
+                    com.deckapp.core.domain.repository.RecentFileType.PDF
+                )
+            }
+        }
+    }
+
+    private fun displayName(uri: Uri): String {
+        val fromProvider = runCatching {
+            context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
+                ?.use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else null }
+        }.getOrNull()
+        return fromProvider?.takeIf { it.isNotBlank() }
+            ?: uri.lastPathSegment?.substringAfterLast('/')
+            ?: "Nuevo mazo.pdf"
     }
 
     suspend fun renderThumbnail(uri: Uri): android.graphics.Bitmap? {
@@ -489,64 +527,103 @@ class DeckImportViewModel @Inject constructor(
     fun startImport() {
         val state = _uiState.value
         val uri = state.selectedUri ?: return
-        if (state.deckName.isBlank()) return
+        if (state.batchPdfUris.isEmpty() && state.deckName.isBlank()) return
 
         _uiState.update { it.copy(phase = DeckImportPhase.IMPORTING, isImporting = true) }
 
         viewModelScope.launch {
-            // Calculate total items for better progress reporting
+            val pdfUris = state.batchPdfUris.ifEmpty { listOf(uri) }
+            val pageCounts = if (state.source == DeckImportSource.PDF) {
+                pdfUris.associateWith { pdfUri ->
+                    runCatching { fileRepository.getPdfPageCount(pdfUri) }.getOrDefault(0)
+                }
+            } else emptyMap()
+            val perPdfTotals = pdfUris.associateWith { pdfUri ->
+                val pages = pageCounts[pdfUri] ?: state.pdfPageCount
+                val startPage = state.pdfStartPage.coerceAtMost(pages.coerceAtLeast(1)).coerceAtLeast(1)
+                val endPage = (state.pdfEndPage ?: pages).coerceAtMost(pages).coerceAtLeast(startPage)
+                calculateEstimatedCards(
+                    state.copy(pdfPageCount = pages, pdfStartPage = startPage, pdfEndPage = endPage)
+                )
+            }
             val total = when (state.source) {
                 DeckImportSource.FOLDER -> fileRepository.listImagesInFolder(uri).size
-                DeckImportSource.PDF -> calculateEstimatedCards(state)
+                DeckImportSource.PDF -> perPdfTotals.values.sum()
                 else -> 0
             }
             _uiState.update { it.copy(totalItemsToImport = total) }
 
             val failedFiles = mutableListOf<String>()
-            val startIdx = (state.pdfStartPage - 1).coerceAtLeast(0)
-            val endIdx = state.pdfEndPage?.let { (it - 1).coerceAtLeast(0) }
-
-            importDeckUseCase(
-                uri = uri,
-                deckName = state.deckName,
-                source = state.source ?: DeckImportSource.FOLDER,
-                defaultContentMode = state.defaultContentMode,
-                pdfLayoutMode = state.pdfLayoutMode,
-                pdfGridCols = state.pdfGridCols,
-                pdfGridRows = state.pdfGridRows,
-                pdfSkipPages = state.pdfSkipPages,
-                pdfStartPage = startIdx,
-                pdfEndPage = endIdx,
-                pdfAutoTrimCells = state.pdfAutoTrimCells,
-                pdfSplitRatio = state.pdfSideBySideSplitRatio,
-                onProgress = { progress, count ->
-                    _uiState.update { it.copy(importProgress = progress, importedCardCount = count) }
-                },
-                onFileError = { fileName ->
-                    failedFiles += fileName
+            var firstDeckId: Long? = null
+            var successfulDecks = 0
+            var successfulCards = 0
+            var completedEstimate = 0
+            val batch = state.source == DeckImportSource.PDF && state.batchPdfUris.isNotEmpty()
+            val sources = if (state.source == DeckImportSource.PDF) pdfUris else listOf(uri)
+            for ((index, sourceUri) in sources.withIndex()) {
+                val pages = pageCounts[sourceUri] ?: state.pdfPageCount
+                val boundedEndPage = state.pdfEndPage?.coerceAtMost(pages)
+                val boundedStartPage = (state.pdfStartPage - 1)
+                    .coerceAtLeast(0)
+                    .coerceAtMost((pages - 1).coerceAtLeast(0))
+                val estimatedForFile = perPdfTotals[sourceUri] ?: total
+                val fileName = displayName(sourceUri)
+                val importName = if (batch) fileName.substringBeforeLast('.', fileName) else state.deckName
+                var cardsInCurrentFile = 0
+                val result = importDeckUseCase(
+                    uri = sourceUri,
+                    deckName = importName,
+                    source = state.source ?: DeckImportSource.FOLDER,
+                    defaultContentMode = state.defaultContentMode,
+                    pdfLayoutMode = state.pdfLayoutMode,
+                    pdfGridCols = state.pdfGridCols,
+                    pdfGridRows = state.pdfGridRows,
+                    pdfSkipPages = state.pdfSkipPages,
+                    pdfStartPage = boundedStartPage,
+                    pdfEndPage = boundedEndPage?.let { (it - 1).coerceAtLeast(0) },
+                    pdfAutoTrimCells = state.pdfAutoTrimCells,
+                    pdfSplitRatio = state.pdfSideBySideSplitRatio,
+                    onProgress = { progress, count ->
+                        cardsInCurrentFile = count
+                        val overall = if (total > 0) (completedEstimate + progress * estimatedForFile) / total else 0f
+                        _uiState.update {
+                            it.copy(importProgress = overall.coerceIn(0f, 1f), importedCardCount = successfulCards + count)
+                        }
+                    },
+                    onFileError = { failed -> failedFiles += "$fileName: $failed" }
+                )
+                result.fold(
+                    onSuccess = { deckId ->
+                        if (firstDeckId == null) firstDeckId = deckId
+                        successfulDecks++
+                        successfulCards += cardsInCurrentFile
+                    },
+                    onFailure = { error -> failedFiles += "$fileName: ${error.message ?: "Error al importar"}" }
+                )
+                completedEstimate += estimatedForFile
+                _uiState.update { it.copy(importProgress = (completedEstimate.toFloat() / total.coerceAtLeast(1)).coerceIn(0f, 1f)) }
+            }
+            if (firstDeckId != null) {
+                _uiState.update {
+                    it.copy(
+                        phase = DeckImportPhase.SUCCESS,
+                        isImporting = false,
+                        importedDeckId = firstDeckId,
+                        importedDeckCount = successfulDecks,
+                        importedCardCount = successfulCards,
+                        failedFiles = failedFiles.toList()
+                    )
                 }
-            ).fold(
-                onSuccess = { deckId ->
-                    _uiState.update {
-                        it.copy(
-                            phase = DeckImportPhase.SUCCESS,
-                            isImporting = false,
-                            importedDeckId = deckId,
-                            failedFiles = failedFiles.toList()
-                        )
-                    }
-                },
-                onFailure = { error ->
-                    _uiState.update {
-                        it.copy(
-                            phase = DeckImportPhase.CONFIGURE,
-                            isImporting = false,
-                            errorMessage = error.message,
-                            failedFiles = failedFiles.toList()
-                        )
-                    }
+            } else {
+                _uiState.update {
+                    it.copy(
+                        phase = DeckImportPhase.CONFIGURE,
+                        isImporting = false,
+                        errorMessage = failedFiles.firstOrNull() ?: "No se pudo importar ningún archivo.",
+                        failedFiles = failedFiles.toList()
+                    )
                 }
-            )
+            }
         }
     }
 

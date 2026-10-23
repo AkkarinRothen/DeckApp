@@ -6,7 +6,7 @@ Este documento sirve para registrar ideas de funcionalidades que podrían integr
 - [ ] **Rango de páginas (Full Range):** Selección de `inicio-fin` (ej: "10-50") para ignorar contenido no deseado en cualquier parte del PDF.
 - [ ] **Dorso Único (Generic Back):** Opción para asignar una imagen fija o de una galería de texturas como dorso global.
 - [ ] **Plantillas de Importación:** Guardar configuraciones de grilla/márgenes para reutilizarlas en PDFs del mismo autor.
-- [ ] **Importación Masiva (Batch):** Procesamiento de múltiples archivos PDF/Carpetas en cola usando plantillas.
+- [x] **Importación Masiva (Batch) de PDFs:** Procesamiento secuencial de PDFs seleccionados usando la misma plantilla; cada archivo crea un mazo y registra sus errores por separado.
 - [ ] **Auto-Crop Inteligente:** Uso de OpenCV para detectar bordes de cartas automáticamente en PDFs irregulares.
 - [ ] **Corrección de Rotación:** Botones de giro 90° en la vista previa para corregir la orientación antes de recortar.
 - [ ] **OCR de Títulos:** Detección automática de títulos durante el recorte para evitar nombres genéricos.
@@ -20,7 +20,7 @@ Este documento sirve para registrar ideas de funcionalidades que podrían integr
 - [ ] **Garbage Collector de Archivos:** Limpieza automática de imágenes "huérfanas" no vinculadas a la base de datos.
 - [ ] **Soporte DPI Adaptativo:** Ajuste inteligente de la resolución de renderizado según el tamaño de la carta.
 - [ ] **Deduplicación por Hash (SHA-256):** Evitar archivos duplicados en disco si varias cartas comparten la misma imagen.
-- [ ] **Indexación Room FTS:** Búsqueda de texto completo optimizada para bibliotecas de miles de cartas.
+- [x] **Indexación Room FTS:** Búsqueda de texto completo para cartas y referencias, integrada al buscador global con consultas cancelables y resultados limitados.
 - [ ] **Sistema de Miniaturas (.webp):** Generación automática de versiones ligeras para scroll fluido en la biblioteca.
 - [ ] **Tests de Regresión de PDF:** Suite de pruebas automáticas para asegurar que nuevos cambios no rompan modos de importación previos.
 - [ ] **Verificador de Integridad SAF:** Chequeo al inicio para detectar y reparar URIs de carpetas externas inaccesibles.
@@ -34,11 +34,11 @@ Este documento sirve para registrar ideas de funcionalidades que podrían integr
 - [ ] **Monitor de Salud de RAM:** Alerta proactiva al usuario si la biblioteca está agotando los recursos del sistema.
 
 ## 2. Organización y Biblioteca
-- [ ] **Etiquetado por mazo (Tags):** Categorizar mazos (Bestiario, Hechizos, Encuentros) para filtrado rápido.
-- [ ] **Buscador Global:** Buscar una carta por nombre entre todos los mazos de la biblioteca.
+- [x] **Etiquetado por mazo (Tags):** Categorizar mazos (Bestiario, Hechizos, Encuentros) para filtrado rápido; el acceso a administración de etiquetas desde la biblioteca ya está conectado.
+- [x] **Buscador Global:** Buscar una carta por nombre entre todos los mazos de la biblioteca.
 
 ## 3. Funciones de Juego (Session Mode)
-- [ ] **Gestión de Descarte:** Pila de descarte visual para ver qué cartas salieron y poder re-mezclarlas.
+- [x] **Gestión de Descarte:** Pila visual en el tapete con historial inspeccionable de cartas descartadas, apertura de cada carta y recuperación al mazo.
 - [ ] **Marcadores sobre la carta:** Tokens temporales (vida, estados, "agotado").
 - [ ] **Mano del Jugador:** Zona de cartas privadas antes de bajarlas a la mesa virtual.
 - [ ] **Timer de Sesión:** Mostrar el tiempo transcurrido de la partida.
@@ -79,7 +79,7 @@ Este documento sirve para registrar ideas de funcionalidades que podrían integr
 - [ ] **Temas de Mesa:** Texturas personalizables para el fondo del Workspace (madera, piedra, etc.).
 
 ---
-*Documento actualizado el 16 de abril de 2026*
+*Documento actualizado el 22 de octubre de 2026*
 
 ## Propuesta de Hoja de Ruta: Organización y Biblioteca (Q2 2026)
 

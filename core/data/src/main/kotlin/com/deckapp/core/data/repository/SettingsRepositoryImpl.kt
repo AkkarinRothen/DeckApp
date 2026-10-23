@@ -36,6 +36,13 @@ class SettingsRepositoryImpl @Inject constructor(
         prefs.edit().putString("board_session_$sessionId", BoardMemoryCodec.encode(memory)).apply()
     }
 
+    override fun getSavedBoardTemplates(): List<com.deckapp.core.model.SavedBoardTemplate> =
+        BoardMemoryCodec.decodeTemplates(prefs.getString("saved_board_templates", null))
+
+    override fun setSavedBoardTemplates(templates: List<com.deckapp.core.model.SavedBoardTemplate>) {
+        prefs.edit().putString("saved_board_templates", BoardMemoryCodec.encodeTemplates(templates)).apply()
+    }
+
     private val generalPreferencesFlow = MutableStateFlow(
         GeneralPreferences(
             startPage = runCatching {

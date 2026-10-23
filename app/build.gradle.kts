@@ -7,6 +7,19 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+val releaseStoreFilePath = providers.environmentVariable("DECKAPP_RELEASE_STORE_FILE").orNull
+val releaseStorePassword = providers.environmentVariable("DECKAPP_RELEASE_STORE_PASSWORD").orNull
+val releaseKeyAlias = providers.environmentVariable("DECKAPP_RELEASE_KEY_ALIAS").orNull
+val releaseKeyPassword = providers.environmentVariable("DECKAPP_RELEASE_KEY_PASSWORD").orNull
+val hasStableReleaseKey = listOf(
+    releaseStoreFilePath,
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword
+).all { !it.isNullOrBlank() }
+val taggedVersionName = providers.gradleProperty("deckappVersionName").orNull
+val taggedVersionCode = providers.gradleProperty("deckappVersionCode").orNull?.toIntOrNull()
+
 android {
     namespace = "com.deckapp"
     compileSdk = 35
@@ -15,8 +28,21 @@ android {
         applicationId = "com.deckapp.ttrpg"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "0.1.1"
+        versionCode = 3
+        versionName = "0.1.2"
+        if (taggedVersionCode != null) versionCode = taggedVersionCode
+        if (!taggedVersionName.isNullOrBlank()) versionName = taggedVersionName
+    }
+
+    signingConfigs {
+        if (hasStableReleaseKey) {
+            create("stableRelease") {
+                storeFile = file(releaseStoreFilePath!!)
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
     }
 
     buildTypes {
@@ -26,7 +52,11 @@ android {
         }
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (hasStableReleaseKey) {
+                signingConfigs.getByName("stableRelease")
+            } else {
+                signingConfigs.getByName("debug")
+            }
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -74,6 +104,8 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.glance)
+    implementation(libs.androidx.glance.appwidget)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose.ui)
     implementation(libs.bundles.lifecycle)

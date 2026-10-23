@@ -38,7 +38,9 @@ data class DeckDetailUiState(
     val exportSuccessMessage: String? = null,
     val showConfigSheet: Boolean = false,
     val showExportDialog: Boolean = false,
-    val isReorderMode: Boolean = false
+    val isReorderMode: Boolean = false,
+    val pendingCardDeletion: Card? = null,
+    val pendingDeckDeletion: Boolean = false
 )
 
 @HiltViewModel
@@ -66,7 +68,9 @@ class DeckDetailViewModel @Inject constructor(
         val exportSuccessMessage: String? = null,
         val showConfigSheet: Boolean = false,
         val suitFilter: String? = null,
-        val isReorderMode: Boolean = false
+        val isReorderMode: Boolean = false,
+        val pendingCardDeletion: Card? = null,
+        val pendingDeckDeletion: Boolean = false
     )
 
     val uiState = combine(
@@ -77,8 +81,9 @@ class DeckDetailViewModel @Inject constructor(
     ) { deck, cards, allDecks, extras ->
         // Este bloque ahora se ejecutará en Dispatchers.Default gracias a flowOn
         val suits = cards.mapNotNull { it.suit }.distinct().sorted()
-        val filtered = if (extras.suitFilter == null) cards
-                       else cards.filter { it.suit == extras.suitFilter }
+        val filtered = cards
+            .filter { extras.suitFilter == null || it.suit == extras.suitFilter }
+            .filter { it.id != extras.pendingCardDeletion?.id }
         DeckDetailUiState(
             deck = deck,
             cards = cards,
@@ -96,7 +101,9 @@ class DeckDetailViewModel @Inject constructor(
             errorMessage = extras.errorMessage,
             exportSuccessMessage = extras.exportSuccessMessage,
             showConfigSheet = extras.showConfigSheet,
-            isReorderMode = extras.isReorderMode
+            isReorderMode = extras.isReorderMode,
+            pendingCardDeletion = extras.pendingCardDeletion,
+            pendingDeckDeletion = extras.pendingDeckDeletion
         )
     }.flowOn(Dispatchers.Default)
     .stateIn(
@@ -244,11 +251,18 @@ class DeckDetailViewModel @Inject constructor(
         }
     }
 
-    fun deleteDeck() {
-        val id = deckId
-        viewModelScope.launch {
-            cardRepository.deleteStack(id)
-        }
+    fun requestDeleteDeck() {
+        _extras.update { it.copy(pendingDeckDeletion = true) }
+    }
+
+    fun cancelPendingDeckDeletion() {
+        _extras.update { it.copy(pendingDeckDeletion = false) }
+    }
+
+    suspend fun confirmPendingDeckDeletion() {
+        if (!_extras.value.pendingDeckDeletion) return
+        cardRepository.deleteStack(deckId)
+        _extras.update { it.copy(pendingDeckDeletion = false) }
     }
 
     fun setSuitFilter(suit: String?) {
@@ -266,10 +280,18 @@ class DeckDetailViewModel @Inject constructor(
         }
     }
 
-    fun deleteCard(cardId: Long) {
-        viewModelScope.launch {
-            cardRepository.deleteCard(cardId)
-        }
+    fun requestDeleteCard(card: Card) {
+        _extras.update { it.copy(pendingCardDeletion = card) }
+    }
+
+    fun cancelPendingCardDeletion() {
+        _extras.update { it.copy(pendingCardDeletion = null) }
+    }
+
+    suspend fun confirmPendingCardDeletion() {
+        val card = _extras.value.pendingCardDeletion ?: return
+        cardRepository.deleteCard(card.id)
+        _extras.update { it.copy(pendingCardDeletion = null) }
     }
 
     /** Crea un tag con [name] y lo asigna a este mazo (si no hay uno con ese nombre ya). */
