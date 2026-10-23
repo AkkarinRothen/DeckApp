@@ -154,6 +154,7 @@ val BoardCentralTool = SessionCentralConnector(
             onRenameGroup = { groupId, name, _, _, _ -> viewModel.renameBoardGroup(groupId, name) },
             onDeleteGroup = viewModel::deleteBoardGroup,
             onToggleGroupCollapsed = { groupId, _ -> viewModel.toggleBoardGroupCollapsed(groupId) },
+            onSetGroupLayoutMode = viewModel::setBoardGroupLayoutMode,
             onMoveBoardGroup = viewModel::moveBoardGroup,
             onAssignToGroup = viewModel::assignItemToGroup,
             onMergeItems = viewModel::mergeBoardItems,

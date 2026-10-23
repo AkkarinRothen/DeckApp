@@ -51,6 +51,7 @@ class DrawCardUseCase @Inject constructor(
             CardContentMode.REVERSIBLE -> listOf(0, 180).random()
             else -> card.currentRotation
         }
+        val isReversed = mode == CardContentMode.REVERSIBLE && randomRotation == 180
 
         // Actualizar estado de forma atómica a través del Use Case unificado
         updateCardStateUseCase(
@@ -59,7 +60,8 @@ class DrawCardUseCase @Inject constructor(
                 isDrawn = true,
                 lastDrawnAt = System.currentTimeMillis(),
                 isRevealed = !faceDown,
-                rotation = randomRotation
+                rotation = randomRotation,
+                isReversed = isReversed
             )
         )
 
@@ -75,6 +77,11 @@ class DrawCardUseCase @Inject constructor(
             )
         )
 
-        return card.copy(isDrawn = true, isRevealed = !faceDown, currentRotation = randomRotation)
+        return card.copy(
+            isDrawn = true,
+            isRevealed = !faceDown,
+            currentRotation = randomRotation,
+            isReversed = isReversed
+        )
     }
 }

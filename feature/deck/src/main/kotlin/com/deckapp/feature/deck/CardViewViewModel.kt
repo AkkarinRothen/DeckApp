@@ -7,6 +7,7 @@ import com.deckapp.core.domain.repository.CardRepository
 import com.deckapp.core.domain.usecase.UpdateCardNotesUseCase
 import com.deckapp.core.domain.usecase.UpdateCardStateUseCase
 import com.deckapp.core.model.Card
+import com.deckapp.core.model.CardContentMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -59,24 +60,74 @@ class CardViewViewModel @Inject constructor(
         }
     }
 
-    fun rotate90() {
+    fun rotateToNextOption() {
         val card = uiState.value.card ?: return
-        val nextRotation = (card.currentRotation + 90) % 360
+        val normalizedRotation = ((card.currentRotation % 360) + 360) % 360
+        val update = when (card.activeFace.contentMode) {
+            CardContentMode.FOUR_EDGE_CUES ->
+                UpdateCardStateUseCase.CardStateUpdate(rotation = (normalizedRotation + 90) % 360)
+
+            CardContentMode.TOP_BOTTOM_SPLIT -> {
+                val currentOptionRotation = if (normalizedRotation == 180) 180 else 0
+                UpdateCardStateUseCase.CardStateUpdate(
+                    rotation = if (currentOptionRotation == 0) 180 else 0
+                )
+            }
+
+            CardContentMode.REVERSIBLE -> {
+                val isCurrentlyReversed = card.isReversed || normalizedRotation == 180
+                val nextIsReversed = !isCurrentlyReversed
+                UpdateCardStateUseCase.CardStateUpdate(
+                    rotation = if (nextIsReversed) 180 else 0,
+                    isReversed = nextIsReversed
+                )
+            }
+
+            else -> return
+        }
         viewModelScope.launch {
-            updateCardStateUseCase(cardId, UpdateCardStateUseCase.CardStateUpdate(rotation = nextRotation))
+            updateCardStateUseCase(cardId, update)
         }
     }
 
     fun setRotation(degrees: Int) {
+        val card = uiState.value.card ?: return
+        val normalizedRotation = ((degrees % 360) + 360) % 360
+        val update = when (card.activeFace.contentMode) {
+            CardContentMode.FOUR_EDGE_CUES ->
+                UpdateCardStateUseCase.CardStateUpdate(rotation = normalizedRotation / 90 * 90)
+
+            CardContentMode.TOP_BOTTOM_SPLIT ->
+                UpdateCardStateUseCase.CardStateUpdate(rotation = if (normalizedRotation == 180) 180 else 0)
+
+            CardContentMode.REVERSIBLE -> {
+                val isReversed = normalizedRotation == 180
+                UpdateCardStateUseCase.CardStateUpdate(
+                    rotation = if (isReversed) 180 else 0,
+                    isReversed = isReversed
+                )
+            }
+
+            else -> UpdateCardStateUseCase.CardStateUpdate(rotation = normalizedRotation)
+        }
         viewModelScope.launch {
-            updateCardStateUseCase(cardId, UpdateCardStateUseCase.CardStateUpdate(rotation = degrees))
+            updateCardStateUseCase(cardId, update)
         }
     }
 
     fun toggleReversed() {
         val card = uiState.value.card ?: return
+        val normalizedRotation = ((card.currentRotation % 360) + 360) % 360
+        val isCurrentlyReversed = card.isReversed || normalizedRotation == 180
+        val nextIsReversed = !isCurrentlyReversed
         viewModelScope.launch {
-            updateCardStateUseCase(cardId, UpdateCardStateUseCase.CardStateUpdate(isReversed = !card.isReversed))
+            updateCardStateUseCase(
+                cardId,
+                UpdateCardStateUseCase.CardStateUpdate(
+                    rotation = if (nextIsReversed) 180 else 0,
+                    isReversed = nextIsReversed
+                )
+            )
         }
     }
 

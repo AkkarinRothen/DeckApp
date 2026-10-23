@@ -3,6 +3,7 @@ package com.deckapp.core.domain.usecase
 import com.deckapp.core.domain.repository.CardRepository
 import com.deckapp.core.domain.repository.SessionRepository
 import com.deckapp.core.model.DrawAction
+import com.deckapp.core.model.CardContentMode
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
@@ -31,12 +32,31 @@ class UndoLastActionUseCase @Inject constructor(
                     }
                 }
                 DrawAction.REVERSE ->
-                    updateCardStateUseCase(cardId, UpdateCardStateUseCase.CardStateUpdate(isReversed = false))
+                    updateCardStateUseCase(
+                        cardId,
+                        UpdateCardStateUseCase.CardStateUpdate(rotation = 0, isReversed = false)
+                    )
                 DrawAction.ROTATE -> {
                     val card = cardRepository.getCardById(cardId).first()
                     if (card != null) {
-                        val prevRotation = (card.currentRotation + 270) % 360
-                        updateCardStateUseCase(card.id, UpdateCardStateUseCase.CardStateUpdate(rotation = prevRotation))
+                        val normalizedRotation = ((card.currentRotation % 360) + 360) % 360
+                        val update = when (card.activeFace.contentMode) {
+                            CardContentMode.FOUR_EDGE_CUES -> UpdateCardStateUseCase.CardStateUpdate(
+                                rotation = (normalizedRotation + 270) % 360
+                            )
+                            CardContentMode.TOP_BOTTOM_SPLIT -> UpdateCardStateUseCase.CardStateUpdate(
+                                rotation = if (normalizedRotation == 180) 0 else 180
+                            )
+                            CardContentMode.REVERSIBLE -> {
+                                val wasReversed = !(card.isReversed || normalizedRotation == 180)
+                                UpdateCardStateUseCase.CardStateUpdate(
+                                    rotation = if (wasReversed) 180 else 0,
+                                    isReversed = wasReversed
+                                )
+                            }
+                            else -> UpdateCardStateUseCase.CardStateUpdate(rotation = normalizedRotation)
+                        }
+                        updateCardStateUseCase(card.id, update)
                     }
                 }
                 DrawAction.DISCARD ->

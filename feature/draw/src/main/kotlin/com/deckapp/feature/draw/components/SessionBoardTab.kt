@@ -6,6 +6,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -113,6 +114,7 @@ fun SessionBoardTab(
     onRenameGroup: (Long, String, String?, String?, String?) -> Unit = { _, _, _, _, _ -> },
     onDeleteGroup: (Long) -> Unit = {},
     onToggleGroupCollapsed: (Long, Boolean) -> Unit = { _, _ -> },
+    onSetGroupLayoutMode: (Long, SessionBoardLayoutMode) -> Unit = { _, _ -> },
     onAssignToGroup: (Long, Long?) -> Unit = { _, _ -> },
     onMergeItems: (Long, Long, (SessionBoardGroup) -> Unit) -> Unit = { _, _, _ -> },
     deckRefs: List<SessionDeckRef> = emptyList(),
@@ -269,11 +271,27 @@ fun SessionBoardTab(
                                 fontWeight = FontWeight.Bold
                             )
                         }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            val isGridLayout = focusedGroup?.preferredLayoutMode != SessionBoardLayoutMode.LIST
+                            IconButton(onClick = {
+                                focusedGroup?.let { group ->
+                                    onSetGroupLayoutMode(
+                                        group.id,
+                                        if (isGridLayout) SessionBoardLayoutMode.LIST else SessionBoardLayoutMode.GRID
+                                    )
+                                }
+                            }) {
+                                Icon(
+                                    imageVector = if (isGridLayout) Icons.AutoMirrored.Filled.ViewList else Icons.Default.ViewModule,
+                                    contentDescription = if (isGridLayout) "Cambiar a lista compacta" else "Cambiar a cuadrícula compacta"
+                                )
+                            }
                         IconButton(onClick = {
                             pickerTargetGroupId = focusedGroupId
                             showPicker = true
                         }) {
                             Icon(Icons.Default.Add, contentDescription = "Agregar a carpeta")
+                        }
                         }
                     }
                 }

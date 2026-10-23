@@ -1610,6 +1610,7 @@ class SessionViewModel @Inject constructor(
     fun setAllBlocksCollapsedInView(collapsed: Boolean) = boardDelegate.setAllBlocksCollapsedInView(_uiState.value.activeBoardView, collapsed)
     fun createBoardGroup(name: String, colorHex: String? = null) = boardDelegate.createBoardGroup(name, colorHex, null, null)
     fun renameBoardGroup(groupId: Long, newName: String) = boardDelegate.renameBoardGroup(groupId, newName, null, null, null)
+    fun setBoardGroupLayoutMode(groupId: Long, mode: SessionBoardLayoutMode) = boardDelegate.setBoardGroupLayoutMode(groupId, mode)
     fun deleteBoardGroup(groupId: Long) = boardDelegate.deleteBoardGroup(groupId)
     fun toggleBoardGroupCollapsed(groupId: Long) {
         val group = _uiState.value.boardGroups.find { it.id == groupId } ?: return

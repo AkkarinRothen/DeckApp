@@ -368,12 +368,32 @@ class SessionDeckDelegate(
     fun rotateCard(cardId: Long) {
         scope.launch {
             val card = cardRepository.getCardById(cardId).first() ?: return@launch
-            val nextRotation = when (card.activeFace.contentMode) {
-                CardContentMode.FOUR_EDGE_CUES -> (card.currentRotation + 90) % 360
-                CardContentMode.TOP_BOTTOM_SPLIT, CardContentMode.REVERSIBLE -> (card.currentRotation + 180) % 360
-                else -> (card.currentRotation + 90) % 360
+            val normalizedRotation = ((card.currentRotation % 360) + 360) % 360
+            val update = when (card.activeFace.contentMode) {
+                CardContentMode.FOUR_EDGE_CUES -> UpdateCardStateUseCase.CardStateUpdate(
+                    rotation = (normalizedRotation + 90) % 360
+                )
+
+                CardContentMode.TOP_BOTTOM_SPLIT -> {
+                    val currentOptionRotation = if (normalizedRotation == 180) 180 else 0
+                    UpdateCardStateUseCase.CardStateUpdate(
+                        rotation = if (currentOptionRotation == 0) 180 else 0
+                    )
+                }
+
+                CardContentMode.REVERSIBLE -> {
+                    val isCurrentlyReversed = card.isReversed || normalizedRotation == 180
+                    val nextIsReversed = !isCurrentlyReversed
+                    UpdateCardStateUseCase.CardStateUpdate(
+                        rotation = if (nextIsReversed) 180 else 0,
+                        isReversed = nextIsReversed
+                    )
+                }
+
+                else -> return@launch
             }
-            updateCardStateUseCase(cardId, UpdateCardStateUseCase.CardStateUpdate(rotation = nextRotation))
+            val nextRotation = update.rotation ?: normalizedRotation
+            updateCardStateUseCase(cardId, update)
             sessionRepository.logEvent(
                 DrawEvent(
                     sessionId = sessionId,

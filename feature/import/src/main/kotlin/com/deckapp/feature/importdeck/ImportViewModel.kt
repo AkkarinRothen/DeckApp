@@ -29,6 +29,15 @@ data class PdfGridTemplate(
 
 val PDF_PRESET_TEMPLATES = listOf(
     PdfGridTemplate(
+        id = "story_engine_2x3",
+        name = "Story Engine 2×3 PnP",
+        subtitle = "6 cartas cuadradas por hoja (frente/dorso alternado)",
+        layoutMode = PdfLayoutMode.ALTERNATING_PAGES,
+        gridCols = 2,
+        gridRows = 3,
+        contentMode = CardContentMode.DOUBLE_SIDED_FULL
+    ),
+    PdfGridTemplate(
         id = "3x3_alt",
         name = "3×3 Alternado",
         subtitle = "P&P Estándar (frente/dorso seguidos)",

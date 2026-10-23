@@ -1,3 +1,37 @@
+### Separación individual de cartas y presets PnP 2×3 para The Story Engine y Deck of Worlds (23 de octubre de 2026)
+
+**Categoría:** `FEATURE / STORY ENGINE / EXPANSIONS / PNP IMPORT / OCR PIPELINE / UX`
+
+- **Regeneración de las 13 Expansiones en Cartas Individuales Auténticas:**
+  - Se corrigió la extracción previa donde cada página completa (hoja de 6 cartas) se trataba como una única carta, dejando mazos con solo 10 cartas gigantes en lugar de cartas separadas.
+  - Se implementó un algoritmo de corte 2×3 preciso por celda (650×650 px a 200 DPI, WebP optimizado ~40 KB) extrayendo las 6 cartas por pliego con emparejamiento dúplex invertido horizontalmente para los reversos (`back_col = 1 - col`).
+  - **Paquete `story_engine_deck_of_worlds_expansions.json` (9 Mazos, 540 Cartas, 540 Caras, 1 Regla de Mundo):**
+    - 3 Expansiones Cartográficas (Ártico, Costas, Desiertos): 60 cartas cada una (12 Regiones, 12 Puntos de Interés, 12 Apelativos, 6 Orígenes, 12 Atributos, 6 Acontecimientos).
+    - 3 Expansiones Creativas: Ganchos de Aventura (60 cartas), Llaves de Cultura (60 cartas), Fragmentos de Lore (30 Opus + 30 Florecimientos).
+    - 3 Expansiones de Género (Fantasía, Horror, Ciencia Ficción): 60 cartas cada una divididas en los 6 palos oficiales de Deck of Worlds.
+  - **Paquete `new_story_engine.json` (4 Mazos, 300 Cartas, 300 Caras, 1 Regla de Narrativa):**
+    - Potenciadores / Boosters: 120 cartas (24 Agentes, 24 Motores, 24 Anclas, 24 Conflictos, 24 Aspectos).
+    - Trasfondos / Backstories: 60 cartas (30 Motores de Trasfondo, 30 Conflictos de Trasfondo).
+    - Misterios / Mystery: 60 cartas (Agentes, Motores, Anclas, Conflictos, Aspectos).
+    - Objetos Únicos / Unique Items: 60 cartas (12 Anclas, 48 Aspectos).
+- **Extracción de Pistas con OCR y Localización al Español:**
+  - Detección neuronal de pistas según el modo nativo de cada tipo de carta: `IMAGE_WITH_TEXT` para Regiones, `TOP_BOTTOM_SPLIT` para Puntos de Interés/Advents/Agentes/Motores/Anclas/Conflictos, y `FOUR_EDGE_CUES` (4 orientaciones cardinales) para Apelativos/Orígenes/Atributos/Aspectos/Ganchos.
+  - Normalización de las pistas en `zonesJson` con texto traducido y mapeado a `List<ContentZone>`.
+- **Soporte de Importación Dúplex en la App (`PdfLayoutProcessor` e `ImportViewModel`):**
+  - Añadido preset `"Story Engine 2×3 PnP"` a `PDF_PRESET_TEMPLATES` en el importador de PDFs para hojas de 6 cartas cuadradas alternadas.
+  - Modificado `PdfLayoutProcessor` para reflejar automáticamente la columna del dorso (`gridCols - 1 - col`) en modos `ALTERNATING_PAGES` y `FIRST_HALF_FRONTS`, garantizando que al importar cualquier PDF PnP dúplex los frentes y dorsos coincidan a la perfección.
+  - Añadida prueba unitaria en `PdfLayoutProcessorTest` validando el reflejo de columnas dúplex.
+- **Verificación:** Pruebas unitarias de `:core:domain:testDebugUnitTest` pasadas con éxito.
+
+### Refactor interno del playmat (23 de octubre de 2026)
+
+**Categoría:** `REFACTOR / PLAYMAT / COMPOSE`
+
+- Se mantuvieron `PlaymatCanvasView` y sus dos firmas públicas, incluida la sobrecarga obsoleta. El composable principal conserva estado, gestos y callbacks.
+- Se extrajo la escena espacial a `PlaymatSceneLayer`, manteniendo el `GraphicsLayer` de snapshot alrededor del fondo, mapa, grilla, plantillas y elementos de mesa.
+- Se extrajeron controles flotantes a `PlaymatCanvasOverlays` y diálogos a `PlaymatDialogsHost`. Las capas reciben un snapshot inmutable de UI y eventos que escriben en el estado del orquestador.
+- Verificación: `:feature:draw:compileDebugKotlin` y `:feature:draw:testDebugUnitTest` finalizaron correctamente. No se realizó revisión manual en dispositivo porque `adb` no está disponible en el entorno actual.
+
 ### Widget de sesión y mesa adaptable (22 de octubre de 2026)
 
 **Categoría:** `FEATURE / UX / ANDROID WIDGET / RESPONSIVE`

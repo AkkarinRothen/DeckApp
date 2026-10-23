@@ -42,7 +42,7 @@ data class Card(
     val value: Int? = null,         // valor numérico — para ordenamiento e iniciativa
     val faces: List<CardFace>,
     val currentFaceIndex: Int = 0,
-    val currentRotation: Int = 0,   // 0/90/180/270 — activo en FOUR_EDGE_CUES y REVERSIBLE
+    val currentRotation: Int = 0,   // FOUR_EDGE_CUES: 0/90/180/270; two-option modes: 0/180
     val isReversed: Boolean = false,
     val isDrawn: Boolean = false,
     val isRevealed: Boolean = true,   // false = boca abajo (Face Down Draw)

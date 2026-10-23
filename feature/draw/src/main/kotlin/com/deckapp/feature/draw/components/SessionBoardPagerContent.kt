@@ -466,8 +466,10 @@ internal fun SessionBoardPagerContent(
                     soloSceneHeader = soloSceneHeader,
                     renderBlock = renderWorkspaceBlock
                 ) { columnsCount, workspaceRootItems ->
+                    val isCompactFolderGrid = focusedGroupId != null && !isFocusedGroupListMode
+                    val effectiveColumnsCount = if (isCompactFolderGrid) maxOf(columnsCount, 2) else columnsCount
                     LazyVerticalGrid(
-                        columns = GridCells.Fixed(columnsCount),
+                        columns = GridCells.Fixed(effectiveColumnsCount),
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.spacedBy(10.dp),
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -583,9 +585,10 @@ internal fun SessionBoardPagerContent(
                                 key = { index, item -> if (item.id != 0L) "group_item_${item.id}" else "group_item_${item.type}_${item.resourceId}_$index" },
                                 span = { _, item ->
                                     val itemSpan = when {
-                                        !isEditing && isFocusedGroupListMode -> columnsCount
-                                        item.size == SessionBoardItemSize.L -> columnsCount
-                                        item.size == SessionBoardItemSize.M -> minOf(2, columnsCount)
+                                        !isEditing && isFocusedGroupListMode -> effectiveColumnsCount
+                                        isCompactFolderGrid -> 1
+                                        item.size == SessionBoardItemSize.L -> effectiveColumnsCount
+                                        item.size == SessionBoardItemSize.M -> minOf(2, effectiveColumnsCount)
                                         else -> 1
                                     }
                                     GridItemSpan(itemSpan)
@@ -594,7 +597,7 @@ internal fun SessionBoardPagerContent(
                                 BoardItemRenderer(
                                     item = item,
                                     uiContext = uiContext,
-                                    compactInFolder = isFocusedGroupListMode,
+                                    compactInFolder = true,
                                     activeDragTargetId = activeDragTargetId,
                                     activeMergeTargetId = null,
                                     onMergeTargetChange = { },

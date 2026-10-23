@@ -521,6 +521,15 @@ class BoardDelegate(
         }
     }
 
+    fun setBoardGroupLayoutMode(groupId: Long, mode: SessionBoardLayoutMode) {
+        val updated = _uiState.value.boardGroups.map { group ->
+            if (group.id == groupId) group.copy(preferredLayoutMode = mode) else group
+        }
+        if (updated != _uiState.value.boardGroups) {
+            commitBoardState(_uiState.value.fullBoardItems, updated, "cambiar vista de carpeta")
+        }
+    }
+
     fun deleteBoardGroup(groupId: Long) {
         scope.launch {
             val updatedGroups = _uiState.value.boardGroups.filterNot { it.id == groupId }

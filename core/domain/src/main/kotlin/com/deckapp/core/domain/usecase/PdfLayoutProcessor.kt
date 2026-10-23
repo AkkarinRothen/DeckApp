@@ -63,9 +63,10 @@ class PdfLayoutProcessor @Inject constructor(
                             )
                             if (frontPath != null) {
                                 val backFaces = if (pageIndex + 1 <= effectiveEnd) {
+                                    val backCol = if (gridCols > 1) gridCols - 1 - col else col
                                     val backPath = fileRepository.renderPdfGridCellAndSave(
                                         uri = pdfUri, pageIndex = pageIndex + 1,
-                                        col = col, row = row, totalCols = gridCols, totalRows = gridRows,
+                                        col = backCol, row = row, totalCols = gridCols, totalRows = gridRows,
                                         deckId = deckId, fileName = "card_${cardIndex}_back.jpg",
                                         pageRenderWidth = 1800, autoTrimCell = autoTrimCells
                                     )
@@ -147,9 +148,10 @@ class PdfLayoutProcessor @Inject constructor(
                             if (frontPath != null) {
                                 val backIndex = effectiveStart + halfCount + pageOffset
                                 val backPath = if (backIndex <= effectiveEnd) {
+                                    val backCol = if (gridCols > 1) gridCols - 1 - col else col
                                     fileRepository.renderPdfGridCellAndSave(
                                         uri = pdfUri, pageIndex = backIndex,
-                                        col = col, row = row, totalCols = gridCols, totalRows = gridRows,
+                                        col = backCol, row = row, totalCols = gridCols, totalRows = gridRows,
                                         deckId = deckId, fileName = "card_${cardIndex}_back.jpg",
                                         pageRenderWidth = 1800, autoTrimCell = autoTrimCells
                                     )

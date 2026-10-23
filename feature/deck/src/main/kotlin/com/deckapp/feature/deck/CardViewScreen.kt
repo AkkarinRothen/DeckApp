@@ -138,13 +138,13 @@ fun CardViewScreen(
                                 )
                             }
                             if (!showCompass) {
-                                IconButton(onClick = { viewModel.rotate90() }) {
+                                IconButton(onClick = { viewModel.rotateToNextOption() }) {
                                     Icon(Icons.Default.Refresh, contentDescription = "Rotar orientación (90°)")
                                 }
                             }
                         } else if (card.activeFace.contentMode == CardContentMode.TOP_BOTTOM_SPLIT ||
                             card.activeFace.contentMode == CardContentMode.REVERSIBLE) {
-                            IconButton(onClick = { viewModel.rotate90() }) {
+                            IconButton(onClick = { viewModel.rotateToNextOption() }) {
                                 Icon(Icons.Default.Refresh, contentDescription = "Rotar orientación (180°)")
                             }
                         }

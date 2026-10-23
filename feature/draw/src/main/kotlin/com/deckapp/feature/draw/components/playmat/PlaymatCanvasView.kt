@@ -274,847 +274,95 @@ fun PlaymatCanvasView(
                 )
             }
     ) {
-        // 1. Contenido Dibujable de la Mesa (Capturable por Snapshot)
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .drawWithContent {
-                    graphicsLayer.record {
-                        this@drawWithContent.drawContent()
-                    }
-                    drawLayer(graphicsLayer)
-                }
-        ) {
-            // Fondo Texturizado / Tapete
-            PlaymatBackground(theme = activeSurface.backgroundTheme)
-
-            // Capa de Battlemap y Preset Atmosférico
-            PlaymatBattlemapLayer(
-                customImageUri = activeSurface.customImageUri,
-                preset = activeSurface.backgroundPreset,
-                opacity = activeSurface.backgroundOpacity,
-                scale = activeSurface.backgroundScale,
-                offsetX = activeSurface.backgroundX,
-                offsetY = activeSurface.backgroundY,
-                zoom = cameraZoom
-            )
-
-            // Capa de Cuadrícula Táctica (Squares / Hexes / Dots)
-            PlaymatGridLayer(
-                gridType = activeSurface.gridType,
-                gridStyle = activeSurface.gridStyle,
-                cellSizeDp = activeSurface.cellSizeDp,
-                cameraX = cameraX,
-                cameraY = cameraY,
-                zoom = cameraZoom
-            )
-
-            // Contenido Espacial 2D Transformado (Plantillas, Cartas, Notas)
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .offset { IntOffset(cameraX.roundToInt(), cameraY.roundToInt()) }
-            ) {
-                // Renderizado de Moldes y Plantillas Temáticas
-                PlaymatTemplateSilhouettes(
-                    template = activeSurface.template,
-                    zoom = cameraZoom,
-                    highlightedSlotTag = hoveredSlotTag
-                )
-
-                // Fichas de Tablas
-                activeSurface.tableChips.forEach { chip ->
-                    PlaymatTableChipItem(
-                        chip = chip,
-                        zoom = cameraZoom
-                    )
-                }
-
-                // Notas Adhesivas
-                activeSurface.stickyNotes.forEach { note ->
-                    PlaymatStickyNoteItem(
-                        note = note,
-                        zoom = cameraZoom,
-                        onDelete = { onDeleteStickyNote(note.id) },
-                        onMove = { newX, newY -> onMoveStickyNote(note.id, newX, newY) }
-                    )
-                }
-
-                // Mazos Físicos 3D y Pilas de Descarte en la Mesa
-                activeSurface.decks.forEach { deckPlacement ->
-                    val deckName = uiState.deckNames[deckPlacement.stackId] ?: "Mazo"
-                    val availableCount = uiState.deckCardCounts[deckPlacement.stackId] ?: 0
-                    val piledCards = piledCardsByDeck[deckPlacement.stackId] ?: emptyList()
-                    val totalCount = availableCount + piledCards.size
-                    val backImage = uiState.deckBackImages[deckPlacement.stackId]
-
-                    key("deck_${deckPlacement.stackId}") {
-                        PlaymatDeckItem(
-                            placement = deckPlacement,
-                            deckName = deckName,
-                            availableCount = availableCount,
-                            totalCount = totalCount,
-                            backImage = backImage,
-                            zoom = cameraZoom,
-                            templateSlots = currentTemplateSlots,
-                            onTapDraw = {
-                                onDrawFromDeck(
-                                    deckPlacement.stackId,
-                                    deckPlacement.x + 150f,
-                                    deckPlacement.y,
-                                    null
-                                )
-                            },
-                            onDragDrawCardToPlaymat = { targetX, targetY, slotTag ->
-                                onDrawFromDeck(deckPlacement.stackId, targetX, targetY, slotTag)
-                            },
-                            onMoveDeck = { newX, newY ->
-                                onMoveDeck(deckPlacement.stackId, newX, newY)
-                            },
-                            onHoverSlotChanged = { tag ->
-                                hoveredSlotTag = tag
-                            },
-                            onShuffleDeck = {
-                                onReshuffleDeck(deckPlacement.stackId)
-                            }
-                        )
-
-                        PlaymatDiscardPileItem(
-                            stackId = deckPlacement.stackId,
-                            x = deckPlacement.discardX ?: (deckPlacement.x + 150f),
-                            y = deckPlacement.discardY ?: deckPlacement.y,
-                            zoom = cameraZoom,
-                            piledCards = piledCards,
-                            onReshuffleToDeck = {
-                                onReshuffleDeck(deckPlacement.stackId)
-                            },
-                            onMoveDiscardPile = { newX, newY ->
-                                onMoveDiscardPile(deckPlacement.stackId, newX, newY)
-                            },
-                            onInspectCard = onCardDetailClick
-                        )
-                    }
-                }
-
-                // Hilos Narrativos y Conexiones de Investigación
-                activeSurface.connections.forEach { conn ->
-                    val fromPos = endpointPositions[conn.effectiveFromId]
-                    val toPos = endpointPositions[conn.effectiveToId]
-                    if (fromPos != null && toPos != null) {
-                        key("conn_${conn.id}") {
-                            PlaymatConnectionLine(
-                                connection = conn,
-                                fromPos = fromPos,
-                                toPos = toPos,
-                                onEdit = { editingConnection = conn }
-                            )
-                        }
-                    }
-                }
-
-                // Cartas colocadas sobre el tapete con arrastre desacoplado y ultra fluido
-                activeSurface.cards.sortedBy { it.zIndex }.forEach { placement ->
-                    val card = cardsById[placement.cardId]
-                    if (card != null) {
-                        val isSelected = uiState.selectedPlaymatCardId == placement.cardId
-                        val isConnectingSource = connectingSourceEndpointId == "card_${placement.cardId}"
-                        val stackId = card.originDeckId ?: card.stackId
-                        val backImage = uiState.deckBackImages[stackId]
-
-                        key(placement.cardId) {
-                            PlaymatCardItem(
-                                placement = placement,
-                                card = card,
-                                backImage = backImage,
-                                isSelected = isSelected,
-                                isConnectingSource = isConnectingSource,
-                                zoom = cameraZoom,
-                                templateSlots = currentTemplateSlots,
-                                onCardClick = {
-                                    if (connectingSourceEndpointId != null) {
-                                        val targetEndpoint = "card_${placement.cardId}"
-                                        if (connectingSourceEndpointId != targetEndpoint) {
-                                            onCreateConnection(connectingSourceEndpointId!!, targetEndpoint)
-                                        }
-                                        connectingSourceEndpointId = null
-                                    } else {
-                                        selectedTokenId = null
-                                        selectedClockId = null
-                                        onSelectCard(if (isSelected) null else placement.cardId)
-                                    }
-                                },
-                                onMove = { cardId, finalX, finalY, slotTag ->
-                                    val finalXWithSnap = if (activeSurface.snapToGrid && slotTag == null && activeSurface.gridType != PlaymatGridType.NONE) {
-                                        (kotlin.math.round(finalX / activeSurface.cellSizeDp)) * activeSurface.cellSizeDp
-                                    } else finalX
-                                    val finalYWithSnap = if (activeSurface.snapToGrid && slotTag == null && activeSurface.gridType != PlaymatGridType.NONE) {
-                                        (kotlin.math.round(finalY / activeSurface.cellSizeDp)) * activeSurface.cellSizeDp
-                                    } else finalY
-                                    onMoveCard(cardId, finalXWithSnap, finalYWithSnap, slotTag)
-                                },
-                                onHoverSlotChanged = { tag ->
-                                    hoveredSlotTag = tag
-                                }
-                            )
-                        }
-                    }
-                }
-
-                // Tokens de Personajes (PJ / PNJ)
-                activeSurface.tokens.forEach { token ->
-                    val isTokenSelected = selectedTokenId == token.id
-                    val isTokenConnectingSource = connectingSourceEndpointId == "token_${token.id}"
-                    key("token_${token.id}") {
-                        PlaymatTokenItem(
-                            token = token,
-                            isSelected = isTokenSelected,
-                            isConnectingSource = isTokenConnectingSource,
-                            zoom = cameraZoom,
-                            onTokenClick = {
-                                if (connectingSourceEndpointId != null) {
-                                    val targetEndpoint = "token_${token.id}"
-                                    if (connectingSourceEndpointId != targetEndpoint) {
-                                        onCreateConnection(connectingSourceEndpointId!!, targetEndpoint)
-                                    }
-                                    connectingSourceEndpointId = null
-                                } else {
-                                    selectedTokenId = if (isTokenSelected) null else token.id
-                                    selectedClockId = null
-                                    onSelectCard(null)
-                                }
-                            },
-                            onDragProgress = { start, current ->
-                                tokenDragStartPos = start
-                                tokenDragCurrentPos = current
-                            },
-                            onMove = { tokenId, finalX, finalY ->
-                                val (snappedX, snappedY) = if (activeSurface.snapToGrid && activeSurface.gridType != PlaymatGridType.NONE) {
-                                    val cell = activeSurface.cellSizeDp
-                                    Pair((kotlin.math.round(finalX / cell)) * cell, (kotlin.math.round(finalY / cell)) * cell)
-                                } else Pair(finalX, finalY)
-                                onMoveToken(tokenId, snappedX, snappedY)
-                            },
-                            onStartConnection = {
-                                connectingSourceEndpointId = "token_${token.id}"
-                                selectedTokenId = null
-                            },
-                            onEditHp = {
-                                editingHpToken = token
-                                selectedTokenId = null
-                            },
-                            onToggleFaction = {
-                                val nextType = when (token.tokenType) {
-                                    PlaymatTokenType.ALLY -> PlaymatTokenType.NEUTRAL
-                                    PlaymatTokenType.NEUTRAL -> PlaymatTokenType.ENEMY
-                                    PlaymatTokenType.ENEMY -> PlaymatTokenType.ALLY
-                                }
-                                onUpdateTokenType(token.id, nextType)
-                            },
-                            onRemove = {
-                                onRemoveToken(token.id)
-                                selectedTokenId = null
-                            },
-                            onDismissMenu = {
-                                selectedTokenId = null
-                            }
-                        )
-                    }
-                }
-
-                // Relojes de Progreso (Progress Clocks estilo Blades in the Dark)
-                activeSurface.clocks.forEach { clock ->
-                    val isClockSelected = selectedClockId == clock.id
-                    val isClockConnectingSource = connectingSourceEndpointId == "clock_${clock.id}"
-                    key("clock_${clock.id}") {
-                        PlaymatClockItem(
-                            clock = clock,
-                            isSelected = isClockSelected,
-                            isConnectingSource = isClockConnectingSource,
-                            zoom = cameraZoom,
-                            onClockClick = {
-                                if (connectingSourceEndpointId != null) {
-                                    val targetEndpoint = "clock_${clock.id}"
-                                    if (connectingSourceEndpointId != targetEndpoint) {
-                                        onCreateConnection(connectingSourceEndpointId!!, targetEndpoint)
-                                    }
-                                    connectingSourceEndpointId = null
-                                } else {
-                                    selectedClockId = if (isClockSelected) null else clock.id
-                                    selectedTokenId = null
-                                    onSelectCard(null)
-                                }
-                            },
-                            onMove = { clockId, finalX, finalY ->
-                                val (snappedX, snappedY) = if (activeSurface.snapToGrid && activeSurface.gridType != PlaymatGridType.NONE) {
-                                    val cell = activeSurface.cellSizeDp
-                                    Pair((kotlin.math.round(finalX / cell)) * cell, (kotlin.math.round(finalY / cell)) * cell)
-                                } else Pair(finalX, finalY)
-                                onMoveClock(clockId, snappedX, snappedY)
-                            },
-                            onAdvanceProgress = {
-                                val nextProgress = (clock.filledSegments + 1).coerceAtMost(clock.totalSegments)
-                                onUpdateClockProgress(clock.id, nextProgress)
-                            },
-                            onReduceProgress = {
-                                val prevProgress = (clock.filledSegments - 1).coerceAtLeast(0)
-                                onUpdateClockProgress(clock.id, prevProgress)
-                            },
-                            onResetProgress = {
-                                onUpdateClockProgress(clock.id, 0)
-                            },
-                            onStartConnection = {
-                                connectingSourceEndpointId = "clock_${clock.id}"
-                                selectedClockId = null
-                            },
-                            onRemove = {
-                                onRemoveClock(clock.id)
-                                selectedClockId = null
-                            },
-                            onDismissMenu = {
-                                selectedClockId = null
-                            }
-                        )
-                    }
+    val canvasState = PlaymatCanvasState(
+        uiState = uiState,
+        actions = actions,
+        activeSurface = activeSurface,
+        allSurfaces = allSurfaces,
+        cameraX = cameraX,
+        cameraY = cameraY,
+        cameraZoom = cameraZoom,
+        showQuickDrawDialog = showQuickDrawDialog,
+        showStickyNoteDialog = showStickyNoteDialog,
+        showSendToTacticalDialog = showSendToTacticalDialog,
+        showDiceOverlay = showDiceOverlay,
+        showTokenPickerDialog = showTokenPickerDialog,
+        showClockCreationDialog = showClockCreationDialog,
+        showTacticalSettingsDialog = showTacticalSettingsDialog,
+        isRulerActive = isRulerActive,
+        rulerStartPos = rulerStartPos,
+        rulerCurrentPos = rulerCurrentPos,
+        tokenDragStartPos = tokenDragStartPos,
+        tokenDragCurrentPos = tokenDragCurrentPos,
+        editingHpToken = editingHpToken,
+        selectedTokenId = selectedTokenId,
+        selectedClockId = selectedClockId,
+        stickyNoteText = stickyNoteText,
+        hoveredSlotTag = hoveredSlotTag,
+        connectingSourceEndpointId = connectingSourceEndpointId,
+        editingConnection = editingConnection,
+        cardsById = cardsById,
+        endpointPositions = endpointPositions,
+        piledCardsByDeck = piledCardsByDeck,
+        placedCardIds = placedCardIds,
+        currentTemplateSlots = currentTemplateSlots,
+        selectedCardPlacement = selectedCardPlacement,
+        selectedCard = selectedCard
+    )
+    val canvasEvents = PlaymatCanvasEvents(
+        onHoveredSlotTagChanged = { hoveredSlotTag = it },
+        onConnectingSourceChanged = { connectingSourceEndpointId = it },
+        onSelectedTokenChanged = { selectedTokenId = it },
+        onSelectedClockChanged = { selectedClockId = it },
+        onTokenDragPositionsChanged = { start, current ->
+            tokenDragStartPos = start
+            tokenDragCurrentPos = current
+        },
+        onEditingHpTokenChanged = { editingHpToken = it },
+        onEditingConnectionChanged = { editingConnection = it },
+        onShowQuickDrawDialogChanged = { showQuickDrawDialog = it },
+        onShowStickyNoteDialogChanged = { showStickyNoteDialog = it },
+        onShowSendToTacticalDialogChanged = { showSendToTacticalDialog = it },
+        onShowDiceOverlayChanged = { showDiceOverlay = it },
+        onShowTokenPickerDialogChanged = { showTokenPickerDialog = it },
+        onShowClockCreationDialogChanged = { showClockCreationDialog = it },
+        onShowTacticalSettingsDialogChanged = { showTacticalSettingsDialog = it },
+        onIsRulerActiveChanged = { isRulerActive = it },
+        onRulerPositionsChanged = { start, current ->
+            rulerStartPos = start
+            rulerCurrentPos = current
+        },
+        onStickyNoteTextChanged = { stickyNoteText = it },
+        onResetCamera = {
+            cameraX = 0f
+            cameraY = 0f
+            cameraZoom = 1f
+            onUpdateCamera(0f, 0f, 1f)
+        },
+        onExportSnapshot = {
+            coroutineScope.launch {
+                try {
+                    val imageBitmap = graphicsLayer.toImageBitmap()
+                    val bitmap = imageBitmap.asAndroidBitmap()
+                    PlaymatSnapshotHelper.shareBitmap(context, bitmap)
+                } catch (e: Exception) {
+                    android.util.Log.e("PlaymatCanvasView", "Fallo al capturar snapshot de tapete", e)
                 }
             }
         }
-
-        // 2. Menú Radial Contextual sobre la carta seleccionada
-        if (selectedCardPlacement != null) {
-            val cardScreenX = (selectedCardPlacement.x * cameraZoom) + cameraX
-            val cardScreenY = (selectedCardPlacement.y * cameraZoom) + cameraY
-
-            Box(
-                modifier = Modifier
-                    .offset {
-                        IntOffset(
-                            (cardScreenX - 60).roundToInt(),
-                            (cardScreenY - 80).roundToInt()
-                        )
-                    }
-            ) {
-                PlaymatRadialMenu(
-                    visible = true,
-                    onRotate = { onRotateCard(selectedCardPlacement.cardId, 90) },
-                    onFlip = { onFlipCard(selectedCardPlacement.cardId) },
-                    onReturnToHand = { onReturnToHand(selectedCardPlacement.cardId) },
-                    onDiscard = { onDiscardCard(selectedCardPlacement.cardId) },
-                    onInspect = { onCardDetailClick(selectedCardPlacement.cardId) },
-                    onSendToTacticalMap = { showSendToTacticalDialog = true },
-                    onStartConnection = {
-                        connectingSourceEndpointId = "card_${selectedCardPlacement.cardId}"
-                        onSelectCard(null)
-                    },
-                    onDismiss = { onSelectCard(null) }
-                )
-            }
-        }
-
-        // 3. Barra Superior Flotante del Tapete (Ocultable en Modo Zen)
-        AnimatedVisibility(
-            visible = !uiState.isZenMode,
-            enter = fadeIn() + slideInVertically(initialOffsetY = { -it }),
-            exit = fadeOut() + slideOutVertically(targetOffsetY = { -it }),
-            modifier = Modifier.align(Alignment.TopStart)
-        ) {
-            PlaymatToolbar(
-                activeSurface = activeSurface,
-                allSurfaces = allSurfaces,
-                onSelectSurface = onSelectSurface,
-                onCreateSurface = onCreateSurface,
-                onDeleteSurface = onDeleteSurface,
-                onSetTheme = onSetTheme,
-                onSetTemplate = onSetTemplate,
-                onResetCamera = {
-                    cameraX = 0f
-                    cameraY = 0f
-                    cameraZoom = 1f
-                    onUpdateCamera(0f, 0f, 1f)
-                },
-                onAddStickyNote = {
-                    stickyNoteText = ""
-                    showStickyNoteDialog = true
-                },
-                onOpenQuickDraw = { showQuickDrawDialog = true },
-                onOpenTokenPicker = { showTokenPickerDialog = true },
-                onOpenClockCreator = { showClockCreationDialog = true },
-                onOpenTacticalSettings = { showTacticalSettingsDialog = true },
-                onToggleRuler = {
-                    isRulerActive = !isRulerActive
-                    rulerStartPos = null
-                    rulerCurrentPos = null
-                },
-                isRulerActive = isRulerActive,
-                onToggleDiceRoller = { showDiceOverlay = !showDiceOverlay },
-                onExportSnapshot = {
-                    coroutineScope.launch {
-                        try {
-                            val imageBitmap = graphicsLayer.toImageBitmap()
-                            val bitmap = imageBitmap.asAndroidBitmap()
-                            PlaymatSnapshotHelper.shareBitmap(context, bitmap)
-                        } catch (e: Exception) {
-                            android.util.Log.e("PlaymatCanvasView", "Fallo al capturar snapshot de tapete", e)
-                        }
-                    }
-                },
-                onToggleZenMode = actions.onToggleZenMode,
-                onToggleSessionDrawer = actions.onToggleSessionDrawer,
-                isSessionDrawerOpen = uiState.isSessionDrawerOpen
-            )
-        }
-
-        // Botón Minimalista para Salir del Modo Zen (Solo visible en Zen Mode)
-        if (uiState.isZenMode) {
-            Surface(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(16.dp),
-                shape = CircleShape,
-                color = Color(0xFF14151B).copy(alpha = 0.85f),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF81C784).copy(alpha = 0.6f)),
-                shadowElevation = 6.dp
-            ) {
-                IconButton(
-                    onClick = actions.onToggleZenMode,
-                    modifier = Modifier.size(42.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.FullscreenExit,
-                        contentDescription = "Salir de Modo Zen",
-                        tint = Color(0xFF81C784),
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-        }
-
-        // Lanzador de Dados Flotante en el Tapete
-        PlaymatDiceOverlay(
-            visible = showDiceOverlay,
-            onDismiss = { showDiceOverlay = false },
-            onPinResultToTable = { name, resultText ->
-                val centerX = (-cameraX + 300) / cameraZoom
-                val centerY = (-cameraY + 300) / cameraZoom
-                onAddTableChip(0L, name, resultText, centerX, centerY)
-            },
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(top = 64.dp, end = 12.dp)
+    )
+        PlaymatSceneLayer(
+            state = canvasState,
+            events = canvasEvents,
+            graphicsLayer = graphicsLayer
         )
-
-        // 4. Bandeja Inferior Acoplable de la Mano (Ocultable en Modo Zen)
-        PlaymatHandTray(
-            visible = !uiState.isZenMode && uiState.showPlaymatHandTray,
-            hand = uiState.hand,
-            placedCardIds = placedCardIds,
-            deckNames = uiState.deckNames,
-            deckAspectRatios = uiState.deckAspectRatios,
-            deckBackImages = uiState.deckBackImages,
-            sessionId = uiState.sessionId,
-            onToggleVisible = onToggleHandTray,
-            onPlaceOnPlaymat = { cardId ->
-                val centerX = (-cameraX + 300) / cameraZoom
-                val centerY = (-cameraY + 300) / cameraZoom
-                onPlaceCardOnPlaymat(cardId, centerX, centerY)
-            },
-            onCardClick = onCardDetailClick,
-            onDiscardCard = onDiscardCard,
-            onRotateCard = { cardId -> onRotateCard(cardId, 90) },
-            modifier = Modifier.align(Alignment.BottomCenter)
+        PlaymatCanvasOverlays(
+            state = canvasState,
+            events = canvasEvents
         )
-
-        // 5. Banner indicador de modo Conexión de Hilos
-        AnimatedVisibility(
-            visible = connectingSourceEndpointId != null,
-            enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
-            exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 76.dp)
-        ) {
-            Surface(
-                shape = RoundedCornerShape(24.dp),
-                color = MaterialTheme.colorScheme.primaryContainer,
-                shadowElevation = 8.dp,
-                border = androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary),
-                modifier = Modifier.padding(horizontal = 16.dp)
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Text(
-                        text = "Toca la segunda carta o personaje para tender el hilo",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                    TextButton(
-                        onClick = { connectingSourceEndpointId = null },
-                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                    ) {
-                        Text("Cancelar")
-                    }
-                }
-            }
-        }
-
-        // 6. Cinta métrica táctica y herramienta de Regla Libre
-        PlaymatMeasurementRuler(
-            startPos = tokenDragStartPos,
-            currentPos = tokenDragCurrentPos,
-            cellSizeDp = activeSurface.cellSizeDp,
-            zoom = cameraZoom,
-            cameraX = cameraX,
-            cameraY = cameraY
-        )
-
-        PlaymatMeasurementRuler(
-            startPos = rulerStartPos,
-            currentPos = rulerCurrentPos,
-            cellSizeDp = activeSurface.cellSizeDp,
-            zoom = cameraZoom,
-            cameraX = cameraX,
-            cameraY = cameraY
-        )
-
-        // Banner indicador de modo Regla
-        AnimatedVisibility(
-            visible = isRulerActive,
-            enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
-            exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 76.dp)
-        ) {
-            Surface(
-                shape = RoundedCornerShape(24.dp),
-                color = MaterialTheme.colorScheme.tertiaryContainer,
-                shadowElevation = 8.dp,
-                border = androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFF00E5FF)),
-                modifier = Modifier.padding(horizontal = 16.dp)
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Straighten,
-                        contentDescription = null,
-                        tint = Color(0xFF00E5FF),
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Text(
-                        text = "Modo Regla activo: arrastra sobre la mesa para medir distancias",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer
-                    )
-                    TextButton(
-                        onClick = {
-                            isRulerActive = false
-                            rulerStartPos = null
-                            rulerCurrentPos = null
-                        }
-                    ) {
-                        Text("Cerrar")
-                    }
-                }
-            }
-        }
-
-        // 7. Panel Lateral / Bottom Sheet de Bitácora y Notas Rápidas
-        PlaymatSessionDrawer(
-            isOpen = uiState.isSessionDrawerOpen,
-            selectedTab = uiState.sessionDrawerTab,
-            logs = uiState.sessionLog.logs,
-            notesMarkdown = uiState.sessionLog.noteDraftMarkdown,
-            isFilterCurrentScene = uiState.sessionLog.isFilterCurrentScene,
-            currentSceneTitle = uiState.scenes.find { it.id == uiState.focusedSceneId }?.title,
-            onClose = actions.onToggleSessionDrawer,
-            onTabSelected = actions.onSetSessionDrawerTab,
-            onToggleFilterCurrentScene = actions.onToggleFilterCurrentScene,
-            onAddManualLog = actions.onAddManualLog,
-            onSaveNotes = actions.onSaveNotes,
-            onClearLogs = actions.onClearLogs,
-            modifier = Modifier.align(Alignment.CenterEnd)
-        )
-    }
-
-    // Diálogo "A Mapa Táctico": Selector de Token o Pin
-    if (showSendToTacticalDialog && selectedCard != null) {
-        AlertDialog(
-            onDismissRequest = { showSendToTacticalDialog = false },
-            title = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Explore,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text("Enviar a Mapa Táctico")
-                }
-            },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(
-                        text = "¿Cómo deseas representar '${selectedCard.title}' en la cuadrícula táctica?",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-
-                    OutlinedCard(
-                        onClick = {
-                            showSendToTacticalDialog = false
-                            onSendCardToTacticalMap(selectedCard, true)
-                            onSelectCard(null)
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = null,
-                                modifier = Modifier.size(28.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(Modifier.width(12.dp))
-                            Column {
-                                Text(
-                                    text = "Token de Combate / Miniatura",
-                                    fontWeight = FontWeight.Bold,
-                                    style = MaterialTheme.typography.titleSmall
-                                )
-                                Text(
-                                    text = "Crea una ficha neutral para combate con la ilustración de la carta, PV y CA.",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
-
-                    OutlinedCard(
-                        onClick = {
-                            showSendToTacticalDialog = false
-                            onSendCardToTacticalMap(selectedCard, false)
-                            onSelectCard(null)
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Place,
-                                contentDescription = null,
-                                modifier = Modifier.size(28.dp),
-                                tint = MaterialTheme.colorScheme.secondary
-                            )
-                            Spacer(Modifier.width(12.dp))
-                            Column {
-                                Text(
-                                    text = "Pin de Exploración / PDI",
-                                    fontWeight = FontWeight.Bold,
-                                    style = MaterialTheme.typography.titleSmall
-                                )
-                                Text(
-                                    text = "Coloca una chincheta de mapa con el nombre y pistas de la carta como punto de interés.",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = {},
-            dismissButton = {
-                TextButton(onClick = { showSendToTacticalDialog = false }) {
-                    Text("Cancelar")
-                }
-            }
-        )
-    }
-
-    // Diálogo de Robo Rápido
-    if (showQuickDrawDialog) {
-        AlertDialog(
-            onDismissRequest = { showQuickDrawDialog = false },
-            title = { Text("Robar Carta al Tapete") },
-            text = {
-                if (uiState.deckRefs.isEmpty()) {
-                    Text("No hay mazos activos en esta sesión. Añade uno desde la biblioteca.")
-                } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        uiState.deckRefs.forEach { ref ->
-                            val deckName = uiState.deckNames[ref.stackId] ?: "Mazo"
-                            val available = uiState.deckCardCounts[ref.stackId] ?: 0
-                            FilledTonalButton(
-                                onClick = {
-                                    showQuickDrawDialog = false
-                                    val centerX = (-cameraX + 350) / cameraZoom
-                                    val centerY = (-cameraY + 350) / cameraZoom
-                                    onQuickDraw(ref.stackId, centerX, centerY)
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Icon(Icons.Default.Add, null, modifier = Modifier.size(16.dp))
-                                Spacer(Modifier.width(8.dp))
-                                Text("$deckName ($available disponibles)")
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = {},
-            dismissButton = {
-                TextButton(onClick = { showQuickDrawDialog = false }) { Text("Cerrar") }
-            }
-        )
-    }
-
-    // Diálogo de Nueva Nota Adhesiva
-    if (showStickyNoteDialog) {
-        AlertDialog(
-            onDismissRequest = { showStickyNoteDialog = false },
-            title = { Text("Nueva Nota Adhesiva") },
-            text = {
-                OutlinedTextField(
-                    value = stickyNoteText,
-                    onValueChange = { stickyNoteText = it },
-                    label = { Text("Contenido de la nota") },
-                    placeholder = { Text("Escribe una pista o recordatorio...") },
-                    modifier = Modifier.fillMaxWidth(),
-                    maxLines = 4
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showStickyNoteDialog = false
-                        val centerX = (-cameraX + 300) / cameraZoom
-                        val centerY = (-cameraY + 300) / cameraZoom
-                        onAddStickyNote(stickyNoteText, centerX, centerY)
-                    }
-                ) {
-                    Text("Añadir al Tapete")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showStickyNoteDialog = false }) { Text("Cancelar") }
-            }
-        )
-    }
-
-    // Diálogo de Edición de Hilo Narrativo
-    if (editingConnection != null) {
-        PlaymatConnectionEditorDialog(
-            connection = editingConnection!!,
-            onDismiss = { editingConnection = null },
-            onSave = { label, colorHex ->
-                onUpdateConnection(editingConnection!!.id, label, colorHex)
-                editingConnection = null
-            },
-            onDelete = {
-                onRemoveConnection(editingConnection!!.id)
-                editingConnection = null
-            }
-        )
-    }
-
-    // Diálogo de Selección de Token de Personaje
-    if (showTokenPickerDialog) {
-        PlaymatTokenPickerDialog(
-            npcs = uiState.npcs,
-            onDismiss = { showTokenPickerDialog = false },
-            onSelectNpc = { npc ->
-                val centerX = (-cameraX + 300) / cameraZoom
-                val centerY = (-cameraY + 300) / cameraZoom
-                val type = if (npc.isMonster) PlaymatTokenType.ENEMY else PlaymatTokenType.NEUTRAL
-                val ringColor = if (npc.isMonster) "#E53935" else "#FFB300"
-                onAddToken(
-                    npc.name,
-                    npc.imagePath,
-                    npc.id,
-                    centerX,
-                    centerY,
-                    npc.maxHp,
-                    npc.currentHp,
-                    type,
-                    ringColor
-                )
-            },
-            onCreateAdHoc = { name, maxHp, type ->
-                val centerX = (-cameraX + 300) / cameraZoom
-                val centerY = (-cameraY + 300) / cameraZoom
-                val ringColor = when (type) {
-                    PlaymatTokenType.ALLY -> "#4CAF50"
-                    PlaymatTokenType.NEUTRAL -> "#FFB300"
-                    PlaymatTokenType.ENEMY -> "#E53935"
-                }
-                onAddToken(
-                    name,
-                    null,
-                    null,
-                    centerX,
-                    centerY,
-                    maxHp,
-                    maxHp,
-                    type,
-                    ringColor
-                )
-            }
-        )
-    }
-
-    // Diálogo de Ajuste de PV de Token
-    if (editingHpToken != null) {
-        PlaymatTokenHpDialog(
-            token = editingHpToken!!,
-            onDismiss = { editingHpToken = null },
-            onSaveHp = { newHp ->
-                onUpdateTokenHp(editingHpToken!!.id, newHp)
-                editingHpToken = null
-            }
-        )
-    }
-
-    // Diálogo de Creación de Reloj de Progreso (Blades in the Dark)
-    if (showClockCreationDialog) {
-        PlaymatClockCreationDialog(
-            onDismissRequest = { showClockCreationDialog = false },
-            onConfirm = { title, segments, colorHex ->
-                val centerX = (-cameraX + 300) / cameraZoom
-                val centerY = (-cameraY + 300) / cameraZoom
-                onAddClock(title, segments, colorHex, centerX, centerY)
-                showClockCreationDialog = false
-            }
-        )
-    }
-
-    // Diálogo de Fondo, Battlemaps y Cuadrícula Táctica
-    if (showTacticalSettingsDialog) {
-        PlaymatTacticalSettingsDialog(
-            surface = activeSurface,
-            onDismissRequest = { showTacticalSettingsDialog = false },
-            onSetBackgroundMap = onSetBackgroundMap,
-            onSetBackgroundTransform = onSetBackgroundTransform,
-            onToggleBackgroundLock = onToggleBackgroundLock,
-            onSetGridConfig = onSetGridConfig
+        PlaymatDialogsHost(
+            state = canvasState,
+            events = canvasEvents
         )
     }
 }
@@ -1123,7 +371,7 @@ fun PlaymatCanvasView(
  * Renderizado de carta física colocada en el tapete 2D con arrastre fluido y desacoplado a 120 FPS.
  */
 @Composable
-private fun PlaymatCardItem(
+internal fun PlaymatCardItem(
     placement: PlaymatCardPlacement,
     card: Card,
     backImage: String?,
@@ -1366,7 +614,7 @@ private fun PlaymatCardItem(
  * Renderiza el fondo del tapete con texturas de casino/taberna y rejilla de puntos.
  */
 @Composable
-private fun PlaymatBackground(theme: PlaymatTheme) {
+internal fun PlaymatBackground(theme: PlaymatTheme) {
     val (primaryColor, secondaryColor) = when (theme) {
         PlaymatTheme.FELT_GREEN -> Color(0xFF1B4D3E) to Color(0xFF0F2E25)
         PlaymatTheme.FELT_RED -> Color(0xFF6B1D2F) to Color(0xFF3F101B)
@@ -1408,7 +656,7 @@ private fun PlaymatBackground(theme: PlaymatTheme) {
  * Renderiza siluetas punteadas magnéticas según la plantilla activa.
  */
 @Composable
-private fun PlaymatTemplateSilhouettes(
+internal fun PlaymatTemplateSilhouettes(
     template: PlaymatTemplateType,
     zoom: Float,
     highlightedSlotTag: String? = null
@@ -1469,7 +717,7 @@ private fun TemplateSlot(
 }
 
 @Composable
-private fun PlaymatStickyNoteItem(
+internal fun PlaymatStickyNoteItem(
     note: PlaymatStickyNote,
     zoom: Float,
     onDelete: () -> Unit,
@@ -1547,7 +795,7 @@ private fun PlaymatStickyNoteItem(
 }
 
 @Composable
-private fun PlaymatTableChipItem(
+internal fun PlaymatTableChipItem(
     chip: PlaymatTableChip,
     zoom: Float
 ) {
