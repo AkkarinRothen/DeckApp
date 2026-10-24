@@ -1003,6 +1003,8 @@ class SessionViewModel @Inject constructor(
 
     fun toggleDeckInSession(deckId: Long) = deckDelegate.toggleDeckInSession(deckId)
 
+    fun reorderSessionDecks(stackIds: List<Long>) = deckDelegate.reorderSessionDecks(stackIds)
+
     fun toggleTableInSession(tableId: Long) {
         viewModelScope.launch {
             val isPresent = _uiState.value.tablesInSession.any { it.id == tableId }

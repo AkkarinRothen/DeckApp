@@ -55,4 +55,26 @@ class BoardMemoryCodecTest {
         val memory = BoardSessionMemory(tarokkaCardsByDeck = mapOf(42L to listOf(101L, 103L, 107L)))
         assertEquals(memory, BoardMemoryCodec.decode(BoardMemoryCodec.encode(memory)))
     }
+
+    @Test
+    fun `playmat groups and mixed members survive a board memory round trip`() {
+        val group = PlaymatElementGroup(
+            id = "group-1",
+            name = "Investigación",
+            memberIds = setOf("card:9", "token:ally", "discard:4"),
+            isLocked = true
+        )
+        val surface = PlaymatSurface(
+            groups = listOf(group),
+            cards = listOf(PlaymatCardPlacement(cardId = 9, x = 10f, y = 20f, clusterId = group.id)),
+            tokens = listOf(PlaymatTokenPlacement(id = "ally", name = "Aliada", x = 30f, y = 40f, groupId = group.id)),
+            decks = listOf(PlaymatDeckPlacement(stackId = 4, x = 50f, y = 60f, discardX = 200f, discardY = 60f, discardGroupId = group.id))
+        )
+        val memory = BoardSessionMemory(playmatSurfaces = listOf(surface), activePlaymatSurfaceId = surface.id)
+
+        assertEquals(memory, BoardMemoryCodec.decode(BoardMemoryCodec.encode(memory)))
+        val legacySurface = BoardMemoryCodec.decode("""{"playmatSurfaces":[{"id":"legacy","name":"Mesa antigua"}]}""")
+            .playmatSurfaces.single()
+        assertTrue(legacySurface.groups.isEmpty())
+    }
 }

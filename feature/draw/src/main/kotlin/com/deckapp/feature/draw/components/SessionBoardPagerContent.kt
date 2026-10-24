@@ -384,8 +384,9 @@ internal fun SessionBoardPagerContent(
                     onLayoutChanged = onWorkspaceLayoutChanged,
                     workspaceActions = workspaceActions,
                     soloSceneHeader = soloSceneHeader,
-                    renderBlock = { _, _ -> }
-                ) { _, _ -> Box(
+                    onToggleEditing = onToggleEditing,
+                    renderBlock = { _, _, _ -> }
+                ) { _, _, _ -> Box(
                     modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
                     contentAlignment = Alignment.Center
                 ) {
@@ -399,11 +400,11 @@ internal fun SessionBoardPagerContent(
                     )
                 } }
             } else {
-                val renderWorkspaceBlock: @Composable (SessionBoardItem, Modifier) -> Unit = { item, blockModifier ->
+                val renderWorkspaceBlock: @Composable (SessionBoardItem, Modifier, Boolean) -> Unit = { item, blockModifier, compact ->
                     BoardItemRenderer(
-                        item = item,
+                        item = if (compact) item.copy(size = SessionBoardItemSize.S) else item,
                         uiContext = uiContext,
-                        compactInFolder = false,
+                        compactInFolder = compact,
                         activeDragTargetId = activeDragTargetId,
                         activeMergeTargetId = null,
                         onMergeTargetChange = { },
@@ -464,8 +465,9 @@ internal fun SessionBoardPagerContent(
                     onLayoutChanged = onWorkspaceLayoutChanged,
                     workspaceActions = workspaceActions,
                     soloSceneHeader = soloSceneHeader,
+                    onToggleEditing = onToggleEditing,
                     renderBlock = renderWorkspaceBlock
-                ) { columnsCount, workspaceRootItems ->
+                ) { columnsCount, workspaceRootItems, bentoMode ->
                     val isCompactFolderGrid = focusedGroupId != null && !isFocusedGroupListMode
                     val effectiveColumnsCount = if (isCompactFolderGrid) maxOf(columnsCount, 2) else columnsCount
                     LazyVerticalGrid(
@@ -480,7 +482,7 @@ internal fun SessionBoardPagerContent(
                                 items = workspaceRootItems,
                                 key = { index, item -> if (item.id != 0L) "item_${item.id}" else "item_${item.type}_${item.resourceId}_$index" },
                                 span = { _, item ->
-                                    val itemSpan = when (item.size) {
+                                    val itemSpan = if (bentoMode) 1 else when (item.size) {
                                         SessionBoardItemSize.L -> columnsCount
                                         SessionBoardItemSize.M -> minOf(2, columnsCount)
                                         SessionBoardItemSize.S -> 1
@@ -488,7 +490,7 @@ internal fun SessionBoardPagerContent(
                                     GridItemSpan(itemSpan)
                                 }
                             ) { index, item ->
-                                renderWorkspaceBlock(item, Modifier.animateItem())
+                                renderWorkspaceBlock(item, Modifier.animateItem(), bentoMode)
                             }
 
                             gridItemsIndexed(

@@ -51,6 +51,7 @@ fun PlaymatDeckItem(
     backImage: String?,
     zoom: Float,
     templateSlots: List<TemplateSlotDef>,
+    isGroupLocked: Boolean = false,
     onTapDraw: () -> Unit,
     onDragDrawCardToPlaymat: (targetX: Float, targetY: Float, slotTag: String?) -> Unit,
     onMoveDeck: (newX: Float, newY: Float) -> Unit,
@@ -137,16 +138,27 @@ fun PlaymatDeckItem(
                     shape = RoundedCornerShape(8.dp)
                 )
                 .clip(RoundedCornerShape(8.dp))
-                .pointerInput(placement.stackId, zoom, availableCount, templateSlots) {
+                .pointerInput(placement.stackId, zoom, availableCount, templateSlots, placement.groupId, placement.isLocked, isGroupLocked) {
                     awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false)
+                        val moveHandleSize = 40.dp.toPx()
+                        val startedOnMoveHandle = down.position.x >= size.width - moveHandleSize && down.position.y <= moveHandleSize
                         var dragDetected = false
                         var currentDragX = localDeckX
                         var currentDragY = localDeckY
 
                         val drag = awaitTouchSlopOrCancellation(down.id) { change, over ->
                             change.consume()
-                            if (availableCount > 0) {
+                            if (startedOnMoveHandle) {
+                                if (isGroupLocked || placement.isLocked) {
+                                    dragDetected = true
+                                } else {
+                                    isMovingDeck = true
+                                    currentDragX += over.x / zoom
+                                    currentDragY += over.y / zoom
+                                    dragDetected = true
+                                }
+                            } else if (availableCount > 0) {
                                 view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                                 isDraggingCardOut = true
                                 currentDragX += over.x / zoom
@@ -157,7 +169,29 @@ fun PlaymatDeckItem(
                             }
                         }
 
-                        if ((drag != null || dragDetected) && availableCount > 0) {
+                        if ((drag != null || dragDetected) && startedOnMoveHandle && (isGroupLocked || placement.isLocked)) {
+                            isMovingDeck = false
+                            isDraggingCardOut = false
+                            localDeckX = placement.x
+                            localDeckY = placement.y
+                        } else if ((drag != null || dragDetected) && startedOnMoveHandle) {
+                            val currentPointerId = down.id
+                            while (true) {
+                                val event = awaitPointerEvent()
+                                val dragChange = event.changes.firstOrNull { it.id == currentPointerId }
+                                if (dragChange == null || !dragChange.pressed) break
+                                val delta = dragChange.position - dragChange.previousPosition
+                                currentDragX += delta.x / zoom
+                                currentDragY += delta.y / zoom
+                                localDeckX = currentDragX
+                                localDeckY = currentDragY
+                                dragChange.consume()
+                            }
+                            isMovingDeck = false
+                            localDeckX = currentDragX
+                            localDeckY = currentDragY
+                            onMoveDeck(currentDragX, currentDragY)
+                        } else if ((drag != null || dragDetected) && availableCount > 0) {
                             val currentPointerId = down.id
                             while (true) {
                                 val event = awaitPointerEvent()
@@ -183,8 +217,10 @@ fun PlaymatDeckItem(
                             val finalY = nearest?.y ?: draggedCardY
                             onDragDrawCardToPlaymat(finalX, finalY, nearest?.tag)
                         } else {
-                            // Toque limpio sobre el mazo
-                            if (availableCount > 0) {
+                            // El cuerpo roba; la agarradera abre las opciones y solo se mueve al arrastrarla.
+                            if (startedOnMoveHandle) {
+                                showContextMenu = true
+                            } else if (availableCount > 0) {
                                 view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                                 onTapDraw()
                             } else {
@@ -273,6 +309,13 @@ fun PlaymatDeckItem(
                         modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
                     )
                 }
+
+                Icon(
+                    imageVector = Icons.Default.DragHandle,
+                    contentDescription = "Arrastra desde esta esquina para mover el mazo; desde el centro para colocar una carta",
+                    tint = Color.White.copy(alpha = 0.86f),
+                    modifier = Modifier.align(Alignment.TopEnd).padding(4.dp).size(18.dp)
+                )
 
                 // Badge inferior con cantidad de cartas
                 Surface(

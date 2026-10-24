@@ -74,6 +74,149 @@ class PlaymatDelegate(
         updatePlaymatState { it.copy(showHandTray = visible) }
     }
 
+    fun createPlaymatGroup(name: String, memberIds: Set<String>) {
+        val cleanName = name.trim().ifBlank { "Nuevo grupo" }
+        if (memberIds.isEmpty()) return
+        val group = PlaymatElementGroup(name = cleanName, memberIds = memberIds)
+        updateCurrentActiveSurface { surface ->
+            val existingIds = surface.groups.map { it.id }.toSet()
+            val validMembers = memberIds.filterTo(mutableSetOf()) { member ->
+                when {
+                    member.startsWith("card:") -> surface.cards.any { it.cardId == member.removePrefix("card:").toLongOrNull() }
+                    member.startsWith("note:") -> surface.stickyNotes.any { it.id == member.removePrefix("note:") }
+                    member.startsWith("chip:") -> surface.tableChips.any { it.id == member.removePrefix("chip:") }
+                    member.startsWith("deck:") || member.startsWith("discard:") -> surface.decks.any { it.stackId == member.substringAfter(':').toLongOrNull() }
+                    member.startsWith("token:") -> surface.tokens.any { it.id == member.removePrefix("token:") }
+                    member.startsWith("clock:") -> surface.clocks.any { it.id == member.removePrefix("clock:") }
+                    else -> false
+                }
+            }
+            if (validMembers.isEmpty()) return@updateCurrentActiveSurface surface
+            val groupId = if (group.id in existingIds) UUID.randomUUID().toString() else group.id
+            val nextGroup = group.copy(id = groupId, memberIds = validMembers)
+            fun assign(id: String, current: String?) = if (id in validMembers) groupId else current?.takeIf { old ->
+                surface.groups.none { it.id == old && id in it.memberIds }
+            }
+            surface.copy(
+                groups = surface.groups.map { old -> old.copy(memberIds = old.memberIds - validMembers) }.filter { it.memberIds.isNotEmpty() } + nextGroup,
+                cards = surface.cards.map { it.copy(clusterId = assign("card:${it.cardId}", it.clusterId)) },
+                stickyNotes = surface.stickyNotes.map { it.copy(groupId = assign("note:${it.id}", it.groupId)) },
+                tableChips = surface.tableChips.map { it.copy(groupId = assign("chip:${it.id}", it.groupId)) },
+                decks = surface.decks.map { it.copy(groupId = assign("deck:${it.stackId}", it.groupId)) }
+            ).let { updated ->
+                updated.copy(
+                    decks = updated.decks.map { placement ->
+                        placement.copy(discardGroupId = assign("discard:${placement.stackId}", placement.discardGroupId))
+                    },
+                    tokens = updated.tokens.map { it.copy(groupId = assign("token:${it.id}", it.groupId)) },
+                    clocks = updated.clocks.map { it.copy(groupId = assign("clock:${it.id}", it.groupId)) }
+                )
+            }
+        }
+    }
+
+    fun renamePlaymatGroup(groupId: String, name: String) {
+        val cleanName = name.trim()
+        if (cleanName.isBlank()) return
+        updateCurrentActiveSurface { surface ->
+            surface.copy(groups = surface.groups.map { if (it.id == groupId) it.copy(name = cleanName) else it })
+        }
+    }
+
+    fun setPlaymatGroupMembers(groupId: String, memberIds: Set<String>) {
+        updateCurrentActiveSurface { surface ->
+            val validMembers = memberIds.filterTo(mutableSetOf()) { member ->
+                when {
+                    member.startsWith("card:") -> surface.cards.any { it.cardId == member.removePrefix("card:").toLongOrNull() }
+                    member.startsWith("note:") -> surface.stickyNotes.any { it.id == member.removePrefix("note:") }
+                    member.startsWith("chip:") -> surface.tableChips.any { it.id == member.removePrefix("chip:") }
+                    member.startsWith("deck:") || member.startsWith("discard:") -> surface.decks.any { it.stackId == member.substringAfter(':').toLongOrNull() }
+                    member.startsWith("token:") -> surface.tokens.any { it.id == member.removePrefix("token:") }
+                    member.startsWith("clock:") -> surface.clocks.any { it.id == member.removePrefix("clock:") }
+                    else -> false
+                }
+            }
+            fun groupFor(id: String, existing: String?) = when {
+                id in validMembers -> groupId
+                existing == groupId -> null
+                else -> existing
+            }
+            surface.copy(
+                groups = surface.groups.map { group ->
+                    if (group.id == groupId) group.copy(memberIds = validMembers)
+                    else group.copy(memberIds = group.memberIds - validMembers)
+                }.filter { it.id == groupId || it.memberIds.isNotEmpty() },
+                cards = surface.cards.map { it.copy(clusterId = groupFor("card:${it.cardId}", it.clusterId)) },
+                stickyNotes = surface.stickyNotes.map { it.copy(groupId = groupFor("note:${it.id}", it.groupId)) },
+                tableChips = surface.tableChips.map { it.copy(groupId = groupFor("chip:${it.id}", it.groupId)) },
+                decks = surface.decks.map { placement ->
+                    placement.copy(
+                        groupId = groupFor("deck:${placement.stackId}", placement.groupId),
+                        discardGroupId = groupFor("discard:${placement.stackId}", placement.discardGroupId)
+                    )
+                },
+                tokens = surface.tokens.map { it.copy(groupId = groupFor("token:${it.id}", it.groupId)) },
+                clocks = surface.clocks.map { it.copy(groupId = groupFor("clock:${it.id}", it.groupId)) }
+            )
+        }
+    }
+
+    fun togglePlaymatGroupLock(groupId: String) {
+        updateCurrentActiveSurface { surface ->
+            surface.copy(groups = surface.groups.map { if (it.id == groupId) it.copy(isLocked = !it.isLocked) else it })
+        }
+    }
+
+    fun togglePlaymatGroupVisibility(groupId: String) {
+        updateCurrentActiveSurface { surface ->
+            surface.copy(groups = surface.groups.map {
+                if (it.id == groupId) it.copy(isHidden = !it.isHidden) else it
+            })
+        }
+    }
+
+    fun deletePlaymatGroup(groupId: String) {
+        updateCurrentActiveSurface { surface ->
+            surface.copy(
+                groups = surface.groups.filterNot { it.id == groupId },
+                cards = surface.cards.map { if (it.clusterId == groupId) it.copy(clusterId = null) else it },
+                stickyNotes = surface.stickyNotes.map { if (it.groupId == groupId) it.copy(groupId = null) else it },
+                tableChips = surface.tableChips.map { if (it.groupId == groupId) it.copy(groupId = null) else it },
+                decks = surface.decks.map { it.copy(
+                    groupId = it.groupId?.takeUnless { id -> id == groupId },
+                    discardGroupId = it.discardGroupId?.takeUnless { id -> id == groupId }
+                ) },
+                tokens = surface.tokens.map { if (it.groupId == groupId) it.copy(groupId = null) else it },
+                clocks = surface.clocks.map { if (it.groupId == groupId) it.copy(groupId = null) else it }
+            )
+        }
+    }
+
+    fun movePlaymatGroup(groupId: String, dx: Float, dy: Float) {
+        updateCurrentActiveSurface { surface ->
+            val group = surface.groups.firstOrNull { it.id == groupId } ?: return@updateCurrentActiveSurface surface
+            if (group.isLocked) return@updateCurrentActiveSurface surface
+            fun member(type: String, id: Any) = "$type:$id" in group.memberIds
+            surface.copy(
+                cards = surface.cards.map { if (member("card", it.cardId)) it.copy(x = it.x + dx, y = it.y + dy) else it },
+                stickyNotes = surface.stickyNotes.map { if (member("note", it.id)) it.copy(x = it.x + dx, y = it.y + dy) else it },
+                tableChips = surface.tableChips.map { if (member("chip", it.id)) it.copy(x = it.x + dx, y = it.y + dy) else it },
+                decks = surface.decks.map { placement ->
+                    val moveDeck = member("deck", placement.stackId)
+                    val moveDiscard = member("discard", placement.stackId)
+                    placement.copy(
+                        x = if (moveDeck) placement.x + dx else placement.x,
+                        y = if (moveDeck) placement.y + dy else placement.y,
+                        discardX = if (moveDiscard) (placement.discardX ?: placement.x + 150f) + dx else placement.discardX,
+                        discardY = if (moveDiscard) (placement.discardY ?: placement.y) + dy else placement.discardY
+                    )
+                },
+                tokens = surface.tokens.map { if (member("token", it.id)) it.copy(x = it.x + dx, y = it.y + dy) else it },
+                clocks = surface.clocks.map { if (member("clock", it.id)) it.copy(x = it.x + dx, y = it.y + dy) else it }
+            )
+        }
+    }
+
     fun switchSurface(surfaceId: String) {
         updateBoardMemory {
             it.copy(activePlaymatSurfaceId = surfaceId)
@@ -496,6 +639,36 @@ class PlaymatDelegate(
     fun removeDeckFromPlaymat(stackId: Long) {
         updateCurrentActiveSurface { surface ->
             surface.copy(decks = surface.decks.filterNot { it.stackId == stackId })
+        }
+    }
+
+    fun setDeckVisibleOnPlaymat(stackId: Long, visible: Boolean) {
+        updateCurrentActiveSurface { surface ->
+            val existing = surface.decks.firstOrNull { it.stackId == stackId }
+            if (existing != null) {
+                surface.copy(decks = surface.decks.map {
+                    if (it.stackId == stackId) it.copy(isVisibleOnPlaymat = visible) else it
+                })
+            } else {
+                val index = surface.decks.size
+                val x = -160f
+                val y = 80f + index * 240f
+                surface.copy(decks = surface.decks + PlaymatDeckPlacement(
+                    stackId = stackId,
+                    x = x,
+                    y = y,
+                    discardX = x + 150f,
+                    discardY = y,
+                    isVisibleOnPlaymat = visible
+                ))
+            }
+        }
+    }
+
+    fun setDeckFavorite(stackId: Long, favorite: Boolean) {
+        updateCurrentActiveSurface { surface ->
+            val favorites = if (favorite) surface.favoriteDeckIds + stackId else surface.favoriteDeckIds - stackId
+            surface.copy(favoriteDeckIds = favorites)
         }
     }
 

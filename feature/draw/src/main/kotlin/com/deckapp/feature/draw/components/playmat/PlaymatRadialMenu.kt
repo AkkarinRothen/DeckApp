@@ -5,9 +5,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -41,14 +41,16 @@ fun PlaymatRadialMenu(
         modifier = modifier
     ) {
         Surface(
-            shape = CircleShape,
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(24.dp),
             color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.95f),
             tonalElevation = 8.dp,
             shadowElevation = 10.dp,
             modifier = Modifier.padding(8.dp)
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                modifier = Modifier
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -107,7 +109,7 @@ private fun RadialActionButton(
 ) {
     FilledTonalIconButton(
         onClick = onClick,
-        modifier = Modifier.size(36.dp),
+        modifier = Modifier.size(48.dp),
         colors = IconButtonDefaults.filledTonalIconButtonColors(
             containerColor = if (isDestructive) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.secondaryContainer,
             contentColor = if (isDestructive) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSecondaryContainer
@@ -116,7 +118,7 @@ private fun RadialActionButton(
         Icon(
             imageVector = icon,
             contentDescription = description,
-            modifier = Modifier.size(18.dp)
+                modifier = Modifier.size(20.dp)
         )
     }
 }

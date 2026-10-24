@@ -1,6 +1,8 @@
 package com.deckapp.feature.draw.components.playmat
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.*
 import androidx.compose.material.icons.Icons
@@ -12,6 +14,7 @@ import androidx.compose.ui.draw.*
 import androidx.compose.ui.geometry.*
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.layer.*
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import com.deckapp.core.model.*
@@ -21,17 +24,16 @@ import kotlin.math.roundToInt
 
 @Composable
 internal fun PlaymatCanvasOverlays(
-    state: PlaymatCanvasState,
+    state: PlaymatOverlayState,
     events: PlaymatCanvasEvents
 ) {
-    val uiState = state.uiState
     val actions = state.actions
     val activeSurface = state.activeSurface
     val cameraX = state.cameraX
     val cameraY = state.cameraY
     val cameraZoom = state.cameraZoom
+    val density = androidx.compose.ui.platform.LocalDensity.current
     val onPlaceCardOnPlaymat = actions.onPlaceCardOnPlaymat
-    val onMoveCard = actions.onMoveCard
     val onRotateCard = actions.onRotateCard
     val onFlipCard = actions.onFlipCard
     val onReturnToHand = actions.onReturnToHand
@@ -46,71 +48,169 @@ internal fun PlaymatCanvasOverlays(
     val onUpdateCamera = actions.onUpdateCamera
     val onQuickDraw = actions.onQuickDraw
     val onAddStickyNote = actions.onAddStickyNote
-    val onMoveStickyNote = actions.onMoveStickyNote
-    val onDeleteStickyNote = actions.onDeleteStickyNote
     val onCardDetailClick = actions.onCardDetailClick
-    val onSendCardToTacticalMap = actions.onSendCardToTacticalMap
-    val onMoveDeck = actions.onMoveDeck
-    val onMoveDiscardPile = actions.onMoveDiscardPile
-    val onDrawFromDeck = actions.onDrawFromDeck
-    val onReshuffleDeck = actions.onReshuffleDeck
     val onAddTableChip = actions.onAddTableChip
-    val onCreateConnection = actions.onCreateConnection
-    val onUpdateConnection = actions.onUpdateConnection
-    val onRemoveConnection = actions.onRemoveConnection
-    val onAddToken = actions.onAddToken
-    val onMoveToken = actions.onMoveToken
-    val onUpdateTokenHp = actions.onUpdateTokenHp
-    val onUpdateTokenType = actions.onUpdateTokenType
-    val onRemoveToken = actions.onRemoveToken
-    val onAddClock = actions.onAddClock
-    val onUpdateClockProgress = actions.onUpdateClockProgress
-    val onMoveClock = actions.onMoveClock
-    val onRemoveClock = actions.onRemoveClock
-    val onSetBackgroundMap = actions.onSetBackgroundMap
-    val onSetBackgroundTransform = actions.onSetBackgroundTransform
-    val onToggleBackgroundLock = actions.onToggleBackgroundLock
-    val onSetGridConfig = actions.onSetGridConfig
     val allSurfaces = state.allSurfaces
-    val showQuickDrawDialog = state.showQuickDrawDialog
-    val showStickyNoteDialog = state.showStickyNoteDialog
-    val showSendToTacticalDialog = state.showSendToTacticalDialog
+    val handCardDrag = state.handCardDrag
     val showDiceOverlay = state.showDiceOverlay
-    val showTokenPickerDialog = state.showTokenPickerDialog
-    val showClockCreationDialog = state.showClockCreationDialog
-    val showTacticalSettingsDialog = state.showTacticalSettingsDialog
     val isRulerActive = state.isRulerActive
     val rulerStartPos = state.rulerStartPos
     val rulerCurrentPos = state.rulerCurrentPos
     val tokenDragStartPos = state.tokenDragStartPos
     val tokenDragCurrentPos = state.tokenDragCurrentPos
-    val editingHpToken = state.editingHpToken
-    val selectedTokenId = state.selectedTokenId
-    val selectedClockId = state.selectedClockId
-    val stickyNoteText = state.stickyNoteText
-    val hoveredSlotTag = state.hoveredSlotTag
     val connectingSourceEndpointId = state.connectingSourceEndpointId
-    val editingConnection = state.editingConnection
-    val cardsById = state.cardsById
-    val endpointPositions = state.endpointPositions
-    val piledCardsByDeck = state.piledCardsByDeck
     val placedCardIds = state.placedCardIds
-    val currentTemplateSlots = state.currentTemplateSlots
     val selectedCardPlacement = state.selectedCardPlacement
-    val selectedCard = state.selectedCard
-    val graphicsActions = actions
-    Box(Modifier.fillMaxSize()) {
+    var radialMenuSize by remember { mutableStateOf(IntSize.Zero) }
+    var showGroupsDialog by remember { mutableStateOf(false) }
+    var showCreateGroupDialog by remember { mutableStateOf(false) }
+    var showMinimap by remember { mutableStateOf(false) }
+    var showSearchDialog by remember(activeSurface.id) { mutableStateOf(false) }
+    var showDeckManager by remember(activeSurface.id) { mutableStateOf(false) }
+    var favoritesDockExpanded by remember(activeSurface.id) { mutableStateOf(false) }
+    var newGroupName by remember { mutableStateOf("") }
+    if (showSearchDialog) PlaymatSearchDialog(
+        surface = activeSurface,
+        cardsById = state.cardsById,
+        deckNames = state.deckNames,
+        onDismiss = { showSearchDialog = false },
+        onFocus = { result ->
+            result.hiddenGroupIds.forEach(actions.onTogglePlaymatGroupVisibility)
+            if (result.focusGroupId != null) state.onCenterGroup(result.focusGroupId)
+            else result.position?.let { state.onCenterAtWorld(it.x, it.y) }
+            showSearchDialog = false
+        }
+    )
+    if (showGroupsDialog) PlaymatGroupsDialog(
+        surface = activeSurface,
+        actions = actions,
+        deckNames = state.deckNames,
+        onJumpToGroup = state.onCenterGroup,
+        onDismiss = { showGroupsDialog = false }
+    )
+    if (showCreateGroupDialog) AlertDialog(
+        onDismissRequest = { showCreateGroupDialog = false },
+        title = { Text("Crear grupo") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("${state.selectedGroupMemberCount} piezas seleccionadas")
+                OutlinedTextField(
+                    value = newGroupName,
+                    onValueChange = { newGroupName = it },
+                    label = { Text("Nombre del grupo") },
+                    singleLine = true
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                if (newGroupName.isNotBlank() && state.selectedGroupMemberIds.isNotEmpty()) {
+                    actions.onCreatePlaymatGroup(newGroupName, state.selectedGroupMemberIds)
+                    events.onGroupSelectionFinished()
+                    showCreateGroupDialog = false
+                }
+            }) { Text("Crear") }
+        },
+        dismissButton = { TextButton(onClick = { showCreateGroupDialog = false }) { Text("Cancelar") } }
+    )
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+    if (showDeckManager && !state.isZenMode) {
+        PlaymatDeckManagerDialog(
+            deckRefs = state.deckRefs,
+            deckNames = state.deckNames,
+            deckCardCounts = state.deckCardCounts,
+            placements = activeSurface.decks,
+            favoriteDeckIds = activeSurface.favoriteDeckIds,
+            groups = activeSurface.groups,
+            resources = remember(activeSurface, state.cardsById, state.deckNames) {
+                buildPlaymatSearchResults(activeSurface, state.cardsById, state.deckNames)
+            },
+            windowClass = when {
+                maxWidth >= 1000.dp -> DeckManagerWindowClass.EXPANDED
+                maxWidth >= 720.dp -> DeckManagerWindowClass.MEDIUM
+                else -> DeckManagerWindowClass.COMPACT
+            },
+            onSetVisible = actions.onSetDeckVisibleOnPlaymat,
+            onSetFavorite = actions.onSetDeckFavorite,
+            onReorderDecks = actions.onReorderSessionDecks,
+            onFocusResource = { result ->
+                result.hiddenGroupIds.forEach(actions.onTogglePlaymatGroupVisibility)
+                if (result.focusGroupId != null) state.onCenterGroup(result.focusGroupId)
+                else result.position?.let { state.onCenterAtWorld(it.x, it.y) }
+                showDeckManager = false
+            },
+            onQuickAction = { result ->
+                when (result.kind) {
+                    PlaymatSearchKind.CARD -> result.id.removePrefix("card:").toLongOrNull()?.let { cardId ->
+                        showDeckManager = false
+                        actions.onCardDetailClick(cardId)
+                    }
+                    PlaymatSearchKind.DECK -> result.id.removePrefix("deck:").toLongOrNull()?.let { stackId ->
+                        activeSurface.decks.firstOrNull { it.stackId == stackId }?.let { deck ->
+                            actions.onQuickDraw(stackId, deck.x + 150f, deck.y)
+                        }
+                    }
+                    PlaymatSearchKind.DISCARD -> result.id.removePrefix("discard:").toLongOrNull()?.let(actions.onReshuffleDeck)
+                    else -> Unit
+                }
+            },
+            onCreateGroupForDeck = { name, stackId ->
+                actions.onCreatePlaymatGroup(name, setOf("deck:$stackId"))
+            },
+            onAssignDeckToGroup = { stackId, targetGroupId ->
+                val memberId = "deck:$stackId"
+                activeSurface.groups.forEach { group ->
+                    val existingMembers = group.memberIds - memberId
+                    val updatedMembers = if (group.id == targetGroupId) existingMembers + memberId else existingMembers
+                    actions.onSetPlaymatGroupMembers(group.id, updatedMembers)
+                }
+            },
+            onManageGroups = {
+                showDeckManager = false
+                showGroupsDialog = true
+            },
+            onDismiss = { showDeckManager = false }
+        )
+    }
+    if (showMinimap && !state.isZenMode) {
+        PlaymatMinimap(
+            surface = activeSurface,
+            cameraX = cameraX,
+            cameraY = cameraY,
+            cameraZoom = cameraZoom,
+            viewportWidth = state.canvasBoundsInWindow.width,
+            viewportHeight = state.canvasBoundsInWindow.height,
+            onCenterAt = state.onCenterAtWorld,
+            modifier = Modifier.align(Alignment.TopEnd).padding(top = 72.dp, end = 12.dp).width(190.dp)
+        )
+    }
     // 2. Menú Radial Contextual sobre la carta seleccionada
     if (selectedCardPlacement != null) {
+        val density = androidx.compose.ui.platform.LocalDensity.current
+        val horizontalMargin = with(density) { 8.dp.roundToPx() }
+        val gap = with(density) { 8.dp.roundToPx() }
+        val cardWidthPx = with(density) { 120.dp.toPx() } * cameraZoom
+        val cardHeightPx = with(density) { 180.dp.toPx() } * cameraZoom
         val cardScreenX = (selectedCardPlacement.x * cameraZoom) + cameraX
         val cardScreenY = (selectedCardPlacement.y * cameraZoom) + cameraY
+        val viewportWidth = constraints.maxWidth
+        val viewportHeight = constraints.maxHeight
     
         Box(
             modifier = Modifier
+                .onSizeChanged { radialMenuSize = it }
                 .offset {
+                    val menuWidth = radialMenuSize.width
+                    val menuHeight = radialMenuSize.height
+                    val maxX = (viewportWidth - menuWidth - horizontalMargin).coerceAtLeast(horizontalMargin)
+                    val maxY = (viewportHeight - menuHeight - horizontalMargin).coerceAtLeast(horizontalMargin)
+                    val centeredX = cardScreenX + cardWidthPx / 2f - menuWidth / 2f
+                    val aboveCardY = cardScreenY - menuHeight - gap
+                    val belowCardY = cardScreenY + cardHeightPx + gap
+                    val preferredY = if (aboveCardY >= horizontalMargin) aboveCardY else belowCardY
                     IntOffset(
-                        (cardScreenX - 60).roundToInt(),
-                        (cardScreenY - 80).roundToInt()
+                        centeredX.roundToInt().coerceIn(horizontalMargin, maxX),
+                        preferredY.roundToInt().coerceIn(horizontalMargin, maxY)
                     )
                 }
         ) {
@@ -133,7 +233,7 @@ internal fun PlaymatCanvasOverlays(
     
     // 3. Barra Superior Flotante del Tapete (Ocultable en Modo Zen)
     AnimatedVisibility(
-        visible = !uiState.isZenMode,
+        visible = !state.isZenMode,
         enter = fadeIn() + slideInVertically(initialOffsetY = { -it }),
         exit = fadeOut() + slideOutVertically(targetOffsetY = { -it }),
         modifier = Modifier.align(Alignment.TopStart)
@@ -152,6 +252,7 @@ internal fun PlaymatCanvasOverlays(
                 events.onShowStickyNoteDialogChanged(true)
             },
             onOpenQuickDraw = { events.onShowQuickDrawDialogChanged(true) },
+            onManageDecks = { showDeckManager = true },
             onOpenTokenPicker = { events.onShowTokenPickerDialogChanged(true) },
             onOpenClockCreator = { events.onShowClockCreationDialogChanged(true) },
             onOpenTacticalSettings = { events.onShowTacticalSettingsDialogChanged(true) },
@@ -164,12 +265,67 @@ internal fun PlaymatCanvasOverlays(
             onExportSnapshot = events.onExportSnapshot,
                     onToggleZenMode = actions.onToggleZenMode,
             onToggleSessionDrawer = actions.onToggleSessionDrawer,
-            isSessionDrawerOpen = uiState.isSessionDrawerOpen
+            isSessionDrawerOpen = state.isSessionDrawerOpen,
+            onManageGroups = { showGroupsDialog = true },
+            onToggleMinimap = { showMinimap = !showMinimap },
+            isMinimapOpen = showMinimap,
+            onSearch = { showSearchDialog = true },
+            isGroupSelectionMode = state.isGroupSelectionMode,
+            selectedGroupMemberCount = state.selectedGroupMemberCount,
+            onToggleGroupSelection = {
+                if (state.isGroupSelectionMode) events.onGroupSelectionFinished()
+                else events.onGroupSelectionModeChanged(true)
+            },
+            onCreateSelectedGroup = {
+                newGroupName = ""
+                showCreateGroupDialog = true
+            }
+        )
+    }
+
+    if (!state.isZenMode && !showDeckManager && activeSurface.favoriteDeckIds.isNotEmpty()) {
+        val handTrayOpen = state.showPlaymatHandTray && state.hand.isNotEmpty()
+        val dockBottomPadding = if (handTrayOpen) (maxHeight * 0.29f).coerceIn(112.dp, 260.dp) else 14.dp
+        PlaymatFavoriteDeckDock(
+            deckRefs = state.deckRefs,
+            favoriteDeckIds = activeSurface.favoriteDeckIds,
+            deckNames = state.deckNames,
+            deckCardCounts = state.deckCardCounts,
+            placements = activeSurface.decks,
+            expanded = favoritesDockExpanded,
+            onToggleExpanded = { favoritesDockExpanded = !favoritesDockExpanded },
+            onShowDeck = { stackId, x, y ->
+                val placement = activeSurface.decks.firstOrNull { it.stackId == stackId }
+                activeSurface.groups.filter { it.isHidden && "deck:$stackId" in it.memberIds }
+                    .forEach { actions.onTogglePlaymatGroupVisibility(it.id) }
+                if (placement == null) {
+                    actions.onSetDeckVisibleOnPlaymat(stackId, true)
+                    actions.onMoveDeck(stackId, x, y)
+                } else if (!placement.isVisibleOnPlaymat) {
+                    actions.onSetDeckVisibleOnPlaymat(stackId, true)
+                }
+                state.onCenterAtWorld((placement?.x ?: x) + 75f, (placement?.y ?: y) + 90f)
+            },
+            onDrawCard = { stackId, x, y ->
+                val placement = activeSurface.decks.firstOrNull { it.stackId == stackId }
+                activeSurface.groups.filter { it.isHidden && "deck:$stackId" in it.memberIds }
+                    .forEach { actions.onTogglePlaymatGroupVisibility(it.id) }
+                if (placement == null) {
+                    actions.onSetDeckVisibleOnPlaymat(stackId, true)
+                    actions.onMoveDeck(stackId, x, y)
+                } else if (!placement.isVisibleOnPlaymat) {
+                    actions.onSetDeckVisibleOnPlaymat(stackId, true)
+                }
+                actions.onQuickDraw(stackId, (placement?.x ?: x) + 150f, placement?.y ?: y)
+            },
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(start = 12.dp, bottom = dockBottomPadding)
         )
     }
     
     // Botón Minimalista para Salir del Modo Zen (Solo visible en Zen Mode)
-    if (uiState.isZenMode) {
+    if (state.isZenMode) {
         Surface(
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -209,13 +365,13 @@ internal fun PlaymatCanvasOverlays(
     
     // 4. Bandeja Inferior Acoplable de la Mano (Ocultable en Modo Zen)
     PlaymatHandTray(
-        visible = !uiState.isZenMode && uiState.showPlaymatHandTray,
-        hand = uiState.hand,
+        visible = !state.isZenMode && state.showPlaymatHandTray && !showDeckManager,
+        hand = state.hand,
         placedCardIds = placedCardIds,
-        deckNames = uiState.deckNames,
-        deckAspectRatios = uiState.deckAspectRatios,
-        deckBackImages = uiState.deckBackImages,
-        sessionId = uiState.sessionId,
+        deckNames = state.deckNames,
+        deckAspectRatios = state.deckAspectRatios,
+        deckBackImages = state.deckBackImages,
+        sessionId = state.sessionId,
         onToggleVisible = onToggleHandTray,
         onPlaceOnPlaymat = { cardId ->
             val centerX = (-cameraX + 300) / cameraZoom
@@ -225,8 +381,85 @@ internal fun PlaymatCanvasOverlays(
         onCardClick = onCardDetailClick,
         onDiscardCard = onDiscardCard,
         onRotateCard = { cardId -> onRotateCard(cardId, 90) },
+        draggedCardId = handCardDrag?.cardId,
+        onHandCardDragChanged = events.onHandCardDragChanged,
+        onTrayBoundsChanged = events.onHandTrayBoundsChanged,
+        onDropHandCard = { drag ->
+            val pointer = drag.pointerInWindow
+            val canvasBounds = state.canvasBoundsInWindow
+            val releasedOnTray = state.handTrayBoundsInWindow.contains(pointer)
+            if (canvasBounds.contains(pointer) && !releasedOnTray) {
+                val cardWidth = with(density) { 120.dp.toPx() }
+                val cardHeight = with(density) { 180.dp.toPx() }
+                val canvasPoint = Offset(
+                    pointer.x - canvasBounds.left,
+                    pointer.y - canvasBounds.top
+                )
+                var cardX = (canvasPoint.x - cameraX) / cameraZoom - drag.grabFraction.x * cardWidth
+                var cardY = (canvasPoint.y - cameraY) / cameraZoom - drag.grabFraction.y * cardHeight
+                val nearestSlot = state.currentTemplateSlots
+                    .map { slot ->
+                        val dx = slot.x - cardX
+                        val dy = slot.y - cardY
+                        slot to kotlin.math.hypot(dx, dy)
+                    }
+                    .filter { (_, distance) -> distance <= 60f }
+                    .minByOrNull { (_, distance) -> distance }
+                    ?.first
+
+                if (nearestSlot != null) {
+                    cardX = nearestSlot.x
+                    cardY = nearestSlot.y
+                } else if (activeSurface.snapToGrid && activeSurface.gridType != PlaymatGridType.NONE) {
+                    cardX = kotlin.math.round(cardX / activeSurface.cellSizeDp) * activeSurface.cellSizeDp
+                    cardY = kotlin.math.round(cardY / activeSurface.cellSizeDp) * activeSurface.cellSizeDp
+                }
+
+                onPlaceCardOnPlaymat(drag.cardId, cardX, cardY)
+                if (nearestSlot != null || (activeSurface.snapToGrid && activeSurface.gridType != PlaymatGridType.NONE)) {
+                    actions.onMoveCard(drag.cardId, cardX, cardY, nearestSlot?.tag)
+                }
+            }
+            events.onHandCardDragChanged(null)
+        },
         modifier = Modifier.align(Alignment.BottomCenter)
     )
+
+    // Preview follows the pointer while the original card remains dimmed in the hand.
+    handCardDrag?.let { drag ->
+        val card = state.hand.firstOrNull { it.id == drag.cardId }
+        if (card != null) {
+            val stackId = card.originDeckId ?: card.stackId
+            val aspectRatio = state.deckAspectRatios[stackId] ?: CardAspectRatio.STANDARD
+            val backImage = state.deckBackImages[stackId]
+            val previewWidth = with(density) { 100.dp.toPx() }
+            val previewHeight = previewWidth / aspectRatio.ratio
+            Box(
+                modifier = Modifier
+                    .offset {
+                        val localX = drag.pointerInWindow.x - state.canvasBoundsInWindow.left
+                        val localY = drag.pointerInWindow.y - state.canvasBoundsInWindow.top
+                        IntOffset(
+                            (localX - previewWidth * drag.grabFraction.x).roundToInt(),
+                            (localY - previewHeight * drag.grabFraction.y).roundToInt()
+                        )
+                    }
+                    .zIndex(20f)
+                    .graphicsLayer { alpha = 0.92f }
+            ) {
+                com.deckapp.feature.draw.components.CardItem(
+                    card = card,
+                    aspectRatio = aspectRatio,
+                    showTitle = true,
+                    backImagePath = backImage,
+                    onClick = {},
+                    onDiscard = {},
+                    onReveal = {},
+                    onRollTable = {}
+                )
+            }
+        }
+    }
     
     // 5. Banner indicador de modo Conexión de Hilos
     AnimatedVisibility(
@@ -337,12 +570,12 @@ internal fun PlaymatCanvasOverlays(
     
     // 7. Panel Lateral / Bottom Sheet de Bitácora y Notas Rápidas
     PlaymatSessionDrawer(
-        isOpen = uiState.isSessionDrawerOpen,
-        selectedTab = uiState.sessionDrawerTab,
-        logs = uiState.sessionLog.logs,
-        notesMarkdown = uiState.sessionLog.noteDraftMarkdown,
-        isFilterCurrentScene = uiState.sessionLog.isFilterCurrentScene,
-        currentSceneTitle = uiState.scenes.find { it.id == uiState.focusedSceneId }?.title,
+        isOpen = state.isSessionDrawerOpen,
+        selectedTab = state.sessionDrawerTab,
+        logs = state.sessionLogs,
+        notesMarkdown = state.notesMarkdown,
+        isFilterCurrentScene = state.isFilterCurrentScene,
+        currentSceneTitle = state.currentSceneTitle,
         onClose = actions.onToggleSessionDrawer,
         onTabSelected = actions.onSetSessionDrawerTab,
         onToggleFilterCurrentScene = actions.onToggleFilterCurrentScene,

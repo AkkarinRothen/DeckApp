@@ -40,6 +40,15 @@ class SessionDeckDelegate(
         _uiState.update { it.copy(decks = transform(it.decks)) }
     }
 
+    /** Saves the library order for this session without changing the decks themselves. */
+    fun reorderSessionDecks(stackIds: List<Long>) {
+        scope.launch {
+            stackIds.distinct().forEachIndexed { index, stackId ->
+                sessionRepository.updateSessionDeckOrder(sessionId, stackId, index)
+            }
+        }
+    }
+
     /**
      * Selecciona un mazo y roba una carta de él.
      */

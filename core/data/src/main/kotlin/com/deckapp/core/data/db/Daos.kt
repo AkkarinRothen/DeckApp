@@ -254,6 +254,9 @@ interface SessionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSessionDeckRef(ref: SessionDeckRefEntity)
 
+    @Query("UPDATE session_deck_refs SET sortOrder = :sortOrder WHERE sessionId = :sessionId AND stackId = :stackId")
+    suspend fun updateSessionDeckOrder(sessionId: Long, stackId: Long, sortOrder: Int)
+
     @Query("DELETE FROM session_deck_refs WHERE sessionId = :sessionId AND stackId = :stackId")
     suspend fun removeSessionDeckRef(sessionId: Long, stackId: Long)
 

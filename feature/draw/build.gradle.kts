@@ -19,6 +19,11 @@ android {
     buildFeatures { compose = true }
 }
 
+composeCompiler {
+    reportsDestination = layout.buildDirectory.dir("compose-reports/current/reports")
+    metricsDestination = layout.buildDirectory.dir("compose-reports/current/metrics")
+}
+
 dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:domain"))

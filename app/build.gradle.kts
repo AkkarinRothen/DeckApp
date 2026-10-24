@@ -28,8 +28,8 @@ android {
         applicationId = "com.deckapp.ttrpg"
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
-        versionName = "0.1.2"
+        versionCode = 7
+        versionName = "0.1.6"
         if (taggedVersionCode != null) versionCode = taggedVersionCode
         if (!taggedVersionName.isNullOrBlank()) versionName = taggedVersionName
     }

@@ -43,7 +43,8 @@ fun CardItem(
     onDiscard: () -> Unit,
     onReveal: () -> Unit,
     onRollTable: (Long) -> Unit,
-    onRotate: (() -> Unit)? = null
+    onRotate: (() -> Unit)? = null,
+    modifier: Modifier = Modifier
 ) {
     val rotationAngle by animateFloatAsState(
         targetValue = card.currentRotation.toFloat(),
@@ -73,7 +74,7 @@ fun CardItem(
     }
 
     DeckCard(
-        modifier = Modifier
+        modifier = modifier
             .width(100.dp)
             .aspectRatio(aspectRatio.ratio)
             .clip(RoundedCornerShape(8.dp))

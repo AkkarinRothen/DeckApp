@@ -49,6 +49,7 @@ fun PlaymatTokenItem(
     isSelected: Boolean,
     isConnectingSource: Boolean,
     zoom: Float,
+    isMovementEnabled: Boolean = true,
     onTokenClick: () -> Unit,
     onMove: (tokenId: String, finalX: Float, finalY: Float) -> Unit,
     onDragProgress: (start: androidx.compose.ui.geometry.Offset?, current: androidx.compose.ui.geometry.Offset?) -> Unit = { _, _ -> },
@@ -107,14 +108,16 @@ fun PlaymatTokenItem(
             Box(
                 modifier = Modifier
                     .size(size)
-                    .pointerInput(token.id, zoom) {
+                    .pointerInput(token.id, zoom, isMovementEnabled) {
                         awaitEachGesture {
                             val down = awaitFirstDown(requireUnconsumed = false)
                             var dragDetected = false
                             val drag = awaitTouchSlopOrCancellation(down.id) { change, over ->
                                 change.consume()
-                                localX += over.x / zoom
-                                localY += over.y / zoom
+                                if (isMovementEnabled) {
+                                    localX += over.x / zoom
+                                    localY += over.y / zoom
+                                }
                                 dragDetected = true
                             }
 
@@ -128,14 +131,17 @@ fun PlaymatTokenItem(
                                     val dragChange = event.changes.firstOrNull { it.id == currentPointerId }
                                     if (dragChange == null || !dragChange.pressed) break
                                     val delta = dragChange.position - dragChange.previousPosition
-                                    localX += delta.x / zoom
-                                    localY += delta.y / zoom
+                                    if (isMovementEnabled) {
+                                        localX += delta.x / zoom
+                                        localY += delta.y / zoom
+                                    }
                                     dragChange.consume()
                                     onDragProgress(startOffset, androidx.compose.ui.geometry.Offset(localX + 32f, localY + 32f))
                                 }
                                 isDragging = false
                                 onDragProgress(null, null)
-                                onMove(token.id, localX, localY)
+                                if (isMovementEnabled) onMove(token.id, localX, localY)
+                                else { localX = token.x; localY = token.y }
                             } else {
                                 // Toque limpio
                                 onTokenClick()

@@ -26,6 +26,7 @@ interface SessionRepository {
     fun getDecksForSession(sessionId: Long): Flow<List<SessionDeckRef>>
     suspend fun addDeckToSession(ref: SessionDeckRef)
     suspend fun removeDeckFromSession(sessionId: Long, stackId: Long)
+    suspend fun updateSessionDeckOrder(sessionId: Long, stackId: Long, sortOrder: Int) {}
 
     fun getTablesForSession(sessionId: Long): Flow<List<RandomTable>>
     suspend fun addTableToSession(sessionId: Long, tableId: Long)

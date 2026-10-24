@@ -37,8 +37,9 @@ internal fun BoardWorkspaceLayout(
     onLayoutChanged: (SessionBoardView, BoardViewMemory) -> Unit = { _, _ -> },
     workspaceActions: @Composable () -> Unit = {},
     soloSceneHeader: @Composable () -> Unit = {},
-    renderBlock: @Composable (SessionBoardItem, Modifier) -> Unit,
-    gridContent: @Composable (Int, List<SessionBoardItem>) -> Unit
+    onToggleEditing: () -> Unit = {},
+    renderBlock: @Composable (SessionBoardItem, Modifier, Boolean) -> Unit,
+    gridContent: @Composable (Int, List<SessionBoardItem>, Boolean) -> Unit
 ) {
     val layout = workspaceMemory.views[view.name] ?: BoardViewMemory()
     val modeName = layout.distribution.name
@@ -60,7 +61,7 @@ internal fun BoardWorkspaceLayout(
         val wide = maxWidth >= 900.dp && tools.isNotEmpty()
         val sceneHeaderMaxHeight = maxHeight * 0.4f
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (active) {
+            if (active || (mode == BoardWorkspaceMode.BENTO && isEditing)) {
                 // The controls scroll on narrow screens instead of squeezing their labels.
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     item {
@@ -83,7 +84,14 @@ internal fun BoardWorkspaceLayout(
                             }
                         }
                     }
-                    item { workspaceActions() }
+                    if (active) item { workspaceActions() }
+                    if (mode == BoardWorkspaceMode.BENTO) {
+                        item {
+                            OutlinedButton(onClick = onToggleEditing, modifier = Modifier.heightIn(min = 48.dp)) {
+                                Text(if (isEditing) "Listo" else "Ordenar bloques")
+                            }
+                        }
+                    }
                     if (primary != null) {
                         item {
                             Box {
@@ -113,7 +121,12 @@ internal fun BoardWorkspaceLayout(
             }
             Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 BoxWithConstraints(Modifier.weight(1f).fillMaxHeight()) {
-                    gridContent(boardWorkspaceColumns(maxWidth.value.toInt()), mainItems)
+                    val bento = mode == BoardWorkspaceMode.BENTO
+                    gridContent(
+                        if (bento) boardWorkspaceBentoColumns(maxWidth.value.toInt()) else boardWorkspaceColumns(maxWidth.value.toInt()),
+                        mainItems,
+                        bento
+                    )
                 }
                 if (wide) {
                     Surface(
@@ -134,7 +147,7 @@ internal fun BoardWorkspaceLayout(
                                 contentPadding = PaddingValues(bottom = 24.dp)
                             ) {
                                 items(tools, key = { it.id }) { tool ->
-                                    renderBlock(tool, Modifier.fillMaxWidth())
+                                    renderBlock(tool, Modifier.fillMaxWidth(), false)
                                 }
                             }
                         }
@@ -176,7 +189,7 @@ internal fun BoardWorkspaceLayout(
                             }
                         }
                         LazyColumn(Modifier.fillMaxWidth().heightIn(max = 560.dp)) {
-                            item { renderBlock(openedTool.copy(size = SessionBoardItemSize.L), Modifier.fillMaxWidth()) }
+                            item { renderBlock(openedTool.copy(size = SessionBoardItemSize.L), Modifier.fillMaxWidth(), false) }
                         }
                     }
                 }

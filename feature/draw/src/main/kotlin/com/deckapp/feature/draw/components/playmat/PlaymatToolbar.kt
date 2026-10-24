@@ -1,7 +1,9 @@
 package com.deckapp.feature.draw.components.playmat
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -13,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.deckapp.core.model.*
+import kotlinx.coroutines.launch
 
 /**
  * Barra de herramientas superior flotante organizada por categorías para el Tapete (Playmat).
@@ -34,6 +37,7 @@ fun PlaymatToolbar(
     onResetCamera: () -> Unit,
     onAddStickyNote: () -> Unit,
     onOpenQuickDraw: () -> Unit,
+    onManageDecks: (() -> Unit)? = null,
     onOpenTokenPicker: (() -> Unit)? = null,
     onOpenClockCreator: (() -> Unit)? = null,
     onOpenTacticalSettings: (() -> Unit)? = null,
@@ -44,8 +48,18 @@ fun PlaymatToolbar(
     onToggleZenMode: (() -> Unit)? = null,
     onToggleSessionDrawer: (() -> Unit)? = null,
     isSessionDrawerOpen: Boolean = false,
+    onManageGroups: (() -> Unit)? = null,
+    isGroupSelectionMode: Boolean = false,
+    selectedGroupMemberCount: Int = 0,
+    onToggleGroupSelection: (() -> Unit)? = null,
+    onCreateSelectedGroup: (() -> Unit)? = null,
+    onToggleMinimap: (() -> Unit)? = null,
+    isMinimapOpen: Boolean = false,
+    onSearch: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    val toolbarScrollState = rememberScrollState()
+    val toolbarScope = rememberCoroutineScope()
     var showSurfaceMenu by remember { mutableStateOf(false) }
     var showWorldMenu by remember { mutableStateOf(false) }
     var showEntitiesMenu by remember { mutableStateOf(false) }
@@ -58,17 +72,53 @@ fun PlaymatToolbar(
     var showTemplateSubmenu by remember { mutableStateOf(false) }
 
     Surface(
-        modifier = modifier.padding(8.dp),
+        modifier = modifier.padding(8.dp).widthIn(max = 760.dp).fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
         color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.94f),
         tonalElevation = 6.dp,
         shadowElevation = 8.dp
     ) {
+        Box(Modifier.fillMaxWidth()) {
         Row(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            modifier = Modifier.fillMaxWidth().horizontalScroll(toolbarScrollState)
+                .padding(start = 8.dp, end = 38.dp, top = 4.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
+            if (onSearch != null) {
+                FilledTonalIconButton(onClick = onSearch, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Default.Search, contentDescription = "Buscar piezas", modifier = Modifier.size(16.dp))
+                }
+            }
+            if (onManageGroups != null) {
+                FilledTonalIconButton(onClick = onManageGroups, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Default.FolderCopy, contentDescription = "Grupos", modifier = Modifier.size(16.dp))
+                }
+            }
+            if (onToggleMinimap != null) {
+                FilledTonalIconButton(onClick = onToggleMinimap, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Default.Explore, contentDescription = if (isMinimapOpen) "Cerrar vista general" else "Abrir vista general", modifier = Modifier.size(16.dp))
+                }
+            }
+            if (onToggleGroupSelection != null) {
+                FilledTonalButton(
+                    onClick = onToggleGroupSelection,
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                    modifier = Modifier.height(32.dp)
+                ) {
+                    Icon(if (isGroupSelectionMode) Icons.Default.Close else Icons.Default.SelectAll, null, modifier = Modifier.size(15.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text(if (isGroupSelectionMode) "Cancelar" else "Seleccionar", style = MaterialTheme.typography.labelSmall)
+                }
+            }
+            if (isGroupSelectionMode && onCreateSelectedGroup != null) {
+                FilledTonalButton(
+                    onClick = onCreateSelectedGroup,
+                    enabled = selectedGroupMemberCount > 0,
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                    modifier = Modifier.height(32.dp)
+                ) { Text("Agrupar ($selectedGroupMemberCount)", style = MaterialTheme.typography.labelSmall) }
+            }
             // --- Selector de Mesa Activa ---
             Box {
                 FilledTonalButton(
@@ -320,6 +370,17 @@ fun PlaymatToolbar(
                         }
                     )
 
+                    if (onManageDecks != null) {
+                        DropdownMenuItem(
+                            text = { Text("Mazos visibles en esta mesa") },
+                            leadingIcon = { Icon(Icons.Default.Layers, null) },
+                            onClick = {
+                                showEntitiesMenu = false
+                                onManageDecks()
+                            }
+                        )
+                    }
+
                     if (onOpenTokenPicker != null) {
                         DropdownMenuItem(
                             text = { Text("Añadir Token (PJ / PNJ)") },
@@ -463,6 +524,30 @@ fun PlaymatToolbar(
                     )
                 }
             }
+        }
+        if (toolbarScrollState.maxValue > 0) {
+            Surface(
+                modifier = Modifier.align(Alignment.CenterEnd).padding(end = 3.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh
+            ) {
+                IconButton(
+                    onClick = {
+                        toolbarScope.launch {
+                            val destination = if (toolbarScrollState.value == 0) toolbarScrollState.maxValue else 0
+                            toolbarScrollState.animateScrollTo(destination)
+                        }
+                    },
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        if (toolbarScrollState.value == 0) Icons.Default.MoreHoriz else Icons.Default.FirstPage,
+                        contentDescription = if (toolbarScrollState.value == 0) "Ver más herramientas" else "Volver al inicio de herramientas",
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+        }
         }
     }
 

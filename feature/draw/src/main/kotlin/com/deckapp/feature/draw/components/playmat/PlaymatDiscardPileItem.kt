@@ -46,6 +46,7 @@ fun PlaymatDiscardPileItem(
     x: Float,
     y: Float,
     zoom: Float,
+    isMovementEnabled: Boolean = true,
     piledCards: List<Card>,
     onReshuffleToDeck: () -> Unit,
     onMoveDiscardPile: (newX: Float, newY: Float) -> Unit,
@@ -79,8 +80,8 @@ fun PlaymatDiscardPileItem(
             }
             .size(width, height)
             .clickable(enabled = piledCards.isNotEmpty()) { showDiscardHistory = true }
-            .pointerInput(stackId, zoom) {
-                detectDragGestures(
+            .pointerInput(stackId, zoom, isMovementEnabled) {
+                if (isMovementEnabled) detectDragGestures(
                     onDragStart = { isDragging = true },
                     onDragEnd = {
                         isDragging = false

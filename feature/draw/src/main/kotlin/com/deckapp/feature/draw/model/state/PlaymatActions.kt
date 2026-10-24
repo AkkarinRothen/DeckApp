@@ -29,10 +29,14 @@ data class PlaymatActions(
     val onCardDetailClick: (Long) -> Unit = {},
     val onSendCardToTacticalMap: (Card, Boolean) -> Unit = { _, _ -> },
     val onMoveDeck: (Long, Float, Float) -> Unit = { _, _, _ -> },
+    val onSetDeckVisibleOnPlaymat: (Long, Boolean) -> Unit = { _, _ -> },
+    val onSetDeckFavorite: (Long, Boolean) -> Unit = { _, _ -> },
+    val onReorderSessionDecks: (List<Long>) -> Unit = {},
     val onMoveDiscardPile: (Long, Float, Float) -> Unit = { _, _, _ -> },
     val onDrawFromDeck: (Long, Float, Float, String?) -> Unit = { _, _, _, _ -> },
     val onReshuffleDeck: (Long) -> Unit = {},
     val onAddTableChip: (Long, String, String, Float, Float) -> Unit = { _, _, _, _, _ -> },
+    val onMoveTableChip: (String, Float, Float) -> Unit = { _, _, _ -> },
     val onCreateConnection: (String, String) -> Unit = { _, _ -> },
     val onUpdateConnection: (String, String, String) -> Unit = { _, _, _ -> },
     val onRemoveConnection: (String) -> Unit = {},
@@ -55,7 +59,14 @@ data class PlaymatActions(
     val onAddManualLog: (String) -> Unit = {},
     val onSaveNotes: (String) -> Unit = {},
     val onClearLogs: () -> Unit = {},
-    val onToggleFilterCurrentScene: () -> Unit = {}
+    val onToggleFilterCurrentScene: () -> Unit = {},
+    val onCreatePlaymatGroup: (String, Set<String>) -> Unit = { _, _ -> },
+    val onRenamePlaymatGroup: (String, String) -> Unit = { _, _ -> },
+    val onTogglePlaymatGroupLock: (String) -> Unit = {},
+    val onTogglePlaymatGroupVisibility: (String) -> Unit = {},
+    val onDeletePlaymatGroup: (String) -> Unit = {},
+    val onMovePlaymatGroup: (String, Float, Float) -> Unit = { _, _, _ -> },
+    val onSetPlaymatGroupMembers: (String, Set<String>) -> Unit = { _, _ -> }
 )
 
 /**
@@ -65,7 +76,8 @@ fun PlaymatDelegate.toActions(
     activeSurfaceIdProvider: () -> String,
     sessionLogDelegate: com.deckapp.feature.draw.delegates.SessionLogDelegate? = null,
     onCardDetailClick: (Long) -> Unit = {},
-    onSendCardToTacticalMap: (Card, Boolean) -> Unit = { _, _ -> }
+    onSendCardToTacticalMap: (Card, Boolean) -> Unit = { _, _ -> },
+    onReorderSessionDecks: (List<Long>) -> Unit = {}
 ): PlaymatActions = PlaymatActions(
     onPlaceCardOnPlaymat = { cardId, x, y -> placeCardOnPlaymat(cardId, x, y) },
     onMoveCard = { cardId, x, y, slotTag -> moveCard(cardId, x, y, slotTag) },
@@ -103,6 +115,9 @@ fun PlaymatDelegate.toActions(
     onCardDetailClick = onCardDetailClick,
     onSendCardToTacticalMap = onSendCardToTacticalMap,
     onMoveDeck = { stackId, x, y -> moveDeck(stackId, x, y) },
+    onSetDeckVisibleOnPlaymat = { stackId, visible -> setDeckVisibleOnPlaymat(stackId, visible) },
+    onSetDeckFavorite = { stackId, favorite -> setDeckFavorite(stackId, favorite) },
+    onReorderSessionDecks = onReorderSessionDecks,
     onMoveDiscardPile = { stackId, x, y -> moveDiscardPile(stackId, x, y) },
     onDrawFromDeck = { stackId, x, y, slotTag ->
         drawFromPhysicalDeck(stackId, x, y, true, slotTag)
@@ -113,6 +128,7 @@ fun PlaymatDelegate.toActions(
         sessionLogDelegate?.logCardAction("Mazo", "Mazo barajado")
     },
     onAddTableChip = { tableId, name, resultText, x, y -> addTableChip(tableId, name, resultText, x, y) },
+    onMoveTableChip = { chipId, x, y -> moveTableChip(chipId, x, y) },
     onCreateConnection = { fromId, toId -> createConnection(fromId, toId) },
     onUpdateConnection = { id, label, color -> updateConnection(id, label, color) },
     onRemoveConnection = { id -> removeConnection(id) },
@@ -146,5 +162,12 @@ fun PlaymatDelegate.toActions(
     onAddManualLog = { text -> sessionLogDelegate?.addManualNote(text) },
     onSaveNotes = { md -> sessionLogDelegate?.saveSceneNote(md) },
     onClearLogs = { sessionLogDelegate?.clearLogs() },
-    onToggleFilterCurrentScene = { sessionLogDelegate?.toggleFilterCurrentScene() }
+    onToggleFilterCurrentScene = { sessionLogDelegate?.toggleFilterCurrentScene() },
+    onCreatePlaymatGroup = { name, ids -> createPlaymatGroup(name, ids) },
+    onRenamePlaymatGroup = { id, name -> renamePlaymatGroup(id, name) },
+    onTogglePlaymatGroupLock = { id -> togglePlaymatGroupLock(id) },
+    onTogglePlaymatGroupVisibility = { id -> togglePlaymatGroupVisibility(id) },
+    onDeletePlaymatGroup = { id -> deletePlaymatGroup(id) },
+    onMovePlaymatGroup = { id, dx, dy -> movePlaymatGroup(id, dx, dy) },
+    onSetPlaymatGroupMembers = { id, ids -> setPlaymatGroupMembers(id, ids) }
 )

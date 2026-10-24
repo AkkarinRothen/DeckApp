@@ -20,9 +20,12 @@ data class PlaymatSurface(
     val stickyNotes: List<PlaymatStickyNote> = emptyList(),
     val tableChips: List<PlaymatTableChip> = emptyList(),
     val decks: List<PlaymatDeckPlacement> = emptyList(),
+    /** Session-local quick access list; independent from whether decks are placed on the board. */
+    val favoriteDeckIds: Set<Long> = emptySet(),
     val connections: List<PlaymatConnection> = emptyList(),
     val tokens: List<PlaymatTokenPlacement> = emptyList(),
     val clocks: List<PlaymatClockPlacement> = emptyList(),
+    val groups: List<PlaymatElementGroup> = emptyList(),
     val backgroundPreset: PlaymatAtmosphericPreset = PlaymatAtmosphericPreset.NONE,
     val backgroundOpacity: Float = 1.0f,
     val backgroundScale: Float = 1.0f,
@@ -33,6 +36,16 @@ data class PlaymatSurface(
     val gridStyle: PlaymatGridStyle = PlaymatGridStyle.LINES,
     val cellSizeDp: Float = 48f,
     val snapToGrid: Boolean = false
+)
+
+/** Named, persistent grouping of movable objects on one playmat surface. */
+@Serializable
+data class PlaymatElementGroup(
+    val id: String = UUID.randomUUID().toString(),
+    val name: String,
+    val memberIds: Set<String> = emptySet(),
+    val isLocked: Boolean = false,
+    val isHidden: Boolean = false
 )
 
 /**
@@ -116,7 +129,8 @@ data class PlaymatStickyNote(
     val colorHex: String = "#FFF59D", // Amarillo pastel
     val x: Float,
     val y: Float,
-    val rotationDegrees: Float = 0f
+    val rotationDegrees: Float = 0f,
+    val groupId: String? = null
 )
 
 /**
@@ -129,7 +143,8 @@ data class PlaymatTableChip(
     val tableName: String,
     val rollResultText: String,
     val x: Float,
-    val y: Float
+    val y: Float,
+    val groupId: String? = null
 )
 
 /**
@@ -142,7 +157,11 @@ data class PlaymatDeckPlacement(
     val y: Float,
     val discardX: Float? = null,
     val discardY: Float? = null,
-    val isLocked: Boolean = false
+    val isLocked: Boolean = false,
+    val groupId: String? = null,
+    val discardGroupId: String? = null,
+    /** Whether this session deck and its discard pile are drawn on this playmat surface. */
+    val isVisibleOnPlaymat: Boolean = true
 )
 
 /**
@@ -170,7 +189,8 @@ data class PlaymatTokenPlacement(
     val maxHp: Int = 10,
     val tokenType: PlaymatTokenType = PlaymatTokenType.ALLY,
     val ringColorHex: String = "#4CAF50",
-    val notes: String = ""
+    val notes: String = "",
+    val groupId: String? = null
 )
 
 /**
@@ -185,7 +205,8 @@ data class PlaymatClockPlacement(
     val filledSegments: Int = 0,
     val x: Float,
     val y: Float,
-    val colorHex: String = "#E53935"
+    val colorHex: String = "#E53935",
+    val groupId: String? = null
 )
 
 /**

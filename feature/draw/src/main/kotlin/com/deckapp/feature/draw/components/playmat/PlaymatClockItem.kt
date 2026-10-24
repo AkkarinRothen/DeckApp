@@ -53,6 +53,7 @@ fun PlaymatClockItem(
     isSelected: Boolean,
     isConnectingSource: Boolean,
     zoom: Float,
+    isMovementEnabled: Boolean = true,
     onClockClick: () -> Unit,
     onMove: (clockId: String, finalX: Float, finalY: Float) -> Unit,
     onAdvanceProgress: () -> Unit,
@@ -116,14 +117,16 @@ fun PlaymatClockItem(
                         else Color(0xFF4A4B54),
                         shape = CircleShape
                     )
-                    .pointerInput(clock.id, zoom) {
+                    .pointerInput(clock.id, zoom, isMovementEnabled) {
                         awaitEachGesture {
                             val down = awaitFirstDown(requireUnconsumed = false)
                             var dragDetected = false
                             val drag = awaitTouchSlopOrCancellation(down.id) { change, over ->
                                 change.consume()
-                                localX += over.x / zoom
-                                localY += over.y / zoom
+                                if (isMovementEnabled) {
+                                    localX += over.x / zoom
+                                    localY += over.y / zoom
+                                }
                                 dragDetected = true
                             }
 
@@ -135,12 +138,15 @@ fun PlaymatClockItem(
                                     val dragChange = event.changes.firstOrNull { it.id == currentPointerId }
                                     if (dragChange == null || !dragChange.pressed) break
                                     val delta = dragChange.position - dragChange.previousPosition
-                                    localX += delta.x / zoom
-                                    localY += delta.y / zoom
+                                    if (isMovementEnabled) {
+                                        localX += delta.x / zoom
+                                        localY += delta.y / zoom
+                                    }
                                     dragChange.consume()
                                 }
                                 isDragging = false
-                                onMove(clock.id, localX, localY)
+                                if (isMovementEnabled) onMove(clock.id, localX, localY)
+                                else { localX = clock.x; localY = clock.y }
                             } else {
                                 onClockClick()
                             }

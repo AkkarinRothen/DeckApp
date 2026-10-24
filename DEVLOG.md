@@ -1,3 +1,59 @@
+### Acceso rápido a favoritos y orden por grupo (24 de octubre de 2026)
+
+**Categoría:** `FEATURE / PLAYMAT / DECK MANAGEMENT / RESPONSIVE UI`
+
+- Se añadió una franja plegable de mazos favoritos en el playmat. Desde ella se puede enfocar un mazo o robar una carta sin abrir el administrador; los mazos ocultos y sus grupos se muestran antes de la acción.
+- El arrastre del asa ahora reordena los mazos dentro de su grupo y guarda el orden de la sesión al terminar el gesto.
+- El administrador usa hoja inferior en ventanas compactas y panel lateral en anchos medianos y expandidos. La bandeja de mano se oculta temporalmente al abrirlo para dejar espacio a la lista.
+- Verificación: `:feature:draw:compileDebugKotlin` y `:app:assembleRelease` completaron correctamente. El APK release se actualizó en la tableta sin borrar sus datos. La revisión visual del nuevo flujo quedó pendiente porque la tableta entró en reposo y quedó bloqueada durante la compilación.
+
+### Organización rápida de mazos en Playmat y restauración en tableta (24 de octubre de 2026)
+
+**Categoría:** `FEATURE / PLAYMAT / DECK MANAGEMENT / RELEASE`
+
+- El administrador de mazos presenta secciones plegables por grupo, con conteo de elementos y señal de grupos ocultos. Las secciones se pueden expandir o contraer para reducir el desplazamiento en sesiones con muchos mazos.
+- Se agregaron favoritos por superficie, independientes de la visibilidad y de la colocación física en el playmat. Se conservan en la serialización de la superficie y son compatibles con sesiones existentes mediante valor por defecto vacío.
+- La tabla de mazos ahora permite filtrar favoritos y mantiene los controles existentes para visibilidad, asignación a grupos y reordenamiento.
+- Se restauró en la tableta la copia del teléfono: 23 recursos, 773 cartas, 251 tablas, 39 PNJ y 12 sesiones; la sesión temporal de prueba fue reemplazada.
+- Versión Android release incrementada a 0.1.6 (versionCode 7).
+- Verificación: `:feature:draw:compileDebugKotlin` completó correctamente. La prueba manual en dispositivo queda para el APK release recién generado.
+
+### Arrastre desde la mano al playmat (23 de octubre de 2026)
+
+**Categoría:** `FEATURE / PLAYMAT / UX / GESTURES`
+
+- Las cartas de la bandeja admiten arrastre directo al superar el umbral táctil y arrastre iniciado con pulsación larga. El toque corto y los controles existentes de la carta siguen disponibles; «A la Mesa» continúa como alternativa.
+- La previsualización sigue el dedo y mantiene el punto de agarre. Al soltar dentro del playmat, la posición se transforma según el origen del lienzo y el zoom; se respetan el ajuste a grilla y el encaje magnético en ranuras. Soltar sobre la bandeja o fuera del lienzo cancela la colocación.
+- La carta original se atenúa durante el gesto y una colocación válida utiliza la acción existente, que deja la carta seleccionada y muestra su menú.
+- Verificación: `:feature:draw:compileDebugKotlin` finalizó correctamente. No fue posible la revisión manual: `adb devices` no mostró dispositivos conectados.
+
+### Selección y acceso a acciones de cartas en el playmat (23 de octubre de 2026)
+
+**Categoría:** `FIX / PLAYMAT / UX / GESTURES`
+
+- Los toques sobre una carta ya no se interpretan como toques al fondo que borraban su selección. La selección se mantiene al volver a tocar la carta y se limpia al tocar el espacio vacío.
+- El menú de acciones de la carta se posiciona dentro del área visible, arriba o abajo según el espacio disponible. En pantallas angostas sus acciones se pueden desplazar horizontalmente y tienen objetivos táctiles de 48 dp.
+- Verificación: `:feature:draw:compileDebugKotlin` finalizó correctamente. No se pudo hacer una revisión visual en dispositivo desde este entorno.
+
+### Separación de renderizadores del playmat (23 de octubre de 2026)
+
+**Categoría:** `ARCHITECTURE / PLAYMAT / COMPOSE`
+
+- Se movieron los renderizadores de cartas, plantillas, fondo, notas adhesivas y fichas de tabla a `PlaymatSceneItems.kt`.
+- `PlaymatCanvasView.kt` conserva el orquestador, los gestos, el estado local y las firmas públicas; se eliminaron importaciones que solo correspondían a los componentes extraídos.
+- No cambian modelos, persistencia, orden de dibujo ni comportamiento de interacción.
+- Verificación: `:feature:draw:compileDebugKotlin` completó correctamente después de la extracción.
+
+### Separación de gestos y estados de composición del playmat (23 de octubre de 2026)
+
+**Categoría:** `ARCHITECTURE / PLAYMAT / COMPOSE / PERFORMANCE`
+
+- `PlaymatCanvasView` dejó de crear alias de acciones que ya estaban disponibles en `PlaymatActions` y se quitó el mapa de colocaciones sin uso.
+- Se extrajeron los detectores de regla, pan/zoom y toque a `playmatCanvasGestures`; el orquestador conserva el estado. Se mantuvieron el orden y las claves originales de `pointerInput`.
+- El contrato común se dividió en estados de escena, overlays y diálogos. Cada estado se memoiza con los valores que consume su capa; abrir un diálogo ya no cambia el estado que recibe la escena. No se usaron anotaciones `@Immutable`.
+- Se habilitaron reportes del compilador Compose en `feature/draw/build/compose-reports/`; la línea base quedó bajo `build/compose-reports/baseline/`. La línea base mostraba un único `PlaymatCanvasState` inestable compartido por las tres capas; el reporte posterior confirma contratos independientes y callbacks estables. La memoización reutiliza las instancias mientras las entradas de cada capa no cambien, permitiendo saltar su composición bajo strong skipping.
+- Verificación: `:feature:draw:compileDebugKotlin` y `:feature:draw:testDebugUnitTest` completaron correctamente. No se pudo hacer revisión con Layout Inspector porque `adb` no está disponible en el entorno.
+
 ### Separación individual de cartas y presets PnP 2×3 para The Story Engine y Deck of Worlds (23 de octubre de 2026)
 
 **Categoría:** `FEATURE / STORY ENGINE / EXPANSIONS / PNP IMPORT / OCR PIPELINE / UX`
@@ -3161,3 +3217,11 @@ opcional de auto-detección cuando el usuario no conoce el layout del PDF.
 - Se añadió selección múltiple de PDFs. La vista previa usa el primero y la configuración se comparte para la cola; cada PDF genera un mazo, se procesa en secuencia y limita el rango al número de páginas disponible.
 - Los errores de importación se presentan por archivo y el resumen informa los mazos/cartas creados.
 - Verificación: `:app:compileDebugKotlin --configuration-cache --max-workers=2` completó correctamente. No se probó manualmente la selección múltiple con archivos reales en un dispositivo.
+
+### Vista compacta de bloques y revisión del playmat (24 de octubre de 2026)
+
+- Añadida la distribución «Bloques compactos» a la mesa: los bloques se presentan en una cuadrícula de dos a cuatro columnas con contenido resumido, sin cambiar las disposiciones predeterminadas.
+- En preparación, «Ordenar bloques» activa el modo de edición existente; las tarjetas muestran controles de arrastre y «Listo» permite terminar.
+- Mock-ups guardados en `artifacts/mesa-mockups/bento-playmat/`.
+- Compilada e instalada la variante release `0.1.3` (código 4) sobre el Motorola One Fusion, conservando los datos de la app.
+- Revisión manual en una sesión clonada: abrir playmat, colocar carta desde la mano, mostrar acciones, girar carta, mover pieza y probar la cuadrícula compacta. La sesión clonada se eliminó al terminar la prueba.

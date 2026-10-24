@@ -719,6 +719,7 @@ fun SessionScreen(
                                     viewModel.playmatDelegate.toActions(
                                         activeSurfaceIdProvider = { viewModel.uiState.value.activePlaymatSurface.id },
                                         sessionLogDelegate = viewModel.sessionLogDelegate,
+                                        onReorderSessionDecks = viewModel::reorderSessionDecks,
                                         onCardDetailClick = { cardId -> onCardClick(cardId, uiState.sessionId) },
                                         onSendCardToTacticalMap = { card, isToken ->
                                             if (isToken) {

@@ -3,7 +3,7 @@ package com.deckapp.core.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class BoardDistribution { GRID, DM, SOLO }
+enum class BoardDistribution { GRID, DM, SOLO, BENTO }
 
 @Serializable
 data class BoardViewMemory(

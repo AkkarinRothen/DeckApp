@@ -57,6 +57,9 @@ class SessionRepositoryImpl @Inject constructor(
     override suspend fun addDeckToSession(ref: SessionDeckRef) =
         sessionDao.insertSessionDeckRef(ref.toEntity())
 
+    override suspend fun updateSessionDeckOrder(sessionId: Long, stackId: Long, sortOrder: Int) =
+        sessionDao.updateSessionDeckOrder(sessionId, stackId, sortOrder)
+
     override suspend fun removeDeckFromSession(sessionId: Long, stackId: Long) =
         sessionDao.removeSessionDeckRef(sessionId, stackId)
 

@@ -1,57 +1,24 @@
 package com.deckapp.feature.draw.components.playmat
 
-import android.content.Context
 import androidx.compose.animation.*
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.Spring
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.awaitTouchSlopOrCancellation
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.positionChange
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
+import androidx.compose.ui.unit.toSize
 import com.deckapp.core.model.*
-import com.deckapp.core.ui.util.toCoilModel
 import com.deckapp.feature.draw.SessionUiState
 import kotlinx.coroutines.launch
-import kotlin.math.hypot
-import kotlin.math.roundToInt
+import kotlinx.coroutines.delay
 
 /**
  * Representación geométrica de una ranura dentro de una plantilla temática.
@@ -107,48 +74,6 @@ fun PlaymatCanvasView(
     actions: com.deckapp.feature.draw.model.state.PlaymatActions,
     modifier: Modifier = Modifier
 ) {
-    val onPlaceCardOnPlaymat = actions.onPlaceCardOnPlaymat
-    val onMoveCard = actions.onMoveCard
-    val onRotateCard = actions.onRotateCard
-    val onFlipCard = actions.onFlipCard
-    val onReturnToHand = actions.onReturnToHand
-    val onDiscardCard = actions.onDiscardCard
-    val onSelectCard = actions.onSelectCard
-    val onToggleHandTray = actions.onToggleHandTray
-    val onSelectSurface = actions.onSelectSurface
-    val onCreateSurface = actions.onCreateSurface
-    val onDeleteSurface = actions.onDeleteSurface
-    val onSetTheme = actions.onSetTheme
-    val onSetTemplate = actions.onSetTemplate
-    val onUpdateCamera = actions.onUpdateCamera
-    val onQuickDraw = actions.onQuickDraw
-    val onAddStickyNote = actions.onAddStickyNote
-    val onMoveStickyNote = actions.onMoveStickyNote
-    val onDeleteStickyNote = actions.onDeleteStickyNote
-    val onCardDetailClick = actions.onCardDetailClick
-    val onSendCardToTacticalMap = actions.onSendCardToTacticalMap
-    val onMoveDeck = actions.onMoveDeck
-    val onMoveDiscardPile = actions.onMoveDiscardPile
-    val onDrawFromDeck = actions.onDrawFromDeck
-    val onReshuffleDeck = actions.onReshuffleDeck
-    val onAddTableChip = actions.onAddTableChip
-    val onCreateConnection = actions.onCreateConnection
-    val onUpdateConnection = actions.onUpdateConnection
-    val onRemoveConnection = actions.onRemoveConnection
-    val onAddToken = actions.onAddToken
-    val onMoveToken = actions.onMoveToken
-    val onUpdateTokenHp = actions.onUpdateTokenHp
-    val onUpdateTokenType = actions.onUpdateTokenType
-    val onRemoveToken = actions.onRemoveToken
-    val onAddClock = actions.onAddClock
-    val onUpdateClockProgress = actions.onUpdateClockProgress
-    val onMoveClock = actions.onMoveClock
-    val onRemoveClock = actions.onRemoveClock
-    val onSetBackgroundMap = actions.onSetBackgroundMap
-    val onSetBackgroundTransform = actions.onSetBackgroundTransform
-    val onToggleBackgroundLock = actions.onToggleBackgroundLock
-    val onSetGridConfig = actions.onSetGridConfig
-
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val activeSurface = uiState.activePlaymatSurface
@@ -158,7 +83,16 @@ fun PlaymatCanvasView(
     var cameraY by remember(activeSurface.id) { mutableFloatStateOf(activeSurface.cameraY) }
     var cameraZoom by remember(activeSurface.id) { mutableFloatStateOf(activeSurface.cameraZoom.coerceIn(0.4f, 2.5f)) }
 
+    LaunchedEffect(activeSurface.id, cameraX, cameraY, cameraZoom) {
+        if (cameraX != activeSurface.cameraX || cameraY != activeSurface.cameraY || cameraZoom != activeSurface.cameraZoom) {
+            delay(300)
+            actions.onUpdateCamera(cameraX, cameraY, cameraZoom)
+        }
+    }
+
     var showQuickDrawDialog by remember { mutableStateOf(false) }
+    var isGroupSelectionMode by remember(activeSurface.id) { mutableStateOf(false) }
+    var selectedGroupMemberIds by remember(activeSurface.id) { mutableStateOf(emptySet<String>()) }
     var showStickyNoteDialog by remember { mutableStateOf(false) }
     var showSendToTacticalDialog by remember { mutableStateOf(false) }
     var showDiceOverlay by remember { mutableStateOf(false) }
@@ -177,24 +111,51 @@ fun PlaymatCanvasView(
     var hoveredSlotTag by remember { mutableStateOf<String?>(null) }
     var connectingSourceEndpointId by remember { mutableStateOf<String?>(null) }
     var editingConnection by remember { mutableStateOf<PlaymatConnection?>(null) }
+    var canvasBoundsInWindow by remember { mutableStateOf(Rect.Zero) }
+    var handTrayBoundsInWindow by remember { mutableStateOf(Rect.Zero) }
+    var handCardDrag by remember { mutableStateOf<PlaymatHandCardDrag?>(null) }
 
     val cardsById = remember(uiState.hand, uiState.pile) {
         (uiState.hand + uiState.pile).associateBy { it.id }
     }
 
-    val cardPlacementsById = remember(activeSurface.cards) {
-        activeSurface.cards.associateBy { it.cardId }
+    val renderSurface = remember(activeSurface) {
+        val hidden = activeSurface.groups.filter { it.isHidden }.map { it.id }.toSet()
+        activeSurface.copy(
+            cards = activeSurface.cards.filterNot { it.clusterId in hidden },
+            stickyNotes = activeSurface.stickyNotes.filterNot { it.groupId in hidden },
+            tableChips = activeSurface.tableChips.filterNot { it.groupId in hidden },
+            tokens = activeSurface.tokens.filterNot { it.groupId in hidden },
+            clocks = activeSurface.clocks.filterNot { it.groupId in hidden },
+            decks = activeSurface.decks.filterNot { it.groupId in hidden || it.discardGroupId in hidden }
+                .filter { it.isVisibleOnPlaymat }
+        )
     }
+    val playmatSpatialIndex = remember(renderSurface) { PlaymatSpatialIndex(renderSurface) }
+    val visibleMemberIds = remember(renderSurface) {
+        buildSet {
+            renderSurface.cards.forEach { add("card:${it.cardId}") }
+            renderSurface.tokens.forEach { add("token:${it.id}") }
+            renderSurface.clocks.forEach { add("clock:${it.id}") }
+            renderSurface.stickyNotes.forEach { add("note:${it.id}") }
+            renderSurface.tableChips.forEach { add("chip:${it.id}") }
+            renderSurface.decks.forEach {
+                add("deck:${it.stackId}")
+                if (it.discardX != null || it.discardY != null) add("discard:${it.stackId}")
+            }
+        }
+    }
+    val visibleSelectedGroupMemberIds = selectedGroupMemberIds intersect visibleMemberIds
 
-    val endpointPositions = remember(activeSurface.cards, activeSurface.tokens, activeSurface.clocks) {
+    val endpointPositions = remember(renderSurface.cards, renderSurface.tokens, renderSurface.clocks) {
         val map = mutableMapOf<String, Offset>()
-        activeSurface.cards.forEach { card ->
+        renderSurface.cards.forEach { card ->
             map["card_${card.cardId}"] = Offset(card.x + 60f, card.y + 18f)
         }
-        activeSurface.tokens.forEach { token ->
+        renderSurface.tokens.forEach { token ->
             map["token_${token.id}"] = Offset(token.x + 32f, token.y + 32f)
         }
-        activeSurface.clocks.forEach { clock ->
+        renderSurface.clocks.forEach { clock ->
             map["clock_${clock.id}"] = Offset(clock.x + 38f, clock.y + 38f)
         }
         map
@@ -212,626 +173,273 @@ fun PlaymatCanvasView(
         getTemplateSlots(activeSurface.template)
     }
 
-    val selectedCardPlacement = remember(activeSurface.cards, uiState.selectedPlaymatCardId) {
-        activeSurface.cards.find { it.cardId == uiState.selectedPlaymatCardId }
+    val selectedCardPlacement = remember(renderSurface.cards, uiState.selectedPlaymatCardId) {
+        renderSurface.cards.find { it.cardId == uiState.selectedPlaymatCardId }
     }
     val selectedCard = remember(selectedCardPlacement, cardsById) {
         selectedCardPlacement?.let { cardsById[it.cardId] }
     }
 
     val graphicsLayer = rememberGraphicsLayer()
+    val latestSurfaceCamera = rememberUpdatedState(Triple(activeSurface.cameraX, activeSurface.cameraY, activeSurface.cameraZoom))
+    val latestCameraUpdater = rememberUpdatedState(actions.onUpdateCamera)
+    val centerAtWorld: (Float, Float) -> Unit = { x, y ->
+        cameraX = canvasBoundsInWindow.width / 2f - x * cameraZoom
+        cameraY = canvasBoundsInWindow.height / 2f - y * cameraZoom
+    }
+    val centerGroup: (String) -> Unit = { groupId ->
+        findPlaymatGroupCenter(activeSurface, groupId)?.let { centerAtWorld(it.first, it.second) }
+    }
+
+    val canvasEvents = remember(activeSurface, canvasBoundsInWindow, actions, context, graphicsLayer, coroutineScope) {
+        PlaymatCanvasEvents(
+            onHoveredSlotTagChanged = { hoveredSlotTag = it },
+            onConnectingSourceChanged = { connectingSourceEndpointId = it },
+            onSelectedTokenChanged = { selectedTokenId = it },
+            onSelectedClockChanged = { selectedClockId = it },
+            onTokenDragPositionsChanged = { start, current ->
+                tokenDragStartPos = start
+                tokenDragCurrentPos = current
+            },
+            onEditingHpTokenChanged = { editingHpToken = it },
+            onEditingConnectionChanged = { editingConnection = it },
+            onShowQuickDrawDialogChanged = { showQuickDrawDialog = it },
+            onShowStickyNoteDialogChanged = { showStickyNoteDialog = it },
+            onShowSendToTacticalDialogChanged = { showSendToTacticalDialog = it },
+            onShowDiceOverlayChanged = { showDiceOverlay = it },
+            onShowTokenPickerDialogChanged = { showTokenPickerDialog = it },
+            onShowClockCreationDialogChanged = { showClockCreationDialog = it },
+            onShowTacticalSettingsDialogChanged = { showTacticalSettingsDialog = it },
+            onIsRulerActiveChanged = { isRulerActive = it },
+            onRulerPositionsChanged = { start, current ->
+                rulerStartPos = start
+                rulerCurrentPos = current
+            },
+            onStickyNoteTextChanged = { stickyNoteText = it },
+            onResetCamera = {
+                cameraX = 0f
+                cameraY = 0f
+                cameraZoom = 1f
+            },
+            onExportSnapshot = {
+                coroutineScope.launch {
+                    try {
+                        val imageBitmap = graphicsLayer.toImageBitmap()
+                        val bitmap = imageBitmap.asAndroidBitmap()
+                        PlaymatSnapshotHelper.shareBitmap(context, bitmap)
+                    } catch (e: Exception) {
+                        android.util.Log.e("PlaymatCanvasView", "Fallo al capturar snapshot de tapete", e)
+                    }
+                }
+            },
+            onHandCardDragChanged = { handCardDrag = it },
+            onHandTrayBoundsChanged = { handTrayBoundsInWindow = it },
+            onGroupSelectionModeChanged = { enabled ->
+                isGroupSelectionMode = enabled
+                if (!enabled) selectedGroupMemberIds = emptySet()
+            },
+            onGroupSelectionFinished = {
+                isGroupSelectionMode = false
+                selectedGroupMemberIds = emptySet()
+            }
+        )
+    }
+
+    // Reuse each slice while its layer-specific inputs stay equal so unrelated UI changes can skip it.
+    val sceneState = remember(
+        renderSurface, cameraX, cameraY, cameraZoom,
+        uiState.deckNames, uiState.deckCardCounts, uiState.deckBackImages,
+        uiState.selectedPlaymatCardId, selectedTokenId, selectedClockId,
+        hoveredSlotTag, connectingSourceEndpointId, cardsById, endpointPositions,
+        piledCardsByDeck, currentTemplateSlots, actions
+    ) {
+        PlaymatSceneState(
+            activeSurface = renderSurface,
+            cameraX = cameraX,
+            cameraY = cameraY,
+            cameraZoom = cameraZoom,
+            deckNames = uiState.deckNames,
+            deckCardCounts = uiState.deckCardCounts,
+            deckBackImages = uiState.deckBackImages,
+            selectedPlaymatCardId = uiState.selectedPlaymatCardId,
+            selectedTokenId = selectedTokenId,
+            selectedClockId = selectedClockId,
+            hoveredSlotTag = hoveredSlotTag,
+            connectingSourceEndpointId = connectingSourceEndpointId,
+            cardsById = cardsById,
+            endpointPositions = endpointPositions,
+            piledCardsByDeck = piledCardsByDeck,
+            currentTemplateSlots = currentTemplateSlots,
+            actions = actions
+        )
+    }
+
+    val currentSceneTitle = remember(uiState.scenes, uiState.focusedSceneId) {
+        uiState.scenes.find { it.id == uiState.focusedSceneId }?.title
+    }
+    val overlayState = remember(
+        activeSurface, allSurfaces, cameraX, cameraY, cameraZoom,
+        uiState.isZenMode, showDiceOverlay, uiState.isSessionDrawerOpen,
+        uiState.sessionDrawerTab, uiState.hand, uiState.showPlaymatHandTray,
+        uiState.deckRefs, uiState.deckNames, uiState.deckCardCounts, uiState.deckAspectRatios, uiState.deckBackImages,
+        uiState.sessionId, uiState.sessionLog.logs, uiState.sessionLog.noteDraftMarkdown,
+        uiState.sessionLog.isFilterCurrentScene, currentSceneTitle,
+        isRulerActive, rulerStartPos, rulerCurrentPos, tokenDragStartPos,
+        tokenDragCurrentPos, selectedTokenId, selectedClockId,
+        connectingSourceEndpointId, cardsById, placedCardIds, currentTemplateSlots,
+        selectedCardPlacement, selectedCard, canvasBoundsInWindow,
+        handTrayBoundsInWindow, handCardDrag, isGroupSelectionMode, visibleSelectedGroupMemberIds, actions,
+        centerGroup, centerAtWorld
+    ) {
+        PlaymatOverlayState(
+            activeSurface = activeSurface,
+            allSurfaces = allSurfaces,
+            cameraX = cameraX,
+            cameraY = cameraY,
+            cameraZoom = cameraZoom,
+            canvasBoundsInWindow = canvasBoundsInWindow,
+            handTrayBoundsInWindow = handTrayBoundsInWindow,
+            handCardDrag = handCardDrag,
+            isZenMode = uiState.isZenMode,
+            showDiceOverlay = showDiceOverlay,
+            isSessionDrawerOpen = uiState.isSessionDrawerOpen,
+            sessionDrawerTab = uiState.sessionDrawerTab,
+            hand = uiState.hand,
+            showPlaymatHandTray = uiState.showPlaymatHandTray,
+            deckRefs = uiState.deckRefs,
+            deckNames = uiState.deckNames,
+            deckCardCounts = uiState.deckCardCounts,
+            deckAspectRatios = uiState.deckAspectRatios,
+            deckBackImages = uiState.deckBackImages,
+            sessionId = uiState.sessionId,
+            sessionLogs = uiState.sessionLog.logs,
+            notesMarkdown = uiState.sessionLog.noteDraftMarkdown,
+            isFilterCurrentScene = uiState.sessionLog.isFilterCurrentScene,
+            currentSceneTitle = currentSceneTitle,
+            isRulerActive = isRulerActive,
+            rulerStartPos = rulerStartPos,
+            rulerCurrentPos = rulerCurrentPos,
+            tokenDragStartPos = tokenDragStartPos,
+            tokenDragCurrentPos = tokenDragCurrentPos,
+            selectedTokenId = selectedTokenId,
+            selectedClockId = selectedClockId,
+            connectingSourceEndpointId = connectingSourceEndpointId,
+            cardsById = cardsById,
+            placedCardIds = placedCardIds,
+            currentTemplateSlots = currentTemplateSlots,
+            selectedCardPlacement = selectedCardPlacement,
+            selectedCard = selectedCard,
+            isGroupSelectionMode = isGroupSelectionMode,
+            selectedGroupMemberIds = visibleSelectedGroupMemberIds,
+            selectedGroupMemberCount = visibleSelectedGroupMemberIds.size,
+            onCenterGroup = centerGroup,
+            onCenterAtWorld = centerAtWorld,
+            actions = actions
+        )
+    }
+
+    val dialogState = remember(
+        activeSurface, cameraX, cameraY, cameraZoom,
+        uiState.deckRefs, uiState.deckNames, uiState.deckCardCounts, uiState.npcs,
+        showQuickDrawDialog, showStickyNoteDialog, showSendToTacticalDialog,
+        showTokenPickerDialog, showClockCreationDialog, showTacticalSettingsDialog,
+        editingHpToken, stickyNoteText, editingConnection, selectedCard, actions
+    ) {
+        PlaymatDialogState(
+            activeSurface = activeSurface,
+            cameraX = cameraX,
+            cameraY = cameraY,
+            cameraZoom = cameraZoom,
+            deckRefs = uiState.deckRefs,
+            deckNames = uiState.deckNames,
+            deckCardCounts = uiState.deckCardCounts,
+            npcs = uiState.npcs,
+            showQuickDrawDialog = showQuickDrawDialog,
+            showStickyNoteDialog = showStickyNoteDialog,
+            showSendToTacticalDialog = showSendToTacticalDialog,
+            showTokenPickerDialog = showTokenPickerDialog,
+            showClockCreationDialog = showClockCreationDialog,
+            showTacticalSettingsDialog = showTacticalSettingsDialog,
+            editingHpToken = editingHpToken,
+            stickyNoteText = stickyNoteText,
+            editingConnection = editingConnection,
+            selectedCard = selectedCard,
+            actions = actions
+        )
+    }
 
     Box(
         modifier = modifier
             .fillMaxSize()
-            .pointerInput(isRulerActive, activeSurface.id) {
-                if (isRulerActive) {
-                    detectDragGestures(
-                        onDragStart = { offset ->
-                            val canvasX = (offset.x - cameraX) / cameraZoom
-                            val canvasY = (offset.y - cameraY) / cameraZoom
-                            rulerStartPos = Offset(canvasX, canvasY)
-                            rulerCurrentPos = Offset(canvasX, canvasY)
-                        },
-                        onDrag = { change, _ ->
-                            change.consume()
-                            val canvasX = (change.position.x - cameraX) / cameraZoom
-                            val canvasY = (change.position.y - cameraY) / cameraZoom
-                            rulerCurrentPos = Offset(canvasX, canvasY)
-                        },
-                        onDragEnd = { },
-                        onDragCancel = {
-                            rulerStartPos = null
-                            rulerCurrentPos = null
-                        }
-                    )
-                }
+            .onGloballyPositioned { coordinates ->
+                canvasBoundsInWindow = Rect(coordinates.positionInWindow(), coordinates.size.toSize())
             }
-            .pointerInput(isRulerActive, activeSurface.id) {
-                if (!isRulerActive) {
-                    detectTransformGestures { _, pan, zoom, _ ->
-                        cameraZoom = (cameraZoom * zoom).coerceIn(0.4f, 2.5f)
-                        cameraX += pan.x
-                        cameraY += pan.y
-                        onUpdateCamera(cameraX, cameraY, cameraZoom)
+            .playmatCanvasGestures(
+                isRulerActive = isRulerActive,
+                surfaceId = activeSurface.id,
+                cameraX = cameraX,
+                cameraY = cameraY,
+                cameraZoom = cameraZoom,
+                rulerStartPos = rulerStartPos,
+                connectingSourceEndpointId = connectingSourceEndpointId,
+                onRulerPositionsChanged = canvasEvents.onRulerPositionsChanged,
+                onTransform = { pan, zoom ->
+                    cameraZoom = (cameraZoom * zoom).coerceIn(0.4f, 2.5f)
+                    cameraX += pan.x
+                    cameraY += pan.y
+                },
+                onTransformEnd = {
+                    val persisted = latestSurfaceCamera.value
+                    if (cameraX != persisted.first || cameraY != persisted.second || cameraZoom != persisted.third) {
+                        latestCameraUpdater.value(cameraX, cameraY, cameraZoom)
+                    }
+                },
+                onCancelConnection = { connectingSourceEndpointId = null },
+                onCanvasTap = { tapPosition ->
+                    val canvasX = (tapPosition.x - cameraX) / cameraZoom
+                    val canvasY = (tapPosition.y - cameraY) / cameraZoom
+                    val tappedCard = playmatSpatialIndex.hitTest(canvasX, canvasY)?.kind == PlaymatSpatialIndex.Kind.CARD
+                    if (!tappedCard) {
+                        actions.onSelectCard(null)
+                        selectedTokenId = null
+                        selectedClockId = null
                     }
                 }
-            }
-            .pointerInput(activeSurface.id) {
-                detectTapGestures(
-                    onTap = {
-                        if (rulerStartPos != null) {
-                            rulerStartPos = null
-                            rulerCurrentPos = null
-                        } else if (connectingSourceEndpointId != null) {
-                            connectingSourceEndpointId = null
-                        } else {
-                            onSelectCard(null)
-                            selectedTokenId = null
-                            selectedClockId = null
-                        }
-                    }
-                )
-            }
+            )
     ) {
-    val canvasState = PlaymatCanvasState(
-        uiState = uiState,
-        actions = actions,
-        activeSurface = activeSurface,
-        allSurfaces = allSurfaces,
-        cameraX = cameraX,
-        cameraY = cameraY,
-        cameraZoom = cameraZoom,
-        showQuickDrawDialog = showQuickDrawDialog,
-        showStickyNoteDialog = showStickyNoteDialog,
-        showSendToTacticalDialog = showSendToTacticalDialog,
-        showDiceOverlay = showDiceOverlay,
-        showTokenPickerDialog = showTokenPickerDialog,
-        showClockCreationDialog = showClockCreationDialog,
-        showTacticalSettingsDialog = showTacticalSettingsDialog,
-        isRulerActive = isRulerActive,
-        rulerStartPos = rulerStartPos,
-        rulerCurrentPos = rulerCurrentPos,
-        tokenDragStartPos = tokenDragStartPos,
-        tokenDragCurrentPos = tokenDragCurrentPos,
-        editingHpToken = editingHpToken,
-        selectedTokenId = selectedTokenId,
-        selectedClockId = selectedClockId,
-        stickyNoteText = stickyNoteText,
-        hoveredSlotTag = hoveredSlotTag,
-        connectingSourceEndpointId = connectingSourceEndpointId,
-        editingConnection = editingConnection,
-        cardsById = cardsById,
-        endpointPositions = endpointPositions,
-        piledCardsByDeck = piledCardsByDeck,
-        placedCardIds = placedCardIds,
-        currentTemplateSlots = currentTemplateSlots,
-        selectedCardPlacement = selectedCardPlacement,
-        selectedCard = selectedCard
-    )
-    val canvasEvents = PlaymatCanvasEvents(
-        onHoveredSlotTagChanged = { hoveredSlotTag = it },
-        onConnectingSourceChanged = { connectingSourceEndpointId = it },
-        onSelectedTokenChanged = { selectedTokenId = it },
-        onSelectedClockChanged = { selectedClockId = it },
-        onTokenDragPositionsChanged = { start, current ->
-            tokenDragStartPos = start
-            tokenDragCurrentPos = current
-        },
-        onEditingHpTokenChanged = { editingHpToken = it },
-        onEditingConnectionChanged = { editingConnection = it },
-        onShowQuickDrawDialogChanged = { showQuickDrawDialog = it },
-        onShowStickyNoteDialogChanged = { showStickyNoteDialog = it },
-        onShowSendToTacticalDialogChanged = { showSendToTacticalDialog = it },
-        onShowDiceOverlayChanged = { showDiceOverlay = it },
-        onShowTokenPickerDialogChanged = { showTokenPickerDialog = it },
-        onShowClockCreationDialogChanged = { showClockCreationDialog = it },
-        onShowTacticalSettingsDialogChanged = { showTacticalSettingsDialog = it },
-        onIsRulerActiveChanged = { isRulerActive = it },
-        onRulerPositionsChanged = { start, current ->
-            rulerStartPos = start
-            rulerCurrentPos = current
-        },
-        onStickyNoteTextChanged = { stickyNoteText = it },
-        onResetCamera = {
-            cameraX = 0f
-            cameraY = 0f
-            cameraZoom = 1f
-            onUpdateCamera(0f, 0f, 1f)
-        },
-        onExportSnapshot = {
-            coroutineScope.launch {
-                try {
-                    val imageBitmap = graphicsLayer.toImageBitmap()
-                    val bitmap = imageBitmap.asAndroidBitmap()
-                    PlaymatSnapshotHelper.shareBitmap(context, bitmap)
-                } catch (e: Exception) {
-                    android.util.Log.e("PlaymatCanvasView", "Fallo al capturar snapshot de tapete", e)
-                }
-            }
-        }
-    )
-        PlaymatSceneLayer(
-            state = canvasState,
-            events = canvasEvents,
-            graphicsLayer = graphicsLayer
+        PlaymatSceneLayer(state = sceneState, events = canvasEvents, graphicsLayer = graphicsLayer)
+        PlaymatSelectionLayer(
+            surface = renderSurface,
+            cameraX = cameraX,
+            cameraY = cameraY,
+            cameraZoom = cameraZoom,
+            enabled = isGroupSelectionMode,
+            selectedIds = visibleSelectedGroupMemberIds,
+            onSelectionChanged = { selectedGroupMemberIds = it }
         )
-        PlaymatCanvasOverlays(
-            state = canvasState,
-            events = canvasEvents
-        )
-        PlaymatDialogsHost(
-            state = canvasState,
-            events = canvasEvents
-        )
+        PlaymatCanvasOverlays(state = overlayState, events = canvasEvents)
+        PlaymatDialogsHost(state = dialogState, events = canvasEvents)
     }
 }
 
-/**
- * Renderizado de carta física colocada en el tapete 2D con arrastre fluido y desacoplado a 120 FPS.
- */
-@Composable
-internal fun PlaymatCardItem(
-    placement: PlaymatCardPlacement,
-    card: Card,
-    backImage: String?,
-    isSelected: Boolean,
-    isConnectingSource: Boolean = false,
-    zoom: Float,
-    templateSlots: List<TemplateSlotDef>,
-    onCardClick: () -> Unit,
-    onMove: (cardId: Long, finalX: Float, finalY: Float, slotTag: String?) -> Unit,
-    onHoverSlotChanged: (String?) -> Unit
-) {
-    val width = 120.dp * zoom
-    val height = 180.dp * zoom
-
-    var localX by remember(placement.cardId, placement.x) { mutableFloatStateOf(placement.x) }
-    var localY by remember(placement.cardId, placement.y) { mutableFloatStateOf(placement.y) }
-    var isDragging by remember { mutableStateOf(false) }
-
-    LaunchedEffect(placement.x, placement.y) {
-        if (!isDragging) {
-            localX = placement.x
-            localY = placement.y
+private fun findPlaymatGroupCenter(surface: PlaymatSurface, groupId: String): Pair<Float, Float>? {
+    val memberIds = surface.groups.firstOrNull { it.id == groupId }?.memberIds ?: return null
+    val points = buildList {
+        surface.cards.filter { "card:${it.cardId}" in memberIds }.forEach { add(it.x + 60f to it.y + 90f) }
+        surface.tokens.filter { "token:${it.id}" in memberIds }.forEach { add(it.x + 32f to it.y + 41f) }
+        surface.clocks.filter { "clock:${it.id}" in memberIds }.forEach { add(it.x + 38f to it.y + 50f) }
+        surface.stickyNotes.filter { "note:${it.id}" in memberIds }.forEach { add(it.x + 50f to it.y + 50f) }
+        surface.tableChips.filter { "chip:${it.id}" in memberIds }.forEach { add(it.x + 90f to it.y + 24f) }
+        surface.decks.forEach { deck ->
+            if ("deck:${deck.stackId}" in memberIds) add(deck.x + 60f to deck.y + 90f)
+            if ("discard:${deck.stackId}" in memberIds) add((deck.discardX ?: deck.x + 150f) + 60f to (deck.discardY ?: deck.y) + 90f)
         }
     }
-
-    val animatedRotation by animateFloatAsState(
-        targetValue = placement.rotationDegrees.toFloat(),
-        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-        label = "cardRotation"
-    )
-
-    val animatedFlipRotation by animateFloatAsState(
-        targetValue = if (placement.isFaceUp) 0f else 180f,
-        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-        label = "cardFlipRotation"
-    )
-
-    val density = LocalDensity.current
-
-    val currentNearestSlot = remember(localX, localY, isDragging, templateSlots) {
-        if (!isDragging || templateSlots.isEmpty()) null
-        else {
-            val snapThreshold = 60f
-            templateSlots.find { slot ->
-                hypot(slot.x - localX, slot.y - localY) <= snapThreshold
-            }
-        }
-    }
-
-    LaunchedEffect(currentNearestSlot) {
-        onHoverSlotChanged(currentNearestSlot?.tag)
-    }
-
-    val elevation by animateDpAsState(
-        targetValue = if (isDragging) 22.dp else if (isSelected) 14.dp else 6.dp,
-        label = "cardElevation"
-    )
-
-    val scale by animateFloatAsState(
-        targetValue = if (isDragging) 1.05f else 1.0f,
-        label = "cardScale"
-    )
-
-    // Lectura de pista / señal activa de la carta
-    val cueText = remember(card, placement.rotationDegrees) {
-        card.activeZone?.text?.ifBlank { null }
-            ?: card.faces.firstOrNull()?.zones?.firstOrNull()?.text?.ifBlank { null }
-            ?: card.title
-    }
-
-    Box(
-        modifier = Modifier
-            .offset {
-                IntOffset(
-                    (localX * zoom).roundToInt(),
-                    (localY * zoom).roundToInt()
-                )
-            }
-            .size(width, height)
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-                rotationZ = animatedRotation
-                rotationY = animatedFlipRotation
-                cameraDistance = 14f * density.density
-            }
-            .pointerInput(placement.cardId, zoom, templateSlots) {
-                awaitEachGesture {
-                    val down = awaitFirstDown(requireUnconsumed = false)
-                    var dragDetected = false
-                    val drag = awaitTouchSlopOrCancellation(down.id) { change, over ->
-                        change.consume()
-                        localX += over.x / zoom
-                        localY += over.y / zoom
-                        dragDetected = true
-                    }
-
-                    if (drag != null || dragDetected) {
-                        isDragging = true
-                        val currentPointerId = down.id
-                        while (true) {
-                            val event = awaitPointerEvent()
-                            val dragChange = event.changes.firstOrNull { it.id == currentPointerId }
-                            if (dragChange == null || !dragChange.pressed) break
-                            val delta = dragChange.position - dragChange.previousPosition
-                            localX += delta.x / zoom
-                            localY += delta.y / zoom
-                            dragChange.consume()
-                        }
-
-                        isDragging = false
-                        onHoverSlotChanged(null)
-
-                        // Aplicar snap magnético si está cerca de un slot
-                        val snapThreshold = 60f
-                        val nearest = templateSlots.find { slot ->
-                            hypot(slot.x - localX, slot.y - localY) <= snapThreshold
-                        }
-
-                        val finalX = nearest?.x ?: localX
-                        val finalY = nearest?.y ?: localY
-                        localX = finalX
-                        localY = finalY
-                        onMove(placement.cardId, finalX, finalY, nearest?.tag)
-                    } else {
-                        // Fue un toque limpio (tap sin superar touch slop)
-                        onCardClick()
-                    }
-                }
-            }
-            .shadow(
-                elevation = elevation,
-                shape = RoundedCornerShape(8.dp)
-            )
-            .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .border(
-                width = if (currentNearestSlot != null) 3.dp else if (isConnectingSource) 3.dp else if (isSelected) 2.5.dp else 1.dp,
-                color = if (currentNearestSlot != null) Color(0xFF00E5FF)
-                    else if (isConnectingSource) Color(0xFFE53935)
-                    else if (isSelected) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
-                shape = RoundedCornerShape(8.dp)
-            )
-    ) {
-        val isShowingBack = animatedFlipRotation > 90f
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer {
-                    if (isShowingBack) {
-                        rotationY = 180f // Compensar reflejo para que la imagen o texto del reverso no se inviertan
-                    }
-                }
-        ) {
-            if (!isShowingBack) {
-                // Frente de la carta
-                val frontImage = card.faces.firstOrNull()?.imagePath ?: card.faces.firstOrNull()?.reversedImagePath
-                if (frontImage != null) {
-                    AsyncImage(
-                        model = frontImage.toCoilModel(),
-                        contentDescription = card.title,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(8.dp),
-                        verticalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = card.title,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Text(
-                            text = card.faces.firstOrNull()?.name ?: "Frente",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                // Banner inferior translúcido para lectura rápida de la pista activa
-                if (!cueText.isNullOrBlank()) {
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.BottomCenter),
-                        color = Color.Black.copy(alpha = 0.75f)
-                    ) {
-                        Text(
-                            text = cueText,
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontSize = (9 * zoom.coerceIn(0.7f, 1.3f)).sp,
-                                fontWeight = FontWeight.SemiBold
-                            ),
-                            color = Color.White,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
-                        )
-                    }
-                }
-            } else {
-                // Reverso de la carta
-                if (backImage != null) {
-                    AsyncImage(
-                        model = backImage.toCoilModel(),
-                        contentDescription = "Reverso",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.primaryContainer),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Style,
-                            contentDescription = "Reverso",
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.5f),
-                            modifier = Modifier.size(36.dp)
-                        )
-                    }
-                }
-            }
-        }
-    }
+    if (points.isEmpty()) return null
+    return points.map { it.first }.average().toFloat() to points.map { it.second }.average().toFloat()
 }
 
-/**
- * Renderiza el fondo del tapete con texturas de casino/taberna y rejilla de puntos.
- */
-@Composable
-internal fun PlaymatBackground(theme: PlaymatTheme) {
-    val (primaryColor, secondaryColor) = when (theme) {
-        PlaymatTheme.FELT_GREEN -> Color(0xFF1B4D3E) to Color(0xFF0F2E25)
-        PlaymatTheme.FELT_RED -> Color(0xFF6B1D2F) to Color(0xFF3F101B)
-        PlaymatTheme.RUSTIC_WOOD -> Color(0xFF3E2723) to Color(0xFF261715)
-        PlaymatTheme.PARCHMENT_LEATHER -> Color(0xFFD7CCC8) to Color(0xFFA1887F)
-        PlaymatTheme.DARK_MINIMAL -> Color(0xFF1A1A22) to Color(0xFF101016)
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.radialGradient(
-                    colors = listOf(primaryColor, secondaryColor),
-                    radius = 1600f
-                )
-            )
-    ) {
-        // Microrejilla de puntos sutiles
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val step = 48.dp.toPx()
-            val dotRadius = 1.2.dp.toPx()
-            val dotColor = Color.White.copy(alpha = 0.08f)
-
-            var x = 0f
-            while (x < size.width) {
-                var y = 0f
-                while (y < size.height) {
-                    drawCircle(color = dotColor, radius = dotRadius, center = Offset(x, y))
-                    y += step
-                }
-                x += step
-            }
-        }
-    }
-}
-
-/**
- * Renderiza siluetas punteadas magnéticas según la plantilla activa.
- */
-@Composable
-internal fun PlaymatTemplateSilhouettes(
-    template: PlaymatTemplateType,
-    zoom: Float,
-    highlightedSlotTag: String? = null
-) {
-    val slots = remember(template) { getTemplateSlots(template) }
-    if (slots.isEmpty()) return
-
-    val slotW = 120.dp * zoom
-    val slotH = 180.dp * zoom
-
-    slots.forEach { slot ->
-        val isHighlighted = slot.tag == highlightedSlotTag
-        TemplateSlot(
-            x = slot.x * zoom,
-            y = slot.y * zoom,
-            width = slotW,
-            height = slotH,
-            label = slot.label,
-            isHighlighted = isHighlighted
-        )
-    }
-}
-
-@Composable
-private fun TemplateSlot(
-    x: Float,
-    y: Float,
-    width: androidx.compose.ui.unit.Dp,
-    height: androidx.compose.ui.unit.Dp,
-    label: String,
-    isHighlighted: Boolean = false
-) {
-    Box(
-        modifier = Modifier
-            .offset { IntOffset(x.roundToInt(), y.roundToInt()) }
-            .size(width, height)
-            .border(
-                width = if (isHighlighted) 2.5.dp else 1.5.dp,
-                color = if (isHighlighted) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.25f),
-                shape = RoundedCornerShape(8.dp)
-            )
-            .background(
-                if (isHighlighted) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                else Color.White.copy(alpha = 0.04f),
-                RoundedCornerShape(8.dp)
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = if (isHighlighted) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.4f),
-            fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.Normal,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(4.dp)
-        )
-    }
-}
-
-@Composable
-internal fun PlaymatStickyNoteItem(
-    note: PlaymatStickyNote,
-    zoom: Float,
-    onDelete: () -> Unit,
-    onMove: (Float, Float) -> Unit
-) {
-    var localX by remember(note.id, note.x) { mutableFloatStateOf(note.x) }
-    var localY by remember(note.id, note.y) { mutableFloatStateOf(note.y) }
-    var isDragging by remember { mutableStateOf(false) }
-
-    LaunchedEffect(note.x, note.y) {
-        if (!isDragging) {
-            localX = note.x
-            localY = note.y
-        }
-    }
-
-    Surface(
-        modifier = Modifier
-            .offset {
-                IntOffset(
-                    (localX * zoom).roundToInt(),
-                    (localY * zoom).roundToInt()
-                )
-            }
-            .size(100.dp * zoom, 100.dp * zoom)
-            .pointerInput(note.id, zoom) {
-                detectDragGestures(
-                    onDragStart = { isDragging = true },
-                    onDragEnd = {
-                        isDragging = false
-                        onMove(localX, localY)
-                    },
-                    onDragCancel = { isDragging = false },
-                    onDrag = { change, dragAmount ->
-                        change.consume()
-                        localX += dragAmount.x / zoom
-                        localY += dragAmount.y / zoom
-                    }
-                )
-            }
-            .shadow(if (isDragging) 10.dp else 4.dp, RoundedCornerShape(4.dp)),
-        color = Color(0xFFFFF59D),
-        shape = RoundedCornerShape(4.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(6.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = note.text,
-                style = MaterialTheme.typography.bodySmall.copy(
-                    fontSize = (11 * zoom).sp,
-                    color = Color(0xFF212121)
-                ),
-                maxLines = 5,
-                overflow = TextOverflow.Ellipsis
-            )
-            IconButton(
-                onClick = onDelete,
-                modifier = Modifier
-                    .size(20.dp)
-                    .align(Alignment.End)
-            ) {
-                Icon(
-                    Icons.Default.Close,
-                    contentDescription = "Borrar nota",
-                    tint = Color.Black.copy(alpha = 0.4f),
-                    modifier = Modifier.size(14.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-internal fun PlaymatTableChipItem(
-    chip: PlaymatTableChip,
-    zoom: Float
-) {
-    Surface(
-        modifier = Modifier
-            .offset {
-                IntOffset(
-                    (chip.x * zoom).roundToInt(),
-                    (chip.y * zoom).roundToInt()
-                )
-            }
-            .shadow(3.dp, RoundedCornerShape(12.dp)),
-        color = MaterialTheme.colorScheme.tertiaryContainer,
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Casino,
-                contentDescription = null,
-                modifier = Modifier.size(14.dp)
-            )
-            Text(
-                text = "${chip.tableName}: ${chip.rollResultText}",
-                style = MaterialTheme.typography.labelSmall
-            )
-        }
-    }
-}
-
-/**
- * Sobrecarga retrocompatible de [PlaymatCanvasView] para preservar compatibilidad con código existente.
- */
+/** Compatibility adapter for callers that still pass the canvas callbacks individually. */
 @Deprecated(
     message = "Usar la sobrecarga principal que recibe PlaymatActions",
     replaceWith = ReplaceWith("PlaymatCanvasView(uiState = uiState, actions = actions, modifier = modifier)")

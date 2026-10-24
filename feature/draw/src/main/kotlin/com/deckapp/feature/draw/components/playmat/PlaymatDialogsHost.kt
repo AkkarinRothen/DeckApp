@@ -21,82 +21,36 @@ import kotlin.math.roundToInt
 
 @Composable
 internal fun PlaymatDialogsHost(
-    state: PlaymatCanvasState,
+    state: PlaymatDialogState,
     events: PlaymatCanvasEvents
 ) {
-    val uiState = state.uiState
     val actions = state.actions
     val activeSurface = state.activeSurface
     val cameraX = state.cameraX
     val cameraY = state.cameraY
     val cameraZoom = state.cameraZoom
-    val onPlaceCardOnPlaymat = actions.onPlaceCardOnPlaymat
-    val onMoveCard = actions.onMoveCard
-    val onRotateCard = actions.onRotateCard
-    val onFlipCard = actions.onFlipCard
-    val onReturnToHand = actions.onReturnToHand
-    val onDiscardCard = actions.onDiscardCard
     val onSelectCard = actions.onSelectCard
-    val onToggleHandTray = actions.onToggleHandTray
-    val onSelectSurface = actions.onSelectSurface
-    val onCreateSurface = actions.onCreateSurface
-    val onDeleteSurface = actions.onDeleteSurface
-    val onSetTheme = actions.onSetTheme
-    val onSetTemplate = actions.onSetTemplate
-    val onUpdateCamera = actions.onUpdateCamera
     val onQuickDraw = actions.onQuickDraw
     val onAddStickyNote = actions.onAddStickyNote
-    val onMoveStickyNote = actions.onMoveStickyNote
-    val onDeleteStickyNote = actions.onDeleteStickyNote
-    val onCardDetailClick = actions.onCardDetailClick
     val onSendCardToTacticalMap = actions.onSendCardToTacticalMap
-    val onMoveDeck = actions.onMoveDeck
-    val onMoveDiscardPile = actions.onMoveDiscardPile
-    val onDrawFromDeck = actions.onDrawFromDeck
-    val onReshuffleDeck = actions.onReshuffleDeck
-    val onAddTableChip = actions.onAddTableChip
-    val onCreateConnection = actions.onCreateConnection
     val onUpdateConnection = actions.onUpdateConnection
     val onRemoveConnection = actions.onRemoveConnection
     val onAddToken = actions.onAddToken
-    val onMoveToken = actions.onMoveToken
     val onUpdateTokenHp = actions.onUpdateTokenHp
-    val onUpdateTokenType = actions.onUpdateTokenType
-    val onRemoveToken = actions.onRemoveToken
     val onAddClock = actions.onAddClock
-    val onUpdateClockProgress = actions.onUpdateClockProgress
-    val onMoveClock = actions.onMoveClock
-    val onRemoveClock = actions.onRemoveClock
     val onSetBackgroundMap = actions.onSetBackgroundMap
     val onSetBackgroundTransform = actions.onSetBackgroundTransform
     val onToggleBackgroundLock = actions.onToggleBackgroundLock
     val onSetGridConfig = actions.onSetGridConfig
-    val allSurfaces = state.allSurfaces
     val showQuickDrawDialog = state.showQuickDrawDialog
     val showStickyNoteDialog = state.showStickyNoteDialog
     val showSendToTacticalDialog = state.showSendToTacticalDialog
-    val showDiceOverlay = state.showDiceOverlay
     val showTokenPickerDialog = state.showTokenPickerDialog
     val showClockCreationDialog = state.showClockCreationDialog
     val showTacticalSettingsDialog = state.showTacticalSettingsDialog
-    val isRulerActive = state.isRulerActive
-    val rulerStartPos = state.rulerStartPos
-    val rulerCurrentPos = state.rulerCurrentPos
-    val tokenDragStartPos = state.tokenDragStartPos
-    val tokenDragCurrentPos = state.tokenDragCurrentPos
     val editingHpToken = state.editingHpToken
-    val selectedTokenId = state.selectedTokenId
-    val selectedClockId = state.selectedClockId
     val stickyNoteText = state.stickyNoteText
-    val hoveredSlotTag = state.hoveredSlotTag
-    val connectingSourceEndpointId = state.connectingSourceEndpointId
     val editingConnection = state.editingConnection
-    val cardsById = state.cardsById
-    val endpointPositions = state.endpointPositions
-    val piledCardsByDeck = state.piledCardsByDeck
-    val placedCardIds = state.placedCardIds
-    val currentTemplateSlots = state.currentTemplateSlots
-    val selectedCardPlacement = state.selectedCardPlacement
     val selectedCard = state.selectedCard
 // Diálogo "A Mapa Táctico": Selector de Token o Pin
 if (showSendToTacticalDialog && selectedCard != null) {
@@ -205,13 +159,13 @@ if (showQuickDrawDialog) {
         onDismissRequest = { events.onShowQuickDrawDialogChanged(false) },
         title = { Text("Robar Carta al Tapete") },
         text = {
-            if (uiState.deckRefs.isEmpty()) {
+            if (state.deckRefs.isEmpty()) {
                 Text("No hay mazos activos en esta sesión. Añade uno desde la biblioteca.")
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    uiState.deckRefs.forEach { ref ->
-                        val deckName = uiState.deckNames[ref.stackId] ?: "Mazo"
-                        val available = uiState.deckCardCounts[ref.stackId] ?: 0
+                    state.deckRefs.forEach { ref ->
+                        val deckName = state.deckNames[ref.stackId] ?: "Mazo"
+                        val available = state.deckCardCounts[ref.stackId] ?: 0
                         FilledTonalButton(
                             onClick = {
                                 events.onShowQuickDrawDialogChanged(false)
@@ -288,7 +242,7 @@ if (editingConnection != null) {
 // Diálogo de Selección de Token de Personaje
 if (showTokenPickerDialog) {
     PlaymatTokenPickerDialog(
-        npcs = uiState.npcs,
+        npcs = state.npcs,
         onDismiss = { events.onShowTokenPickerDialogChanged(false) },
         onSelectNpc = { npc ->
             val centerX = (-cameraX + 300) / cameraZoom
