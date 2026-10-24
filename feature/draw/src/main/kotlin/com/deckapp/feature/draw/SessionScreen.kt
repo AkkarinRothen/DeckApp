@@ -544,6 +544,7 @@ fun SessionScreen(
                                     onDismissAttackResolution = viewModel.tacticalMapDelegate::dismissAttackResolution,
                                     onDismissCustomAttackDialog = viewModel.tacticalMapDelegate::dismissCustomAttackDialog,
                                     onAdvanceCombatTurn = viewModel.tacticalMapDelegate::advanceCombatTurn,
+                                    onStartQuickCombat = viewModel::startQuickCombat,
                                     onPreviousCombatTurn = viewModel.tacticalMapDelegate::previousCombatTurn,
                                     onFocusOnCombatCreature = viewModel.tacticalMapDelegate::focusOnCombatCreature,
                                     onClearCameraFocus = viewModel.tacticalMapDelegate::clearCameraFocus,

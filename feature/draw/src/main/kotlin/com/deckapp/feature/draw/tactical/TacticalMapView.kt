@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.deckapp.core.domain.usecase.CalculateTacticalDistanceUseCase
 import com.deckapp.core.model.*
+import com.deckapp.core.ui.components.ContextualEmptyState
 
 @Composable
 fun TacticalMapView(
@@ -88,6 +89,7 @@ fun TacticalMapView(
     onDismissAttackResolution: () -> Unit = {},
     onDismissCustomAttackDialog: () -> Unit = {},
     onAdvanceCombatTurn: () -> Unit = {},
+    onStartQuickCombat: () -> Unit = {},
     onPreviousCombatTurn: () -> Unit = {},
     onFocusOnCombatCreature: (Long) -> Unit = {},
     onClearCameraFocus: () -> Unit = {},
@@ -139,47 +141,16 @@ fun TacticalMapView(
             modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Map,
-                    contentDescription = null,
-                    modifier = Modifier.size(64.dp),
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
-                )
-                Text(
-                    text = "NO HAY MAPA TÁCTICO ACTIVO",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "Inicia un mapa táctico interactivo con grilla y tokens para tu sesión",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.outline
-                )
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Button(onClick = onCreateDefaultMap) {
-                        Icon(Icons.Default.Add, contentDescription = null)
-                        Spacer(Modifier.width(8.dp))
-                        Text("Crear Mapa Rápido")
-                    }
-                    if (uiState.availableMaps.isNotEmpty()) {
-                        FilledTonalButton(onClick = onOpenMapSelector) {
-                            Icon(Icons.Default.Layers, contentDescription = null)
-                            Spacer(Modifier.width(8.dp))
-                            Text("Elegir Mapa (${uiState.availableMaps.size})")
-                        }
-                    } else {
-                        OutlinedButton(onClick = { imagePickerLauncher.launch("image/*") }) {
-                            Icon(Icons.Default.PhotoLibrary, contentDescription = null)
-                            Spacer(Modifier.width(8.dp))
-                            Text("Subir Imagen")
-                        }
-                    }
-                }
-            }
+            ContextualEmptyState(
+                title = "No hay mapa táctico activo",
+                description = "Crea un mapa o elige uno de la sesión para colocar tokens y consultar la grilla.",
+                actionLabel = "Crear mapa rápido",
+                onAction = onCreateDefaultMap,
+                secondaryActionLabel = if (uiState.availableMaps.isNotEmpty()) "Elegir mapa (${uiState.availableMaps.size})" else "Subir imagen",
+                onSecondaryAction = if (uiState.availableMaps.isNotEmpty()) onOpenMapSelector else { { imagePickerLauncher.launch("image/*") } },
+                icon = Icons.Default.Map,
+                modifier = Modifier.padding(24.dp)
+            )
         }
         return
     }
@@ -606,6 +577,7 @@ fun TacticalMapView(
                 onRollRandomEvent = onRollSidePanelRandomEvent,
                 onWikiSearchQueryChanged = onWikiSearchQueryChanged,
                 onAdvanceCombatTurn = onAdvanceCombatTurn,
+                onStartQuickCombat = onStartQuickCombat,
                 onSelectToken = onTokenSelected,
                 onClose = { onSetSidePanelOpen(false) },
                 onFocusPinCoordinates = onFocusPinCoordinates,
@@ -646,6 +618,7 @@ fun TacticalMapView(
                     onRollRandomEvent = onRollSidePanelRandomEvent,
                     onWikiSearchQueryChanged = onWikiSearchQueryChanged,
                     onAdvanceCombatTurn = onAdvanceCombatTurn,
+                    onStartQuickCombat = onStartQuickCombat,
                     onSelectToken = onTokenSelected,
                     onClose = { onSetSidePanelOpen(false) },
                     onFocusPinCoordinates = onFocusPinCoordinates,

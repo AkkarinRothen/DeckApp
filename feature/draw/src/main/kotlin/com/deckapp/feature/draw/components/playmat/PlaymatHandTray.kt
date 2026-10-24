@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import com.deckapp.core.model.Card
 import com.deckapp.core.model.CardAspectRatio
+import com.deckapp.core.ui.components.ContextualEmptyState
 import com.deckapp.feature.draw.components.CardItem
 
 /**
@@ -47,6 +48,7 @@ internal fun PlaymatHandTray(
     deckBackImages: Map<Long, String?>,
     sessionId: Long,
     onToggleVisible: () -> Unit,
+    onOpenDeckManager: () -> Unit,
     onPlaceOnPlaymat: (Long) -> Unit,
     onCardClick: (Long) -> Unit,
     onDiscardCard: (Long) -> Unit,
@@ -111,14 +113,25 @@ internal fun PlaymatHandTray(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 20.dp),
+                            .padding(horizontal = 20.dp, vertical = 14.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = if (hand.isEmpty()) "No hay cartas en mano. Roba un mazo para comenzar." else "Todas las cartas de tu mano están desplegadas en el tapete.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        if (hand.isEmpty()) {
+                            ContextualEmptyState(
+                                title = "Mano vacía",
+                                description = "Añade o abre un mazo en el tapete y roba una carta para empezar.",
+                                actionLabel = "Ver mazos",
+                                onAction = onOpenDeckManager,
+                                icon = Icons.Default.Style,
+                                compact = true
+                            )
+                        } else {
+                            Text(
+                                text = "Todas las cartas de tu mano están desplegadas en el tapete.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 } else {
                     LazyRow(

@@ -3,6 +3,7 @@ package com.deckapp.feature.encounters
 import com.deckapp.core.ui.components.DeckCard
 import com.deckapp.core.ui.components.DeckButton
 import com.deckapp.core.ui.components.DeckTextButton
+import com.deckapp.core.ui.components.ContextualEmptyState
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -63,8 +64,10 @@ fun EncounterListScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { onEncounterClick(0L) }) {
-                Icon(Icons.Default.Add, contentDescription = "Nuevo Encuentro")
+            if (uiState.encounters.isNotEmpty()) {
+                FloatingActionButton(onClick = { onEncounterClick(0L) }) {
+                    Icon(Icons.Default.Add, contentDescription = "Nuevo Encuentro")
+                }
             }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -74,8 +77,14 @@ fun EncounterListScreen(
                 CircularProgressIndicator()
             }
         } else if (uiState.encounters.isEmpty()) {
-            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Text("No hay encuentros preparados", style = MaterialTheme.typography.bodyLarge)
+            Box(Modifier.fillMaxSize().padding(padding).padding(24.dp), contentAlignment = Alignment.Center) {
+                ContextualEmptyState(
+                    title = "No hay encuentros preparados",
+                    description = "Prepara un encuentro para tener sus participantes listos durante la partida.",
+                    actionLabel = "Preparar encuentro",
+                    onAction = { onEncounterClick(0L) },
+                    icon = Icons.Default.Add
+                )
             }
         } else {
             LazyColumn(

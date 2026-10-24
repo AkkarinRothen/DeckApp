@@ -1,6 +1,11 @@
 package com.deckapp.feature.draw.components.playmat
 
+import android.view.HapticFeedbackConstants
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -28,9 +33,11 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -38,7 +45,9 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.deckapp.core.model.PlaymatClockPlacement
+import com.deckapp.core.model.PlaymatGridType
 import kotlin.math.cos
+import kotlin.math.round
 import kotlin.math.roundToInt
 import kotlin.math.sin
 
@@ -54,6 +63,9 @@ fun PlaymatClockItem(
     isConnectingSource: Boolean,
     zoom: Float,
     isMovementEnabled: Boolean = true,
+    snapToGrid: Boolean = false,
+    gridType: PlaymatGridType = PlaymatGridType.NONE,
+    cellSizeDp: Float = 48f,
     onClockClick: () -> Unit,
     onMove: (clockId: String, finalX: Float, finalY: Float) -> Unit,
     onAdvanceProgress: () -> Unit,
@@ -64,6 +76,7 @@ fun PlaymatClockItem(
     onDismissMenu: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val view = LocalView.current
     val clockSize = 76.dp * zoom
 
     var localX by remember(clock.id, clock.x) { mutableFloatStateOf(clock.x) }
@@ -77,12 +90,38 @@ fun PlaymatClockItem(
         }
     }
 
+    val elevation by animateDpAsState(
+        targetValue = if (isDragging) 18.dp else if (isSelected) 10.dp else 4.dp,
+        label = "clockElevation"
+    )
+
+    val scale by animateFloatAsState(
+        targetValue = if (isDragging) 1.06f else 1.0f,
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+        label = "clockScale"
+    )
+
     val progressColor = remember(clock.colorHex) {
         try {
             Color(android.graphics.Color.parseColor(clock.colorHex))
         } catch (e: Exception) {
             Color(0xFFE53935)
         }
+    }
+
+    // Ghost Preview si se ajusta a cuadrícula
+    if (isDragging && snapToGrid && gridType != PlaymatGridType.NONE && cellSizeDp > 0f) {
+        val snappedX = round(localX / cellSizeDp) * cellSizeDp
+        val snappedY = round(localY / cellSizeDp) * cellSizeDp
+        PlaymatGhostSilhouette(
+            x = snappedX,
+            y = snappedY,
+            width = clockSize,
+            height = clockSize,
+            zoom = 1f,
+            shape = CircleShape,
+            accentColor = progressColor
+        )
     }
 
     Box(
@@ -104,8 +143,12 @@ fun PlaymatClockItem(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .size(clockSize)
+                    .graphicsLayer {
+                        scaleX = scale
+                        scaleY = scale
+                    }
                     .shadow(
-                        elevation = if (isDragging) 16.dp else if (isSelected) 10.dp else 4.dp,
+                        elevation = elevation,
                         shape = CircleShape
                     )
                     .clip(CircleShape)
@@ -117,7 +160,7 @@ fun PlaymatClockItem(
                         else Color(0xFF4A4B54),
                         shape = CircleShape
                     )
-                    .pointerInput(clock.id, zoom, isMovementEnabled) {
+                    .pointerInput(clock.id, zoom, isMovementEnabled, snapToGrid, gridType, cellSizeDp) {
                         awaitEachGesture {
                             val down = awaitFirstDown(requireUnconsumed = false)
                             var dragDetected = false
@@ -132,6 +175,7 @@ fun PlaymatClockItem(
 
                             if (drag != null || dragDetected) {
                                 isDragging = true
+                                view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                                 val currentPointerId = down.id
                                 while (true) {
                                     val event = awaitPointerEvent()
@@ -145,8 +189,21 @@ fun PlaymatClockItem(
                                     dragChange.consume()
                                 }
                                 isDragging = false
-                                if (isMovementEnabled) onMove(clock.id, localX, localY)
-                                else { localX = clock.x; localY = clock.y }
+                                view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                                if (isMovementEnabled) {
+                                    val finalX = if (snapToGrid && gridType != PlaymatGridType.NONE && cellSizeDp > 0f) {
+                                        round(localX / cellSizeDp) * cellSizeDp
+                                    } else localX
+                                    val finalY = if (snapToGrid && gridType != PlaymatGridType.NONE && cellSizeDp > 0f) {
+                                        round(localY / cellSizeDp) * cellSizeDp
+                                    } else localY
+                                    localX = finalX
+                                    localY = finalY
+                                    onMove(clock.id, finalX, finalY)
+                                } else {
+                                    localX = clock.x
+                                    localY = clock.y
+                                }
                             } else {
                                 onClockClick()
                             }

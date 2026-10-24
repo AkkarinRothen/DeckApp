@@ -3,6 +3,8 @@ package com.deckapp.feature.draw.components.playmat
 import android.view.HapticFeedbackConstants
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -22,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.ContentScale
@@ -34,9 +37,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.deckapp.core.model.PlaymatDeckPlacement
+import com.deckapp.core.model.PlaymatGridType
 import com.deckapp.core.ui.util.toCoilModel
 import kotlin.math.hypot
 import kotlin.math.min
+import kotlin.math.round
 import kotlin.math.roundToInt
 
 /**
@@ -52,6 +57,10 @@ fun PlaymatDeckItem(
     zoom: Float,
     templateSlots: List<TemplateSlotDef>,
     isGroupLocked: Boolean = false,
+    isDropTargetHovered: Boolean = false,
+    snapToGrid: Boolean = false,
+    gridType: PlaymatGridType = PlaymatGridType.NONE,
+    cellSizeDp: Float = 48f,
     onTapDraw: () -> Unit,
     onDragDrawCardToPlaymat: (targetX: Float, targetY: Float, slotTag: String?) -> Unit,
     onMoveDeck: (newX: Float, newY: Float) -> Unit,
@@ -78,6 +87,27 @@ fun PlaymatDeckItem(
     var draggedCardX by remember { mutableFloatStateOf(placement.x) }
     var draggedCardY by remember { mutableFloatStateOf(placement.y) }
     var showContextMenu by remember { mutableStateOf(false) }
+
+    // Física de inclinación al robar arrastrando desde el mazo
+    var cardTiltZ by remember { mutableFloatStateOf(0f) }
+    var cardTiltY by remember { mutableFloatStateOf(0f) }
+    var cardTiltX by remember { mutableFloatStateOf(0f) }
+
+    val animatedCardTiltZ by animateFloatAsState(
+        targetValue = if (isDraggingCardOut) cardTiltZ else 0f,
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "deckCardTiltZ"
+    )
+    val animatedCardTiltY by animateFloatAsState(
+        targetValue = if (isDraggingCardOut) cardTiltY else 0f,
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "deckCardTiltY"
+    )
+    val animatedCardTiltX by animateFloatAsState(
+        targetValue = if (isDraggingCardOut) cardTiltX else 0f,
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "deckCardTiltX"
+    )
 
     val currentNearestSlot = remember(draggedCardX, draggedCardY, isDraggingCardOut, templateSlots) {
         if (!isDraggingCardOut || templateSlots.isEmpty()) null
@@ -131,14 +161,14 @@ fun PlaymatDeckItem(
         Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .shadow(elevation = 10.dp, shape = RoundedCornerShape(8.dp))
+                .shadow(elevation = if (isDropTargetHovered) 18.dp else 10.dp, shape = RoundedCornerShape(8.dp))
                 .border(
-                    width = 2.dp,
-                    color = MaterialTheme.colorScheme.primaryContainer,
+                    width = if (isDropTargetHovered) 3.5.dp else 2.dp,
+                    color = if (isDropTargetHovered) Color(0xFF00E5FF) else MaterialTheme.colorScheme.primaryContainer,
                     shape = RoundedCornerShape(8.dp)
                 )
                 .clip(RoundedCornerShape(8.dp))
-                .pointerInput(placement.stackId, zoom, availableCount, templateSlots, placement.groupId, placement.isLocked, isGroupLocked) {
+                .pointerInput(placement.stackId, zoom, availableCount, templateSlots, placement.groupId, placement.isLocked, isGroupLocked, snapToGrid, gridType, cellSizeDp) {
                     awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false)
                         val moveHandleSize = 40.dp.toPx()
@@ -159,12 +189,15 @@ fun PlaymatDeckItem(
                                     dragDetected = true
                                 }
                             } else if (availableCount > 0) {
-                                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                                view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                                 isDraggingCardOut = true
                                 currentDragX += over.x / zoom
                                 currentDragY += over.y / zoom
                                 draggedCardX = currentDragX
                                 draggedCardY = currentDragY
+                                cardTiltZ = (over.x * 0.40f).coerceIn(-10f, 10f)
+                                cardTiltY = (over.x * 0.35f).coerceIn(-12f, 12f)
+                                cardTiltX = (-over.y * 0.35f).coerceIn(-12f, 12f)
                                 dragDetected = true
                             }
                         }
@@ -175,6 +208,7 @@ fun PlaymatDeckItem(
                             localDeckX = placement.x
                             localDeckY = placement.y
                         } else if ((drag != null || dragDetected) && startedOnMoveHandle) {
+                            view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                             val currentPointerId = down.id
                             while (true) {
                                 val event = awaitPointerEvent()
@@ -188,6 +222,7 @@ fun PlaymatDeckItem(
                                 dragChange.consume()
                             }
                             isMovingDeck = false
+                            view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                             localDeckX = currentDragX
                             localDeckY = currentDragY
                             onMoveDeck(currentDragX, currentDragY)
@@ -202,19 +237,30 @@ fun PlaymatDeckItem(
                                 currentDragY += delta.y / zoom
                                 draggedCardX = currentDragX
                                 draggedCardY = currentDragY
+                                cardTiltZ = (delta.x * 0.40f).coerceIn(-10f, 10f)
+                                cardTiltY = (delta.x * 0.35f).coerceIn(-12f, 12f)
+                                cardTiltX = (-delta.y * 0.35f).coerceIn(-12f, 12f)
                                 dragChange.consume()
                             }
 
                             isDraggingCardOut = false
+                            cardTiltZ = 0f
+                            cardTiltY = 0f
+                            cardTiltX = 0f
                             onHoverSlotChanged(null)
+                            view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
 
                             val snapThreshold = 60f
                             val nearest = templateSlots.find { slot ->
                                 hypot(slot.x - draggedCardX, slot.y - draggedCardY) <= snapThreshold
                             }
 
-                            val finalX = nearest?.x ?: draggedCardX
-                            val finalY = nearest?.y ?: draggedCardY
+                            val finalX = nearest?.x ?: if (snapToGrid && gridType != PlaymatGridType.NONE && cellSizeDp > 0f) {
+                                round(draggedCardX / cellSizeDp) * cellSizeDp
+                            } else draggedCardX
+                            val finalY = nearest?.y ?: if (snapToGrid && gridType != PlaymatGridType.NONE && cellSizeDp > 0f) {
+                                round(draggedCardY / cellSizeDp) * cellSizeDp
+                            } else draggedCardY
                             onDragDrawCardToPlaymat(finalX, finalY, nearest?.tag)
                         } else {
                             // El cuerpo roba; la agarradera abre las opciones y solo se mueve al arrastrarla.
@@ -348,6 +394,28 @@ fun PlaymatDeckItem(
                         modifier = Modifier.size(16.dp)
                     )
                 }
+
+                // Halo de absorción luminoso cuando una carta se arrastra sobre este mazo
+                if (isDropTargetHovered) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color(0xFF00E5FF).copy(alpha = 0.22f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Surface(
+                            shape = CircleShape,
+                            color = Color(0xCC004D40)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.VerticalAlignBottom,
+                                contentDescription = "Devolver al mazo",
+                                tint = Color(0xFF00E5FF),
+                                modifier = Modifier.padding(8.dp).size(24.dp)
+                            )
+                        }
+                    }
+                }
             }
         }
 
@@ -376,8 +444,29 @@ fun PlaymatDeckItem(
         }
     }
 
-    // Carta flotante proyectada mientras se arrastra desde el mazo hacia el tapete
+    // Silueta guía fantasma para la carta que se está robando si hay ranura o cuadrícula
     if (isDraggingCardOut) {
+        val ghostX = currentNearestSlot?.x ?: if (snapToGrid && gridType != PlaymatGridType.NONE && cellSizeDp > 0f) {
+            round(draggedCardX / cellSizeDp) * cellSizeDp
+        } else null
+        val ghostY = currentNearestSlot?.y ?: if (snapToGrid && gridType != PlaymatGridType.NONE && cellSizeDp > 0f) {
+            round(draggedCardY / cellSizeDp) * cellSizeDp
+        } else null
+
+        if (ghostX != null && ghostY != null) {
+            PlaymatGhostSilhouette(
+                x = ghostX,
+                y = ghostY,
+                width = width,
+                height = height,
+                zoom = zoom,
+                shape = RoundedCornerShape(8.dp),
+                accentColor = if (currentNearestSlot != null) Color(0xFF00E5FF) else MaterialTheme.colorScheme.primary,
+                label = currentNearestSlot?.label
+            )
+        }
+
+        // Carta flotante proyectada con física de inclinación dinámica
         Box(
             modifier = Modifier
                 .offset {
@@ -387,7 +476,14 @@ fun PlaymatDeckItem(
                     )
                 }
                 .size(width, height)
-                .shadow(elevation = 18.dp, shape = RoundedCornerShape(8.dp))
+                .graphicsLayer {
+                    scaleX = 1.05f
+                    scaleY = 1.05f
+                    rotationZ = animatedCardTiltZ
+                    rotationY = animatedCardTiltY
+                    rotationX = animatedCardTiltX
+                }
+                .shadow(elevation = 20.dp, shape = RoundedCornerShape(8.dp))
                 .clip(RoundedCornerShape(8.dp))
                 .background(MaterialTheme.colorScheme.surface)
                 .border(

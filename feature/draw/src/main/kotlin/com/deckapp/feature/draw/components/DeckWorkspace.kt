@@ -20,8 +20,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.deckapp.core.model.Card
 import com.deckapp.core.model.CardAspectRatio
-import com.deckapp.core.ui.components.DeckButton
 import com.deckapp.core.ui.components.DeckTextButton
+import com.deckapp.core.ui.components.ContextualEmptyState
 import com.deckapp.feature.draw.SessionUiState
 
 @Composable
@@ -43,37 +43,14 @@ fun DeckWorkspace(
             modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
+            ContextualEmptyState(
+                title = "No hay mazos en esta sesión",
+                description = "Añade mazos de tu biblioteca para comenzar a robar cartas en la mesa.",
+                actionLabel = "Añadir mazos",
+                onAction = onOpenDeckPicker,
+                icon = Icons.Default.Style,
                 modifier = Modifier.padding(24.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Style,
-                    contentDescription = null,
-                    modifier = Modifier.size(64.dp),
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                )
-                Spacer(Modifier.height(14.dp))
-                Text(
-                    text = "No hay mazos en esta sesión",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    text = "Añade mazos de tu biblioteca o activa packs de inicio para comenzar a robar cartas en la mesa.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                )
-                Spacer(Modifier.height(20.dp))
-                DeckButton(onClick = onOpenDeckPicker) {
-                    Icon(Icons.Default.Add, null)
-                    Spacer(Modifier.width(8.dp))
-                    Text("Añadir Mazos a la Mesa")
-                }
-            }
+            )
         }
     } else {
         val discardCountByDeck = uiState.pile.groupingBy { it.stackId }.eachCount()

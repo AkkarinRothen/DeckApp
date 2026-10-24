@@ -1,5 +1,8 @@
 package com.deckapp.feature.draw.components.playmat
 
+import android.view.HapticFeedbackConstants
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,6 +29,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -34,7 +38,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.deckapp.core.model.Card
+import com.deckapp.core.model.PlaymatGridType
 import com.deckapp.core.ui.util.toCoilModel
+import kotlin.math.round
 import kotlin.math.roundToInt
 
 /**
@@ -47,12 +53,17 @@ fun PlaymatDiscardPileItem(
     y: Float,
     zoom: Float,
     isMovementEnabled: Boolean = true,
+    isDropTargetHovered: Boolean = false,
+    snapToGrid: Boolean = false,
+    gridType: PlaymatGridType = PlaymatGridType.NONE,
+    cellSizeDp: Float = 48f,
     piledCards: List<Card>,
     onReshuffleToDeck: () -> Unit,
     onMoveDiscardPile: (newX: Float, newY: Float) -> Unit,
     onInspectCard: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val view = LocalView.current
     val width = 120.dp * zoom
     val height = 180.dp * zoom
 
@@ -68,6 +79,11 @@ fun PlaymatDiscardPileItem(
         }
     }
 
+    val elevation by animateDpAsState(
+        targetValue = if (isDropTargetHovered) 16.dp else if (isDragging) 14.dp else 6.dp,
+        label = "discardElevation"
+    )
+
     val topCard = piledCards.lastOrNull()
 
     Box(
@@ -80,12 +96,24 @@ fun PlaymatDiscardPileItem(
             }
             .size(width, height)
             .clickable(enabled = piledCards.isNotEmpty()) { showDiscardHistory = true }
-            .pointerInput(stackId, zoom, isMovementEnabled) {
+            .pointerInput(stackId, zoom, isMovementEnabled, snapToGrid, gridType, cellSizeDp) {
                 if (isMovementEnabled) detectDragGestures(
-                    onDragStart = { isDragging = true },
+                    onDragStart = {
+                        isDragging = true
+                        view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                    },
                     onDragEnd = {
                         isDragging = false
-                        onMoveDiscardPile(localX, localY)
+                        view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                        val finalX = if (snapToGrid && gridType != PlaymatGridType.NONE && cellSizeDp > 0f) {
+                            round(localX / cellSizeDp) * cellSizeDp
+                        } else localX
+                        val finalY = if (snapToGrid && gridType != PlaymatGridType.NONE && cellSizeDp > 0f) {
+                            round(localY / cellSizeDp) * cellSizeDp
+                        } else localY
+                        localX = finalX
+                        localY = finalY
+                        onMoveDiscardPile(finalX, finalY)
                     },
                     onDragCancel = { isDragging = false },
                     onDrag = { change, dragAmount ->
@@ -100,11 +128,11 @@ fun PlaymatDiscardPileItem(
             // Pila vacía: Silueta punteada
             Canvas(modifier = Modifier.fillMaxSize()) {
                 val stroke = Stroke(
-                    width = 2.dp.toPx(),
+                    width = if (isDropTargetHovered) 3.5.dp.toPx() else 2.dp.toPx(),
                     pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 8f), 0f)
                 )
                 drawRoundRect(
-                    color = Color.White.copy(alpha = 0.25f),
+                    color = if (isDropTargetHovered) Color(0xFFFF5252) else Color.White.copy(alpha = 0.25f),
                     size = size,
                     cornerRadius = CornerRadius(8.dp.toPx(), 8.dp.toPx()),
                     style = stroke
@@ -113,6 +141,10 @@ fun PlaymatDiscardPileItem(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .background(
+                        if (isDropTargetHovered) Color(0x33FF5252) else Color.Transparent,
+                        shape = RoundedCornerShape(8.dp)
+                    )
                     .padding(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
@@ -120,14 +152,15 @@ fun PlaymatDiscardPileItem(
                 Icon(
                     imageVector = Icons.Default.DeleteSweep,
                     contentDescription = "Pila vacía",
-                    tint = Color.White.copy(alpha = 0.35f),
-                    modifier = Modifier.size(28.dp)
+                    tint = if (isDropTargetHovered) Color(0xFFFF5252) else Color.White.copy(alpha = 0.35f),
+                    modifier = Modifier.size(if (isDropTargetHovered) 36.dp else 28.dp)
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "Descarte",
+                    text = if (isDropTargetHovered) "Soltar para descartar" else "Descarte",
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color.White.copy(alpha = 0.35f),
+                    color = if (isDropTargetHovered) Color(0xFFFF5252) else Color.White.copy(alpha = 0.35f),
+                    fontWeight = if (isDropTargetHovered) FontWeight.Bold else FontWeight.Normal,
                     textAlign = TextAlign.Center
                 )
             }
@@ -137,9 +170,13 @@ fun PlaymatDiscardPileItem(
                 modifier = Modifier
                     .fillMaxSize()
                     .rotate(-2.5f)
-                    .shadow(if (isDragging) 14.dp else 6.dp, RoundedCornerShape(8.dp))
+                    .shadow(elevation, RoundedCornerShape(8.dp))
                     .clip(RoundedCornerShape(8.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f), RoundedCornerShape(8.dp)),
+                    .border(
+                        width = if (isDropTargetHovered) 3.5.dp else 1.dp,
+                        color = if (isDropTargetHovered) Color(0xFFFF5252) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f),
+                        shape = RoundedCornerShape(8.dp)
+                    ),
                 color = MaterialTheme.colorScheme.surface,
                 shape = RoundedCornerShape(8.dp)
             ) {
@@ -210,6 +247,35 @@ fun PlaymatDiscardPileItem(
                             contentDescription = "Recuperar al mazo",
                             modifier = Modifier.size(16.dp)
                         )
+                    }
+
+                    // Halo de absorción luminoso al sobrevolar para descartar
+                    if (isDropTargetHovered) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color(0xDD8B0000)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.DeleteSweep,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    text = "Descartar",
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                    color = Color.White,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
                     }
                 }
             }

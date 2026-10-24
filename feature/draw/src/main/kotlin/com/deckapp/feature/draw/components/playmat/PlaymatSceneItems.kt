@@ -1,5 +1,6 @@
 package com.deckapp.feature.draw.components.playmat
 
+import android.view.HapticFeedbackConstants
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -29,6 +30,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -39,11 +41,56 @@ import coil.compose.AsyncImage
 import com.deckapp.core.model.*
 import com.deckapp.core.ui.util.toCoilModel
 import kotlin.math.hypot
+import kotlin.math.round
 import kotlin.math.roundToInt
 
 /**
  * Representación geométrica de una ranura dentro de una plantilla temática.
  */
+
+/**
+ * Silueta guía translúcida ("Ghost Preview") que muestra en tiempo real dónde encajará la pieza.
+ */
+@Composable
+internal fun PlaymatGhostSilhouette(
+    x: Float,
+    y: Float,
+    width: androidx.compose.ui.unit.Dp,
+    height: androidx.compose.ui.unit.Dp,
+    zoom: Float,
+    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(8.dp),
+    accentColor: Color = Color(0xFF00E5FF),
+    label: String? = null
+) {
+    Box(
+        modifier = Modifier
+            .offset { IntOffset((x * zoom).roundToInt(), (y * zoom).roundToInt()) }
+            .size(width, height)
+            .border(
+                width = 2.dp,
+                color = accentColor.copy(alpha = 0.85f),
+                shape = shape
+            )
+            .background(
+                accentColor.copy(alpha = 0.15f),
+                shape = shape
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        if (!label.isNullOrBlank()) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = (9 * zoom.coerceIn(0.7f, 1.3f)).sp,
+                    fontWeight = FontWeight.Bold
+                ),
+                color = accentColor,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(4.dp)
+            )
+        }
+    }
+}
 
 @Composable
 internal fun PlaymatCardItem(
@@ -55,16 +102,45 @@ internal fun PlaymatCardItem(
     isMovementEnabled: Boolean = true,
     zoom: Float,
     templateSlots: List<TemplateSlotDef>,
+    snapToGrid: Boolean = false,
+    gridType: PlaymatGridType = PlaymatGridType.NONE,
+    cellSizeDp: Float = 48f,
+    decks: List<PlaymatDeckPlacement> = emptyList(),
     onCardClick: () -> Unit,
     onMove: (cardId: Long, finalX: Float, finalY: Float, slotTag: String?) -> Unit,
-    onHoverSlotChanged: (String?) -> Unit
+    onHoverSlotChanged: (String?) -> Unit,
+    onReturnToDeck: (Long) -> Unit = {},
+    onDiscardCard: (Long) -> Unit = {},
+    onDropTargetHoverChanged: (deckId: Long?, isDiscard: Boolean) -> Unit = { _, _ -> }
 ) {
+    val view = LocalView.current
     val width = 120.dp * zoom
     val height = 180.dp * zoom
 
     var localX by remember(placement.cardId, placement.x) { mutableFloatStateOf(placement.x) }
     var localY by remember(placement.cardId, placement.y) { mutableFloatStateOf(placement.y) }
     var isDragging by remember { mutableStateOf(false) }
+
+    // Física de inclinación dinámica ("tilt") proporcional a la velocidad del arrastre
+    var tiltZ by remember { mutableFloatStateOf(0f) }
+    var tiltY by remember { mutableFloatStateOf(0f) }
+    var tiltX by remember { mutableFloatStateOf(0f) }
+
+    val animatedTiltZ by animateFloatAsState(
+        targetValue = if (isDragging) tiltZ else 0f,
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "cardTiltZ"
+    )
+    val animatedTiltY by animateFloatAsState(
+        targetValue = if (isDragging) tiltY else 0f,
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "cardTiltY"
+    )
+    val animatedTiltX by animateFloatAsState(
+        targetValue = if (isDragging) tiltX else 0f,
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "cardTiltX"
+    )
 
     LaunchedEffect(placement.x, placement.y) {
         if (!isDragging) {
@@ -87,6 +163,7 @@ internal fun PlaymatCardItem(
 
     val density = LocalDensity.current
 
+    // Detección de ranura más cercana de la plantilla
     val currentNearestSlot = remember(localX, localY, isDragging, templateSlots) {
         if (!isDragging || templateSlots.isEmpty()) null
         else {
@@ -101,13 +178,55 @@ internal fun PlaymatCardItem(
         onHoverSlotChanged(currentNearestSlot?.tag)
     }
 
+    // Detección de zonas de soltado inteligentes (Mazo original o Pila de descarte)
+    val originStackId = remember(card) { card.originDeckId ?: card.stackId }
+    val originDeck = remember(decks, originStackId) { decks.firstOrNull { it.stackId == originStackId } }
+
+    val cardCenterX = localX + 60f
+    val cardCenterY = localY + 90f
+
+    val isOverDeck = remember(isDragging, originDeck, cardCenterX, cardCenterY) {
+        if (!isDragging || originDeck == null) false
+        else hypot((originDeck.x + 60f) - cardCenterX, (originDeck.y + 90f) - cardCenterY) <= 85f
+    }
+
+    val discardPileX = originDeck?.let { it.discardX ?: (it.x + 150f) } ?: 0f
+    val discardPileY = originDeck?.let { it.discardY ?: it.y } ?: 0f
+
+    val isOverDiscard = remember(isDragging, originDeck, cardCenterX, cardCenterY, discardPileX, discardPileY) {
+        if (!isDragging || originDeck == null) false
+        else hypot((discardPileX + 60f) - cardCenterX, (discardPileY + 90f) - cardCenterY) <= 85f
+    }
+
+    LaunchedEffect(isOverDeck, isOverDiscard, originStackId) {
+        if (isDragging) {
+            onDropTargetHoverChanged(
+                if (isOverDeck || isOverDiscard) originStackId else null,
+                isOverDiscard
+            )
+        }
+    }
+
+    // Coordenadas de silueta guía (Ghost Preview) si hay acople
+    val ghostPreview = remember(isDragging, isOverDeck, isOverDiscard, currentNearestSlot, snapToGrid, gridType, cellSizeDp, localX, localY) {
+        if (!isDragging || isOverDeck || isOverDiscard) null
+        else if (currentNearestSlot != null) {
+            Triple(currentNearestSlot.x, currentNearestSlot.y, currentNearestSlot.label)
+        } else if (snapToGrid && gridType != PlaymatGridType.NONE && cellSizeDp > 0f) {
+            val snappedX = round(localX / cellSizeDp) * cellSizeDp
+            val snappedY = round(localY / cellSizeDp) * cellSizeDp
+            Triple(snappedX, snappedY, null)
+        } else null
+    }
+
     val elevation by animateDpAsState(
-        targetValue = if (isDragging) 22.dp else if (isSelected) 14.dp else 6.dp,
+        targetValue = if (isDragging) 24.dp else if (isSelected) 14.dp else 6.dp,
         label = "cardElevation"
     )
 
     val scale by animateFloatAsState(
-        targetValue = if (isDragging) 1.05f else 1.0f,
+        targetValue = if (isOverDeck || isOverDiscard) 0.96f else if (isDragging) 1.05f else 1.0f,
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
         label = "cardScale"
     )
 
@@ -116,6 +235,20 @@ internal fun PlaymatCardItem(
         card.activeZone?.text?.ifBlank { null }
             ?: card.faces.firstOrNull()?.zones?.firstOrNull()?.text?.ifBlank { null }
             ?: card.title
+    }
+
+    // Renderizar silueta guía ("Ghost Preview") debajo de la carta en movimiento
+    if (ghostPreview != null) {
+        PlaymatGhostSilhouette(
+            x = ghostPreview.first,
+            y = ghostPreview.second,
+            width = width,
+            height = height,
+            zoom = zoom,
+            shape = RoundedCornerShape(8.dp),
+            accentColor = if (currentNearestSlot != null) Color(0xFF00E5FF) else MaterialTheme.colorScheme.primary,
+            label = ghostPreview.third
+        )
     }
 
     Box(
@@ -130,11 +263,12 @@ internal fun PlaymatCardItem(
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
-                rotationZ = animatedRotation
-                rotationY = animatedFlipRotation
+                rotationZ = animatedRotation + animatedTiltZ
+                rotationY = animatedFlipRotation + animatedTiltY
+                rotationX = animatedTiltX
                 cameraDistance = 14f * density.density
             }
-            .pointerInput(placement.cardId, zoom, templateSlots, isMovementEnabled) {
+            .pointerInput(placement.cardId, zoom, templateSlots, isMovementEnabled, snapToGrid, gridType, cellSizeDp, decks) {
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
                     var dragDetected = false
@@ -143,12 +277,16 @@ internal fun PlaymatCardItem(
                         if (isMovementEnabled) {
                             localX += over.x / zoom
                             localY += over.y / zoom
+                            tiltZ = (over.x * 0.40f).coerceIn(-10f, 10f)
+                            tiltY = (over.x * 0.35f).coerceIn(-12f, 12f)
+                            tiltX = (-over.y * 0.35f).coerceIn(-12f, 12f)
                         }
                         dragDetected = true
                     }
 
                     if (drag != null || dragDetected) {
                         isDragging = true
+                        view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                         val currentPointerId = down.id
                         while (true) {
                             val event = awaitPointerEvent()
@@ -158,27 +296,54 @@ internal fun PlaymatCardItem(
                             if (isMovementEnabled) {
                                 localX += delta.x / zoom
                                 localY += delta.y / zoom
+                                tiltZ = (delta.x * 0.40f).coerceIn(-10f, 10f)
+                                tiltY = (delta.x * 0.35f).coerceIn(-12f, 12f)
+                                tiltX = (-delta.y * 0.35f).coerceIn(-12f, 12f)
                             }
                             dragChange.consume()
                         }
 
                         isDragging = false
+                        tiltZ = 0f
+                        tiltY = 0f
+                        tiltX = 0f
                         onHoverSlotChanged(null)
+                        onDropTargetHoverChanged(null, false)
 
                         if (!isMovementEnabled) {
                             localX = placement.x
                             localY = placement.y
                         } else {
-                            // Aplicar snap magnético si está cerca de un slot
-                            val snapThreshold = 60f
-                            val nearest = templateSlots.find { slot ->
-                                hypot(slot.x - localX, slot.y - localY) <= snapThreshold
+                            val curCenterCardX = localX + 60f
+                            val curCenterCardY = localY + 90f
+                            val overOriginDeck = originDeck != null && hypot((originDeck.x + 60f) - curCenterCardX, (originDeck.y + 90f) - curCenterCardY) <= 85f
+                            val curDiscardX = originDeck?.let { it.discardX ?: (it.x + 150f) } ?: 0f
+                            val curDiscardY = originDeck?.let { it.discardY ?: it.y } ?: 0f
+                            val overDiscard = originDeck != null && hypot((curDiscardX + 60f) - curCenterCardX, (curDiscardY + 90f) - curCenterCardY) <= 85f
+
+                            if (overOriginDeck) {
+                                view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                                onReturnToDeck(placement.cardId)
+                            } else if (overDiscard) {
+                                view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                                onDiscardCard(placement.cardId)
+                            } else {
+                                view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                                val snapThreshold = 60f
+                                val nearest = templateSlots.find { slot ->
+                                    hypot(slot.x - localX, slot.y - localY) <= snapThreshold
+                                }
+                                val finalX = nearest?.x ?: if (snapToGrid && gridType != PlaymatGridType.NONE && cellSizeDp > 0f) {
+                                    round(localX / cellSizeDp) * cellSizeDp
+                                } else localX
+                                val finalY = nearest?.y ?: if (snapToGrid && gridType != PlaymatGridType.NONE && cellSizeDp > 0f) {
+                                    round(localY / cellSizeDp) * cellSizeDp
+                                } else localY
+
+                                localX = finalX
+                                localY = finalY
+                                onMove(placement.cardId, finalX, finalY, nearest?.tag)
                             }
-                            val finalX = nearest?.x ?: localX
-                            val finalY = nearest?.y ?: localY
-                            localX = finalX
-                            localY = finalY
-                            onMove(placement.cardId, finalX, finalY, nearest?.tag)
                         }
                     } else {
                         // Fue un toque limpio (tap sin superar touch slop)
@@ -193,8 +358,14 @@ internal fun PlaymatCardItem(
             .clip(RoundedCornerShape(8.dp))
             .background(MaterialTheme.colorScheme.surface)
             .border(
-                width = if (currentNearestSlot != null) 3.dp else if (isConnectingSource) 3.dp else if (isSelected) 2.5.dp else 1.dp,
-                color = if (currentNearestSlot != null) Color(0xFF00E5FF)
+                width = if (isOverDeck || isOverDiscard) 3.5.dp
+                    else if (currentNearestSlot != null) 3.dp
+                    else if (isConnectingSource) 3.dp
+                    else if (isSelected) 2.5.dp
+                    else 1.dp,
+                color = if (isOverDeck) Color(0xFF00E5FF)
+                    else if (isOverDiscard) Color(0xFFFF5252)
+                    else if (currentNearestSlot != null) Color(0xFF00E5FF)
                     else if (isConnectingSource) Color(0xFFE53935)
                     else if (isSelected) MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
@@ -288,6 +459,35 @@ internal fun PlaymatCardItem(
                             modifier = Modifier.size(36.dp)
                         )
                     }
+                }
+            }
+        }
+
+        // Indicador visual luminoso al sobrevolar una zona de soltado inteligente
+        if (isOverDeck || isOverDiscard) {
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = if (isOverDeck) Color(0xDD004D40) else Color(0xDD8B0000),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = if (isOverDeck) Icons.Default.Layers else Icons.Default.DeleteSweep,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = if (isOverDeck) "Devolver al mazo" else "Descartar",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        color = Color.White,
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }
@@ -405,9 +605,13 @@ internal fun PlaymatStickyNoteItem(
     note: PlaymatStickyNote,
     zoom: Float,
     isMovementEnabled: Boolean = true,
+    snapToGrid: Boolean = false,
+    gridType: PlaymatGridType = PlaymatGridType.NONE,
+    cellSizeDp: Float = 48f,
     onDelete: () -> Unit,
     onMove: (Float, Float) -> Unit
 ) {
+    val view = LocalView.current
     var localX by remember(note.id, note.x) { mutableFloatStateOf(note.x) }
     var localY by remember(note.id, note.y) { mutableFloatStateOf(note.y) }
     var isDragging by remember { mutableStateOf(false) }
@@ -419,6 +623,31 @@ internal fun PlaymatStickyNoteItem(
         }
     }
 
+    val elevation by animateDpAsState(
+        targetValue = if (isDragging) 14.dp else 4.dp,
+        label = "noteElevation"
+    )
+
+    val scale by animateFloatAsState(
+        targetValue = if (isDragging) 1.04f else 1.0f,
+        label = "noteScale"
+    )
+
+    // Ghost Preview si se ajusta a la cuadrícula
+    if (isDragging && snapToGrid && gridType != PlaymatGridType.NONE && cellSizeDp > 0f) {
+        val snappedX = round(localX / cellSizeDp) * cellSizeDp
+        val snappedY = round(localY / cellSizeDp) * cellSizeDp
+        PlaymatGhostSilhouette(
+            x = snappedX,
+            y = snappedY,
+            width = 100.dp * zoom,
+            height = 100.dp * zoom,
+            zoom = 1f,
+            shape = RoundedCornerShape(4.dp),
+            accentColor = Color(0xFFFFD54F)
+        )
+    }
+
     Surface(
         modifier = Modifier
             .offset {
@@ -428,14 +657,34 @@ internal fun PlaymatStickyNoteItem(
                 )
             }
             .size(100.dp * zoom, 100.dp * zoom)
-            .pointerInput(note.id, zoom, isMovementEnabled) {
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .pointerInput(note.id, zoom, isMovementEnabled, snapToGrid, gridType, cellSizeDp) {
                 if (isMovementEnabled) detectDragGestures(
-                    onDragStart = { isDragging = true },
+                    onDragStart = {
+                        isDragging = true
+                        view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                    },
                     onDragEnd = {
                         isDragging = false
-                        onMove(localX, localY)
+                        view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                        val finalX = if (snapToGrid && gridType != PlaymatGridType.NONE && cellSizeDp > 0f) {
+                            round(localX / cellSizeDp) * cellSizeDp
+                        } else localX
+                        val finalY = if (snapToGrid && gridType != PlaymatGridType.NONE && cellSizeDp > 0f) {
+                            round(localY / cellSizeDp) * cellSizeDp
+                        } else localY
+                        localX = finalX
+                        localY = finalY
+                        onMove(finalX, finalY)
                     },
-                    onDragCancel = { isDragging = false },
+                    onDragCancel = {
+                        isDragging = false
+                        localX = note.x
+                        localY = note.y
+                    },
                     onDrag = { change, dragAmount ->
                         change.consume()
                         localX += dragAmount.x / zoom
@@ -443,7 +692,7 @@ internal fun PlaymatStickyNoteItem(
                     }
                 )
             }
-            .shadow(if (isDragging) 10.dp else 4.dp, RoundedCornerShape(4.dp)),
+            .shadow(elevation, RoundedCornerShape(4.dp)),
         color = Color(0xFFFFF59D),
         shape = RoundedCornerShape(4.dp)
     ) {
@@ -484,14 +733,45 @@ internal fun PlaymatTableChipItem(
     chip: PlaymatTableChip,
     zoom: Float,
     isMovementEnabled: Boolean = true,
+    snapToGrid: Boolean = false,
+    gridType: PlaymatGridType = PlaymatGridType.NONE,
+    cellSizeDp: Float = 48f,
     onMove: (Float, Float) -> Unit = { _, _ -> }
 ) {
+    val view = LocalView.current
     var localX by remember(chip.id, chip.x) { mutableFloatStateOf(chip.x) }
     var localY by remember(chip.id, chip.y) { mutableFloatStateOf(chip.y) }
     var isDragging by remember(chip.id) { mutableStateOf(false) }
+
     LaunchedEffect(chip.x, chip.y) {
         if (!isDragging) { localX = chip.x; localY = chip.y }
     }
+
+    val elevation by animateDpAsState(
+        targetValue = if (isDragging) 10.dp else 3.dp,
+        label = "chipElevation"
+    )
+
+    val scale by animateFloatAsState(
+        targetValue = if (isDragging) 1.05f else 1.0f,
+        label = "chipScale"
+    )
+
+    // Ghost Preview si se ajusta a la cuadrícula
+    if (isDragging && snapToGrid && gridType != PlaymatGridType.NONE && cellSizeDp > 0f) {
+        val snappedX = round(localX / cellSizeDp) * cellSizeDp
+        val snappedY = round(localY / cellSizeDp) * cellSizeDp
+        PlaymatGhostSilhouette(
+            x = snappedX,
+            y = snappedY,
+            width = 110.dp * zoom,
+            height = 36.dp * zoom,
+            zoom = 1f,
+            shape = RoundedCornerShape(12.dp),
+            accentColor = MaterialTheme.colorScheme.tertiary
+        )
+    }
+
     Surface(
         modifier = Modifier
             .offset {
@@ -500,10 +780,29 @@ internal fun PlaymatTableChipItem(
                     (localY * zoom).roundToInt()
                 )
             }
-            .pointerInput(chip.id, zoom, isMovementEnabled) {
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .pointerInput(chip.id, zoom, isMovementEnabled, snapToGrid, gridType, cellSizeDp) {
                 if (isMovementEnabled) detectDragGestures(
-                    onDragStart = { isDragging = true },
-                    onDragEnd = { isDragging = false; onMove(localX, localY) },
+                    onDragStart = {
+                        isDragging = true
+                        view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                    },
+                    onDragEnd = {
+                        isDragging = false
+                        view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                        val finalX = if (snapToGrid && gridType != PlaymatGridType.NONE && cellSizeDp > 0f) {
+                            round(localX / cellSizeDp) * cellSizeDp
+                        } else localX
+                        val finalY = if (snapToGrid && gridType != PlaymatGridType.NONE && cellSizeDp > 0f) {
+                            round(localY / cellSizeDp) * cellSizeDp
+                        } else localY
+                        localX = finalX
+                        localY = finalY
+                        onMove(finalX, finalY)
+                    },
                     onDragCancel = { isDragging = false; localX = chip.x; localY = chip.y },
                     onDrag = { change, amount ->
                         change.consume()
@@ -512,7 +811,7 @@ internal fun PlaymatTableChipItem(
                     }
                 )
             }
-            .shadow(3.dp, RoundedCornerShape(12.dp)),
+            .shadow(elevation, RoundedCornerShape(12.dp)),
         color = MaterialTheme.colorScheme.tertiaryContainer,
         shape = RoundedCornerShape(12.dp)
     ) {

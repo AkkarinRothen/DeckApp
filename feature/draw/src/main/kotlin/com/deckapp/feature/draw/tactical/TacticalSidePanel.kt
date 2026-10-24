@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.deckapp.core.model.*
+import com.deckapp.core.ui.components.ContextualEmptyState
 
 @Composable
 fun TacticalSidePanel(
@@ -39,6 +40,7 @@ fun TacticalSidePanel(
     onRollRandomEvent: () -> Unit,
     onWikiSearchQueryChanged: (String) -> Unit,
     onAdvanceCombatTurn: () -> Unit,
+    onStartQuickCombat: () -> Unit,
     onSelectToken: (Long) -> Unit,
     onClose: () -> Unit,
     onFocusPinCoordinates: (cellX: Float, cellY: Float) -> Unit = { _, _ -> },
@@ -176,7 +178,8 @@ fun TacticalSidePanel(
                             tokens = uiState.tokens,
                             activeTurnTokenId = uiState.activeCombatTurnTokenId,
                             onAdvanceTurn = onAdvanceCombatTurn,
-                            onSelectToken = onSelectToken
+                            onSelectToken = onSelectToken,
+                            onStartQuickCombat = onStartQuickCombat
                         )
                     }
                 }
@@ -631,17 +634,19 @@ private fun SidePanelCombatTab(
     tokens: List<TacticalToken>,
     activeTurnTokenId: Long?,
     onAdvanceTurn: () -> Unit,
-    onSelectToken: (Long) -> Unit
+    onSelectToken: (Long) -> Unit,
+    onStartQuickCombat: () -> Unit
 ) {
     if (activeEncounter == null) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Icon(Icons.Default.SportsKabaddi, contentDescription = null, modifier = Modifier.size(36.dp), tint = MaterialTheme.colorScheme.outline)
-            Spacer(Modifier.height(8.dp))
-            Text("No hay combate activo", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.outline)
+        Box(Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
+            ContextualEmptyState(
+                title = "No hay combate activo",
+                description = "Inicia un combate rápido para seguir turnos y participantes.",
+                actionLabel = "Iniciar combate rápido",
+                onAction = onStartQuickCombat,
+                icon = Icons.Default.SportsKabaddi,
+                compact = true
+            )
         }
         return
     }

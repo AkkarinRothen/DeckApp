@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.deckapp.core.model.*
+import com.deckapp.core.ui.components.ContextualEmptyState
 import com.deckapp.feature.draw.components.BoardBlockMeta
 import com.deckapp.feature.draw.util.getMode
 import kotlinx.coroutines.delay
@@ -73,28 +74,15 @@ fun CombatBlockContent(
     val mode = item.getMode()
     if (activeEncounter == null) {
         // Estado sin combate activo
-        Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(vertical = 12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = "No hay combate activo",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-            )
-            Button(
-                onClick = onOpenTracker,
-                colors = ButtonDefaults.buttonColors(containerColor = meta.color),
-                shape = MaterialTheme.shapes.medium
-            ) {
-                Icon(Icons.Default.CrisisAlert, null, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.width(8.dp))
-                Text("Abrir Tracker")
-            }
-        }
+        ContextualEmptyState(
+            title = "No hay combate activo",
+            description = "Abre el tracker para iniciar un combate o cargar un encuentro preparado.",
+            actionLabel = "Abrir tracker",
+            onAction = onOpenTracker,
+            icon = Icons.Default.CrisisAlert,
+            modifier = modifier.fillMaxWidth().padding(vertical = 12.dp),
+            compact = true
+        )
         return
     }
 

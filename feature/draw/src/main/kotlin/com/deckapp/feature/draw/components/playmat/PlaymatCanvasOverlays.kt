@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.*
 import com.deckapp.core.model.*
 import com.deckapp.feature.draw.model.state.PlaymatActions
 import kotlinx.coroutines.launch
+import kotlin.math.hypot
+import kotlin.math.round
 import kotlin.math.roundToInt
 
 @Composable
@@ -373,6 +375,7 @@ internal fun PlaymatCanvasOverlays(
         deckBackImages = state.deckBackImages,
         sessionId = state.sessionId,
         onToggleVisible = onToggleHandTray,
+        onOpenDeckManager = { showDeckManager = true },
         onPlaceOnPlaymat = { cardId ->
             val centerX = (-cameraX + 300) / cameraZoom
             val centerY = (-cameraY + 300) / cameraZoom
@@ -434,18 +437,49 @@ internal fun PlaymatCanvasOverlays(
             val backImage = state.deckBackImages[stackId]
             val previewWidth = with(density) { 100.dp.toPx() }
             val previewHeight = previewWidth / aspectRatio.ratio
+            val localX = drag.pointerInWindow.x - state.canvasBoundsInWindow.left
+            val localY = drag.pointerInWindow.y - state.canvasBoundsInWindow.top
+
+            // Ghost Preview proyectado en el tapete mientras la carta sobrevuela desde la mano
+            val worldX = (localX - cameraX) / cameraZoom
+            val worldY = (localY - cameraY) / cameraZoom
+            val templateSlots = remember(activeSurface.template) { getTemplateSlots(activeSurface.template) }
+            val nearestSlot = templateSlots.find { slot -> hypot(slot.x - worldX, slot.y - worldY) <= 60f }
+            val ghostWorldX = nearestSlot?.x ?: if (activeSurface.snapToGrid && activeSurface.gridType != PlaymatGridType.NONE && activeSurface.cellSizeDp > 0f) {
+                round(worldX / activeSurface.cellSizeDp) * activeSurface.cellSizeDp
+            } else null
+            val ghostWorldY = nearestSlot?.y ?: if (activeSurface.snapToGrid && activeSurface.gridType != PlaymatGridType.NONE && activeSurface.cellSizeDp > 0f) {
+                round(worldY / activeSurface.cellSizeDp) * activeSurface.cellSizeDp
+            } else null
+
+            if (ghostWorldX != null && ghostWorldY != null) {
+                PlaymatGhostSilhouette(
+                    x = ghostWorldX,
+                    y = ghostWorldY,
+                    width = 120.dp,
+                    height = 180.dp,
+                    zoom = cameraZoom,
+                    shape = RoundedCornerShape(8.dp),
+                    accentColor = if (nearestSlot != null) Color(0xFF00E5FF) else MaterialTheme.colorScheme.primary,
+                    label = nearestSlot?.label
+                )
+            }
+
             Box(
                 modifier = Modifier
                     .offset {
-                        val localX = drag.pointerInWindow.x - state.canvasBoundsInWindow.left
-                        val localY = drag.pointerInWindow.y - state.canvasBoundsInWindow.top
                         IntOffset(
                             (localX - previewWidth * drag.grabFraction.x).roundToInt(),
                             (localY - previewHeight * drag.grabFraction.y).roundToInt()
                         )
                     }
                     .zIndex(20f)
-                    .graphicsLayer { alpha = 0.92f }
+                    .graphicsLayer {
+                        scaleX = 1.05f
+                        scaleY = 1.05f
+                        alpha = 0.95f
+                    }
+                    .shadow(22.dp, RoundedCornerShape(8.dp))
             ) {
                 com.deckapp.feature.draw.components.CardItem(
                     card = card,

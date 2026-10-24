@@ -25,6 +25,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.deckapp.core.model.WikiEntry
 import com.deckapp.core.ui.components.MarkdownText
+import com.deckapp.core.ui.components.ContextualEmptyState
 import com.deckapp.feature.wiki.WikiViewModel
 import com.deckapp.feature.wiki.WikiUiState
 
@@ -111,43 +112,24 @@ fun WikiTab(
                         if (filteredEntries.isEmpty()) {
                             item {
                                 if (searchQuery.isNotEmpty()) {
-                                    Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                                        Text("No se encontró nada con ese nombre.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                    }
+                                    ContextualEmptyState(
+                                        title = "Sin coincidencias",
+                                        description = "No se encontró lore para ‘$searchQuery’.",
+                                        actionLabel = "Limpiar búsqueda",
+                                        onAction = { searchQuery = "" },
+                                        icon = Icons.Default.Search,
+                                        modifier = Modifier.fillMaxWidth().padding(24.dp),
+                                        compact = true
+                                    )
                                 } else {
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(32.dp),
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                                    ) {
-                                        Icon(
-                                            Icons.Default.MenuBook,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(48.dp),
-                                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                                        )
-                                        Text(
-                                            "Enciclopedia vacía",
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                        Text(
-                                            "Crea artículos de lore, facciones, lugares y conceptos del mundo de juego. Puedes vincular artículos entre sí usando [[Título]].",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                                        )
-                                        Button(
-                                            onClick = { showCreateDialog = true },
-                                            modifier = Modifier.padding(top = 8.dp)
-                                        ) {
-                                            Icon(Icons.Default.Add, contentDescription = null)
-                                            Spacer(Modifier.width(8.dp))
-                                            Text("Crear Primer Artículo")
-                                        }
-                                    }
+                                    ContextualEmptyState(
+                                        title = "Enciclopedia vacía",
+                                        description = "Crea artículos de lore, facciones, lugares y conceptos del mundo. Puedes vincular artículos usando [[Título]].",
+                                        actionLabel = "Crear primer artículo",
+                                        onAction = { showCreateDialog = true },
+                                        icon = Icons.Default.MenuBook,
+                                        modifier = Modifier.fillMaxWidth().padding(24.dp)
+                                    )
                                 }
                             }
                         }

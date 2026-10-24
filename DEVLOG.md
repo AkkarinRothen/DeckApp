@@ -1,3 +1,14 @@
+### Física táctil de arrastre, siluetas guía y zonas de soltado inteligentes en el Playmat (24 de octubre de 2026)
+
+**Categoría:** `FEATURE / PLAYMAT / GESTURES / HAPTICS / PHYSICS / SMART DROP TARGETS`
+
+- **Física dinámica e inclinación táctil:** Se incorporó inclinación dinámica ("tilt" en ejes Z, Y y X de hasta ±12°) proporcional a la velocidad y dirección del arrastre con retorno elástico suave (`spring`). Elevación reactiva profunda (hasta 24 dp) y aumento de escala dinámico (1.05x) al despegar.
+- **Micro-feedback háptico:** Integración de pulsos hápticos instantáneos (`HapticFeedbackConstants.CLOCK_TICK`) tanto en el despegue inmediato tras superar el touch slop como en el momento de soltado/aterrizaje.
+- **Silueta guía translúcida ("Ghost Preview"):** Proyección en tiempo real de `PlaymatGhostSilhouette` con borde cian punteado y halo luminoso, mostrando con exactitud la celda de la cuadrícula táctica o la ranura de la plantilla temática donde encajará la pieza antes de soltarla, permitiendo un movimiento 1:1 sin tirones al dedo y acople magnético elástico final.
+- **Zonas de soltado inteligentes (Smart Drop Targets):** Al sobrevolar una carta sobre su mazo de origen o sobre la pila de descarte asociada, tanto el contenedor en la mesa como la carta arrastrada muestran un halo de absorción luminoso ("Devolver al mazo" o "Descartar"). Al soltarla, la carta se reintegra al mazo o se envía a la pila de descarte con feedback táctil y registro automático en el log de sesión.
+- **Alcance integral a todos los elementos del tapete:** La experiencia física mejorada (háptica, elevación, escala y siluetas fantasma) se aplicó transversalmente a cartas en mesa (`PlaymatCardItem`), extracción desde el mazo (`PlaymatDeckItem`), cartas jugadas desde la bandeja de mano (`PlaymatHandCardDrag`), notas adhesivas (`PlaymatStickyNoteItem`), marcadores de tabla (`PlaymatTableChipItem`), tokens tácticos (`PlaymatTokenItem`) y relojes de progreso (`PlaymatClockItem`).
+- **Verificación:** Pruebas unitarias de `:feature:draw:testDebugUnitTest` exitosas (`BUILD SUCCESSFUL in 9m 4s`), build `:app:assembleRelease` completado (`BUILD SUCCESSFUL in 36m 50s`), e instalación streamed vía ADB en el teléfono físico Motorola (`ZE222B5GXX`) completada con éxito.
+
 ### Acceso rápido a favoritos y orden por grupo (24 de octubre de 2026)
 
 **Categoría:** `FEATURE / PLAYMAT / DECK MANAGEMENT / RESPONSIVE UI`

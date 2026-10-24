@@ -1,6 +1,11 @@
 package com.deckapp.feature.draw.components.playmat
 
+import android.view.HapticFeedbackConstants
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -23,9 +28,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -33,9 +40,11 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.deckapp.core.model.PlaymatGridType
 import com.deckapp.core.model.PlaymatTokenPlacement
 import com.deckapp.core.model.PlaymatTokenType
 import com.deckapp.core.ui.util.toCoilModel
+import kotlin.math.round
 import kotlin.math.roundToInt
 
 /**
@@ -50,6 +59,9 @@ fun PlaymatTokenItem(
     isConnectingSource: Boolean,
     zoom: Float,
     isMovementEnabled: Boolean = true,
+    snapToGrid: Boolean = false,
+    gridType: PlaymatGridType = PlaymatGridType.NONE,
+    cellSizeDp: Float = 48f,
     onTokenClick: () -> Unit,
     onMove: (tokenId: String, finalX: Float, finalY: Float) -> Unit,
     onDragProgress: (start: androidx.compose.ui.geometry.Offset?, current: androidx.compose.ui.geometry.Offset?) -> Unit = { _, _ -> },
@@ -60,6 +72,7 @@ fun PlaymatTokenItem(
     onDismissMenu: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val view = LocalView.current
     val size = 64.dp * zoom
 
     var localX by remember(token.id, token.x) { mutableFloatStateOf(token.x) }
@@ -72,6 +85,17 @@ fun PlaymatTokenItem(
             localY = token.y
         }
     }
+
+    val elevation by animateDpAsState(
+        targetValue = if (isDragging) 18.dp else if (isSelected) 10.dp else 4.dp,
+        label = "tokenElevation"
+    )
+
+    val scale by animateFloatAsState(
+        targetValue = if (isDragging) 1.08f else 1.0f,
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+        label = "tokenScale"
+    )
 
     val ringColor = remember(token.ringColorHex, token.tokenType) {
         try {
@@ -89,6 +113,21 @@ fun PlaymatTokenItem(
     val hpBarColor = if (hpFraction <= 0.25f) Color(0xFFE53935)
     else if (hpFraction <= 0.5f) Color(0xFFFFB300)
     else Color(0xFF4CAF50)
+
+    // Silueta guía fantasma si está activo el ajuste a cuadrícula
+    if (isDragging && snapToGrid && gridType != PlaymatGridType.NONE && cellSizeDp > 0f) {
+        val snappedX = round(localX / cellSizeDp) * cellSizeDp
+        val snappedY = round(localY / cellSizeDp) * cellSizeDp
+        PlaymatGhostSilhouette(
+            x = snappedX,
+            y = snappedY,
+            width = size,
+            height = size,
+            zoom = 1f,
+            shape = CircleShape,
+            accentColor = ringColor
+        )
+    }
 
     Box(
         modifier = modifier
@@ -108,7 +147,11 @@ fun PlaymatTokenItem(
             Box(
                 modifier = Modifier
                     .size(size)
-                    .pointerInput(token.id, zoom, isMovementEnabled) {
+                    .graphicsLayer {
+                        scaleX = scale
+                        scaleY = scale
+                    }
+                    .pointerInput(token.id, zoom, isMovementEnabled, snapToGrid, gridType, cellSizeDp) {
                         awaitEachGesture {
                             val down = awaitFirstDown(requireUnconsumed = false)
                             var dragDetected = false
@@ -123,6 +166,7 @@ fun PlaymatTokenItem(
 
                             if (drag != null || dragDetected) {
                                 isDragging = true
+                                view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                                 val startOffset = androidx.compose.ui.geometry.Offset(localX + 32f, localY + 32f)
                                 onDragProgress(startOffset, androidx.compose.ui.geometry.Offset(localX + 32f, localY + 32f))
                                 val currentPointerId = down.id
@@ -139,9 +183,22 @@ fun PlaymatTokenItem(
                                     onDragProgress(startOffset, androidx.compose.ui.geometry.Offset(localX + 32f, localY + 32f))
                                 }
                                 isDragging = false
+                                view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                                 onDragProgress(null, null)
-                                if (isMovementEnabled) onMove(token.id, localX, localY)
-                                else { localX = token.x; localY = token.y }
+                                if (isMovementEnabled) {
+                                    val finalX = if (snapToGrid && gridType != PlaymatGridType.NONE && cellSizeDp > 0f) {
+                                        round(localX / cellSizeDp) * cellSizeDp
+                                    } else localX
+                                    val finalY = if (snapToGrid && gridType != PlaymatGridType.NONE && cellSizeDp > 0f) {
+                                        round(localY / cellSizeDp) * cellSizeDp
+                                    } else localY
+                                    localX = finalX
+                                    localY = finalY
+                                    onMove(token.id, finalX, finalY)
+                                } else {
+                                    localX = token.x
+                                    localY = token.y
+                                }
                             } else {
                                 // Toque limpio
                                 onTokenClick()
@@ -149,7 +206,7 @@ fun PlaymatTokenItem(
                         }
                     }
                     .shadow(
-                        elevation = if (isDragging) 12.dp else 6.dp,
+                        elevation = elevation,
                         shape = CircleShape
                     )
                     .clip(CircleShape)

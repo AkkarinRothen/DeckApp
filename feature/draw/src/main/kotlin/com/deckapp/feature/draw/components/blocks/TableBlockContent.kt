@@ -37,6 +37,7 @@ import com.deckapp.core.model.SessionBoardItemSize
 import com.deckapp.core.model.TableRollResult
 import com.deckapp.core.model.RandomTable
 import com.deckapp.core.ui.components.SmartText
+import com.deckapp.core.ui.components.ContextualEmptyState
 import com.deckapp.feature.draw.components.BoardBlockMeta
 import kotlinx.coroutines.delay
 
@@ -86,34 +87,15 @@ fun TableBlockContent(
     }
 
     if (item.resourceId == null) {
-        Column(
+        ContextualEmptyState(
+            title = "Sin tabla vinculada",
+            description = "Elige una tabla para tirar directamente desde la mesa.",
+            actionLabel = if (onOpenTable != null) "Elegir tabla" else null,
+            onAction = onOpenTable,
+            icon = Icons.Default.Casino,
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Icon(Icons.Default.Casino, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
-            Text(
-                "Sin tabla vinculada",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                "Asigna una tabla a este bloque para tirar directamente desde la mesa.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
-            )
-            if (onOpenTable != null) {
-                FilledTonalButton(
-                    onClick = onOpenTable,
-                    modifier = Modifier.padding(top = 4.dp)
-                ) {
-                    Icon(Icons.Default.Casino, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text("Elegir tabla")
-                }
-            }
-        }
+            compact = true
+        )
         return
     }
 

@@ -24,6 +24,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.deckapp.core.ui.components.MarkdownText
 import com.deckapp.core.ui.components.MarkdownToolbar
+import com.deckapp.core.ui.components.ContextualEmptyState
 
 enum class NotesTabMode {
     NOTES, ACTIVITY
@@ -225,10 +226,14 @@ fun NotesTab(
                         }
                         Spacer(Modifier.height(8.dp))
                         if (textFieldValue.text.isBlank()) {
-                            Text(
-                                "No hay actividad registrada aún. Los resultados de tablas, oráculos y apuntes narrativos se mostrarán aquí.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            ContextualEmptyState(
+                                title = "Aún no hay actividad",
+                                description = "Los resultados de tablas, oráculos y apuntes narrativos aparecerán aquí.",
+                                actionLabel = "Escribir una nota",
+                                onAction = { mode = NotesTabMode.NOTES },
+                                icon = androidx.compose.material.icons.Icons.AutoMirrored.Filled.MenuBook,
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
+                                compact = true
                             )
                         } else {
                             MarkdownText(

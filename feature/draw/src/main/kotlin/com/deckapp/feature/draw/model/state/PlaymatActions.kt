@@ -13,6 +13,7 @@ data class PlaymatActions(
     val onRotateCard: (Long, Int) -> Unit = { _, _ -> },
     val onFlipCard: (Long) -> Unit = {},
     val onReturnToHand: (Long) -> Unit = {},
+    val onReturnToDeck: (Long) -> Unit = {},
     val onDiscardCard: (Long) -> Unit = {},
     val onSelectCard: (Long?) -> Unit = {},
     val onToggleHandTray: () -> Unit = {},
@@ -92,6 +93,10 @@ fun PlaymatDelegate.toActions(
     onReturnToHand = { cardId ->
         returnCardToHand(cardId)
         sessionLogDelegate?.logCardAction("Carta", "Devuelta a la mano")
+    },
+    onReturnToDeck = { cardId ->
+        returnCardToDeck(cardId)
+        sessionLogDelegate?.logCardAction("Carta", "Devuelta al mazo")
     },
     onDiscardCard = { cardId ->
         discardCard(cardId)

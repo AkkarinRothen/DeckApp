@@ -56,6 +56,9 @@ internal fun PlaymatSceneLayer(
     val currentTemplateSlots = state.currentTemplateSlots
     val spatialIndex = remember(activeSurface) { PlaymatSpatialIndex(activeSurface) }
 
+    var hoveredDropTargetDeckId by remember { mutableStateOf<Long?>(null) }
+    var hoveredDropTargetIsDiscard by remember { mutableStateOf(false) }
+
     fun moveAsGroup(groupId: String?, originalX: Float, originalY: Float, newX: Float, newY: Float, moveSingle: () -> Unit) {
         val group = activeSurface.groups.firstOrNull { it.id == groupId }
         when {
@@ -140,6 +143,9 @@ BoxWithConstraints(
                 chip = chip,
                 zoom = cameraZoom,
                 isMovementEnabled = activeSurface.groups.none { it.id == chip.groupId && it.isLocked },
+                snapToGrid = activeSurface.snapToGrid,
+                gridType = activeSurface.gridType,
+                cellSizeDp = activeSurface.cellSizeDp,
                 onMove = { newX, newY ->
                     moveAsGroup(chip.groupId, chip.x, chip.y, newX, newY) {
                         actions.onMoveTableChip(chip.id, newX, newY)
@@ -154,6 +160,9 @@ BoxWithConstraints(
                 note = note,
                 zoom = cameraZoom,
                 isMovementEnabled = activeSurface.groups.none { it.id == note.groupId && it.isLocked },
+                snapToGrid = activeSurface.snapToGrid,
+                gridType = activeSurface.gridType,
+                cellSizeDp = activeSurface.cellSizeDp,
                 onDelete = { onDeleteStickyNote(note.id) },
                 onMove = { newX, newY -> moveAsGroup(note.groupId, note.x, note.y, newX, newY) { onMoveStickyNote(note.id, newX, newY) } }
             )
@@ -177,6 +186,10 @@ BoxWithConstraints(
                     zoom = cameraZoom,
                     templateSlots = currentTemplateSlots,
                     isGroupLocked = activeSurface.groups.any { it.id == deckPlacement.groupId && it.isLocked },
+                    isDropTargetHovered = (hoveredDropTargetDeckId == deckPlacement.stackId && !hoveredDropTargetIsDiscard),
+                    snapToGrid = activeSurface.snapToGrid,
+                    gridType = activeSurface.gridType,
+                    cellSizeDp = activeSurface.cellSizeDp,
                     onTapDraw = {
                         onDrawFromDeck(
                             deckPlacement.stackId,
@@ -203,6 +216,10 @@ BoxWithConstraints(
                     y = deckPlacement.discardY ?: deckPlacement.y,
                     zoom = cameraZoom,
                     isMovementEnabled = activeSurface.groups.none { it.id == deckPlacement.discardGroupId && it.isLocked },
+                    isDropTargetHovered = (hoveredDropTargetDeckId == deckPlacement.stackId && hoveredDropTargetIsDiscard),
+                    snapToGrid = activeSurface.snapToGrid,
+                    gridType = activeSurface.gridType,
+                    cellSizeDp = activeSurface.cellSizeDp,
                     piledCards = piledCards,
                     onReshuffleToDeck = {
                         onReshuffleDeck(deckPlacement.stackId)
@@ -263,6 +280,10 @@ BoxWithConstraints(
                         isMovementEnabled = activeSurface.groups.none { it.id == placement.clusterId && it.isLocked },
                         zoom = cameraZoom,
                         templateSlots = currentTemplateSlots,
+                        snapToGrid = activeSurface.snapToGrid,
+                        gridType = activeSurface.gridType,
+                        cellSizeDp = activeSurface.cellSizeDp,
+                        decks = activeSurface.decks,
                         onCardClick = {
                             if (connectingSourceEndpointId != null) {
                                 val targetEndpoint = "card_${placement.cardId}"
@@ -279,18 +300,18 @@ BoxWithConstraints(
                             }
                         },
                         onMove = { cardId, finalX, finalY, slotTag ->
-                            val finalXWithSnap = if (activeSurface.snapToGrid && slotTag == null && activeSurface.gridType != PlaymatGridType.NONE) {
-                                (kotlin.math.round(finalX / activeSurface.cellSizeDp)) * activeSurface.cellSizeDp
-                            } else finalX
-                            val finalYWithSnap = if (activeSurface.snapToGrid && slotTag == null && activeSurface.gridType != PlaymatGridType.NONE) {
-                                (kotlin.math.round(finalY / activeSurface.cellSizeDp)) * activeSurface.cellSizeDp
-                            } else finalY
-                            moveAsGroup(placement.clusterId, placement.x, placement.y, finalXWithSnap, finalYWithSnap) {
-                                onMoveCard(cardId, finalXWithSnap, finalYWithSnap, slotTag)
+                            moveAsGroup(placement.clusterId, placement.x, placement.y, finalX, finalY) {
+                                onMoveCard(cardId, finalX, finalY, slotTag)
                             }
                         },
                         onHoverSlotChanged = { tag ->
                             events.onHoveredSlotTagChanged(tag)
+                        },
+                        onReturnToDeck = { cardId -> actions.onReturnToDeck(cardId) },
+                        onDiscardCard = { cardId -> actions.onDiscardCard(cardId) },
+                        onDropTargetHoverChanged = { deckId, isDiscard ->
+                            hoveredDropTargetDeckId = deckId
+                            hoveredDropTargetIsDiscard = isDiscard
                         }
                     )
                 }
@@ -308,6 +329,9 @@ BoxWithConstraints(
                     isConnectingSource = isTokenConnectingSource,
                     zoom = cameraZoom,
                     isMovementEnabled = activeSurface.groups.none { it.id == token.groupId && it.isLocked },
+                    snapToGrid = activeSurface.snapToGrid,
+                    gridType = activeSurface.gridType,
+                    cellSizeDp = activeSurface.cellSizeDp,
                     onTokenClick = {
                         if (connectingSourceEndpointId != null) {
                             val targetEndpoint = "token_${token.id}"
@@ -325,11 +349,7 @@ BoxWithConstraints(
                         events.onTokenDragPositionsChanged(start, current)
                     },
                     onMove = { tokenId, finalX, finalY ->
-                        val (snappedX, snappedY) = if (activeSurface.snapToGrid && activeSurface.gridType != PlaymatGridType.NONE) {
-                            val cell = activeSurface.cellSizeDp
-                            Pair((kotlin.math.round(finalX / cell)) * cell, (kotlin.math.round(finalY / cell)) * cell)
-                        } else Pair(finalX, finalY)
-                        moveAsGroup(token.groupId, token.x, token.y, snappedX, snappedY) { onMoveToken(tokenId, snappedX, snappedY) }
+                        moveAsGroup(token.groupId, token.x, token.y, finalX, finalY) { onMoveToken(tokenId, finalX, finalY) }
                     },
                     onStartConnection = {
                         events.onConnectingSourceChanged("token_${token.id}")
@@ -369,6 +389,9 @@ BoxWithConstraints(
                     isConnectingSource = isClockConnectingSource,
                     zoom = cameraZoom,
                     isMovementEnabled = activeSurface.groups.none { it.id == clock.groupId && it.isLocked },
+                    snapToGrid = activeSurface.snapToGrid,
+                    gridType = activeSurface.gridType,
+                    cellSizeDp = activeSurface.cellSizeDp,
                     onClockClick = {
                         if (connectingSourceEndpointId != null) {
                             val targetEndpoint = "clock_${clock.id}"
@@ -383,11 +406,7 @@ BoxWithConstraints(
                         }
                     },
                     onMove = { clockId, finalX, finalY ->
-                        val (snappedX, snappedY) = if (activeSurface.snapToGrid && activeSurface.gridType != PlaymatGridType.NONE) {
-                            val cell = activeSurface.cellSizeDp
-                            Pair((kotlin.math.round(finalX / cell)) * cell, (kotlin.math.round(finalY / cell)) * cell)
-                        } else Pair(finalX, finalY)
-                        moveAsGroup(clock.groupId, clock.x, clock.y, snappedX, snappedY) { onMoveClock(clockId, snappedX, snappedY) }
+                        moveAsGroup(clock.groupId, clock.x, clock.y, finalX, finalY) { onMoveClock(clockId, finalX, finalY) }
                     },
                     onAdvanceProgress = {
                         val nextProgress = (clock.filledSegments + 1).coerceAtMost(clock.totalSegments)

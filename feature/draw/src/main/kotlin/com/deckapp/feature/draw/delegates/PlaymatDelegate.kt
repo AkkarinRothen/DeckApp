@@ -447,6 +447,16 @@ class PlaymatDelegate(
     }
 
     /**
+     * Devuelve una carta directamente al mazo desde el tapete.
+     */
+    fun returnCardToDeck(cardId: Long) {
+        val cardName = _uiState.value.hand.find { it.id == cardId }?.title ?: "Carta #$cardId"
+        returnCardToHand(cardId)
+        deckDelegate.returnToDeck(cardId)
+        onLogCardAction?.invoke(cardName, "Devuelta al mazo")
+    }
+
+    /**
      * Roba del mazo seleccionado y la ubica directamente en el tapete en las coordenadas dadas.
      */
     fun quickDrawToPlaymat(stackId: Long, x: Float, y: Float) {
